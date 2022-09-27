@@ -18,8 +18,11 @@
 
 #include <string>
 
+#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/scroll_bar.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GridView {
@@ -27,6 +30,25 @@ public:
     static void Create();
     static void SetColumnsTemplate(const std::string& value);
     static void SetRowsTemplate(const std::string& value);
+    static void SetColumnsGap(const Dimension& value);
+    static void SetRowsGap(const Dimension& value);
+    static void SetScrollBarMode(DisplayMode value);
+    static void SetScrollBarColor(const Color& value);
+    static void SetScrollBarWidth(const Dimension& value);
+    static void SetCachedCount(int32_t value);
+    static void SetLayoutDirection(FlexDirection value);
+    static void SetMaxCount(int32_t value);
+    static void SetMinCount(int32_t value);
+    static void SetCellLength(int32_t value);
+    static void SetEditable(bool value);
+    static void SetMultiSelectable(bool value);
+    static void SetSupportAnimation(bool value);
+    static void SetOnScrollToIndex(ScrollToIndexFunc&& value);
+    static void SetOnItemDragStart(ItemDragStartFunc&& value);
+    static void SetOnItemDragEnter(ItemDragEnterFunc&& value);
+    static void SetOnItemDragMove(ItemDragMoveFunc&& value);
+    static void SetOnItemDragLeave(ItemDragLeaveFunc&& value);
+    static void SetOnItemDrop(ItemDropFunc&& value);
 };
 } // namespace OHOS::Ace::NG
 

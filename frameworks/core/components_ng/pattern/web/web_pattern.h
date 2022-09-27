@@ -52,13 +52,9 @@ struct TouchHandleState {
     int32_t edge_height = 0;
 };
 
-enum WebOverlayType {
-    INSERT_OVERLAY,
-    SELECTION_OVERLAY,
-    INVALID_OVERLAY
-};
+enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
-}
+} // namespace
 
 class WebPattern : public Pattern {
     DECLARE_ACE_TYPE(WebPattern, Pattern);
@@ -147,6 +143,9 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
 
+    void RequestFullScreen();
+    void ExitFullScreen();
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -177,9 +176,15 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleMouseEvent(MouseInfo& info);
-    void OnMouseEvent(const MouseInfo& info);
+    void WebOnMouseEvent(const MouseInfo& info);
     bool HandleDoubleClickEvent(const MouseInfo& info);
     void SendDoubleClickEvent(const MouseClickInfo& info);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+    bool WebOnKeyEvent(const KeyEvent& keyEvent);
+    void WebRequestFocus();
 
     void HandleTouchDown(const TouchEventInfo& info, bool fromOverlay);
 

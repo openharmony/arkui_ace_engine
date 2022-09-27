@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
@@ -35,6 +36,11 @@ public:
         return false;
     }
 
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<GridItemLayoutProperty>();
+    }
+
     void BeforeCreateLayoutWrapper() override
     {
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
@@ -43,8 +49,30 @@ public:
         }
     }
 
+    void SetForceRebuild(bool forceRebuild)
+    {
+        forceRebuild_ = forceRebuild;
+    }
+
+    void SetSelectable(bool selectable)
+    {
+        selectable_ = selectable;
+    }
+
+    bool ForceRebuild() const
+    {
+        return forceRebuild_;
+    }
+
+    bool Selectable() const
+    {
+        return selectable_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
+    bool forceRebuild_ = false;
+    bool selectable_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridItemPattern);
 };

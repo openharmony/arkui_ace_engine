@@ -57,6 +57,7 @@
 #include "core/components/option/option_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/gestures/long_press_gesture.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -1126,8 +1127,8 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
         // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX,
-            rotate.centerY, angle);
+        ParseJsRotate(
+            rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX, rotate.centerY, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             transitionOption.UpdateRotate(rotate);
@@ -1293,6 +1294,11 @@ void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
 
     std::vector<DimensionRect> result;
     if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetResponseRegion(result);
         return;
     }
 
@@ -1707,6 +1713,11 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetVisibility(VisibleType(info[0]->ToNumber<int32_t>()));
+        return;
+    }
+
     auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
     display->SetVisible(VisibleType(info[0]->ToNumber<int32_t>()));
 
@@ -1786,6 +1797,10 @@ void JSViewAbstract::JsDisplayPriority(const JSCallbackInfo& info)
     }
     double value = 0.0;
     if (!ParseJsDouble(info[0], value)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetDisplayIndex(static_cast<int32_t>(value));
         return;
     }
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -3149,11 +3164,17 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         LOGW("resId is not number");
         return false;
     }
-
     auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGE("themeConstants is nullptr");
         return false;
+    }
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
     }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
@@ -4023,7 +4044,13 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         LOGE("arg is not a object.");
         return;
     }
-
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::Gradient newGradient;
+        NewJsLinearGradient(info, newGradient);
+        NG::ViewAbstract::SetLinearGradient(newGradient);
+        return;
+    }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
     if (!argsPtrItem || argsPtrItem->IsNull()) {
         LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
@@ -4083,7 +4110,6 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
     lineGradient.SetRepeat(repeating);
     // color stops
     GetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
-
     auto stack = ViewStackProcessor::GetInstance();
     if (!stack->IsVisualStateSet()) {
         auto decoration = GetBackDecoration();
@@ -4103,6 +4129,65 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
                 BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
         }
     }
+}
+
+void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
+{
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        info.ReturnSelf();
+        return;
+    }
+    newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    // angle
+    std::optional<float> degree;
+    GetAngle("angle", argsPtrItem, degree);
+    if (degree) {
+        newGradient.GetLinearGradient()->angle = Dimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // direction
+    auto direction =
+        static_cast<GradientDirection>(argsPtrItem->GetInt("direction", static_cast<int32_t>(GradientDirection::NONE)));
+    switch (direction) {
+        case GradientDirection::LEFT:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+            break;
+        case GradientDirection::RIGHT:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
+            break;
+        case GradientDirection::TOP:
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::BOTTOM:
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::LEFT_TOP:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::RIGHT_TOP:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::NONE:
+        case GradientDirection::START_TO_END:
+        case GradientDirection::END_TO_START:
+        default:
+            break;
+    }
+    auto repeating = argsPtrItem->GetBool("repeating", false);
+    newGradient.SetRepeat(repeating);
+    NewGetGradientColorStops(newGradient, argsPtrItem->GetValue("colors"));
 }
 
 void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
@@ -5432,6 +5517,41 @@ void JSViewAbstract::GetGradientColorStops(Gradient& gradient, const std::unique
             if (ParseJsonDouble(stopValue, value)) {
                 value = std::clamp(value, 0.0, 1.0);
                 gradientColor.SetHasValue(true);
+                gradientColor.SetDimension(Dimension(value * 100.0, DimensionUnit::PERCENT));
+            }
+            gradient.AddColor(gradientColor);
+        }
+    }
+}
+
+void JSViewAbstract::NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& colorStops)
+{
+    if (!colorStops || colorStops->IsNull() || !colorStops->IsArray()) {
+        return;
+    }
+
+    for (int32_t i = 0; i < colorStops->GetArraySize(); i++) {
+        NG::GradientColor gradientColor;
+        auto item = colorStops->GetArrayItem(i);
+        if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
+            auto colorParams = item->GetArrayItem(0);
+            // color
+            Color color;
+            if (!ParseJsonColor(colorParams, color)) {
+                LOGE("parse colorParams failed");
+                continue;
+            }
+            gradientColor.SetColor(color);
+            gradientColor.SetHasValue(false);
+            // stop value
+            if (item->GetArraySize() <= 1) {
+                continue;
+            }
+            auto stopValue = item->GetArrayItem(1);
+            double value = 0.0;
+            if (ParseJsonDouble(stopValue, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                gradientColor.SetHasValue(true);
                 //  [0, 1] -> [0, 100.0];
                 gradientColor.SetDimension(Dimension(value * 100.0, DimensionUnit::PERCENT));
             }
@@ -5674,6 +5794,13 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
         LOGE("JsHitTestBehavior: The arg is wrong, it is supposed to have 1 arguments");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::HitTestMode hitTestModeNG = NG::HitTestMode::HTMDEFAULT;
+        hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
+        NG::ViewAbstract::SetHitTestMode(hitTestModeNG);
         return;
     }
 

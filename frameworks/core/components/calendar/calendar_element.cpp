@@ -123,7 +123,10 @@ void CalendarElement::BuildCardCalendar(const RefPtr<CalendarComponent>& calenda
             return;
         }
         auto swiper = controller->GetRenderSwiper();
-        if (swiper && swiper->GetMoveStatus()) {
+        if (!swiper) {
+            return;
+        }
+        if (swiper->GetMoveStatus()) {
             return;
         }
         if (controller->GetCurrentIndex() != swiper->GetCurrentIndex()) {

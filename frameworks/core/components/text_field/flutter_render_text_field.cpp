@@ -441,6 +441,10 @@ void FlutterRenderTextField::PaintOverlayForHoverAndPress(const Offset& offset, 
 void FlutterRenderTextField::PaintFocus(const Offset& offset, const Size& widthHeight, RenderContext& context)
 {
     auto canvas = ScopedCanvas::Create(context);
+    if (!canvas) {
+        LOGE("canvas is null");
+        return;
+    }
     SkCanvas* skCanvas = canvas->canvas();
     if (!skCanvas) {
         LOGE("Paint skCanvas is null");

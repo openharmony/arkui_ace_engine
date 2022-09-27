@@ -105,6 +105,9 @@ public:
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
     bool DispatchAxisEvent(const AxisEvent& event);
 
+    void AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode);
+    bool DispatchAxisEventNG(const AxisEvent& event);
+
     void ClearResults();
     void SetInstanceId(int32_t instanceId)
     {
@@ -141,6 +144,7 @@ private:
     MouseTestResult currMouseTestResults_;
     MouseTestResult currHoverTestResults_;
     MouseTestResult lastHoverTestResults_;
+    AxisTestResult axisTestResults_;
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;
     TouchTestResult axisTouchTestResult_;

@@ -104,6 +104,7 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateBackShadow(const Shadow& shadow) override;
+    void UpdateLinearGradient(const NG::Gradient& gradient) override;
 
     void UpdateTransition(const TransitionOptions& options) override;
     bool HasAppearingTransition() const
@@ -119,6 +120,8 @@ public:
         const std::list<RefPtr<FrameNode>>& frameChildren);
 
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(const TransitionOptions& options);
+
+    void FlushModifier(const RefPtr<Modifier>& modifier) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -154,6 +157,7 @@ private:
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
     void PaintBackground();
+    void PaintDecoration(const SizeF& rect);
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;

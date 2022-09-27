@@ -42,4 +42,15 @@ bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, MouseTe
     }
     return false;
 }
+
+bool InputEventHub::ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult)
+{
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+
+    if (axisEventActuator_) {
+        axisEventActuator_->OnCollectAxisEvent(coordinateOffset, getEventTargetImpl, onAxisResult);
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

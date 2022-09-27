@@ -1201,6 +1201,7 @@ void JsRegisterViews(BindingTarget globalObj)
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
         LOGE("JsRegisterViews can't find runtime");
+        return;
     }
     auto vm = runtime->GetEcmaVm();
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),

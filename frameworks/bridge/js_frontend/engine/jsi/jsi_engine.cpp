@@ -2933,6 +2933,7 @@ void JsiEngineInstance::RegisterFaPlugin()
     shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime_, "requireNapi");
     if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime_)) {
         LOGW("requireNapi func not found");
+        return;
     }
     std::vector<shared_ptr<JsValue>> argv = { runtime_->NewString("FeatureAbility") };
     requireNapiFunc->Call(runtime_, global, argv, argv.size());

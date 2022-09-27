@@ -137,6 +137,7 @@ void SubwindowOhos::InitContainer()
         DynamicCast<PipelineContext>(Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
     if (!subPipelineContext) {
         LOGE("Get SubPipelineContext failed, pipelineContext is null");
+        return;
     }
     subPipelineContext->SetupSubRootElement();
 }
@@ -207,6 +208,7 @@ void SubwindowOhos::ClearMenu()
     auto context = stack->GetContext().Upgrade();
     if (!context) {
         LOGE("Get context failed, it is null");
+        return;
     }
     context->FlushPipelineImmediately();
     HideWindow();

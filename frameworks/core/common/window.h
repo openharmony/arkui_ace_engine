@@ -50,6 +50,11 @@ public:
 
     virtual void FlushTasks() {}
 
+    virtual bool FlushCustomAnimation(uint64_t timeStamp)
+    {
+        return false;
+    };
+
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
     virtual void SetVsyncCallback(AceVsyncCallback&& callback)
@@ -76,12 +81,7 @@ public:
     {
         density_ = density;
     }
-
-    virtual bool FlushCustomAnimation(uint64_t timeStamp)
-    {
-        return false;
-    }
-
+    
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

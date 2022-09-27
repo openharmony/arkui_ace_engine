@@ -21,9 +21,9 @@
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 
 #include "adapter/preview/entrance/ace_run_args.h"
-#include "core/event/touch_event.h"
-#include "core/event/key_event.h"
 #include "base/utils/macros.h"
+#include "core/event/key_event.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::Platform {
 

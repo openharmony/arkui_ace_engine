@@ -19,12 +19,18 @@
 #include "core/components/progress/loading_progress_component.h"
 #include "core/components/progress/progress_component.h"
 #include "core/components/track/track_component.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSLoadingProgress::Create()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::LoadingProgressView::Create();
+        return;
+    }
+
     RefPtr<LoadingProgressComponent> loadingProgressComponent =
         AceType::MakeRefPtr<OHOS::Ace::LoadingProgressComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(loadingProgressComponent);
@@ -44,12 +50,18 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
 
 void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto loadingProgress = AceType::DynamicCast<LoadingProgressComponent>(component);
     Color progressColor;
     if (!ParseJsColor(info[0], progressColor)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::LoadingProgressView::SetColor(progressColor);
+        return;
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto loadingProgress = AceType::DynamicCast<LoadingProgressComponent>(component);
     loadingProgress->SetProgressColor(progressColor);
 }
 

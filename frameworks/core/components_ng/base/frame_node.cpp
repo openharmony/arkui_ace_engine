@@ -144,6 +144,17 @@ void FrameNode::OnAttachToMainTree()
     CHECK_NULL_VOID(context);
     context->RequestFrame();
     hasPendingRequest_ = false;
+
+    if (IsResponseRegion()) {
+        auto parent = GetParent();
+        while (parent) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+            if (frameNode) {
+                frameNode->MarkResponseRegion(true);
+            }
+            parent = parent->GetParent();
+        }
+    }
 }
 
 void FrameNode::OnDetachFromMainTree()
@@ -433,6 +444,16 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    if (IsResponseRegion()) {
+        auto parent = GetParent();
+        while (parent) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+            if (frameNode) {
+                frameNode->MarkResponseRegion(true);
+            }
+            parent = parent->GetParent();
+        }
+    }
     renderContext_->OnModifyDone();
 }
 
@@ -537,7 +558,27 @@ bool FrameNode::IsAtomicNode() const
 HitTestMode FrameNode::GetHitTestMode() const
 {
     auto gestureHub = eventHub_->GetGestureEventHub();
-    return gestureHub ? gestureHub->GetHitTestMode() : HitTestMode::DEFAULT;
+    return gestureHub ? gestureHub->GetHitTestMode() : HitTestMode::HTMDEFAULT;
+}
+
+bool FrameNode::GetTouchable() const
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    return gestureHub ? gestureHub->GetTouchable() : true;
+}
+
+bool FrameNode::IsResponseRegion() const
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    return gestureHub ? gestureHub->IsResponseRegion() : true;
+}
+
+void FrameNode::MarkResponseRegion(bool isResponseRegion)
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (gestureHub) {
+        gestureHub->MarkResponseRegion(isResponseRegion);
+    }
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -546,7 +587,11 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const auto& rect = geometryNode_->GetFrame().GetRect();
     LOGD("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
 
-    if (!rect.IsInRegion(parentLocalPoint)) {
+    if ((!rect.IsInRegion(parentLocalPoint) || !GetTouchable()) && !IsResponseRegion()) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    if (IsResponseRegion() && !InResponseRegionList(parentLocalPoint, GetResponseRegionList())) {
         return HitTestResult::OUT_OF_REGION;
     }
 
@@ -560,19 +605,27 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // TODO: add hit test mode.
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+            break;
+        }
+
         const auto& child = *iter;
         auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
-            break;
+            if (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
+                break;
+            }
         }
+
         // In normal process, the node block the brother node.
-        if (childHitResult == HitTestResult::BUBBLING) {
+        if (childHitResult == HitTestResult::BUBBLING && child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
             // TODO: add hit test mode judge.
             break;
         }
     }
-    if (!preventBubbling) {
+
+    if (!preventBubbling && GetHitTestMode() != HitTestMode::HTMNONE) {
         auto gestureHub = eventHub_->GetGestureEventHub();
         if (gestureHub) {
             TouchTestResult finalResult;
@@ -592,6 +645,39 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         return HitTestResult::STOP_BUBBLING;
     }
     return HitTestResult::BUBBLING;
+}
+
+std::vector<RectF> FrameNode::GetResponseRegionList()
+{
+    const auto& rect = geometryNode_->GetFrame().GetRect();
+    std::vector<RectF> responseRegionList;
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (!gestureHub) {
+        responseRegionList.emplace_back(rect);
+        return responseRegionList;
+    }
+
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    for (auto& region : gestureHub->GetResponseRegion()) {
+        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
+        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
+        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
+        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        RectF responseRegion(rect.GetOffset().GetX() + x.value(),
+            rect.GetOffset().GetY() + y.value(), width.value(), height.value());
+        responseRegionList.emplace_back(responseRegion);
+    }
+    return responseRegionList;
+}
+
+bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
+{
+    for (auto& rect : responseRegionList) {
+        if (rect.IsInRegion(parentLocalPoint)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -637,6 +723,54 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
     if (!preventBubbling) {
         preventBubbling = isPrevent;
         onMouseResult.splice(onMouseResult.end(), std::move(mouseResult));
+    }
+    if (preventBubbling) {
+        return HitTestResult::STOP_BUBBLING;
+    }
+    return HitTestResult::BUBBLING;
+}
+
+HitTestResult FrameNode::AxisTest(
+    const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+{
+    const auto& rect = geometryNode_->GetFrame().GetRect();
+    LOGD("AxisTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    // TODO: disableTouchEvent || disabled_ need handle
+
+    // TODO: Region need change to RectList
+    if (!rect.IsInRegion(parentLocalPoint)) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    bool preventBubbling = false;
+
+    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        auto childHitResult = child->AxisTest(globalPoint, localPoint, onAxisResult);
+        if (childHitResult == HitTestResult::STOP_BUBBLING) {
+            preventBubbling = true;
+        }
+        // In normal process, the node block the brother node.
+        if (childHitResult == HitTestResult::BUBBLING) {
+            // TODO: add hit test mode judge.
+            break;
+        }
+    }
+
+    AxisTestResult axisResult;
+    bool isPrevent = false;
+    auto inputHub = eventHub_->GetInputEventHub();
+    if (inputHub) {
+        const auto coordinateOffset = globalPoint - localPoint;
+        isPrevent = inputHub->ProcessAxisTestHit(coordinateOffset, axisResult);
+    }
+
+    if (!preventBubbling) {
+        preventBubbling = isPrevent;
+        onAxisResult.splice(onAxisResult.end(), std::move(axisResult));
     }
     if (preventBubbling) {
         return HitTestResult::STOP_BUBBLING;

@@ -35,25 +35,25 @@ enum class HitTestMode {
      *  Both self and children respond to the hit test for touch events,
      *  but block hit test of the other nodes which is masked by this node.
      */
-    DEFAULT = 0,
+    HTMDEFAULT = 0,
 
     /**
      * Self respond to the hit test for touch events,
      * but block hit test of children and other nodes which is masked by this node.
      */
-    BLOCK,
+    HTMBLOCK,
 
     /**
      * Self and child respond to the hit test for touch events,
      * and allow hit test of other nodes which is masked by this node.
      */
-    TRANSPARENT,
+    HTMTRANSPARENT,
 
     /**
      * Self not respond to the hit test for touch events,
      * but children respond to the hit test for touch events.
      */
-    NONE
+    HTMNONE
 };
 
 enum class HitTestResult {
@@ -194,6 +194,35 @@ public:
     void CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint,
         TouchTestResult& result);
 
+    bool IsResponseRegion() const
+    {
+        return isResponseRegion_;
+    }
+    void MarkResponseRegion(bool isResponseRegion)
+    {
+        isResponseRegion_ = isResponseRegion;
+    }
+
+    const std::vector<DimensionRect>& GetResponseRegion() const
+    {
+        return responseRegion_;
+    }
+
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+    {
+        responseRegion_ = responseRegion;
+    }
+
+    bool GetTouchable() const
+    {
+        return touchable_;
+    }
+
+    void SetTouchable(bool touchable)
+    {
+        touchable_ = touchable;
+    }
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult);
@@ -213,8 +242,11 @@ private:
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
     std::list<RefPtr<GestureRecognizer>> gestureHierarchy_;
-    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
+    HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
+    bool isResponseRegion_ = false;
+    std::vector<DimensionRect> responseRegion_;
+    bool touchable_ = true;
 };
 
 } // namespace OHOS::Ace::NG

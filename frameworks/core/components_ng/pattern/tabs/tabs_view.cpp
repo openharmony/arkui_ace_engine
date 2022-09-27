@@ -59,10 +59,10 @@ void TabsView::Create()
     // Create TabBar to contain TabBar of TabContent.
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId,
         [swiperController]() { return AceType::MakeRefPtr<TabBarPattern>(swiperController); });
-    if (!hasSwiperNode) {
+    if (!hasTabBarNode) {
         tabBarNode->MountToParent(tabsNode);
     }
-    if (!hasTabBarNode) {
+    if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
     }
     ViewStackProcessor::GetInstance()->Push(tabsNode);
