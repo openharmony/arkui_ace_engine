@@ -140,6 +140,9 @@ void JSList::Create(const JSCallbackInfo& args)
 
 void JSList::SetChainAnimation(bool enableChainAnimation)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetChainAnimation(enableChainAnimation);
+    }
     JSViewSetProperty(&V2::ListComponent::SetChainAnimation, enableChainAnimation);
 }
 
@@ -231,6 +234,9 @@ void JSList::SetLanes(const JSCallbackInfo& info)
 
 void JSList::SetSticky(int32_t sticky)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetSticky(static_cast<V2::StickyStyle>(sticky));
+    }
     JSViewSetProperty(&V2::ListComponent::SetSticky, static_cast<V2::StickyStyle>(sticky));
 }
 
