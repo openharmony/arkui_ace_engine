@@ -285,9 +285,10 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType /* visible */) const
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parent = host->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID(parent);
-    parent->MarkNeedSyncRenderTree();
-    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (parent) {
+        parent->MarkNeedSyncRenderTree();
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -18,10 +18,10 @@
 #include <cmath>
 #include <cstdint>
 
+#include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
-#include "render_service_client/core/pipeline/rs_node_map.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -32,14 +32,14 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
-#include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
+#include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -581,15 +581,15 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     if (!diffRes) {
         return;
     }
-    AnimationUtils::Animate(option, [rsParentNode = rsNode_, &removing = toRemoveRSNodes,
-        &adding = toAddRSNodesAndIndex]() {
-        for (auto& node : removing) {
-            rsParentNode->RemoveChild(node);
-        }
-        for (auto& [node, index] : adding) {
-            rsParentNode->AddChild(node, index);
-        }
-    });
+    AnimationUtils::Animate(
+        option, [rsParentNode = rsNode_, &removing = toRemoveRSNodes, &adding = toAddRSNodesAndIndex]() {
+            for (auto& node : removing) {
+                rsParentNode->RemoveChild(node);
+            }
+            for (auto& [node, index] : adding) {
+                rsParentNode->AddChild(node, index);
+            }
+        });
 }
 
 void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
@@ -761,13 +761,17 @@ void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
 
 void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
 {
-    auto& backDecoration = GetOrCreateBackDecoration();
+    const auto& backDecoration = GetOrCreateBackDecoration();
     if (backDecoration->CheckBackShadow(shadow)) {
         return;
     }
     backDecoration->UpdateBackShadow(shadow);
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetShadowRadius(shadow.GetBlurRadius());
+    if (!shadow.GetHardwareAcceleration()) {
+        rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
+    } else {
+        rsNode_->SetShadowElevation(shadow.GetElevation());
+    }
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
@@ -808,16 +812,15 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     }
     if (options.HasTranslate()) {
         const auto& translate = options.GetTranslateValue();
-        effect = effect->Translate({translate.x.ConvertToPx(), translate.y.ConvertToPx(),
-            translate.z.ConvertToPx()});
+        effect = effect->Translate({ translate.x.ConvertToPx(), translate.y.ConvertToPx(), translate.z.ConvertToPx() });
     }
     if (options.HasScale()) {
         const auto& scale = options.GetScaleValue();
-        effect = effect->Scale({scale.xScale, scale.yScale, scale.zScale});
+        effect = effect->Scale({ scale.xScale, scale.yScale, scale.zScale });
     }
     if (options.HasRotate()) {
         const auto& rotate = options.GetRotateValue();
-        effect = effect->Rotate({rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle});
+        effect = effect->Rotate({ rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle });
     }
     return effect;
 }

@@ -37,14 +37,12 @@ class LongPressRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(LongPressRecognizer, MultiFingersRecognizer);
 
 public:
-    explicit LongPressRecognizer() {}
-    LongPressRecognizer(int32_t duration, int32_t fingers, bool repeat,
-        bool isForDrag = false, bool isDisableMouseLeft = false)
-        : duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
+    explicit LongPressRecognizer() = default;
+    LongPressRecognizer(
+        int32_t duration, int32_t fingers, bool repeat, bool isForDrag = false, bool isDisableMouseLeft = false)
+        : duration_(duration), fingers_(fingers), repeat_(repeat), isForDrag_(isForDrag),
           isDisableMouseLeft_(isDisableMouseLeft)
-    {
-        fingers_ = fingers;
-    }
+    {}
     ~LongPressRecognizer() override = default;
 
     void OnAccepted() override;

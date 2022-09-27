@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -154,6 +155,11 @@ public:
 
     const RefPtr<OverlayManager>& GetOverlayManager();
 
+    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager()
+    {
+        return selectOverlayManager_;
+    }
+
     void FlushBuild() override;
 
     void AddCallBack(std::function<void()>&& callback);
@@ -215,6 +221,7 @@ private:
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
+    RefPtr<SelectOverlayManager> selectOverlayManager_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
