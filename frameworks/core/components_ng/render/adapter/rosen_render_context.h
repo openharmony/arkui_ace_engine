@@ -26,6 +26,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -42,6 +43,8 @@ public:
     void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
+
+    void SyncGeometryProperties(const RectF& rectF) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 

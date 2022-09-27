@@ -24,7 +24,7 @@ namespace OHOS::Ace::Framework {
 
 void JSPath::Create(const JSCallbackInfo& info)
 {
-    if(Container::IsCurrentUseNewPipeline()){
+    if (Container::IsCurrentUseNewPipeline()) {
         NG::PathView::Create();
         JSShapeAbstract::SetNgSize(info);
         if (info.Length() > 0 && info[0]->IsObject()) {

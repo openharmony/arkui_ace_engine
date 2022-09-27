@@ -37,7 +37,6 @@ public:
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         auto shapePaintProperty = DynamicCast<PolygonPaintProperty>(paintWrapper->GetPaintProperty());
-        LOGE("wch polygon_paint_method  shapePaintProperty isnull? : %{public}d", !!shapePaintProperty);
         if (!shapePaintProperty) {
             return nullptr;
         }

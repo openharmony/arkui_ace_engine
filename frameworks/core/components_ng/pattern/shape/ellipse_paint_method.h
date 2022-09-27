@@ -20,7 +20,6 @@
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_ng/render/circle_painter.h"
 #include "core/components_ng/render/ellipse_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
@@ -41,7 +40,6 @@ public:
         if (!shapePaintProperty) {
             return nullptr;
         }
-
         if (propertiesFromAncestor_) {
             shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }

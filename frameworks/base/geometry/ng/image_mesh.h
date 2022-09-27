@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_IMAGEMESH_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_IMAGEMESH_H
 
@@ -43,17 +44,17 @@ public:
         return (mesh_ == imageMess.mesh_) && (column_ == imageMess.column_) && (row_ == imageMess.row_);
     }
 
-    ImageMesh operator!=(const ImageMesh& imageMess)
+    bool operator!=(const ImageMesh& imageMess)
+    {
+        return (mesh_ != imageMess.mesh_) || (column_ != imageMess.column_) || (row_ != imageMess.row_);
+    }
+
+   ImageMesh& operator=(const ImageMesh& imageMess)
     {
         mesh_ = imageMess.mesh_;
         column_ = imageMess.column_;
         row_ = imageMess.row_;
         return *this;
-    }
-
-    bool operator=(const ImageMesh& imageMess)
-    {
-        return (mesh_ != imageMess.mesh_) || (column_ != imageMess.column_) || (row_ != imageMess.row_);
     }
 
 private:

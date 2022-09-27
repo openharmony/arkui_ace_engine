@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H
 
@@ -28,10 +29,7 @@ class PolygonPattern : public Pattern {
 
 public:
     PolygonPattern() = default;
-    PolygonPattern(bool isPolygon):isPolygon_(isPolygon)
-    {
-
-    }
+    explicit PolygonPattern(bool isPolygon) : isPolygon_(isPolygon) {}
     ~PolygonPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -48,7 +46,8 @@ public:
             curFrameNode = parentFrameNode;
             parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
         }
-        return MakeRefPtr<PolygonPaintMethod>(DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()), isPolygon_);
+        return MakeRefPtr<PolygonPaintMethod>(
+            DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()), isPolygon_);
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -62,10 +61,11 @@ public:
     }
 
 private:
-    bool isPolygon_;
+    bool isPolygon_ {};
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(PolygonPattern);
 };
+
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H

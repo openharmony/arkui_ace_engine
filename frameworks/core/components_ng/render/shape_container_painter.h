@@ -13,26 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_GROUP_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_GROUP_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SHAPE_CONTAINER_PAINTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SHAPE_CONTAINER_PAINTER_H
 
-#include <string>
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/image_mesh.h"
-#include "base/utils/macros.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/shape/shape_view_box.h"
+#include "core/components_ng/pattern/shape/container_paint_property.h"
+#include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT ShapeGroupView {
+class ShapeContainerPainter {
 public:
-    static void Create();
-    static void SetBitmapMesh(ImageMesh& imageMess);
-    static void SetViewPort(ShapeViewBox& viewPort);
+    ShapeContainerPainter() = default;
+    ~ShapeContainerPainter() = default;
+    static void BitmapMesh(RSCanvas& canvas, const ContainerPaintProperty& containerPaintProperty);
 };
-
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_GROUP_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SHAPE_CONTAINER_PAINTER_H

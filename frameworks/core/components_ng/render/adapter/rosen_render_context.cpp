@@ -105,6 +105,14 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
         return;
     }
     auto paintRect = AdjustPaintRect();
+    SyncGeometryProperties(paintRect);
+}
+
+void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
+{
+    if (!rsNode_) {
+        return;
+    }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
 
@@ -122,7 +130,6 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
         PaintBackground();
     }
 }
-
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     if (!rsNode_) {

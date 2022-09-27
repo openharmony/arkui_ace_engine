@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PATH_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PATH_PAINTER_H
 
-#include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -30,4 +29,5 @@ public:
 };
 
 } // namespace OHOS::Ace::NG
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PATH_PAINTER_H

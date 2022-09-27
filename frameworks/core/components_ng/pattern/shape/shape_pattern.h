@@ -16,11 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATTERN_H
 
+#include <cstddef>
+#include <optional>
+
+#include "base/geometry/ng/rect_t.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/shape/container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
-#include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_view_box.h"
 
 namespace OHOS::Ace::NG {
 class ShapePattern : public Pattern {
@@ -37,7 +43,73 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return MakeRefPtr<ShapePaintProperty>();
+        return MakeRefPtr<ContainerPaintProperty>();
+    }
+
+    bool GetGeomeryFromRect() override
+    {
+        auto frameNode = GetHost();
+        if (!frameNode) {
+            return false;
+        }
+        auto containerProperty = frameNode->GetPaintProperty<ContainerPaintProperty>();
+        if (!containerProperty) {
+            return false;
+        }
+        auto shapeViewBoxOpt = containerProperty->CloneShapeViewBox();
+        auto geoNode = frameNode->GetGeometryNode();
+        if (!geoNode) {
+            return false;
+        }
+        SizeF rectF = geoNode->GetContentSize();
+        if (shapeViewBoxOpt.has_value() && shapeViewBoxOpt->IsValid()) {
+            double viewBoxWidth = shapeViewBoxOpt->Width().ConvertToPx();
+            double viedwBoxHeight = shapeViewBoxOpt->Height().ConvertToPx();
+            double actualWidth = rectF.Width();
+            double actualHeight = rectF.Height();
+            if (viewBoxWidth < actualWidth || viedwBoxHeight < actualHeight) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    std::optional<RectF> GetGeomeryRectData() override
+    {
+        auto frameNode = GetHost();
+        if (!frameNode) {
+            return std::nullopt;
+        }
+        auto containerProperty = frameNode->GetPaintProperty<ContainerPaintProperty>();
+        if (!containerProperty) {
+            return std::nullopt;
+        }
+        auto shapeViewBoxOpt = containerProperty->CloneShapeViewBox();
+        auto geoNode = frameNode->GetGeometryNode();
+        if (!geoNode) {
+            return std::nullopt;
+        }
+        SizeF rectF = geoNode->GetContentSize();
+        OffsetF offsetF = geoNode->GetContentOffset();
+        if (shapeViewBoxOpt.has_value() && shapeViewBoxOpt->IsValid()) {
+            double viewBoxWidth = shapeViewBoxOpt->Width().ConvertToPx();
+            double viewBoxHeight = shapeViewBoxOpt->Height().ConvertToPx();
+            double actualWidth = rectF.Width();
+            double actualHeight = rectF.Height();
+            bool compareWithActualSize = false;
+            if (Positive(actualWidth) && Positive(actualHeight)) {
+                compareWithActualSize = true;
+            }
+            if (compareWithActualSize) {
+                return RectF(offsetF.GetX() + shapeViewBoxOpt->Left().ConvertToPx(),
+                    offsetF.GetY() + shapeViewBoxOpt->Top().ConvertToPx(), std::min(viewBoxWidth, actualWidth),
+                    std::min(viewBoxHeight, actualHeight));
+            } else {
+                return RectF(offsetF.GetX() + shapeViewBoxOpt->Left().ConvertToPx(),
+                    offsetF.GetY() + shapeViewBoxOpt->Top().ConvertToPx(), viewBoxWidth, viewBoxHeight);
+            }
+        }
+        return std::nullopt;
     }
 
     bool IsAtomicNode() const override
@@ -46,6 +118,7 @@ public:
     }
 
 private:
+    void ViewPortTansfer();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(ShapePattern);
 };

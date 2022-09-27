@@ -101,8 +101,8 @@ build_component_ng("pattern_ng") {
     "shape/circle_layout_algorithm.cpp",
     "shape/circle_pattern.cpp",
     "shape/circle_view.cpp",
-    "shape/ellipse_view.cpp",
     "shape/ellipse_pattern.cpp",
+    "shape/ellipse_view.cpp",
     "shape/line_layout_algorithm.cpp",
     "shape/line_pattern.cpp",
     "shape/line_view.cpp",
@@ -156,6 +156,10 @@ build_component_ng("pattern_ng") {
     "xcomponent/xcomponent_layout_algorithm.cpp",
     "xcomponent/xcomponent_pattern.cpp",
     "xcomponent/xcomponent_view.cpp",
+  ]
+
+  deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 }
 

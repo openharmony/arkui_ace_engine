@@ -13,23 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_POLYGON_PAINTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_POLYGON_PAINTER_H
-
-#include "base/geometry/ng/radius.h"
-#include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/pattern/shape/polygon_paint_property.h"
+#include "core/components_ng/pattern/shape/container_paint_property.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/shape_container_painter.h"
+#include "core/components_ng/render/sk_painter.h"
 
 namespace OHOS::Ace::NG {
-
-class PolygonPainter {
-public:
-    PolygonPainter() = default;
-    ~PolygonPainter() = default;
-    static void DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& polygonPaintProperty, bool isclose);
-};
-
+void ShapeContainerPainter::BitmapMesh(RSCanvas& canvas, const ContainerPaintProperty& containerPaintProperty)
+{
+    SkPainter::BitmapMesh(canvas, containerPaintProperty);
+}
 } // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_POLYGON_PAINTER_H

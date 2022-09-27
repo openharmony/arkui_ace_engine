@@ -40,11 +40,9 @@ public:
         if (!shapePaintProperty) {
             return nullptr;
         }
-
         if (propertiesFromAncestor_) {
             shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }
-
         return [shapePaintProperty](RSCanvas& canvas) { PathPainter::DrawPath(canvas, *shapePaintProperty); };
     }
 

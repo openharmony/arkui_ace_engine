@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/render/polygon_painter.h"
+
 #include "core/components_ng/pattern/shape/polygon_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/polygon_painter.h"
 #include "core/components_ng/render/shape_painter.h"
 
 namespace OHOS::Ace::NG {
-void PolygonPainter::DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& polygonPaintProperty,bool isClose)
+void PolygonPainter::DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& polygonPaintProperty, bool isClose)
 {
     if (!polygonPaintProperty.HasPoints()) {
         return;

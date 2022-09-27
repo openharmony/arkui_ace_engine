@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
@@ -91,6 +92,16 @@ public:
     virtual RefPtr<NodePaintMethod> CreateNodePaintMethod()
     {
         return nullptr;
+    }
+
+    virtual bool GetGeomeryFromRect()
+    {
+        return false;
+    }
+
+    virtual std::optional<RectF> GetGeomeryRectData()
+    {
+        return std::nullopt;
     }
 
     virtual RefPtr<EventHub> CreateEventHub()

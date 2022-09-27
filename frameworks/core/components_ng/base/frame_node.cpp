@@ -195,7 +195,11 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     SetGeometryNode(dirty->GetGeometryNode());
     if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
-        renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
+        if (pattern_->GetGeomeryFromRect()) {
+            renderContext_->SyncGeometryProperties(pattern_->GetGeomeryRectData().value_or(RectF()));
+        } else {
+            renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
+        }
     }
 
     // clean layout flag.
