@@ -22,6 +22,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/components/counter/counter_theme.h"
+#include "frameworks/core/components_ng/pattern/counter/counter_view.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -51,6 +52,18 @@ void JSCounter::JSBind(BindingTarget globalObj)
 
 void JSCounter::JsOnInc(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
+    }
+    if (!args[0]->IsFunction()) {
+        LOGW("Argument is not a function object");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::CounterView::SetOnInc(JsEventCallback<void()>(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0])));
+        return;
+    }
     if (!JSViewBindEvent(&CounterComponent::SetOnInc, args)) {
         LOGW("Failed to bind event");
     }
@@ -59,6 +72,18 @@ void JSCounter::JsOnInc(const JSCallbackInfo& args)
 
 void JSCounter::JsOnDec(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
+    }
+    if (!args[0]->IsFunction()) {
+        LOGW("Argument is not a function object");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::CounterView::SetOnDec(JsEventCallback<void()>(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0])));
+        return;
+    }
     if (!JSViewBindEvent(&CounterComponent::SetOnDec, args)) {
         LOGW("Failed to bind event");
     }
@@ -169,6 +194,10 @@ void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
 
 void JSCounter::Create()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::CounterView::Create();
+        return;
+    }
     std::list<RefPtr<Component>> children;
     RefPtr<OHOS::Ace::CounterComponent> component = AceType::MakeRefPtr<CounterComponent>(children);
     ViewStackProcessor::GetInstance()->ClaimElementId(component);
