@@ -265,6 +265,8 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         return;
     }
     UpdateIndex(swiper->GetIndex());
+
+    ApplyRestoreInfo();
     Initialize(GetContext(), catchMode_);
     swiper_ = swiper; // must after UpdateIndex
 }
@@ -3386,6 +3388,36 @@ void RenderSwiper::OnSurfaceChanged()
     if(isIndicatorAnimationStart_ && !needRestore_) {
         FinishAllSwipeAnimation(true, true);
     }
+}
+
+std::string RenderSwiper::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("index", index_);
+    jsonObj->Put("currentIndex", currentIndex_);
+    jsonObj->Put("swipeToIndex", swipeToIndex_);
+    return jsonObj->ToString();
+}
+
+void RenderSwiper::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(GetRestoreInfo());
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("RenderSwiper:: restore info is invalid");
+        return;
+    }
+
+    auto jsonIndex = info->GetValue("index");
+    auto jsonCurrentIndex = info->GetValue("currentIndex");
+    auto jsonSwipeToIndex = info->GetValue("swipeToIndex");
+
+    index_ = jsonIndex->GetInt();
+    currentIndex_ = jsonCurrentIndex->GetInt();
+    swipeToIndex_ = jsonSwipeToIndex->GetInt();
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

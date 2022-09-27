@@ -49,6 +49,8 @@ void RenderTabContent::Update(const RefPtr<Component>& component)
         currentIndex_ = tabIndex;
     }
 
+    ApplyRestoreInfo();
+
     if (scrollable_ != tabContent->IsScrollable()) {
         if (animator_ && animator_->IsRunning()) {
             animator_->Finish();
@@ -504,6 +506,23 @@ void RenderTabContent::PerformLayout()
 bool RenderTabContent::IsUseOnly()
 {
     return true;
+}
+
+std::string RenderTabContent::ProvideRestoreInfo()
+{
+    return std::to_string(currentIndex_);
+}
+
+void RenderTabContent::ApplyRestoreInfo()
+{
+    auto parent = GetParent().Upgrade();
+    auto grandParent = parent->GetParent().Upgrade();
+    std::string restoreInfo = grandParent->GetRestoreInfo();
+    if (restoreInfo.empty()) {
+        return;
+    }
+    currentIndex_ = static_cast<size_t>(StringUtils::StringToInt(GetRestoreInfo()));
+    grandParent->SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

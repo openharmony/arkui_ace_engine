@@ -97,6 +97,9 @@ void RenderTabBar::FlushIndex(const RefPtr<TabController>& controller)
         // In partial update we have zero tabs yet here, so just keep the index
         index_ = (index < tabsSize_ || tabsSize_ == 0) ? index : tabsSize_ - 1;
     }
+	
+    ApplyRestoreInfo(controller);
+
     LOGD("focus index_ %{public}d tabsSize_ %{public}d, index %{public}d, initial %{public}d, pending %{public}d",
         index_, tabsSize_, index, controller->GetInitialIndex(), controller->GetIndex());
     controller->SetIndexWithoutChangeContent(index_);
@@ -746,6 +749,43 @@ RefPtr<RenderNode> RenderTabBar::GetChildByIndex(int32_t index) const
     auto pos = GetChildren().begin();
     std::advance(pos, index);
     return *pos;
+}
+
+std::string RenderTabBar::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("index", index_);
+    jsonObj->Put("OffsetX", scrollableOffset_.GetX());
+    jsonObj->Put("OffsetY", scrollableOffset_.GetY());
+    return jsonObj->ToString();
+}
+
+void RenderTabBar::ApplyRestoreInfo(const RefPtr<TabController>& controller)
+{
+    auto parent = GetParent().Upgrade();
+    auto grandParent = parent->GetParent().Upgrade();
+    std::string restoreInfo = grandParent->GetRestoreInfo();
+    if (restoreInfo.empty()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("RenderTabBar:: restore info is invalid");
+        return;
+    }
+
+    auto jsonIndex = info->GetValue("index");
+    auto jsonOffsetX = info->GetValue("OffsetX");
+    auto jsonOffsetY = info->GetValue("OffsetY");
+
+    index_ = jsonIndex->GetInt();
+    SetIndex(index_, true);
+    controller->SetIndexByController(index_, false);
+    controller->SetPendingIndex(index_);
+    controller->SetInitialIndex(index_);
+    scrollableOffset_.SetX(jsonOffsetX->GetDouble());
+    scrollableOffset_.SetY(jsonOffsetY->GetDouble());
+    grandParent->SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

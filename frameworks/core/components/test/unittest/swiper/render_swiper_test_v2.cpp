@@ -79,6 +79,64 @@ public:
 };
 
 /**
+ * @tc.name: RenderSwiperTestContinuation001
+ * @tc.desc: Test state transfer of the swiper component
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC9F
+ */
+HWTEST_F(RenderSwiperTest, RenderSwiperTestContinuation001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderSwiperTest continuation001 start";
+
+    /**
+     * @tc.steps: step1. Construct a SwiperComponent, set current index.
+     */
+    std::list<RefPtr<Component>> componentChildren;
+    for (uint32_t i = 0; i < 10; i++) {
+        componentChildren.emplace_back(AceType::MakeRefPtr<BoxComponent>());
+    }
+    RefPtr<SwiperComponent> swiperComponent = AceType::MakeRefPtr<SwiperComponent>(componentChildren);
+    RefPtr<SwiperIndicatorTest> swiperIndicator = AceType::MakeRefPtr<SwiperIndicatorTest>();
+    swiperIndicator->SetCurrentIndex(3);
+    
+    /**
+     * @tc.steps: step2. Store index state of swiper component.
+     * @tc.expected: step2. The return string is correct.
+     */
+    std::string info = swiperIndicator->ProvideRestoreInfo();
+    std::string expectStateResult = "{\"index\":0,\"currentIndex\":3,\"swipeToIndex\":-1}";
+    EXPECT_EQ(info, expectStateResult);
+
+    /**
+     * @tc.steps: step3. Restore index state of swiper component.
+     * @tc.expected: step3. The index state is correct.
+     */
+    swiperIndicator->SetRestoreInfo(expectStateResult);
+    auto mockContext = MockRenderCommon::GetMockContext();
+    swiperIndicator->Attach(mockContext);
+    swiperIndicator->Update(swiperComponent);
+    EXPECT_EQ(swiperIndicator->GetCurrentIndex(), 3);
+
+    /**
+     * @tc.steps: step4. Second Update doesn't restore the state.
+     * @tc.expected: step4. The stored string is empty.
+     */
+    swiperIndicator->Update(swiperComponent);
+    EXPECT_TRUE(swiperIndicator->GetRestoreInfo().empty());
+
+    /**
+     * @tc.steps: step5. Restore index state from invalid json string.
+     * @tc.expected: step5. The index state is unchanged.
+     */
+    std::string invalidInfo = "index\":0,\"currentIndex\":2,\"swipeToIndex\":-1";
+    swiperIndicator->SetRestoreInfo(invalidInfo);
+    swiperIndicator->Update(swiperComponent);
+    EXPECT_EQ(swiperIndicator->GetCurrentIndex(), 3);
+
+    GTEST_LOG_(INFO) << "RenderSwiperTest continuation001 stop";
+}
+
+/**
  * @tc.name: ShowPrevious001
  * @tc.desc: Test ShowPrevious interface of the swiper component for RTL
  * @tc.type: FUNC
