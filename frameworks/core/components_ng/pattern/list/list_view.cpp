@@ -58,7 +58,6 @@ void ListView::SetDivider(const V2::ItemDivider& divider)
 
 void ListView::SetChainAnimation(bool enableChainAnimation)
 {
-
 }
 
 void ListView::SetLanes(int32_t lanes)
@@ -88,7 +87,6 @@ void ListView::SetCachedCount(const int32_t& cachedCount)
 
 void ListView::SetSticky(V2::StickyStyle stickyStyle)
 {
-
 }
 
 void ListView::SetOnScroll(OnScrollEvent&& onScroll)
