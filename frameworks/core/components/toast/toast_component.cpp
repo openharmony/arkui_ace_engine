@@ -175,10 +175,8 @@ void ToastComponent::Show(const RefPtr<PipelineContext>& context, const std::str
 
     int32_t toastId = GenerateNextToastId();
     auto deviceType = SystemProperties::GetDeviceType();
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        int32_t barrierfreeDuration = AceApplicationInfo::GetInstance().GetBarrierfreeDuration();
-        duration = duration > barrierfreeDuration ? duration : barrierfreeDuration;
-    }
+    int32_t barrierfreeDuration = AceApplicationInfo::GetInstance().GetBarrierfreeDuration();
+    duration = duration > barrierfreeDuration ? duration : barrierfreeDuration;
     // get toast animation playing time
     toastDurationTime_ = duration;
     Dimension bottomPosition = StringUtils::StringToDimension(bottom);
