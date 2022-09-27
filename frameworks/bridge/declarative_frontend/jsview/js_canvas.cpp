@@ -17,12 +17,24 @@
 
 #include "core/common/container.h"
 #include "core/components/custom_paint/custom_paint_component.h"
+#include "core/components_ng/pattern/custom_paint/custom_paint_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSCanvas::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pattern = NG::CustomPaintView::Create();
+        if (info[0]->IsObject()) {
+            JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
+            if (jsContext) {
+                jsContext->SetCustomPaintPattern(pattern);
+            }
+        }
+        return;
+    }
+
     RefPtr<OHOS::Ace::CustomPaintComponent> paintChild = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
     if (info[0]->IsObject()) {
         JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
@@ -31,6 +43,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
             jsContext->SetAntiAlias();
         }
     }
+
     ViewStackProcessor::GetInstance()->ClaimElementId(paintChild);
     ViewStackProcessor::GetInstance()->Push(paintChild);
 }
@@ -57,6 +70,18 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto readyEvent_ = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Canvas.onReady");
+            func->Execute();
+        };
+        NG::CustomPaintView::SetOnReady(std::move(readyEvent_));
+        return;
+    }
+
     auto container = Container::Current();
     if (!container) {
         LOGE("No container");
