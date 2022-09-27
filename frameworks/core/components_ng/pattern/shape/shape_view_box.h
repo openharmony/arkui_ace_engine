@@ -12,9 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_VIEWBOX_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_VIEWBOX_H
+
 #include "base/geometry/dimension.h"
-#include "core/components/shape/shape_container_component.h"
+
 namespace OHOS::Ace::NG {
+
 class ShapeViewBox final {
 public:
     ShapeViewBox() = default;
@@ -74,15 +79,15 @@ public:
         return *this;
     }
 
-    bool operator==(const ShapeViewBox& shapeViewBox)
+    bool operator==(const ShapeViewBox& shapeViewBox) const
     {
         return (x_ == shapeViewBox.x_) && (y_ == shapeViewBox.y_) && (width_ == shapeViewBox.width_) &&
                (height_ == shapeViewBox.height_);
     }
 
-    bool operator!=(const ShapeViewBox& shapeViewBox)
+    bool operator!=(const ShapeViewBox& shapeViewBox) const
     {
-        return (x_ != shapeViewBox.x_) && (y_ != shapeViewBox.y_) && (width_ != shapeViewBox.width_) &&
+        return (x_ != shapeViewBox.x_) || (y_ != shapeViewBox.y_) || (width_ != shapeViewBox.width_) ||
                (height_ != shapeViewBox.height_);
     }
 
@@ -92,4 +97,7 @@ private:
     Dimension width_ = Dimension(-1.0);
     Dimension height_ = Dimension(-1.0);
 };
+
 } // namespace OHOS::Ace::NG
+
+#endif

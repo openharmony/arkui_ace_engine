@@ -48,6 +48,7 @@ public:
 
 private:
     static void InitBox(const JSCallbackInfo& info);
+    static void SetNgViewPort(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

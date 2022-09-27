@@ -16,11 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATTERN_H
 
+#include <cstddef>
+#include <optional>
+
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/shape/container_paint_method.h"
+#include "core/components_ng/pattern/shape/container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_view_box.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 class ShapePattern : public Pattern {
@@ -37,7 +46,14 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return MakeRefPtr<ShapePaintProperty>();
+        return MakeRefPtr<ContainerPaintProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        //return nullptr;
+    return nullptr;
+       // return MakeRefPtr<ContainerPaintMethod>(width_, height_, shapeViewBox_, imageMesh_,rsNode);
     }
 
     bool IsAtomicNode() const override

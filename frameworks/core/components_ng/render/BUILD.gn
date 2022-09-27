@@ -37,6 +37,7 @@ build_component_ng("render_ng") {
     "render_context_creator.cpp",
     "render_surface_creator.cpp",
     "shape_painter.cpp",
+    "shape_container_painter.cpp",
     "sk_painter.cpp",
   ]
 

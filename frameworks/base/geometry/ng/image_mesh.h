@@ -43,17 +43,17 @@ public:
         return (mesh_ == imageMess.mesh_) && (column_ == imageMess.column_) && (row_ == imageMess.row_);
     }
 
-    ImageMesh operator!=(const ImageMesh& imageMess)
+    bool operator!=(const ImageMesh& imageMess)
+    {
+        return (mesh_ != imageMess.mesh_) || (column_ != imageMess.column_) || (row_ != imageMess.row_);
+    }
+
+   ImageMesh& operator=(const ImageMesh& imageMess)
     {
         mesh_ = imageMess.mesh_;
         column_ = imageMess.column_;
         row_ = imageMess.row_;
         return *this;
-    }
-
-    bool operator=(const ImageMesh& imageMess)
-    {
-        return (mesh_ != imageMess.mesh_) || (column_ != imageMess.column_) || (row_ != imageMess.row_);
     }
 
 private:
