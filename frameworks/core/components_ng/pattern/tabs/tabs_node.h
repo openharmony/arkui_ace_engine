@@ -62,10 +62,10 @@ public:
 
     int32_t GetTabBarByContentId(int32_t tabContentId)
     {
-        auto iter = tabBarNode_.find(tabContentId);
-        if (iter == tabBarNode_.end()) {
+        auto iter = tabBarItemIds_.find(tabContentId);
+        if (iter == tabBarItemIds_.end()) {
             auto tabBarId = ElementRegister::GetInstance()->MakeUniqueId();
-            tabBarNode_.try_emplace(tabContentId, tabBarId);
+            tabBarItemIds_.try_emplace(tabContentId, tabBarId);
             return tabBarId;
         }
         return iter->second;
@@ -83,6 +83,16 @@ public:
         return result;
     }
 
+    RefPtr<UINode> GetTabBar()
+    {
+        return GetChildren().front();
+    }
+
+    RefPtr<UINode> GetTabs()
+    {
+        return GetChildren().back();
+    }
+
 private:
     bool Scrollable() const;
     int32_t GetAnimationDuration() const;
@@ -94,7 +104,7 @@ private:
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;
     std::set<int32_t> swiperChildren_;
-    std::map<int32_t, int32_t> tabBarNode_;         // Key is id of TabContent, value is id of Column of TabBar.
+    std::map<int32_t, int32_t> tabBarItemIds_;         // Key is id of TabContent, value is id of Column of TabBar.
     std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
 };
 

@@ -124,9 +124,6 @@ public:
     // the map to the render component stack.
     void Push(const RefPtr<UINode>& element, bool isCustomView = false);
 
-    void PushTabBar(const TabBarParam& tabBarParam);
-    const TabBarParam& PopTabBar() const;
-
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.
     void Pop();
@@ -267,8 +264,6 @@ private:
 
     // elmtId to account get access to
     ElementIdType accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
-
-    TabBarParam tabBarParam_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

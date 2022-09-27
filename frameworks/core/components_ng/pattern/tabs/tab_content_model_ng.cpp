@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -55,7 +56,7 @@ void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
         }
         return deepChild;
     };
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId,
+    auto frameNode = TabContentNode::GetOrCreateTabContentNode(V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<TabContentPattern>(shallowBuilder);
         });
@@ -68,7 +69,7 @@ void TabContentModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     stack->Push(frameNode);
 }
@@ -78,17 +79,35 @@ void TabContentModelNG::Pop()
     auto tabContent = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 
+}
+
+RefPtr<TabsNode> TabContentView::FindTabsNode(const RefPtr<UINode>& tabContent)
+{
+    CHECK_NULL_RETURN(tabContent, nullptr);
+    RefPtr<UINode> parent = tabContent->GetParent();
+
+    while(parent) {
+        if (AceType::InstanceOf<TabsNode>(parent)) {
+            return AceType::DynamicCast<TabsNode>(parent);
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
+void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent)
+{
     CHECK_NULL_VOID(tabContent);
     auto tabContentId = tabContent->GetId();
-    auto swiperNode = tabContent->GetParent();
-    CHECK_NULL_VOID(swiperNode);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(swiperNode->GetParent());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = tabsNode->GetChildren().front();
-    CHECK_NULL_VOID(tabBarNode);
 
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto tabBarParam = stack->PopTabBar();
+    auto tabContentFrameNode = AceType::DynamicCast<FrameNode>(tabContent);
+    CHECK_NULL_VOID(tabContentFrameNode);
+
+    auto tabsNode = FindTabsNode(tabContent);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = tabsNode->GetTabBar();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarParam = tabContentFrameNode->GetPattern<TabContentPattern>()->GetTabBarParam();
 
     // Create column node to contain image and text or builder.
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetTabBarByContentId(tabContentId),
@@ -100,25 +119,28 @@ void TabContentModelNG::Pop()
     linearLayoutProperty->UpdateSpace(TAB_BAR_SPACE);
 
     // Create tab bar with builder.
-    if (tabBarParam.builder) {
+    if (tabBarParam->HasBuilder()) {
         ScopedViewStackProcessor builderViewStackProcessor;
-        tabBarParam.builder();
+        tabBarParam->builder();
         auto builderNode = ViewStackProcessor::GetInstance()->Finish();
         builderNode->MountToParent(columnNode);
         tabBarNode->ReplaceChild(tabsNode->GetBuilderByContentId(tabContentId, columnNode), columnNode);
         return;
     }
 
-    if (tabBarParam.text.empty()) {
+    if (tabBarParam->text.empty()) {
         LOGW("Text is empty.");
         return;
     }
+
+    LOGD("Text %{public}s", tabBarParam->text.c_str());
 
     // Create text node and image node.
     RefPtr<FrameNode> textNode;
     RefPtr<FrameNode> imageNode;
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
-        ImageSourceInfo imageSourceInfo(tabBarParam.icon);
+        LOGD("Text new child to column %{public}s", tabBarParam->text.c_str());
+        ImageSourceInfo imageSourceInfo(tabBarParam->icon);
         imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
         textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -138,7 +160,7 @@ void TabContentModelNG::Pop()
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(tabBarParam.text);
+    textLayoutProperty->UpdateContent(tabBarParam->text);
     textLayoutProperty->UpdateFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textLayoutProperty->UpdateMaxLines(1);
@@ -147,14 +169,14 @@ void TabContentModelNG::Pop()
     // Update property of image.
     auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageProperty);
-    if (!tabBarParam.icon.empty()) {
+    if (!tabBarParam->icon.empty()) {
         textLayoutProperty->UpdateFontSize(DEFAULT_SMALL_TEXT_FONT_SIZE);
         imageProperty->UpdateUserDefinedIdealSize(
             CalcSize(NG::CalcLength(DEFAULT_IMAGE_SIZE), NG::CalcLength(DEFAULT_IMAGE_SIZE)));
     } else {
         imageProperty->UpdateUserDefinedIdealSize(CalcSize());
     }
-    ImageSourceInfo imageSourceInfo(tabBarParam.icon);
+    ImageSourceInfo imageSourceInfo(tabBarParam->icon);
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
 
     imageNode->MarkModifyDone();
@@ -162,13 +184,27 @@ void TabContentModelNG::Pop()
     columnNode->MarkModifyDone();
 }
 
+void TabContentView::RemoveTabBarItem(const RefPtr<TabsNode>& tabsNode, int32_t tabContentId)
+{
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = tabsNode->GetTabBar();
+    CHECK_NULL_VOID(tabBarNode);
+
+    auto tabBarItemId = tabsNode->GetTabBarByContentId(tabContentId);
+    LOGD("Tab ID: %{public}d, Bar item ID: %{public}d", tabContentId, tabBarItemId);
+
+    auto tabBarItemNode = ElementRegister::GetInstance()->GetUINodeById(tabBarItemId);
+    tabBarNode->RemoveChild(tabBarItemNode);
+}
+
 void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
     TabBarBuilderFunc&& builder, bool /*useContentOnly*/)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, icon.value_or(""));
     ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, text.value_or(""));
-    TabBarParam tabBarParam { .text = text.value_or(""), .icon = icon.value_or(""), .builder = std::move(builder) };
-    ViewStackProcessor::GetInstance()->PushTabBar(tabBarParam);
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBar(text.value_or(""), icon.value_or(""), std::move(builder));
 }
 
 } // namespace OHOS::Ace::NG

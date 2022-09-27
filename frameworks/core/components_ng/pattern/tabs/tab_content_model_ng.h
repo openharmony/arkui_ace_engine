@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,6 +35,10 @@ public:
     void Pop() override;
     void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         TabBarBuilderFunc&& builder, bool useContentOnly) override;
+    static void SetTabBar(const std::string& text, const std::string& icon, TabBarBuilderFunc&& builder);
+    static void AddTabBarItem(const RefPtr<UINode>& tabContent);
+    static void RemoveTabBarItem(const RefPtr<TabsNode>& tabs, int32_t id);
+    static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
 };
 
 } // namespace OHOS::Ace::NG
