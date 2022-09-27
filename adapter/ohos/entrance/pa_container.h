@@ -130,7 +130,8 @@ public:
     static void DestroyContainer(int32_t instanceId);
     static RefPtr<PaContainer> GetContainer(int32_t instanceId);
     static bool RunPa(int32_t instanceId, const std::string& content, const OHOS::AAFwk::Want& want);
-    static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
+    static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
+        const std::vector<std::string>& paths);
     static void AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath);
     static bool OnCreate(int32_t instanceId, const OHOS::AAFwk::Want& want);
     static bool OnDelete(int32_t instanceId, int64_t formId);

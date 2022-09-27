@@ -942,29 +942,21 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
-    std::string basePath = delegate->GetAssetPath(fileName);
-    if (!basePath.empty()) {
-        std::string abcPath = basePath.append(fileName);
-        LOGD("abcPath is: %{private}s", abcPath.c_str());
-        if (!runtime->ExecuteJsBin(abcPath)) {
-            LOGE("ExecuteJsBin %{private}s failed.", fileName.c_str());
-            return false;
-        }
-    }
-    return true;
-#else
     std::vector<uint8_t> content;
     if (!delegate->GetAssetContent(fileName, content)) {
         LOGD("GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
     }
-    if (!runtime->EvaluateJsCode(content.data(), content.size(), fileName)) {
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
+    const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
+#else
+    const std::string& abcPath = fileName;
+#endif
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
         LOGE("EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;
     }
     return true;
-#endif
 }
 
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)

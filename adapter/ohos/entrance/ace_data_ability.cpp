@@ -82,8 +82,11 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want)
     }
 
     // init data ability
+    bool isHap = !moduleInfo->hapPath.empty();
+    std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     BackendType backendType = BackendType::DATA;
-    bool isArkApp = GetIsArkFromConfig(packagePathStr);
+    bool isArkApp = GetIsArkFromConfig(packagePath, isHap);
+
     Platform::PaContainer::CreateContainer(abilityId_, backendType, isArkApp, this,
         std::make_unique<DataPlatformEventCallback>([this]() { TerminateAbility(); }));
 
@@ -93,11 +96,11 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want)
         LOGI("AceDataAbility::OnStart assetBasePathStr: %{public}s, parsedUrl: %{public}s",
             info->srcPath.c_str(), parsedUrl.c_str());
         auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
-        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
         LOGI("AceDataAbility::OnStart parsedUrl: %{public}s", parsedUrl.c_str());
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
     std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
     if (appInfo) {

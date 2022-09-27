@@ -38,6 +38,7 @@
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/rect.h"
@@ -390,6 +391,17 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     std::string pageProfile;
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
     if (isModelJson) {
+        std::string hapPath = info->hapPath;
+        LOGI("hapPath:%{public}s", hapPath.c_str());
+        // first use hap provider
+        if (flutterAssetManager && !hapPath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+            if (assetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
+                LOGD("Push HapAssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
+        }
+
         if (appInfo) {
             std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
             for (const auto& module : moduleList) {
@@ -401,6 +413,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 }
             }
         }
+
+        // second use file provider, will remove later
         LOGI("In stage mode, resPath:%{private}s", resPath.c_str());
         auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
         if (flutterAssetManager && !resPath.empty()) {
@@ -410,6 +424,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 flutterAssetManager->PushBack(std::move(assetProvider));
             }
         }
+
         auto hapInfo = context->GetHapModuleInfo();
         if (hapInfo) {
             pageProfile = hapInfo->pages;
