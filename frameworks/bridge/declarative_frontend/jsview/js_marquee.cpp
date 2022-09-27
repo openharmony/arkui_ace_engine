@@ -15,9 +15,11 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
 
+#include "bridge/declarative_frontend/jsview/js_text.h"
 #include "core/components/marquee/marquee_component.h"
 #include "core/components/marquee/marquee_theme.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/pattern/marquee/marquee_view.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -29,6 +31,38 @@ void JSMarquee::Create(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("marquee create error, info is non-valid");
         return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::MarqueeView::Create();
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto src = paramObject->GetProperty("src");
+        if (!src->IsString()) {
+            LOGE("marquee create error, src is non-valid");
+            return;
+        }
+        NG::MarqueeView::SetValue(src->ToString());
+
+        auto getStart = paramObject->GetProperty("start");
+        bool start = getStart->IsBoolean() ? getStart->ToBoolean() : false;
+        NG::MarqueeView::SetPlayerStatus(start);
+
+        auto getStep = paramObject->GetProperty("step");
+        if (getStep->IsNumber()) {
+            NG::MarqueeView::SetScrollAmount(getStep->ToNumber<double>());
+        }
+
+        auto getLoop = paramObject->GetProperty("loop");
+        if (getLoop->IsNumber()) {
+            NG::MarqueeView::SetLoop(getLoop->ToNumber<int32_t>());
+        }
+
+        auto getFromStart = paramObject->GetProperty("fromStart");
+        bool fromStart = getFromStart->IsBoolean() ? getFromStart->ToBoolean() : true;
+        if (fromStart) {
+            NG::MarqueeView::SetDirection(MarqueeDirection::LEFT);
+        } else {
+            NG::MarqueeView::SetDirection(MarqueeDirection::RIGHT);
+        }
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -71,9 +105,9 @@ void JSMarquee::JSBind(BindingTarget globalObj)
     JSClass<JSMarquee>::Declare("Marquee");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSMarquee>::StaticMethod("create", &JSMarquee::Create, opt);
+    JSClass<JSMarquee>::StaticMethod("allowScale", &JSMarquee::SetAllowScale);
     JSClass<JSMarquee>::StaticMethod("fontColor", &JSMarquee::SetTextColor);
     JSClass<JSMarquee>::StaticMethod("fontSize", &JSMarquee::SetFontSize);
-    JSClass<JSMarquee>::StaticMethod("allowScale", &JSMarquee::SetAllowScale);
     JSClass<JSMarquee>::StaticMethod("fontWeight", &JSMarquee::SetFontWeight);
     JSClass<JSMarquee>::StaticMethod("fontFamily", &JSMarquee::SetFontFamily);
     JSClass<JSMarquee>::StaticMethod("onStart", &JSMarquee::OnStart);
@@ -101,6 +135,10 @@ void JSMarquee::SetTextColor(const JSCallbackInfo& info)
         LOGE("the info[0] is null");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::MarqueeView::SetTextColor(color);
+        return;
+    }
 
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
@@ -119,6 +157,16 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
         LOGE("SetFrontSize create error, info is non-valid");
         return;
     }
+
+    Dimension fontSize;
+    if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::MarqueeView::SetFontSize(fontSize);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
     if (!component) {
@@ -126,10 +174,6 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
-        return;
-    }
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontSize(fontSize);
     component->SetTextStyle(std::move(textStyle));
@@ -139,6 +183,10 @@ void JSMarquee::SetAllowScale(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsBoolean()) {
         LOGE("SetAllowScale create error, info is non-valid");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::MarqueeView::SetAllowScale(info[0]->ToBoolean());
         return;
     }
 
@@ -155,6 +203,11 @@ void JSMarquee::SetAllowScale(const JSCallbackInfo& info)
 
 void JSMarquee::SetFontWeight(const std::string& value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::MarqueeView::SetFontWeight(ConvertStrToFontWeight(value));
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
     if (!component) {
@@ -173,6 +226,16 @@ void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
         return;
     }
 
+    std::vector<std::string> fontFamilies;
+    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
+        LOGE("Parse FontFamilies failed");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::MarqueeView::SetFontFamily(fontFamilies);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
     if (!component) {
@@ -180,11 +243,6 @@ void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
         return;
     }
 
-    std::vector<std::string> fontFamilies;
-    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
-        return;
-    }
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontFamilies(fontFamilies);
     component->SetTextStyle(std::move(textStyle));
@@ -192,6 +250,21 @@ void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
 
 void JSMarquee::OnStart(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Marquee.onStart");
+            func->ExecuteJS();
+        };
+        NG::MarqueeView::SetOnStart(std::move(onChange));
+        return;
+    }
+
     if (!JSViewBindEvent(&MarqueeComponent::SetOnStart, info)) {
         LOGW("Failed to bind event");
     }
@@ -200,6 +273,21 @@ void JSMarquee::OnStart(const JSCallbackInfo& info)
 
 void JSMarquee::OnBounce(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Marquee.onBounce");
+            func->ExecuteJS();
+        };
+        NG::MarqueeView::SetOnBounce(std::move(onChange));
+        return;
+    }
+
     if (!JSViewBindEvent(&MarqueeComponent::SetOnBounce, info)) {
         LOGW("Failed to bind event");
     }
@@ -208,6 +296,21 @@ void JSMarquee::OnBounce(const JSCallbackInfo& info)
 
 void JSMarquee::OnFinish(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Marquee.onFinish");
+            func->ExecuteJS();
+        };
+        NG::MarqueeView::SetOnFinish(std::move(onChange));
+        return;
+    }
+
     if (!JSViewBindEvent(&MarqueeComponent::SetOnFinish, info)) {
         LOGW("Failed to bind event");
     }
