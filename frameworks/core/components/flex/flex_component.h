@@ -171,7 +171,7 @@ public:
         isTabs_ = flag;
     }
 
-    bool GetTabsFlag()
+    bool GetTabsFlag() const
     {
         return isTabs_;
     }
@@ -181,7 +181,7 @@ public:
         isTabContent_ = flag;
     }
 
-    bool GetTabContentFlag()
+    bool GetTabContentFlag() const
     {
         return isTabContent_;
     }

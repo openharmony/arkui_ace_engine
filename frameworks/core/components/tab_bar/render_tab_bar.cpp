@@ -774,11 +774,11 @@ void RenderTabBar::ApplyRestoreInfo(const RefPtr<TabController>& controller)
         return;
     }
 
-    auto jsonindex = info->GetValue("index");
+    auto jsonIndex = info->GetValue("index");
     auto jsonOffsetX = info->GetValue("OffsetX");
     auto jsonOffsetY = info->GetValue("OffsetY");
 
-    index_ = jsonindex->GetInt();
+    index_ = jsonIndex->GetInt();
     SetIndex(index_, true);
     controller->SetIndexByController(index_, false);
     controller->SetPendingIndex(index_);

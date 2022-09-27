@@ -312,11 +312,11 @@ void RenderToggle::ApplyRestoreInfo()
         return;
     }
 
-    auto jsonchecked = info->GetValue("checked");
-    auto jsonisPressed = info->GetValue("isPressed");
+    auto jsonChecked = info->GetValue("checked");
+    auto jsonIsPressed = info->GetValue("isPressed");
 
-    toggleComponent_->SetCheckedState(jsonchecked->GetBool());
-    isPressed_ = jsonisPressed->GetBool();
+    toggleComponent_->SetCheckedState(jsonChecked->GetBool());
+    isPressed_ = jsonIsPressed->GetBool();
     SetRestoreInfo("");
 }
 

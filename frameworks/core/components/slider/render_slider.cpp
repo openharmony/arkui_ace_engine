@@ -846,21 +846,21 @@ void RenderSlider::ApplyRestoreInfo()
         return;
     }
 
-    auto jsonvalue = info->GetValue("value");
-    auto jsonshowTips = info->GetValue("showTips");
-    auto jsonshowSteps = info->GetValue("showSteps");
-    auto jsonthickness = info->GetValue("thickness");
-    auto jsonmin = info->GetValue("min");
-    auto jsonmax = info->GetValue("max");
-    auto jsonstep = info->GetValue("step");
+    auto jsonValue = info->GetValue("value");
+    auto jsonShowTips = info->GetValue("showTips");
+    auto jsonShowSteps = info->GetValue("showSteps");
+    auto jsonThickness = info->GetValue("thickness");
+    auto jsonMin = info->GetValue("min");
+    auto jsonMax = info->GetValue("max");
+    auto jsonStep = info->GetValue("step");
 
-    value_ = jsonvalue->GetDouble();
-    showTips_ = jsonshowTips->GetBool();
-    showSteps_ = jsonshowSteps->GetBool();
-    thickness_ = jsonthickness->GetDouble();
-    min_ = jsonmin->GetDouble();
-    max_ = jsonmax->GetDouble();
-    step_ = jsonstep->GetDouble();
+    value_ = jsonValue->GetDouble();
+    showTips_ = jsonShowTips->GetBool();
+    showSteps_ = jsonShowSteps->GetBool();
+    thickness_ = jsonThickness->GetDouble();
+    min_ = jsonMin->GetDouble();
+    max_ = jsonMax->GetDouble();
+    step_ = jsonStep->GetDouble();
 
     SetRestoreInfo("");
 }

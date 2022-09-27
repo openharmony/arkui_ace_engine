@@ -3414,13 +3414,13 @@ void RenderSwiper::ApplyRestoreInfo()
         return;
     }
 
-    auto jsonindex = info->GetValue("index");
-    auto jsoncurrentIndex = info->GetValue("currentIndex");
-    auto jsonswipeToIndex = info->GetValue("swipeToIndex");
+    auto jsonIndex = info->GetValue("index");
+    auto jsonCurrentIndex = info->GetValue("currentIndex");
+    auto jsonSwipeToIndex = info->GetValue("swipeToIndex");
 
-    index_ = jsonindex->GetInt();
-    currentIndex_ = jsoncurrentIndex->GetInt();
-    swipeToIndex_ = jsonswipeToIndex->GetInt();
+    index_ = jsonIndex->GetInt();
+    currentIndex_ = jsonCurrentIndex->GetInt();
+    swipeToIndex_ = jsonSwipeToIndex->GetInt();
     SetRestoreInfo("");
 }
 

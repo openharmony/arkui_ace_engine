@@ -53,7 +53,7 @@ void RenderTabsTestV2::TearDown() {}
  */
 HWTEST_F(RenderTabsTestV2, RenderTabsContinuation001, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation001 start";
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation001 start";
 
     /**
      * @tc.steps: step1. construct TabBarComponent.
@@ -111,7 +111,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation001, TestSize.Level1)
     renderTabBar->Update(tabBarComponent);
     EXPECT_EQ(renderTabBar->GetIndex(), -1);
 
-    GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation001 stop";
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation001 stop";
 }
 
 /**
@@ -122,7 +122,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation001, TestSize.Level1)
  */
 HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation002 start";
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation002 start";
 
     /**
      * @tc.steps: step1. construct TabContentComponent.
@@ -156,7 +156,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
      * @tc.steps: step3. Store index state of tabcontent component.
      * @tc.expected: step3. The return string is correct.
      */
-    std::string info = renderTabContent->ProvideRestoreInfo();
+    std::string info = renderFlex->ProvideRestoreInfo();
     std::string expectStateResult = "0";
     EXPECT_EQ(info, expectStateResult);
 
@@ -164,7 +164,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
      * @tc.steps: step4. Restore index state of tabcontent component.
      * @tc.expected: step4. The index state is correct.
      */
-    renderTabContent->SetRestoreInfo(expectStateResult);
+    renderFlex->SetRestoreInfo(expectStateResult);
     renderTabContent->Update(tabContentComponent);
     EXPECT_EQ(renderTabContent->GetCurrentIndex(), 0);
 
@@ -175,7 +175,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
     renderTabContent->Update(tabContentComponent);
     EXPECT_TRUE(renderFlex->GetRestoreInfo().empty());
 
-    GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation002 stop";
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation002 stop";
 }
 
 /**
@@ -186,7 +186,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
  */
 HWTEST_F(RenderTabsTestV2, RenderTabsContinuation003, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation003 start";
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation003 start";
 
     /**
      * @tc.steps: step1. construct TabContentItemComponent.
@@ -196,7 +196,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation003, TestSize.Level1)
     auto tabContentItemComponent = AceType::MakeRefPtr<V2::TabContentItemComponent>(components);
     EXPECT_TRUE(tabContentItemComponent->GetTabContentFlag());
 
-    GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation003 stop";
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation003 stop";
 }
 
 /**
@@ -207,7 +207,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation003, TestSize.Level1)
  */
 HWTEST_F(RenderTabsTestV2, RenderTabsContinuation004, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation004 start";
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation004 start";
 
     /**
      * @tc.steps: step1. construct TabContentItemComponent.
@@ -219,7 +219,139 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation004, TestSize.Level1)
     auto tabsComponent = AceType::MakeRefPtr<V2::TabsComponent>(children, barVal, tabController);
     EXPECT_TRUE(tabsComponent->GetTabsFlag());
 
-    GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation004 stop";
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation004 stop";
+}
+
+/**
+ * @tc.name: RenderTabsContinuation005
+ * @tc.desc: Test state transfer of the tabbar component
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC9F
+ */
+HWTEST_F(RenderTabsTestV2, RenderTabsContinuation005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation005 start";
+
+    /**
+     * @tc.steps: step1. Construct RenderFlex without child.
+     */
+    std::list<RefPtr<Component>> children;
+    auto flexComponent = AceType::MakeRefPtr<FlexComponent>(FlexDirection::ROW, FlexAlign::CENTER,
+        FlexAlign::CENTER, children);
+    flexComponent->SetTabsFlag(true);
+    EXPECT_TRUE(flexComponent->GetTabsFlag());
+    RefPtr<RenderFlex> renderFlex = AceType::MakeRefPtr<RenderFlex>();
+    renderFlex->Update(flexComponent);
+
+    /**
+     * @tc.steps: step2. Store index state of tabbar component.
+     * @tc.expected: step2. The return string is empty.
+     */
+    std::string info = renderFlex->ProvideRestoreInfo();
+    std::string expectStateResult = "";
+    EXPECT_EQ(info, expectStateResult);
+
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation005 stop";
+}
+
+/**
+ * @tc.name: RenderTabsContinuation006
+ * @tc.desc: Test state transfer of the tabbar component
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC9F
+ */
+HWTEST_F(RenderTabsTestV2, RenderTabsContinuation006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation006 start";
+
+    /**
+     * @tc.steps: step1. Construct RenderFlex without parent child.
+     */
+    std::list<RefPtr<Component>> children;
+    auto flexComponent = AceType::MakeRefPtr<FlexComponent>(FlexDirection::ROW, FlexAlign::CENTER,
+        FlexAlign::CENTER, children);
+    flexComponent->SetTabsFlag(true);
+    EXPECT_TRUE(flexComponent->GetTabsFlag());
+    RefPtr<RenderFlex> renderFlex = AceType::MakeRefPtr<RenderFlex>();
+    RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<RenderBox>();
+    renderFlex->Update(flexComponent);
+    renderFlex->AddChild(renderBox);
+
+    /**
+     * @tc.steps: step3. Store index state of tabbar component.
+     * @tc.expected: step3. The return string is empty.
+     */
+    std::string info = renderFlex->ProvideRestoreInfo();
+    std::string expectStateResult = "";
+    EXPECT_EQ(info, expectStateResult);
+
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation006 stop";
+}
+
+/**
+ * @tc.name: RenderTabsContinuation007
+ * @tc.desc: Test state transfer of the tabcontent component
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC9F
+ */
+HWTEST_F(RenderTabsTestV2, RenderTabsContinuation007, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation007 start";
+
+    /**
+     * @tc.steps: step1. Construct RenderFlex without child.
+     */
+    std::list<RefPtr<Component>> children;
+    auto flexComponent = AceType::MakeRefPtr<FlexComponent>(FlexDirection::ROW, FlexAlign::CENTER,
+        FlexAlign::CENTER, children);
+    flexComponent->SetTabContentFlag(true);
+    EXPECT_TRUE(flexComponent->GetTabContentFlag());
+    RefPtr<RenderFlex> renderFlex = AceType::MakeRefPtr<RenderFlex>();
+    renderFlex->Update(flexComponent);
+
+    /**
+     * @tc.steps: step2. Store index state of tabcontent component.
+     * @tc.expected: step2. The return string is empty.
+     */
+    std::string info = renderFlex->ProvideRestoreInfo();
+    std::string expectStateResult = "";
+    EXPECT_EQ(info, expectStateResult);
+
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation007 stop";
+}
+
+/**
+ * @tc.name: RenderTabsContinuation008
+ * @tc.desc: Test state transfer of the tabcontent component
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC9F
+ */
+HWTEST_F(RenderTabsTestV2, RenderTabsContinuation008, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation008 start";
+
+    /**
+     * @tc.steps: step1. Construct RenderFlex without parent child.
+     */
+    std::list<RefPtr<Component>> children;
+    auto flexComponent = AceType::MakeRefPtr<FlexComponent>(FlexDirection::ROW, FlexAlign::CENTER,
+        FlexAlign::CENTER, children);
+    flexComponent->SetTabContentFlag(true);
+    EXPECT_TRUE(flexComponent->GetTabContentFlag());
+    RefPtr<RenderFlex> renderFlex = AceType::MakeRefPtr<RenderFlex>();
+    RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<RenderBox>();
+    renderFlex->Update(flexComponent);
+    renderFlex->AddChild(renderBox);
+
+    /**
+     * @tc.steps: step2. Store index state of tabcontent component.
+     * @tc.expected: step2. The return string is empty.
+     */
+    std::string info = renderFlex->ProvideRestoreInfo();
+    std::string expectStateResult = "";
+    EXPECT_EQ(info, expectStateResult);
+
+    GTEST_LOG_(INFO) << "RenderTabsTestV2 RenderTabsContinuation008 stop";
 }
 
 } // namespace OHOS::Ace::V2
