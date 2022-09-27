@@ -54,6 +54,7 @@ namespace {
 const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
+static int32_t g_instanceId = 0;
 
 FrontendType GetFrontendType(const std::string& frontendType)
 {
@@ -227,6 +228,7 @@ void AceAbility::OnStart(const Want& want)
 {
     Ability::OnStart(want);
     LOGI("AceAbility::OnStart called");
+    abilityId_ = g_instanceId++;
     static std::once_flag onceFlag;
     auto abilityContext = GetAbilityContext();
     std::call_once(onceFlag, [abilityContext]() {
@@ -490,6 +492,7 @@ void AceAbility::OnStop()
     LOGI("AceAbility::OnStop called ");
     Ability::OnStop();
     Platform::AceContainer::DestroyContainer(abilityId_);
+    abilityId_ = -1;
     LOGI("AceAbility::OnStop called End");
 }
 
