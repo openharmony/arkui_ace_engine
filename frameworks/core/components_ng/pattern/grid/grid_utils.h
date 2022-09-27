@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +30,8 @@ public:
     ~GridUtils() = delete;
 
     static std::vector<float> ParseArgs(const std::string& args, float size, float gap);
+    static float GetMainGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis);
+    static float GetCrossGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis);
 };
 
 } // namespace OHOS::Ace::NG
