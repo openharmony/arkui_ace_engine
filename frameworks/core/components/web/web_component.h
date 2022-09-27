@@ -434,6 +434,16 @@ public:
         isWebDebuggingAccessEnabled_ = isEnabled;
     }
 
+    bool GetPinchSmoothModeEnabled() const
+    {
+        return isPinchSmoothModeEnabled_;
+    }
+
+    void SetPinchSmoothModeEnabled(bool isEnabled)
+    {
+        isPinchSmoothModeEnabled_ = isEnabled;
+    }
+
     bool GetIsInitialScaleSet() const
     {
         return isInitialScaleSet_;
@@ -812,6 +822,7 @@ private:
     OnDropFunc onDragMoveId_;
     OnDropFunc onDragLeaveId_;
     OnDropFunc onDropId_;
+    bool isPinchSmoothModeEnabled_ = false;
 };
 
 } // namespace OHOS::Ace

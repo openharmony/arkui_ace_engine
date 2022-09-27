@@ -2255,6 +2255,23 @@ void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isPinchSmoothModeEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                setting->PutPinchSmoothMode(isPinchSmoothModeEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess)
 {
     auto context = context_.Upgrade();

@@ -89,6 +89,7 @@ public:
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
+    static void PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

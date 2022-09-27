@@ -110,6 +110,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdateTextZoomRatio(web->GetTextZoomRatio());
         delegate_->UpdateWebDebuggingAccess(web->GetWebDebuggingAccessEnabled());
         delegate_->UpdateMediaPlayGestureAccess(web->IsMediaPlayGestureAccess());
+        delegate_->UpdatePinchSmoothModeEnabled(web->GetPinchSmoothModeEnabled());
         auto userAgent = web->GetUserAgent();
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);

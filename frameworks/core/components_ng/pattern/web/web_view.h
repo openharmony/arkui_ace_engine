@@ -84,6 +84,7 @@ public:
     static void SetOnDragMoveId(const OnDropFunc& onDragMoveId);
     static void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId);
     static void SetOnDropId(const OnDropFunc& onDropId);
+    static void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
 };
 } // namespace OHOS::Ace::NG
 
