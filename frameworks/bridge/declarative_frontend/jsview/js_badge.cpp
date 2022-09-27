@@ -17,6 +17,8 @@
 
 #include "base/log/ace_trace.h"
 #include "core/components/badge/badge_component.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/badge/badge_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -33,6 +35,11 @@ void JSBadge::Create(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateNG(info);
+        return;
+    }
+
     auto badge = AceType::MakeRefPtr<OHOS::Ace::BadgeComponent>();
     SetDefaultTheme(badge);
 
@@ -43,12 +50,80 @@ void JSBadge::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(badge);
 }
 
+void JSBadge::Pop()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::BadgeView::Pop();
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
+        return;
+    }
+    JSViewAbstract::Pop();
+}
+
+void JSBadge::CreateNG(const JSCallbackInfo& info)
+{
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+
+    NG::BadgeView::BadgeParameters badgeParameters;
+    auto value = obj->GetProperty("value");
+    if (!value->IsNull() && value->IsString()) {
+        auto label = value->ToString();
+        badgeParameters.badgeValue = label;
+    }
+
+    auto position = obj->GetProperty("position");
+    if (!position->IsNull() && position->IsNumber()) {
+        badgeParameters.badgePosition = position->ToNumber<int32_t>();
+    }
+    auto style = obj->GetProperty("style");
+    if (!style->IsNull() && style->IsObject()) {
+        auto value = JSRef<JSObject>::Cast(style);
+        JSRef<JSVal> colorValue = value->GetProperty("color");
+        JSRef<JSVal> fontSizeValue = value->GetProperty("fontSize");
+        JSRef<JSVal> badgeSizeValue = value->GetProperty("badgeSize");
+        JSRef<JSVal> badgeColorValue = value->GetProperty("badgeColor");
+
+        Color colorVal;
+        if (ParseJsColor(colorValue, colorVal)) {
+            badgeParameters.badgeTextColor = colorVal;
+        }
+
+        Dimension fontSize;
+        if (ParseJsDimensionFp(fontSizeValue, fontSize)) {
+            badgeParameters.badgeFontSize = fontSize;
+        }
+
+        Dimension badgeSize;
+        if (ParseJsDimensionFp(badgeSizeValue, badgeSize)) {
+            badgeParameters.badgeCircleSize = badgeSize;
+        }
+
+        Color color;
+        if (ParseJsColor(badgeColorValue, color)) {
+            badgeParameters.badgeColor = color;
+        }
+    }
+
+    auto count = obj->GetProperty("count");
+    if (!count->IsNull() && count->IsNumber()) {
+        badgeParameters.badgeCount = count->ToNumber<int32_t>();
+    }
+    auto maxCount = obj->GetProperty("maxCount");
+    if (!maxCount->IsNull() && maxCount->IsNumber()) {
+        badgeParameters.badgeMaxCount = maxCount->ToNumber<int32_t>();
+    }
+
+    NG::BadgeView::Create(badgeParameters);
+}
+
 void JSBadge::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBadge>::Declare("Badge");
 
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBadge>::StaticMethod("create", &JSBadge::Create, opt);
+
+    JSClass<JSBadge>::StaticMethod("pop", &JSBadge::Pop);
 
     JSClass<JSBadge>::Inherit<JSViewAbstract>();
     JSClass<JSBadge>::Bind(globalObj);
@@ -98,7 +173,7 @@ void JSBadge::SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<O
         JSRef<JSVal> badgeColorValue = value->GetProperty("badgeColor");
 
         Color colorVal;
-        if (ParseJsColor(colorValue, colorVal))  {
+        if (ParseJsColor(colorValue, colorVal)) {
             badge->SetBadgeTextColor(colorVal);
         }
 

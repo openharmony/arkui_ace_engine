@@ -225,6 +225,15 @@ public:
 
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
+    std::string& GetNodeName()
+    {
+        return nodeName_;
+    }
+
+    void SetNodeName(std::string& nodeName)
+    {
+        nodeName_ = nodeName;
+    }
     bool IsResponseRegion() const;
     void MarkResponseRegion(bool isResponseRegion);
 
@@ -273,6 +282,8 @@ private:
 
     bool isActive_ = false;
     bool isResponseRegion_ = false;
+
+    std::string nodeName_;
 
     friend class RosenRenderContext;
     friend class RenderContext;
