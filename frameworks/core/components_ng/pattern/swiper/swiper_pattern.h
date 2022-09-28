@@ -115,6 +115,7 @@ private:
     void PlayFadeAnimation();
 
     // Implement of swiper controller
+    void SwipeToWithoutAnimation(int32_t index);
     void SwipeTo(int32_t index);
     void ShowNext();
     void ShowPrevious();
