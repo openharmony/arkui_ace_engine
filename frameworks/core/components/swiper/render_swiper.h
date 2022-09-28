@@ -323,6 +323,7 @@ public:
     bool HandleMouseEvent(const MouseEvent& event) override;
     bool RefuseUpdatePosition(int32_t index);
     void OnPaintFinish() override;
+    std::string ProvideRestoreInfo() override;
 protected:
     struct IndicatorProperties final {
         IndicatorProperties(const Offset& normalPaddingStart, const Offset& normalPaddingEnd,
@@ -523,6 +524,7 @@ private:
     void LoadLazyItems(bool swipeToNext);
     double CalculateFriction(double gamma);
     void ClearItems(const RefPtr<Component>& lazyForEachComponent, int32_t index);
+    void ApplyRestoreInfo();
 
     RefPtr<SwiperComponent> swiper_;
 

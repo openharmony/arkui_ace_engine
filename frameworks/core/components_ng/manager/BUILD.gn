@@ -15,5 +15,9 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
 build_component_ng("manager_ng") {
-  sources = [ "full_screen/full_screen_manager.cpp" ]
+  sources = [
+    "full_screen/full_screen_manager.cpp",
+    "select_overlay/select_overlay_manager.cpp",
+    "select_overlay/select_overlay_proxy.cpp",
+  ]
 }

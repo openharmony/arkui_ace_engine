@@ -282,6 +282,7 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
 
         if (measureType == MeasureType::MATCH_PARENT) {
             idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.parentIdealSize);
+            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
             break;
         }
 

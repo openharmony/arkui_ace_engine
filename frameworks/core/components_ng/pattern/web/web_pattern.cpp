@@ -49,11 +49,18 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
+
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
+
     auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
+
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitFocusEvent(focusHub);
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -65,6 +72,12 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
             LOGE("touch point is null");
             return;
         }
+
+        // only handle touch event
+        if (info.GetSourceDevice() != SourceType::TOUCH) {
+            return;
+        }
+
         const auto& changedPoint = info.GetChangedTouches().front();
         if (changedPoint.GetTouchType() == TouchType::DOWN) {
             pattern->HandleTouchDown(info, false);
@@ -102,29 +115,51 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent_);
+
+    auto axisTask = [weak = WeakClaim(this)](AxisInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleAxisEvent(info);
+        }
+    };
+    axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
+    inputHub->AddOnAxisEvent(axisEvent_);
 }
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
 {
-    OnMouseEvent(info);
+    WebOnMouseEvent(info);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto onMouseEvent = eventHub->GetOnMouseEvent();
-    CHECK_NULL_VOID(onMouseEvent);
-    onMouseEvent(info);
+    auto mouseEventCallback = eventHub->GetOnMouseEvent();
+    CHECK_NULL_VOID(mouseEventCallback);
+    mouseEventCallback(info);
 }
 
-void WebPattern::OnMouseEvent(const MouseInfo& info)
+void WebPattern::HandleAxisEvent(AxisInfo& info)
+{
+    if (!delegate_) {
+        LOGE("Delegate_ is nullptr");
+        return;
+    }
+    auto localLocation = info.GetLocalLocation();
+    delegate_->HandleAxisEvent(
+        localLocation.GetX(), localLocation.GetY(), info.GetHorizontalAxis(), info.GetVerticalAxis());
+}
+
+void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
     if (!delegate_) {
         LOGE("delegate_ is nullptr");
         return;
     }
 
-    // TODO:web request when mouse release
+    if (info.GetAction() == MouseAction::RELEASE) {
+        WebRequestFocus();
+    }
 
     auto localLocation = info.GetLocalLocation();
     if (!HandleDoubleClickEvent(info)) {
@@ -170,6 +205,88 @@ void WebPattern::SendDoubleClickEvent(const MouseClickInfo& info)
         return;
     }
     delegate_->OnMouseEvent(info.x, info.y, MouseButton::LEFT_BUTTON, MouseAction::PRESS, DOUBLE_CLICK_NUM);
+}
+
+void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleBlurEvent();
+        }
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+
+    auto keyTask = [weak = WeakClaim(this)](const KeyEvent& keyEvent) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->HandleKeyEvent(keyEvent);
+    };
+    focusHub->SetOnKeyEventInternal(keyTask);
+}
+
+void WebPattern::HandleFocusEvent()
+{
+    if (!delegate_) {
+        LOGE("handle focus delegate_ is nullptr");
+        return;
+    }
+    delegate_->OnFocus();
+}
+
+void WebPattern::HandleBlurEvent()
+{
+    if (!delegate_) {
+        LOGE("handle blur delegate_ is nullptr");
+        return;
+    }
+    delegate_->OnBlur();
+}
+
+bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
+{
+    bool ret = WebOnKeyEvent(keyEvent);
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ret);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_RETURN(eventHub, ret);
+    auto keyEventCallback = eventHub->GetOnKeyEvent();
+    CHECK_NULL_RETURN(keyEventCallback, ret);
+
+    KeyEventInfo info(keyEvent);
+    keyEventCallback(info);
+
+    return ret;
+}
+
+bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
+{
+    if (!delegate_) {
+        LOGE("OnKeyEvent delegate_ is nullptr");
+        return false;
+    }
+    return delegate_->OnKeyEvent(static_cast<int32_t>(keyEvent.code), static_cast<int32_t>(keyEvent.action));
+}
+
+void WebPattern::WebRequestFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    focusHub->RequestFocusImmediately();
 }
 
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -320,6 +437,13 @@ void WebPattern::OnWebDebuggingAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnPinchSmoothModeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdatePinchSmoothModeEnabled(value);
+    }
+}
+
 void WebPattern::OnBackgroundColorUpdate(int32_t value)
 {
     if (delegate_) {
@@ -365,6 +489,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
         delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
+        delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
         if (GetUserAgent()) {
             delegate_->UpdateUserAgent(GetUserAgent().value());
         }
@@ -415,6 +540,9 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         }
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
     }
+    if (!touchInfos.empty()) {
+        WebRequestFocus();
+    }
 }
 
 void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
@@ -458,5 +586,27 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
         touchInfos.emplace_back(touchInfo);
     }
     return true;
+}
+
+void WebPattern::RequestFullScreen()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto fullScreenManager = context->GetFullScreenManager();
+    CHECK_NULL_VOID(fullScreenManager);
+    fullScreenManager->RequestFullScreen(host);
+}
+
+void WebPattern::ExitFullScreen()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto fullScreenManager = context->GetFullScreenManager();
+    CHECK_NULL_VOID(fullScreenManager);
+    fullScreenManager->ExitFullScreen(host);
 }
 } // namespace OHOS::Ace::NG

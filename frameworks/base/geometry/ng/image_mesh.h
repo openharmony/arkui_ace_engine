@@ -18,42 +18,43 @@
 
 #include <stdint.h>
 #include <vector>
+
 namespace OHOS::Ace::NG {
 class ImageMesh final {
 public:
     ImageMesh() = default;
     ImageMesh(std::vector<double>& mesh, int32_t column, int32_t row) : mesh_(mesh), column_(column), row_(row) {}
     ~ImageMesh() = default;
-    std::vector<double> GetMesh()
+    std::vector<double> GetMesh() const
     {
         return mesh_;
     }
 
-    int32_t getColumn()
+    int32_t GetColumn() const
     {
         return column_;
     }
 
-    int32_t getRow()
+    int32_t GetRow() const
     {
         return row_;
     }
 
-    bool operator==(const ImageMesh& imageMess) const
+    bool operator==(const ImageMesh& imageMesh) const
     {
-        return (mesh_ == imageMess.mesh_) && (column_ == imageMess.column_) && (row_ == imageMess.row_);
+        return (mesh_ == imageMesh.mesh_) && (column_ == imageMesh.column_) && (row_ == imageMesh.row_);
     }
 
-    bool operator!=(const ImageMesh& imageMess)
+    bool operator!=(const ImageMesh& imageMesh) const
     {
-        return (mesh_ != imageMess.mesh_) || (column_ != imageMess.column_) || (row_ != imageMess.row_);
+        return (mesh_ != imageMesh.mesh_) || (column_ != imageMesh.column_) || (row_ != imageMesh.row_);
     }
 
-   ImageMesh& operator=(const ImageMesh& imageMess)
+    ImageMesh& operator=(const ImageMesh& imageMesh)
     {
-        mesh_ = imageMess.mesh_;
-        column_ = imageMess.column_;
-        row_ = imageMess.row_;
+        mesh_ = imageMesh.mesh_;
+        column_ = imageMesh.column_;
+        row_ = imageMesh.row_;
         return *this;
     }
 

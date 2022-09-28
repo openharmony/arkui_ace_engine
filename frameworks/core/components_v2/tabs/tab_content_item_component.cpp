@@ -21,7 +21,9 @@ namespace OHOS::Ace::V2 {
 
 TabContentItemComponent::TabContentItemComponent(std::list<RefPtr<Component>>& children)
     : ColumnComponent(FlexAlign::FLEX_START, FlexAlign::FLEX_START, children)
-{}
+{
+    SetTabContentFlag(true);
+}
 
 RefPtr<Element> TabContentItemComponent::CreateElement()
 {

@@ -238,11 +238,12 @@ void RenderWaterFlow::AddChildByIndex(int32_t index, const RefPtr<RenderNode>& r
         AddChild(renderNode);
         SetItemCalSizeNeeded(renderNode, true);
         RefPtr<RenderWaterFlowItem> node = AceType::DynamicCast<RenderWaterFlowItem>(renderNode);
-        if (node) {
-            node->SetBoundary();
-            node->SetIndex(index);
-            node->SetHidden(false);
+        if (!node) {
+            return;
         }
+        node->SetBoundary();
+        node->SetIndex(index);
+        node->SetHidden(false);
         Span span;
         span.rowSpan = node->GetRowSpan();
         span.colSpan = node->GetColumnSpan();
@@ -1683,10 +1684,6 @@ void RenderWaterFlow::SetItemCalSizeNeeded(const RefPtr<RenderNode>& child, bool
     auto item = child;
     auto flowItem = AceType::DynamicCast<RenderWaterFlowItem>(item);
     while (!flowItem && depth > 0) {
-        if (!item || item->GetChildren().empty()) {
-            flowItem->SetCalSizeNeeded(need);
-            return;
-        }
         item = item->GetChildren().front();
         flowItem = AceType::DynamicCast<RenderWaterFlowItem>(item);
         --depth;

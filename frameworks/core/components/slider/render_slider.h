@@ -206,6 +206,8 @@ public:
     {
         return isHover_;
     }
+
+    std::string ProvideRestoreInfo() override;
     
 protected:
     static TouchRegionPoint GetTopTouchRegion(const Vertex& center, double width, double height);
@@ -296,6 +298,8 @@ protected:
     RefPtr<RenderNode> track_ = AceType::MakeRefPtr<RenderTrack>();
 
 private:
+    void ApplyRestoreInfo();
+
     // Slider render information
     double value_ = DEFAULT_VALUE;
     double preMovingValue_ = DEFAULT_VALUE;

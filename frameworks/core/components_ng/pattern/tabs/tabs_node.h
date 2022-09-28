@@ -77,7 +77,7 @@ public:
             return nullptr;
         }
         auto result = iter->second;
-        builderNode_[tabContentId] = builderNode;
+        iter->second = builderNode;
         return result;
     }
 

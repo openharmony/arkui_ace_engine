@@ -81,6 +81,15 @@ public:
         return !operator==(PointT);
     }
 
+    std::string ToString() const
+    {
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << "Point (" << std::fixed << std::setprecision(precision) << x_ << ", " << y_ << ")";
+        std::string output = ss.str();
+        return output;
+    }
+
 private:
     T x_ { 0 };
     T y_ { 0 };

@@ -21,8 +21,10 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components_ng/property/clip_path.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
@@ -57,6 +59,7 @@ struct DecorationProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurStyle, BlurStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradient, NG::Gradient);
 };
 
 struct RenderPositionProperty {
@@ -65,6 +68,10 @@ struct RenderPositionProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Anchor, OffsetT<Dimension>);
 };
 
+struct ClipProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipShape, ClipPathNG);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipEdge, bool);
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H

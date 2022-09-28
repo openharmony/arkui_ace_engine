@@ -142,9 +142,10 @@ public:
     LineJoinStyle GetLineJoinStyle(const std::string& val) const;
     Color GetColor(const std::string& value) const;
 
+    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
+
 protected:
     void InitSpecialized() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     bool SetPresentationAttr(const std::pair<std::string, std::string>& attr);
 };

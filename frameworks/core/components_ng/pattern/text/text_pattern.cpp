@@ -17,13 +17,134 @@
 
 #include <stack>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/event/long_press_event.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {
+
+void TextPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleLongPress(info);
+    };
+    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    gestureEventHub->AddLongPressEvent(longPressEvent_);
+}
+
+void TextPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        selectOverlayProxy_->Close();
+    }
+}
+
+void TextPattern::HandleLongPress(GestureEvent& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetGeometryNode()->GetFrameRect();
+    const auto& offset = info.GetLocalLocation();
+    // TODO: add text char match operation.
+    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), rect.Height() };
+    RectF firstHandle;
+    firstHandle.SetOffset({ offset.GetX(), offset.GetY() });
+    firstHandle.SetSize(handlePaintSize);
+    RectF secondHandle;
+    secondHandle.SetOffset({ offset.GetX() + rect.Width() / 2, offset.GetY() + rect.Height() / 2 });
+    secondHandle.SetSize(handlePaintSize);
+    ShowSelectOverlay(firstHandle, secondHandle);
+}
+
+void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
+{
+    // TODO: add text select area update.
+}
+
+void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
+{
+    // TODO: use text area update handle position.
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetGeometryNode()->GetFrameRect();
+    if (isFirstHandle) {
+        SelectHandleInfo info;
+        info.paintRect.SetOffset({ rect.Left(), rect.Top() });
+        info.paintRect.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), rect.GetSize().Height() });
+        selectOverlayProxy_->UpdateFirstSelectHandleInfo(info);
+        return;
+    }
+    SelectHandleInfo info;
+    info.paintRect.SetOffset({ rect.Right(), rect.Bottom() });
+    info.paintRect.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), rect.GetSize().Height() });
+    selectOverlayProxy_->UpdateSecondSelectHandleInfo(info);
+}
+
+void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    SelectOverlayInfo selectInfo;
+    selectInfo.firstHandle.paintRect = firstHandle;
+    selectInfo.secondHandle.paintRect = secondHandle;
+    selectInfo.onHandleMove = [weak = WeakClaim(this)](const RectF& handleRect, bool isFirst) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleMove(handleRect, isFirst);
+    };
+    selectInfo.onHandleMoveDone = [weak = WeakClaim(this)](const RectF& handleRect, bool isFirst) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleMoveDone(handleRect, isFirst);
+    };
+
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showPaste = false;
+    selectInfo.menuCallback.onSelectAll = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleOnSelectAll();
+    };
+
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        selectOverlayProxy_->Close();
+    }
+    selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
+}
+
+void TextPattern::HandleOnSelectAll()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rect = host->GetGeometryNode()->GetFrameRect();
+    // TODO: use text area update handle position.
+    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), rect.Height() };
+    RectF firstHandle;
+    firstHandle.SetOffset({ rect.Left(), rect.Top() });
+    firstHandle.SetSize(handlePaintSize);
+    RectF secondHandle;
+    secondHandle.SetOffset({ rect.Right(), rect.Bottom() });
+    secondHandle.SetSize(handlePaintSize);
+    ShowSelectOverlay(firstHandle, secondHandle);
+}
+
 void TextPattern::OnModifyDone()
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();

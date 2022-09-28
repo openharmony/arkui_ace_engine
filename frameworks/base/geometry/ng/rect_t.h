@@ -337,6 +337,27 @@ public:
         return output;
     }
 
+    std::string ToBounds() const
+    {
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << "[" << std::fixed << std::setprecision(precision) << x_ << ", " << y_ << "][";
+        if (NearEqual(width_, Infinity<T>())) {
+            ss << "INFINITE";
+        } else {
+            ss << (x_ + width_);
+        }
+        ss << ",";
+        if (NearEqual(height_, Infinity<T>())) {
+            ss << "INFINITE";
+        } else {
+            ss << (y_ + height_);
+        }
+        ss << "]";
+        std::string output = ss.str();
+        return output;
+    }
+
     OffsetT<T> Center() const
     {
         return OffsetT<T>(width_ / 2.0 + x_, height_ / 2.0 + y_);

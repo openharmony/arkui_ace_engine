@@ -210,6 +210,23 @@ void WebClientImpl::OnPageTitle(const std::string &title)
     delegate->OnReceivedTitle(title);
 }
 
+void WebClientImpl::OnFullScreenExit()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnFullScreenExit();
+}
+
+void WebClientImpl::OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(handler);
+    delegate->OnFullScreenEnter(handler);
+}
+
 void WebClientImpl::OnGeolocationHide()
 {
     ContainerScope scope(instanceId_);

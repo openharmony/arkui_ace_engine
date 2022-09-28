@@ -59,6 +59,8 @@ public:
         rawRecognizer_ = rawRecognizer;
     }
 
+    std::string ProvideRestoreInfo() override;
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -68,6 +70,9 @@ protected:
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<SelectComponent> data_;
     std::function<void()> onFocusCallback_;
+    int index_ = 0;
+private:
+    void ApplyRestoreInfo();
 };
 
 } // namespace OHOS::Ace

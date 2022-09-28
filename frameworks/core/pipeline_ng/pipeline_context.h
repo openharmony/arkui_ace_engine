@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H
 
+#include <functional>
+#include <list>
 #include <utility>
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -49,6 +52,11 @@ public:
 
     void SetupRootElement() override;
 
+    const RefPtr<FrameNode>& GetRootElement() const
+    {
+        return rootNode_;
+    }
+
     void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) override
     {}
 
@@ -71,7 +79,7 @@ public:
     void OnMouseEvent(const MouseEvent& event) override;
 
     // Called by view when axis event received.
-    void OnAxisEvent(const AxisEvent& event) override {}
+    void OnAxisEvent(const AxisEvent& event) override;
 
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
@@ -147,6 +155,11 @@ public:
 
     const RefPtr<OverlayManager>& GetOverlayManager();
 
+    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager()
+    {
+        return selectOverlayManager_;
+    }
+
     void FlushBuild() override;
 
     void AddCallBack(std::function<void()>&& callback);
@@ -201,14 +214,14 @@ private:
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
-    std::list<TouchEvent> touchEvents_;
-
     std::list<std::function<void()>> buildFinishCallbacks_;
+    std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
+    RefPtr<SelectOverlayManager> selectOverlayManager_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;

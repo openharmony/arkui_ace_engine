@@ -140,7 +140,15 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
-    FlushPipelineWithoutAnimation();
+    FlushBuild();
+    FlushTouchEvents();
+    taskScheduler_.FlushTask();
+    auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
+    if (hasAninmation) {
+        RequestFrame();
+    }
+    FlushMessages();
+    FlushFocus();
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -204,14 +212,7 @@ void PipelineContext::FlushFocus()
     }
 }
 
-void PipelineContext::FlushPipelineWithoutAnimation()
-{
-    FlushBuild();
-    FlushTouchEvents();
-    taskScheduler_.FlushTask();
-    FlushMessages();
-    FlushFocus();
-}
+void PipelineContext::FlushPipelineWithoutAnimation() {}
 
 void PipelineContext::FlushBuild()
 {
@@ -254,6 +255,7 @@ void PipelineContext::SetupRootElement()
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
+    selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
 
@@ -405,6 +407,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-multimodal") {
 #endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
+        rootNode_->DumpTree(0);
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {
@@ -415,7 +418,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     }
     return true;
 }
-
 
 void PipelineContext::FlushTouchEvents()
 {
@@ -477,6 +479,21 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
     return eventManager_->DispatchKeyEventNG(event, rootNode_);
+}
+
+void PipelineContext::OnAxisEvent(const AxisEvent& event)
+{
+    // Need develop here: CTRL+AXIS = Pinch event
+
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), horizontalAxis: %{public}f, verticalAxis: %{public}f, action: "
+         "%{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.horizontalAxis, scaleEvent.verticalAxis, scaleEvent.action);
+
+    // Need develop here: AxisEvent to touchTest pan recognizer
+
+    eventManager_->AxisTest(scaleEvent, rootNode_);
+    eventManager_->DispatchAxisEventNG(scaleEvent);
 }
 
 void PipelineContext::Destroy()

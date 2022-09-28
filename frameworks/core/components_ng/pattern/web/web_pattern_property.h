@@ -43,6 +43,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebDebuggingAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(InitialScale, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PinchSmoothModeEnabled, bool);
 };
 
 } // namespace OHOS::Ace::NG

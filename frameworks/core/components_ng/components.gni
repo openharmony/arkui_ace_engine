@@ -112,8 +112,8 @@ template("build_component_ng") {
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
-        "//foundation/graphic/graphcis_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
       ]
 
       if (platform == "ohos") {

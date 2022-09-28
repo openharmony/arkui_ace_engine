@@ -17,11 +17,31 @@
 
 #include "base/log/ace_trace.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/stack/stack_view.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/stack_model_impl.h"
+#include "frameworks/core/components_ng/pattern/stack/stack_model_ng.h"
 
+namespace OHOS::Ace {
+
+std::unique_ptr<StackModel> StackModel::instance_ = nullptr;
+
+StackModel* StackModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::StackModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::StackModelNG());
+        } else {
+            instance_.reset(new Framework::StackModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 const static std::array<Alignment, 9> ALIGNMENT_ARR { Alignment::TOP_LEFT, Alignment::TOP_CENTER, Alignment::TOP_RIGHT,
@@ -30,11 +50,8 @@ const static std::array<Alignment, 9> ALIGNMENT_ARR { Alignment::TOP_LEFT, Align
 
 void JSStack::SetStackFit(int value)
 {
-    if (value >= (int)StackFit::KEEP && value <= (int)StackFit::FIRST_CHILD) {
-        auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (stack) {
-            stack->SetStackFit((StackFit)value);
-        }
+    if (value >= static_cast<int>(StackFit::KEEP) && value <= static_cast<int>(StackFit::FIRST_CHILD)) {
+        StackModel::GetInstance()->SetStackFit(static_cast<StackFit>(value));
     } else {
         LOGE("Invalid value for stackfit");
     }
@@ -42,11 +59,8 @@ void JSStack::SetStackFit(int value)
 
 void JSStack::SetOverflow(int value)
 {
-    if (value >= (int)Overflow::CLIP && value <= (int)Overflow::OBSERVABLE) {
-        auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (stack) {
-            stack->SetOverflow((Overflow)value);
-        }
+    if (value >= static_cast<int>(Overflow::CLIP) && value <= static_cast<int>(Overflow::OBSERVABLE)) {
+        StackModel::GetInstance()->SetOverflow(static_cast<Overflow>(value));
     } else {
         LOGE("Invalid value for overflow");
     }
@@ -89,10 +103,7 @@ void JSStack::SetAlignment(int value)
             return;
     }
 
-    auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (stack) {
-        stack->SetAlignment(alignment);
-    }
+    StackModel::GetInstance()->SetAlignment(alignment);
 }
 
 void JSStack::SetWidth(const JSCallbackInfo& info)
@@ -108,15 +119,7 @@ void JSStack::SetWidth(const JSCallbackInfo& info)
 void JSStack::SetWidth(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsWidth(jsValue);
-
-    auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (stack) {
-        if (stack->GetMainStackSize() == MainStackSize::MAX || stack->GetMainStackSize() == MainStackSize::MAX_Y) {
-            stack->SetMainStackSize(MainStackSize::MAX);
-        } else {
-            stack->SetMainStackSize(MainStackSize::MAX_X);
-        }
-    }
+    StackModel::GetInstance()->SetHasWidth();
 }
 
 void JSStack::SetHeight(const JSCallbackInfo& info)
@@ -132,14 +135,7 @@ void JSStack::SetHeight(const JSCallbackInfo& info)
 void JSStack::SetHeight(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsHeight(jsValue);
-    auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (stack) {
-        if (stack->GetMainStackSize() == MainStackSize::MAX || stack->GetMainStackSize() == MainStackSize::MAX_X) {
-            stack->SetMainStackSize(MainStackSize::MAX);
-        } else {
-            stack->SetMainStackSize(MainStackSize::MAX_Y);
-        }
-    }
+    StackModel::GetInstance()->SetHasHeight();
 }
 
 void JSStack::SetSize(const JSCallbackInfo& info)
@@ -173,17 +169,32 @@ void JSStack::Create(const JSCallbackInfo& info)
         }
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::StackView::Create(alignment);
-        return;
-    }
+    StackModel::GetInstance()->Create(alignment);
+}
 
-    std::list<RefPtr<Component>> children;
-    RefPtr<OHOS::Ace::StackComponent> component =
-        AceType::MakeRefPtr<StackComponent>(alignment, StackFit::KEEP, Overflow::OBSERVABLE, children);
-    ViewStackProcessor::GetInstance()->ClaimElementId(component);
-    ViewStackProcessor::GetInstance()->Push(component);
-    JSInteractableView::SetFocusNode(true);
+void JSStack::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSStack>::Declare("Stack");
+
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSStack>::StaticMethod("create", &JSStack::Create, opt);
+    JSClass<JSStack>::StaticMethod("stackFit", &JSStack::SetStackFit, opt);
+    JSClass<JSStack>::StaticMethod("overflow", &JSStack::SetOverflow, opt);
+    JSClass<JSStack>::StaticMethod("alignContent", &JSStack::SetAlignment, opt);
+    JSClass<JSStack>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSStack>::StaticMethod("width", SetWidth);
+    JSClass<JSStack>::StaticMethod("height", SetHeight);
+    JSClass<JSStack>::StaticMethod("size", SetSize);
+    JSClass<JSStack>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSStack>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSStack>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSStack>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSStack>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSStack>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSStack>::Inherit<JSContainerBase>();
+    JSClass<JSStack>::Inherit<JSViewAbstract>();
+    JSClass<JSStack>::Bind<>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -42,6 +42,8 @@ public:
         return component_;
     }
 
+    std::string ProvideRestoreInfo() override;
+
 protected:
     double innerCircleRadius_ = 0.0;
     double outCircleRadius_ = 0.0;
@@ -63,6 +65,9 @@ protected:
     double pointScale_ = 1.0;
     bool isClicked_ = false;
     RefPtr<RadioComponent<std::string>> component_;
+
+private:
+    void ApplyRestoreInfo();
 };
 
 } // namespace OHOS::Ace

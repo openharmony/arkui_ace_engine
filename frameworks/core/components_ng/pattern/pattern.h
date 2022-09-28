@@ -94,12 +94,12 @@ public:
         return nullptr;
     }
 
-    virtual bool GetGeomeryFromRect()
+    virtual bool NeedOverridePaintRect()
     {
         return false;
     }
 
-    virtual std::optional<RectF> GetGeomeryRectData()
+    virtual std::optional<RectF> GetOverridePaintRect() const
     {
         return std::nullopt;
     }

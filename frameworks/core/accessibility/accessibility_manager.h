@@ -73,7 +73,7 @@ public:
     virtual void RemoveVisibleChangeNode(NodeId nodeId) = 0;
     virtual bool IsVisibleChangeNodeExists(NodeId nodeId) = 0;
     virtual void UpdateEventTarget(NodeId id, BaseEventInfo& info) = 0;
-    virtual void SetWindowPos(int32_t left, int32_t top) = 0;
+    virtual void SetWindowPos(int32_t left, int32_t top, int32_t windowId) = 0;
 
     void SetVersion(AccessibilityVersion version)
     {

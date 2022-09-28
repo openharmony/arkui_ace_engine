@@ -90,7 +90,6 @@ void SkPainter::SetPaint(SkPaint& skPaint, const ShapePaintProperty& shapePaintP
     if (shapePaintProperty.HasStroke()) {
         skPaint.setStyle(SkPaint::Style::kStroke_Style);
         Color strokeColor = shapePaintProperty.GetStrokeValue();
-        (strokeColor.GetRed(), strokeColor.GetGreen(), strokeColor.GetBlue(), strokeColor.GetAlpha());
         double curOpacity = shapePaintProperty.STOKE_OPACITY_DEFAULT;
         if (shapePaintProperty.HasStrokeOpacity()) {
             curOpacity = shapePaintProperty.GetStrokeOpacityValue();
@@ -120,7 +119,6 @@ void SkPainter::SetPaint(SkPaint& skPaint, const ShapePaintProperty& shapePaintP
     if (shapePaintProperty.HasFill()) {
         skPaint.setStyle(SkPaint::Style::kFill_Style);
         Color fillColor = shapePaintProperty.GetFillValue();
-        (fillColor.GetRed(), fillColor.GetGreen(), fillColor.GetBlue(), fillColor.GetAlpha());
         double curOpacity = shapePaintProperty.STOKE_OPACITY_DEFAULT;
         if (shapePaintProperty.HasStrokeOpacity()) {
             curOpacity = shapePaintProperty.GetStrokeOpacityValue();

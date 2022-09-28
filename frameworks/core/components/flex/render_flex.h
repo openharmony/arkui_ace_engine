@@ -116,12 +116,17 @@ public:
 
     void OnVisibleChanged() override;
 
+    std::string ProvideRestoreInfo() override;
+
 protected:
     void ClearRenderObject() override;
     bool MaybeRelease() override;
 
     Overflow overflow_ = Overflow::CLIP;
     bool isChildOverflow_ = false;
+
+    bool isTabs_ = false;
+    bool isTabContent_ = false;
 
 private:
     void PerformLayoutInWeightMode();

@@ -92,7 +92,7 @@ void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
  * @param layoutConstraint the constraint of current node.
  * @param axis the axis of this node.
  * @param measureType the measure info.
- * @param usingMaxSize When the component cannot confirm the size, it decides whether to use the maxi or min value.
+ * @param usingMaxSize When the component cannot confirm the size, it decides whether to use the max or min value.
  * @return SizeF the node size info.
  */
 SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingMaxSize);

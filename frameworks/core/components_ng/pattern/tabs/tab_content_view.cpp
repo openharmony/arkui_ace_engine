@@ -120,6 +120,8 @@ void TabContentView::Pop(const RefPtr<FrameNode>& tabContent)
         textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<TextPattern>(); });
         columnNode->MountToParent(tabBarNode);
+        CHECK_NULL_VOID(textNode);
+        CHECK_NULL_VOID(imageNode);
         imageNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
     } else {

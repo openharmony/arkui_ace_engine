@@ -327,7 +327,11 @@ inline std::string DoubleToString(double value, int32_t precision = 2)
 {
     std::ostringstream result;
     result.precision(precision);
-    result << std::fixed << value;
+    if (NearEqual(value, Infinity<double>())) {
+        result << "Infinity";
+    } else {
+        result << std::fixed << value;
+    }
     return result.str();
 }
 

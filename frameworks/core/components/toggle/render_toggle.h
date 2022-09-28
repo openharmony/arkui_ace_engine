@@ -44,6 +44,8 @@ public:
         return toggleComponent_;
     }
 
+    std::string ProvideRestoreInfo() override;
+
 protected:
     RenderToggle();
     virtual Size Measure() = 0;
@@ -90,6 +92,7 @@ private:
     void ResetController(RefPtr<Animator>& controller);
     void CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue);
     void SetAccessibilityClickImpl();
+    void ApplyRestoreInfo();
 };
 
 } // namespace OHOS::Ace

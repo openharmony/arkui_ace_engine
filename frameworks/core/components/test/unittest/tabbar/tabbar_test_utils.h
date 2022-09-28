@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "core/components/flex/render_flex.h"
 #include "core/components/root/render_root.h"
 #include "core/components/tab_bar/render_tab_bar.h"
+#include "core/components/tab_bar/render_tab_content.h"
 
 namespace OHOS::Ace {
 
@@ -65,6 +66,19 @@ public:
     {
         return tabsSize_;
     }
+
+    void SetIndex(int32_t index)
+    {
+        index_ = index;
+    }
+};
+
+class MockRenderTabContent final : public RenderTabContent {
+    DECLARE_ACE_TYPE(MockRenderTabContent, RenderTabContent);
+
+public:
+    MockRenderTabContent() = default;
+    ~MockRenderTabContent() override = default;
 };
 
 class TabBarTestUtils {

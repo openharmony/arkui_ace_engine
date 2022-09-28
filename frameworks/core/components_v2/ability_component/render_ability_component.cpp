@@ -106,7 +106,8 @@ void RenderAbilityComponent::ConnectOrUpdateExtension()
         return;
     }
     adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
-    adapter_->ConnectExtension(component_->GetWant(), currentRect_, AceType::Claim(this));
+    int32_t windowId = pipelineContext->GetWindowId();
+    adapter_->ConnectExtension(component_->GetWant(), currentRect_, AceType::Claim(this), windowId);
 }
 
 } // namespace OHOS::Ace::V2

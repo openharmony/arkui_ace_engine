@@ -33,11 +33,13 @@ public:
     static void SetListDirection(Axis axis);
     static void SetEdgeEffect(EdgeEffect edgeEffect);
     static void SetDivider(const V2::ItemDivider& divider);
+    static void SetChainAnimation(bool enableChainAnimation);
     static void SetLanes(int32_t lanes);
     static void SetLaneMinLength(const Dimension& laneMinLength);
     static void SetLaneMaxLength(const Dimension& laneMaxLength);
     static void SetListItemAlign(V2::ListItemAlign listItemAlign);
     static void SetCachedCount(const int32_t& cachedCount);
+    static void SetSticky(V2::StickyStyle stickyStyle);
     static void SetOnScroll(OnScrollEvent&& onScroll);
     static void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin);
     static void SetOnScrollStop(OnScrollStopEvent&& onScrollStop);

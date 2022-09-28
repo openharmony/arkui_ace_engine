@@ -77,6 +77,7 @@ public:
                 generatedItem_.try_emplace(iter->first, iter->second);
             }
         }
+        LOGD("LazyForEach cached size : %{public}d", static_cast<int32_t>(generatedItem_.size()));
     }
 
     void Clean()

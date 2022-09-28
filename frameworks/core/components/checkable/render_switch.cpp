@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,9 @@ void RenderSwitch::Update(const RefPtr<Component>& component)
     if (switchComponent->GetUpdateType() == UpdateType::ALL) {
         checked_ = switchComponent->GetValue();
     }
+
+    ApplyRestoreInfo();
+
     oldChecked_ = checked_;
     needReverse_ = (switchComponent->GetTextDirection() == TextDirection::RTL);
     auto theme = GetTheme<SwitchTheme>();
@@ -524,6 +527,20 @@ void RenderSwitch::SetAccessibilityClickImpl()
             }
         });
     }
+}
+
+std::string RenderSwitch::ProvideRestoreInfo()
+{
+    return std::to_string(checked_);
+}
+
+void RenderSwitch::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    checked_ = static_cast<size_t>(StringUtils::StringToInt(GetRestoreInfo()));
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

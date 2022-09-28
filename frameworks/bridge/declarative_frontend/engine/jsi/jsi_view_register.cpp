@@ -162,6 +162,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/core/common/container.h"
+#include "frameworks/core/components_ng/base/inspector.h"
 #include "frameworks/core/components_v2/inspector/inspector.h"
 #if defined(PREVIEW)
 #include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
@@ -501,6 +502,11 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
+
+    if (container->IsUseNewPipeline()) {
+        auto nodeInfos = NG::Inspector::GetInspectorTree();
+        return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+    }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipeline is null");
@@ -513,7 +519,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
 panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -528,13 +534,16 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
+    std::string key = firstArg->ToString(vm)->ToString();
+    if (container->IsUseNewPipeline()) {
+        auto resultStr = NG::Inspector::GetInspectorNodeByKey(key);
+        return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
+    }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
-
-    std::string key = firstArg->ToString(vm)->ToString();
     auto resultStr = V2::Inspector::GetInspectorNodeByKey(pipelineContext, key);
     return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
 }
@@ -542,7 +551,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
 panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -557,15 +566,19 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runt
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
+
+    std::string key = firstArg->ToString(vm)->ToString();
+    auto action = runtimeCallInfo->GetCallArgRef(1)->Int32Value(vm);
+    auto params = runtimeCallInfo->GetCallArgRef(2)->ToString(vm)->ToString();
+    if (container->IsUseNewPipeline()) {
+        auto result = NG::Inspector::SendEventByKey(key, action, params);
+        return panda::BooleanRef::New(vm, result);
+    }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
-
-    std::string key = firstArg->ToString(vm)->ToString();
-    auto action = runtimeCallInfo->GetCallArgRef(1)->Int32Value(vm);
-    auto params = runtimeCallInfo->GetCallArgRef(2)->ToString(vm)->ToString();
     auto result = V2::Inspector::SendEventByKey(pipelineContext, key, action, params);
     return panda::BooleanRef::New(vm, result);
 }
@@ -594,7 +607,7 @@ static TouchEvent GetTouchPointFromJS(const JsiObject& value)
 panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -622,17 +635,18 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     return panda::BooleanRef::New(vm, result);
 }
 
-static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
+static KeyEvent GetKeyEventFromJS(const JsiObject& value)
 {
-    V2::JsKeyEvent keyEvent;
     auto type = value->GetProperty("type");
-    keyEvent.action = static_cast<KeyAction>(type->ToNumber<int32_t>());
+    auto action = static_cast<KeyAction>(type->ToNumber<int32_t>());
 
     auto jsKeyCode = value->GetProperty("keyCode");
-    keyEvent.code = static_cast<KeyCode>(jsKeyCode->ToNumber<int32_t>());
+    auto code = static_cast<KeyCode>(jsKeyCode->ToNumber<int32_t>());
+
+    KeyEvent keyEvent(code, action);
 
     auto jsKeySource = value->GetProperty("keySource");
-    keyEvent.sourceDevice = jsKeySource->ToNumber<int32_t>();
+    keyEvent.sourceType = static_cast<SourceType>(jsKeySource->ToNumber<int32_t>());
 
     auto jsDeviceId = value->GetProperty("deviceId");
     keyEvent.deviceId = jsDeviceId->ToNumber<int32_t>();
@@ -641,7 +655,8 @@ static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
     keyEvent.metaKey = jsMetaKey->ToNumber<int32_t>();
 
     auto jsTimestamp = value->GetProperty("timestamp");
-    keyEvent.timeStamp = jsTimestamp->ToNumber<int64_t>();
+    auto timeStamp = jsTimestamp->ToNumber<int64_t>();
+    keyEvent.SetTimeStamp(timeStamp);
 
     return keyEvent;
 }
@@ -649,7 +664,7 @@ static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
 panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -665,13 +680,15 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext == nullptr) {
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
     JsiObject obj(firstArg);
-    auto result = V2::Inspector::SendKeyEvent(pipelineContext, GetKeyEventFromJS(obj));
+    KeyEvent keyEvent = GetKeyEventFromJS(obj);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); }, TaskExecutor::TaskType::UI);
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -701,7 +718,7 @@ static MouseEvent GetMouseEventFromJS(const JsiObject& value)
 panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -1201,6 +1218,7 @@ void JsRegisterViews(BindingTarget globalObj)
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
         LOGE("JsRegisterViews can't find runtime");
+        return;
     }
     auto vm = runtime->GetEcmaVm();
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),

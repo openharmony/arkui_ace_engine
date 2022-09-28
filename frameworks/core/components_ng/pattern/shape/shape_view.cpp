@@ -90,7 +90,7 @@ void ShapeView::SetAntiAlias(bool antiAlias)
 }
 
 void ShapeView::SetBitmapMesh(const ImageMesh& imageMesh)
-{        
+{
     ACE_UPDATE_PAINT_PROPERTY(ContainerPaintProperty, ImageMesh, imageMesh);
 }
 

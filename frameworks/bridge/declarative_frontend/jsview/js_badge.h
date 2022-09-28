@@ -24,13 +24,15 @@ namespace OHOS::Ace::Framework {
 class JSBadge : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
+    static void Pop();
     static void JSBind(BindingTarget globalObj);
 
 private:
     static void SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge);
     static void SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge);
+    static void CreateNG(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
 
-#endif  // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BADGE_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BADGE_H

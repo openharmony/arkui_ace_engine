@@ -15,6 +15,8 @@
 
 #include "core/animation/curves.h"
 
+#include <map>
+
 namespace OHOS::Ace {
 
 const RefPtr<DecelerationCurve> Curves::DECELE = AceType::MakeRefPtr<DecelerationCurve>();
@@ -35,5 +37,23 @@ const RefPtr<CubicCurve> Curves::SMOOTH = AceType::MakeRefPtr<CubicCurve>(0.4f, 
 const RefPtr<AnticipateCurve> Curves::ANTICIPATE = AceType::MakeRefPtr<AnticipateCurve>(2.0f);
 const RefPtr<CubicCurve> Curves::MAGNETIC = AceType::MakeRefPtr<CubicCurve>(0.8f, 0.0f, 1.0f, 0.6f);
 const RefPtr<ElasticsCurve> Curves::ELASTICS = AceType::MakeRefPtr<ElasticsCurve>(2.0f);
+
+const std::string Curves::DEFAULT_CURVE_NAME = "Curves.Ease";
+
+std::string Curves::ToString(const RefPtr<Curve>& curve)
+{
+    static const std::map<RefPtr<Curve>, std::string> curveNames = { { Curves::EASE, Curves::DEFAULT_CURVE_NAME },
+        { Curves::EASE_IN, "Curves.EaseIn" }, { Curves::EASE_OUT, "Curves.EaseOut" },
+        { Curves::EASE_IN_OUT, "Curves.EaseInOut" }, { Curves::FAST_OUT_SLOW_IN, "Curves.FastOutSlowIn" },
+        { Curves::LINEAR_OUT_SLOW_IN, "Curves.LinearOutSlowIn" },
+        { Curves::FAST_OUT_LINEAR_IN, "Curves.FastOutLinearIn" }, { Curves::FRICTION, "Curves.Friction" },
+        { Curves::EXTREME_DECELERATION, "Curves.ExtremeDeceleration" }, { Curves::SHARP, "Curves.Sharp" },
+        { Curves::SMOOTH, "Curves.Smooth" }, { Curves::LINEAR, "Curves.Linear" } };
+    auto iter = curveNames.find(curve);
+    if (iter != curveNames.end()) {
+        return iter->second;
+    }
+    return Curves::DEFAULT_CURVE_NAME;
+}
 
 } // namespace OHOS::Ace

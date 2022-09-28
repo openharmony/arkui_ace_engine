@@ -42,6 +42,7 @@ void CheckBoxView::Create(
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
     }
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CheckBoxView::SetSelect(bool isSelected)

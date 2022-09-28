@@ -300,9 +300,10 @@ void RenderImage::RegisterCallbacksToOverlay()
         textOverlayManager->PushTextOverlayToStack(textOverlay, pipelineContext);
 
         auto image = weak.Upgrade();
-        if (image) {
-            image->UpdateOverlay();
+        if (!image) {
+            return;
         }
+        image->UpdateOverlay();
         image->MarkIsOverlayShowed(true);
     };
     if (clipboard_) {
