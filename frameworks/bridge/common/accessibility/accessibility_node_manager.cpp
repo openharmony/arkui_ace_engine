@@ -422,7 +422,7 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
             std::lock_guard<std::mutex> lock(mutex_);
             auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
             if (!result.second) {
-                LOGW("the accessibility node has already in the map");
+                LOGD("the accessibility node has already in the map");
                 return nullptr;
             }
         }
@@ -465,7 +465,7 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateCommonAccessibilityNod
         auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
 
         if (!result.second) {
-            LOGW("the accessibility node has already in the map");
+            LOGD("the accessibility node has already in the map");
             return nullptr;
         }
     }

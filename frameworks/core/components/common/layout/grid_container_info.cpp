@@ -69,7 +69,7 @@ void GridContainerInfo::BuildColumnWidth(double width)
     double padding = paddingLeft_.ConvertToPx(dipScale) + paddingRight_.ConvertToPx(dipScale);
 
     columnWidth_ = (width - marginLeft - marginRight - padding - (columns - 1) * gutterWidth) / columns;
-    LOGI("width = %{public}f, columns: %{public}d columnWidth: %{public}f gutterWidth: %{public}f marginLeft: "
+    LOGD("width = %{public}f, columns: %{public}d columnWidth: %{public}f gutterWidth: %{public}f marginLeft: "
          "%{public}f marginRight: %{public}f padding: %{public}f",
         width, columns, columnWidth_, gutterWidth, marginLeft, marginRight, padding);
 }
