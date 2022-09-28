@@ -83,6 +83,11 @@ public:
         return swiperController_;
     }
 
+    int GetCurrentIndex() const
+    {
+        return currentIndex_;
+    }
+
     void UpdateCurrentOffset(float offset);
 
 private:
@@ -166,6 +171,8 @@ private:
     std::set<int32_t> preItemRange_;
 
     float currentOffset_ = 0.0f;
+
+    bool moveDirection_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 
