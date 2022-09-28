@@ -33,6 +33,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
+
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -2203,6 +2204,10 @@ void JSViewAbstract::ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<Menu
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
+    // NG
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
     if (!menuComponent) {
