@@ -287,6 +287,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         JSInteractableView::JsOnClick(info);
     } else {
+#ifndef NG_BUILD
         if (info[0]->IsFunction()) {
             auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
             auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
@@ -305,6 +306,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             };
             TextModel::GetInstance()->SetOnClick(std::move(onClickId));
         }
+#endif
     }
 }
 
@@ -352,6 +354,7 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
             LOGE("builder param is not an object.");
             return itemInfo;
         }
+#ifndef NG_BUILD
         auto component = ParseDragItemComponent(ret);
         if (component) {
             LOGI("use custom builder param.");
@@ -368,6 +371,7 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
         ParseJsString(extraInfo, itemInfo.extraInfo);
         component = ParseDragItemComponent(builderObj->GetProperty("builder"));
         itemInfo.customComponent = component;
+#endif
         return itemInfo;
     };
 

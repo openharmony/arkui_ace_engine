@@ -92,6 +92,18 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result_;
 };
 
+class FullScreenExitHandlerOhos : public FullScreenExitHandler {
+    DECLARE_ACE_TYPE(FullScreenExitHandlerOhos, FullScreenExitHandler)
+
+public:
+    FullScreenExitHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler,
+        WeakPtr<WebDelegate> webDelegate) : handler_(handler), webDelegate_(webDelegate) {}
+    void ExitFullScreen() override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler_;
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
 class AuthResultOhos : public AuthResult {
     DECLARE_ACE_TYPE(AuthResultOhos, AuthResult)
 
@@ -296,6 +308,7 @@ public:
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
     void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
+    void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
@@ -333,6 +346,8 @@ public:
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);
     void OnReceivedTitle(const std::string& param);
+    void ExitFullScreen();
+    void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
     void OnGeolocationPermissionsShowPrompt(
         const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
@@ -345,6 +360,7 @@ public:
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
+    void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
     bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message);
     void OnRouterPush(const std::string& param);
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
@@ -456,6 +472,7 @@ private:
     EventCallbackV2 onPageStartedV2_;
     EventCallbackV2 onProgressChangeV2_;
     EventCallbackV2 onTitleReceiveV2_;
+    EventCallbackV2 onFullScreenExitV2_;
     EventCallbackV2 onGeolocationHideV2_;
     EventCallbackV2 onGeolocationShowV2_;
     EventCallbackV2 onRequestFocusV2_;

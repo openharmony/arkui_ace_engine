@@ -24,10 +24,10 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
-#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Rosen::Drawing {
 class Canvas;
@@ -36,6 +36,7 @@ namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+class Modifier;
 
 using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
@@ -60,6 +61,8 @@ public:
     virtual void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) {}
 
     virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
+
+    virtual void FlushModifier(const RefPtr<Modifier>& modifier) {}
 
     virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
@@ -101,6 +104,7 @@ public:
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}
+    virtual void UpdateLinearGradient(const NG::Gradient& gradient) {}
 
     // Add Transform in group
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
@@ -140,6 +144,11 @@ public:
     // zIndex.
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ZIndex, int32_t);
 
+    // Clip
+    ACE_DEFINE_PROPERTY_GROUP(Clip, ClipProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, ClipPathNG);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipEdge, bool);
+
 protected:
     RenderContext() = default;
 
@@ -165,6 +174,9 @@ protected:
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
+    virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
+    virtual void OnClipEdgeUpdate(bool isClip) {}
+    
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;

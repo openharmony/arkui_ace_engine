@@ -46,7 +46,7 @@ public:
         return MakeRefPtr<ContainerPaintProperty>();
     }
 
-    bool GetGeomeryFromRect() override
+    bool NeedOverridePaintRect() override
     {
         auto frameNode = GetHost();
         if (!frameNode) {
@@ -57,24 +57,10 @@ public:
             return false;
         }
         auto shapeViewBoxOpt = containerProperty->CloneShapeViewBox();
-        auto geoNode = frameNode->GetGeometryNode();
-        if (!geoNode) {
-            return false;
-        }
-        SizeF rectF = geoNode->GetContentSize();
-        if (shapeViewBoxOpt.has_value() && shapeViewBoxOpt->IsValid()) {
-            double viewBoxWidth = shapeViewBoxOpt->Width().ConvertToPx();
-            double viedwBoxHeight = shapeViewBoxOpt->Height().ConvertToPx();
-            double actualWidth = rectF.Width();
-            double actualHeight = rectF.Height();
-            if (viewBoxWidth < actualWidth || viedwBoxHeight < actualHeight) {
-                return true;
-            }
-        }
-        return false;
+        return (shapeViewBoxOpt.has_value() && shapeViewBoxOpt->IsValid());
     }
 
-    std::optional<RectF> GetGeomeryRectData() override
+    std::optional<RectF> GetOverridePaintRect() const override
     {
         auto frameNode = GetHost();
         if (!frameNode) {
@@ -89,25 +75,11 @@ public:
         if (!geoNode) {
             return std::nullopt;
         }
-        SizeF rectF = geoNode->GetContentSize();
-        OffsetF offsetF = geoNode->GetContentOffset();
+        OffsetF offsetF = geoNode->GetFrameOffset();
         if (shapeViewBoxOpt.has_value() && shapeViewBoxOpt->IsValid()) {
             double viewBoxWidth = shapeViewBoxOpt->Width().ConvertToPx();
             double viewBoxHeight = shapeViewBoxOpt->Height().ConvertToPx();
-            double actualWidth = rectF.Width();
-            double actualHeight = rectF.Height();
-            bool compareWithActualSize = false;
-            if (Positive(actualWidth) && Positive(actualHeight)) {
-                compareWithActualSize = true;
-            }
-            if (compareWithActualSize) {
-                return RectF(offsetF.GetX() + shapeViewBoxOpt->Left().ConvertToPx(),
-                    offsetF.GetY() + shapeViewBoxOpt->Top().ConvertToPx(), std::min(viewBoxWidth, actualWidth),
-                    std::min(viewBoxHeight, actualHeight));
-            } else {
-                return RectF(offsetF.GetX() + shapeViewBoxOpt->Left().ConvertToPx(),
-                    offsetF.GetY() + shapeViewBoxOpt->Top().ConvertToPx(), viewBoxWidth, viewBoxHeight);
-            }
+            return RectF(offsetF.GetX(), offsetF.GetY(), viewBoxWidth, viewBoxHeight);
         }
         return std::nullopt;
     }
@@ -118,7 +90,7 @@ public:
     }
 
 private:
-    void ViewPortTansfer();
+    void ViewPortTansform();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(ShapePattern);
 };

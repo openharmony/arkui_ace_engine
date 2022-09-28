@@ -17,6 +17,7 @@ import(
 build_component_ng("property_ng") {
   sources = [
     "calc_length.cpp",
+    "gradient_property.cpp",
     "measure_utils.cpp",
     "property.cpp",
   ]

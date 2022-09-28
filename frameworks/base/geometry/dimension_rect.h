@@ -62,7 +62,6 @@ public:
         height_ = size.Height();
     }
 
-
     void SetWidth(const Dimension& width)
     {
         width_ = width;
@@ -73,12 +72,25 @@ public:
         height_ = height;
     }
 
-
     void Reset()
     {
         width_ = 0.0_vp;
         height_ = 0.0_vp;
         offset_ = DimensionOffset();
+    }
+
+    std::string ToString() const
+    {
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << "Rect (" << std::fixed << std::setprecision(precision) << offset_.GetX().ToString() << ", "
+           << offset_.GetY().ToString() << ") - [";
+        ss << width_.ToString();
+        ss << " x ";
+        ss << height_.ToString();
+        ss << "]";
+        std::string output = ss.str();
+        return output;
     }
 
 private:

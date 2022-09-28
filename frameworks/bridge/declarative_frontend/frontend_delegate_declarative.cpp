@@ -1287,6 +1287,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
+    LOGI("FrontendDelegateDeclarative::ShowDialog");
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     if (callbacks.find(COMMON_SUCCESS) != callbacks.end()) {
         auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
@@ -1325,6 +1326,20 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .buttons = buttons,
         .callbacks = std::move(callbackMarkers),
     };
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Dialog IsCurrentUseNewPipeline.");
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
+        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+        taskExecutor_->PostTask(
+            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
+            },
+            TaskExecutor::TaskType::UI);
+        return;
+    }
     auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(context);
     context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
@@ -1559,7 +1574,10 @@ void FrontendDelegateDeclarative::LoadPage(
     page->SetPageParams(params);
     page->SetFlushCallback([weak = AceType::WeakClaim(this), isMainPage, isRestore](const RefPtr<JsAcePage>& acePage) {
         auto delegate = weak.Upgrade();
-        if (delegate && acePage) {
+        if (!delegate) {
+            return;
+        }
+        if (acePage) {
             delegate->FlushPageCommand(acePage, acePage->GetUrl(), isMainPage, isRestore);
         } else {
             LOGE("flush callback called unexpected");

@@ -107,6 +107,7 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateBackShadow(const Shadow& shadow) override;
+    void UpdateLinearGradient(const NG::Gradient& gradient) override;
 
     void UpdateTransition(const TransitionOptions& options) override;
     bool HasAppearingTransition() const
@@ -117,11 +118,13 @@ public:
     {
         return transitionDisappearingEffect_ != nullptr;
     }
-
+    void ClipWithRect(const RectF& rectF);
     static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren);
 
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(const TransitionOptions& options);
+
+    void FlushModifier(const RefPtr<Modifier>& modifier) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -147,6 +150,9 @@ private:
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
 
+    void OnClipShapeUpdate(const ClipPathNG& clipPath) override;
+    void OnClipEdgeUpdate(bool isClip) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
     bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
         std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
@@ -157,6 +163,8 @@ private:
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
     void PaintBackground();
+    void PaintDecoration(const SizeF& size);
+    void PaintClip(const SizeF& size);
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;

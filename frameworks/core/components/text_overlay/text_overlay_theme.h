@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_TEXT_OVERLAY_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_TEXT_OVERLAY_THEME_H
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_edge.h"
 #include "core/components/common/properties/color.h"
@@ -97,10 +98,8 @@ public:
                 theme->menuBackgroundColor_ = pattern->GetAttr<Color>("menu_bg_color", Color());
                 theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color());
                 theme->buttonClickedColor_ = pattern->GetAttr<Color>("button_bg_color_clicked", Color());
-                theme->menuButtonTextStyle_.SetTextColor(
-                    pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
-                theme->menuButtonTextStyle_.SetFontSize(
-                    pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
+                theme->menuButtonTextStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+                theme->menuButtonTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
             } else {
                 LOGW("find pattern of textoverlay fail");
             }
@@ -187,6 +186,26 @@ public:
     const TextStyle& GetMenuButtonTextStyle() const
     {
         return menuButtonTextStyle_;
+    }
+
+    Dimension GetMenuToolbarHeight() const
+    {
+        return 40.0_vp;
+    }
+
+    float GetDefaultMenuPositionX()
+    {
+        return 10.0f;
+    }
+
+    Dimension GetHandleLineWidth() const
+    {
+        return 1.5_vp;
+    }
+
+    Dimension GetHandleHotZoneRadius() const
+    {
+        return 10.0_vp;
     }
 
 protected:

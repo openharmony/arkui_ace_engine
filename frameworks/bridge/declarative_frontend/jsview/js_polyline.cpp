@@ -84,7 +84,7 @@ void JSPolyline::JSPoints(const JSCallbackInfo& info)
             }
             points.push_back(point);
         }
-        if(Container::IsCurrentUseNewPipeline()){
+        if (Container::IsCurrentUseNewPipeline()) {
             NG::PolygonView::SetPoints(points);
             return;
         }

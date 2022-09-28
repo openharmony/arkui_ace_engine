@@ -28,6 +28,8 @@ public:
     static void OnAlert(const JSCallbackInfo& args);
     static void OnBeforeUnload(const JSCallbackInfo& args);
     static void OnConfirm(const JSCallbackInfo& args);
+    static void OnFullScreenEnter(const JSCallbackInfo& args);
+    static void OnFullScreenExit(const JSCallbackInfo& args);
     static void OnPrompt(const JSCallbackInfo& args);
     static void OnConsoleLog(const JSCallbackInfo& args);
     static void OnPageStart(const JSCallbackInfo& args);
@@ -87,6 +89,7 @@ public:
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
+    static void PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

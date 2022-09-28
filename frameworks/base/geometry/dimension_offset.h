@@ -29,8 +29,8 @@ class DimensionOffset {
 public:
     DimensionOffset() = default;
     ~DimensionOffset() = default;
-    DimensionOffset(Dimension deltaX, Dimension deltaY) : deltaX_(deltaX), deltaY_(deltaY) {}
-    DimensionOffset(Offset offset) : deltaX_(Dimension(offset.GetX(), DimensionUnit::PX)),
+    DimensionOffset(const Dimension& deltaX, const Dimension& deltaY) : deltaX_(deltaX), deltaY_(deltaY) {}
+    DimensionOffset(const Offset& offset) : deltaX_(Dimension(offset.GetX(), DimensionUnit::PX)),
         deltaY_(Dimension(offset.GetY(), DimensionUnit::PX)) {}
 
     explicit DimensionOffset(const NG::OffsetF& offset)

@@ -125,6 +125,8 @@ public:
         return -1;
     }
 
+    std::string ProvideRestoreInfo() override;
+
 protected:
     RenderTabBar();
     void OnTouchTestHit(
@@ -189,6 +191,7 @@ private:
     RefPtr<RenderNode> GetChildByIndex(int32_t index) const;
 
     void FlushIndex(const RefPtr<TabController>& controller);
+    void ApplyRestoreInfo(const RefPtr<TabController>& controller);
 
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<Scrollable> scrollable_;

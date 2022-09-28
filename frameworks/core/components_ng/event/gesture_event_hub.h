@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/event/touch_event.h"
@@ -35,25 +36,25 @@ enum class HitTestMode {
      *  Both self and children respond to the hit test for touch events,
      *  but block hit test of the other nodes which is masked by this node.
      */
-    DEFAULT = 0,
+    HTMDEFAULT = 0,
 
     /**
      * Self respond to the hit test for touch events,
      * but block hit test of children and other nodes which is masked by this node.
      */
-    BLOCK,
+    HTMBLOCK,
 
     /**
      * Self and child respond to the hit test for touch events,
      * and allow hit test of other nodes which is masked by this node.
      */
-    TRANSPARENT,
+    HTMTRANSPARENT,
 
     /**
      * Self not respond to the hit test for touch events,
      * but children respond to the hit test for touch events.
      */
-    NONE
+    HTMNONE
 };
 
 enum class HitTestResult {
@@ -148,6 +149,22 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
+    void AddLongPressEvent(const RefPtr<LongPressEvent>& event)
+    {
+        if (!longPressEventActuator_) {
+            longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
+        }
+        longPressEventActuator_->AddLongPressEvent(event);
+    }
+
+    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& event)
+    {
+        if (!longPressEventActuator_) {
+            return;
+        }
+        longPressEventActuator_->RemoveLongPressEvent(event);
+    }
+
     // Set by user define, which will replace old one.
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, float distance)
     {
@@ -191,8 +208,39 @@ public:
         hitTestMode_ = hitTestMode;
     }
 
-    void CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint,
-        TouchTestResult& result);
+    void CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result);
+
+    bool IsResponseRegion() const
+    {
+        return isResponseRegion_;
+    }
+    void MarkResponseRegion(bool isResponseRegion)
+    {
+        isResponseRegion_ = isResponseRegion;
+    }
+
+    const std::vector<DimensionRect>& GetResponseRegion() const
+    {
+        return responseRegion_;
+    }
+
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+    {
+        responseRegion_ = responseRegion;
+        if (!responseRegion_.empty()) {
+            isResponseRegion_ = true;
+        }
+    }
+
+    bool GetTouchable() const
+    {
+        return touchable_;
+    }
+
+    void SetTouchable(bool touchable)
+    {
+        touchable_ = touchable;
+    }
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -204,6 +252,7 @@ private:
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
     RefPtr<ClickEventActuator> clickEventActuator_;
+    RefPtr<LongPressEventActuator> longPressEventActuator_;
     RefPtr<PanEventActuator> panEventActuator_;
     RefPtr<ExclusiveRecognizer> innerExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> externalExclusiveRecognizer_;
@@ -213,8 +262,11 @@ private:
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
     std::list<RefPtr<GestureRecognizer>> gestureHierarchy_;
-    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
+    HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
+    bool isResponseRegion_ = false;
+    std::vector<DimensionRect> responseRegion_;
+    bool touchable_ = true;
 };
 
 } // namespace OHOS::Ace::NG

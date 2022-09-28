@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -28,6 +29,7 @@
 #include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
@@ -68,10 +70,23 @@ public:
     }
 
 private:
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* node) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    void HandleLongPress(GestureEvent& info);
+    void HandleOnSelectAll();
+    void HandleOnCopy();
+    void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
+    void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::shared_ptr<RSParagraph> paragraph_;
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<SelectOverlayProxy> selectOverlayProxy_;
+
     float baselineOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);

@@ -35,6 +35,7 @@
 #include "core/components/menu/menu_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/core/gestures/tap_gesture.h"
 #include "core/components_ng/property/transition_property.h"
@@ -76,6 +77,8 @@ public:
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
+    static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
+    static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<MenuComponent> menuComponent);
 
     static void JsScale(const JSCallbackInfo& info);

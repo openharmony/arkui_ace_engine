@@ -39,6 +39,14 @@ void LayoutProperty::Reset()
     CleanDirty();
 }
 
+void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    ACE_PROPERTY_TO_JSON_VALUE(calcLayoutConstraint_, MeasureProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
+}
+
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
 {
     auto layoutProperty = MakeRefPtr<LayoutProperty>();
@@ -277,9 +285,10 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType /* visible */) const
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parent = host->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID(parent);
-    parent->MarkNeedSyncRenderTree();
-    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (parent) {
+        parent->MarkNeedSyncRenderTree();
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 } // namespace OHOS::Ace::NG

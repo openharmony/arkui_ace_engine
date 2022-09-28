@@ -23,4 +23,9 @@
             <option name="push" value="imageprovider/images -> /data/test/resource/imageprovider/" src="res"/>
         </preparer>
     </target>
+    <target name="ImageCompressorTest">
+        <preparer>
+            <option name="push" value="imageprovider/images/unbroken.jpg -> /data/test/resource/imageprovider/images/" src="res"/>
+        </preparer>
+    </target>
 </configuration>

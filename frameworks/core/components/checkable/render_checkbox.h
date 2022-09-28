@@ -105,6 +105,8 @@ public:
         return component_;
     }
 
+    std::string ProvideRestoreInfo() override;
+
 protected:
     void UpdateAnimation();
     void OnAnimationStop();
@@ -134,6 +136,7 @@ protected:
 
 private:
     void SetAccessibilityClickImpl();
+    void ApplyRestoreInfo();
 };
 
 } // namespace OHOS::Ace

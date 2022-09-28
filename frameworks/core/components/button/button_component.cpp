@@ -344,7 +344,7 @@ void ButtonComponent::FitTextHeight(AnimatableDimension& height)
     }
     auto padding = AceType::DynamicCast<PaddingComponent>(GetChildren().front());
     if (padding == nullptr) {
-        LOGW("Padding component get failed");
+        LOGD("Padding component get failed");
         return;
     }
     auto text = AceType::DynamicCast<TextComponent>(padding->GetChild());

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/web/web_view.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -29,6 +30,9 @@ void WebView::Create(const std::string& src, const RefPtr<WebController>& webCon
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
         [src, webController]() { return AceType::MakeRefPtr<WebPattern>(src, webController); });
     stack->Push(frameNode);
+    NG::ViewAbstract::SetFocusType(NG::FocusType::NODE);
+    NG::ViewAbstract::SetFocusable(true);
+
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebSrc(src);
@@ -98,6 +102,13 @@ void WebView::SetTitleReceiveEventId(OnWebAsyncFunc&& titleReceiveEventId)
     webEventHub->SetOnTitleReceiveEvent(std::move(titleReceiveEventId));
 }
 
+void WebView::SetFullScreenExitEventId(OnWebAsyncFunc&& fullScreenExitEventId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFullScreenExitEvent(std::move(fullScreenExitEventId));
+}
+
 void WebView::SetGeolocationHideEventId(OnWebAsyncFunc&& geolocationHideEventId)
 {
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
@@ -124,6 +135,13 @@ void WebView::SetDownloadStartEventId(OnWebAsyncFunc&& downloadStartEventId)
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnDownloadStartEvent(std::move(downloadStartEventId));
+}
+
+void WebView::SetOnFullScreenEnterImpl(OnWebAsyncFunc&& onFullScreenEnterImpl)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFullScreenEnterEvent(std::move(onFullScreenEnterImpl));
 }
 
 void WebView::SetOnHttpAuthRequestImpl(OnWebSyncFunc&& onHttpAuthRequestImpl)
@@ -393,4 +411,10 @@ void WebView::SetOnDropId(const OnDropFunc& onDropId)
     webEventHub->SetOnDropEvent(std::move(onDropId));
 }
 
+void WebView::SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdatePinchSmoothModeEnabled(isPinchSmoothModeEnabled);
+}
 } // namespace OHOS::Ace::NG

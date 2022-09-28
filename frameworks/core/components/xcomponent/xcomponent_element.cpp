@@ -186,6 +186,9 @@ void XComponentElement::CreatePlatformResource()
     };
 
     texture_ = AceType::MakeRefPtr<NativeTexture>(context_, errorCallback);
+    if (!texture_) {
+        return;
+    }
     texture_->Create(
         [weak = WeakClaim(this), errorCallback](int64_t id) mutable {
             auto XComponentElement = weak.Upgrade();
@@ -203,17 +206,15 @@ void XComponentElement::CreatePlatformResource()
         },
         idStr_);
 
-    if (texture_) {
-        auto onTextureRefresh = [weak = WeakClaim(this), uiTaskExecutor]() {
-            uiTaskExecutor.PostSyncTask([weak] {
-                auto texture = weak.Upgrade();
-                if (texture) {
-                    texture->OnTextureRefresh();
-                }
-            });
-        };
-        texture_->SetRefreshListener(onTextureRefresh);
-    }
+    auto onTextureRefresh = [weak = WeakClaim(this), uiTaskExecutor]() {
+        uiTaskExecutor.PostSyncTask([weak] {
+            auto texture = weak.Upgrade();
+            if (texture) {
+                texture->OnTextureRefresh();
+            }
+        });
+    };
+    texture_->SetRefreshListener(onTextureRefresh);
 #endif
 }
 

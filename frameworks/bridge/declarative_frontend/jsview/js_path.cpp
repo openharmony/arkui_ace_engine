@@ -51,7 +51,7 @@ void JSPath::Create(const JSCallbackInfo& info)
 
 void JSPath::SetCommands(const std::string& commands)
 {
-    if(Container::IsCurrentUseNewPipeline()){
+    if (Container::IsCurrentUseNewPipeline()) {
         NG::PathView::SetCommands(commands);
         return;
     }

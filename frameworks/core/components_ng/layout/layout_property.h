@@ -52,6 +52,8 @@ public:
 
     virtual void Reset();
 
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
     const std::optional<LayoutConstraintF>& GetLayoutConstraint() const
     {
         return layoutConstraint_;
@@ -226,6 +228,16 @@ public:
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
         }
         if (flexItemProperty_->UpdateAlignSelf(flexAlign)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateDisplayIndex(int32_t displayIndex)
+    {
+        if (!flexItemProperty_) {
+            flexItemProperty_ = std::make_unique<FlexItemProperty>();
+        }
+        if (flexItemProperty_->UpdateDisplayIndex(displayIndex)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }

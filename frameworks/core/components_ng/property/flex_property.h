@@ -28,6 +28,17 @@ struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignSelf, FlexAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, CalcLength);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DisplayIndex, int32_t);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        static const char* ITEM_ALIGN[] = { "ItemAlign.Auto", "ItemAlign.Start", "ItemAlign.Center", "ItemAlign.End",
+            "ItemAlign.Stretch", "ItemAlign.Baseline" };
+        json->Put("flexBasis", propFlexBasis.has_value() ? propFlexBasis.value().ToString().c_str() : "auto");
+        json->Put("flexGrow", propFlexGrow.value_or(0.0));
+        json->Put("flexShrink", propFlexShrink.value_or(1));
+        json->Put("alignSelf", ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))]);
+    }
 };
 } // namespace OHOS::Ace::NG
 

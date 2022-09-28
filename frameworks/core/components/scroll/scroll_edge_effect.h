@@ -54,6 +54,11 @@ public:
         return edgeEffect_ == EdgeEffect::FADE;
     }
 
+    bool IsNoneEffect() const
+    {
+        return edgeEffect_ == EdgeEffect::NONE;
+    }
+
     bool IsSpringEffect() const
     {
         return edgeEffect_ == EdgeEffect::SPRING;

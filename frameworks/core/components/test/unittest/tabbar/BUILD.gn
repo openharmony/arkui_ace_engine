@@ -91,6 +91,27 @@ ohos_unittest("RenderTabContentTest") {
   part_name = ace_engine_part
 }
 
+ohos_unittest("RenderTabsTestV2") {
+  module_out_path = module_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
+    "render_tabs_test_v2.cpp",
+  ]
+
+  configs = [
+    ":config_render_tabcontent_test",
+    "$ace_root:ace_test_config",
+  ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components/test:json",
+  ]
+
+  part_name = ace_engine_part
+}
+
 config("config_render_tabcontent_test") {
   visibility = [ ":*" ]
   include_dirs = [
@@ -185,6 +206,7 @@ group("unittest") {
 
     #":TabBarElementTest",
 
+    ":RenderTabsTestV2",
     ":TabContentCreatorTest",
   ]
 }

@@ -165,10 +165,12 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnConsole, bool);
     ACE_WEB_EVENT_PROPERTY(OnProgressChange, void);
     ACE_WEB_EVENT_PROPERTY(OnTitleReceive, void);
+    ACE_WEB_EVENT_PROPERTY(OnFullScreenExit, void);
     ACE_WEB_EVENT_PROPERTY(OnGeolocationHide, void);
     ACE_WEB_EVENT_PROPERTY(OnGeolocationShow, void);
     ACE_WEB_EVENT_PROPERTY(OnRequestFocus, void);
     ACE_WEB_EVENT_PROPERTY(OnDownloadStart, void);
+    ACE_WEB_EVENT_PROPERTY(OnFullScreenEnter, void);
     ACE_WEB_EVENT_PROPERTY(OnHttpAuthRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnSslErrorRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnSslSelectCertRequest, bool);

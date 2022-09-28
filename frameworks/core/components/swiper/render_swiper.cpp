@@ -224,31 +224,7 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
 
     curve_ = swiper->GetCurve();
     if (curve_) {
-        if (curve_ == Curves::EASE) {
-            curveRender_ = "Curves.Ease";
-        } else if (curve_ == Curves::EASE_IN) {
-            curveRender_ = "Curves.EaseIn";
-        } else if (curve_ == Curves::EASE_OUT) {
-            curveRender_ = "Curves.EaseOut";
-        } else if (curve_ == Curves::EASE_IN_OUT) {
-            curveRender_ = "Curves.EaseInOut";
-        } else if (curve_ == Curves::FAST_OUT_SLOW_IN) {
-            curveRender_ = "Curves.FastOutSlowIn";
-        } else if (curve_ == Curves::LINEAR_OUT_SLOW_IN) {
-            curveRender_ = "Curves.LinearOutSlowIn";
-        } else if (curve_ == Curves::FAST_OUT_LINEAR_IN) {
-            curveRender_ = "Curves.FastOutLinearIn";
-        } else if (curve_ == Curves::FRICTION) {
-            curveRender_ = "Curves.Friction";
-        } else if (curve_ == Curves::EXTREME_DECELERATION) {
-            curveRender_ = "Curves.ExtremeDeceleration";
-        } else if (curve_ == Curves::SHARP) {
-            curveRender_ = "Curves.Sharp";
-        } else if (curve_ == Curves::SMOOTH) {
-            curveRender_ = "Curves.Smooth";
-        } else if (curve_ == Curves::LINEAR) {
-            curveRender_ = "Curves.Linear";
-        }
+        curveRender_ = Curves::ToString(curve_);
     }
 
     // Get item count of swiper
@@ -289,6 +265,8 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         return;
     }
     UpdateIndex(swiper->GetIndex());
+
+    ApplyRestoreInfo();
     Initialize(GetContext(), catchMode_);
     swiper_ = swiper; // must after UpdateIndex
 }
@@ -3410,6 +3388,36 @@ void RenderSwiper::OnSurfaceChanged()
     if(isIndicatorAnimationStart_ && !needRestore_) {
         FinishAllSwipeAnimation(true, true);
     }
+}
+
+std::string RenderSwiper::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("index", index_);
+    jsonObj->Put("currentIndex", currentIndex_);
+    jsonObj->Put("swipeToIndex", swipeToIndex_);
+    return jsonObj->ToString();
+}
+
+void RenderSwiper::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(GetRestoreInfo());
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("RenderSwiper:: restore info is invalid");
+        return;
+    }
+
+    auto jsonIndex = info->GetValue("index");
+    auto jsonCurrentIndex = info->GetValue("currentIndex");
+    auto jsonSwipeToIndex = info->GetValue("swipeToIndex");
+
+    index_ = jsonIndex->GetInt();
+    currentIndex_ = jsonCurrentIndex->GetInt();
+    swipeToIndex_ = jsonSwipeToIndex->GetInt();
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

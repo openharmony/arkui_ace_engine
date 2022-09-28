@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_LIST_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_LIST_ELEMENT_H
 
+#include <map>
 #include "base/utils/noncopyable.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "core/components_v2/list/render_list.h"
@@ -37,6 +38,7 @@ public:
 
     void PerformBuild() override;
 
+    size_t FindItemStartIndex(size_t index) override;
     RefPtr<RenderListItem> RequestListItem(size_t index) override;
     RefPtr<Element> GetListItemBySlot(size_t index);
     void RecycleListItem(size_t index) override;
@@ -58,10 +60,13 @@ private:
 
     bool IsAncestor(const RefPtr<Element>& parent, const RefPtr<Element>& node);
     int32_t GetRealElementIndex(const RefPtr<FocusNode>& node);
+    size_t FindItemStartIndex(size_t startIndex, size_t index);
 
     RefPtr<RenderList> renderList_;
     size_t stickyRange_ = 0;
     std::list<RefPtr<FocusNode>> sortedFocusNodesList_;
+
+    std::map<size_t, size_t> listItemRange_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListElement);
 };

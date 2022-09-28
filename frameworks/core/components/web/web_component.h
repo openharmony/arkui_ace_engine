@@ -128,6 +128,16 @@ public:
         return declaration_->GetTitleReceiveEventId();
     }
 
+    void SetOnFullScreenExitEventId(const EventMarker& fullScreenExitEventId)
+    {
+        declaration_->SetOnFullScreenExitEventId(fullScreenExitEventId);
+    }
+
+    const EventMarker& GetOnFullScreenExitEventId() const
+    {
+        return declaration_->GetOnFullScreenExitEventId();
+    }
+
     void SetGeolocationHideEventId(const EventMarker& geolocationHideEventId)
     {
         declaration_->SetGeolocationHideEventId(geolocationHideEventId);
@@ -424,6 +434,16 @@ public:
         isWebDebuggingAccessEnabled_ = isEnabled;
     }
 
+    bool GetPinchSmoothModeEnabled() const
+    {
+        return isPinchSmoothModeEnabled_;
+    }
+
+    void SetPinchSmoothModeEnabled(bool isEnabled)
+    {
+        isPinchSmoothModeEnabled_ = isEnabled;
+    }
+
     bool GetIsInitialScaleSet() const
     {
         return isInitialScaleSet_;
@@ -505,6 +525,18 @@ public:
             default:
                 break;
         }
+    }
+
+    using OnFullScreenEnterImpl = std::function<void(const BaseEventInfo* info)>;
+    void OnFullScreenEnter(const BaseEventInfo* info) const
+    {
+        if (onFullScreenEnterImpl_) {
+            onFullScreenEnterImpl_(info);
+        }
+    }
+    void SetOnFullScreenEnterImpl(OnFullScreenEnterImpl&& onFullScreenEnterImpl)
+    {
+        onFullScreenEnterImpl_ = std::move(onFullScreenEnterImpl);
     }
 
     using OnHttpAuthRequestImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -751,6 +783,7 @@ private:
     OnCommonDialogImpl onBeforeUnloadImpl_;
     OnConsoleImpl consoleImpl_;
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
+    OnFullScreenEnterImpl onFullScreenEnterImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
@@ -789,6 +822,7 @@ private:
     OnDropFunc onDragMoveId_;
     OnDropFunc onDragLeaveId_;
     OnDropFunc onDropId_;
+    bool isPinchSmoothModeEnabled_ = false;
 };
 
 } // namespace OHOS::Ace

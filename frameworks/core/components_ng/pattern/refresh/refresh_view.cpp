@@ -80,7 +80,7 @@ void RefreshView::Pop()
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateValue(10.0);
     progressPaintProperty->UpdateMaxValue(10.0);
-    progressLayoutProperty->UpdateColor(Color::BLUE);
+    progressPaintProperty->UpdateColor(Color::BLUE);
     progressLayoutProperty->UpdateType(ProgressType::SCALE);
     progressLayoutProperty->UpdateStrokeWidth(Dimension(15, DimensionUnit::VP));
     progressPaintProperty->UpdateScaleCount(15);

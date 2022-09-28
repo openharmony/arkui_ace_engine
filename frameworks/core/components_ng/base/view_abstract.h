@@ -33,6 +33,8 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/clip_path.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstract {
@@ -69,6 +71,7 @@ public:
     static void SetBackdropBlur(const Dimension& radius);
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
+    static void SetLinearGradient(const NG::Gradient& gradient);
 
     // layout
     static void SetAlign(Alignment alignment);
@@ -104,11 +107,15 @@ public:
     static void SetOnAreaChanged(
         std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
             onAreaChanged);
+    static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
+    static void SetTouchable(bool touchable);
+    static void SetHitTestMode(HitTestMode hitTestMode);
 
     // flex properties
     static void SetAlignSelf(int32_t value);
     static void SetFlexShrink(float value);
     static void SetFlexGrow(float value);
+    static void SetDisplayIndex(int32_t value);
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam>& param);
@@ -116,6 +123,9 @@ public:
     static void SetInspectorId(const std::string& inspectorId);
     // transition
     static void SetTransition(const TransitionOptions& options);
+    // clip
+    static void SetClipPath(const ClipPathNG& clipPath);
+    static void SetEdgeClip(bool isClip);
 
     static void Pop();
 };

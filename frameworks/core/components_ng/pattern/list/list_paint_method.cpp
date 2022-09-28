@@ -18,21 +18,23 @@
 namespace OHOS::Ace::NG {
 CanvasDrawFunction ListPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
 {
-    double constrainStrokeWidth = divider_.strokeWidth.Value();
+    double constrainStrokeWidth = divider_.strokeWidth.ConvertToPx();
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetFrameSize();
     double dividerLength = 0.0;
     if (vertical_) {
-        dividerLength = frameSize.Height() - divider_.startMargin.Value() - divider_.endMargin.Value();
+        dividerLength = frameSize.Height() - divider_.startMargin.ConvertToPx() - divider_.endMargin.ConvertToPx();
     } else {
-        dividerLength = frameSize.Width() - divider_.startMargin.Value() - divider_.endMargin.Value();
+        dividerLength = frameSize.Width() - divider_.startMargin.ConvertToPx() - divider_.endMargin.ConvertToPx();
     }
     DividerPainter dividerPainter(constrainStrokeWidth, dividerLength, vertical_, divider_.color, LineCap::SQUARE);
 
     int32_t startIndex = startIndex_;
     int32_t endIndex = endIndex_;
+    float startMargin = divider_.startMargin.ConvertToPx();
 
-    return [dividerPainter, startIndex, endIndex, itemPosition = std::move(itemPosition_)](
-               RSCanvas& canvas) { dividerPainter.DrawListLines(canvas, startIndex, endIndex, itemPosition); };
+    return [dividerPainter, startIndex, endIndex, itemPosition = std::move(itemPosition_), startMargin](
+               RSCanvas& canvas) { dividerPainter.DrawListLines(canvas, startIndex, endIndex,
+               itemPosition, startMargin); };
 }
 } // namespace OHOS::Ace::NG

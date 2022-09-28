@@ -36,13 +36,14 @@ void DividerPainter::DrawLine(RSCanvas& canvas, const OffsetF& offset) const
 }
 
 void DividerPainter::DrawListLines(RSCanvas& canvas, const int32_t startIndex, const int32_t endIndex,
-    const ListLayoutAlgorithm::PositionMap& itemPosition) const
+    const ListLayoutAlgorithm::PositionMap& itemPosition, float startMargin) const
 {
+    float half = 0.5f;
     for (int32_t lineIndex = startIndex; lineIndex < endIndex; lineIndex++) {
         if (vertical_) {
-            DrawLine(canvas, OffsetF(itemPosition.at(lineIndex).second, 0));
+            DrawLine(canvas, OffsetF(itemPosition.at(lineIndex).second + constrainStrokeWidth_ * half, startMargin));
         } else {
-            DrawLine(canvas, OffsetF(0, itemPosition.at(lineIndex).second));
+            DrawLine(canvas, OffsetF(startMargin, itemPosition.at(lineIndex).second + constrainStrokeWidth_ * half));
         }
     }
 }

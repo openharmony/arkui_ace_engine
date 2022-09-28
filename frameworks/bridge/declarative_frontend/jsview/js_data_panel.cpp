@@ -21,6 +21,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/components_ng/pattern/data_panel/data_panel_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -47,9 +48,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("toggle create error, info is non-valid");
         return;
-    }
-    RefPtr<PercentageDataPanelComponent> component =
-        AceType::MakeRefPtr<PercentageDataPanelComponent>(ChartType::RAINBOW);
+    }  
     auto param = JsonUtil::ParseJsonString(info[0]->ToString());
     if (!param || param->IsNull()) {
         LOGE("JSDataPanel::Create param is null");
@@ -63,13 +62,52 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         LOGE("JSDataPanel::Create values is not array");
         return;
     }
-    size_t length = static_cast<uint32_t>(values->GetArraySize());
+    auto type = param->GetValue("type");
+    size_t length = static_cast<size_t>(values->GetArraySize());   
+    std::vector<double> dateValues;
+    double dataSum = 0.0;
+    for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
+        auto item = values->GetArrayItem(i);
+        if (!item || !item->IsNumber()) {
+            LOGE("JSDataPanel::Create value is not number");
+            return;
+        }
+        auto value = item->GetDouble();
+        if (LessOrEqual(value, 0.0)) {
+            value = 0.0;
+        }
+        dataSum += value;
+        if (GreatOrEqual(dataSum, max) && max > 0) {
+            value = max - (dataSum - value);
+            if (NearEqual(value, 0.0)) {
+                break;
+            }
+        }
+        dateValues.push_back(value);
+    }
+    if (LessOrEqual(max, 0.0)) {
+        max = dataSum;
+    }
+    size_t dataPanelType = 0;
+    if (type->IsNumber()) {
+        if (type->GetInt() == static_cast<int32_t>(ChartType::LINE)) {
+            dataPanelType = 1;
+        } else if (type->GetInt() == static_cast<int32_t>(ChartType::RAINBOW)) {
+            dataPanelType = 0;
+        }
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::DataPanelView::Create(dateValues, max, dataPanelType);
+        return;
+    }
+    RefPtr<PercentageDataPanelComponent> component =
+        AceType::MakeRefPtr<PercentageDataPanelComponent>(ChartType::RAINBOW);    
     double valueSum = 0.0;
     for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
         auto item = values->GetArrayItem(i);
         if (!item || !item->IsNumber()) {
             LOGE("JSDataPanel::Create value is not number");
-            continue;
+            return;
         }
         auto value = item->GetDouble();
         if (LessOrEqual(value, 0.0)) {
@@ -96,7 +134,6 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         max = valueSum;
     }
     component->SetMaxValue(max);
-    auto type = param->GetValue("type");
     if (type->IsNumber()) {
         if (type->GetInt() == static_cast<int32_t>(ChartType::LINE)) {
             component->SetPanelType(ChartType::LINE);
@@ -113,8 +150,14 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
 void JSDataPanel::CloseEffect(const JSCallbackInfo& info)
 {
     bool isCloseEffect = false;
+    bool ngCloseEffect = true;
     if (info[0]->IsBoolean()) {
         isCloseEffect = info[0]->ToBoolean();
+        ngCloseEffect = info[0]->ToBoolean();
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::DataPanelView::SetEffect(!ngCloseEffect);
+        return;
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto component =

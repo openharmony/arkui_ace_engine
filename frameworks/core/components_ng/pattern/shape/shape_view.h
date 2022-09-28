@@ -40,8 +40,8 @@ public:
     static void SetStrokeWidth(const Ace::Dimension& lineWidth);
     static void SetStrokeDashArray(const std::vector<Ace::Dimension>& segments);
     static void SetAntiAlias(bool antiAlias);
-    static void SetBitmapMesh(const ImageMesh& imageMesh);//used by shape container
-    static void SetViewPort(const ShapeViewBox& viewBox);//used by shape container
+    static void SetBitmapMesh(const ImageMesh& imageMesh);
+    static void SetViewPort(const ShapeViewBox& viewBox);
 };
 
 } // namespace OHOS::Ace::NG

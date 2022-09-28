@@ -18,10 +18,10 @@
 #include <cmath>
 #include <cstdint>
 
+#include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
-#include "render_service_client/core/pipeline/rs_node_map.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -32,13 +32,14 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
+#include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/core/components_ng/render/decoration_painter.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -128,6 +129,16 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (bgLoadingCtx_ && bgLoadingCtx_->GetCanvasImage()) {
         PaintBackground();
+    }
+
+    if (propBackDecoration_) {
+        SizeF frameSize(paintRect.Width(), paintRect.Height());
+        PaintDecoration(frameSize);
+    }
+
+    if (propClip_) {
+        SizeF frameSize(paintRect.Width(), paintRect.Height());
+        PaintClip(frameSize);
     }
 }
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
@@ -356,6 +367,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     const auto& geometryNode = frameNode->GetGeometryNode();
     if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
         rect = geometryNode->GetContent() ? geometryNode->GetContent()->GetRect() : RectF();
+        rect.SetOffset(geometryNode->GetFrameOffset() + geometryNode->GetContentOffset());
     } else {
         rect = geometryNode->GetFrameRect();
     }
@@ -444,6 +456,13 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
             RSCanvas rsCanvas(&canvas);
             contentDraw(rsCanvas);
         });
+}
+
+void RosenRenderContext::FlushModifier(const RefPtr<Modifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    rsNode_->AddModifier(ConvertModifier(modifier));
 }
 
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
@@ -574,15 +593,15 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     if (!diffRes) {
         return;
     }
-    AnimationUtils::Animate(option, [rsParentNode = rsNode_, &removing = toRemoveRSNodes,
-        &adding = toAddRSNodesAndIndex]() {
-        for (auto& node : removing) {
-            rsParentNode->RemoveChild(node);
-        }
-        for (auto& [node, index] : adding) {
-            rsParentNode->AddChild(node, index);
-        }
-    });
+    AnimationUtils::Animate(
+        option, [rsParentNode = rsNode_, &removing = toRemoveRSNodes, &adding = toAddRSNodesAndIndex]() {
+            for (auto& node : removing) {
+                rsParentNode->RemoveChild(node);
+            }
+            for (auto& [node, index] : adding) {
+                rsParentNode->AddChild(node, index);
+            }
+        });
 }
 
 void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
@@ -723,7 +742,7 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
             static_cast<int>(backDecoration->GetBlurStyleValue()), pipelineBase->GetDipScale());
     } else if (radius.IsValid()) {
         float radiusPx = pipelineBase->NormalizeToPx(radius);
-        float backblurRadius = DecorationPainter::ConvertRadiusToSigma(radiusPx);
+        float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
         backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
     }
     CHECK_NULL_VOID(rsNode_);
@@ -744,7 +763,7 @@ void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
     std::shared_ptr<Rosen::RSFilter> frontFilter = nullptr;
     if (radius.IsValid()) {
         float radiusPx = radius.ConvertToPx();
-        float frontBlurRadius = DecorationPainter::ConvertRadiusToSigma(radiusPx);
+        float frontBlurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
         frontFilter = Rosen::RSFilter::CreateBlurFilter(frontBlurRadius, frontBlurRadius);
     }
     CHECK_NULL_VOID(rsNode_);
@@ -754,13 +773,17 @@ void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
 
 void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
 {
-    auto& backDecoration = GetOrCreateBackDecoration();
+    const auto& backDecoration = GetOrCreateBackDecoration();
     if (backDecoration->CheckBackShadow(shadow)) {
         return;
     }
     backDecoration->UpdateBackShadow(shadow);
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetShadowRadius(shadow.GetBlurRadius());
+    if (!shadow.GetHardwareAcceleration()) {
+        rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
+    } else {
+        rsNode_->SetShadowElevation(shadow.GetElevation());
+    }
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
@@ -801,18 +824,86 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     }
     if (options.HasTranslate()) {
         const auto& translate = options.GetTranslateValue();
-        effect = effect->Translate({translate.x.ConvertToPx(), translate.y.ConvertToPx(),
-            translate.z.ConvertToPx()});
+        effect = effect->Translate({ translate.x.ConvertToPx(), translate.y.ConvertToPx(), translate.z.ConvertToPx() });
     }
     if (options.HasScale()) {
         const auto& scale = options.GetScaleValue();
-        effect = effect->Scale({scale.xScale, scale.yScale, scale.zScale});
+        effect = effect->Scale({ scale.xScale, scale.yScale, scale.zScale });
     }
     if (options.HasRotate()) {
         const auto& rotate = options.GetRotateValue();
-        effect = effect->Rotate({rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle});
+        effect = effect->Rotate({ rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle });
     }
     return effect;
+}
+
+void RosenRenderContext::PaintDecoration(const SizeF& frameSize)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto& backDecoration = GetOrCreateBackDecoration();
+    if (backDecoration->HasLinearGradient()) {
+        auto gradient = backDecoration->GetLinearGradientValue();
+        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
+        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+    }
+}
+
+void RosenRenderContext::UpdateLinearGradient(const NG::Gradient& gradient)
+{
+    auto& backDecoration = GetOrCreateBackDecoration();
+    if (backDecoration->UpdateLinearGradient(gradient)) {
+        auto frameNode = GetHost();
+        if (frameNode) {
+            SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+            if (frameSize.Width() != 0 && frameSize.Height() != 0) {
+                PaintDecoration(frameSize);
+            }
+            RequestNextFrame();
+        }
+    }
+}
+
+void RosenRenderContext::PaintClip(const SizeF& frameSize)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto& clip = GetOrCreateClip();
+    if (clip->HasClipShape()) {
+        auto clipShape = clip->GetClipShapeValue();
+        auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(clipShape.GetBasicShape(), frameSize);
+        if (skPath.isEmpty()) {
+            return;
+        }
+        rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+    }
+}
+
+void RosenRenderContext::ClipWithRect(const RectF& rectF)
+{
+    SkPath skPath;
+    skPath.addRect(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+}
+
+void RosenRenderContext::OnClipShapeUpdate(const ClipPathNG& clipPath)
+{
+    auto& clip = GetOrCreateClip();
+    if (clip->UpdateClipShape(clipPath)) {
+        auto frameNode = GetHost();
+        if (frameNode) {
+            SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+            if (frameSize.Width() != 0 && frameSize.Height() != 0) {
+                PaintClip(frameSize);
+            }
+            RequestNextFrame();
+        }
+    }
+}
+
+void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetClipToBounds(isClip);
+    RequestNextFrame();
 }
 
 } // namespace OHOS::Ace::NG

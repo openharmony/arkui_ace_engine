@@ -39,6 +39,9 @@ void RenderSelect::OnTouchTestHit(
 void RenderSelect::Update(const RefPtr<Component>& component)
 {
     data_ = AceType::DynamicCast<SelectComponent>(component);
+
+    ApplyRestoreInfo();
+
     MarkNeedLayout();
 }
 
@@ -61,6 +64,39 @@ void RenderSelect::PerformLayout()
     selectSize_ = child->GetLayoutSize();
     selectSize_ = GetLayoutParam().Constrain(selectSize_);
     SetLayoutSize(selectSize_);
+}
+
+std::string RenderSelect::ProvideRestoreInfo()
+{
+    std::size_t optionCount = data_->GetSelectOptionCount();
+    index_ = 0;
+    for (std::size_t index = 0; index < optionCount; index++) {
+        auto optionComponent = data_->GetSelectOption(index);
+        if (optionComponent->GetSelected()) {
+            index_ = index;
+            break;
+        }
+    }
+    return std::to_string(index_);
+}
+
+void RenderSelect::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    index_ = static_cast<size_t>(StringUtils::StringToInt(GetRestoreInfo()));
+    SetRestoreInfo("");
+
+    auto tipText = data_->GetTipText();
+    auto optionComponent = data_->GetSelectOption(index_);
+    optionComponent->SetSelected(true);
+
+    auto optionText = optionComponent->GetText();
+    if (!optionText) {
+        return;
+    }
+    tipText->SetData(optionText->GetData());
 }
 
 } // namespace OHOS::Ace

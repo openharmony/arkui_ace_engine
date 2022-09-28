@@ -38,18 +38,19 @@ void ProgressPaintMethod::GetThemeDate()
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto parogressTheme = themeManager->GetTheme<ProgressTheme>();
-    CHECK_NULL_VOID(parogressTheme);
-    color_ = parogressTheme->GetTrackSelectedColor();
-    scaleWidth_ = parogressTheme->GetScaleWidth().ConvertToPx();
-    scaleCount_ = parogressTheme->GetScaleNumber();
+    auto progressTheme = themeManager->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(progressTheme);
+    color_ = progressTheme->GetTrackSelectedColor();
+    bgColor_ = progressTheme->GetTrackBgColor();
+    scaleWidth_ = progressTheme->GetScaleWidth().ConvertToPx();
+    scaleCount_ = progressTheme->GetScaleNumber();
 }
 
 void ProgressPaintMethod::PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor((Color::GRAY)));
+    brush.SetColor(ToRSColor(bgColor_));
     double radius = strokeWidth_ / 2;
     if (frameSize.Width() >= frameSize.Height()) {
         double dateLength = frameSize.Width() * value_ / maxValue_;
@@ -95,7 +96,7 @@ void ProgressPaintMethod::PaintRing(RSCanvas& canvas, const OffsetF& offset, con
     radius = radius - widthOfLine / 2;
     pen.SetWidth(widthOfLine);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
-    pen.SetColor(ToRSColor((Color::GRAY)));
+    pen.SetColor(ToRSColor(bgColor_));
     canvas.AttachPen(pen);
     canvas.DrawCircle(ToRSPonit(centerPt), radius);
     pen.SetColor(ToRSColor((color_)));
@@ -133,7 +134,7 @@ void ProgressPaintMethod::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset
     pen.SetAntiAlias(true);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
     pen.SetPathEffect(RSPathEffect::CreatePathDashEffect(path, pathDistance, 0.0f, RSPathDashStyle::ROTATE));
-    pen.SetColor(ToRSColor((Color::GRAY)));
+    pen.SetColor(ToRSColor(bgColor_));
     canvas.AttachPen(pen);
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius }, 270,
@@ -153,7 +154,7 @@ void ProgressPaintMethod::PaintMoon(RSCanvas& canvas, const OffsetF& offset, con
     double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
     RSBrush brush;
     brush.SetAlpha(true);
-    brush.SetColor(ToRSColor(Color::GRAY));
+    brush.SetColor(ToRSColor(bgColor_));
     double angle = (value_ / maxValue_) * totalDegree;
     RSPath path;
     canvas.AttachBrush(brush);
@@ -191,7 +192,7 @@ void ProgressPaintMethod::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, 
     double progressWidth = (value_ / maxValue_) * totalDegree * frameSize.Width();
     RSBrush brush;
     brush.SetAlpha(true);
-    brush.SetColor(ToRSColor(Color::GRAY));
+    brush.SetColor(ToRSColor(bgColor_));
     RSPath path;
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(
@@ -225,7 +226,7 @@ void ProgressPaintMethod::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& 
     double progressWidth = (value_ / maxValue_) * totalDegree * frameSize.Height();
     RSBrush brush;
     brush.SetAlpha(true);
-    brush.SetColor(ToRSColor(Color::GRAY));
+    brush.SetColor(ToRSColor(bgColor_));
     RSPath path;
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(

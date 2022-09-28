@@ -55,6 +55,9 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
     }
+    if (longPressEventActuator_) {
+        longPressEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
+    }
     if (clickEventActuator_) {
         clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
     }
@@ -189,8 +192,8 @@ void GestureEventHub::UpdateGestureHierarchy()
     gestures_.clear();
 }
 
-void GestureEventHub::CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint,
-    TouchTestResult& result)
+void GestureEventHub::CombineIntoExclusiveRecognizer(
+    const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result)
 {
     TouchTestResult finalResult;
     std::list<RefPtr<GestureRecognizer>> recognizers;

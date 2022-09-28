@@ -338,9 +338,6 @@ public:
             LOGD("TabContentItemElementProxy NEW my id, adding: %{public}d ", GetElementId());
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
-            LOGD("TabContentItemElementProxy: initial render case, setting elmtId %{public}d, "
-                "realelmtId will be %{public}d",
-                tabContentItemComponent->GetElementId(), realElmtId_);
         }
 
         // Add Tab Bar Item
@@ -966,6 +963,9 @@ public:
                 }
                 items.emplace_back(idx + 1, it->second);
                 children_.erase(it);
+                if (idx == 0) {
+                    break;
+                }
             }
         }
 

@@ -157,25 +157,25 @@ const char PATTERN_LOCK_ETS_TAG[] = "PatternLock";
 const char ROW_COMPONENT_TAG[] = "RowComponent";
 const char ROW_ETS_TAG[] = "Row";
 
-//rect
+// rect
 const char RECT_ETS_TAG[] = "Rect";
 
-//line
+// line
 const char LINE_ETS_TAG[] = "Line";
 
-//circle
+// circle
 const char CIRCLE_ETS_TAG[] = "Circle";
 
-//ellipse
+// ellipse
 const char ELLIPSE_ETS_TAG[] = "Ellipse";
 
-//path
+// path
 const char PATH_ETS_TAG[] = "Path";
 
-//polygon
+// polygon
 const char POLYGON_ETS_TAG[] = "Polygon";
 
-//polyline
+// polyline
 const char POLYLINE_ETS_TAG[] = "Polyline";
 
 // shape
@@ -382,6 +382,9 @@ ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[] = "CustomDialog";
 // datePickerdialog
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
+
+// Normal dialog
+ACE_EXPORT extern const char DIALOG_ETS_TAG[] = "Dialog";
 
 // sideBar
 ACE_EXPORT extern const char SIDE_BAR_COMPONENT_TAG[] = "SideBarContainerComponent";

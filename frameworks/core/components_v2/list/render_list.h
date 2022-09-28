@@ -288,6 +288,8 @@ protected:
 
     RefPtr<RenderListItem> RequestListItem(size_t index);
     void RecycleListItem(size_t index);
+    size_t FindItemStartIndex(size_t index);
+    size_t GetItemRelativeIndex(size_t index);
     size_t TotalCount();
     size_t FindPreviousStickyListItem(size_t index);
 

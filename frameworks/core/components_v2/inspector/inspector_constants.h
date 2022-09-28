@@ -173,13 +173,13 @@ ACE_EXPORT extern const char CIRCLE_ETS_TAG[];
 // ellipse
 ACE_EXPORT extern const char ELLIPSE_ETS_TAG[];
 
-//path
+// path
 ACE_EXPORT extern const char PATH_ETS_TAG[];
 
-//polygon
+// polygon
 ACE_EXPORT extern const char POLYGON_ETS_TAG[];
 
-//polyline
+// polyline
 ACE_EXPORT extern const char POLYLINE_ETS_TAG[];
 
 // shape
@@ -391,6 +391,9 @@ ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[];
 // datePickerdialog
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[];
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[];
+
+// Normal dialog
+ACE_EXPORT extern const char DIALOG_ETS_TAG[];
 
 // sideBar
 ACE_EXPORT extern const char SIDE_BAR_COMPONENT_TAG[];

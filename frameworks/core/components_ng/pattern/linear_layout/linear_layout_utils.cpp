@@ -149,18 +149,12 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
 
     // measure normal node.
-    auto maxMainSize = GetMainAxisSize(childConstraint.maxSize, isVertical);
     for (auto& child : linearMeasureProperty.relativeNodes) {
         child->Measure(childConstraint);
         linearMeasureProperty.allocatedSize += GetMainAxisSize(AceType::RawPtr(child), isVertical);
         auto crossSize = GetCrossAxisSize(AceType::RawPtr(child), isVertical);
         linearMeasureProperty.crossSize =
             linearMeasureProperty.crossSize > crossSize ? linearMeasureProperty.crossSize : crossSize;
-        if (isVertical) {
-            childConstraint.maxSize.SetHeight(maxMainSize - linearMeasureProperty.allocatedSize);
-        } else {
-            childConstraint.maxSize.SetWidth(maxMainSize - linearMeasureProperty.allocatedSize);
-        }
     }
     if (!linearMeasureProperty.relativeNodes.empty()) {
         linearMeasureProperty.allocatedSize +=

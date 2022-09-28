@@ -22,7 +22,9 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,6 +68,9 @@ public:
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
     void PopToast(int32_t toastId);
+
+    void ShowDialog(const DialogProperties& dialogProps, bool isRightToLeft);
+    void CloseDialog(RefPtr<FrameNode> dialogNode);
 
 private:
     std::list<NG::ToastInfo> toastStack_;

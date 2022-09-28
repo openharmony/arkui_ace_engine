@@ -56,6 +56,10 @@ void ListView::SetDivider(const V2::ItemDivider& divider)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);
 }
 
+void ListView::SetChainAnimation(bool enableChainAnimation)
+{
+}
+
 void ListView::SetLanes(int32_t lanes)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes);
@@ -79,6 +83,10 @@ void ListView::SetListItemAlign(V2::ListItemAlign listItemAlign)
 void ListView::SetCachedCount(const int32_t& cachedCount)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
+}
+
+void ListView::SetSticky(V2::StickyStyle stickyStyle)
+{
 }
 
 void ListView::SetOnScroll(OnScrollEvent&& onScroll)

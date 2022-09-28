@@ -75,7 +75,6 @@ int main(int argc, const char* argv[])
         .deviceWidth = 1280,
         .deviceHeight = 800,
         .onRender = std::move(renderCallback),
-        .physicalDeviceFontsEnabled = false,
     };
 
     if (argc == MAX_ARGS_COUNT) {

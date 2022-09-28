@@ -94,6 +94,9 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     if (checkbox->GetUpdateType() == UpdateType::ALL) {
         checked_ = checkbox->GetValue();
     }
+
+    ApplyRestoreInfo();
+
     UpdateUIStatus();
     UpdateAccessibilityAttr();
     SetAccessibilityClickImpl();
@@ -314,6 +317,20 @@ void RenderCheckbox::SetAccessibilityClickImpl()
             }
         });
     }
+}
+
+std::string RenderCheckbox::ProvideRestoreInfo()
+{
+    return std::to_string(checked_);
+}
+
+void RenderCheckbox::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    checked_ = static_cast<size_t>(StringUtils::StringToInt(GetRestoreInfo()));
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

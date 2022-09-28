@@ -97,6 +97,47 @@ private:
     RefPtr<Result> result_;
 };
 
+class JSFullScreenExitHandler : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSFullScreenExitHandler>::Declare("FullScreenExitHandler");
+        JSClass<JSFullScreenExitHandler>::CustomMethod("exitFullScreen",
+            &JSFullScreenExitHandler::ExitFullScreen);
+        JSClass<JSFullScreenExitHandler>::Bind(globalObj,
+            &JSFullScreenExitHandler::Constructor,
+            &JSFullScreenExitHandler::Destructor);
+    }
+
+    void SetHandler(const RefPtr<FullScreenExitHandler>& handler)
+    {
+        fullScreenExitHandler_ = handler;
+    }
+
+    void ExitFullScreen(const JSCallbackInfo& args)
+    {
+        if (fullScreenExitHandler_) {
+            fullScreenExitHandler_->ExitFullScreen();
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsFullScreenExitHandler = Referenced::MakeRefPtr<JSFullScreenExitHandler>();
+        jsFullScreenExitHandler->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsFullScreenExitHandler));
+    }
+
+    static void Destructor(JSFullScreenExitHandler* jsFullScreenExitHandler)
+    {
+        if (jsFullScreenExitHandler != nullptr) {
+            jsFullScreenExitHandler->DecRefCount();
+        }
+    }
+    RefPtr<FullScreenExitHandler> fullScreenExitHandler_;
+};
+
 class JSWebHttpAuth : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -1115,6 +1156,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onConfirm", &JSWeb::OnConfirm);
     JSClass<JSWeb>::StaticMethod("onPrompt", &JSWeb::OnPrompt);
     JSClass<JSWeb>::StaticMethod("onConsole", &JSWeb::OnConsoleLog);
+    JSClass<JSWeb>::StaticMethod("onFullScreenEnter", &JSWeb::OnFullScreenEnter);
+    JSClass<JSWeb>::StaticMethod("onFullScreenExit", &JSWeb::OnFullScreenExit);
     JSClass<JSWeb>::StaticMethod("onPageBegin", &JSWeb::OnPageStart);
     JSClass<JSWeb>::StaticMethod("onPageEnd", &JSWeb::OnPageFinish);
     JSClass<JSWeb>::StaticMethod("onProgressChange", &JSWeb::OnProgressChange);
@@ -1171,6 +1214,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDragLeave", &JSWeb::JsOnDragLeave);
     JSClass<JSWeb>::StaticMethod("onDrop", &JSWeb::JsOnDrop);
     JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
+    JSClass<JSWeb>::StaticMethod("pinchSmoothMode", &JSWeb::PinchSmoothModeEnabled);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1181,6 +1225,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebConsoleLog::JSBind(globalObj);
     JSFileSelectorParam::JSBind(globalObj);
     JSFileSelectorResult::JSBind(globalObj);
+    JSFullScreenExitHandler::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
     JSWebSslError::JSBind(globalObj);
     JSWebSslSelectCert::JSBind(globalObj);
@@ -1225,6 +1270,27 @@ JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& event
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("url", eventInfo.GetLoadedUrl());
     return JSRef<JSVal>::Cast(obj);
+}
+
+
+JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSFullScreenExitHandler>::NewInstance();
+    auto jsFullScreenExitHandler = Referenced::Claim(resultObj->Unwrap<JSFullScreenExitHandler>());
+    if (!jsFullScreenExitHandler) {
+        LOGE("jsFullScreenExitHandler is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jsFullScreenExitHandler->SetHandler(eventInfo.GetHandler());
+
+    obj->SetPropertyObject("handler", resultObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> FullScreenExitEventToJSValue(const FullScreenExitEvent& eventInfo)
+{
+    return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsFullScreen()));
 }
 
 JSRef<JSVal> LoadWebPageStartEventToJSValue(const LoadWebPageStartEvent& eventInfo)
@@ -1667,6 +1733,82 @@ void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetTitleReceiveEventId(eventMarker);
+}
+
+void JSWeb::OnFullScreenExit(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FullScreenExitEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), FullScreenExitEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenExitEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetFullScreenExitEventId(std::move(uiCallback));
+        return;
+    }
+
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<FullScreenExitEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnFullScreenExitEventId(eventMarker);
+}
+
+void JSWeb::OnFullScreenEnter(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("param is invalid");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FullScreenEnterEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), FullScreenEnterEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            // need to execute in ui.
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                CHECK_NULL_VOID(func);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info.get());
+                CHECK_NULL_VOID(eventInfo);
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetOnFullScreenEnterImpl(std::move(uiCallback));
+        return;
+    }
+    auto jsCallback = [func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> void {
+            ACE_SCORING_EVENT("OnFullScreenEnter CallBack");
+            CHECK_NULL_VOID(func);
+            auto eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
+            CHECK_NULL_VOID(eventInfo);
+            func->Execute(*eventInfo);
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnFullScreenEnterImpl(std::move(jsCallback));
 }
 
 void JSWeb::OnGeolocationHide(const JSCallbackInfo& args)
@@ -3233,5 +3375,20 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
     if (webComponent) {
         webComponent->SetOnDropId(onDropId);
     }
+}
+
+void JSWeb::PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetPinchSmoothModeEnabled(isPinchSmoothModeEnabled);
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetPinchSmoothModeEnabled(isPinchSmoothModeEnabled);
 }
 } // namespace OHOS::Ace::Framework
