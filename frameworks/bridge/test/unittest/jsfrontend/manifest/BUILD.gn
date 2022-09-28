@@ -36,9 +36,7 @@ ohos_unittest("ManifestWindowTest") {
 ohos_unittest("ManifestRouterTest") {
   module_out_path = module_output_path
 
-  sources = [
-    "manifest_router_test.cpp",
-  ]
+  sources = [ "manifest_router_test.cpp" ]
 
   configs = [
     ":config_manifest_test",
