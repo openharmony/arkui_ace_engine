@@ -31,7 +31,6 @@ void RadioPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
 }
 
@@ -171,6 +170,10 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
     radioEventHub->UpdateChangeEvent(check);
     if (check) {
         pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode);
+    } else {
+        auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+        CHECK_NULL_VOID(radioPaintProperty);
+        radioPaintProperty->UpdateRadioCheck(check);
     }
 }
 
