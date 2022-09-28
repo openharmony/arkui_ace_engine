@@ -29,6 +29,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 #include "frameworks/core/components/custom_paint/offscreen_canvas.h"
+#include "frameworks/core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "frameworks/core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -141,6 +143,18 @@ public:
         isOffscreen_ = true;
     }
 
+    void SetCustomPaintPattern(const RefPtr<NG::CustomPaintPattern>& pattern)
+    {
+        customPaintPattern_ = pattern;
+        isOffscreen_ = false;
+    }
+
+    void SetOffscreenCanvasPattern(const RefPtr<NG::OffscreenCanvasPattern>& pattern)
+    {
+        offscreenCanvasPattern_ = pattern;
+        isOffscreen_ = true;
+    }
+
     std::vector<uint32_t> GetLineDash() const
     {
         return lineDash_;
@@ -167,6 +181,8 @@ protected:
     RefPtr<CanvasTaskPool> pool_;
     RefPtr<OffscreenCanvas> offscreenCanvas_;
     bool anti_ = false;
+    RefPtr<NG::CustomPaintPattern> customPaintPattern_;
+    RefPtr<NG::OffscreenCanvasPattern> offscreenCanvasPattern_;
 
 private:
     PaintState paintState_;

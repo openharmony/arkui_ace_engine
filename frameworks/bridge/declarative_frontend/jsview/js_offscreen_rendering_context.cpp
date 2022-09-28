@@ -15,15 +15,23 @@
 
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
+#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {
 std::unordered_map<uint32_t, RefPtr<OffscreenCanvas>> JSOffscreenRenderingContext::offscreenCanvasMap_;
+std::unordered_map<uint32_t, RefPtr<NG::OffscreenCanvasPattern>>
+    JSOffscreenRenderingContext::offscreenCanvasPatternMap_;
 uint32_t JSOffscreenRenderingContext::offscreenCanvasCount_ = 0;
+uint32_t JSOffscreenRenderingContext::offscreenCanvasPatternCount_ = 0;
 std::mutex JSOffscreenRenderingContext::mutex_;
 
 JSOffscreenRenderingContext::JSOffscreenRenderingContext()
 {
-    id = offscreenCanvasCount_;
+    if (Container::IsCurrentUseNewPipeline()) {
+        id = offscreenCanvasPatternCount_;
+    } else {
+        id = offscreenCanvasCount_;
+    }
 }
 
 void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
@@ -129,6 +137,12 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
             height = SystemProperties::Vp2Px(height);
             auto container = Container::Current();
             if (container) {
+                if (Container::IsCurrentUseNewPipeline()) {
+                    auto offscreenCanvasPattern = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(width, height);
+                    jsRenderContext->SetOffscreenCanvasPattern(offscreenCanvasPattern);
+                    std::lock_guard<std::mutex> lock(mutex_);
+                    offscreenCanvasPatternMap_[offscreenCanvasPatternCount_++] = offscreenCanvasPattern;
+                }
                 auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context) {
                     auto offscreenCanvas = context->CreateOffscreenCanvas(width, height);
@@ -147,8 +161,12 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
             }
             bool anti = jsContextSetting->GetAntialias();
 
-            jsRenderContext->SetAnti(anti);
-            jsRenderContext->SetAntiAlias();
+            if (Container::IsCurrentUseNewPipeline()) {
+                jsRenderContext->SetAnti(anti);
+            } else {
+                jsRenderContext->SetAnti(anti);
+                jsRenderContext->SetAntiAlias();
+            }
         }
     }
 }
@@ -165,6 +183,9 @@ void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* contex
     }
     std::lock_guard<std::mutex> lock(mutex_);
     offscreenCanvasMap_.erase(contextId);
+    if (Container::IsCurrentUseNewPipeline()) {
+        offscreenCanvasPatternMap_.erase(contextId);
+    }
 }
 
 void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& info)

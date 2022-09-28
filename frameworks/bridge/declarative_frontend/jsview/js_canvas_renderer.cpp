@@ -446,10 +446,19 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         std::string colorStr = "";
         JSViewAbstract::ParseJsString(info[0], colorStr);
         auto color = Color::FromString(colorStr);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetFillColor(color);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->UpdateFillColor(color);
+            } else {
+                customPaintPattern_->UpdateFillColor(color);
+            }
         } else {
-            pool_->UpdateFillColor(color);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetFillColor(color);
+            } else {
+                pool_->UpdateFillColor(color);
+            }
         }
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -824,10 +833,19 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     height = SystemProperties::Vp2Px(height);
 
     std::unique_ptr<ImageData> data;
-    if (isOffscreen_) {
-        data = offscreenCanvas_->GetImageData(left, top, width, height);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            data = offscreenCanvasPattern_->GetImageData(left, top, width, height);
+        } else {
+            data = customPaintPattern_->GetImageData(left, top, width, height);
+        }
     } else {
-        data = pool_->GetImageData(left, top, width, height);
+        if (isOffscreen_) {
+            data = offscreenCanvas_->GetImageData(left, top, width, height);
+        } else {
+            data = pool_->GetImageData(left, top, width, height);
+        }
     }
 
     final_height = static_cast<uint32_t>(data->dirtyHeight);
@@ -887,11 +905,21 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 
     // 1 Get data from canvas
     std::unique_ptr<ImageData> canvasData;
-    if (isOffscreen_) {
-        canvasData = offscreenCanvas_->GetImageData(left, top, width, height);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            canvasData = offscreenCanvasPattern_->GetImageData(left, top, width, height);
+        } else {
+            canvasData = customPaintPattern_->GetImageData(left, top, width, height);
+        }
     } else {
-        canvasData = pool_->GetImageData(left, top, width, height);
+        if (isOffscreen_) {
+            canvasData = offscreenCanvas_->GetImageData(left, top, width, height);
+        } else {
+            canvasData = pool_->GetImageData(left, top, width, height);
+        }
     }
+
     final_height = static_cast<uint32_t>(canvasData->dirtyHeight);
     final_width = static_cast<uint32_t>(canvasData->dirtyWidth);
     uint32_t length = final_height * final_width;
@@ -1869,10 +1897,19 @@ void JSCanvasRenderer::JsFillRect(const JSCallbackInfo& info)
         height = SystemProperties::Vp2Px(height);
 
         Rect rect = Rect(x, y, width, height);
-        if (isOffscreen_) {
-            offscreenCanvas_->FillRect(rect);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->FillRect(rect);
+            } else {
+                customPaintPattern_->FillRect(rect);
+            }
         } else {
-            pool_->FillRect(rect);
+            if (isOffscreen_) {
+                offscreenCanvas_->FillRect(rect);
+            } else {
+                pool_->FillRect(rect);
+            }
         }
     }
 }
@@ -1899,10 +1936,19 @@ void JSCanvasRenderer::JsStrokeRect(const JSCallbackInfo& info)
         height = SystemProperties::Vp2Px(height);
 
         Rect rect = Rect(x, y, width, height);
-        if (isOffscreen_) {
-            offscreenCanvas_->StrokeRect(rect);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->StrokeRect(rect);
+            } else {
+                customPaintPattern_->StrokeRect(rect);
+            }
         } else {
-            pool_->StrokeRect(rect);
+            if (isOffscreen_) {
+                offscreenCanvas_->StrokeRect(rect);
+            } else {
+                pool_->StrokeRect(rect);
+            }
         }
     }
 }
