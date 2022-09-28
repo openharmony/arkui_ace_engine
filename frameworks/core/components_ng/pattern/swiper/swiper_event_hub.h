@@ -22,7 +22,13 @@
 
 namespace OHOS::Ace::NG {
 
+enum Direction {
+    PRE = 0,
+    NEXT,
+};
+
 using ChangeEvent = std::function<void(const int32_t)>;
+using ChangeDoneEvent = std::function<void()>;
 
 class SwiperEventHub : public EventHub {
     DECLARE_ACE_TYPE(SwiperEventHub, EventHub)
@@ -36,15 +42,40 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
+    void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
+    {
+        changeDoneEvent_ = std::move(changeDoneEvent);
+    }
+
+    void FireChangeDoneEvent(bool direction)
+    {
+        if (changeDoneEvent_) {
+            if (direction == true) {
+                direction_ = Direction::NEXT;
+            } else {
+                direction_ = Direction::PRE;
+            }
+            changeDoneEvent_();
+            LOGE("FireChangeEvent");
+        }
+    }
+
     void FireChangeEvent(int32_t index) const
     {
         if (changeEvent_) {
             changeEvent_(index);
         }
     }
+    
+    Direction GetDirection()
+    {
+        return direction_;
+    }
 
 private:
+    Direction direction_;
     ChangeEvent changeEvent_;
+    ChangeDoneEvent changeDoneEvent_;
 };
 
 } // namespace OHOS::Ace::NG

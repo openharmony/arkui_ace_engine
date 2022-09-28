@@ -29,7 +29,6 @@
 #include "bridge/codec/codec_data.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/event/ace_event_helper.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 
