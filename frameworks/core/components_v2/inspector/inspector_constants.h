@@ -77,6 +77,10 @@ ACE_EXPORT extern const char COLUMN_COMPONENT_TAG[];
 ACE_EXPORT extern const char COLUMN_ETS_TAG[];
 ACE_EXPORT extern const char COLUMN_ATTRS_ALIGN_ITEMS[];
 
+// panel bar
+ACE_EXPORT extern const char DRAG_BAR_COMPONENT_TAG[];
+ACE_EXPORT extern const char DRAG_BAR_ETS_TAG[];
+
 // text
 ACE_EXPORT extern const char TEXT_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXT_ETS_TAG[];

@@ -502,8 +502,6 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     LOGI("Drag end velocity: %{public}lf, currentOffset: %{public}lf", dragVelocity, currentOffset_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
 
     // Play edge effect animation.
     if (!IsLoop() && IsOutOfBoundary(currentOffset_)) {
@@ -528,8 +526,8 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     int32_t nextIndex = currentIndex_;
     float start = currentOffset_;
     float end = 0.0f;
-    if (std::abs(dragVelocity) > context->NormalizeToPx(MIN_TURN_PAGE_VELOCITY) &&
-        std::abs(currentOffset_) > context->NormalizeToPx(MIN_DRAG_DISTANCE)) {
+    if (std::abs(dragVelocity) > MIN_TURN_PAGE_VELOCITY.ConvertToPx() &&
+        std::abs(currentOffset_) > MIN_DRAG_DISTANCE.ConvertToPx()) {
         if (GreatNotEqual(dragVelocity * currentOffset_, 0.0)) {
             auto intervalSize = static_cast<int32_t>(std::floor(std::abs(currentOffset_) / mainSize)) + 1;
             end = GreatNotEqual(dragVelocity, 0.0) ? mainSize * intervalSize : -mainSize * intervalSize;

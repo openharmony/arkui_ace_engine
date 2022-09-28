@@ -1,0 +1,124 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_PANEL_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_PANEL_PATTERN_H
+
+#include "base/geometry/axis.h"
+#include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/panel/panel_component.h"
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/panel/drag_bar_pattern.h"
+#include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
+#include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
+#include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
+#include "core/components_ng/pattern/panel/sliding_panel_node.h"
+#include "core/components_ng/pattern/pattern.h"
+
+namespace OHOS::Ace::NG {
+
+class SlidingPanelPattern : public Pattern {
+    DECLARE_ACE_TYPE(SlidingPanelPattern, Pattern);
+
+public:
+    SlidingPanelPattern() = default;
+    ~SlidingPanelPattern() override = default;
+
+    void ResetContentHeight();
+    void OnAnimationStop();
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<SlidingPanelLayoutProperty>();
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        auto layoutAlgorithm = MakeRefPtr<SlidingPanelLayoutAlgorithm>();
+        layoutAlgorithm->SetCurrentOffset(currentOffset_);
+        layoutAlgorithm->SetIsFirstLayout(isFirstLayout_);
+        return layoutAlgorithm;
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<SlidingPanelEventHub>();
+    }
+
+    void UpdateCurrentOffset(float offset);
+    void UpdateCurrentOffsetOnAnimate(float currentOffset);
+
+private:
+    void OnModifyDone() override;
+    void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    // Init pan recognizer to move items when drag update, play translate animation when drag end.
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void Update();
+    // Init LayoutProperties
+    bool InitializeLayoutProps();
+    // Init touch event, stop animation when touch down.
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+
+    void FireSizeChangeEvent();
+    void FireHeightChangeEvent();
+    void HandleDragStart(const Offset& startPoint);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(double dragVelocity);
+    void CalculateModeTypeMini(double dragLen, double dragVelocity);
+    void CalculateModeTypeFold(double dragLen, double dragVelocity);
+    void CalculateModeTypeTemp(double dragLen, double dragVelocity);
+    void AnimateTo(double blankHeight, PanelMode mode);
+    void AppendBlankHeightAnimation(double blankHeight, PanelMode mode);
+    int32_t GetAnimationDuration(double delta, double dragRange) const;
+    void CheckHeightValidity();
+
+    PanelType GetPanelType() const;
+    PanelMode GetPanelMode() const;
+    void FireChangeEvent() const;
+    bool IsShow() const;
+
+    RefPtr<PanEvent> panEvent_;
+    RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<Animator> animator_;
+    std::unordered_map<PanelMode, double> defaultBlankHeights_;
+    std::optional<int32_t> dragBarId_;
+
+    bool isAnimating_ = false;
+    bool isFirstLayout_ = true;
+    
+    PanelMode mode_ = PanelMode::FULL;
+    PanelMode previousMode_ = PanelMode::HALF;
+    PanelType type_ = PanelType::FOLDABLE_BAR;
+    float fullHalfBoundary_ = 0.0f;
+    float halfMiniBoundary_ = 0.0f;
+    float fullMiniBoundary_ = 0.0f;
+
+    SizeF previousSize_;
+
+    float currentOffset_ = 0.0f;
+    float dragStartCurrentOffset_ = 0.0f;
+
+    ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);
+};
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_PANEL_PATTERN_H
