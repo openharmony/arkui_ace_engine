@@ -119,11 +119,13 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 
     if (parentConstraint) {
         geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
+        layoutProperty_->UpdateGridConstraint(GetHostNode());
         layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
     } else {
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
         layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+        layoutProperty_->UpdateGridConstraint(GetHostNode());
         layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     }
     layoutProperty_->UpdateContentConstraint();
@@ -188,6 +190,17 @@ void LayoutWrapper::Layout()
             layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
         }
         layoutProperty_->UpdateContentConstraint();
+    }
+
+    // TODO: delete following to use constraint offset
+    {
+        const auto& gridProp = layoutProperty_->GetGridProperty();
+        if (gridProp) {
+            OffsetF gridOffset = geometryNode_->GetFrameOffset();
+            gridOffset.SetX(gridProp->GetOffset().Value());
+            LOGD("On grid layout Done: %{public}s, Offset: %{public}f", GetHostTag().c_str(), gridOffset.GetX());
+            geometryNode_->SetMarginFrameOffset(gridOffset);
+        }
     }
     layoutAlgorithm_->Layout(this);
     LOGD("On Layout Done: %{public}s, Offset: %{public}s", GetHostTag().c_str(),

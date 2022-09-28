@@ -29,6 +29,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/geometry_property.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -98,6 +99,12 @@ public:
     {
         return flexItemProperty_;
     }
+
+    const std::unique_ptr<GridProperty>& GetGridProperty() const
+    {
+        return gridProperty_;
+    }
+
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
         return measureType_.value_or(defaultType);
@@ -272,6 +279,22 @@ public:
         }
     }
 
+    void UpdateGridProperty(
+        std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED)
+    {
+        if (!gridProperty_) {
+            gridProperty_ = std::make_unique<GridProperty>();
+        }
+
+        bool isSpanUpdated = (span.has_value() && gridProperty_->UpdateSpan(span.value(), type));
+        bool isOffsetUpdated = (offset.has_value() && gridProperty_->UpdateOffset(offset.value(), type));
+        if (isSpanUpdated || isOffsetUpdated) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateGridConstraint(const RefPtr<FrameNode>& host);
+
     void UpdateContentConstraint();
 
     LayoutConstraintF CreateChildConstraint() const;
@@ -315,6 +338,7 @@ private:
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
     std::unique_ptr<FlexItemProperty> flexItemProperty_;
+    std::unique_ptr<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
 
     WeakPtr<FrameNode> host_;
