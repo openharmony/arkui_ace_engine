@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
 class OffscreenCanvasPattern;
+// CustomPaintPattern is the base class for custom paint render node to perform paint canvas.
 class ACE_EXPORT CustomPaintPattern : public Pattern {
     DECLARE_ACE_TYPE(CustomPaintPattern, Pattern);
 
@@ -52,10 +53,30 @@ public:
 
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
+    void Fill();
+    void Fill(const RefPtr<CanvasPath2D>& path);
+    void Stroke();
+    void Stroke(const RefPtr<CanvasPath2D>& path);
+    void BeginPath();
+    void ClosePath();
+    void MoveTo(double x, double y);
+    void LineTo(double x, double y);
+    void Arc(const ArcParam& param);
+    void ArcTo(const ArcToParam& param);
+    void AddRect(const Rect& rect);
+    void Ellipse(const EllipseParam& param);
+    void BezierCurveTo(const BezierCurveParam& param);
+    void QuadraticCurveTo(const QuadraticCurveParam& param);
+
+    void DrawImage(const Ace::CanvasImage& image, double width, double height);
+    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
+    void PutImageData(const Ace::ImageData& imageData);
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern);
 
     void UpdateFillColor(const Color& color);
+    void UpdateFillRuleForPath(const CanvasFillRule rule);
+    void UpdateFillRuleForPath2D(const CanvasFillRule rule);
 
 private:
     void OnAttachToFrameNode() override;

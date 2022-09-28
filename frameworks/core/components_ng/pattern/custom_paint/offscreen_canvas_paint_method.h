@@ -19,6 +19,8 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 
 namespace OHOS::Ace::NG {
+using setColorFunc = std::function<void (const std::string&)>;
+
 class OffscreenCanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(OffscreenCanvasPaintMethod, CustomPaintPaintMethod)
 public:
@@ -37,8 +39,31 @@ public:
         return height_;
     }
 private:
+    void InitFilterFunc();
+    void SetGrayFilter(const std::string& percent);
+    void SetSepiaFilter(const std::string& percent);
+    void SetInvertFilter(const std::string& percent);
+    void SetOpacityFilter(const std::string& percent);
+    void SetBrightnessFilter(const std::string& percent);
+    void SetContrastFilter(const std::string& percent);
+    void SetBlurFilter(const std::string& percent);
+    void SetDropShadowFilter(const std::string& percent);
+    void SetSaturateFilter(const std::string& percent);
+    void SetHueRotateFilter(const std::string& percent);
+    void SetColorFilter(float matrix[20]);
+
+    bool IsPercentStr(std::string& percentStr);
+    double PxStrToDouble(const std::string& str);
+    double BlurStrToDouble(const std::string& str);
+
+    void ImageObjReady(const RefPtr<ImageObject>& imageObj) override;
+    void ImageObjFailed() override;
+
+    sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }
+
     int32_t width_;
     int32_t height_;
+    std::map<std::string, setColorFunc> filterFunc_;
     Shadow imageShadow_;
 };
 } // namespace OHOS::Ace::NG

@@ -37,15 +37,110 @@ void OffscreenCanvasPattern::StrokeRect(const Rect& rect)
     offscreenPaintMethod_->StrokeRect(nullptr, rect);
 }
 
+void OffscreenCanvasPattern::Fill()
+{
+    offscreenPaintMethod_->Fill(nullptr);
+}
+
+void OffscreenCanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
+{
+    offscreenPaintMethod_->Fill(nullptr, path);
+}
+
+void OffscreenCanvasPattern::Stroke()
+{
+    offscreenPaintMethod_->Stroke(nullptr);
+}
+
+void OffscreenCanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
+{
+    offscreenPaintMethod_->Stroke(nullptr, path);
+}
+
+void OffscreenCanvasPattern::BeginPath()
+{
+    offscreenPaintMethod_->BeginPath();
+}
+
+void OffscreenCanvasPattern::ClosePath()
+{
+    offscreenPaintMethod_->ClosePath();
+}
+
+void OffscreenCanvasPattern::MoveTo(double x, double y)
+{
+    offscreenPaintMethod_->MoveTo(nullptr, x, y);
+}
+
+void OffscreenCanvasPattern::LineTo(double x, double y)
+{
+    offscreenPaintMethod_->LineTo(nullptr, x, y);
+}
+
+void OffscreenCanvasPattern::Arc(const ArcParam& param)
+{
+    offscreenPaintMethod_->Arc(nullptr, param);
+}
+
+void OffscreenCanvasPattern::ArcTo(const ArcToParam& param)
+{
+    offscreenPaintMethod_->ArcTo(nullptr, param);
+}
+
+void OffscreenCanvasPattern::AddRect(const Rect& rect)
+{
+    offscreenPaintMethod_->AddRect(nullptr, rect);
+}
+
+void OffscreenCanvasPattern::Ellipse(const EllipseParam& param)
+{
+    offscreenPaintMethod_->Ellipse(nullptr, param);
+}
+
+void OffscreenCanvasPattern::BezierCurveTo(const BezierCurveParam& param)
+{
+    offscreenPaintMethod_->BezierCurveTo(nullptr, param);
+}
+
+void OffscreenCanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
+{
+    offscreenPaintMethod_->QuadraticCurveTo(nullptr, param);
+}
+
+void OffscreenCanvasPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
+{
+    offscreenPaintMethod_->DrawImage(nullptr, image, width, height);
+}
+
+void OffscreenCanvasPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
+{
+    offscreenPaintMethod_->DrawPixelMap(pixelMap, image);
+}
+
 std::unique_ptr<Ace::ImageData> OffscreenCanvasPattern::GetImageData(
     double left, double top, double width, double height)
 {
     return offscreenPaintMethod_->GetImageData(left, top, width, height);
 }
 
+void OffscreenCanvasPattern::PutImageData(const Ace::ImageData& imageData)
+{
+    offscreenPaintMethod_->PutImageData(nullptr, imageData);
+}
+
 void OffscreenCanvasPattern::UpdateFillColor(const Color& color)
 {
     offscreenPaintMethod_->SetFillColor(color);
+}
+
+void OffscreenCanvasPattern::SetFillRuleForPath(const CanvasFillRule rule)
+{
+    offscreenPaintMethod_->SetFillRuleForPath(rule);
+}
+
+void OffscreenCanvasPattern::SetFillRuleForPath2D(const CanvasFillRule rule)
+{
+    offscreenPaintMethod_->SetFillRuleForPath2D(rule);
 }
 
 int32_t OffscreenCanvasPattern::GetWidth()
