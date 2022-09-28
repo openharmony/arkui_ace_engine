@@ -47,8 +47,6 @@ ohos_unittest("ManifestRouterTest") {
 
   external_deps = [ "ability_base:configuration" ]
 
-  subsystem_name = ace_engine_subsystem
-
   part_name = ace_engine_part
 }
 
