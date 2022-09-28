@@ -38,6 +38,8 @@ build_component_ng("pattern_ng") {
     "checkboxgroup/checkboxgroup_paint_method.cpp",
     "checkboxgroup/checkboxgroup_pattern.cpp",
     "checkboxgroup/checkboxgroup_view.cpp",
+    "counter/counter_node.cpp",
+    "counter/counter_view.cpp",
     "custom/custom_node.cpp",
     "custom/custom_node_layout_algorithm.cpp",
     "custom/custom_node_pattern.cpp",
