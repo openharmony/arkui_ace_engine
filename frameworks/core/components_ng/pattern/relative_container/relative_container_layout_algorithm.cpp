@@ -1,0 +1,575 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
+
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/log/ace_trace.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
+#include "core/components_ng/property/flex_property.h"
+#include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
+namespace OHOS::Ace::NG {
+namespace {
+
+inline bool IsAnchorContainer(const std::string& anchor)
+{
+    return anchor == "__container__";
+}
+
+} // namespace
+
+void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
+        LOGD("RelativeContainerLayoutAlgorithm: No child in Relative container");
+        return;
+    }
+    auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerlayoutProperty);
+    idNodeMap_.clear();
+    reliedOnMap_.clear();
+    incomingDegreeMap_.clear();
+    auto parentIdealSize = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->selfIdealSize.ConvertToSizeT();
+    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(parentIdealSize.Width(), parentIdealSize.Height()));
+    CollectNodesById(layoutWrapper);
+    GetDependencyRelationship();
+    if (!PreTopologicalLoopDetection()) {
+        auto childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
+        auto constraint = relativeContainerlayoutProperty->CreateChildConstraint();
+        for (const auto& childrenWrapper : childrenWrappers) {
+            constraint.maxSize = SizeF(layoutWrapper->GetGeometryNode()->GetFrameSize());
+            constraint.minSize = SizeF(0.0f, 0.0f);
+            childrenWrapper->Measure(constraint);
+            constraint.Reset();
+        }
+        return;
+    }
+    TopologicalSort(renderList_);
+    for (const auto& nodeName : renderList_) {
+        auto childWrapper = idNodeMap_[nodeName];
+        if (!childWrapper) {
+            continue;
+        }
+        CalcSizeParam(layoutWrapper, nodeName);
+        CalcOffsetParam(layoutWrapper, nodeName);
+    }
+}
+
+void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerlayoutProperty);
+    auto parentOffset =
+        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    auto childrenWrapper = layoutWrapper->GetAllChildrenWithBuild();
+    for (auto& childWrapper : childrenWrapper) {
+        auto curOffset = recordOffsetMap_[childWrapper->GetHostNode()->GetInspectorIdValue()];
+        childWrapper->GetGeometryNode()->SetFrameOffset(curOffset);
+        childWrapper->Layout(parentOffset);
+    }
+}
+
+void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWrapper)
+{
+    idNodeMap_.clear();
+    auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto constraint = relativeContainerlayoutProperty->GetLayoutConstraint();
+    auto childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
+    for (const auto& childWrapper : childrenWrappers) {
+        auto childLayoutProperty = childWrapper->GetLayoutProperty();
+        auto childHostNode = childWrapper->GetHostNode();
+        if (childHostNode) {
+            auto geometryNode = childWrapper->GetGeometryNode();
+            auto childConstraint = relativeContainerlayoutProperty->CreateChildConstraint();
+            if (childHostNode->GetInspectorId()->empty()) {
+                // Component who does not have align Rules will have default offset and layout param
+                childConstraint.maxSize = SizeF(constraint->maxSize);
+                childConstraint.minSize = SizeF(0.0f, 0.0f);
+                childWrapper->Measure(childConstraint);
+                childWrapper->GetGeometryNode()->SetFrameOffset(OffsetF(0.0f, 0.0f));
+                idNodeMap_.emplace(childHostNode->GetInspectorIdValue(), childWrapper);
+            }
+            if (idNodeMap_.find(childHostNode->GetInspectorIdValue()) != idNodeMap_.end()) {
+                LOGE("Component %{public}s ID is duplicated", childHostNode->GetInspectorIdValue().c_str());
+            }
+            idNodeMap_.emplace(childHostNode->GetInspectorIdValue(), childWrapper);
+        }
+    }
+}
+
+void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
+{
+    for (const auto& node : idNodeMap_) {
+        auto childWrapper = node.second;
+        auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        auto childHostNode = childWrapper->GetHostNode();
+        if (!flexItem) {
+            continue;
+        }
+        for (const auto& alignRule : flexItem->GetAlignRulesValue()) {
+            if (IsAnchorContainer(alignRule.second.anchor) ||
+                idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end()) {
+                continue;
+            }
+            if (reliedOnMap_.count(alignRule.second.anchor) == 0) {
+                std::set<std::string> reliedList;
+                reliedList.insert(childHostNode->GetInspectorIdValue());
+                reliedOnMap_[alignRule.second.anchor] = reliedList;
+                continue;
+            }
+            reliedOnMap_[alignRule.second.anchor].insert(childHostNode->GetInspectorIdValue());
+        }
+    }
+}
+
+bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
+{
+    std::queue<std::string> visitedNode;
+    std::queue<std::string> layoutQueue;
+
+    for (const auto& node : idNodeMap_) {
+        auto childWrapper = node.second;
+        auto childHostNode = childWrapper->GetHostNode();
+        auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        if (!flexItem) {
+            continue;
+        }
+        std::set<std::string> anchorSet;
+        for (const auto& alignRule : flexItem->GetAlignRulesValue()) {
+            if (IsAnchorContainer(alignRule.second.anchor) ||
+                idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end()) {
+                continue;
+            }
+            anchorSet.insert(alignRule.second.anchor);
+            if (alignRule.second.anchor == node.first) {
+                LOGE("Component %{public}s has dependency on itself", node.first.c_str());
+            }
+        }
+        incomingDegreeMap_[childHostNode->GetInspectorIdValue()] = anchorSet.size();
+        if (incomingDegreeMap_[childHostNode->GetInspectorIdValue()] == 0) {
+            layoutQueue.push(childHostNode->GetInspectorIdValue());
+        }
+    }
+    std::map<std::string, uint32_t> incomingDegreeMapCopy;
+    incomingDegreeMapCopy.insert(incomingDegreeMap_.begin(), incomingDegreeMap_.end());
+    while (!layoutQueue.empty()) {
+        auto currentNodeName = layoutQueue.front();
+        layoutQueue.pop();
+        auto reliedSet = reliedOnMap_[currentNodeName];
+        for (const auto& node : reliedSet) {
+            if (incomingDegreeMapCopy.find(node) == incomingDegreeMapCopy.end() || IsAnchorContainer(node)) {
+                continue;
+            }
+            incomingDegreeMapCopy[node] -= 1;
+            if (incomingDegreeMapCopy[node] == 0) {
+                layoutQueue.push(node);
+            }
+        }
+        incomingDegreeMapCopy.erase(currentNodeName);
+        visitedNode.push(currentNodeName);
+    }
+    if (visitedNode.size() != idNodeMap_.size()) {
+        std::string loopDependentNodes = "";
+        for (const auto& node : incomingDegreeMapCopy) {
+            loopDependentNodes += node.first + ",";
+        }
+        LOGE("Perform Layout failed, components [%{public}s] has loop dependency",
+            loopDependentNodes.substr(0, loopDependentNodes.size() - 1).c_str());
+        return false;
+    }
+    return true;
+}
+
+void RelativeContainerLayoutAlgorithm::TopologicalSort(std::list<std::string>& renderList)
+{
+    std::queue<std::string> layoutQueue;
+    for (const auto& node : idNodeMap_) {
+        auto childWrapper = node.second;
+        auto childHostNode = childWrapper->GetHostNode();
+        auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        if (!flexItem) {
+            continue;
+        }
+        if (incomingDegreeMap_[childHostNode->GetInspectorIdValue()] == 0) {
+            layoutQueue.push(childHostNode->GetInspectorIdValue());
+        }
+    }
+    while (layoutQueue.size() > 0) {
+        auto currentNodeName = layoutQueue.front();
+        layoutQueue.pop();
+        // reduce incoming degree of nodes relied on currentNode
+        auto reliedList = reliedOnMap_[currentNodeName];
+        for (const auto& node : reliedList) {
+            if (incomingDegreeMap_.find(node) == incomingDegreeMap_.end() || IsAnchorContainer(node)) {
+                continue;
+            }
+            incomingDegreeMap_[node] -= 1;
+            if (incomingDegreeMap_[node] == 0) {
+                layoutQueue.push(node);
+            }
+        }
+        renderList.emplace_back(currentNodeName);
+    }
+}
+
+void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrapper, const std::string& nodeName)
+{
+    auto childWrapper = idNodeMap_[nodeName];
+    auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
+    auto geometryNode = childWrapper->GetGeometryNode();
+    auto childLayoutProperty = childWrapper->GetLayoutProperty();
+    const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
+    float itemMaxWidth = 0.0f;
+    float itemMaxHeight = 0.0f;
+    float itemMinWidth = 0.0f;
+    float itemMinHeight = 0.0f;
+    auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto childConstraint = relativeContainerlayoutProperty->CreateChildConstraint();
+    childConstraint.maxSize = SizeF(layoutWrapper->GetGeometryNode()->GetFrameSize());
+    childConstraint.minSize = SizeF(0.0f, 0.0f);
+    // set first two boudnaries of each direction
+    for (const auto& alignRule : alignRules) {
+        if (idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end() &&
+            !IsAnchorContainer(alignRule.second.anchor)) {
+            continue;
+        }
+        if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE) {
+            if (!childFlexItemProperty->GetTwoHorizontalDirectionAligned()) {
+                CalcHorizontalLayoutParam(alignRule.first, alignRule.second, layoutWrapper, nodeName);
+            }
+        } else {
+            if (!childFlexItemProperty->GetTwoVerticalDirectionAligned()) {
+                CalcVerticalLayoutParam(alignRule.first, alignRule.second, layoutWrapper, nodeName);
+            }
+        }
+    }
+    // If less than two boundaries have been set, width will use container's width
+    if (!childFlexItemProperty->GetTwoHorizontalDirectionAligned()) {
+        itemMaxWidth = childConstraint.maxSize.Width();
+        itemMinWidth = childConstraint.minSize.Width();
+    } else {
+        // Use two confirmed boundaries to set item's layout param
+        // For example left and middle, item's width will be (middle - left) *2
+        // If offset difference is negative, which is the case simillar to
+        // item's left aligns to container's right, right aligns to left
+        // Item layout size will be (0, 0) due to this illegal align
+        auto checkAlign = AlignDirection::MIDDLE;
+        float widthValue = 0.0f;
+        if (childFlexItemProperty->GetAligned(checkAlign)) {
+            auto middleValue = childFlexItemProperty->GetAlignValue(checkAlign);
+            checkAlign = AlignDirection::LEFT;
+            if (childFlexItemProperty->GetAligned(checkAlign)) {
+                widthValue = middleValue - childFlexItemProperty->GetAlignValue(checkAlign);
+                itemMaxWidth = 2 * (widthValue > 0.0f ? widthValue : 0.0f);
+                itemMinWidth = 2 * (widthValue > 0.0f ? widthValue : 0.0f);
+            } else {
+                checkAlign = AlignDirection::RIGHT;
+                widthValue = childFlexItemProperty->GetAlignValue(checkAlign) - middleValue;
+                itemMaxWidth = 2 * (widthValue > 0.0f ? widthValue : 0.0f);
+                itemMinWidth = 2 * (widthValue > 0.0f ? widthValue : 0.0f);
+            }
+        } else {
+            auto checkAlign = AlignDirection::LEFT;
+            auto leftValue = childFlexItemProperty->GetAlignValue(checkAlign);
+            checkAlign = AlignDirection::RIGHT;
+            widthValue = childFlexItemProperty->GetAlignValue(checkAlign) - leftValue;
+            itemMaxWidth = widthValue > 0.0f ? widthValue : 0.0f;
+            itemMinWidth = widthValue > 0.0f ? widthValue : 0.0f;
+        }
+        if (widthValue <= 0.0f) {
+            childConstraint.maxSize = SizeF(0.0f, 0.0f);
+            childConstraint.minSize = SizeF(0.0f, 0.0f);
+            LOGE("Component %{public}s horizontal alignment illegal, will layout with size (0, 0)", nodeName.c_str());
+            return;
+        }
+    }
+
+    if (!childFlexItemProperty->GetTwoVerticalDirectionAligned()) {
+        itemMaxHeight = childConstraint.maxSize.Height();
+        itemMinHeight = childConstraint.minSize.Height();
+    } else {
+        auto checkAlign = AlignDirection::CENTER;
+        float heightValue = 0.0f;
+        if (childFlexItemProperty->GetAligned(checkAlign)) {
+            auto centerValue = childFlexItemProperty->GetAlignValue(checkAlign);
+            checkAlign = AlignDirection::TOP;
+            if (childFlexItemProperty->GetAligned(checkAlign)) {
+                heightValue = centerValue - childFlexItemProperty->GetAlignValue(checkAlign);
+                itemMaxHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
+                itemMinHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
+            } else {
+                checkAlign = AlignDirection::BOTTOM;
+                heightValue = childFlexItemProperty->GetAlignValue(checkAlign) - centerValue;
+                itemMaxHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
+                itemMinHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
+            }
+        } else {
+            auto checkAlign = AlignDirection::TOP;
+            auto topValue = childFlexItemProperty->GetAlignValue(checkAlign);
+            checkAlign = AlignDirection::BOTTOM;
+            heightValue = childFlexItemProperty->GetAlignValue(checkAlign) - topValue;
+            itemMaxHeight = heightValue > 0.0f ? heightValue : 0.0f;
+            itemMinHeight = heightValue > 0.0f ? heightValue : 0.0f;
+        }
+        if (heightValue <= 0.0f) {
+            childConstraint.maxSize = SizeF(0.0f, 0.0f);
+            childConstraint.minSize = SizeF(0.0f, 0.0f);
+            LOGE("Component %{public}s vertical alignment illegal, will layout with size (0, 0)", nodeName.c_str());
+            return;
+        }
+    }
+
+    childConstraint.maxSize = SizeF(itemMaxWidth, itemMaxHeight);
+    childConstraint.minSize = SizeF(itemMinWidth, itemMinHeight);
+    childWrapper->Measure(childConstraint);
+}
+
+void RelativeContainerLayoutAlgorithm::CalcOffsetParam(LayoutWrapper* layoutWrapper, const std::string& nodeName)
+{
+    auto childWrapper = idNodeMap_[nodeName];
+    auto containerSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
+    float offsetX = 0.0f;
+    bool offsetXCalculated = false;
+    float offsetY = 0.0f;
+    bool offsetYCalculated = false;
+    for (const auto& alignRule : alignRules) {
+        if (idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end() &&
+            !IsAnchorContainer(alignRule.second.anchor)) {
+            LOGW("Anchor %{public}s of component %{public}s is not found, will be ignored",
+                alignRule.second.anchor.c_str(), nodeName.c_str());
+            continue;
+        }
+        if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE) {
+            if (!offsetXCalculated) {
+                offsetX = CalcHorizontalOffset(alignRule.first, alignRule.second, containerSize.Width(), nodeName);
+                offsetXCalculated = true;
+            }
+        } else {
+            if (!offsetYCalculated) {
+                offsetY = CalcVerticalOffset(alignRule.first, alignRule.second, containerSize.Height(), nodeName);
+                offsetYCalculated = true;
+            }
+        }
+    }
+    recordOffsetMap_[nodeName] = OffsetF(offsetX, offsetY);
+}
+
+void RelativeContainerLayoutAlgorithm::CalcHorizontalLayoutParam(AlignDirection alignDirection,
+    const AlignRule& alignRule, LayoutWrapper* layoutWrapper, const std::string& nodeName)
+{
+    auto childWrapper = idNodeMap_[nodeName];
+    auto childLayoutProperty = childWrapper->GetLayoutProperty();
+    const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
+    if (!childLayoutProperty) {
+        return;
+    }
+    auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    switch (alignRule.horizontal) {
+        case HorizontalAlign::START:
+            childFlexItemProperty->SetAlignValue(
+                alignDirection, IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetX());
+            break;
+        case HorizontalAlign::CENTER:
+            childFlexItemProperty->SetAlignValue(
+                alignDirection, IsAnchorContainer(alignRule.anchor)
+                                    ? parentSize.Width() / 2
+                                    : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width() / 2 +
+                                          recordOffsetMap_[alignRule.anchor].GetX());
+            break;
+        case HorizontalAlign::END:
+            childFlexItemProperty->SetAlignValue(
+                alignDirection, IsAnchorContainer(alignRule.anchor)
+                                    ? parentSize.Width()
+                                    : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width() +
+                                          recordOffsetMap_[alignRule.anchor].GetX());
+            break;
+        default:
+            LOGE("Unsupported align direction");
+            break;
+    }
+}
+
+void RelativeContainerLayoutAlgorithm::CalcVerticalLayoutParam(AlignDirection alignDirection,
+    const AlignRule& alignRule, LayoutWrapper* layoutWrapper, const std::string& nodeName)
+{
+    auto childWrapper = idNodeMap_[nodeName];
+    auto childLayoutProperty = childWrapper->GetLayoutProperty();
+    const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
+    if (!childLayoutProperty) {
+        return;
+    }
+    auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    switch (alignRule.vertical) {
+        case VerticalAlign::TOP:
+            childFlexItemProperty->SetAlignValue(
+                alignDirection, IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetY());
+            break;
+        case VerticalAlign::CENTER:
+            childFlexItemProperty->SetAlignValue(
+                alignDirection, IsAnchorContainer(alignRule.anchor)
+                                    ? parentSize.Height() / 2
+                                    : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height() / 2 +
+                                          recordOffsetMap_[alignRule.anchor].GetY());
+            break;
+        case VerticalAlign::BOTTOM:
+            childFlexItemProperty->SetAlignValue(
+                alignDirection, IsAnchorContainer(alignRule.anchor)
+                                    ? parentSize.Height()
+                                    : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height() +
+                                          recordOffsetMap_[alignRule.anchor].GetY());
+            break;
+        default:
+            LOGE("Unsupported align direction");
+            break;
+    }
+}
+
+float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
+    AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName)
+{
+    float offsetX = 0.0f;
+    auto childWrapper = idNodeMap_[nodeName];
+
+    float flexItemWidth = childWrapper->GetGeometryNode()->GetFrameSize().Width();
+    float anchorWidth = IsAnchorContainer(alignRule.anchor)
+                            ? containerWidth
+                            : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width();
+    switch (alignDirection) {
+        case AlignDirection::LEFT:
+            switch (alignRule.horizontal) {
+                case HorizontalAlign::START:
+                    offsetX = 0.0f;
+                    break;
+                case HorizontalAlign::CENTER:
+                    offsetX = anchorWidth / 2;
+                    break;
+                case HorizontalAlign::END:
+                    offsetX = anchorWidth;
+                    break;
+                default:
+                    LOGE("Unsupported align direction");
+            }
+            break;
+        case AlignDirection::MIDDLE:
+            switch (alignRule.horizontal) {
+                case HorizontalAlign::START:
+                    offsetX = (-1) * flexItemWidth / 2;
+                    break;
+                case HorizontalAlign::CENTER:
+                    offsetX = anchorWidth / 2 - flexItemWidth / 2;
+                    break;
+                case HorizontalAlign::END:
+                    offsetX = anchorWidth - flexItemWidth / 2;
+                    break;
+                default:
+                    LOGE("Unsupported align direction");
+            }
+            break;
+        case AlignDirection::RIGHT:
+            switch (alignRule.horizontal) {
+                case HorizontalAlign::START:
+                    offsetX = (-1) * flexItemWidth;
+                    break;
+                case HorizontalAlign::CENTER:
+                    offsetX = anchorWidth / 2 - flexItemWidth;
+                    break;
+                case HorizontalAlign::END:
+                    offsetX = anchorWidth - flexItemWidth;
+                    break;
+                default:
+                    LOGE("Unsupported align direction");
+            }
+            break;
+        default:
+            LOGE("Unsupported layout position");
+    }
+    offsetX += IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetX();
+    return offsetX;
+}
+
+float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
+    AlignDirection alignDirection, const AlignRule& alignRule, float containerHeight, const std::string& nodeName)
+{
+    float offsetY = 0.0f;
+    auto childWrapper = idNodeMap_[nodeName];
+
+    float flexItemHeight = childWrapper->GetGeometryNode()->GetFrameSize().Height();
+    float anchorHeight = IsAnchorContainer(alignRule.anchor)
+                             ? containerHeight
+                             : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height();
+    switch (alignDirection) {
+        case AlignDirection::TOP:
+            switch (alignRule.vertical) {
+                case VerticalAlign::TOP:
+                    offsetY = 0.0f;
+                    break;
+                case VerticalAlign::CENTER:
+                    offsetY = anchorHeight / 2;
+                    break;
+                case VerticalAlign::BOTTOM:
+                    offsetY = anchorHeight;
+                    break;
+                default:
+                    LOGE("Unsupported align direction");
+            }
+            break;
+        case AlignDirection::CENTER:
+            switch (alignRule.vertical) {
+                case VerticalAlign::TOP:
+                    offsetY = (-1) * flexItemHeight / 2;
+                    break;
+                case VerticalAlign::CENTER:
+                    offsetY = anchorHeight / 2 - flexItemHeight / 2;
+                    break;
+                case VerticalAlign::BOTTOM:
+                    offsetY = anchorHeight - flexItemHeight / 2;
+                    break;
+                default:
+                    LOGE("Unsupported align direction");
+            }
+            break;
+        case AlignDirection::BOTTOM:
+            switch (alignRule.vertical) {
+                case VerticalAlign::TOP:
+                    offsetY = (-1) * flexItemHeight;
+                    break;
+                case VerticalAlign::CENTER:
+                    offsetY = anchorHeight / 2 - flexItemHeight;
+                    break;
+                case VerticalAlign::BOTTOM:
+                    offsetY = anchorHeight - flexItemHeight;
+                    break;
+                default:
+                    LOGE("Unsupported align direction");
+            }
+            break;
+        default:
+            LOGE("Unsupported layout position");
+    }
+    offsetY += IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetY();
+    return offsetY;
+}
+
+} // namespace OHOS::Ace::NG

@@ -45,6 +45,12 @@ struct AlignRule {
         HorizontalAlign horizontal;
         VerticalAlign vertical;
     };
+    
+    bool operator==(const AlignRule& right) const
+    {
+        return ((this->anchor == right.anchor) && (this->vertical == right.vertical) &&
+                (this->horizontal == right.horizontal));
+    }
 };
 
 } // namespace OHOS::Ace

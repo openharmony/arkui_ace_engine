@@ -124,6 +124,8 @@ build_component_ng("pattern_ng") {
     "refresh/refresh_layout_algorithm.cpp",
     "refresh/refresh_pattern.cpp",
     "refresh/refresh_view.cpp",
+    "relative_container/relative_container_layout_algorithm.cpp",
+    "relative_container/relative_container_view.cpp",
     "scroll/scroll_layout_algorithm.cpp",
     "scroll/scroll_pattern.cpp",
     "scroll/scroll_view.cpp",

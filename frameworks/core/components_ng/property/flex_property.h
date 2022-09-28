@@ -16,19 +16,28 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_FLEX_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_FLEX_PROPERTIES_H
 
-#include <memory>
+#include <map>
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+using AlignRulesType = std::map<AlignDirection, AlignRule>;
 struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignSelf, FlexAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, CalcLength);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DisplayIndex, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRules, AlignRulesType);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignLeft, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignMiddle, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRight, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignTop, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignCenter, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignBottom, float);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
@@ -38,6 +47,77 @@ struct FlexItemProperty {
         json->Put("flexGrow", propFlexGrow.value_or(0.0));
         json->Put("flexShrink", propFlexShrink.value_or(1));
         json->Put("alignSelf", ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))]);
+    }
+
+    bool GetTwoHorizontalDirectionAligned() const
+    {
+        return (HasAlignLeft() && HasAlignRight()) || (HasAlignRight() && HasAlignMiddle()) ||
+               (HasAlignLeft() && HasAlignMiddle());
+    }
+
+    bool GetTwoVerticalDirectionAligned() const
+    {
+        return (HasAlignTop() && HasAlignCenter()) || (HasAlignBottom() && HasAlignCenter()) ||
+               (HasAlignTop() && HasAlignBottom());
+    }
+
+    void SetAlignValue(AlignDirection& alignDirection, float value)
+    {
+        static const std::unordered_map<AlignDirection, void (*)(float, FlexItemProperty&)> operators = {
+            { AlignDirection::LEFT,
+                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignLeft(inMapvalue); } },
+            { AlignDirection::RIGHT,
+                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignRight(inMapvalue); } },
+            { AlignDirection::MIDDLE,
+                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignMiddle(inMapvalue); } },
+            { AlignDirection::TOP, [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignTop(inMapvalue); } },
+            { AlignDirection::BOTTOM,
+                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignBottom(inMapvalue); } },
+            { AlignDirection::CENTER,
+                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignCenter(inMapvalue); } },
+        };
+        auto operatorIter = operators.find(alignDirection);
+        if (operatorIter != operators.end()) {
+            operatorIter->second(value, *this);
+            return;
+        }
+        LOGE("Unknown Align Direction");
+    }
+
+    bool GetAligned(AlignDirection& alignDirection)
+    {
+        static const std::unordered_map<AlignDirection, bool (*)(FlexItemProperty&)> operators = {
+            { AlignDirection::LEFT, [](FlexItemProperty& item) { return item.HasAlignLeft(); } },
+            { AlignDirection::RIGHT, [](FlexItemProperty& item) { return item.HasAlignRight(); } },
+            { AlignDirection::MIDDLE, [](FlexItemProperty& item) { return item.HasAlignMiddle(); } },
+            { AlignDirection::TOP, [](FlexItemProperty& item) { return item.HasAlignTop(); } },
+            { AlignDirection::BOTTOM, [](FlexItemProperty& item) { return item.HasAlignBottom(); } },
+            { AlignDirection::CENTER, [](FlexItemProperty& item) { return item.HasAlignCenter(); } },
+        };
+        auto operatorIter = operators.find(alignDirection);
+        if (operatorIter != operators.end()) {
+            return operatorIter->second(*this);
+        }
+        LOGE("Unknown Align Direction");
+        return false;
+    }
+
+    float GetAlignValue(AlignDirection& alignDirection)
+    {
+        static const std::unordered_map<AlignDirection, float (*)(FlexItemProperty&)> operators = {
+            { AlignDirection::LEFT, [](FlexItemProperty& item) { return item.GetAlignLeft().value_or(0.0f); } },
+            { AlignDirection::RIGHT, [](FlexItemProperty& item) { return item.GetAlignRight().value_or(0.0f); } },
+            { AlignDirection::MIDDLE, [](FlexItemProperty& item) { return item.GetAlignMiddle().value_or(0.0f); } },
+            { AlignDirection::TOP, [](FlexItemProperty& item) { return item.GetAlignTop().value_or(0.0f); } },
+            { AlignDirection::BOTTOM, [](FlexItemProperty& item) { return item.GetAlignBottom().value_or(0.0f); } },
+            { AlignDirection::CENTER, [](FlexItemProperty& item) { return item.GetAlignCenter().value_or(0.0f); } },
+        };
+        auto operatorIter = operators.find(alignDirection);
+        if (operatorIter != operators.end()) {
+            return operatorIter->second(*this);
+        }
+        LOGE("Unknown Align Direction");
+        return 0.0f;
     }
 };
 } // namespace OHOS::Ace::NG

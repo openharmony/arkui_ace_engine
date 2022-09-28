@@ -232,6 +232,16 @@ public:
         }
     }
 
+    void UpdateAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
+    {
+        if (!flexItemProperty_) {
+            flexItemProperty_ = std::make_unique<FlexItemProperty>();
+        }
+        if (flexItemProperty_->UpdateAlignRules(alignRules)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+    
     void UpdateDisplayIndex(int32_t displayIndex)
     {
         if (!flexItemProperty_) {
@@ -285,6 +295,7 @@ private:
     std::optional<MeasureType> measureType_;
 
     WeakPtr<FrameNode> host_;
+
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG

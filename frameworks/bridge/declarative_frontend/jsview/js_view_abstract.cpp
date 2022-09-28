@@ -56,7 +56,6 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/option/option_component.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/clip_path.h"
@@ -5130,7 +5129,6 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
         LOGE("arg is not Object or String.");
         return;
     }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
 
     JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(info[0]);
     if (valueObj->IsEmpty()) {
@@ -5154,6 +5152,13 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
             alignRules[static_cast<AlignDirection>(i)] = alignRule;
         }
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetAlignRules(alignRules);
+        return;
+    }
+    
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     flexItem->SetAlignRules(alignRules);
 }
 
