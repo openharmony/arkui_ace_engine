@@ -27,6 +27,7 @@
 #include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_base/include/platform/common/rs_system_properties.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -675,6 +676,9 @@ void PipelineContext::FlushRender()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushRender();
     }
+#ifdef ENABLE_ROSEN_BACKEND
+    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
+#endif
 }
 
 void PipelineContext::FlushRenderFinish()
@@ -2141,6 +2145,10 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
                 SetRootSizeWithWidthHeight(width, height);
                 FlushLayout();
             });
+#ifdef ENABLE_ROSEN_BACKEND
+            // to improve performance, duration rotation animation, draw text as bitmap
+            Rosen::RSSystemProperties::SetDrawTextAsBitmap(true);
+#endif
             break;
         }
         case WindowSizeChangeReason::RESIZE:
