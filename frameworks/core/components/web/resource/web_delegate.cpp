@@ -1390,8 +1390,8 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                          webCom->GetTitleReceiveEventId(), oldContext);
     onFullScreenExitV2_ = useNewPipe ? eventHub->GetOnFullScreenExitEvent()
-                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                            webCom->GetOnFullScreenExitEventId(), oldContext);
+                                     : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                           webCom->GetOnFullScreenExitEventId(), oldContext);
     onGeolocationHideV2_ = useNewPipe ? eventHub->GetOnGeolocationHideEvent()
                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                             webCom->GetGeolocationHideEventId(), oldContext);
