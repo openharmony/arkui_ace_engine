@@ -437,13 +437,13 @@ JsAccessibilityManager::~JsAccessibilityManager()
 void JsAccessibilityManager::ToastAccessibilityConfigObserver::OnConfigChanged(
     const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value)
 {
-    LOGI("accessibility content timeout changed:%{public}u", value.contentTimeout);
+    LOGD("accessibility content timeout changed:%{public}u", value.contentTimeout);
     AceApplicationInfo::GetInstance().SetBarrierfreeDuration((int32_t)value.contentTimeout);
 }
 
 bool JsAccessibilityManager::SubscribeToastObserver()
 {
-    LOGI("SubscribeToastObserver");
+    LOGD("SubscribeToastObserver");
     if (!toastObserver_) {
         toastObserver_ = std::make_shared<ToastAccessibilityConfigObserver>();
     }
@@ -491,7 +491,7 @@ bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
     }
 
     bool ret = instance->SubscribeStateObserver(stateObserver_, eventType);
-    LOGI("SubscribeStateObserver:%{public}d", ret);
+    LOGD("SubscribeStateObserver:%{public}d", ret);
     return ret;
 }
 
