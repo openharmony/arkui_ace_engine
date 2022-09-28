@@ -108,7 +108,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto swiperLayoutAlgorithm = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
-    return false;
+    return GetEdgeEffect() == EdgeEffect::FADE;
 }
 
 void SwiperPattern::CalculateCacheRange()
@@ -149,8 +149,20 @@ void SwiperPattern::FireChangeEvent() const
     swiperEventHub->FireChangeEvent(currentIndex_);
 }
 
+void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
+{
+    LOGI("Swipe to index: %{public}d without animation", index);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    currentIndex_ = index;
+    FireChangeEvent();
+    CalculateCacheRange();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void SwiperPattern::SwipeTo(int32_t index)
 {
+    LOGI("Swipe to index: %{public}d with animation, duration: %{public}d", index, GetDuration());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto targetIndex = std::clamp(index, 0, TotalCount() - 1);
@@ -162,6 +174,12 @@ void SwiperPattern::SwipeTo(int32_t index)
     StopAutoPlay();
     StopTranslateAnimation();
     targetIndex_ = targetIndex;
+
+    if (GetDuration() == 0) {
+        SwipeToWithoutAnimation(index);
+        return;
+    }
+
     // TODO Adapt displayCount.
     auto translateOffset = targetIndex_.value() > currentIndex_ ? -MainSize() : MainSize();
     PlayTranslateAnimation(0, translateOffset, targetIndex_.value(), true);
@@ -220,6 +238,13 @@ void SwiperPattern::InitSwiperController()
         auto swiper = weak.Upgrade();
         if (swiper) {
             swiper->SwipeTo(index);
+        }
+    });
+
+    swiperController_->SetSwipeToWithoutAnimationImpl([weak = WeakClaim(this)](int32_t index) {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            swiper->SwipeToWithoutAnimation(index);
         }
     });
 
