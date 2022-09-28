@@ -52,4 +52,22 @@ std::vector<float> GridUtils::ParseArgs(const std::string& args, float size, flo
     return lens;
 }
 
+float GridUtils::GetMainGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis)
+{
+    auto scale = gridLayoutProperty->GetLayoutConstraint()->scaleProperty;
+    auto rowsGap = ConvertToPx(gridLayoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
+    auto columnsGap =
+        ConvertToPx(gridLayoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
+    return axis == Axis::HORIZONTAL ? columnsGap : rowsGap;
+}
+
+float GridUtils::GetCrossGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis)
+{
+    auto scale = gridLayoutProperty->GetLayoutConstraint()->scaleProperty;
+    auto rowsGap = ConvertToPx(gridLayoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
+    auto columnsGap =
+        ConvertToPx(gridLayoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
+    return axis == Axis::HORIZONTAL ? rowsGap : columnsGap;
+}
+
 } // namespace OHOS::Ace::NG

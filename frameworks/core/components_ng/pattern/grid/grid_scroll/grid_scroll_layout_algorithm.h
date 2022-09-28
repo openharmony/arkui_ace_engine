@@ -18,6 +18,7 @@
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 
@@ -57,16 +58,31 @@ private:
     float FillNewLineBackward(float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
         LayoutWrapper* layoutWrapper);
 
-    LayoutConstraintF MakeMeasureConstraintForGridItem(float mainSize, float crossSize, uint32_t itemFractionCount,
-        const RefPtr<GridLayoutProperty>& gridLayoutProperty) const;
+    int32_t MeasureChild(float mainSize, float crossSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper);
+    float ComputeItemCrossPosition(LayoutWrapper* layoutWrapper, int32_t crossStart) const;
+    void GetNextGrid(int32_t& curMain, int32_t& curCross) const;
+    bool CheckGridPlaced(int32_t index, int32_t main, int32_t cross, int32_t& mainSpan, int32_t& crossSpan);
+    LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
+        const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const;
     void StripItemsOutOfViewport(LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);
+    void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
 
     GridLayoutInfo gridLayoutInfo_;
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
-    int32_t currentMainLineIndex_ = 0; // it equals to row index in vertical grid
+    int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
+    std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
+    Axis axis_ = Axis::VERTICAL;
+
+    // Store current index when place children.
+    int32_t mainIndex_ = 0;
+    int32_t crossIndex_ = 0;
+
+    // Map structure: [index, crossPosition], store cross position of each item.
+    std::map<int32_t, float> itemsCrossPosition_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };
