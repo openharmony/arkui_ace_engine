@@ -437,6 +437,16 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
+void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
+{
+    ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
+}
+
+void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
+{
+    ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
+}
+
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

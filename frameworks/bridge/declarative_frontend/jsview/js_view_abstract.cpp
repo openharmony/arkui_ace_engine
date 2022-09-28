@@ -4045,17 +4045,17 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         LOGE("arg is not a object.");
         return;
     }
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        info.ReturnSelf();
+        return;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         // new pipeline
         NG::Gradient newGradient;
         NewJsLinearGradient(info, newGradient);
         NG::ViewAbstract::SetLinearGradient(newGradient);
-        return;
-    }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.ReturnSelf();
         return;
     }
     Gradient lineGradient;
@@ -4135,11 +4135,6 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.ReturnSelf();
-        return;
-    }
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
     std::optional<float> degree;
@@ -4204,7 +4199,12 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::Gradient newGradient;
+        NewJsRadialGradient(info, newGradient);
+        NG::ViewAbstract::SetRadialGradient(newGradient);
+        return;
+    }
     Gradient radialGradient;
     radialGradient.SetType(GradientType::RADIAL);
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
@@ -4262,6 +4262,44 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
+{
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    // center
+    auto center = argsPtrItem->GetValue("center");
+    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
+        Dimension value;
+        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
+            newGradient.GetRadialGradient()->radialCenterX = Dimension(value);
+            if (value.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                newGradient.GetRadialGradient()->radialCenterX =
+                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        }
+        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
+            newGradient.GetRadialGradient()->radialCenterY = Dimension(value);
+            if (value.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                newGradient.GetRadialGradient()->radialCenterY =
+                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        }
+    }
+    // radius
+    Dimension radius;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius)) {
+        newGradient.GetRadialGradient()->radialVerticalSize = Dimension(radius);
+        newGradient.GetRadialGradient()->radialHorizontalSize = Dimension(radius);
+    }
+    // repeating
+    auto repeating = argsPtrItem->GetBool("repeating", false);
+    newGradient.SetRepeat(repeating);
+    // color stops
+    NewGetGradientColorStops(newGradient, argsPtrItem->GetValue("colors"));
+}
+
 void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -4275,7 +4313,13 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::Gradient newGradient;
+        NewJsSweepGradient(info, newGradient);
+        NG::ViewAbstract::SetSweepGradient(newGradient);
+        return;
+    }
     Gradient sweepGradient;
     sweepGradient.SetType(GradientType::SWEEP);
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
@@ -4344,6 +4388,57 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
                 BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
         }
     }
+}
+
+void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
+{
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    newGradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    // center
+    auto center = argsPtrItem->GetValue("center");
+    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
+        Dimension value;
+        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
+            newGradient.GetSweepGradient()->centerX = Dimension(value);
+            if (value.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                newGradient.GetSweepGradient()->centerX =
+                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        }
+        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
+            newGradient.GetSweepGradient()->centerY = Dimension(value);
+            if (value.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                newGradient.GetSweepGradient()->centerY =
+                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        }
+    }
+    std::optional<float> degree;
+    // start
+    GetAngle("start", argsPtrItem, degree);
+    if (degree) {
+        newGradient.GetSweepGradient()->startAngle = Dimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // end
+    GetAngle("end", argsPtrItem, degree);
+    if (degree) {
+        newGradient.GetSweepGradient()->endAngle = Dimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // rotation
+    GetAngle("rotation", argsPtrItem, degree);
+    if (degree) {
+        newGradient.GetSweepGradient()->rotation = Dimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // repeating
+    auto repeating = argsPtrItem->GetBool("repeating", false);
+    newGradient.SetRepeat(repeating);
+    // color stops
+    NewGetGradientColorStops(newGradient, argsPtrItem->GetValue("colors"));
 }
 
 void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)

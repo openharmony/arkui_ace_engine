@@ -71,7 +71,11 @@ public:
     static void SetBackdropBlur(const Dimension& radius);
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
+
+    // gradient
     static void SetLinearGradient(const NG::Gradient& gradient);
+    static void SetSweepGradient(const NG::Gradient& gradient);
+    static void SetRadialGradient(const NG::Gradient& gradient);
 
     // layout
     static void SetAlign(Alignment alignment);
