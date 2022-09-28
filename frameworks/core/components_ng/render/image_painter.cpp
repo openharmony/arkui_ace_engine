@@ -91,6 +91,23 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
                                       0,     0,     0,     1.0f, 0}; // alpha transparency
 } // namespace
 
+void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize,
+    const ImagePaintConfig& imagePaintConfig) const
+{
+    CHECK_NULL_VOID(canvasImage_);
+    canvas.Save();
+    canvas.Translate(offset.GetX(), offset.GetY());
+
+    if (imagePaintConfig.needFlipCanvasHorizontally_) {
+        ImagePainter::FlipHorizontal(canvas, offset.GetX(), imagePaintConfig.dstRect_.Width());
+    }
+
+    RectF srcRect;
+    srcRect.SetSize(svgContainerSize);
+    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_));
+    canvas.Restore();
+}
+
 void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
 {
     CHECK_NULL_VOID(canvasImage_);

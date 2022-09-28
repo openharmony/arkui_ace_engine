@@ -77,8 +77,9 @@ void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& siz
     NG::ImageView::SetImageSourceSize(size);
 }
 
-void ImageModelNG::SetImageFill(Color color)
+void ImageModelNG::SetImageFill(const Color& color)
 {
+    NG::ImageView::SetSvgFillColor(color);
 }
 
 void ImageModelNG::SetImageInterpolation(ImageInterpolation iterpolation)

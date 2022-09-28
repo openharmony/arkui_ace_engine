@@ -75,7 +75,8 @@ EnterStateTask ImageLoadingContext::CreateOnDataLoadingTask()
     auto task = [weakCtx = WeakClaim(this)]() {
         auto imageLoadingContext = weakCtx.Upgrade();
         CHECK_NULL_VOID(imageLoadingContext);
-        ImageProvider::CreateImageObject(imageLoadingContext->sourceInfo_, imageLoadingContext->loadCallbacks_);
+        ImageProvider::CreateImageObject(imageLoadingContext->sourceInfo_, imageLoadingContext->loadCallbacks_,
+            imageLoadingContext->GetSvgFillColor());
     };
     return task;
 }
@@ -330,6 +331,18 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 bool ImageLoadingContext::NeedAlt() const
 {
     return needAlt_;
+}
+
+const std::optional<Color>& ImageLoadingContext::GetSvgFillColor() const
+{
+    return svgFillColorOpt_;
+}
+
+void ImageLoadingContext::SetSvgFillColor(const std::optional<Color>& svgFillColorOpt)
+{
+    if (sourceInfo_.IsSvg() && svgFillColorOpt) {
+        svgFillColorOpt_ = svgFillColorOpt;
+    }
 }
 
 } // namespace OHOS::Ace::NG

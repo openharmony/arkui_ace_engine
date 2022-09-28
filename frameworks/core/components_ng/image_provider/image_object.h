@@ -45,6 +45,7 @@ public:
 
     void SetCanvasImage(const RefPtr<CanvasImage>& canvasImage);
     void SetData(const RefPtr<ImageData>& data);
+    void SetImageSize(const SizeF& imageSize);
     void ClearData();
 
     virtual void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) = 0;
@@ -55,19 +56,6 @@ protected:
     int32_t frameCount_ = 1;
     RefPtr<ImageData> data_; // TODO: clear data timely
     RefPtr<CanvasImage> canvasImage_;
-};
-
-class StaticImageObject : public ImageObject { // TODO: seperate different ImageObject to it's own cpp/h
-    DECLARE_ACE_TYPE(StaticImageObject, ImageObject);
-
-public:
-    StaticImageObject(
-        ImageSourceInfo sourceInfo, const SizeF& imageSize, int32_t frameCount, const RefPtr<ImageData>& data)
-        : ImageObject(sourceInfo, imageSize, frameCount, data)
-    {}
-    ~StaticImageObject() override = default;
-
-    void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) override;
 };
 
 } // namespace OHOS::Ace::NG

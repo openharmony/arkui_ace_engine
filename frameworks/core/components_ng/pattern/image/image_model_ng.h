@@ -36,7 +36,7 @@ public:
     void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;
     void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
-    void SetImageFill(Color color) override;
+    void SetImageFill(const Color& color) override;
     void SetImageInterpolation(ImageInterpolation iterpolation) override;
     void SetImageRepeat(ImageRepeat imageRepeat) override;
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;

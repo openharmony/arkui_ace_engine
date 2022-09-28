@@ -45,7 +45,7 @@ public:
     virtual void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) = 0;
     virtual void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) = 0;
-    virtual void SetImageFill(Color color) = 0;
+    virtual void SetImageFill(const Color& color) = 0;
     virtual void SetImageInterpolation(ImageInterpolation interpolation) = 0;
     virtual void SetImageRepeat(ImageRepeat imageRepeat) = 0;
     virtual void SetImageRenderMode(ImageRenderMode imageRenderMode) = 0;

@@ -40,6 +40,11 @@ const SizeF& ImageObject::GetImageSize() const
     return imageSize_;
 }
 
+void ImageObject::SetImageSize(const SizeF& imageSize)
+{
+    imageSize_ = imageSize;
+}
+
 int32_t ImageObject::GetFrameCount() const
 {
     return frameCount_;
@@ -68,13 +73,6 @@ void ImageObject::SetData(const RefPtr<ImageData>& data)
 void ImageObject::ClearData()
 {
     data_ = nullptr;
-}
-
-void StaticImageObject::MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize)
-{
-    auto renderTaskHolder = ImageProvider::CreateRenderTaskHolder();
-    CHECK_NULL_VOID(renderTaskHolder);
-    ImageProvider::MakeCanvasImage(WeakClaim(this), loadCallbacks, resizeTarget, renderTaskHolder, forceResize);
 }
 
 } // namespace OHOS::Ace::NG

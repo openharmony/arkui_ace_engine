@@ -26,10 +26,11 @@ class SkiaImageData : public ImageData {
     DECLARE_ACE_TYPE(SkiaImageData, ImageData);
 public:
     SkiaImageData(const void* data, size_t length);
-    SkiaImageData(sk_sp<SkData> skData) : skData_(skData) {}
+    explicit SkiaImageData(sk_sp<SkData> skData) : skData_(std::move(skData)) {}
     size_t GetSize() const override;
     const void* GetData() const override;
     sk_sp<SkData> GetSkData() const;
+    RefPtr<SvgDom> MakeSvgDom(const std::optional<Color>& svgFillColor) override;
 
 private:
     sk_sp<SkData> skData_;

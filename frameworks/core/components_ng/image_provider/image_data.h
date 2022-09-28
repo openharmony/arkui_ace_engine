@@ -16,9 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_DATA_H
 
-#include <vector>
-
-#include "base/memory/ace_type.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/image_provider/svg_dom.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,8 +28,9 @@ public:
     static RefPtr<ImageData> MakeFromDataWrapper(void* dataWrapper);
     virtual size_t GetSize() const = 0;
     virtual const void* GetData() const = 0;
+    virtual RefPtr<SvgDom> MakeSvgDom(const std::optional<Color>& svgFillColor) = 0;
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_DATA_H

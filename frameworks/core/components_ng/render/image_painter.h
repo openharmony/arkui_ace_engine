@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_IMAGE_PAINT_H
 
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -35,6 +36,7 @@ struct ImagePaintConfig {
     ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
     std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
     bool needFlipCanvasHorizontally_ = false;
+    bool isSvg = false;
 };
 
 class ImagePainter {
@@ -43,7 +45,8 @@ public:
     ~ImagePainter() = default;
 
     void DrawImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const;
-
+    void DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize,
+        const ImagePaintConfig& imagePaintConfig) const;
     void DrawImageWithRepeat(RSCanvas& canvas, const ImagePaintConfig& ImagePaintConfig, const RectF& rect) const;
 
     static void ApplyImageFit(
