@@ -13,17 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STACK_STACK_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STACK_STACK_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_MODEL_NG_H
 
 #include "base/utils/macros.h"
-#include "core/components/common/properties/alignment.h"
+#include "core/components_ng/pattern/stack/stack_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT StackView {
+
+class ACE_EXPORT StackModelNG : public StackModel {
 public:
-    static void Create(Alignment alignment);
-    static void Create();
+    void Create(Alignment align) override;
+    void SetStackFit(StackFit fit) override {}
+    void SetOverflow(Overflow overflow) override {}
+    void SetAlignment(Alignment align) override {}
+    void SetHasHeight() override {}
+    void SetHasWidth() override {}
+
+private:
+    void Create();
 };
+
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STACK_STACK_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_MODEL_NG_H

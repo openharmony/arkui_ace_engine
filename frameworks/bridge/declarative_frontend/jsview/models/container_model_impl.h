@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_VIEW_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CONTAINER_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CONTAINER_MODEL_IMPL_H
 
-#include <optional>
-#include <string>
-
-#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/container_model.h"
 
-namespace OHOS::Ace::NG {
-class ACE_EXPORT ColumnView {
+namespace OHOS::Ace::Framework {
+
+class ContainerModelImpl : public ContainerModel {
 public:
-    static void Create(const std::optional<Dimension>& space);
-    static void AlignItems(FlexAlign flexAlign);
-    static void JustifyContent(FlexAlign flexAlign);
+    void Pop() override
+    {
+        ViewStackProcessor::GetInstance()->PopContainer();
+    }
 };
-} // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_VIEW_H
+} // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CONTAINER_MODEL_IMPL_H

@@ -13,14 +13,29 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_FLEX_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_FLEX_MODEL_IMPL_H
 
-#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/flex/flex_model.h"
 
 namespace OHOS::Ace::Framework {
-void JSContainerBase::Pop()
-{
-    NG::ViewStackProcessor::GetInstance()->PopContainer();
-}
+
+class FlexModelImpl : public FlexModel {
+public:
+    void SetFillParent() override;
+
+    void SetWrapContent() override;
+
+    void SetJustifyContent(int32_t value) override;
+
+    void SetAlignItems(int32_t value) override;
+
+    void SetAlignContent(int32_t value) override;
+
+    void SetHasHeight() override;
+
+    void SetHasWidth() override;
+};
 
 } // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_FLEX_MODEL_IMPL_H

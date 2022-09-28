@@ -13,23 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODEL_H
 
-#include <optional>
-#include <string>
+#include <memory>
 
-#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
 
-namespace OHOS::Ace::NG {
-class ACE_EXPORT RowView {
+namespace OHOS::Ace {
+
+class ACE_EXPORT ContainerModel {
 public:
-    static void Create(const std::optional<Dimension>& space);
-    static void AlignItems(FlexAlign flexAlign);
-    static void JustifyContent(FlexAlign flexAlign);
-};
-} // namespace OHOS::Ace::NG
+    static ContainerModel* GetInstance();
+    virtual ~ContainerModel() = default;
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_VIEW_H
+    virtual void Pop() = 0;
+
+private:
+    static std::unique_ptr<ContainerModel> instance_;
+};
+
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODEL_H
