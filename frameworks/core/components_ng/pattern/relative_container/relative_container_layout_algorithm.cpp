@@ -29,7 +29,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 
 inline bool IsAnchorContainer(const std::string& anchor)
@@ -295,10 +294,10 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
             auto leftValue = childFlexItemProperty->GetAlignValue(checkAlign);
             checkAlign = AlignDirection::RIGHT;
             widthValue = childFlexItemProperty->GetAlignValue(checkAlign) - leftValue;
-            itemMaxWidth = widthValue > 0.0 ? widthValue : 0.0f;
-            itemMinWidth = widthValue > 0.0 ? widthValue : 0.0f;
+            itemMaxWidth = widthValue > 0.0f ? widthValue : 0.0f;
+            itemMinWidth = widthValue > 0.0f ? widthValue : 0.0f;
         }
-        if (widthValue <= 0.0) {
+        if (widthValue <= 0.0f) {
             childConstraint.maxSize = SizeF(0.0f, 0.0f);
             childConstraint.minSize = SizeF(0.0f, 0.0f);
             LOGE("Component %{public}s horizontal alignment illegal, will layout with size (0, 0)", nodeName.c_str());
@@ -317,23 +316,23 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
             checkAlign = AlignDirection::TOP;
             if (childFlexItemProperty->GetAligned(checkAlign)) {
                 heightValue = centerValue - childFlexItemProperty->GetAlignValue(checkAlign);
-                itemMaxHeight = 2 * (heightValue > 0.0 ? heightValue : 0.0f);
-                itemMinHeight = 2 * (heightValue > 0.0 ? heightValue : 0.0f);
+                itemMaxHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
+                itemMinHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
             } else {
                 checkAlign = AlignDirection::BOTTOM;
                 heightValue = childFlexItemProperty->GetAlignValue(checkAlign) - centerValue;
-                itemMaxHeight = 2 * (heightValue > 0.0 ? heightValue : 0.0f);
-                itemMinHeight = 2 * (heightValue > 0.0 ? heightValue : 0.0f);
+                itemMaxHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
+                itemMinHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
             }
         } else {
             auto checkAlign = AlignDirection::TOP;
             auto topValue = childFlexItemProperty->GetAlignValue(checkAlign);
             checkAlign = AlignDirection::BOTTOM;
             heightValue = childFlexItemProperty->GetAlignValue(checkAlign) - topValue;
-            itemMaxHeight = heightValue > 0.0 ? heightValue : 0.0f;
-            itemMinHeight = heightValue > 0.0 ? heightValue : 0.0f;
+            itemMaxHeight = heightValue > 0.0f ? heightValue : 0.0f;
+            itemMinHeight = heightValue > 0.0f ? heightValue : 0.0f;
         }
-        if (heightValue <= 0.0) {
+        if (heightValue <= 0.0f) {
             childConstraint.maxSize = SizeF(0.0f, 0.0f);
             childConstraint.minSize = SizeF(0.0f, 0.0f);
             LOGE("Component %{public}s vertical alignment illegal, will layout with size (0, 0)", nodeName.c_str());

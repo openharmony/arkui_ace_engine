@@ -186,10 +186,6 @@ const char IMAGE_ETS_TAG[] = "Image";
 const char QRCODE_COMPONENT_TAG[] = "QrcodeComponent";
 const char QRCODE_ETS_TAG[] = "QRCode";
 
-// relative container
-const char RELATIVECONTAINER_COMPONENT_TAG[] = "RelativeContainerComponent";
-const char RELATIVECONTAINER_ETS_TAG[] = "RelativeContainer";
-
 // span
 const char SPAN_COMPONENT_TAG[] = "TextSpanComponent";
 const char SPAN_ETS_TAG[] = "Span";

@@ -105,18 +105,12 @@ struct FlexItemProperty {
     float GetAlignValue(AlignDirection& alignDirection)
     {
         static const std::unordered_map<AlignDirection, float (*)(FlexItemProperty&)> operators = {
-            { AlignDirection::LEFT,
-                [](FlexItemProperty& item) { return item.HasAlignLeft() ? item.GetAlignLeftValue() : 0.0f; } },
-            { AlignDirection::RIGHT,
-                [](FlexItemProperty& item) { return item.HasAlignRight() ? item.GetAlignRightValue() : 0.0f; } },
-            { AlignDirection::MIDDLE,
-                [](FlexItemProperty& item) { return item.HasAlignMiddle() ? item.GetAlignMiddleValue() : 0.0f; } },
-            { AlignDirection::TOP,
-                [](FlexItemProperty& item) { return item.HasAlignTop() ? item.GetAlignTopValue() : 0.0f; } },
-            { AlignDirection::BOTTOM,
-                [](FlexItemProperty& item) { return item.HasAlignBottom() ? item.GetAlignBottomValue() : 0.0f; } },
-            { AlignDirection::CENTER,
-                [](FlexItemProperty& item) { return item.HasAlignCenter() ? item.GetAlignCenterValue() : 0.0f; } },
+            { AlignDirection::LEFT, [](FlexItemProperty& item) { return item.GetAlignLeft().value_or(0.0f); } },
+            { AlignDirection::RIGHT, [](FlexItemProperty& item) { return item.GetAlignRight().value_or(0.0f); } },
+            { AlignDirection::MIDDLE, [](FlexItemProperty& item) { return item.GetAlignMiddle().value_or(0.0f); } },
+            { AlignDirection::TOP, [](FlexItemProperty& item) { return item.GetAlignTop().value_or(0.0f); } },
+            { AlignDirection::BOTTOM, [](FlexItemProperty& item) { return item.GetAlignBottom().value_or(0.0f); } },
+            { AlignDirection::CENTER, [](FlexItemProperty& item) { return item.GetAlignCenter().value_or(0.0f); } },
         };
         auto operatorIter = operators.find(alignDirection);
         if (operatorIter != operators.end()) {

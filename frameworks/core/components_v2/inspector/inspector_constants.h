@@ -190,10 +190,6 @@ ACE_EXPORT extern const char IMAGE_ETS_TAG[];
 ACE_EXPORT extern const char QRCODE_COMPONENT_TAG[];
 ACE_EXPORT extern const char QRCODE_ETS_TAG[];
 
-// relative container
-ACE_EXPORT extern const char RELATIVECONTAINER_COMPONENT_TAG[];
-ACE_EXPORT extern const char RELATIVECONTAINER_ETS_TAG[];
-
 // span
 ACE_EXPORT extern const char SPAN_COMPONENT_TAG[];
 ACE_EXPORT extern const char SPAN_ETS_TAG[];
