@@ -31,6 +31,7 @@ public:
     static void SetValue(double value);
     static void SetMaxValue(double value);
     static void SetColor(const Color& value);
+    static void SetBackgroundColor(const Color& value);
     static void SetStrokeWidth(const Dimension& value);
     static void SetScaleCount(int32_t value);
     static void SetScaleWidth(const Dimension& value);

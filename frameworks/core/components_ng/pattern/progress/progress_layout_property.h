@@ -33,7 +33,7 @@ public:
     {
         auto value = MakeRefPtr<ProgressLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propProgressStyle_ = CloneProgressStyle();
+        value->propType_ = CloneType();
         value->propStrokeWidth_ = CloneStrokeWidth();
         return value;
     }
@@ -41,14 +41,11 @@ public:
     void Reset() override
     {
         LayoutProperty::Reset();
-        ResetProgressStyle();
+        ResetType();
         ResetStrokeWidth();
     }
 
-    ACE_DEFINE_PROPERTY_GROUP(ProgressStyle, ProgressStyle);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, Color, Color, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, Type, ProgressType, PROPERTY_UPDATE_MEASURE);
-
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Type, ProgressType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
 private:

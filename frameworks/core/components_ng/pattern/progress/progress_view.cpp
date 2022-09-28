@@ -51,6 +51,11 @@ void ProgressView::SetColor(const Color& value)
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, value);
 }
 
+void ProgressView::SetBackgroundColor(const Color& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value);
+}
+
 void ProgressView::SetStrokeWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value);

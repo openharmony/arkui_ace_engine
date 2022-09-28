@@ -40,9 +40,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     auto progressTheme = themeManager->GetTheme<ProgressTheme>();
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
-    const auto& progressStyle = progressLayoutProperty->GetProgressStyle();
-    CHECK_NULL_RETURN(progressStyle, std::nullopt);
-    type_ = progressStyle->GetType().value_or(ProgressType::LINEAR);
+    type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth()
                        .value_or(progressTheme ? (type_ == ProgressType::SCALE ? progressTheme->GetScaleLength()
                                                                                : progressTheme->GetTrackThickness())

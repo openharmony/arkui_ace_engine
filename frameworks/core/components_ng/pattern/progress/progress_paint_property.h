@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_PAINT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
-#include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ProgressPaintProperty : public PaintProperty {
@@ -34,6 +34,7 @@ public:
         auto paintProperty = MakeRefPtr<ProgressPaintProperty>();
         paintProperty->propProgressPaintDate_ = CloneProgressPaintDate();
         paintProperty->propColor_ = CloneColor();
+        paintProperty->propBackgroundColor_ = CloneBackgroundColor();
         return paintProperty;
     }
 
@@ -42,6 +43,7 @@ public:
         PaintProperty::Reset();
         ResetProgressPaintDate();
         ResetColor();
+        ResetBackgroundColor();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(ProgressPaintDate, ProgressDate);
@@ -51,7 +53,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, ScaleWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);
-
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

@@ -48,8 +48,9 @@ public:
         auto offset = paintWrapper->GetContentOffset();
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         GetThemeDate();
-        color_ = paintProperty->GetColor().value_or(color_);
         if (paintProperty) {
+            color_ = paintProperty->GetColor().value_or(color_);
+            bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
             maxValue_ = paintProperty->GetMaxValue().value_or(maxValue_);
             value_ = paintProperty->GetValue().value_or(value_);
             scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
@@ -88,6 +89,7 @@ private:
     float maxValue_ = 100.0f;
     float value_ = 0.0f;
     Color color_ = Color::BLUE;
+    Color bgColor_ = Color::GRAY;
     float strokeWidth_ = 2.0f;
     float scaleWidth_ = 10.0f;
     int32_t scaleCount_ = 100;
