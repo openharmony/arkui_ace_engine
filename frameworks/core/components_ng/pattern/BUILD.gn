@@ -146,6 +146,7 @@ build_component_ng("pattern_ng") {
     "stage/stage_manager.cpp",
     "swiper/swiper_layout_algorithm.cpp",
     "swiper/swiper_paint_method.cpp",
+    "swiper/swiper_paint_property.cpp",
     "swiper/swiper_pattern.cpp",
     "swiper/swiper_view.cpp",
     "tabs/tab_bar_layout_algorithm.cpp",
