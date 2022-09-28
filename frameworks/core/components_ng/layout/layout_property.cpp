@@ -32,6 +32,7 @@ void LayoutProperty::Reset()
     layoutConstraint_.reset();
     calcLayoutConstraint_.reset();
     padding_.reset();
+    margin_.reset();
     borderWidth_.reset();
     magicItemProperty_.reset();
     positionProperty_.reset();
@@ -68,6 +69,9 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->padding_) {
         padding_ = std::make_unique<PaddingProperty>(*layoutProperty->padding_);
     }
+    if (layoutProperty->margin_) {
+        margin_ = std::make_unique<PaddingProperty>(*layoutProperty->margin_);
+    }
     if (layoutProperty->borderWidth_) {
         borderWidth_ = std::make_unique<BorderWidthProperty>(*layoutProperty->borderWidth_);
     }
@@ -103,6 +107,13 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
+    if (margin_) {
+        // TODO: add margin is negative case.
+        auto margin = CreateMargin();
+        MinusPaddingToSize(margin, layoutConstraint_->maxSize);
+        MinusPaddingToSize(margin, layoutConstraint_->minSize);
+        MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
+    }
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
@@ -120,6 +131,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
                     parentConstraint.percentReference));
         }
     }
+
     CheckSelfIdealSize();
     CheckAspectRatio();
 }
@@ -170,7 +182,7 @@ void LayoutProperty::CheckAspectRatio()
 void LayoutProperty::CheckSelfIdealSize()
 {
     if (measureType_ == MeasureType::MATCH_PARENT) {
-        layoutConstraint_->UpdateSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
+        layoutConstraint_->UpdateSelfMarginSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
     if (!calcLayoutConstraint_) {
         return;
@@ -225,12 +237,12 @@ void LayoutProperty::UpdateContentConstraint()
     if (padding_) {
         auto paddingF = ConvertToPaddingPropertyF(
             *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        contentConstraint_->MinusPaddingOnBothSize(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
             *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(
+        contentConstraint_->MinusPaddingOnBothSize(
             borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
     }
 }
@@ -268,6 +280,17 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 
     return ConvertToPaddingPropertyF(
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+}
+
+MarginPropertyF LayoutProperty::CreateMargin()
+{
+    if (layoutConstraint_.has_value()) {
+        return ConvertToMarginPropertyF(
+            margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    }
+
+    return ConvertToMarginPropertyF(
+        margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
 
 void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)

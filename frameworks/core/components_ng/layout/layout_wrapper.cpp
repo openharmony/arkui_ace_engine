@@ -127,6 +127,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     }
     layoutProperty_->UpdateContentConstraint();
+    geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
 
     LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
@@ -163,7 +164,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 }
 
 // Called to perform layout children.
-void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
+void LayoutWrapper::Layout()
 {
     if (!layoutAlgorithm_ || layoutAlgorithm_->SkipLayout()) {
         LOGD("the layoutAlgorithm skip layout");
@@ -187,10 +188,6 @@ void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
             layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
         }
         layoutProperty_->UpdateContentConstraint();
-    }
-
-    if (parentGlobalOffset) {
-        geometryNode_->SetParentGlobalOffset(parentGlobalOffset.value());
     }
     layoutAlgorithm_->Layout(this);
     LOGD("On Layout Done: %{public}s, Offset: %{public}s", GetHostTag().c_str(),

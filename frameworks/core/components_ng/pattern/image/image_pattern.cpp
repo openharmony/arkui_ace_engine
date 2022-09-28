@@ -87,9 +87,9 @@ void ImagePattern::OnImageLoadSuccess()
     CHECK_NULL_VOID(geometryNode);
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent loadImageSuccessEvent_(
-        loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
-        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1);
+    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
+        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
+        geometryNode->GetFrameSize().Height(), 1);
     imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
     // update src data
     lastCanvasImage_ = loadingCtx_->GetCanvasImage();
@@ -122,9 +122,9 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(geometryNode);
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent loadImageSuccessEvent_(
-        loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
-        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 0);
+    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
+        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
+        geometryNode->GetFrameSize().Height(), 0);
     imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
 
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
@@ -158,7 +158,8 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     bool isRightToLeft = pipelineCtx ? pipelineCtx->IsRightToLeft() : false;
-    imagePaintConfig.needFlipCanvasHorizontally_ = isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
+    imagePaintConfig.needFlipCanvasHorizontally_ =
+        isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
     auto colorFilterMatrix = imageRenderProperty->GetColorFilter();
     if (colorFilterMatrix.has_value()) {
         imagePaintConfig.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());

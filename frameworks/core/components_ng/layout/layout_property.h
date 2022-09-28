@@ -74,6 +74,11 @@ public:
         return padding_;
     }
 
+    const std::unique_ptr<MarginProperty>& GetMarginProperty() const
+    {
+        return margin_;
+    }
+
     const std::unique_ptr<BorderWidthProperty>& GetBorderWidthProperty() const
     {
         return borderWidth_;
@@ -104,6 +109,16 @@ public:
             padding_ = std::make_unique<PaddingProperty>();
         }
         if (padding_->UpdateWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateMargin(const MarginProperty& value)
+    {
+        if (!margin_) {
+            margin_ = std::make_unique<MarginProperty>();
+        }
+        if (margin_->UpdateWithCheck(value)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
         }
     }
@@ -192,12 +207,12 @@ public:
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
-    void UpdateSelfIdealSize(const SizeF& value)
+    void UpdateMarginSelfIdealSize(const SizeF& value)
     {
         if (!layoutConstraint_.has_value()) {
             layoutConstraint_ = LayoutConstraintF();
         }
-        if (layoutConstraint_->UpdateSelfIdealSizeWithCheck(OptionalSizeF(value))) {
+        if (layoutConstraint_->UpdateSelfMarginSizeWithCheck(OptionalSizeF(value))) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
@@ -266,6 +281,8 @@ public:
     PaddingPropertyF CreatePaddingWithoutBorder();
     PaddingPropertyF CreatePaddingAndBorder();
 
+    MarginPropertyF CreateMargin();
+
     void SetHost(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
 
@@ -288,6 +305,7 @@ private:
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
     std::unique_ptr<PaddingProperty> padding_;
+    std::unique_ptr<MarginProperty> margin_;
     std::unique_ptr<BorderWidthProperty> borderWidth_;
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;

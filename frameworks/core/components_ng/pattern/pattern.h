@@ -139,7 +139,7 @@ public:
         if (!frameNode) {
             return std::nullopt;
         }
-        return frameNode->GetGeometryNode()->GetFrameSize();
+        return frameNode->GetGeometryNode()->GetMarginFrameSize();
     }
 
     std::optional<OffsetF> GetHostFrameOffset() const

@@ -19,9 +19,9 @@
 #include "core/components/common/layout/layout_param.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#include "core/components_ng/pattern/text/text_model.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -32,7 +32,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
-    
+
     if (indexerLayoutProperty->GetArrayValue().has_value()) {
         arrayValue_ = indexerLayoutProperty->GetArrayValue().value();
         itemCount_ = arrayValue_.size();
@@ -47,7 +47,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutConstraint = indexerLayoutProperty->GetLayoutConstraint().value();
     }
     SizeF maxSize = layoutConstraint.maxSize;
-    
+
     color_ = indexerLayoutProperty->GetColor().value_or(Color::BLACK);
     selectedColor_ = indexerLayoutProperty->GetSelectedColor().value_or(Color::BLACK);
     popupColor_ = indexerLayoutProperty->GetPopupColor().value_or(Color::BLACK);
@@ -61,7 +61,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(0));
     itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, maxSize.Height()).value();
     alignStyle_ = indexerLayoutProperty->GetAlignStyle().value_or(V2::AlignStyle::RIGHT);
-    
+
     if (itemCount_ <= 0) {
         LOGE("AlphabetIndexer arrayValue size is less than 0");
         return;
@@ -83,9 +83,9 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(childWrapper);
         auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(childLayoutProperty);
-        childLayoutConstraint.UpdateSelfIdealSizeWithCheck(OptionalSizeF(itemSizeRender_, itemSizeRender_));
+        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemSizeRender_, itemSizeRender_));
         childLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        
+
         if (index == selected_) {
             childLayoutProperty->UpdateTextColor(selectedColor_);
             auto fontSize = selectedFont_.GetFontSize();
@@ -96,7 +96,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto childFrameNode = childWrapper->GetHostNode();
             auto childRenderContext = childFrameNode->GetRenderContext();
             childRenderContext->BlendBgColor(selectedBackgroundColor_);
-            
+
             Dimension radius = Dimension(BOX_RADIUS);
             BorderRadiusProperty borderRadius { radius, radius, radius, radius };
             childRenderContext->UpdateBorderRadius(borderRadius);
@@ -110,7 +110,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto childFrameNode = childWrapper->GetHostNode();
             auto childRenderContext = childFrameNode->GetRenderContext();
             childRenderContext->ResetBlendBgColor();
-            
+
             Dimension radius = Dimension(BOX_RADIUS);
             BorderRadiusProperty borderRadius { radius, radius, radius, radius };
             childRenderContext->UpdateBorderRadius(borderRadius);
@@ -123,8 +123,8 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(childWrapper);
         auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(childLayoutProperty);
-        
-        childLayoutConstraint.UpdateSelfIdealSizeWithCheck(OptionalSizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE));
+
+        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE));
         childLayoutProperty->UpdateAlignment(Alignment::CENTER);
         childLayoutProperty->UpdateContent(arrayValue_[selected_]);
         childLayoutProperty->UpdateTextColor(popupColor_);
@@ -132,7 +132,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutProperty->UpdateFontSize(fontSize);
         auto fontWeight = popupFont_.GetFontWeight();
         childLayoutProperty->UpdateFontWeight(fontWeight);
-        
+
         auto childFrameNode = childWrapper->GetHostNode();
         auto childRenderContext = childFrameNode->GetRenderContext();
         childRenderContext->BlendBgColor(popupBackground_);
@@ -140,7 +140,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         Dimension radius = Dimension(BUBBLE_BOX_RADIUS);
         BorderRadiusProperty borderRadius { radius, radius, radius, radius };
         childRenderContext->UpdateBorderRadius(borderRadius);
-        
+
         childWrapper->Measure(childLayoutConstraint);
     }
     auto size = SizeF(itemSizeRender_, itemSizeRender_ * itemCount_);
@@ -156,15 +156,13 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
-    
+
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
     auto paddingOffset = OffsetF(left, top);
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
 
     for (int32_t index = 0; index < itemCount_; index++) {
         auto offset = paddingOffset;
@@ -174,12 +172,12 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         offset = offset + OffsetF(0, index * itemSizeRender_);
-        childWrapper->GetGeometryNode()->SetFrameOffset(offset);
-        
+        childWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+
         auto childNode = childWrapper->GetHostNode();
         CHECK_NULL_VOID(childNode);
-        
-        childWrapper->Layout(parentOffset);
+
+        childWrapper->Layout();
     }
 
     if (usingPopup_) {
@@ -197,12 +195,12 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             bubblePosition = OffsetF(BUBBLE_POSITION_X + itemSizeRender_, BUBBLE_POSITION_Y);
         }
         offset = offset + bubblePosition;
-        childWrapper->GetGeometryNode()->SetFrameOffset(offset);
-        
+        childWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+
         auto childNode = childWrapper->GetHostNode();
         CHECK_NULL_VOID(childNode);
-        
-        childWrapper->Layout(parentOffset);
+
+        childWrapper->Layout();
     }
 }
 } // namespace OHOS::Ace::NG

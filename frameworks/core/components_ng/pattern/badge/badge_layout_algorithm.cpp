@@ -86,8 +86,7 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    textGeometryNode->SetFrameSize(SizeF(badgeWidth, badgeHeight));
-    textLayoutProperty->UpdateSelfIdealSize(SizeF(badgeWidth, badgeHeight));
+    textLayoutProperty->UpdateMarginSelfIdealSize(SizeF(badgeWidth, badgeHeight));
     auto textLayoutConstraint = childLayoutConstraint;
     textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);
     textWrapper->Measure(textLayoutConstraint);
@@ -178,13 +177,12 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
 
-    auto parentOffset = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
-    textGeometryNode->SetFrameOffset(textOffset - geometryNode->GetFrameOffset());
-    textWrapper->Layout(parentOffset);
+    textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
+    textWrapper->Layout();
 
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);
-    childWrapper->Layout(parentOffset);
+    childWrapper->Layout();
 }
 
 } // namespace OHOS::Ace::NG

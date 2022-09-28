@@ -23,6 +23,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -64,8 +65,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childFrameOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     childFrameOffset += gridLayoutProperty->IsVertical() ? OffsetF(0.0f, gridLayoutInfo_.currentOffset_)
                                                          : OffsetF(gridLayoutInfo_.currentOffset_, 0.0f);
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    float crossFrWidth = GetCrossAxisSize(size, gridLayoutInfo_.axis_) / static_cast<float>(crossCount_);
 
     float prevLineHeight = 0.0f;
     for (const auto& line : gridLayoutInfo_.gridMatrix_) {
@@ -76,6 +76,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             break;
         }
         int32_t itemIdex = -1;
+        float lineHeight = gridLayoutInfo_.lineHeightMap_[line.first];
         for (auto iter = line.second.begin(); iter != line.second.end(); iter++) {
             // If item index is the same, must be the same GridItem, need't layout again.
             if (itemIdex == iter->second) {
@@ -93,8 +94,12 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 LOGE("item wrapper of index: %{public}d is null, please check.", iter->second);
                 continue;
             }
-            wrapper->GetGeometryNode()->SetFrameOffset(offset);
-            wrapper->Layout(parentOffset);
+            auto frSize = static_cast<float>(iter->second) * crossFrWidth;
+            SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
+            auto translate = Alignment::GetAlignPosition(
+                blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::CENTER);
+            wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
+            wrapper->Layout();
         }
         prevLineHeight +=
             gridLayoutInfo_.lineHeightMap_[line.first] + GridUtils::GetMainGap(gridLayoutProperty, size, axis_);
@@ -404,7 +409,7 @@ LayoutConstraintF GridScrollLayoutAlgorithm::CreateChildConstraint(float mainSiz
                                   : itemConstraint.percentReference.Height() / static_cast<float>(mainCount_);
     itemConstraint.percentReference = SizeF(widthPercentBase, heightPercentBase);
     itemConstraint.maxSize = itemIdealSize;
-    itemConstraint.UpdateIllegalSelfIdealSizeWithCheck(axis_ == Axis::VERTICAL
+    itemConstraint.UpdateIllegalSelfMarginSizeWithCheck(axis_ == Axis::VERTICAL
                                                            ? OptionalSizeF(itemCrossSize, std::nullopt)
                                                            : OptionalSizeF(std::nullopt, itemCrossSize));
     return itemConstraint;

@@ -45,7 +45,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(firstChildWrapper);
     auto layoutConstraint = gridLayoutProperty->CreateChildConstraint();
     firstChildWrapper->Measure(layoutConstraint);
-    auto firstChildSize = firstChildWrapper->GetGeometryNode()->GetFrameSize();
+    auto firstChildSize = firstChildWrapper->GetGeometryNode()->GetMarginFrameSize();
 
     // Calculate grid cell size.
     gridCellSize_ = firstChildSize;
@@ -111,22 +111,20 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-
     for (int32_t index = 0; index < displayCount_; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
             continue;
         }
-        childWrapper->GetGeometryNode()->SetFrameOffset(CalculateChildOffset(index, layoutWrapper));
-        childWrapper->Layout(parentOffset);
+        // TODO: add center position when grid item is less than ceil.
+        childWrapper->GetGeometryNode()->SetMarginFrameOffset(CalculateChildOffset(index, layoutWrapper));
+        childWrapper->Layout();
     }
 }
 
 OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper) const
 {
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
     auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
     auto padding = layoutProperty->CreatePaddingAndBorder();

@@ -60,7 +60,7 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info);
-    imageLayoutProperty->UpdateSelfIdealSize(SizeF(ICON_SIZE, ICON_SIZE));
+    imageLayoutProperty->UpdateMarginSelfIdealSize(SizeF(ICON_SIZE, ICON_SIZE));
     return iconNode;
 }
 

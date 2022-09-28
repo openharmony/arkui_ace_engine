@@ -39,10 +39,8 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Layout(parentOffset);
+        child->Layout();
     }
 }
 
@@ -111,7 +109,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             // use the max child size.
             auto childFrame = SizeF(-1, -1);
             for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-                auto childSize = child->GetGeometryNode()->GetFrameSize();
+                auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
                 childFrame = childFrame > childSize ? childFrame : childSize;
             }
             AddPaddingToSize(padding, childFrame);
@@ -141,8 +139,8 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
-            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetFrameSize(), align) + paddingOffset;
-        child->GetGeometryNode()->SetFrameOffset(translate);
+            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+        child->GetGeometryNode()->SetMarginFrameOffset(translate);
     }
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();

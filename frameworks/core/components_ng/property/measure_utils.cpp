@@ -108,25 +108,6 @@ SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSiz
     return { width, height };
 }
 
-void MinusPaddingToConstraint(const std::unique_ptr<PaddingProperty>& padding, LayoutConstraintF& size)
-{
-    if (!padding) {
-        return;
-    }
-    MinusPaddingToConstraint(*padding, size);
-}
-
-void MinusPaddingToConstraint(const PaddingProperty& padding, LayoutConstraintF& size)
-{
-    auto width = size.percentReference.Width();
-    auto height = size.percentReference.Height();
-    auto left = ConvertToPx(padding.left, size.scaleProperty, width);
-    auto right = ConvertToPx(padding.right, size.scaleProperty, width);
-    auto top = ConvertToPx(padding.top, size.scaleProperty, height);
-    auto bottom = ConvertToPx(padding.bottom, size.scaleProperty, height);
-    size.MinusPadding(left, right, top, bottom);
-}
-
 PaddingPropertyF ConvertToPaddingPropertyF(
     const std::unique_ptr<PaddingProperty>& padding, const ScaleProperty& scaleProperty, float percentReference)
 {
@@ -144,6 +125,18 @@ PaddingPropertyF ConvertToPaddingPropertyF(
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
     return PaddingPropertyF { left, right, top, bottom };
+}
+
+MarginPropertyF ConvertToMarginPropertyF(
+    const std::unique_ptr<MarginProperty>& margin, const ScaleProperty& scaleProperty, float percentReference)
+{
+    return ConvertToPaddingPropertyF(margin, scaleProperty, percentReference);
+}
+
+MarginPropertyF ConvertToMarginPropertyF(
+    const MarginProperty& margin, const ScaleProperty& scaleProperty, float percentReference)
+{
+    return ConvertToPaddingPropertyF(margin, scaleProperty, percentReference);
 }
 
 BorderWidthPropertyF ConvertToBorderWidthPropertyF(

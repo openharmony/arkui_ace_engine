@@ -44,7 +44,7 @@ public:
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+        auto frameSize = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         GetThemeDate();

@@ -100,7 +100,8 @@ void JSGridItem::Create(const JSCallbackInfo& args)
 void JSGridItem::CreateForNGPartialUpdate(const JSCallbackInfo& args)
 {
     if (args.Length() < 2 || !args[0]->IsFunction()) {
-        LOGE("Expected deep render function parameter");
+        LOGW("Expected deep render function parameter");
+         NG::GridItemView::Create();
         return;
     }
     if (!args[1]->IsBoolean()) {

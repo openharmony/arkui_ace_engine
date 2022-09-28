@@ -127,7 +127,7 @@ void FrameNode::InitializePatternAndContext()
 void FrameNode::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-    DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrame().ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
     DumpLog::GetInstance().AddDesc(std::string("LayoutConstraint: ")
                                        .append(layoutProperty_->GetLayoutConstraint().has_value()
                                                    ? layoutProperty_->GetLayoutConstraint().value().ToString()
@@ -275,8 +275,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
-    auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), offset = GetParentGlobalOffset(),
-                    forceUseMainThread]() {
+    auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
         {
@@ -285,7 +284,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         }
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Layout");
-            layoutWrapper->Layout(offset);
+            layoutWrapper->Layout();
         }
         {
             ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
@@ -593,14 +592,14 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 {
     auto responseRegionList = GetResponseRegionList();
     if (SystemProperties::GetDebugEnabled()) {
-        LOGE("TouchTest: point is %{public}s in %{public}s", parentLocalPoint.ToString().c_str(), GetTag().c_str());
+        LOGD("TouchTest: point is %{public}s in %{public}s", parentLocalPoint.ToString().c_str(), GetTag().c_str());
         for (const auto& rect : responseRegionList) {
             LOGD("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
                 parentLocalPoint.ToString().c_str());
         }
     }
     if ((!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) && !IsResponseRegion()) {
-        LOGE("TouchTest: point is out of region in %{public}s", GetTag().c_str());
+        LOGD("TouchTest: point is out of region in %{public}s", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
 
@@ -661,7 +660,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
 std::vector<RectF> FrameNode::GetResponseRegionList()
 {
-    const auto& rect = geometryNode_->GetFrame().GetRect();
+    const auto& rect = geometryNode_->GetFrameRect();
     std::vector<RectF> responseRegionList;
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (!gestureHub) {
@@ -700,7 +699,7 @@ bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::
 HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
 {
-    const auto& rect = geometryNode_->GetFrame().GetRect();
+    const auto& rect = geometryNode_->GetFrameRect();
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
     // TODO: disableTouchEvent || disabled_ need handle
@@ -750,7 +749,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
 HitTestResult FrameNode::AxisTest(
     const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
 {
-    const auto& rect = geometryNode_->GetFrame().GetRect();
+    const auto& rect = geometryNode_->GetFrameRect();
     LOGD("AxisTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
     // TODO: disableTouchEvent || disabled_ need handle

@@ -111,7 +111,8 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 void JSListItem::CreateForNGPartialUpdate(const JSCallbackInfo& args)
 {
     if (args.Length() < 2 || !args[0]->IsFunction()) {
-        LOGE("Expected deep render function parameter");
+        LOGW("Expected deep render function parameter");
+        NG::ListItemView::Create();
         return;
     }
     if (!args[1]->IsBoolean()) {

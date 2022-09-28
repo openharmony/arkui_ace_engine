@@ -77,9 +77,9 @@ void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
 
     // TODO: recover the original property of padding&margin
     auto originGeometryNode = iterOfGeometryNode->second;
-    auto originFrameOffset = originGeometryNode->GetFrameOffset();
+    auto originFrameOffset = originGeometryNode->GetMarginFrameOffset();
     auto originParentGlobalOffset = originGeometryNode->GetParentGlobalOffset();
-    frameNode->GetGeometryNode()->SetFrameOffset(originFrameOffset);
+    frameNode->GetGeometryNode()->SetMarginFrameOffset(originFrameOffset);
     frameNode->GetGeometryNode()->SetParentGlobalOffset(originParentGlobalOffset);
     MeasureProperty layoutConstraint;
     auto geoFrameSize = originGeometryNode->GetFrameSize();

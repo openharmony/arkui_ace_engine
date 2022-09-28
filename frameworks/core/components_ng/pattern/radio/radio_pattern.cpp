@@ -36,9 +36,7 @@ void RadioPattern::OnAttachToFrameNode()
 
 void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = Claim(frameNode);
-    CHECK_NULL_VOID(host);
-
+    CHECK_NULL_VOID(frameNode);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
@@ -48,9 +46,9 @@ void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
     CHECK_NULL_VOID(pageEventHub);
 
-    auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
+    auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
-    pageEventHub->RemoveRadioFromGroup(radioEventHub->GetGroup(), host);
+    pageEventHub->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
 }
 
 void RadioPattern::OnModifyDone()
@@ -109,7 +107,7 @@ void RadioPattern::UpdateState()
         CHECK_NULL_VOID(pageNode);
         auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
         CHECK_NULL_VOID(pageEventHub);
-        pageEventHub->AddRadioToGroup(group, host);
+        pageEventHub->AddRadioToGroup(group, host->GetId());
     } else {
         if (preGroup.value() != group) {
             auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -121,8 +119,8 @@ void RadioPattern::UpdateState()
             auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
             CHECK_NULL_VOID(pageEventHub);
 
-            pageEventHub->RemoveRadioFromGroup(preGroup.value(), host);
-            pageEventHub->AddRadioToGroup(group, host);
+            pageEventHub->RemoveRadioFromGroup(preGroup.value(), host->GetId());
+            pageEventHub->AddRadioToGroup(group, host->GetId());
         }
     }
     pattern->SetPreGroup(group);
@@ -169,7 +167,7 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
     CHECK_NULL_VOID(radioEventHub);
     radioEventHub->UpdateChangeEvent(check);
     if (check) {
-        pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode);
+        pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
     } else {
         auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(radioPaintProperty);

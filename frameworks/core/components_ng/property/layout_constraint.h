@@ -43,8 +43,8 @@ struct LayoutConstraintT {
         selfIdealSize.Reset();
     }
 
-    void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
-        const std::optional<T>& bottom)
+    void MinusPaddingOnBothSize(const std::optional<T>& left, const std::optional<T>& right,
+        const std::optional<T>& top, const std::optional<T>& bottom)
     {
         minSize.MinusPadding(left, right, top, bottom);
         maxSize.MinusPadding(left, right, top, bottom);
@@ -65,12 +65,20 @@ struct LayoutConstraintT {
         return !(*this == layoutConstraint);
     }
 
-    bool UpdateSelfIdealSizeWithCheck(const OptionalSize<T>& size)
+    bool UpdateSelfMarginSizeWithCheck(const OptionalSize<T>& size)
     {
         if (selfIdealSize == size) {
             return false;
         }
         return selfIdealSize.UpdateSizeWithCheck(size);
+    }
+
+    bool UpdateIllegalSelfMarginSizeWithCheck(const OptionalSize<T>& size)
+    {
+        if (selfIdealSize == size) {
+            return false;
+        }
+        return selfIdealSize.UpdateIllegalSizeWithCheck(size);
     }
 
     bool UpdateIllegalSelfIdealSizeWithCheck(const OptionalSize<T>& size)

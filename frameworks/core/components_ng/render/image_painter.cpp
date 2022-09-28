@@ -134,6 +134,7 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Imag
 
     brush.SetFilter(filter);
     canvas.AttachBrush(brush);
+    // need add recordingCanvas's ClipAdaptiveRRect operation.
     canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_));
     canvas.Restore();
 }

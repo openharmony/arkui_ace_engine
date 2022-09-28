@@ -2300,10 +2300,6 @@ void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("Margin is not support");
-        return;
-    }
     JSViewAbstract::ParseMarginOrPadding(info, true);
 }
 
@@ -2319,24 +2315,28 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         if (Container::IsCurrentUseNewPipeline()) {
             // TODO: Add Margin case.
             JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-            NG::PaddingProperty padding;
+            NG::PaddingProperty value;
             Dimension leftDimen;
             if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-                padding.left = NG::CalcLength(leftDimen);
+                value.left = NG::CalcLength(leftDimen);
             }
             Dimension rightDimen;
             if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-                padding.right = NG::CalcLength(rightDimen);
+                value.right = NG::CalcLength(rightDimen);
             }
             Dimension topDimen;
             if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-                padding.top = NG::CalcLength(topDimen);
+                value.top = NG::CalcLength(topDimen);
             }
             Dimension bottomDimen;
             if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-                padding.bottom = NG::CalcLength(bottomDimen);
+                value.bottom = NG::CalcLength(bottomDimen);
             }
-            NG::ViewAbstract::SetPadding(padding);
+            if (isMargin) {
+                NG::ViewAbstract::SetMargin(value);
+            } else {
+                NG::ViewAbstract::SetPadding(value);
+            }
             return;
         }
 
@@ -2367,7 +2367,11 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
     if (Container::IsCurrentUseNewPipeline()) {
         Dimension length;
         if (ParseJsDimensionVp(info[0], length)) {
-            NG::ViewAbstract::SetPadding(NG::CalcLength(length));
+            if (isMargin) {
+                NG::ViewAbstract::SetMargin(NG::CalcLength(length));
+            } else {
+                NG::ViewAbstract::SetPadding(NG::CalcLength(length));
+            }
         }
         return;
     }

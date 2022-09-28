@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_EVENT_HUB_H
 
+#include <stdint.h>
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,23 +32,20 @@ public:
     PageEventHub() = default;
     ~PageEventHub() override = default;
 
-    void AddRadioToGroup(const std::string& group, const RefPtr<FrameNode>& radioFrameNode);
-    void RemoveRadioFromGroup(const std::string& group, const RefPtr<FrameNode>& radioFrameNode);
-    void UpdateRadioGroupValue(const std::string& group, const RefPtr<FrameNode>& radioFrameNode);
+    void AddRadioToGroup(const std::string& group, int32_t radioId);
+    void RemoveRadioFromGroup(const std::string& group, int32_t radioId);
+    void UpdateRadioGroupValue(const std::string& group, int32_t radioId);
 
-    void AddCheckBoxToGroup(const std::string& group, const RefPtr<FrameNode>& checkBoxFrameNode);
-    void AddCheckBoxGroupToGroup(const std::string& group, const RefPtr<FrameNode>& checkBoxFrameNode);
-    void RemoveCheckBoxFromGroup(const std::string& group, const RefPtr<FrameNode>& radioFrameNode);
+    void AddCheckBoxToGroup(const std::string& group, int32_t checkBoxId);
+    void AddCheckBoxGroupToGroup(const std::string& group, int32_t checkBoxId);
+    void RemoveCheckBoxFromGroup(const std::string& group, int32_t checkBoxId);
 
-    const std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& GetCheckBoxGroupMap()
-    {
-        return checkBoxGroupNotify_;
-    }
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> GetCheckBoxGroupMap();
 
 private:
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> radioGroupNotify_;
+    std::unordered_map<std::string, std::list<int32_t>> radioGroupNotify_;
 
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupNotify_;
+    std::unordered_map<std::string, std::list<int32_t>> checkBoxGroupNotify_;
 };
 
 } // namespace OHOS::Ace::NG
