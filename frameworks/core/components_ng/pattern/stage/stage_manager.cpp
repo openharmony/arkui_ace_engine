@@ -41,6 +41,13 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast)
     const auto& children = stageNode_->GetChildren();
     if (!children.empty() && needHideLast) {
         FirePageHide(children.back());
+        auto pageOutNode = DynamicCast<FrameNode>(children.back());
+        if (pageOutNode) {
+            auto pageOutPattern = pageOutNode->GetPattern<PagePattern>();
+            if (pageOutPattern) {
+                pageOutPattern->TriggerPageTransition(PageTransitionType::EXIT_PUSH);
+            }
+        }
     }
 
     node->MountToParent(stageNode_);
@@ -48,6 +55,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast)
 
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
+    pagePattern->TriggerPageTransition(PageTransitionType::ENTER_PUSH);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
 
     // flush layout task.
@@ -72,11 +80,25 @@ bool StageManager::PopPage(bool needShowNext)
     }
     auto pageNode = children.back();
     FirePageHide(pageNode);
+    auto pageOutNode = DynamicCast<FrameNode>(pageNode);
+    if (pageOutNode) {
+        auto pageOutPattern = pageOutNode->GetPattern<PagePattern>();
+        if (pageOutPattern) {
+            pageOutPattern->TriggerPageTransition(PageTransitionType::EXIT_POP);
+        }
+    }
     stageNode_->RemoveChild(pageNode);
 
     if (needShowNext) {
         const auto& newPageNode = children.back();
         FirePageShow(newPageNode);
+        auto pageInNode = DynamicCast<FrameNode>(newPageNode);
+        if (pageInNode) {
+            auto pageInPattern = pageInNode->GetPattern<PagePattern>();
+            if (pageInPattern) {
+                pageInPattern->TriggerPageTransition(PageTransitionType::ENTER_POP);
+            }
+        }
     }
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();

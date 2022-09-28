@@ -20,6 +20,7 @@
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/animation/page_transition_common.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
@@ -97,6 +98,10 @@ public:
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
     virtual void UpdateTransition(const TransitionOptions& options) {}
+    virtual bool TriggerPageTransition(PageTransitionType type) const
+    {
+        return false;
+    }
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}

@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/animation/page_transition_common.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
@@ -88,6 +89,8 @@ public:
     {
         return MakeRefPtr<PageEventHub>();
     }
+
+    bool TriggerPageTransition(PageTransitionType type) const;
 
 private:
     void OnAttachToFrameNode() override;

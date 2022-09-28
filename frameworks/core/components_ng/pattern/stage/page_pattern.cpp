@@ -29,4 +29,13 @@ void PagePattern::OnAttachToFrameNode()
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
 }
 
+bool PagePattern::TriggerPageTransition(PageTransitionType type) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    return renderContext->TriggerPageTransition(type);
+}
+
 } // namespace OHOS::Ace::NG

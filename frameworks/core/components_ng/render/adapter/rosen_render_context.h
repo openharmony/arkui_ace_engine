@@ -116,6 +116,8 @@ public:
         return transitionDisappearingEffect_ != nullptr;
     }
 
+    bool TriggerPageTransition(PageTransitionType type) const override;
+
     static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren);
 

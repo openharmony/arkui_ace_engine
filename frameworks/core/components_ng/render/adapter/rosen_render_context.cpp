@@ -27,6 +27,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
+#include "core/animation/page_transition_common.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -890,6 +891,45 @@ void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetClipToBounds(isClip);
     RequestNextFrame();
+}
+
+bool RosenRenderContext::TriggerPageTransition(PageTransitionType type) const
+{
+    CHECK_NULL_RETURN(rsNode_, false);
+    const int32_t PAGE_TRANSITION_DURATION = 300;
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(PAGE_TRANSITION_DURATION);
+    auto pipelineBase = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineBase, false);
+    const double width = pipelineBase->GetRootWidth();
+    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
+    bool transitionIn = true;
+    switch (type) {
+        case PageTransitionType::ENTER_PUSH:
+            effect->Translate({width, 0, 0});
+            transitionIn = true;
+            break;
+        case PageTransitionType::ENTER_POP:
+            effect->Translate({-width, 0, 0});
+            transitionIn = true;
+            break;
+        case PageTransitionType::EXIT_PUSH:
+            effect->Translate({-width, 0, 0});
+            transitionIn = false;
+            break;
+        case PageTransitionType::EXIT_POP:
+            effect->Translate({width, 0, 0});
+            transitionIn = false;
+            break;
+        default:
+            LOGI("unexpected transition type");
+            return false;
+    }
+    AnimationUtils::Animate(option, [rsNode = rsNode_, effect, transitionIn]() {
+        rsNode->NotifyTransition(effect, transitionIn);
+    });
+    return true;
 }
 
 } // namespace OHOS::Ace::NG
