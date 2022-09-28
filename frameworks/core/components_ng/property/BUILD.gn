@@ -22,4 +22,5 @@ build_component_ng("property_ng") {
     "measure_utils.cpp",
     "property.cpp",
   ]
+  rosen_sources = [ "rosen_modifier_property.cpp" ]
 }
