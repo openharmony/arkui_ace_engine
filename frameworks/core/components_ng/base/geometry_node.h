@@ -43,7 +43,7 @@ public:
 
     bool CheckUnchanged(const GeometryNode& geometryNode)
     {
-        return (frame_ == geometryNode.frame_) && (bound_ == geometryNode.bound_) &&
+        return (frame_ == geometryNode.frame_) && (margin_ == geometryNode.margin_) &&
                (content_ == geometryNode.content_) && (parentGlobalOffset_ == geometryNode.parentGlobalOffset_) &&
                (parentLayoutConstraint_ == geometryNode.parentLayoutConstraint_);
     }
@@ -111,9 +111,9 @@ public:
         return frame_;
     }
 
-    const std::unique_ptr<GeometryProperty>& GetBound() const
+    const std::unique_ptr<MarginPropertyF>& GetMargin() const
     {
-        return bound_;
+        return margin_;
     }
 
     const OffsetF& GetParentGlobalOffset() const
@@ -154,8 +154,8 @@ private:
 
     // the frame size in parent local coordinate.
     GeometryProperty frame_;
-    // the size of border rect in current node local coordinate.
-    std::unique_ptr<GeometryProperty> bound_;
+    // the size of margin rect in current node local coordinate.
+    std::unique_ptr<MarginPropertyF> margin_;
     // the size of content rect in current node local coordinate.
     std::unique_ptr<GeometryProperty> content_;
 

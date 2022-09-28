@@ -234,7 +234,7 @@ void GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cross
                 break;
             }
             MeasureChild(mainSize, crossSize, currentIndex, layoutWrapper, itemWrapper);
-            auto itemSize = itemWrapper->GetGeometryNode()->GetFrameSize();
+            auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
             lineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), lineHeight);
             // Record end index. When fill new line, the [endIndex_] will be the first item index to request
             gridLayoutInfo_.endIndex_ = gridItemRecord.second;
@@ -294,7 +294,7 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(
         i += MeasureChild(mainSize, crossSize, currentIndex, layoutWrapper, itemWrapper);
 
         // Step3. Measure [GridItem]
-        auto itemSize = itemWrapper->GetGeometryNode()->GetFrameSize();
+        auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         lineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), lineHeight);
         gridLayoutInfo_.startIndex_ = currentIndex;
         doneCreateNewLine = true;
@@ -329,7 +329,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         i += MeasureChild(mainSize, crossSize, currentIndex, layoutWrapper, itemWrapper);
 
         // Step3. Measure [GridItem]
-        auto itemSize = itemWrapper->GetGeometryNode()->GetFrameSize();
+        auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         lineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), lineHeight);
         gridLayoutInfo_.endIndex_ = currentIndex;
         currentIndex++;
@@ -509,7 +509,7 @@ float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(LayoutWrapper* layoutW
 {
     auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, 0);
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
     auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
     auto columnsGap =
@@ -524,11 +524,6 @@ float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(LayoutWrapper* layoutW
     }
     position += crossStart * crossGap;
     return position;
-}
-
-GridLayoutInfo GridScrollLayoutAlgorithm::GetGridLayoutInfo()
-{
-    return std::move(gridLayoutInfo_);
 }
 
 // only for debug use

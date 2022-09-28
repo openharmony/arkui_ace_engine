@@ -19,23 +19,22 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT GridScrollLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(GridScrollLayoutAlgorithm, LayoutAlgorithm);
+class ACE_EXPORT GridScrollLayoutAlgorithm : public GridLayoutBaseAlgorithm {
+    DECLARE_ACE_TYPE(GridScrollLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
     GridScrollLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, uint32_t crossCount, uint32_t mainCount)
-        : gridLayoutInfo_(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
+        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
     ~GridScrollLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
-
-    GridLayoutInfo GetGridLayoutInfo();
 
     static void PrintGridMatrix(const std::map<int32_t, std::map<int32_t, uint32_t>>& gridMatrix);
     static void PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap);
@@ -68,8 +67,6 @@ private:
     void StripItemsOutOfViewport(LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
-
-    GridLayoutInfo gridLayoutInfo_;
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;

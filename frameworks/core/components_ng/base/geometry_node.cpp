@@ -20,7 +20,7 @@ namespace OHOS::Ace::NG {
 void GeometryNode::Reset()
 {
     frame_.Reset();
-    bound_.reset();
+    margin_.reset();
     content_.reset();
     parentGlobalOffset_.Reset();
     parentLayoutConstraint_.reset();
@@ -30,8 +30,8 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
 {
     auto node = MakeRefPtr<GeometryNode>();
     node->frame_ = frame_;
-    if (bound_) {
-        node->bound_ = std::make_unique<GeometryProperty>(*bound_);
+    if (margin_) {
+        node->margin_ = std::make_unique<MarginPropertyF>(*margin_);
     }
     if (content_) {
         node->content_ = std::make_unique<GeometryProperty>(*content_);

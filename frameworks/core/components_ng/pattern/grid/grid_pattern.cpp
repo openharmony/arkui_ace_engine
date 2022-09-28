@@ -124,7 +124,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto gridLayoutAlgorithm = DynamicCast<GridLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
     gridLayoutInfo_ = gridLayoutAlgorithm->GetGridLayoutInfo();
     return false;
