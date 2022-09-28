@@ -491,6 +491,13 @@ enum class SideBarPosition {
     END
 };
 
+enum class SideBarStatus {
+    SHOW,
+    HIDDEN,
+    CHANGING,
+    AUTO,
+};
+
 enum class HitTestMode {
     /**
      *  Both self and children respond to the hit test for touch events,
