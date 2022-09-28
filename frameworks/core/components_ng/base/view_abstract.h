@@ -34,6 +34,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/clip_path.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstract {
@@ -122,6 +123,9 @@ public:
     static void SetInspectorId(const std::string& inspectorId);
     // transition
     static void SetTransition(const TransitionOptions& options);
+    // clip
+    static void SetClipPath(const ClipPathNG& clipPath);
+    static void SetEdgeClip(bool isClip);
 
     static void Pop();
 };

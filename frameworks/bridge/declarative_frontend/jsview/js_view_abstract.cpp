@@ -58,6 +58,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/property/clip_path.h"
 #include "core/gestures/long_press_gesture.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -4549,7 +4550,18 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
 void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("Clip is not supported");
+        if (info[0]->IsObject()) {
+            JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+            if (clipShape == nullptr) {
+                LOGE("clipShape is null");
+                return;
+            }
+            NG::ClipPathNG clipPath;
+            clipPath.SetBasicShape(clipShape->GetBasicShape());
+            NG::ViewAbstract::SetClipPath(clipPath);
+        } else if (info[0]->IsBoolean()) {
+            NG::ViewAbstract::SetEdgeClip(info[0]->ToBoolean());
+        }
         return;
     }
     if (info.Length() > 0) {

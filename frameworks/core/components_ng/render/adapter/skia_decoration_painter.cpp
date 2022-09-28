@@ -20,9 +20,17 @@
 #include <memory>
 
 #include "include/core/SkColor.h"
+#include "include/core/SkRRect.h"
+#include "include/core/SkScalar.h"
+#include "include/utils/SkParsePath.h"
 #include "include/effects/SkGradientShader.h"
 
+#include "base/utils/utils.h"
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
+
+#include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
 
@@ -702,4 +710,216 @@ sk_sp<SkShader> SkiaDecorationPainter::CreateGradientShader(
     return ptr->CreateGradientShader();
 }
 
+float SkiaDecorationPainter::SkiaDimensionToPx(const Dimension& value, const SizeF& size, LengthMode type)
+{
+    if (value.Unit() == DimensionUnit::PERCENT) {
+        switch (type) {
+            case LengthMode::HORIZONTAL:
+                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(),
+                size.Width()).value();
+            case LengthMode::VERTICAL:
+                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(),
+                size.Height()).value();
+            case LengthMode::OTHER:
+                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(),
+                sqrt(size.Width() * size.Height())).value();
+            default:
+                return 0.0f;
+        }
+    } else {
+        return static_cast<float>(value.ConvertToPx());
+    }
+}
+
+float SkiaDecorationPainter::SkiaGetFloatRadiusValue(
+    const Dimension& src, const Dimension& dest, const SizeF& size, LengthMode type)
+{
+    if (src.Value() < 0.0 && dest.Value() > 0.0) {
+        return SkiaDimensionToPx(dest, size, type);
+    }
+    return SkiaDimensionToPx(src, size, type);
+}
+
+SkPath SkiaDecorationPainter::SkiaCreateSkPath(
+    const RefPtr<BasicShape>& basicShape, const SizeF& size)
+{
+    OffsetF position;
+    SkPath skPath;
+    if (basicShape == nullptr) {
+        skPath.addRect(SkRect::MakeXYWH(0.0, 0.0, size.Width(), size.Height()));
+        return skPath;
+    }
+    switch (basicShape->GetBasicShapeType()) {
+        case BasicShapeType::INSET: {
+            SkiaCreateInset(basicShape, size, position, skPath);
+            break;
+        }
+        case BasicShapeType::CIRCLE: {
+            SkiaCreateCircle(basicShape, size, position, skPath);
+            break;
+        }
+        case BasicShapeType::ELLIPSE: {
+            SkiaCreateEllipse(basicShape, size, position, skPath);
+            break;
+        }
+        case BasicShapeType::POLYGON: {
+            SkiaCreatePolygon(basicShape, size, position, skPath);
+            break;
+        }
+        case BasicShapeType::PATH: {
+            SkiaCreatePath(basicShape, size, position, skPath);
+            break;
+        }
+        case BasicShapeType::RECT: {
+            SkiaCreateRect(basicShape, size, position, skPath);
+            break;
+        }
+        default: {
+            LOGE("invalid BasicShapeType");
+            break;
+        }
+    }
+    return skPath;
+}
+
+void SkiaDecorationPainter::SkiaCreateInset(
+    const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath)
+{
+    const auto& inset = AceType::DynamicCast<Inset>(basicShape);
+    CHECK_NULL_VOID(inset);
+    double left = SkiaDimensionToPx(inset->GetLeft(), size, LengthMode::HORIZONTAL) + position.GetX();
+    double top = SkiaDimensionToPx(inset->GetTop(), size, LengthMode::VERTICAL) + position.GetY();
+    double right = size.Width() - SkiaDimensionToPx(inset->GetRight(), size, LengthMode::HORIZONTAL) + position.GetX();
+    double bottom = size.Height() - SkiaDimensionToPx(inset->GetBottom(), size, LengthMode::VERTICAL) + position.GetY();
+    SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
+    auto radiusSize = SizeF(std::abs(rect.width()), std::abs(rect.height()));
+    float topLeftRadiusX = SkiaDimensionToPx(inset->GetTopLeftRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
+    float topLeftRadiusY = SkiaDimensionToPx(inset->GetTopLeftRadius().GetY(), radiusSize, LengthMode::VERTICAL);
+    float topRightRadiusX = SkiaDimensionToPx(inset->GetTopRightRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
+    float topRightRadiusY = SkiaDimensionToPx(inset->GetTopRightRadius().GetY(), radiusSize, LengthMode::VERTICAL);
+    float bottomRightRadiusX = SkiaDimensionToPx(
+        inset->GetBottomRightRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
+    float bottomRightRadiusY = SkiaDimensionToPx(
+        inset->GetBottomRightRadius().GetY(), radiusSize, LengthMode::VERTICAL);
+    float bottomLeftRadiusX = SkiaDimensionToPx(
+        inset->GetBottomLeftRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
+    float bottomLeftRadiusY = SkiaDimensionToPx(
+        inset->GetBottomLeftRadius().GetY(), radiusSize, LengthMode::VERTICAL);
+    const SkVector fRadii[4] = { { topLeftRadiusX, topLeftRadiusY }, { topRightRadiusX, topRightRadiusY },
+        { bottomRightRadiusX, bottomRightRadiusY }, { bottomLeftRadiusX, bottomLeftRadiusY } };
+    SkRRect roundRect;
+    roundRect.setRectRadii(rect, fRadii);
+    skPath.addRRect(roundRect);
+}
+
+void SkiaDecorationPainter::SkiaCreateCircle(
+    const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath)
+{
+    const auto& circle = AceType::DynamicCast<Circle>(basicShape);
+    CHECK_NULL_VOID(circle);
+    if (circle->GetRadius().IsValid()) {
+        skPath.addCircle(SkiaDimensionToPx(circle->GetAxisX(), size, LengthMode::HORIZONTAL) + position.GetX(),
+            SkiaDimensionToPx(circle->GetAxisY(), size, LengthMode::VERTICAL) + position.GetY(),
+            SkiaDimensionToPx(circle->GetRadius(), size, LengthMode::OTHER));
+    } else {
+        float width = SkiaDimensionToPx(circle->GetWidth(), size, LengthMode::HORIZONTAL);
+        float height = SkiaDimensionToPx(circle->GetHeight(), size, LengthMode::VERTICAL);
+        float offsetX = SkiaDimensionToPx(circle->GetOffset().GetX(), size, LengthMode::HORIZONTAL) + position.GetX();
+        float offsetY = SkiaDimensionToPx(circle->GetOffset().GetY(), size, LengthMode::VERTICAL) + position.GetY();
+        skPath.addCircle(width * 0.5 + offsetX, height * 0.5 + offsetY, std::min(width, height) * 0.5);
+    }
+}
+
+void SkiaDecorationPainter::SkiaCreateEllipse(
+    const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath)
+{
+    const auto& ellipse = AceType::DynamicCast<Ellipse>(basicShape);
+    CHECK_NULL_VOID(ellipse);
+    if (ellipse->GetRadiusX().IsValid()) {
+        float rx = SkiaDimensionToPx(ellipse->GetRadiusX(), size, LengthMode::HORIZONTAL);
+        float ry = SkiaDimensionToPx(ellipse->GetRadiusY(), size, LengthMode::VERTICAL);
+        double x = SkiaDimensionToPx(ellipse->GetAxisX(), size, LengthMode::HORIZONTAL) + position.GetX() - rx;
+        double y = SkiaDimensionToPx(ellipse->GetAxisY(), size, LengthMode::VERTICAL) + position.GetY() - ry;
+        SkRect rect = SkRect::MakeXYWH(x, y, rx + rx, ry + ry);
+        skPath.addOval(rect);
+    } else {
+        auto width = SkiaDimensionToPx(ellipse->GetWidth(), size, LengthMode::HORIZONTAL);
+        auto height = SkiaDimensionToPx(ellipse->GetHeight(), size, LengthMode::VERTICAL);
+        float x = SkiaDimensionToPx(ellipse->GetOffset().GetX(), size, LengthMode::HORIZONTAL) + position.GetX();
+        float y = SkiaDimensionToPx(ellipse->GetOffset().GetY(), size, LengthMode::VERTICAL) + position.GetY();
+        SkRect rect = SkRect::MakeXYWH(x, y, width, height);
+        skPath.addOval(rect);
+    }
+}
+
+void SkiaDecorationPainter::SkiaCreatePolygon(
+    const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath)
+{
+    const auto& polygon = AceType::DynamicCast<Polygon>(basicShape);
+    CHECK_NULL_VOID(polygon);
+    std::vector<SkPoint> skPoints;
+    for (auto [x, y] : polygon->GetPoints()) {
+        skPoints.emplace_back(SkPoint::Make(SkiaDimensionToPx(x, size, LengthMode::HORIZONTAL) + position.GetX(),
+            SkiaDimensionToPx(y, size, LengthMode::VERTICAL) + position.GetX()));
+    }
+    if (skPoints.empty()) {
+        LOGW("points is null");
+        return;
+    }
+    skPath.addPoly(&skPoints[0], skPoints.size(), true);
+}
+
+void SkiaDecorationPainter::SkiaCreatePath(
+    const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath)
+{
+    const auto& path = AceType::DynamicCast<Path>(basicShape);
+    CHECK_NULL_VOID(path);
+    if (path->GetValue().empty()) {
+        LOGW("path value is null");
+        return;
+    }
+    SkPath tmpPath;
+    bool ret = SkParsePath::FromSVGString(path->GetValue().c_str(), &tmpPath);
+    if (!ret) {
+        LOGW("path value is invalid");
+        return;
+    }
+    float offsetX = SkiaDimensionToPx(path->GetOffset().GetX(), size, LengthMode::HORIZONTAL) + position.GetX();
+    float offsetY = SkiaDimensionToPx(path->GetOffset().GetY(), size, LengthMode::VERTICAL) + position.GetY();
+    skPath.addPath(tmpPath, offsetX, offsetY);
+}
+
+void SkiaDecorationPainter::SkiaCreateRect(
+    const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath)
+{
+    const auto& rect = AceType::DynamicCast<ShapeRect>(basicShape);
+    CHECK_NULL_VOID(rect);
+    double left = SkiaDimensionToPx(rect->GetOffset().GetX(), size, LengthMode::HORIZONTAL) + position.GetX();
+    double top = SkiaDimensionToPx(rect->GetOffset().GetY(), size, LengthMode::VERTICAL) + position.GetY();
+    double width = SkiaDimensionToPx(rect->GetWidth(), size, LengthMode::HORIZONTAL);
+    double height = SkiaDimensionToPx(rect->GetHeight(), size, LengthMode::VERTICAL);
+    SkRect skRect = SkRect::MakeXYWH(left, top, width, height);
+    auto radiusSize = SizeF(width, height);
+    float topLeftRadiusX = SkiaGetFloatRadiusValue(
+        rect->GetTopLeftRadius().GetX(), rect->GetTopLeftRadius().GetY(), radiusSize, LengthMode::HORIZONTAL);
+    float topLeftRadiusY = SkiaGetFloatRadiusValue(
+        rect->GetTopLeftRadius().GetY(), rect->GetTopLeftRadius().GetX(), radiusSize, LengthMode::VERTICAL);
+    float topRightRadiusX = SkiaGetFloatRadiusValue(
+        rect->GetTopRightRadius().GetX(), rect->GetTopRightRadius().GetY(), radiusSize, LengthMode::HORIZONTAL);
+    float topRightRadiusY = SkiaGetFloatRadiusValue(
+        rect->GetTopRightRadius().GetY(), rect->GetTopRightRadius().GetX(), radiusSize, LengthMode::VERTICAL);
+    float bottomRightRadiusX = SkiaGetFloatRadiusValue(
+        rect->GetBottomRightRadius().GetX(), rect->GetBottomRightRadius().GetY(), radiusSize, LengthMode::HORIZONTAL);
+    float bottomRightRadiusY = SkiaGetFloatRadiusValue(
+        rect->GetBottomRightRadius().GetY(), rect->GetBottomRightRadius().GetX(), radiusSize, LengthMode::VERTICAL);
+    float bottomLeftRadiusX = SkiaGetFloatRadiusValue(
+        rect->GetBottomLeftRadius().GetX(), rect->GetBottomLeftRadius().GetY(), radiusSize, LengthMode::HORIZONTAL);
+    float bottomLeftRadiusY = SkiaGetFloatRadiusValue(
+        rect->GetBottomLeftRadius().GetY(), rect->GetBottomLeftRadius().GetX(), radiusSize, LengthMode::VERTICAL);
+    const SkVector fRadii[4] = { { topLeftRadiusX, topLeftRadiusY }, { topRightRadiusX, topRightRadiusY },
+        { bottomRightRadiusX, bottomRightRadiusY }, { bottomLeftRadiusX, bottomLeftRadiusY } };
+    SkRRect roundRect;
+    roundRect.setRectRadii(skRect, fRadii);
+    skPath.addRRect(roundRect);
+}
 } // namespace OHOS::Ace::NG

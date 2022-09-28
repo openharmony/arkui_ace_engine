@@ -141,6 +141,11 @@ public:
     // zIndex.
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ZIndex, int32_t);
 
+    // Clip
+    ACE_DEFINE_PROPERTY_GROUP(Clip, ClipProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, ClipPathNG);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipEdge, bool);
+
 protected:
     RenderContext() = default;
 
@@ -166,6 +171,9 @@ protected:
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
+    virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
+    virtual void OnClipEdgeUpdate(bool isClip) {}
+    
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
