@@ -74,6 +74,7 @@ public:
 
     // layout
     static void SetAlign(Alignment alignment);
+    static void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules);
     static void SetVisibility(VisibleType visible);
 
     // position

@@ -125,6 +125,11 @@ void ViewAbstract::SetLayoutWeight(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
+void ViewAbstract::SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules);
+}
+
 void ViewAbstract::SetAlignSelf(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, static_cast<FlexAlign>(value));
