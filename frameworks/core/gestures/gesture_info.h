@@ -41,6 +41,7 @@ constexpr double DEFAULT_PAN_DISTANCE = 5.0;
 constexpr double DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 300.0;
+constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 100;
 } // namespace
 
 class GestureRecognizer;

@@ -19,6 +19,8 @@
 #include "base/log/log.h"
 #include "core/components/button/button_component.h"
 #include "core/components/side_bar/render_side_bar_container.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -42,6 +44,23 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        switch (widthType) {
+            case WidthType::SIDEBAR_WIDTH:
+                NG::SideBarContainerView::SetSideBarWidth(value);
+                break;
+            case WidthType::MIN_SIDEBAR_WIDTH:
+                NG::SideBarContainerView::SetMinSideBarWidth(value);
+                break;
+            case WidthType::MAX_SIDEBAR_WIDTH:
+                NG::SideBarContainerView::SetMaxSideBarWidth(value);
+                break;
+            default:
+                break;
+        }
+        return;
+    }
+
     if (LessNotEqual(value.Value(), 0.0)) {
         LOGW("JSSideBar::ParseAndSetWidth info[0] value is less than 0, the default is set to 0.");
         value.SetValue(0.0);
@@ -54,9 +73,8 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
         return;
     }
 
-    bool isPercentSize = value.Unit() == DimensionUnit::PERCENT;
-    if (isPercentSize) {
-        component->SetIsPercentSize(isPercentSize);
+    if (value.Unit() == DimensionUnit::PERCENT) {
+        component->SetIsPercentSize(value.Unit() == DimensionUnit::PERCENT);
     }
 
     switch (widthType) {
@@ -78,6 +96,11 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
 
 void JSSideBar::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateForNG(info);
+        return;
+    }
+
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
@@ -107,8 +130,37 @@ void JSSideBar::Create(const JSCallbackInfo& info)
     JSInteractableView::SetFocusNode(true);
 }
 
+void JSSideBar::CreateForNG(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("JSSideBar::CreateForNG The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    NG::SideBarContainerView::Create();
+
+    SideBarContainerType style = SideBarContainerType::EMBED;
+    if (!info[0]->IsNull()) {
+        if (info[0]->IsBoolean()) {
+            style = static_cast<SideBarContainerType>(info[0]->ToBoolean());
+        } else if (info[0]->IsNumber()) {
+            style = static_cast<SideBarContainerType>(info[0]->ToNumber<int>());
+        } else {
+            LOGE("JSSideBar::CreateForNG The arg is wrong");
+            return;
+        }
+    }
+
+    NG::SideBarContainerView::SetSideBarContainerType(style);
+}
+
 void JSSideBar::SetShowControlButton(bool isShow)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SideBarContainerView::SetShowControlButton(isShow);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
     if (!component) {
@@ -132,6 +184,12 @@ void JSSideBar::JsSideBarPosition(const JSCallbackInfo& info)
         LOGE("The arg is wrong");
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SideBarContainerView::SetSideBarPosition(sideBarPosition);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<SideBarContainerComponent>(stack->GetMainComponent());
     if (!component) {
@@ -147,6 +205,7 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::Declare("SideBarContainer");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSideBar>::StaticMethod("create", &JSSideBar::Create, opt);
+    JSClass<JSSideBar>::StaticMethod("pop", &JSSideBar::Pop, opt);
     JSClass<JSSideBar>::StaticMethod("showSideBar", &JSSideBar::JsShowSideBar);
     JSClass<JSSideBar>::StaticMethod("controlButton", &JSSideBar::JsControlButton);
     JSClass<JSSideBar>::StaticMethod("showControlButton", &JSSideBar::SetShowControlButton);
@@ -175,12 +234,28 @@ void JSSideBar::JSBind(BindingTarget globalObj)
 
 void JSSideBar::OnChange(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info.Length() < 1 || !info[0]->IsFunction()) {
+            LOGE("JSSideBar::OnChange info param is wrong.");
+            return;
+        }
+
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool isShow) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("SideBarContainer.onChange");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isShow));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::SideBarContainerView::SetOnChange(std::move(onChange));
+        return;
+    }
+
     if (!JSViewBindEvent(&SideBarContainerComponent::SetOnChange, info)) {
         LOGE("Failed to bind event");
     }
     info.ReturnSelf();
 }
-
 
 
 void JSSideBar::JsSideBarWidth(const JSCallbackInfo& info)
@@ -200,6 +275,11 @@ void JSSideBar::JsMinSideBarWidth(const JSCallbackInfo& info)
 
 void JSSideBar::JsShowSideBar(bool isShow)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SideBarContainerView::SetShowSideBar(isShow);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
     if (!component) {
@@ -211,6 +291,11 @@ void JSSideBar::JsShowSideBar(bool isShow)
 
 void JSSideBar::JsControlButton(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JsControlButtonForNG(info);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
     if (!component) {
@@ -263,8 +348,65 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
     }
 }
 
+void JSSideBar::JsControlButtonForNG(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("JSSideBar::JsControlButtonForNG The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsNull() && info[0]->IsObject()) {
+        JSRef<JSObject> value = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> width = value->GetProperty("width");
+        JSRef<JSVal> height = value->GetProperty("height");
+        JSRef<JSVal> left = value->GetProperty("left");
+        JSRef<JSVal> top = value->GetProperty("top");
+        JSRef<JSVal> icons = value->GetProperty("icons");
+
+        if (!width->IsNull() && width->IsNumber()) {
+            NG::SideBarContainerView::SetControlButtonWidth(Dimension(width->ToNumber<double>(), DimensionUnit::VP));
+        }
+
+        if (!height->IsNull() && height->IsNumber()) {
+            NG::SideBarContainerView::SetControlButtonHeight(Dimension(height->ToNumber<double>(), DimensionUnit::VP));
+        }
+
+        if (!left->IsNull() && left->IsNumber()) {
+            NG::SideBarContainerView::SetControlButtonLeft(Dimension(left->ToNumber<double>(), DimensionUnit::VP));
+        }
+
+        if (!top->IsNull() && top->IsNumber()) {
+            NG::SideBarContainerView::SetControlButtonTop(Dimension(top->ToNumber<double>(), DimensionUnit::VP));
+        }
+
+        if (!icons->IsNull() && icons->IsObject()) {
+            JSRef<JSObject> iconsVal = JSRef<JSObject>::Cast(icons);
+            JSRef<JSVal> showIcon = iconsVal->GetProperty("shown");
+            JSRef<JSVal> switchingIcon = iconsVal->GetProperty("switching");
+            JSRef<JSVal> hiddenIcon = iconsVal->GetProperty("hidden");
+            std::string showIconStr;
+            if (!showIcon->IsNull() && ParseJsMedia(showIcon, showIconStr)) {
+                NG::SideBarContainerView::SetControlButtonShowIconStr(showIconStr);
+            }
+            std::string hiddenIconStr;
+            if (!hiddenIcon->IsNull() && ParseJsMedia(hiddenIcon, hiddenIconStr)) {
+                NG::SideBarContainerView::SetControlButtonHiddenIconStr(hiddenIconStr);
+            }
+            std::string switchingIconStr;
+            if (!switchingIcon->IsNull() && ParseJsMedia(switchingIcon, switchingIconStr)) {
+                NG::SideBarContainerView::SetControlButtonSwitchingIconStr(switchingIconStr);
+            }
+        }
+    }
+}
+
 void JSSideBar::JsAutoHide(bool autoHide)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SideBarContainerView::SetAutoHide(autoHide);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
     if (!component) {
@@ -272,6 +414,17 @@ void JSSideBar::JsAutoHide(bool autoHide)
         return;
     }
     component->SetAutoHide(autoHide);
+}
+
+void JSSideBar::Pop()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SideBarContainerView::Pop();
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
+        return;
+    }
+
+    ViewStackProcessor::GetInstance()->PopContainer();
 }
 
 } // namespace OHOS::Ace::Framework
