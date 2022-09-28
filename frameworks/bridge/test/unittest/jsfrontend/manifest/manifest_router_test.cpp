@@ -46,22 +46,22 @@ public:
 
 void ManifestRouterTest::SetUpTestCase()
 {
-   GTEST_LOG_(INFO) << "ManifestRouterTest SetUpTestCase";
+    GTEST_LOG_(INFO) << "ManifestRouterTest SetUpTestCase";
 }
 
 void ManifestRouterTest::TearDownTestCase()
 {
-   GTEST_LOG_(INFO) << "ManifestRouterTest TearDownTestCase";
+    GTEST_LOG_(INFO) << "ManifestRouterTest TearDownTestCase";
 }
 
 void ManifestRouterTest::SetUp()
 {
-   GTEST_LOG_(INFO) << "ManifestRouterTest SetUp";
+    GTEST_LOG_(INFO) << "ManifestRouterTest SetUp";
 }
 
 void ManifestRouterTest::TearDown()
 {
-   GTEST_LOG_(INFO) << "ManifestRouterTest TearDown";
+    GTEST_LOG_(INFO) << "ManifestRouterTest TearDown";
 }
 
 /**
