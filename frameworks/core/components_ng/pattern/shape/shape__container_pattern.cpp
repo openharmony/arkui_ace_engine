@@ -34,11 +34,7 @@ bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(
 void ShapeContainerPattern::ViewPortTansform()
 {
     auto curFrameNode = GetHost();
-    auto renderContext = DynamicCast<RosenRenderContext>(curFrameNode->GetRenderContext());
-    auto rsNode = renderContext->GetRSNode();
-    if (!rsNode) {
-        return;
-    }
+    auto renderContext = curFrameNode->GetRenderContext();
     auto geoNode = curFrameNode->GetGeometryNode();
     if (!geoNode) {
         return;
@@ -56,7 +52,7 @@ void ShapeContainerPattern::ViewPortTansform()
         } else {
             rectF = RectF(-1 * portLeft, -1 * portTop, static_cast<float>(portWidth), static_cast<float>(portHeight));
         }
-        rsNode->SetTranslate({ static_cast<float>(portLeft), static_cast<float>(portTop) });
+        renderContext->OnTransformTranslateUpdate({ static_cast<float>(portLeft), static_cast<float>(portTop), 0 });
         renderContext->ClipWithRect(rectF);
     }
 }

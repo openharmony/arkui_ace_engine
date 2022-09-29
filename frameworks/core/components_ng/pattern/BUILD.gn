@@ -204,7 +204,6 @@ build_component_ng("pattern_ng") {
     "xcomponent/xcomponent_view.cpp",
   ]
 
-  deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
 }
 
 build_component_ng("pattern_ability_component_ng") {

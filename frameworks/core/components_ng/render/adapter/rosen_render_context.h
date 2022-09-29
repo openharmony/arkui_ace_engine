@@ -119,7 +119,7 @@ public:
     {
         return transitionDisappearingEffect_ != nullptr;
     }
-    void ClipWithRect(const RectF& rectF);
+    void ClipWithRect(const RectF& rectF) override;
 
     bool TriggerPageTransition(PageTransitionType type) const override;
 
@@ -132,6 +132,7 @@ public:
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
+    void OnTransformTranslateUpdate(const Vector3F& value) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -149,7 +150,6 @@ private:
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
-    void OnTransformTranslateUpdate(const Vector3F& value) override;
     void OnTransformRotateUpdate(const Vector4F& value) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
