@@ -21,6 +21,10 @@
 #include "core/image/flutter_image_cache.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t IMAGE_CACHE_COUNT = 50;
+} // namespace
+
 CanvasDrawFunction CanvasPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
@@ -41,9 +45,7 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
         CreateBitmap(contentSize);
         lastLayoutSize_.SetSizeT(contentSize);
     }
-
     auto viewScale = context_->GetViewScale();
-
     skCanvas_->scale(viewScale, viewScale);
 
     for (const auto& task : tasks_) {
@@ -73,6 +75,53 @@ void CanvasPaintMethod::CreateBitmap(SizeF contentSize)
     cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
     skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
+}
+
+void CanvasPaintMethod::ImageObjReady(const RefPtr<ImageObject>& imageObj)
+{
+    imageObj_ = imageObj;
+    if (imageObj_->IsSvg()) {
+        skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
+        currentSource_ = loadingSource_;
+        Ace::CanvasImage canvasImage = canvasImage_;
+        TaskFunc func = [canvasImage](CustomPaintPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+            paintMethod.DrawImage(paintWrapper, canvasImage, 0, 0);
+        };
+        tasks_.emplace_back(func);
+        return;
+    }
+    LOGE("image is not svg");
+}
+
+void CanvasPaintMethod::ImageObjFailed()
+{
+    imageObj_ = nullptr;
+    skiaDom_ = nullptr;
+}
+
+sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
+{
+    if (!imageCache_) {
+        imageCache_ = ImageCache::Create();
+        imageCache_->SetCapacity(IMAGE_CACHE_COUNT);
+    }
+    auto cacheImage = imageCache_->GetCacheImage(src);
+    if (cacheImage && cacheImage->imagePtr) {
+        return cacheImage->imagePtr->image();
+    }
+
+    CHECK_NULL_RETURN(context_, nullptr);
+
+    auto image = ImageProvider::GetSkImage(src, context_);
+    if (image) {
+        auto rasterizedImage = image->makeRasterImage();
+        auto canvasImage = flutter::CanvasImage::Create();
+        canvasImage->set_image({ rasterizedImage, renderTaskHolder_->unrefQueue });
+        imageCache_->CacheImage(src, std::make_shared<CachedImage>(canvasImage));
+        return rasterizedImage;
+    }
+
+    return image;
 }
 
 std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(

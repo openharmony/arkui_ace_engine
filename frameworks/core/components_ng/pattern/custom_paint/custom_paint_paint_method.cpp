@@ -59,6 +59,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double HALF_CIRCLE_ANGLE = 180.0;
+constexpr double FULL_CIRCLE_ANGLE = 360.0;
 const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] = {
     { CompositeOperation::SOURCE_OVER, SkBlendMode::kSrcOver },
     { CompositeOperation::SOURCE_ATOP, SkBlendMode::kSrcATop },
@@ -231,6 +233,206 @@ SkPaint CustomPaintPaintMethod::GetStrokePaint()
     return paint;
 }
 
+void CustomPaintPaintMethod::InitImagePaint()
+{
+    if (smoothingEnabled_) {
+        if (smoothingQuality_ == "low") {
+            imagePaint_.setFilterQuality(SkFilterQuality::kLow_SkFilterQuality);
+        } else if (smoothingQuality_ == "medium") {
+            imagePaint_.setFilterQuality(SkFilterQuality::kMedium_SkFilterQuality);
+        } else if (smoothingQuality_ == "high") {
+            imagePaint_.setFilterQuality(SkFilterQuality::kHigh_SkFilterQuality);
+        } else {
+            LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
+        }
+    } else {
+        imagePaint_.setFilterQuality(SkFilterQuality::kNone_SkFilterQuality);
+    }
+}
+
+void CustomPaintPaintMethod::InitImageCallbacks()
+{
+    imageObjSuccessCallback_ = [weak = AceType::WeakClaim(this)](
+                                   ImageSourceInfo info, const RefPtr<ImageObject>& imageObj) {
+        auto paintMethod = weak.Upgrade();
+        if (paintMethod->loadingSource_ == info) {
+            paintMethod->ImageObjReady(imageObj);
+            return;
+        } else {
+            LOGE("image sourceInfo_ check error, : %{public}s vs %{public}s",
+                paintMethod->loadingSource_.ToString().c_str(), info.ToString().c_str());
+        }
+    };
+
+    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info, const std::string& errorMsg = "") {
+        auto paintMethod = weak.Upgrade();
+        LOGE("tkh failedCallback_");
+        paintMethod->ImageObjFailed();
+    };
+
+    uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
+                                 ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {};
+
+    onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
+}
+
+void CustomPaintPaintMethod::DrawImage(
+    PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
+{
+    if (!flutter::UIDartState::Current()) {
+        return;
+    }
+
+    std::string::size_type tmp = canvasImage.src.find(".svg");
+    if (tmp != std::string::npos) {
+        DrawSvgImage(paintWrapper, canvasImage);
+        return;
+    }
+
+    auto image = sk_sp<SkImage>();
+    if (!isOffscreen_) {
+        image = GetImage(canvasImage.src);
+    }
+
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    InitImagePaint();
+    InitPaintBlend(imagePaint_);
+
+    switch (canvasImage.flag) {
+        case 0:
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
+            break;
+        case 1: {
+            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            skCanvas_->drawImageRect(image, rect, &imagePaint_);
+            break;
+        }
+        case 2: {
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage)
+{
+    SkCanvas* skCanvas;
+    if (isOffscreen_) {
+        skCanvas = globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    } else {
+        skCanvas = skCanvas_.get();
+    }
+    // Make the ImageSourceInfo
+    canvasImage_ = canvasImage;
+    loadingSource_ = ImageSourceInfo(canvasImage.src);
+    // get the ImageObject
+    if (currentSource_ != loadingSource_) {
+        ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
+            failedCallback_, context_, true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+    }
+
+    // draw the svg
+    if (skiaDom_) {
+        SkRect srcRect;
+        SkRect dstRect;
+        OffsetF startPoint;
+        float scaleX = 1.0f;
+        float scaleY = 1.0f;
+        switch (canvasImage.flag) {
+            case 0:
+                srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width(),
+                    skiaDom_->containerSize().height());
+                break;
+            case 1: {
+                srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+                break;
+            }
+            case 2: {
+                srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+                break;
+            }
+            default:
+                break;
+        }
+        scaleX = dstRect.width() / srcRect.width();
+        scaleY = dstRect.height() / srcRect.height();
+        OffsetF offset;
+        if (isOffscreen_) {
+            offset = OffsetF(0.0f, 0.0f);
+        } else {
+            CHECK_NULL_VOID(paintWrapper);
+            offset = paintWrapper->GetContentOffset();
+        }
+        startPoint = offset + OffsetF(dstRect.left(), dstRect.top()) -
+            OffsetF(srcRect.left() * scaleX, srcRect.top() * scaleY);
+
+        skCanvas->save();
+        skCanvas->clipRect(dstRect);
+        skCanvas->translate(startPoint.GetX(), startPoint.GetY());
+        skCanvas->scale(scaleX, scaleY);
+        skiaDom_->render(skCanvas);
+        skCanvas->restore();
+    }
+}
+
+void CustomPaintPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
+{
+    if (!flutter::UIDartState::Current()) {
+        return;
+    }
+
+    // get skImage form pixelMap
+    auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
+
+    // Step2: Create SkImage and draw it, using gpu or cpu
+    sk_sp<SkImage> image;
+    if (!renderTaskHolder_->ioManager) {
+        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    } else {
+#ifndef GPU_DISABLED
+        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
+            imagePixmap, true, imagePixmap.colorSpace(), true);
+#else
+        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+#endif
+    }
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    InitImagePaint();
+    InitPaintBlend(imagePaint_);
+    switch (canvasImage.flag) {
+        case 0:
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
+            break;
+        case 1: {
+            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            skCanvas_->drawImageRect(image, rect, &imagePaint_);
+            break;
+        }
+        case 2: {
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData)
 {
     if (imageData.data.empty()) {
@@ -336,5 +538,571 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
         cacheBitmap_.eraseColor(0);
     }
+}
+
+void CustomPaintPaintMethod::SetFillRuleForPath(const CanvasFillRule& rule)
+{
+    if (rule == CanvasFillRule::NONZERO) {
+        skPath_.setFillType(SkPath::FillType::kWinding_FillType);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        skPath_.setFillType(SkPath::FillType::kEvenOdd_FillType);
+    }
+}
+
+void CustomPaintPaintMethod::SetFillRuleForPath2D(const CanvasFillRule& rule)
+{
+    if (rule == CanvasFillRule::NONZERO) {
+        skPath2d_.setFillType(SkPath::FillType::kWinding_FillType);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        skPath2d_.setFillType(SkPath::FillType::kEvenOdd_FillType);
+    }
+}
+
+void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    SkPaint paint;
+    paint.setAntiAlias(antiAlias_);
+    paint.setColor(fillState_.GetColor().GetValue());
+    paint.setStyle(SkPaint::Style::kFill_Style);
+    if (HasShadow()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+#endif
+    }
+    if (fillState_.GetGradient().IsValid()) {
+        UpdatePaintShader(offset, paint, fillState_.GetGradient());
+    }
+    if (fillState_.GetPattern().IsValid()) {
+        UpdatePaintShader(fillState_.GetPattern(), paint);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        paint.setAlphaf(globalState_.GetAlpha());
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawPath(skPath_, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawPath(skPath_, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0.0f, 0.0f, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
+}
+
+void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    if (path == nullptr) {
+        LOGE("Fill failed, target path is null.");
+        return;
+    }
+    ParsePath2D(offset, path);
+    Path2DFill(offset);
+    skPath2d_.reset();
+}
+
+void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
+{
+    SkPaint paint;
+    paint.setAntiAlias(antiAlias_);
+    paint.setColor(fillState_.GetColor().GetValue());
+    paint.setStyle(SkPaint::Style::kFill_Style);
+    if (HasShadow()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+#endif
+    }
+    if (fillState_.GetGradient().IsValid()) {
+        UpdatePaintShader(offset, paint, fillState_.GetGradient());
+    }
+    if (fillState_.GetPattern().IsValid()) {
+        UpdatePaintShader(fillState_.GetPattern(), paint);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        paint.setAlphaf(globalState_.GetAlpha());
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawPath(skPath2d_, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawPath(skPath2d_, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
+}
+
+void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto offset = paintWrapper->GetContentOffset();
+
+    SkPaint paint = GetStrokePaint();
+    paint.setAntiAlias(antiAlias_);
+    if (HasShadow()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+#endif
+    }
+    if (strokeState_.GetGradient().IsValid()) {
+        UpdatePaintShader(offset, paint, strokeState_.GetGradient());
+    }
+    if (strokeState_.GetPattern().IsValid()) {
+        UpdatePaintShader(strokeState_.GetPattern(), paint);
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawPath(skPath_, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawPath(skPath_, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
+}
+
+void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto offset = paintWrapper->GetContentOffset();
+
+    if (path == nullptr) {
+        LOGE("Stroke failed, target path is null.");
+        return;
+    }
+    ParsePath2D(offset, path);
+    Path2DStroke(offset);
+    skPath2d_.reset();
+}
+
+void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
+{
+    SkPaint paint = GetStrokePaint();
+    paint.setAntiAlias(antiAlias_);
+    if (HasShadow()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+#endif
+    }
+    if (strokeState_.GetGradient().IsValid()) {
+        UpdatePaintShader(offset, paint, strokeState_.GetGradient());
+    }
+    if (strokeState_.GetPattern().IsValid()) {
+        UpdatePaintShader(strokeState_.GetPattern(), paint);
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawPath(skPath2d_, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawPath(skPath2d_, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
+}
+
+void CustomPaintPaintMethod::BeginPath()
+{
+    skPath_.reset();
+}
+
+void CustomPaintPaintMethod::ClosePath()
+{
+    skPath_.close();
+}
+
+void CustomPaintPaintMethod::MoveTo(PaintWrapper* paintWrapper, double x, double y)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    skPath_.moveTo(SkDoubleToScalar(x + offset.GetX()), SkDoubleToScalar(y + offset.GetY()));
+}
+
+void CustomPaintPaintMethod::LineTo(PaintWrapper* paintWrapper, double x, double y)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    skPath_.lineTo(SkDoubleToScalar(x + offset.GetX()), SkDoubleToScalar(y + offset.GetY()));
+}
+
+void CustomPaintPaintMethod::Arc(PaintWrapper* paintWrapper, const ArcParam& param)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    double left = param.x - param.radius + offset.GetX();
+    double top = param.y - param.radius + offset.GetY();
+    double right = param.x + param.radius + offset.GetX();
+    double bottom = param.y + param.radius + offset.GetY();
+    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double sweepAngle = endAngle - startAngle;
+    if (param.anticlockwise) {
+        sweepAngle =
+            endAngle > startAngle ? (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
+    } else {
+        sweepAngle =
+            endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
+    }
+    auto rect = SkRect::MakeLTRB(left, top, right, bottom);
+    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
+        // draw circle
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(half), false);
+        skPath_.arcTo(rect, SkDoubleToScalar(half + startAngle), SkDoubleToScalar(half), false);
+    } else {
+        skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(sweepAngle), false);
+    }
+}
+
+void CustomPaintPaintMethod::ArcTo(PaintWrapper* paintWrapper, const ArcToParam& param)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    double x1 = param.x1 + offset.GetX();
+    double y1 = param.y1 + offset.GetY();
+    double x2 = param.x2 + offset.GetX();
+    double y2 = param.y2 + offset.GetY();
+    double radius = param.radius;
+    skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
+        SkDoubleToScalar(radius));
+}
+
+void CustomPaintPaintMethod::AddRect(PaintWrapper* paintWrapper, const Rect& rect)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
+        rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
+    skPath_.addRect(skRect);
+}
+
+void CustomPaintPaintMethod::Ellipse(PaintWrapper* paintWrapper, const EllipseParam& param)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+    // Init the start and end angle, then calculated the sweepAngle.
+    double startAngle = std::fmod(param.startAngle, M_PI * 2.0);
+    double endAngle = std::fmod(param.endAngle, M_PI * 2.0);
+    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    if (NearEqual(param.startAngle, param.endAngle)) {
+        return; // Just return when startAngle is same as endAngle.
+    }
+    double rotation = param.rotation * HALF_CIRCLE_ANGLE / M_PI;
+    double sweepAngle = endAngle - startAngle;
+    if (param.anticlockwise) {
+        if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
+            sweepAngle -= FULL_CIRCLE_ANGLE;
+        }
+    } else {
+        if (sweepAngle < 0.0) { // Make sure the sweepAngle is positive when clockwise.
+            sweepAngle += FULL_CIRCLE_ANGLE;
+        }
+    }
+
+    // Init the oval Rect(left, top, right, bottom).
+    double left = param.x - param.radiusX + offset.GetX();
+    double top = param.y - param.radiusY + offset.GetY();
+    double right = param.x + param.radiusX + offset.GetX();
+    double bottom = param.y + param.radiusY + offset.GetY();
+    auto rect = SkRect::MakeLTRB(left, top, right, bottom);
+    if (!NearZero(rotation)) {
+        SkMatrix matrix;
+        matrix.setRotate(-rotation, param.x + offset.GetX(), param.y + offset.GetY());
+        skPath_.transform(matrix);
+    }
+    if (NearZero(sweepAngle) && !NearZero(param.endAngle - param.startAngle)) {
+        // The entire ellipse needs to be drawn with two arcTo.
+        skPath_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        skPath_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+    } else {
+        skPath_.arcTo(rect, startAngle, sweepAngle, false);
+    }
+    if (!NearZero(rotation)) {
+        SkMatrix matrix;
+        matrix.setRotate(rotation, param.x + offset.GetX(), param.y + offset.GetY());
+        skPath_.transform(matrix);
+    }
+}
+
+void CustomPaintPaintMethod::BezierCurveTo(PaintWrapper* paintWrapper, const BezierCurveParam& param)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    skPath_.cubicTo(SkDoubleToScalar(param.cp1x + offset.GetX()), SkDoubleToScalar(param.cp1y + offset.GetY()),
+        SkDoubleToScalar(param.cp2x + offset.GetX()), SkDoubleToScalar(param.cp2y + offset.GetY()),
+        SkDoubleToScalar(param.x + offset.GetX()), SkDoubleToScalar(param.y + offset.GetY()));
+}
+
+void CustomPaintPaintMethod::QuadraticCurveTo(PaintWrapper* paintWrapper, const QuadraticCurveParam& param)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    skPath_.quadTo(SkDoubleToScalar(param.cpx + offset.GetX()), SkDoubleToScalar(param.cpy + offset.GetY()),
+        SkDoubleToScalar(param.x + offset.GetX()), SkDoubleToScalar(param.y + offset.GetY()));
+}
+
+void CustomPaintPaintMethod::ParsePath2D(const OffsetF& offset, const RefPtr<CanvasPath2D>& path)
+{
+    for (const auto& [cmd, args] : path->GetCaches()) {
+        switch (cmd) {
+            case PathCmd::CMDS: {
+                Path2DAddPath(offset, args);
+                break;
+            }
+            case PathCmd::TRANSFORM: {
+                Path2DSetTransform(offset, args);
+                break;
+            }
+            case PathCmd::MOVE_TO: {
+                Path2DMoveTo(offset, args);
+                break;
+            }
+            case PathCmd::LINE_TO: {
+                Path2DLineTo(offset, args);
+                break;
+            }
+            case PathCmd::ARC: {
+                Path2DArc(offset, args);
+                break;
+            }
+            case PathCmd::ARC_TO: {
+                Path2DArcTo(offset, args);
+                break;
+            }
+            case PathCmd::QUADRATIC_CURVE_TO: {
+                Path2DQuadraticCurveTo(offset, args);
+                break;
+            }
+            case PathCmd::BEZIER_CURVE_TO: {
+                Path2DBezierCurveTo(offset, args);
+                break;
+            }
+            case PathCmd::ELLIPSE: {
+                Path2DEllipse(offset, args);
+                break;
+            }
+            case PathCmd::RECT: {
+                Path2DRect(offset, args);
+                break;
+            }
+            case PathCmd::CLOSE_PATH: {
+                Path2DClosePath(offset, args);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+}
+
+void CustomPaintPaintMethod::Path2DAddPath(const OffsetF& offset, const PathArgs& args)
+{
+    SkPath out;
+    SkParsePath::FromSVGString(args.cmds.c_str(), &out);
+    skPath2d_.addPath(out);
+}
+
+void CustomPaintPaintMethod::Path2DClosePath(const OffsetF& offset, const PathArgs& args)
+{
+    skPath2d_.close();
+}
+
+void CustomPaintPaintMethod::Path2DMoveTo(const OffsetF& offset, const PathArgs& args)
+{
+    double x = args.para1 + offset.GetX();
+    double y = args.para2 + offset.GetY();
+    skPath2d_.moveTo(x, y);
+}
+
+void CustomPaintPaintMethod::Path2DLineTo(const OffsetF& offset, const PathArgs& args)
+{
+    double x = args.para1 + offset.GetX();
+    double y = args.para2 + offset.GetY();
+    skPath2d_.lineTo(x, y);
+}
+
+void CustomPaintPaintMethod::Path2DArc(const OffsetF& offset, const PathArgs& args)
+{
+    double x = args.para1;
+    double y = args.para2;
+    double r = args.para3;
+    auto rect =
+        SkRect::MakeLTRB(x - r + offset.GetX(), y - r + offset.GetY(), x + r + offset.GetX(), y + r + offset.GetY());
+    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
+    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
+    double sweepAngle = endAngle - startAngle;
+    if (!NearZero(args.para6)) {
+        sweepAngle =
+            endAngle > startAngle ? (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
+    } else {
+        sweepAngle =
+            endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
+    }
+    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
+        skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+    } else {
+        skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
+    }
+}
+
+void CustomPaintPaintMethod::Path2DArcTo(const OffsetF& offset, const PathArgs& args)
+{
+    double x1 = args.para1 + offset.GetX();
+    double y1 = args.para2 + offset.GetY();
+    double x2 = args.para3 + offset.GetX();
+    double y2 = args.para4 + offset.GetY();
+    double r = args.para5;
+    skPath2d_.arcTo(x1, y1, x2, y2, r);
+}
+
+void CustomPaintPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
+{
+    double left = args.para1 + offset.GetX();
+    double top = args.para2 + offset.GetY();
+    double right = args.para3 + args.para1 + offset.GetX();
+    double bottom = args.para4 + args.para2 + offset.GetY();
+    skPath2d_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
+}
+
+void CustomPaintPaintMethod::Path2DEllipse(const OffsetF& offset, const PathArgs& args)
+{
+    if (NearEqual(args.para6, args.para7)) {
+        return; // Just return when startAngle is same as endAngle.
+    }
+
+    double x = args.para1;
+    double y = args.para2;
+    double rx = args.para3;
+    double ry = args.para4;
+    double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = std::fmod(args.para6, M_PI * 2.0);
+    double endAngle = std::fmod(args.para7, M_PI * 2.0);
+    bool anticlockwise = NearZero(args.para8) ? false : true;
+    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    double sweepAngle = endAngle - startAngle;
+    if (anticlockwise) {
+        if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
+            sweepAngle -= FULL_CIRCLE_ANGLE;
+        }
+    } else {
+        if (sweepAngle < 0.0) { // Make sure the sweepAngle is positive when clockwise.
+            sweepAngle += FULL_CIRCLE_ANGLE;
+        }
+    }
+    auto rect = SkRect::MakeLTRB(
+        x - rx + offset.GetX(), y - ry + offset.GetY(), x + rx + offset.GetX(), y + ry + offset.GetY());
+
+    if (!NearZero(rotation)) {
+        SkMatrix matrix;
+        matrix.setRotate(-rotation, x + offset.GetX(), y + offset.GetY());
+        skPath2d_.transform(matrix);
+    }
+    if (NearZero(sweepAngle) && !NearZero(args.para6 - args.para7)) {
+        // The entire ellipse needs to be drawn with two arcTo.
+        skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+    } else {
+        skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
+    }
+    if (!NearZero(rotation)) {
+        SkMatrix matrix;
+        matrix.setRotate(rotation, x + offset.GetX(), y + offset.GetY());
+        skPath2d_.transform(matrix);
+    }
+}
+
+void CustomPaintPaintMethod::Path2DBezierCurveTo(const OffsetF& offset, const PathArgs& args)
+{
+    double cp1x = args.para1 + offset.GetX();
+    double cp1y = args.para2 + offset.GetY();
+    double cp2x = args.para3 + offset.GetX();
+    double cp2y = args.para4 + offset.GetY();
+    double x = args.para5 + offset.GetX();
+    double y = args.para6 + offset.GetY();
+    skPath2d_.cubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
+}
+
+void CustomPaintPaintMethod::Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args)
+{
+    double cpx = args.para1 + offset.GetX();
+    double cpy = args.para2 + offset.GetY();
+    double x = args.para3 + offset.GetX();
+    double y = args.para4 + offset.GetY();
+    skPath2d_.quadTo(cpx, cpy, x, y);
+}
+
+void CustomPaintPaintMethod::Path2DSetTransform(const OffsetF& offset, const PathArgs& args)
+{
+    SkMatrix skMatrix;
+    double scaleX = args.para1;
+    double skewX = args.para2;
+    double skewY = args.para3;
+    double scaleY = args.para4;
+    double translateX = args.para5;
+    double translateY = args.para6;
+    skMatrix.setAll(scaleX, skewY, translateX, skewX, scaleY, translateY, 0.0f, 0.0f, 1.0f);
+    skPath2d_.transform(skMatrix);
 }
 } // namespace OHOS::Ace::NG

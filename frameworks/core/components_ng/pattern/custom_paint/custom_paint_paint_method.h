@@ -42,9 +42,28 @@ public:
         fillState_.SetTextColor(color);
     }
 
+    void SetFillRuleForPath(const CanvasFillRule& rule);
+    void SetFillRuleForPath2D(const CanvasFillRule& rule);
+
     void FillRect(PaintWrapper* paintWrapper, const Rect& rect);
     void StrokeRect(PaintWrapper* paintWrapper, const Rect& rect);
+    void Fill(PaintWrapper* paintWrapper);
+    void Fill(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
+    void Stroke(PaintWrapper* paintWrapper);
+    void Stroke(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
+    void BeginPath();
+    void ClosePath();
+    void MoveTo(PaintWrapper* paintWrapper, double x, double y);
+    void LineTo(PaintWrapper* paintWrapper, double x, double y);
+    void Arc(PaintWrapper* paintWrapper, const ArcParam& param);
+    void ArcTo(PaintWrapper* paintWrapper, const ArcToParam& param);
+    void AddRect(PaintWrapper* paintWrapper, const Rect& rect);
+    void Ellipse(PaintWrapper* paintWrapper, const EllipseParam& param);
+    void BezierCurveTo(PaintWrapper* paintWrapper, const BezierCurveParam& param);
+    void QuadraticCurveTo(PaintWrapper* paintWrapper, const QuadraticCurveParam& param);
 
+    void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
+    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     virtual std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height) = 0;
     void PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData);
 
@@ -55,6 +74,28 @@ protected:
     void UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint);
     void InitPaintBlend(SkPaint& paint);
     SkPaint GetStrokePaint();
+
+    void Path2DFill(const OffsetF& offset);
+    void Path2DStroke(const OffsetF& offset);
+    void ParsePath2D(const OffsetF& offset, const RefPtr<CanvasPath2D>& path);
+    void Path2DAddPath(const OffsetF& offset, const PathArgs& args);
+    void Path2DClosePath(const OffsetF& offset, const PathArgs& args);
+    void Path2DMoveTo(const OffsetF& offset, const PathArgs& args);
+    void Path2DLineTo(const OffsetF& offset, const PathArgs& args);
+    void Path2DArc(const OffsetF& offset, const PathArgs& args);
+    void Path2DArcTo(const OffsetF& offset, const PathArgs& args);
+    void Path2DRect(const OffsetF& offset, const PathArgs& args);
+    void Path2DEllipse(const OffsetF& offset, const PathArgs& args);
+    void Path2DBezierCurveTo(const OffsetF& offset, const PathArgs& args);
+    void Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args);
+    void Path2DSetTransform(const OffsetF& offset, const PathArgs& args);
+
+    void InitImagePaint();
+    void InitImageCallbacks();
+    virtual void ImageObjReady(const RefPtr<ImageObject>& imageObj) = 0;
+    virtual void ImageObjFailed() = 0;
+    virtual sk_sp<SkImage> GetImage(const std::string& src) = 0;
+    void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
 
     PaintState fillState_;
     StrokePaintState strokeState_;
@@ -70,6 +111,8 @@ protected:
 
     RefPtr<PipelineContext> context_;
 
+    SkPath skPath_;
+    SkPath skPath2d_;
     SkPaint imagePaint_;
     SkPaint cachePaint_;
     SkBitmap cacheBitmap_;
@@ -78,6 +121,16 @@ protected:
     std::unique_ptr<SkCanvas> cacheCanvas_;
 
     RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
+
+    sk_sp<SkSVGDOM> skiaDom_ = nullptr;
+    Ace::CanvasImage canvasImage_;
+
+    ImageSourceInfo currentSource_;
+    ImageSourceInfo loadingSource_;
+    ImageObjSuccessCallback imageObjSuccessCallback_;
+    UploadSuccessCallback uploadSuccessCallback_;
+    OnPostBackgroundTask onPostBackgroundTask_;
+    FailedCallback failedCallback_;
 };
 } // namespace OHOS::Ace::NG
 

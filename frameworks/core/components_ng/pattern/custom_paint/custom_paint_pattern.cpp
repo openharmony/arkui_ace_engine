@@ -68,6 +68,166 @@ void CustomPaintPattern::StrokeRect(const Rect& rect)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::Fill()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Fill(paintWrapper);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Fill(const RefPtr<CanvasPath2D>& path)
+{
+    auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Fill(paintWrapper, path);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Stroke()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Stroke(paintWrapper);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Stroke(const RefPtr<CanvasPath2D>& path)
+{
+    auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Stroke(paintWrapper, path);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::BeginPath()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.BeginPath();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::ClosePath()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.ClosePath();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::MoveTo(double x, double y)
+{
+    auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.MoveTo(paintWrapper, x, y);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::LineTo(double x, double y)
+{
+    auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.LineTo(paintWrapper, x, y);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Arc(const ArcParam& param)
+{
+    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Arc(paintWrapper, param);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::ArcTo(const ArcToParam& param)
+{
+    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.ArcTo(paintWrapper, param);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::AddRect(const Rect& rect)
+{
+    auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.AddRect(paintWrapper, rect);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Ellipse(const EllipseParam& param)
+{
+    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Ellipse(paintWrapper, param);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::BezierCurveTo(const BezierCurveParam& param)
+{
+    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.BezierCurveTo(paintWrapper, param);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
+{
+    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.QuadraticCurveTo(paintWrapper, param);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
+{
+    auto task = [image, width, height](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.DrawImage(paintWrapper, image, width, height);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
+{
+    auto task = [pixelMap, image](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.DrawPixelMap(pixelMap, image);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, double top, double width, double height)
 {
     if (!paintMethod_) {
@@ -77,6 +237,16 @@ std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, do
         return data;
     }
     return paintMethod_->GetImageData(left, top, width, height);
+}
+
+void CustomPaintPattern::PutImageData(const Ace::ImageData& imageData)
+{
+    auto task = [imageData](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.PutImageData(paintWrapper, imageData);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern)
@@ -92,6 +262,26 @@ void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPat
 void CustomPaintPattern::UpdateFillColor(const Color& color)
 {
     paintMethod_->SetFillColor(color);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
+{
+    auto task = [rule](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFillRuleForPath(rule);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
+{
+    auto task = [rule](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFillRuleForPath2D(rule);
+    };
+    paintMethod_->PushTask(task);
     auto host = GetHost();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
