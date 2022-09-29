@@ -103,8 +103,8 @@ template("js_engine_ark") {
       sources += [ "jsi_utils.cpp" ]
       deps += [ "//third_party/jsframework:ark_build" ]
       external_deps = [
-        "multimedia_image_standard:image",
-        "multimedia_image_standard:image_native",
+        "multimedia_image_framework:image",
+        "multimedia_image_framework:image_native",
         "napi:ace_napi",
       ]
     }

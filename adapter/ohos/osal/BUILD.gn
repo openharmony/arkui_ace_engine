@@ -75,7 +75,7 @@ template("ace_osal_ohos_source_set") {
       external_deps += [
         "ability_base:want",
         "input:libmmi-client",
-        "multimedia_image_standard:image",
+        "multimedia_image_framework:image",
         "napi:ace_napi",
       ]
       if (defined(config.accessibility_support) &&
