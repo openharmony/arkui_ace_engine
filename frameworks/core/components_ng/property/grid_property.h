@@ -46,8 +46,8 @@ struct GridTypedProperty {
     int32_t offset_ = DEFAULT_GRID_OFFSET;
 };
 
-class ACE_EXPORT GridProperty : public AceType { // TODO delete EXPORT
-    DECLARE_ACE_TYPE(GridPropertySet, AceType);
+class ACE_EXPORT GridProperty : public AceType {
+    DECLARE_ACE_TYPE(GridProperty, AceType);
 
 public:
     GridProperty() : typedPropertySet_ { { GridSizeType::UNDEFINED, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET } } {}
