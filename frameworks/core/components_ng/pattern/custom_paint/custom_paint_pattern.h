@@ -99,6 +99,30 @@ public:
     void Translate(double x, double y);
     std::string ToDataURL(const std::string& args);
 
+    void UpdateGlobalAlpha(double alpha);
+    void UpdateCompositeOperation(CompositeOperation type);
+    void UpdateSmoothingEnabled(bool enabled);
+    void UpdateLineCap(LineCapStyle cap);
+    void UpdateLineDashOffset(double dash);
+    void UpdateLineWidth(double width);
+    void UpdateMiterLimit(double limit);
+    void UpdateShadowBlur(double blur);
+    void UpdateShadowOffsetX(double offsetX);
+    void UpdateShadowOffsetY(double offsetY);
+    void UpdateTextAlign(TextAlign align);
+    void UpdateTextBaseline(TextBaseline baseline);
+    void UpdateStrokePattern(const Ace::Pattern& pattern);
+    void UpdateStrokeColor(const Color& color);
+    void UpdateFontWeight(FontWeight weight);
+    void UpdateFontStyle(FontStyle style);
+    void UpdateFontFamilies(const std::vector<std::string>& families);
+    void UpdateFontSize(const Dimension& size);
+    void UpdateLineJoin(LineJoinStyle join);
+    void UpdateFillGradient(const Ace::Gradient& gradient);
+    void UpdateFillPattern(const Ace::Pattern& pattern);
+    void UpdateShadowColor(const Color& color);
+    void UpdateStrokeGradient(const Ace::Gradient& grad);
+    
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

@@ -36,10 +36,102 @@ class CustomPaintPaintMethod : public NodePaintMethod {
 public:
     ~CustomPaintPaintMethod() override = default;
 
+    void SetFillRuleForPath(const CanvasFillRule& rule);
+    void SetFillRuleForPath2D(const CanvasFillRule& rule);
+
+    void FillRect(PaintWrapper* paintWrapper, const Rect& rect);
+    void StrokeRect(PaintWrapper* paintWrapper, const Rect& rect);
+    void ClearRect(PaintWrapper* paintWrapper, const Rect& rect);
+    void Fill(PaintWrapper* paintWrapper);
+    void Fill(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
+    void Stroke(PaintWrapper* paintWrapper);
+    void Stroke(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
+    void BeginPath();
+    void ClosePath();
+    void MoveTo(PaintWrapper* paintWrapper, double x, double y);
+    void LineTo(PaintWrapper* paintWrapper, double x, double y);
+    void Arc(PaintWrapper* paintWrapper, const ArcParam& param);
+    void ArcTo(PaintWrapper* paintWrapper, const ArcToParam& param);
+    void AddRect(PaintWrapper* paintWrapper, const Rect& rect);
+    void Ellipse(PaintWrapper* paintWrapper, const EllipseParam& param);
+    void BezierCurveTo(PaintWrapper* paintWrapper, const BezierCurveParam& param);
+    void QuadraticCurveTo(PaintWrapper* paintWrapper, const QuadraticCurveParam& param);
+    void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
+    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
+    void PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData);
+
+    void Save();
+    void Restore();
+    void Scale(double x, double y);
+    void Rotate(double angle);
+    void SetTransform(const TransformParam& param);
+    void Transform(const TransformParam& param);
+    void Translate(double x, double y);
+
     void SetFillColor(const Color& color)
     {
         fillState_.SetColor(color);
         fillState_.SetTextColor(color);
+    }
+
+    void SetFillPattern(const Ace::Pattern& pattern)
+    {
+        fillState_.SetPattern(pattern);
+    }
+
+    void SetFillGradient(const Ace::Gradient& gradient)
+    {
+        fillState_.SetGradient(gradient);
+    }
+    
+    void SetAlpha(double alpha)
+    {
+        globalState_.SetAlpha(alpha);
+    }
+    
+    void SetCompositeType(CompositeOperation operation)
+    {
+        globalState_.SetType(operation);
+    }
+
+    void SetStrokeColor(const Color& color)
+    {
+        strokeState_.SetColor(color);
+    }
+
+    void SetStrokePattern(const Ace::Pattern& pattern)
+    {
+        strokeState_.SetPattern(pattern);
+    }
+
+    void SetStrokeGradient(const Ace::Gradient& gradient)
+    {
+        strokeState_.SetGradient(gradient);
+    }
+
+    void SetLineCap(LineCapStyle style)
+    {
+        strokeState_.SetLineCap(style);
+    }
+
+    void SetLineDashOffset(double offset)
+    {
+        strokeState_.SetLineDashOffset(offset);
+    }
+
+    void SetLineJoin(LineJoinStyle style)
+    {
+        strokeState_.SetLineJoin(style);
+    }
+
+    void SetLineWidth(double width)
+    {
+        strokeState_.SetLineWidth(width);
+    }
+
+    void SetMiterLimit(double limit)
+    {
+        strokeState_.SetMiterLimit(limit);
     }
 
     const LineDashParam& GetLineDash() const
@@ -50,6 +142,67 @@ public:
     void SetLineDash(const std::vector<double>& segments)
     {
         strokeState_.SetLineDash(segments);
+    }
+
+    void SetTextAlign(TextAlign align)
+    {
+        fillState_.SetTextAlign(align);
+        strokeState_.SetTextAlign(align);
+    }
+
+    void SetTextBaseline(TextBaseline baseline)
+    {
+        fillState_.SetTextBaseline(baseline);
+        strokeState_.SetTextBaseline(baseline);
+    }
+
+    void SetShadowColor(const Color& color)
+    {
+        shadow_.SetColor(color);
+    }
+
+    void SetShadowBlur(double blur)
+    {
+        shadow_.SetBlurRadius(blur);
+    }
+
+    void SetShadowOffsetX(double x)
+    {
+        shadow_.SetOffsetX(x);
+    }
+
+    void SetShadowOffsetY(double y)
+    {
+        shadow_.SetOffsetY(y);
+    }
+
+    void SetSmoothingEnabled(bool enabled)
+    {
+        smoothingEnabled_ = enabled;
+    }
+
+    void SetFontSize(const Dimension& size)
+    {
+        fillState_.SetFontSize(size);
+        strokeState_.SetFontSize(size);
+    }
+
+    void SetFontStyle(FontStyle style)
+    {
+        fillState_.SetFontStyle(style);
+        strokeState_.SetFontStyle(style);
+    }
+
+    void SetFontWeight(FontWeight weight)
+    {
+        fillState_.SetFontWeight(weight);
+        strokeState_.SetFontWeight(weight);
+    }
+
+    void SetFontFamilies(const std::vector<std::string>& fontFamilies)
+    {
+        fillState_.SetFontFamilies(fontFamilies);
+        strokeState_.SetFontFamilies(fontFamilies);
     }
 
     void SaveStates()
@@ -74,40 +227,6 @@ public:
         globalState_ = saveState.globalState;
         saveStates_.pop();
     }
-
-    void SetFillRuleForPath(const CanvasFillRule& rule);
-    void SetFillRuleForPath2D(const CanvasFillRule& rule);
-
-    void FillRect(PaintWrapper* paintWrapper, const Rect& rect);
-    void StrokeRect(PaintWrapper* paintWrapper, const Rect& rect);
-    void ClearRect(PaintWrapper* paintWrapper, const Rect& rect);
-    void Fill(PaintWrapper* paintWrapper);
-    void Fill(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
-    void Stroke(PaintWrapper* paintWrapper);
-    void Stroke(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
-    void BeginPath();
-    void ClosePath();
-    void MoveTo(PaintWrapper* paintWrapper, double x, double y);
-    void LineTo(PaintWrapper* paintWrapper, double x, double y);
-    void Arc(PaintWrapper* paintWrapper, const ArcParam& param);
-    void ArcTo(PaintWrapper* paintWrapper, const ArcToParam& param);
-    void AddRect(PaintWrapper* paintWrapper, const Rect& rect);
-    void Ellipse(PaintWrapper* paintWrapper, const EllipseParam& param);
-    void BezierCurveTo(PaintWrapper* paintWrapper, const BezierCurveParam& param);
-    void QuadraticCurveTo(PaintWrapper* paintWrapper, const QuadraticCurveParam& param);
-
-    void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
-    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
-    virtual std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height) = 0;
-    void PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData);
-
-    void Save();
-    void Restore();
-    void Scale(double x, double y);
-    void Rotate(double angle);
-    void SetTransform(const TransformParam& param);
-    void Transform(const TransformParam& param);
-    void Translate(double x, double y);
 
 protected:
     bool HasShadow() const;

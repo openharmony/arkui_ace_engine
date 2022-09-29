@@ -60,9 +60,32 @@ public:
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void PutImageData(const Ace::ImageData& imageData);
 
-    void UpdateFillColor(const Color& color);
     void SetFillRuleForPath(const CanvasFillRule rule);
     void SetFillRuleForPath2D(const CanvasFillRule rule);
+    void SetFillPattern(const Ace::Pattern& pattern);
+    void SetFillGradient(const Ace::Gradient& gradient);
+    void SetAlpha(double alpha);
+    void SetCompositeType(CompositeOperation operation);
+    void SetLineWidth(double width);
+    void SetLineCap(LineCapStyle style);
+    void SetLineJoin(LineJoinStyle style);
+    void SetMiterLimit(double limit);
+    void SetTextAlign(TextAlign align);
+    void SetTextBaseline(TextBaseline baseline);
+    void SetShadowBlur(double blur);
+    void SetShadowOffsetX(double x);
+    void SetShadowOffsetY(double y);
+    void SetSmoothingEnabled(bool enabled);
+    void SetLineDashOffset(double offset);
+    void SetShadowColor(const Color& color);
+    void SetStrokePattern(const Ace::Pattern& pattern);
+    void SetStrokeGradient(const Ace::Gradient& gradient);
+    void SetStrokeColor(const Color& color);
+    void SetFontWeight(FontWeight weight);
+    void SetFontStyle(FontStyle style);
+    void SetFontFamilies(const std::vector<std::string>& fontFamilies);
+    void SetFontSize(const Dimension& size);
+    void SetFillColor(const Color& color);
     int32_t GetWidth();
     int32_t GetHeight();
 
@@ -77,9 +100,9 @@ public:
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
     std::string ToDataURL(const std::string& type, const double quality);
+
 private:
     RefPtr<OffscreenCanvasPaintMethod> offscreenPaintMethod_;
-
     ACE_DISALLOW_COPY_AND_MOVE(OffscreenCanvasPattern);
 };
 } // namespace OHOS::Ace::NG

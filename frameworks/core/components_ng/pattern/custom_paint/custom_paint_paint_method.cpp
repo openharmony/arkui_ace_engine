@@ -51,6 +51,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
+
 const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] = {
     { CompositeOperation::SOURCE_OVER, SkBlendMode::kSrcOver },
     { CompositeOperation::SOURCE_ATOP, SkBlendMode::kSrcATop },
@@ -451,7 +452,7 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
 {
     OffsetF offset;
     if (isOffscreen_) {
-        offset = OffsetF(0, 0);
+        offset = OffsetF(0.0f, 0.0f);
     } else {
         CHECK_NULL_VOID(paintWrapper);
         offset = paintWrapper->GetContentOffset();
@@ -497,7 +498,7 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
 {
     OffsetF offset;
     if (isOffscreen_) {
-        offset = OffsetF(0, 0);
+        offset = OffsetF(0.0f, 0.0f);
     } else {
         CHECK_NULL_VOID(paintWrapper);
         offset = paintWrapper->GetContentOffset();
@@ -534,7 +535,7 @@ void CustomPaintPaintMethod::ClearRect(PaintWrapper* paintWrapper, const Rect& r
 {
     OffsetF offset;
     if (isOffscreen_) {
-        offset = OffsetF(0, 0);
+        offset = OffsetF(0.0f, 0.0f);
     } else {
         CHECK_NULL_VOID(paintWrapper);
         offset = paintWrapper->GetContentOffset();
@@ -655,8 +656,13 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
 
 void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto offset = paintWrapper->GetContentOffset();
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
 
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
@@ -683,8 +689,13 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
 
 void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto offset = paintWrapper->GetContentOffset();
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0.0f, 0.0f);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
 
     if (path == nullptr) {
         LOGE("Stroke failed, target path is null.");

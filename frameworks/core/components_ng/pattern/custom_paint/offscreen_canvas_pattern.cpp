@@ -158,7 +158,7 @@ void OffscreenCanvasPattern::PutImageData(const Ace::ImageData& imageData)
     offscreenPaintMethod_->PutImageData(nullptr, imageData);
 }
 
-void OffscreenCanvasPattern::UpdateFillColor(const Color& color)
+void OffscreenCanvasPattern::SetFillColor(const Color& color)
 {
     offscreenPaintMethod_->SetFillColor(color);
 }
@@ -226,6 +226,127 @@ void OffscreenCanvasPattern::Transform(const TransformParam& param)
 void OffscreenCanvasPattern::Translate(double x, double y)
 {
     offscreenPaintMethod_->Translate(x, y);
+}
+
+void OffscreenCanvasPattern::SetFillPattern(const Ace::Pattern& pattern)
+{
+    offscreenPaintMethod_->SetFillPattern(pattern);
+}
+
+void OffscreenCanvasPattern::SetFillGradient(const Ace::Gradient& gradient)
+{
+    offscreenPaintMethod_->SetFillGradient(gradient);
+}
+    
+void OffscreenCanvasPattern::SetAlpha(double alpha)
+{
+    offscreenPaintMethod_->SetAlpha(alpha);
+}
+    
+void OffscreenCanvasPattern::SetCompositeType(CompositeOperation operation)
+{
+    offscreenPaintMethod_->SetCompositeType(operation);
+}
+
+void OffscreenCanvasPattern::SetLineWidth(double width)
+{
+    offscreenPaintMethod_->SetLineWidth(width);
+}
+
+void OffscreenCanvasPattern::SetLineCap(LineCapStyle style)
+{
+    offscreenPaintMethod_->SetLineCap(style);
+}
+
+void OffscreenCanvasPattern::SetLineJoin(LineJoinStyle style)
+{
+    offscreenPaintMethod_->SetLineJoin(style);
+}
+
+void OffscreenCanvasPattern::SetMiterLimit(double limit)
+{
+    offscreenPaintMethod_->SetMiterLimit(limit);
+}
+
+void OffscreenCanvasPattern::SetTextAlign(TextAlign align)
+{
+    offscreenPaintMethod_->SetTextAlign(align);
+    offscreenPaintMethod_->SetTextAlign(align);
+}
+
+void OffscreenCanvasPattern::SetTextBaseline(TextBaseline baseline)
+{
+    offscreenPaintMethod_->SetTextBaseline(baseline);
+    offscreenPaintMethod_->SetTextBaseline(baseline);
+}
+
+void OffscreenCanvasPattern::SetShadowBlur(double blur)
+{
+    offscreenPaintMethod_->SetShadowBlur(blur);
+}
+
+void OffscreenCanvasPattern::SetShadowOffsetX(double x)
+{
+    offscreenPaintMethod_->SetShadowOffsetX(x);
+}
+
+void OffscreenCanvasPattern::SetShadowOffsetY(double y)
+{
+    offscreenPaintMethod_->SetShadowOffsetY(y);
+}
+
+void OffscreenCanvasPattern::SetSmoothingEnabled(bool enabled)
+{
+    offscreenPaintMethod_->SetSmoothingEnabled(enabled);
+}
+
+void OffscreenCanvasPattern::SetLineDashOffset(double offset)
+{
+    offscreenPaintMethod_->SetLineDashOffset(offset);
+}
+
+void OffscreenCanvasPattern::SetShadowColor(const Color& color)
+{
+    offscreenPaintMethod_->SetShadowColor(color);
+}
+
+void OffscreenCanvasPattern::SetStrokePattern(const Ace::Pattern& pattern)
+{
+    offscreenPaintMethod_->SetStrokePattern(pattern);
+}
+
+void OffscreenCanvasPattern::SetStrokeGradient(const Ace::Gradient& gradient)
+{
+    offscreenPaintMethod_->SetStrokeGradient(gradient);
+}
+
+void OffscreenCanvasPattern::SetStrokeColor(const Color& color)
+{
+    offscreenPaintMethod_->SetStrokeColor(color);
+}
+
+void OffscreenCanvasPattern::SetFontWeight(FontWeight weight)
+{
+    offscreenPaintMethod_->SetFontWeight(weight);
+    offscreenPaintMethod_->SetFontWeight(weight);
+}
+
+void OffscreenCanvasPattern::SetFontStyle(FontStyle style)
+{
+    offscreenPaintMethod_->SetFontStyle(style);
+    offscreenPaintMethod_->SetFontStyle(style);
+}
+
+void OffscreenCanvasPattern::SetFontFamilies(const std::vector<std::string>& fontFamilies)
+{
+    offscreenPaintMethod_->SetFontFamilies(fontFamilies);
+    offscreenPaintMethod_->SetFontFamilies(fontFamilies);
+}
+
+void OffscreenCanvasPattern::SetFontSize(const Dimension& size)
+{
+    offscreenPaintMethod_->SetFontSize(size);
+    offscreenPaintMethod_->SetFontSize(size);
 }
 
 std::string OffscreenCanvasPattern::ToDataURL(const std::string& type, const double quality)
