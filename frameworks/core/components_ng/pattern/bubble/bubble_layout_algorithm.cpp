@@ -97,14 +97,14 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     selfSize_ = frameNode->GetGeometryNode()->GetFrameSize();
     auto child = children.front();
-    childSize_ = child->GetGeometryNode()->GetFrameSize();
+    childSize_ = child->GetGeometryNode()->GetMarginFrameSize();
     childOffset_ = GetChildPosition(childSize_, bubbleProp);
     bool useCustom = bubbleProp->GetUseCustom().value_or(false);
     if (useCustom) {
         UpdateCustomChildPosition(bubbleProp);
         UpdateTouchRegion();
     }
-    child->GetGeometryNode()->SetFrameOffset(childOffset_);
+    child->GetGeometryNode()->SetMarginFrameOffset(childOffset_);
 }
 
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)

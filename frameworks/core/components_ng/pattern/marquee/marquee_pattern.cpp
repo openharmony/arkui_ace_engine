@@ -64,7 +64,7 @@ bool MarqueePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*dir
         if (isNeedMarquee_) {
             childOffset_ = (direction_ == MarqueeDirection::LEFT)
                                ? childOffset_ = GetHostFrameSize()->Width()
-                               : -(textChild->GetGeometryNode()->GetFrameSize().Width());
+                               : -(textChild->GetGeometryNode()->GetMarginFrameSize().Width());
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             return false;
         }
@@ -240,9 +240,9 @@ void MarqueePattern::UpdateAnimation()
     float end = 0.0;
     if (direction_ == MarqueeDirection::LEFT) {
         start = GetHostFrameSize()->Width();
-        end = -(textChild->GetGeometryNode()->GetFrameSize().Width());
+        end = -(textChild->GetGeometryNode()->GetMarginFrameSize().Width());
     } else {
-        start = -(textChild->GetGeometryNode()->GetFrameSize().Width());
+        start = -(textChild->GetGeometryNode()->GetMarginFrameSize().Width());
         end = GetHostFrameSize()->Width();
     }
 
@@ -287,7 +287,7 @@ bool MarqueePattern::NeedMarquee() const
     auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_RETURN(textChild, true);
 
-    auto needMarquee = textChild->GetGeometryNode()->GetFrameSize().Width() > GetHostFrameSize()->Width();
+    auto needMarquee = textChild->GetGeometryNode()->GetMarginFrameSize().Width() > GetHostFrameSize()->Width();
     return needMarquee;
 }
 

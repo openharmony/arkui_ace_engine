@@ -81,7 +81,7 @@ public:
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint);
 
     // Called to perform layout children.
-    void Layout(const std::optional<OffsetF>& parentGlobalOffset);
+    void Layout();
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {

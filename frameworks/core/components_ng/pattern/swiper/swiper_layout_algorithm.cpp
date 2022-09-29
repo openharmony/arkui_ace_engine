@@ -107,8 +107,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             break;
         }
         wrapper->Measure(layoutConstraint);
-        crossSize = std::max(crossSize, GetCrossAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis));
-        mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis));
+        crossSize = std::max(crossSize, GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+        mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
     }
 
     // Mark inactive in wrapper.
@@ -150,9 +150,6 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
 
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-
     // Effect when difference between current index and target index is greater than 1.
     // eg. Current index is 0, call swipeTo method to jump to index 2,
     // change item's position only 0 and 2, ignore others.
@@ -163,8 +160,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // Layout current item.
         auto currentWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex_);
         if (currentWrapper && currentWrapper->GetGeometryNode()) {
-            currentWrapper->GetGeometryNode()->SetFrameOffset(currentOffset + itemSpaceOffset);
-            currentWrapper->Layout(parentOffset);
+            currentWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset + itemSpaceOffset);
+            currentWrapper->Layout();
         }
 
         // Layout target item.
@@ -173,8 +170,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             axis == Axis::HORIZONTAL ? OffsetF(targetMainOffset, 0.0f) : OffsetF(0.0f, targetMainOffset);
         auto targetWrapper = layoutWrapper->GetOrCreateChildByIndex(targetIndex_.value());
         if (targetWrapper && targetWrapper->GetGeometryNode()) {
-            targetWrapper->GetGeometryNode()->SetFrameOffset(currentOffset + targetOffset + itemSpaceOffset);
-            targetWrapper->Layout(parentOffset);
+            targetWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset + targetOffset + itemSpaceOffset);
+            targetWrapper->Layout();
         }
         return;
     }
@@ -200,10 +197,10 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto geometryNode = wrapper->GetGeometryNode();
-        auto frameSize = geometryNode->GetFrameSize();
+        auto frameSize = geometryNode->GetMarginFrameSize();
         preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
-        geometryNode->SetFrameOffset(preOffset);
-        wrapper->Layout(parentOffset);
+        geometryNode->SetMarginFrameOffset(preOffset);
+        wrapper->Layout();
         preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
     }
 
@@ -216,9 +213,9 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto geometryNode = wrapper->GetGeometryNode();
-        geometryNode->SetFrameOffset(nextOffset);
-        wrapper->Layout(parentOffset);
-        auto frameSize = geometryNode->GetFrameSize();
+        geometryNode->SetMarginFrameOffset(nextOffset);
+        wrapper->Layout();
+        auto frameSize = geometryNode->GetMarginFrameSize();
         nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width() + itemSpace, 0)
                                                 : OffsetF(0, frameSize.Height() + itemSpace));
     }
@@ -231,17 +228,17 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
         if (lastWrapper) {
             auto geometryNode = lastWrapper->GetGeometryNode();
-            auto frameSize = geometryNode->GetFrameSize();
+            auto frameSize = geometryNode->GetMarginFrameSize();
             preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
-            geometryNode->SetFrameOffset(preOffset);
-            lastWrapper->Layout(parentOffset);
+            geometryNode->SetMarginFrameOffset(preOffset);
+            lastWrapper->Layout();
         }
     } else if (currentIndex_ == childrenSize - 1 && LessNotEqual(currentOffset_, 0.0)) {
         auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         if (firstWrapper) {
             auto geometryNode = firstWrapper->GetGeometryNode();
-            geometryNode->SetFrameOffset(nextOffset);
-            firstWrapper->Layout(parentOffset);
+            geometryNode->SetMarginFrameOffset(nextOffset);
+            firstWrapper->Layout();
         }
     }
 }

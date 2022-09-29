@@ -29,6 +29,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
@@ -43,16 +44,45 @@ public:
 
     bool CheckUnchanged(const GeometryNode& geometryNode)
     {
-        return (frame_ == geometryNode.frame_) && (bound_ == geometryNode.bound_) &&
+        return (frame_ == geometryNode.frame_) && (margin_ == geometryNode.margin_) &&
                (content_ == geometryNode.content_) && (parentGlobalOffset_ == geometryNode.parentGlobalOffset_) &&
                (parentLayoutConstraint_ == geometryNode.parentLayoutConstraint_);
     }
 
     RefPtr<GeometryNode> Clone() const;
 
-    void SetFrameSize(const SizeF& size)
+    SizeF GetMarginFrameSize() const
     {
-        frame_.rect_.SetSize(size);
+        // TODO: add margin in negative.
+        auto size = frame_.rect_.GetSize();
+        if (margin_) {
+            AddPaddingToSize(*margin_, size);
+        }
+        return size;
+    }
+
+    OffsetF GetMarginFrameOffset() const
+    {
+        // TODO: add margin in negative.
+        auto offset = frame_.rect_.GetOffset();
+        if (margin_) {
+            offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
+        }
+        return offset;
+    }
+
+    void SetMarginFrameOffset(const OffsetF& translate)
+    {
+        OffsetF offset;
+        if (margin_) {
+            offset += OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
+        }
+        frame_.rect_.SetOffset(translate + offset);
+    }
+
+    const RectF& GetFrameRect() const
+    {
+        return frame_.rect_;
     }
 
     SizeF GetFrameSize() const
@@ -65,14 +95,9 @@ public:
         return frame_.rect_.GetOffset();
     }
 
-    const RectF& GetFrameRect() const
+    void SetFrameSize(const SizeF& size)
     {
-        return frame_.rect_;
-    }
-
-    void SetFrameOffset(const OffsetF& translate)
-    {
-        frame_.rect_.SetOffset(translate);
+        frame_.rect_.SetSize(size);
     }
 
     void SetContentSize(const SizeF& size)
@@ -91,6 +116,11 @@ public:
         content_->rect_.SetOffset(translate);
     }
 
+    RectF GetContentRect() const
+    {
+        return content_ ? content_->rect_ : RectF();
+    }
+
     SizeF GetContentSize() const
     {
         return content_ ? content_->rect_.GetSize() : SizeF();
@@ -106,14 +136,29 @@ public:
         return content_;
     }
 
-    const GeometryProperty& GetFrame() const
+    const std::unique_ptr<MarginPropertyF>& GetMargin() const
     {
-        return frame_;
+        return margin_;
     }
 
-    const std::unique_ptr<GeometryProperty>& GetBound() const
+    void UpdateMargin(const MarginPropertyF& margin)
     {
-        return bound_;
+        if (!margin_) {
+            margin_ = std::make_unique<MarginPropertyF>(margin);
+            return;
+        }
+        if (margin.left) {
+            margin_->left = margin.left;
+        }
+        if (margin.right) {
+            margin_->right = margin.right;
+        }
+        if (margin.top) {
+            margin_->top = margin.top;
+        }
+        if (margin.bottom) {
+            margin_->bottom = margin.bottom;
+        }
     }
 
     const OffsetF& GetParentGlobalOffset() const
@@ -154,8 +199,8 @@ private:
 
     // the frame size in parent local coordinate.
     GeometryProperty frame_;
-    // the size of border rect in current node local coordinate.
-    std::unique_ptr<GeometryProperty> bound_;
+    // the size of margin rect in current node local coordinate.
+    std::unique_ptr<MarginPropertyF> margin_;
     // the size of content rect in current node local coordinate.
     std::unique_ptr<GeometryProperty> content_;
 

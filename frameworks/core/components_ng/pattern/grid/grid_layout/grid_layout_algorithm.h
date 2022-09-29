@@ -20,27 +20,23 @@
 
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT GridLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(GridLayoutAlgorithm, LayoutAlgorithm);
+class ACE_EXPORT GridLayoutAlgorithm : public GridLayoutBaseAlgorithm {
+    DECLARE_ACE_TYPE(GridLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
     GridLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, int32_t crossCount, int32_t mainCount)
-        : gridLayoutInfo_(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
+        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
     ~GridLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
-
-    GridLayoutInfo GetGridLayoutInfo()
-    {
-        return gridLayoutInfo_;
-    }
 
 private:
     void InitGridCeils(LayoutWrapper* layoutWrapper, const SizeF& idealSize);
@@ -51,7 +47,6 @@ private:
     LayoutConstraintF CreateChildConstraint(const SizeF& idealSize, const RefPtr<GridLayoutProperty>& layoutProperty,
         int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan) const;
 
-    GridLayoutInfo gridLayoutInfo_;
     int32_t crossCount_ = 0;
     int32_t mainCount_ = 0;
     bool isVertical_ = true;

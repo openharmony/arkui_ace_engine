@@ -102,7 +102,7 @@ void ButtonLayoutAlgorithm::UpdateFrameSizeUsingChild(LayoutWrapper* layoutWrapp
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto childFrame = SizeF(-1, -1);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto childSize = child->GetGeometryNode()->GetFrameSize();
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         childFrame = childFrame > childSize ? childFrame : childSize;
     }
     childFrame.Constrain(minSize, maxSize);

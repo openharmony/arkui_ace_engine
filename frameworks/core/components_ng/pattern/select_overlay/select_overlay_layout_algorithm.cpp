@@ -33,8 +33,8 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
-    menu->GetGeometryNode()->SetFrameOffset(menuOffset);
-    menu->Layout(OffsetF());
+    menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
+    menu->Layout();
 }
 
 bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const std::shared_ptr<SelectOverlayInfo>& info)
@@ -62,8 +62,8 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
     double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
 
-    auto menuWidth = menuItem->GetGeometryNode()->GetFrameSize().Width();
-    auto menuHeight = menuItem->GetGeometryNode()->GetFrameSize().Height();
+    auto menuWidth = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
+    auto menuHeight = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
     OffsetF menuPosition;
     const auto& firstHandleRect = info_->firstHandle.paintRect;
     if (info_->isSingleHandle) {

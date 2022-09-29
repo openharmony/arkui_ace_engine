@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 
 #include "base/utils/utils.h"
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -28,7 +27,7 @@ namespace OHOS::Ace::NG {
 RefreshLayoutAlgorithm::RefreshLayoutAlgorithm() = default;
 
 std::optional<SizeF> RefreshLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper*  /*layoutWrapper*/)
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
 {
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
@@ -40,11 +39,9 @@ std::optional<SizeF> RefreshLayoutAlgorithm::MeasureContent(
 void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
 
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Layout(parentOffset);
+        child->Layout();
     }
 }
 // Called to perform layout render node and child.
@@ -76,9 +73,9 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
             paddingOffsetChild += layoutProperty->GetLoadingProcessOffsetValue();
             alignChild = Alignment::TOP_CENTER;
         }
-        auto translate = Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetFrameSize(), alignChild) +
+        auto translate = Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), alignChild) +
                          paddingOffsetChild;
-        child->GetGeometryNode()->SetFrameOffset(translate);
+        child->GetGeometryNode()->SetMarginFrameOffset(translate);
         index++;
     }
 }

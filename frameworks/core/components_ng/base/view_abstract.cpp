@@ -162,6 +162,18 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
 }
 
+void ViewAbstract::SetMargin(const CalcLength& value)
+{
+    MarginProperty margin;
+    margin.SetEdges(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin);
+}
+
+void ViewAbstract::SetMargin(const MarginProperty& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Margin, value);
+}
+
 void ViewAbstract::SetBorderRadius(const Dimension& value)
 {
     BorderRadiusProperty borderRadius;

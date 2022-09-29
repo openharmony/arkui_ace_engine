@@ -511,6 +511,7 @@ void RosenRenderContext::Restore()
 void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
 {
     ReCreateRsNodeTree(children);
+    RequestNextFrame();
 }
 
 std::list<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes(

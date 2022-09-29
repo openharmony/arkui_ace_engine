@@ -38,12 +38,10 @@ void LinearLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     } else {
         LOGW("fail to cast to LinearLayoutProperty");
     }
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
 
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     for (auto&& child : children) {
-        child->Layout(parentOffset);
+        child->Layout();
     }
 }
 

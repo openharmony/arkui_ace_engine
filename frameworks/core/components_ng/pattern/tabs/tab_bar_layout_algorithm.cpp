@@ -89,7 +89,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         childWrapper->Measure(childLayoutConstraint);
-        childrenMainSize_ += childWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis);
+        childrenMainSize_ += childWrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis);
     }
 }
 
@@ -103,7 +103,6 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto axis = GetAxis(layoutWrapper);
     auto frameSize = geometryNode->GetFrameSize();
 
-    auto parentOffset = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
     auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
     currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
     OffsetF childOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_));
@@ -113,11 +112,11 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto childGeometryNode = childWrapper->GetGeometryNode();
-        auto childFrameSize = childGeometryNode->GetFrameSize();
+        auto childFrameSize = childGeometryNode->GetMarginFrameSize();
         auto centerOffset =
             OffsetF(0, (frameSize.Height() - childFrameSize.Height()) / 2.0); // Center child in vertical.
-        childGeometryNode->SetFrameOffset(childOffset + centerOffset);
-        childWrapper->Layout(parentOffset);
+        childGeometryNode->SetMarginFrameOffset(childOffset + centerOffset);
+        childWrapper->Layout();
         tabItemOffset_.emplace_back(childOffset);
 
         if (axis == Axis::HORIZONTAL) {

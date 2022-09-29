@@ -57,6 +57,8 @@ public:
     static void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
+    static void SetMargin(const CalcLength& value);
+    static void SetMargin(const PaddingProperty& value);
     static void SetBorderRadius(const BorderRadiusProperty& value);
     static void SetBorderRadius(const Dimension& value);
     static void SetBorderColor(const Color& value);

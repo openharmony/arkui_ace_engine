@@ -182,12 +182,9 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     auto controlButtonLeftPx = ConvertToPx(controlButtonLeft, scaleProperty, parentWidth).value_or(0);
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);
 
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-
-    auto imgOffset = parentOffset + OffsetF(controlButtonLeftPx, controlButtonTopPx);
-    buttonLayoutWrapper->GetGeometryNode()->SetFrameOffset(imgOffset);
-    buttonLayoutWrapper->Layout(parentOffset);
+    auto imgOffset = OffsetF(controlButtonLeftPx, controlButtonTopPx);
+    buttonLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(imgOffset);
+    buttonLayoutWrapper->Layout();
 }
 
 void SideBarContainerLayoutAlgorithm::LayoutSideBar(
@@ -225,11 +222,9 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
             break;
     }
 
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    auto sideBarOffset = parentOffset + OffsetF(sideBarOffsetX, 0.0f);
-    sideBarLayoutWrapper->GetGeometryNode()->SetFrameOffset(sideBarOffset);
-    sideBarLayoutWrapper->Layout(parentOffset);
+    auto sideBarOffset = OffsetF(sideBarOffsetX, 0.0f);
+    sideBarLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset);
+    sideBarLayoutWrapper->Layout();
 }
 
 void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
@@ -250,12 +245,9 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
         }
     }
 
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    auto contentOffset = parentOffset + OffsetF(contentOffsetX, 0.0f);
-
-    contentLayoutWrapper->GetGeometryNode()->SetFrameOffset(contentOffset);
-    contentLayoutWrapper->Layout(parentOffset);
+    auto contentOffset = OffsetF(contentOffsetX, 0.0f);
+    contentLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(contentOffset);
+    contentLayoutWrapper->Layout();
 }
 
 } // namespace OHOS::Ace::NG

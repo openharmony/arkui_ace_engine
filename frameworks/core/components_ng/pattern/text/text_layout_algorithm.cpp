@@ -182,7 +182,7 @@ double TextLayoutAlgorithm::GetTextWidth() const
 {
     CHECK_NULL_RETURN(paragraph_, 0.0);
     // TODO: need check Line count
-    return paragraph_->GetMaxWidth();
+    return paragraph_->GetLongestLine();
 }
 
 const std::shared_ptr<RSParagraph>& TextLayoutAlgorithm::GetParagraph()
