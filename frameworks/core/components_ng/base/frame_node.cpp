@@ -444,6 +444,7 @@ void FrameNode::RebuildRenderContextTree()
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthVisibleFrame(children);
     renderContext_->RebuildFrame(this, children);
+    pattern_->OnRebuildFrame();
     needSyncRenderTree_ = false;
 }
 

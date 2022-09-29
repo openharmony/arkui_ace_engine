@@ -16,10 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
 
-#include <cstddef>
-#include <string>
-#include <utility>
-
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
@@ -43,11 +39,6 @@ public:
     VideoPattern() = default;
     explicit VideoPattern(const RefPtr<VideoControllerV2>& videoController);
     ~VideoPattern() override = default;
-
-    std::optional<std::string> GetSurfaceNodeName() const override
-    {
-        return "VideoSurface";
-    }
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -87,6 +78,8 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnRebuildFrame() override;
 
     void UpdateMediaPlayer();
     void PrepareMediaPlayer();
@@ -111,15 +104,24 @@ private:
     void OnResolutionChange() const;
     void OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnCompletion();
+    void OnSliderChange(float posTime, int32_t mode);
 
-    void IntTimeToText(uint32_t time, std::string& timeText) const;
+    void OnUpdateTime(uint32_t time, int pos) const;
 
     RefPtr<FrameNode> CreateControlBar();
     static RefPtr<FrameNode> CreateButton(const std::string& label, GestureEventFunc clickCallback);
+    static RefPtr<FrameNode> CreateText(uint32_t time);
+    RefPtr<FrameNode> CreateSlider();
+    void ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn);
+    void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
+    RefPtr<RenderContext> renderContextForMediaPlayer_ = RenderContext::Create();
+
+    GestureEventFunc playBtnCallBack_;
+    GestureEventFunc pauseBtnCallBack_;
 
     bool isStop_ = false;
     bool hasInit_ = false;
@@ -127,8 +129,6 @@ private:
 
     uint32_t duration_ = 0;
     uint32_t currentPos_ = 0;
-    std::string durationText_;
-    std::string currentPosText_;
 
     bool muted_ = false;
     bool autoPlay_ = false;

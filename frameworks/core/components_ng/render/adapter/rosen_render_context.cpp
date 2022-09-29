@@ -933,4 +933,17 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type) const
     return true;
 }
 
+void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, int index)
+{
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    auto child = rosenRenderContext->GetRSNode();
+    rsNode_->AddChild(child, index);
+}
+
+void RosenRenderContext::SetBounds(float positionX, float positionY, float width, float height)
+{
+    rsNode_->SetBounds(positionX, positionY, width, height);
+}
+
 } // namespace OHOS::Ace::NG

@@ -205,6 +205,8 @@ public:
     virtual void OnInActive() {}
     virtual void OnActive() {}
 
+    // Called after frameNode RebuildRenderContextTree.
+    virtual void OnRebuildFrame() {}
     // Called before frameNode CreateLayoutWrapper.
     virtual void BeforeCreateLayoutWrapper() {}
     // Called before frameNode CreatePaintWrapper.
