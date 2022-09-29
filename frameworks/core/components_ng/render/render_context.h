@@ -106,15 +106,15 @@ public:
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}
-    virtual void UpdateLinearGradient(const NG::Gradient& gradient) {}
 
-    // Add Transform in group
+    // Transform
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, Vector3F);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
 
+    // Background
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImage, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
@@ -125,6 +125,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
 
+    // Decoration
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
     ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
@@ -133,6 +134,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
+
     // Transition Options
     ACE_DEFINE_PROPERTY_GROUP(TransitionAppearing, TransitionOptions);
     ACE_DEFINE_PROPERTY_GROUP(TransitionDisappearing, TransitionOptions);
@@ -150,6 +152,12 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Clip, ClipProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, ClipPathNG);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipEdge, bool);
+
+    // Gradient
+    ACE_DEFINE_PROPERTY_GROUP(Gradient, GradientProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LinearGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, SweepGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, RadialGradient, NG::Gradient);
 
 protected:
     RenderContext() = default;
@@ -179,6 +187,10 @@ protected:
     virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
     
+    virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;

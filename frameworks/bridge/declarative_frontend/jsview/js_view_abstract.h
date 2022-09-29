@@ -78,7 +78,6 @@ public:
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
-    static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<MenuComponent> menuComponent);
 
     static void JsScale(const JSCallbackInfo& info);
@@ -211,6 +210,9 @@ public:
     static void JsLinearGradient(const JSCallbackInfo& info);
     static void JsRadialGradient(const JSCallbackInfo& info);
     static void JsSweepGradient(const JSCallbackInfo& info);
+    static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
+    static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
+    static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void JsMotionPath(const JSCallbackInfo& info);
     static void JsShadow(const JSCallbackInfo& info);
     static void JsGrayScale(const JSCallbackInfo& info);

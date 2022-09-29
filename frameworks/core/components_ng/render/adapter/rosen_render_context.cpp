@@ -124,9 +124,9 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
         PaintBackground();
     }
 
-    if (propBackDecoration_) {
+    if (propGradient_) {
         SizeF frameSize(paintRect.Width(), paintRect.Height());
-        PaintDecoration(frameSize);
+        PaintGradient(frameSize);
     }
 
     if (propClip_) {
@@ -832,30 +832,70 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     return effect;
 }
 
-void RosenRenderContext::PaintDecoration(const SizeF& frameSize)
+void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->HasLinearGradient()) {
-        auto gradient = backDecoration->GetLinearGradientValue();
+    auto& gradientProperty = GetOrCreateGradient();
+    if (gradientProperty->HasLinearGradient()) {
+        auto gradient = gradientProperty->GetLinearGradientValue();
+        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
+        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+    }
+    if (gradientProperty->HasRadialGradient()) {
+        auto gradient = gradientProperty->GetRadialGradientValue();
+        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
+        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+    }
+    if (gradientProperty->HasSweepGradient()) {
+        auto gradient = gradientProperty->GetSweepGradientValue();
         auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
         rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
     }
 }
 
-void RosenRenderContext::UpdateLinearGradient(const NG::Gradient& gradient)
+void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->UpdateLinearGradient(gradient)) {
-        auto frameNode = GetHost();
-        if (frameNode) {
-            SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-            if (frameSize.Width() != 0 && frameSize.Height() != 0) {
-                PaintDecoration(frameSize);
-            }
-            RequestNextFrame();
-        }
+    auto& gradientProperty = GetOrCreateGradient();
+    if (!gradientProperty || !gradientProperty->UpdateLinearGradient(gradient)) {
+        return;
     }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
+        PaintGradient(frameSize);
+    }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnRadialGradientUpdate(const NG::Gradient& gradient)
+{
+    auto& gradientProperty = GetOrCreateGradient();
+    if (!gradientProperty || !gradientProperty->UpdateRadialGradient(gradient)) {
+        return;
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
+        PaintGradient(frameSize);
+    }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnSweepGradientUpdate(const NG::Gradient& gradient)
+{
+    auto& gradientProperty = GetOrCreateGradient();
+    if (!gradientProperty || !gradientProperty->UpdateSweepGradient(gradient)) {
+        return;
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
+        PaintGradient(frameSize);
+    }
+    RequestNextFrame();
 }
 
 void RosenRenderContext::PaintClip(const SizeF& frameSize)
@@ -875,16 +915,16 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
 void RosenRenderContext::OnClipShapeUpdate(const ClipPathNG& clipPath)
 {
     auto& clip = GetOrCreateClip();
-    if (clip->UpdateClipShape(clipPath)) {
-        auto frameNode = GetHost();
-        if (frameNode) {
-            SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-            if (frameSize.Width() != 0 && frameSize.Height() != 0) {
-                PaintClip(frameSize);
-            }
-            RequestNextFrame();
-        }
+    if (!clip || !clip->UpdateClipShape(clipPath)) {
+        return;
     }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
+        PaintClip(frameSize);
+    }
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
