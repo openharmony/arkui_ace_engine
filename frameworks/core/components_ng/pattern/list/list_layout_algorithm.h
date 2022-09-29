@@ -167,7 +167,6 @@ private:
     bool playEdgeEffectAnimation_ = false;
     bool mainSizeIsDefined_ = false;
     float contentMainSize_ = 0.0f;
-    float mainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
     float edgeEffectOffset_ = 0.0f;

@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
+#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
@@ -74,6 +75,7 @@ public:
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
     std::list<RefPtr<LongPressEvent>> longPressEvents_;
 };
 

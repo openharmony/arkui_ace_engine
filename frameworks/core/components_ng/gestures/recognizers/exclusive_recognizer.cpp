@@ -29,12 +29,14 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
 {
     LOGD("the exclusive gesture recognizer has been accepted, touch id %{public}zu", touchId);
     if (refereePointers_.find(touchId) == refereePointers_.end()) {
+        LOGD("the exclusive gesture refereePointers_ can not find current touch id");
         return;
     }
 
     refereePointers_.erase(touchId);
 
     if (!activeRecognizer_) {
+        LOGD("the activeRecognizer is nullptr");
         return;
     }
 
@@ -44,7 +46,8 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
 
     for (auto& recognizer : recognizers_) {
         if (recognizer != activeRecognizer_) {
-            LOGD("the sub gesture %{public}s is rejected because one is accepted", AceType::TypeName(recognizer));
+            LOGD("the sub gesture %{public}s is rejected because %{public}s is accepted", AceType::TypeName(recognizer),
+                AceType::TypeName(activeRecognizer_));
             recognizer->OnRejected(touchId);
             recognizer->SetRefereeState(RefereeState::FAIL);
         }
@@ -66,9 +69,11 @@ void ExclusiveRecognizer::OnRejected(size_t touchId)
     LOGD("the exclusive gesture recognizer has been rejected! the touch id is %{public}zu", touchId);
     for (auto& recognizer : recognizers_) {
         if (recognizer->GetRefereeState() == RefereeState::FAIL) {
+            LOGD("the %{public}s gesture recognizer already failed", AceType::TypeName(recognizer));
             continue;
         }
 
+        LOGD("the %{public}s gesture recognizer call on reject", AceType::TypeName(recognizer));
         recognizer->OnRejected(touchId);
         if (recognizer->GetDetectState() == DetectState::READY) {
             recognizer->SetRefereeState(RefereeState::FAIL);

@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_UTILS_H
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
@@ -53,7 +56,11 @@ public:
     // Called to perform layout render node.
     static void Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign crossAlign, FlexAlign mainAlign);
 
-    static void LayoutCondition(LayoutConditions& layoutConditions);
+    static void LayoutCondition(
+        const std::list<RefPtr<LayoutWrapper>>& children, TextDirection direction, LayoutConditions& layoutConditions);
+
+    static OffsetF AdjustChildOnDirection(
+        const RefPtr<LayoutWrapper>& child, const OffsetF& offset, TextDirection direction, float parentWidth);
 };
 } // namespace OHOS::Ace::NG
 

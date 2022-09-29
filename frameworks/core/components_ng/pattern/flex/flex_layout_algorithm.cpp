@@ -677,8 +677,7 @@ void FlexLayoutAlgorithm::PlaceChildren(LayoutWrapper* layoutWrapper, float fron
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-    CHECK_NULL_RETURN(flexItemProperty, crossAxisAlign_);
-    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_);
+    return flexItemProperty ? flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) : crossAxisAlign_;
 }
 
 TextDirection FlexLayoutAlgorithm::AdjustTextDirectionByDir() const
