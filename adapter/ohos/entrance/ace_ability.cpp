@@ -732,8 +732,8 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
         ContainerScope scope(abilityId_);
         taskExecutor->PostTask(
             [container, keyboardRect] {
-                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-                if (context != nullptr) {
+                auto context = container->GetPipelineContext();
+                if (context) {
                     context->OnVirtualKeyboardAreaChange(keyboardRect);
                 }
             },

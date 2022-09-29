@@ -2011,16 +2011,12 @@ void PipelineContext::OnIdle(int64_t deadline)
     FlushPageUpdateTasks();
 }
 
-void PipelineContext::OnVirtualKeyboardAreaChange(Rect keyboardArea)
+void PipelineContext::OnVirtualKeyboardHeightChange(double keyboardHeight)
 {
     CHECK_RUN_ON(UI);
-    double keyboardHeight = keyboardArea.Height();
     double positionY = 0;
     if (textFieldManager_) {
         positionY = textFieldManager_->GetClickPosition().GetY();
-    }
-    if (NotifyVirtualKeyBoard(width_, height_, keyboardHeight)) {
-        return;
     }
     double offsetFix = (height_ - positionY) > 100.0 ? keyboardHeight - (height_ - positionY) / 2.0 : keyboardHeight;
     LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
@@ -2147,17 +2143,6 @@ void PipelineContext::NotifyWebPaint() const
             iterWebPaintCallback();
         }
     }
-}
-
-bool PipelineContext::NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
-{
-    CHECK_RUN_ON(UI);
-    for (auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
-        if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
-            return true;
-        }
-    }
-    return false;
 }
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -2847,7 +2832,7 @@ void PipelineContext::SetClickPosition(const Offset& position) const
     }
 }
 
-const RefPtr<OverlayElement> PipelineContext::GetOverlayElement() const
+const RefPtr<OverlayElement>& PipelineContext::GetOverlayElement() const
 {
     if (!rootElement_) {
         LOGE("Root element is null!");

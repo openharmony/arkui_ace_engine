@@ -186,6 +186,8 @@ protected:
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
+    void OnVirtualKeyboardHeightChange(double keyboardHeight) override;
+
     void FlushUITasks() override
     {
         taskScheduler_.FlushTask();

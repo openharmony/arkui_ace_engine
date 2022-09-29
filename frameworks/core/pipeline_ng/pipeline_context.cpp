@@ -296,6 +296,11 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     }
 }
 
+void PipelineContext::OnVirtualKeyboardHeightChange(double keyboardHeight)
+{
+    // TODO: add textfield opeartion.
+}
+
 bool PipelineContext::OnBackPressed()
 {
     LOGD("OnBackPressed");
