@@ -79,6 +79,11 @@ public:
         return MakeRefPtr<SwiperEventHub>();
     }
 
+    int32_t GetCurrentShownIndex() const
+    {
+        return currentIndex_;
+    }
+
     RefPtr<SwiperController> GetSwiperController() const
     {
         return swiperController_;

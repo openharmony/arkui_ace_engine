@@ -104,7 +104,7 @@ private:
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;
     std::set<int32_t> swiperChildren_;
-    std::map<int32_t, int32_t> tabBarItemIds_;         // Key is id of TabContent, value is id of Column of TabBar.
+    std::map<int32_t, int32_t> tabBarItemIds_;      // Key is id of TabContent, value is id of Column of TabBar.
     std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
 };
 

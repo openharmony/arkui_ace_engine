@@ -53,16 +53,52 @@ public:
 
     void OnAttachToMainTree() override
     {
-        LOGE("OLEG");
-        TabContentView::AddTabBarItem(Referenced::Claim(this));
+        auto tabs = TabContentView::FindTabsNode(Referenced::Claim(this));
+        if (!tabs) {
+            return;
+        }
+
+        auto swiper = tabs? tabs->GetTabs() : nullptr;
+        auto myIndex = swiper ? swiper->GetShallowIndex<TabContentNode>(GetId()).second : 0;
+
+        TabContentView::AddTabBarItem(Referenced::Claim(this), myIndex);
     }
 
     void OnDetachFromMainTree() override
     {
-        LOGE("OLEG ---");
-        // That is never called, because obkect in in the middle of distruction
+        // That is never called, because object in in the middle of distruction
         // virtual function is not working anymore
-        //TabContentView::RemoveTabBarItem(Referenced::Claim(this));
+
+        auto tabs = TabContentView::FindTabsNode(Referenced::Claim(this));
+
+        if (!tabs) {
+            LOGE("Tabs  not found");
+            return;
+        }
+
+        // Change focus to the other tab if current is being deleted
+        auto swiper = tabs? tabs->GetTabs() : nullptr;
+        auto pattern = swiper ? AceType::DynamicCast<FrameNode>(swiper)->GetPattern():nullptr;
+        auto swiperPattern = pattern? AceType::DynamicCast<SwiperPattern>(pattern) : nullptr;
+
+        auto deletedIdx = swiper->GetShallowIndex<TabContentNode>(GetId()).second;
+        auto currentIdx = swiperPattern->GetCurrentShownIndex();
+        LOGD( "Deleting tab: %{public}d, currentTab: %{public}d", deletedIdx,
+            swiperPattern->GetCurrentShownIndex());
+        if (swiperPattern) {
+            // Removing currently shown tab, focus on first after that
+            if (currentIdx == deletedIdx) {
+                swiperPattern->GetSwiperController()->SwipeTo(0);
+            }
+            TabContentView::RemoveTabBarItem(tabs, GetId());
+
+            // Removing tab before current, re-focus on the same tab with new index
+            if (currentIdx > deletedIdx) {
+                LOGD( "RE-activate TAB with new IDX %{public}d from idx %{public}d",
+                    currentIdx-1, deletedIdx);
+                swiperPattern->GetSwiperController()->SwipeTo(currentIdx-1);
+            }
+        }
     }
 
     static RefPtr<TabContentNode> GetOrCreateTabContentNode(

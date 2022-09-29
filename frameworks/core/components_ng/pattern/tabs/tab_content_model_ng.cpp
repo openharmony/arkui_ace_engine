@@ -95,8 +95,9 @@ RefPtr<TabsNode> TabContentView::FindTabsNode(const RefPtr<UINode>& tabContent)
     return nullptr;
 }
 
-void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent)
+void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position)
 {
+    LOGD("position %{public}d", position);
     CHECK_NULL_VOID(tabContent);
     auto tabContentId = tabContent->GetId();
 
@@ -145,9 +146,9 @@ void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent)
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
         textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<TextPattern>(); });
-        columnNode->MountToParent(tabBarNode);
         CHECK_NULL_VOID(textNode);
         CHECK_NULL_VOID(imageNode);
+        columnNode->MountToParent(tabBarNode, position);
         imageNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
     } else {
