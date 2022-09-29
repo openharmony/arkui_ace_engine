@@ -144,7 +144,11 @@ void JSRenderingContext::Destructor(JSRenderingContext* controller)
 void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
 {
     double width = 0.0;
-    width = pool_->GetWidth();
+    if (Container::IsCurrentUseNewPipeline()) {
+        width = customPaintPattern_->GetWidth();
+    } else {
+        width = pool_->GetWidth();
+    }
     width = SystemProperties::Px2Vp(width);
     auto returnValue = JSVal(ToJSValue(width));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
@@ -164,7 +168,11 @@ void JSRenderingContext::JsSetHeight(const JSCallbackInfo& info)
 void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 {
     double height = 0.0;
-    height = pool_->GetHeight();
+    if (Container::IsCurrentUseNewPipeline()) {
+        height = customPaintPattern_->GetHeight();
+    } else {
+        height = pool_->GetHeight();
+    }
     height = SystemProperties::Px2Vp(height);
     auto returnValue = JSVal(ToJSValue(height));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);

@@ -68,6 +68,16 @@ void CustomPaintPattern::StrokeRect(const Rect& rect)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::ClearRect(const Rect& rect)
+{
+    auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.ClearRect(paintWrapper, rect);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::Fill()
 {
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
@@ -208,6 +218,41 @@ void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::FillText(const std::string& text, double x, double y)
+{
+    auto task = [text, x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.FillText(paintWrapper, text, x, y);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::StrokeText(const std::string& text, double x, double y)
+{
+    auto task = [text, x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.StrokeText(paintWrapper, text, x, y);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+double CustomPaintPattern::MeasureText(const std::string& text, const PaintState& state)
+{
+    return paintMethod_->MeasureText(text, state);
+}
+
+double CustomPaintPattern::MeasureTextHeight(const std::string& text, const PaintState& state)
+{
+    return paintMethod_->MeasureTextHeight(text, state);
+}
+
+TextMetrics CustomPaintPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)
+{
+    return paintMethod_->MeasureTextMetrics(text, state);
+}
+
 void CustomPaintPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
 {
     auto task = [image, width, height](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
@@ -284,5 +329,105 @@ void CustomPaintPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
     paintMethod_->PushTask(task);
     auto host = GetHost();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+const LineDashParam& CustomPaintPattern::GetLineDash() const
+{
+    return paintMethod_->GetLineDash();
+}
+
+void CustomPaintPattern::UpdateLineDash(const std::vector<double>& segments)
+{
+    auto task = [segments](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetLineDash(segments);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Save()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Save();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Restore()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Restore();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Scale(double x, double y)
+{
+    auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Scale(x, y);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Rotate(double angle)
+{
+    auto task = [angle](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Rotate(angle);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::SetTransform(const TransformParam& param)
+{
+    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetTransform(param);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Transform(const TransformParam& param)
+{
+    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Transform(param);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Translate(double x, double y)
+{
+    auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Translate(x, y);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+std::string CustomPaintPattern::ToDataURL(const std::string& args)
+{
+    return paintMethod_->ToDataURL(args);
+}
+
+double CustomPaintPattern::GetWidth()
+{
+    return paintMethod_->GetWidth();
+}
+
+double CustomPaintPattern::GetHeight()
+{
+    return paintMethod_->GetHeight();
 }
 } // namespace OHOS::Ace::NG

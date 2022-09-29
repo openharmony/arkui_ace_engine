@@ -20,27 +20,19 @@
 #include "commonlibrary/c_utils/base/include/securec.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
-#include "third_party/skia/include/encode/SkJpegEncoder.h"
-#include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/encode/SkWebpEncoder.h"
-#include "third_party/skia/include/utils/SkBase64.h"
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/linear_map.h"
@@ -49,8 +41,6 @@
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
-#include "core/components/font/constants_converter.h"
-#include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_cache.h"
@@ -538,6 +528,24 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
         cacheBitmap_.eraseColor(0);
     }
+}
+
+void CustomPaintPaintMethod::ClearRect(PaintWrapper* paintWrapper, const Rect& rect)
+{
+    OffsetF offset;
+    if (isOffscreen_) {
+        offset = OffsetF(0, 0);
+    } else {
+        CHECK_NULL_VOID(paintWrapper);
+        offset = paintWrapper->GetContentOffset();
+    }
+
+    SkPaint paint;
+    paint.setAntiAlias(antiAlias_);
+    paint.setBlendMode(SkBlendMode::kClear);
+    auto skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
+        rect.Right() + offset.GetX(), rect.Bottom() + offset.GetY());
+    skCanvas_->drawRect(skRect, paint);
 }
 
 void CustomPaintPaintMethod::SetFillRuleForPath(const CanvasFillRule& rule)
@@ -1105,4 +1113,53 @@ void CustomPaintPaintMethod::Path2DSetTransform(const OffsetF& offset, const Pat
     skMatrix.setAll(scaleX, skewY, translateX, skewX, scaleY, translateY, 0.0f, 0.0f, 1.0f);
     skPath2d_.transform(skMatrix);
 }
+
+void CustomPaintPaintMethod::Save()
+{
+    SaveStates();
+    skCanvas_->save();
+}
+
+void CustomPaintPaintMethod::Restore()
+{
+    RestoreStates();
+    skCanvas_->restore();
+}
+
+void CustomPaintPaintMethod::Scale(double x, double y)
+{
+    skCanvas_->scale(x, y);
+}
+
+void CustomPaintPaintMethod::Rotate(double angle)
+{
+    skCanvas_->rotate(angle * 180 / M_PI);
+}
+
+void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
+{
+    double viewScale = context_->GetViewScale();
+    SkMatrix skMatrix;
+    if (isOffscreen_) {
+        skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX, param.skewX * viewScale,
+            param.scaleY * viewScale, param.translateY, 0, 0, 1);
+    } else {
+        skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX * viewScale,
+            param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
+    }
+    skCanvas_->setMatrix(skMatrix);
+}
+
+void CustomPaintPaintMethod::Transform(const TransformParam& param)
+{
+    SkMatrix skMatrix;
+    skMatrix.setAll(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
+    skCanvas_->concat(skMatrix);
+}
+
+void CustomPaintPaintMethod::Translate(double x, double y)
+{
+    skCanvas_->translate(x, y);
+}
+
 } // namespace OHOS::Ace::NG
