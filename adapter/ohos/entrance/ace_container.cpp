@@ -26,6 +26,7 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
@@ -945,8 +946,8 @@ void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* co
         TaskExecutor::TaskType::JS);
 }
 
-void AceContainer::AddAssetPath(
-    int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
+void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
+    const std::vector<std::string>& paths)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     if (!container) {
@@ -963,10 +964,20 @@ void AceContainer::AddAssetPath(
             container->frontend_->SetAssetManager(flutterAssetManager);
         }
     }
-    if (flutterAssetManager && !packagePath.empty()) {
+    if (!flutterAssetManager) {
+        return;
+    }
+    if (!hapPath.empty()) {
+        auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+        if (assetProvider->Initialize(hapPath, paths)) {
+            LOGI("Push AssetProvider to queue.");
+            flutterAssetManager->PushBack(std::move(assetProvider));
+        }
+    }
+    if (!packagePath.empty()) {
         auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
         if (assetProvider->Initialize(packagePath, paths)) {
-            LOGD("Push AssetProvider to queue.");
+            LOGI("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }

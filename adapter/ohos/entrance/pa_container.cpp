@@ -19,6 +19,7 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
 #include "base/log/ace_trace.h"
@@ -331,8 +332,8 @@ void PaContainer::DestroyContainer(int32_t instanceId)
     return;
 }
 
-void PaContainer::AddAssetPath(
-    int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
+void PaContainer::AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
+    const std::vector<std::string>& paths)
 {
     auto container = AceType::DynamicCast<PaContainer>(AceEngine::Get().GetContainer(instanceId));
     if (!container) {
@@ -347,7 +348,17 @@ void PaContainer::AddAssetPath(
         container->assetManager_ = flutterAssetManager;
         AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(flutterAssetManager);
     }
-    if (flutterAssetManager && !packagePath.empty()) {
+    if (!flutterAssetManager) {
+        return;
+    }
+    if (!hapPath.empty()) {
+        auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+        if (assetProvider->Initialize(hapPath, paths)) {
+            LOGI("Push AssetProvider to queue.");
+            flutterAssetManager->PushBack(std::move(assetProvider));
+        }
+    }
+    if (!packagePath.empty()) {
         auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
         if (assetProvider->Initialize(packagePath, paths)) {
             LOGI("Push AssetProvider to queue.");

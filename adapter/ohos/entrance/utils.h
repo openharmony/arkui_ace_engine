@@ -19,53 +19,13 @@
 #include <string>
 
 #include "base/log/log.h"
+#include "runtime_extractor.h"
 
 namespace OHOS::Ace {
 
-inline bool GetIsArkFromConfig(const std::string& packagePathStr)
-{
-    auto configPath = packagePathStr + std::string("config.json");
-    char realPath[PATH_MAX] = { 0x00 };
-    if (realpath(configPath.c_str(), realPath) == nullptr) {
-        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
-        LOGE("return not arkApp.");
-        return false;
-    }
-    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-    if (!file) {
-        LOGE("open file failed, filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
-        LOGE("return not arkApp.");
-        return false;
-    }
-    if (std::fseek(file.get(), 0, SEEK_END) != 0) {
-        LOGE("seek file tail error, return not arkApp.");
-        return false;
-    }
-
-    int64_t size = std::ftell(file.get());
-    if (size == -1L) {
-        return false;
-    }
-    char *fileData = new (std::nothrow) char[size];
-    if (fileData == nullptr) {
-        LOGE("new json buff failed, return not arkApp.");
-        return false;
-    }
-    rewind(file.get());
-    std::unique_ptr<char[]> jsonStream(fileData);
-    size_t result = std::fread(jsonStream.get(), 1, size, file.get());
-    if (result != (size_t)size) {
-        LOGE("read file failed, return not arkApp.");
-        return false;
-    }
-
-    std::string jsonString(jsonStream.get(), jsonStream.get() + size);
-    auto rootJson = JsonUtil::ParseJsonString(jsonString);
-    auto module = rootJson->GetValue("module");
-    auto distro = module->GetValue("distro");
-    std::string virtualMachine = distro->GetString("virtualMachine");
-    return virtualMachine.find("ark") != std::string::npos;
-}
+std::string GetStringFromFile(const std::string& packagePathStr, const std::string& fileName);
+std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName);
+bool GetIsArkFromConfig(const std::string& packagePathStr, bool isHap);
 
 inline const std::string GenerateFullPath(const std::string& prePath, const std::string& postPath)
 {
@@ -84,7 +44,6 @@ inline const std::string GenerateFullPath(const std::string& prePath, const std:
     }
     return fullPath;
 }
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_UTILS_H

@@ -81,8 +81,11 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     }
 
     // init form ability
+    bool isHap = !moduleInfo->hapPath.empty();
+    std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     BackendType backendType = BackendType::FORM;
-    bool isArkApp = GetIsArkFromConfig(packagePathStr);
+    bool isArkApp = GetIsArkFromConfig(packagePath, isHap);
+    
     Platform::PaContainer::CreateContainer(instanceId_, backendType, isArkApp, this,
         std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
 
@@ -90,11 +93,11 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceFormAbility srcPath:%{public}s url:%{public}s", info->srcPath.c_str(), parsedUrl.c_str());
         auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
-        Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, assetBasePathStr);
+        Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
         LOGI("AceFormAbility parsedUrl:%{public}s", parsedUrl.c_str());
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-        Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, assetBasePathStr);
+        Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
     std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
     if (appInfo) {

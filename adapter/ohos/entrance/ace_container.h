@@ -239,7 +239,8 @@ public:
     static void OnConfigurationUpdated(int32_t instanceId, const std::string& configuration);
     static void OnNewRequest(int32_t instanceId, const std::string& data);
     static void OnDialogUpdated(int32_t instanceId, const std::string& data);
-    static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
+    static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
+        const std::vector<std::string>& paths);
     static void AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath);
     static void SetView(AceView* view, double density, int32_t width, int32_t height,
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);

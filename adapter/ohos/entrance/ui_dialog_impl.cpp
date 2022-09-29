@@ -251,7 +251,7 @@ void UIDialogImpl::ShowDialog(const std::string& name, const std::string& params
 
     std::string packagePathStr = "/system/etc/SADialog/";
     std::vector<std::string> assetBasePathStr = { name + "/" };
-    Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, assetBasePathStr);
+    Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, "", assetBasePathStr);
 
     Ace::Platform::UIEnvCallback callback = nullptr;
     callback =
