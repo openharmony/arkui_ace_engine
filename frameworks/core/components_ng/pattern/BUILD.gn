@@ -33,6 +33,7 @@ build_component_ng("pattern_ng") {
     "calendar/calendar_layout_algorithm.cpp",
     "calendar/calendar_month_pattern.cpp",
     "calendar/calendar_month_view.cpp",
+    "calendar/calendar_paint_method.cpp",
     "calendar/calendar_pattern.cpp",
     "calendar/calendar_view.cpp",
     "checkbox/checkbox_layout_algorithm.cpp",

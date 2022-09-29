@@ -84,8 +84,12 @@ void CalendarView::Create(const CalendarData& calendarData)
         nextPattern->SetCalendarController(calendarData.controller);
     }
     preMonthFrameNode->MountToParent(swiperNode);
+    preMonthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     currentMonthFrameNode->MountToParent(swiperNode);
+    currentMonthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     nextMonthFrameNode->MountToParent(swiperNode);
+    nextMonthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
     swiperNode->MarkModifyDone();
     stack->Push(frameNode);
 }
@@ -417,7 +421,7 @@ void CalendarView::SetWorkStateStyle(const WorkStateStyle& workStateStyle)
     }
 }
 
-void CalendarView::SetSelectedChangeEvent(std::function<void(const std::string&)>&& selectedChangeEvent)
+void CalendarView::SetSelectedChangeEvent(const std::function<void(const std::string&)>& selectedChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -427,10 +431,9 @@ void CalendarView::SetSelectedChangeEvent(std::function<void(const std::string&)
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
         CHECK_NULL_VOID(calendarFrameNode);
         auto pattern = calendarFrameNode->GetPattern<CalendarMonthPattern>();
-        auto eventHub = calendarFrameNode->GetEventHub<EventHub>();
-        auto calendarEventHub = AceType::DynamicCast<CalendarEventHub>(eventHub);
+        auto calendarEventHub = pattern->GetEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
-        calendarEventHub->SetSelectedChangeEvent(std::move(selectedChangeEvent));
+        calendarEventHub->SetSelectedChangeEvent(selectedChangeEvent);
     }
 }
 

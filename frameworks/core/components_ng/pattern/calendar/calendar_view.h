@@ -46,7 +46,7 @@ public:
     static void SetTodayStyle(const TodayStyle& todayStyle);
     static void SetWeekStyle(const WeekStyle& weekStyle);
     static void SetWorkStateStyle(const WorkStateStyle& workStateStyle);
-    static void SetSelectedChangeEvent(std::function<void(const std::string&)>&& selectedChangeEvent);
+    static void SetSelectedChangeEvent(const std::function<void(const std::string&)>& selectedChangeEvent);
     static void SetOnRequestDataEvent(std::function<void(const std::string&)>&& requestDataEvent);
     static void SetCurrentData(const ObtainedMonth& currentData);
     static void SetPreData(const ObtainedMonth& preData);

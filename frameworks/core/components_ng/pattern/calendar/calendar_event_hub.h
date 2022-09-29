@@ -34,9 +34,9 @@ public:
     CalendarEventHub() = default;
     ~CalendarEventHub() override = default;
 
-    void SetSelectedChangeEvent(SelectedChangeEvent&& selectedChangeEvent)
+    void SetSelectedChangeEvent(const SelectedChangeEvent& selectedChangeEvent)
     {
-        changeEvent_ = std::move(selectedChangeEvent);
+        changeEvent_ = selectedChangeEvent;
     }
 
     void UpdateSelectedChangeEvent(const std::string& info) const
