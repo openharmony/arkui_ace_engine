@@ -602,6 +602,10 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    if (!isActive_) {
+        LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
+        return HitTestResult::OUT_OF_REGION;
+    }
     auto responseRegionList = GetResponseRegionList();
     if (SystemProperties::GetDebugEnabled()) {
         LOGD("TouchTest: point is %{public}s in %{public}s", parentLocalPoint.ToString().c_str(), GetTag().c_str());
