@@ -161,11 +161,67 @@ void ListLayoutAlgorithm::LayoutListInIndexMode(
     if (lanes_.has_value() && lanes_.value() > 1) {
         // first layout Forward.
         LayoutForwardForLaneList(layoutWrapper, layoutConstraint, axis);
-        // TODO: need to check the size if the item already fill the list.
+        if (itemPosition_[endIndex_.value_or(0)].second < contentMainSize_) {
+            auto movePosition = contentMainSize_ - itemPosition_[endIndex_.value_or(0)].second;
+            for (auto index = startIndex_.value_or(0); index <= endIndex_.value_or(0); index++) {
+                itemPosition_[index].first = itemPosition_[index].first + movePosition;
+                itemPosition_[index].second = itemPosition_[index].second + movePosition;
+            }
+            currentOffset_ = currentOffset_ + movePosition;
+    
+            preEndIndex_ = startIndex_.value_or(0);
+            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(preEndIndex_);
+            CHECK_NULL_VOID(childWrapper);
+            if (axis == Axis::VERTICAL) {
+                childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, itemPosition_[preEndIndex_].first));
+            } else {
+                childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(itemPosition_[preEndIndex_].first, 0));
+            }
+            auto saveEndIndex = endIndex_.value_or(0);
+            LayoutBackwardForLaneList(layoutWrapper, layoutConstraint, axis);
+            endIndex_ = saveEndIndex;
+    
+            if (startIndex_.value_or(0) == 0 && itemPosition_[0].first > 0) {
+                movePosition = itemPosition_[0].first;
+                for (auto index = startIndex_.value_or(0); index <= endIndex_.value_or(0); index++) {
+                    itemPosition_[index].first = itemPosition_[index].first - movePosition;
+                    itemPosition_[index].second = itemPosition_[index].second - movePosition;
+                }
+                currentOffset_ = currentOffset_ - movePosition;
+            }
+        }
         return;
     }
     LayoutForward(layoutWrapper, layoutConstraint, axis);
-    // TODO: need to check the size if the item already fill the list.
+    if (itemPosition_[endIndex_.value_or(0)].second < contentMainSize_) {
+        auto movePosition = contentMainSize_ - itemPosition_[endIndex_.value_or(0)].second;
+        for (auto index = startIndex_.value_or(0); index <= endIndex_.value_or(0); index++) {
+            itemPosition_[index].first = itemPosition_[index].first + movePosition;
+            itemPosition_[index].second = itemPosition_[index].second + movePosition;
+        }
+        currentOffset_ = currentOffset_ + movePosition;
+    
+        preEndIndex_ = startIndex_.value_or(0);
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(preEndIndex_);
+        CHECK_NULL_VOID(childWrapper);
+        if (axis == Axis::VERTICAL) {
+            childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, itemPosition_[preEndIndex_].first));
+        } else {
+            childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(itemPosition_[preEndIndex_].first, 0));
+        }
+        auto saveEndIndex = endIndex_.value_or(0);
+        LayoutBackward(layoutWrapper, layoutConstraint, axis);
+        endIndex_ = saveEndIndex;
+    
+        if (startIndex_.value_or(0) == 0 && itemPosition_[0].first > 0) {
+            movePosition = itemPosition_[0].first;
+            for (auto index = startIndex_.value_or(0); index <= endIndex_.value_or(0); index++) {
+                itemPosition_[index].first = itemPosition_[index].first - movePosition;
+                itemPosition_[index].second = itemPosition_[index].second - movePosition;
+            }
+            currentOffset_ = currentOffset_ - movePosition;
+        }
+    }
 }
 
 void ListLayoutAlgorithm::LayoutListInOffsetMode(
