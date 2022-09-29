@@ -203,7 +203,6 @@ build_component_ng("pattern_ng") {
     "xcomponent/xcomponent_pattern.cpp",
     "xcomponent/xcomponent_view.cpp",
   ]
-
 }
 
 build_component_ng("pattern_ability_component_ng") {
