@@ -61,7 +61,7 @@ protected:
             curFrameNode = parentFrameNode;
             parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
         }
-        return MakeRefPtr<ShapePaintProperty>(propertiesFromAncestor.Clone());
+        return DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone());
     }
 
 private:
