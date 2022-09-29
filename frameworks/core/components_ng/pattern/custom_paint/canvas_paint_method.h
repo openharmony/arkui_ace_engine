@@ -66,7 +66,7 @@ public:
         return lastLayoutSize_.Height();
     }
 
-    std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height) override;
+    std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
     std::string ToDataURL(const std::string& args);
 

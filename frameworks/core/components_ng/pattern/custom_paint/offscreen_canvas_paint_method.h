@@ -28,7 +28,7 @@ public:
     OffscreenCanvasPaintMethod(const RefPtr<PipelineContext> context, int32_t width, int32_t height);
     ~OffscreenCanvasPaintMethod() override = default;
 
-    std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height) override;
+    std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     std::string ToDataURL(const std::string& type, const double quality);
 
     void FillText(const std::string& text, double x, double y, const PaintState& state);

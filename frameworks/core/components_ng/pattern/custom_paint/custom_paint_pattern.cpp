@@ -304,9 +304,254 @@ void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPat
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::UpdateGlobalAlpha(double alpha)
+{
+    auto task = [alpha](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetAlpha(alpha); ;
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateCompositeOperation(CompositeOperation type)
+{
+    auto task = [type](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetCompositeType(type);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateSmoothingEnabled(bool enabled)
+{
+    auto task = [enabled](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetSmoothingEnabled(enabled);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateLineCap(LineCapStyle cap)
+{
+    auto task = [cap](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetLineCap(cap);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateLineDashOffset(double dash)
+{
+    auto task = [dash](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetLineDashOffset(dash);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateLineJoin(LineJoinStyle join)
+{
+    auto task = [join](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetLineJoin(join);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateLineWidth(double width)
+{
+    auto task = [width](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetLineWidth(width);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateMiterLimit(double limit)
+{
+    auto task = [limit](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetMiterLimit(limit);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateShadowBlur(double blur)
+{
+    auto task = [blur](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetShadowBlur(blur);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateShadowColor(const Color& color)
+{
+    auto task = [color](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetShadowColor(color);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateShadowOffsetX(double offsetX)
+{
+    auto task = [offsetX](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetShadowOffsetX(offsetX);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateShadowOffsetY(double offsetY)
+{
+    auto task = [offsetY](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetShadowOffsetY(offsetY);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateTextAlign(TextAlign align)
+{
+    auto task = [align](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetTextAlign(align);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateTextBaseline(TextBaseline baseline)
+{
+    auto task = [baseline](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetTextBaseline(baseline);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateStrokePattern(const Ace::Pattern& pattern)
+{
+    auto task = [pattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetStrokePattern(pattern);
+        paintMethod.SetStrokeGradient(Ace::Gradient());
+        paintMethod.SetStrokeColor(Color());
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateStrokeColor(const Color& color)
+{
+    auto task = [color](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetStrokeColor(color);
+        paintMethod.SetStrokePattern(Ace::Pattern());
+        paintMethod.SetStrokeGradient(Ace::Gradient());
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
+{
+    auto task = [grad](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetStrokeGradient(grad);
+        paintMethod.SetStrokeColor(Color());
+        paintMethod.SetStrokePattern(Ace::Pattern());
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateFontWeight(FontWeight weight)
+{
+    auto task = [weight](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFontWeight(weight);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateFontStyle(FontStyle style)
+{
+    auto task = [style](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFontStyle(style);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateFontFamilies(const std::vector<std::string>& families)
+{
+    auto task = [families](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFontFamilies(families);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateFontSize(const Dimension& size)
+{
+    auto task = [size](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFontSize(size);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::UpdateFillColor(const Color& color)
 {
-    paintMethod_->SetFillColor(color);
+    auto task = [color](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFillColor(color);
+        paintMethod.SetFillPattern(Ace::Pattern());
+        paintMethod.SetFillGradient(Ace::Gradient());
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateFillGradient(const Ace::Gradient& gradient)
+{
+    auto task = [gradient](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFillGradient(gradient);
+        paintMethod.SetFillColor(Color());
+        paintMethod.SetFillPattern(Ace::Pattern());
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::UpdateFillPattern(const Ace::Pattern& pattern)
+{
+    auto task = [pattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFillPattern(pattern);
+        paintMethod.SetFillGradient(Ace::Gradient());
+        paintMethod.SetFillColor(Color());
+    };
+    paintMethod_->PushTask(task);
     auto host = GetHost();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

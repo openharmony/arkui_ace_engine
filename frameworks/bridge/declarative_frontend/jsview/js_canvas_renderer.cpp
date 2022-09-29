@@ -293,37 +293,68 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
     for (const auto& fontProp : fontProps) {
         if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
             auto weight = ConvertStrToFontWeight(fontProp);
-            if (isOffscreen_) {
-                offscreenCanvas_->SetFontWeight(weight);
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetFontWeight(weight);
+                } else {
+                    customPaintPattern_->UpdateFontWeight(weight);
+                }
             } else {
-                pool_->UpdateFontWeight(weight);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetFontWeight(weight);
+                } else {
+                    pool_->UpdateFontWeight(weight);
+                }
             }
-
             style_.SetFontWeight(weight);
         } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
             updateFontStyle = true;
             auto fontStyle = ConvertStrToFontStyle(fontProp);
-            if (isOffscreen_) {
-                offscreenCanvas_->SetFontStyle(fontStyle);
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetFontStyle(fontStyle);
+                } else {
+                    customPaintPattern_->UpdateFontStyle(fontStyle);
+                }
             } else {
-                pool_->UpdateFontStyle(fontStyle);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetFontStyle(fontStyle);
+                } else {
+                    pool_->UpdateFontStyle(fontStyle);
+                }
             }
             style_.SetFontStyle(fontStyle);
         } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
             auto families = ConvertStrToFontFamilies(fontProp);
-            if (isOffscreen_) {
-                offscreenCanvas_->SetFontFamilies(families);
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetFontFamilies(families);
+                } else {
+                    customPaintPattern_->UpdateFontFamilies(families);
+                }
             } else {
-                pool_->UpdateFontFamilies(families);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetFontFamilies(families);
+                } else {
+                    pool_->UpdateFontFamilies(families);
+                }
             }
             style_.SetFontFamilies(families);
         } else if (fontProp.find("px") != std::string::npos) {
             std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
             auto size = Dimension(StringToDouble(fontProp));
-            if (isOffscreen_) {
-                offscreenCanvas_->SetFontSize(size);
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetFontSize(size);
+                } else {
+                    customPaintPattern_->UpdateFontSize(size);
+                }
             } else {
-                pool_->UpdateFontSize(size);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetFontSize(size);
+                } else {
+                    pool_->UpdateFontSize(size);
+                }
             }
             style_.SetFontSize(size);
         } else {
@@ -331,10 +362,18 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
         }
     }
     if (!updateFontStyle) {
-        if (isOffscreen_) {
-            offscreenCanvas_->SetFontStyle(FontStyle::NORMAL);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetFontStyle(FontStyle::NORMAL);
+            } else {
+                customPaintPattern_->UpdateFontStyle(FontStyle::NORMAL);
+            }
         } else {
-            pool_->UpdateFontStyle(FontStyle::NORMAL);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetFontStyle(FontStyle::NORMAL);
+            } else {
+                pool_->UpdateFontStyle(FontStyle::NORMAL);
+            }
         }
     }
 }
@@ -462,7 +501,7 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
 
         if (Container::IsCurrentUseNewPipeline()) {
             if (isOffscreen_) {
-                offscreenCanvasPattern_->UpdateFillColor(color);
+                offscreenCanvasPattern_->SetFillColor(color);
             } else {
                 customPaintPattern_->UpdateFillColor(color);
             }
@@ -487,20 +526,36 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
             if (!gradient) {
                 return;
             }
-            if (isOffscreen_) {
-                offscreenCanvas_->SetFillGradient(*gradient);
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetFillGradient(*gradient);
+                } else {
+                    customPaintPattern_->UpdateFillGradient(*gradient);
+                }
             } else {
-                pool_->UpdateFillGradient(*gradient);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetFillGradient(*gradient);
+                } else {
+                    pool_->UpdateFillGradient(*gradient);
+                }
             }
         } else if (type == "pattern") {
             JSRef<JSVal> typeValue = obj->GetProperty("__id");
             int32_t id;
             ParseJsInt(typeValue, id);
             auto pattern = GetPattern(id);
-            if (isOffscreen_) {
-                offscreenCanvas_->SetFillPattern(pattern);
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetFillPattern(pattern);
+                } else {
+                    customPaintPattern_->UpdateFillPattern(pattern);
+                }
             } else {
-                pool_->UpdateFillPattern(pattern);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetFillPattern(pattern);
+                } else {
+                    pool_->UpdateFillPattern(pattern);
+                }
             }
         } else {
             LOGW("unsupported function for stroke style.");
@@ -514,17 +569,24 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-
     std::string type = "";
     if (info[0]->IsString()) {
         std::string colorStr = "";
         JSViewAbstract::ParseJsString(info[0], colorStr);
         auto color = Color::FromString(colorStr);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetStrokeColor(color);
-        } else {
-            pool_->UpdateStrokeColor(color);
-        }
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetStrokeColor(color);
+                } else {
+                    customPaintPattern_->UpdateStrokeColor(color);
+                }
+            } else {
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetStrokeColor(color);
+                } else {
+                    pool_->UpdateStrokeColor(color);
+                }
+            }
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> typeValue = obj->GetProperty("__type");
@@ -539,20 +601,36 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
             if (!gradient) {
                 return;
             }
-            if (isOffscreen_) {
-                offscreenCanvas_->SetStrokeGradient(*gradient);
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetStrokeGradient(*gradient);
+                } else {
+                    customPaintPattern_->UpdateStrokeGradient(*gradient);
+                }
             } else {
-                pool_->UpdateStrokeGradient(*gradient);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetStrokeGradient(*gradient);
+                } else {
+                    pool_->UpdateStrokeGradient(*gradient);
+                }
             }
         } else if (type == "pattern") {
             JSRef<JSVal> typeValue = obj->GetProperty("__id");
             int32_t id;
             ParseJsInt(typeValue, id);
             auto pattern = GetPattern(id);
-            if (isOffscreen_) {
-                offscreenCanvas_->SetStrokePattern(pattern);
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetStrokePattern(pattern);
+                } else {
+                    customPaintPattern_->UpdateStrokePattern(pattern);
+                }
             } else {
-                pool_->UpdateStrokePattern(pattern);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetStrokePattern(pattern);
+                } else {
+                    pool_->UpdateStrokePattern(pattern);
+                }
             }
         } else {
             LOGW("unsupported function for stroke style.");
@@ -1076,10 +1154,18 @@ void JSCanvasRenderer::JsSetLineCap(const JSCallbackInfo& info)
             { "square", LineCapStyle::SQUARE },
         };
         auto lineCap = ConvertStrToEnum(capStr.c_str(), lineCapTable, ArraySize(lineCapTable), LineCapStyle::BUTT);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetLineCap(lineCap);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetLineCap(lineCap);
+            } else {
+                customPaintPattern_->UpdateLineCap(lineCap);
+            }
         } else {
-            pool_->UpdateLineCap(lineCap);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetLineCap(lineCap);
+            } else {
+                pool_->UpdateLineCap(lineCap);
+            }
         }
     }
 }
@@ -1096,10 +1182,18 @@ void JSCanvasRenderer::JsSetLineJoin(const JSCallbackInfo& info)
         };
         auto lineJoin = ConvertStrToEnum(
             joinStr.c_str(), lineJoinTable, ArraySize(lineJoinTable), LineJoinStyle::MITER);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetLineJoin(lineJoin);
-        } else {
-            pool_->UpdateLineJoin(lineJoin);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetLineJoin(lineJoin);
+            } else {
+                customPaintPattern_->UpdateLineJoin(lineJoin);
+            }
+        } else {            
+            if (isOffscreen_) {
+                offscreenCanvas_->SetLineJoin(lineJoin);
+            } else {
+                pool_->UpdateLineJoin(lineJoin);
+            }
         }
     }
 }
@@ -1110,10 +1204,18 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
         double limit = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], limit);
         limit = SystemProperties::Vp2Px(limit);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetMiterLimit(limit);
-        } else {
-            pool_->UpdateMiterLimit(limit);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetMiterLimit(limit);
+            } else {
+                customPaintPattern_->UpdateMiterLimit(limit);
+            }
+        } else {            
+            if (isOffscreen_) {
+                offscreenCanvas_->SetMiterLimit(limit);
+            } else {
+                pool_->UpdateMiterLimit(limit);
+            }
         }
     }
 }
@@ -1124,10 +1226,18 @@ void JSCanvasRenderer::JsSetLineWidth(const JSCallbackInfo& info)
         double lineWidth = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], lineWidth);
         lineWidth = SystemProperties::Vp2Px(lineWidth);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetLineWidth(lineWidth);
-        } else {
-            pool_->UpdateLineWidth(lineWidth);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetLineWidth(lineWidth);
+            } else {
+                customPaintPattern_->UpdateLineWidth(lineWidth);
+            }
+        } else {            
+            if (isOffscreen_) {
+                offscreenCanvas_->SetLineWidth(lineWidth);
+            } else {
+                pool_->UpdateLineWidth(lineWidth);
+            }
         }
     }
 }
@@ -1137,10 +1247,18 @@ void JSCanvasRenderer::JsSetGlobalAlpha(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double alpha = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], alpha);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetAlpha(alpha);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetAlpha(alpha);
+            } else {
+                customPaintPattern_->UpdateGlobalAlpha(alpha);
+            }
         } else {
-            pool_->UpdateGlobalAlpha(alpha);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetAlpha(alpha);
+            } else {
+                pool_->UpdateGlobalAlpha(alpha);
+            }
         }
     }
 }
@@ -1168,10 +1286,18 @@ void JSCanvasRenderer::JsSetGlobalCompositeOperation(const JSCallbackInfo& info)
         auto type = ConvertStrToEnum(
             compositeStr.c_str(), compositeOperationTable,
             ArraySize(compositeOperationTable), CompositeOperation::SOURCE_OVER);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetCompositeType(type);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetCompositeType(type);
+            } else {
+                customPaintPattern_->UpdateCompositeOperation(type);
+            }
         } else {
-            pool_->UpdateCompositeOperation(type);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetCompositeType(type);
+            } else {
+                pool_->UpdateCompositeOperation(type);
+            }
         }
     }
 }
@@ -1182,10 +1308,18 @@ void JSCanvasRenderer::JsSetLineDashOffset(const JSCallbackInfo& info)
         double lineDashOffset = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], lineDashOffset);
         lineDashOffset = SystemProperties::Vp2Px(lineDashOffset);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetLineDashOffset(lineDashOffset);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetLineDashOffset(lineDashOffset);
+            } else {
+                customPaintPattern_->UpdateLineDashOffset(lineDashOffset);
+            }
         } else {
-            pool_->UpdateLineDashOffset(lineDashOffset);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetLineDashOffset(lineDashOffset);
+            } else {
+                pool_->UpdateLineDashOffset(lineDashOffset);
+            }
         }
     }
 }
@@ -1195,10 +1329,18 @@ void JSCanvasRenderer::JsSetShadowBlur(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double blur = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], blur);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetShadowBlur(blur);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetShadowBlur(blur);
+            } else {
+                customPaintPattern_->UpdateShadowBlur(blur);
+            }
         } else {
-            pool_->UpdateShadowBlur(blur);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetShadowBlur(blur);
+            } else {
+                pool_->UpdateShadowBlur(blur);
+            }
         }
     }
 }
@@ -1209,10 +1351,18 @@ void JSCanvasRenderer::JsSetShadowColor(const JSCallbackInfo& info)
         std::string colorStr = "";
         JSViewAbstract::ParseJsString(info[0], colorStr);
         auto color = Color::FromString(colorStr);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetShadowColor(color);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetShadowColor(color);
+            } else {
+                customPaintPattern_->UpdateShadowColor(color);
+            }
         } else {
-            pool_->UpdateShadowColor(color);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetShadowColor(color);
+            } else {
+                pool_->UpdateShadowColor(color);
+            }
         }
     }
 }
@@ -1223,10 +1373,18 @@ void JSCanvasRenderer::JsSetShadowOffsetX(const JSCallbackInfo& info)
         double offsetX = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], offsetX);
         offsetX = SystemProperties::Vp2Px(offsetX);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetShadowOffsetX(offsetX);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetShadowOffsetX(offsetX);
+            } else {
+                customPaintPattern_->UpdateShadowOffsetX(offsetX);
+            }
         } else {
-            pool_->UpdateShadowOffsetX(offsetX);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetShadowOffsetX(offsetX);
+            } else {
+                pool_->UpdateShadowOffsetX(offsetX);
+            }
         }
     }
 }
@@ -1237,10 +1395,18 @@ void JSCanvasRenderer::JsSetShadowOffsetY(const JSCallbackInfo& info)
         double offsetY = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], offsetY);
         offsetY = SystemProperties::Vp2Px(offsetY);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetShadowOffsetY(offsetY);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetShadowOffsetY(offsetY);
+            } else {
+                customPaintPattern_->UpdateShadowOffsetY(offsetY);
+            }
         } else {
-            pool_->UpdateShadowOffsetY(offsetY);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetShadowOffsetY(offsetY);
+            } else {
+                pool_->UpdateShadowOffsetY(offsetY);
+            }
         }
     }
 }
@@ -1254,10 +1420,18 @@ void JSCanvasRenderer::JsSetImageSmoothingEnabled(const JSCallbackInfo& info)
 
     bool enabled = false;
     if (JSViewAbstract::ParseJsBool(info[0], enabled)) {
-        if (isOffscreen_) {
-            offscreenCanvas_->SetSmoothingEnabled(enabled);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetSmoothingEnabled(enabled);
+            } else {
+                customPaintPattern_->UpdateSmoothingEnabled(enabled);
+            }
         } else {
-            pool_->UpdateSmoothingEnabled(enabled);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetSmoothingEnabled(enabled);
+            } else {
+                pool_->UpdateSmoothingEnabled(enabled);
+            }
         }
     }
 }
@@ -1907,11 +2081,9 @@ void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
 {
     std::vector<double> lineDash;
     ParseJsDoubleArray(info[0], lineDash);
-
     if (lineDash.size() % 2 != 0) {
         lineDash.insert(lineDash.end(), lineDash.begin(), lineDash.end());
     }
-
 
     if (Container::IsCurrentUseNewPipeline()) {
         if (isOffscreen_) {
@@ -1946,11 +2118,18 @@ void JSCanvasRenderer::JsSetTextAlign(const JSCallbackInfo& info)
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], value);
         auto align = ConvertStrToTextAlign(value);
-
-        if (isOffscreen_) {
-            offscreenCanvas_->SetTextAlign(align);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetTextAlign(align);
+            } else {
+                customPaintPattern_->UpdateTextAlign(align);
+            }
         } else {
-            pool_->UpdateTextAlign(align);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetTextAlign(align);
+            } else {
+                pool_->UpdateTextAlign(align);
+            }
         }
         paintState_.SetTextAlign(align);
     }
@@ -1969,10 +2148,18 @@ void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
         auto baseline = ConvertStrToEnum(
             textBaseline.c_str(), BASELINE_TABLE, ArraySize(BASELINE_TABLE), TextBaseline::ALPHABETIC);
 
-        if (isOffscreen_) {
-            offscreenCanvas_->SetTextBaseline(baseline);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetTextBaseline(baseline);
+            } else {
+                customPaintPattern_->UpdateTextBaseline(baseline);
+            }
         } else {
-            pool_->UpdateTextBaseline(baseline);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetTextBaseline(baseline);
+            } else {
+                pool_->UpdateTextBaseline(baseline);
+            }
         }
         style_.SetTextBaseline(baseline);
     }

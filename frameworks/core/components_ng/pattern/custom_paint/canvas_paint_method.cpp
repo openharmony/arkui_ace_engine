@@ -141,7 +141,7 @@ void CanvasPaintMethod::ImageObjReady(const RefPtr<ImageObject>& imageObj)
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
         currentSource_ = loadingSource_;
         Ace::CanvasImage canvasImage = canvasImage_;
-        TaskFunc func = [canvasImage](CustomPaintPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        TaskFunc func = [canvasImage](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
             paintMethod.DrawImage(paintWrapper, canvasImage, 0, 0);
         };
         tasks_.emplace_back(func);
