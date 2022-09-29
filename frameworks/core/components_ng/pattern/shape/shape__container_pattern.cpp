@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include <algorithm>
 
 #include "base/geometry/ng/rect_t.h"
@@ -22,7 +21,8 @@
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 
 namespace OHOS::Ace::NG {
-bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
