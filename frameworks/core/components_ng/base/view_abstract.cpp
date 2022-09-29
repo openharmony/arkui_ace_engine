@@ -224,9 +224,16 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
+    auto gestureEvent = clickEventFunc;
+    auto focusEvent = clickEventFunc;
+
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetClickEvent(std::move(clickEventFunc));
+    gestureHub->SetClickEvent(std::move(gestureEvent));
+
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnClickCallback(std::move(focusEvent));
 }
 
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
@@ -257,11 +264,11 @@ void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
     eventHub->SetHoverAnimation(hoverEffect);
 }
 
-void ViewAbstract::SetFocusType(FocusType type)
+void ViewAbstract::SetEnabled(bool enabled)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusType(type);
+    focusHub->SetEnabled(enabled);
 }
 
 void ViewAbstract::SetFocusable(bool focusable)
@@ -290,6 +297,34 @@ void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnKeyCallback(std::move(onKeyCallback));
+}
+
+void ViewAbstract::SetTabIndex(int32_t index)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetTabIndex(index);
+}
+
+void ViewAbstract::SetFocusOnTouch(bool isSet)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsFocusOnTouch(isSet);
+}
+
+void ViewAbstract::SetDefaultFocus(bool isSet)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsDefaultFocus(isSet);
+}
+
+void ViewAbstract::SetGroupDefaultFocus(bool isSet)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsDefaultGroupFocus(isSet);
 }
 
 void ViewAbstract::SetOnAppear(std::function<void()>&& onAppear)

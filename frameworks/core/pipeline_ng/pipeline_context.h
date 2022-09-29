@@ -164,6 +164,20 @@ public:
 
     void AddCallBack(std::function<void()>&& callback);
 
+    bool GetIsFocusingByTab() const
+    {
+        return isFocusingByTab_;
+    }
+
+    void SetIsFocusingByTab(bool isFocusingByTab)
+    {
+        isFocusingByTab_ = isFocusingByTab;
+    }
+
+    bool RequestDefaultFocus();
+    bool RequestFocus(const std::string& targetNodeId) override;
+    void AddDirtyFocus(const RefPtr<FrameNode>& node);
+
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -226,6 +240,7 @@ private:
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
+    bool isFocusingByTab_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

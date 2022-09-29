@@ -152,10 +152,7 @@ public:
         return eventHub_->GetOrCreateInputEventHub();
     }
 
-    RefPtr<FocusHub> GetOrCreateFocusHub() const
-    {
-        return eventHub_->GetOrCreateFocusHub();
-    }
+    RefPtr<FocusHub> GetOrCreateFocusHub() const;
 
     RefPtr<FocusHub> GetFocusHub() const
     {

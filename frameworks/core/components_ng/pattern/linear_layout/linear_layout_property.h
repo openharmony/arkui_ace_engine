@@ -59,6 +59,11 @@ public:
         return isVertical_;
     }
 
+    bool IsDirectionVertical() override
+    {
+        return isVertical_;
+    }
+
 private:
     // This will call after ModifyLayoutConstraint.
     bool isVertical_ = false;

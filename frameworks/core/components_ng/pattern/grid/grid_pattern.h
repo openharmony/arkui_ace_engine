@@ -61,6 +61,15 @@ public:
     {
         return supportAnimation_;
     }
+ 
+    FocusType GetFocusType() override
+    {
+        return FocusType::SCOPE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
 
 private:
     void OnAttachToFrameNode() override;

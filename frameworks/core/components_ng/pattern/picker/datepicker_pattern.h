@@ -338,6 +338,15 @@ public:
 
     static const std::string& GetLunarDay(uint32_t day);
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::NODE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

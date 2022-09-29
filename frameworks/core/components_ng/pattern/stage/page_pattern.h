@@ -92,6 +92,15 @@ public:
 
     bool TriggerPageTransition(PageTransitionType type) const;
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::SCOPE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
 

@@ -58,6 +58,10 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
 FrameNode::~FrameNode()
 {
     pattern_->DetachFromFrameNode(this);
+    auto focusHub = GetFocusHub();
+    if (focusHub) {
+        focusHub->RemoveSelf();
+    }
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -122,6 +126,14 @@ void FrameNode::InitializePatternAndContext()
         frameNode->hasPendingRequest_ = true;
     });
     renderContext_->SetHostNode(WeakClaim(this));
+    // Initialize FocusHub
+    if (pattern_->GetFocusType() != FocusType::DISABLE) {
+        auto focusHub = GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        if (layoutProperty_) {
+            focusHub->SetScopeVertical(layoutProperty_->IsDirectionVertical());
+        }
+    }
 }
 
 void FrameNode::DumpInfo()
@@ -792,5 +804,13 @@ HitTestResult FrameNode::AxisTest(
         return HitTestResult::STOP_BUBBLING;
     }
     return HitTestResult::BUBBLING;
+}
+
+RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
+{
+    if (!pattern_) {
+        return eventHub_->GetOrCreateFocusHub();
+    }
+    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusType(), pattern_->GetFocusable());
 }
 } // namespace OHOS::Ace::NG

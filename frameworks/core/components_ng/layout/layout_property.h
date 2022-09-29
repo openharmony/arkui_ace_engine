@@ -103,6 +103,11 @@ public:
         return measureType_.value_or(defaultType);
     }
 
+    virtual bool IsDirectionVertical()
+    {
+        return true;
+    }
+
     void UpdatePadding(const PaddingProperty& value)
     {
         if (!padding_) {

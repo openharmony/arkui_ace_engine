@@ -945,17 +945,9 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     }
     std::string inspectorKey = firstArg->ToString(vm)->ToString();
 
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return panda::JSValueRef::Undefined(vm);
-    }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (pipelineContext == nullptr) {
-        LOGE("pipelineContext==nullptr");
-        return panda::JSValueRef::Undefined(vm);
-    }
     bool result = false;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, panda::BooleanRef::New(vm, result));
     if (!pipelineContext->GetTaskExecutor()) {
         LOGE("pipelineContext's task excutor is null");
         return panda::BooleanRef::New(vm, result);

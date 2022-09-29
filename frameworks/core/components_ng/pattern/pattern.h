@@ -210,6 +210,15 @@ public:
     // Called before frameNode CreatePaintWrapper.
     virtual void BeforeCreatePaintWrapper() {}
 
+    virtual FocusType GetFocusType()
+    {
+        return FocusType::DISABLE;
+    }
+    virtual bool GetFocusable()
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

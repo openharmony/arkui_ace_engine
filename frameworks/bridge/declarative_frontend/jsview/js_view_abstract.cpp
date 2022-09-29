@@ -1593,6 +1593,12 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
     }
 
     bool enabled = info[0]->ToBoolean();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetEnabled(enabled);
+        return;
+    }
+
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     if (mainComponent) {
         mainComponent->SetDisabledStatus(!enabled);
@@ -4614,6 +4620,11 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetFocusable(info[0]->ToBoolean());
+        return;
+    }
+
     auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
     if (!focusComponent) {
         LOGE("The focusComponent is null");
@@ -4724,6 +4735,10 @@ void JSViewAbstract::JsTabIndex(const JSCallbackInfo& info)
         LOGE("Param is wrong, it is supposed to be a number");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetTabIndex(info[0]->ToNumber<int32_t>());
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
     if (focusableComponent) {
         focusableComponent->SetFocusable(true);
@@ -4737,12 +4752,16 @@ void JSViewAbstract::JsFocusOnTouch(const JSCallbackInfo& info)
         LOGE("Param is wrong, it is supposed to be a boolean");
         return;
     }
+    auto isFocusOnTouch = info[0]->ToBoolean();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetFocusOnTouch(isFocusOnTouch);
+        return;
+    }
     auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
     if (!touchComponent) {
         LOGE("Touch listener component get failed!");
         return;
     }
-    auto isFocusOnTouch = info[0]->ToBoolean();
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
     if (!focusableComponent) {
         LOGE("focusable component get failed!");
@@ -4764,6 +4783,10 @@ void JSViewAbstract::JsDefaultFocus(const JSCallbackInfo& info)
         return;
     }
     auto isDefaultFocus = info[0]->ToBoolean();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetDefaultFocus(isDefaultFocus);
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
     if (!focusableComponent) {
         LOGE("focusable component get failed!");
@@ -4779,6 +4802,10 @@ void JSViewAbstract::JsGroupDefaultFocus(const JSCallbackInfo& info)
         return;
     }
     auto isGroupDefaultFocus = info[0]->ToBoolean();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetGroupDefaultFocus(isGroupDefaultFocus);
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
     if (!focusableComponent) {
         LOGE("focusable component get failed!");
