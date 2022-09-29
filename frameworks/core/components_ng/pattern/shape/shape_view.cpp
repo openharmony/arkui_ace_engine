@@ -18,6 +18,8 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/container_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -29,7 +31,7 @@ void ShapeView::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SHAPE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ShapePattern>(); });
+        V2::SHAPE_CONTAINER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ShapeContainerPattern>(); });
     stack->Push(frameNode);
 }
 
@@ -86,6 +88,16 @@ void ShapeView::SetStrokeDashArray(const std::vector<Dimension>& segments)
 void ShapeView::SetAntiAlias(bool antiAlias)
 {
     ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, AntiAlias, antiAlias);
+}
+
+void ShapeView::SetBitmapMesh(const ImageMesh& imageMesh)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ContainerPaintProperty, ImageMesh, imageMesh);
+}
+
+void ShapeView::SetViewPort(const ShapeViewBox& viewBox)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ContainerPaintProperty, ShapeViewBox, viewBox);
 }
 
 } // namespace OHOS::Ace::NG

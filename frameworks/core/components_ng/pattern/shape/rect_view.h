@@ -24,7 +24,6 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
 
-
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT RectView {
@@ -36,6 +35,7 @@ public:
     static void SetTopRightRadius(const Radius& topRightRadius);
     static void SetBottomRightRadius(const Radius& bottomRightRadius);
     static void SetBottomLeftRadius(const Radius& bottomLeftRadius);
+
 private:
     static void UpdateRadius(const Radius& radius);
 };

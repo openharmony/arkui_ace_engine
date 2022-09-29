@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_VIEW_H
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/image_mesh.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/shape/shape_view_box.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,6 +40,8 @@ public:
     static void SetStrokeWidth(const Ace::Dimension& lineWidth);
     static void SetStrokeDashArray(const std::vector<Ace::Dimension>& segments);
     static void SetAntiAlias(bool antiAlias);
+    static void SetBitmapMesh(const ImageMesh& imageMesh);
+    static void SetViewPort(const ShapeViewBox& viewBox);
 };
 
 } // namespace OHOS::Ace::NG

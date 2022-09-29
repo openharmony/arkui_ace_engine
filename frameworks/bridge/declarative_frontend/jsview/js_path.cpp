@@ -15,13 +15,27 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 
+#include "core/common/container.h"
 #include "core/components/shape/shape_component.h"
+#include "core/components_ng/pattern/shape/path_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSPath::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::PathView::Create();
+        JSShapeAbstract::SetNgSize(info);
+        if (info.Length() > 0 && info[0]->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+            JSRef<JSVal> commands = obj->GetProperty("commands");
+            if (commands->IsString()) {
+                NG::PathView::SetCommands(commands->ToString());
+            }
+        }
+        return;
+    }
     RefPtr<Component> component = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::PATH);
     ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
@@ -37,6 +51,10 @@ void JSPath::Create(const JSCallbackInfo& info)
 
 void JSPath::SetCommands(const std::string& commands)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::PathView::SetCommands(commands);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::ShapeComponent>(stack->GetMainComponent());
     if (component) {

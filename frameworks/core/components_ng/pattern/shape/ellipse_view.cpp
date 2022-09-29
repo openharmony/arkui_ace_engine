@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/circle_layout_algorithm.h"
+#include "core/components_ng/pattern/shape/ellipse_view.h"
 
-#include <string>
-
-#include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/ellipse_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-std::optional<SizeF> CircleLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+void EllipseView::Create()
 {
-    if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
-    }
-    return std::nullopt;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::ELLIPSE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<EllipsePattern>(); });
+    stack->Push(frameNode);
 }
 } // namespace OHOS::Ace::NG

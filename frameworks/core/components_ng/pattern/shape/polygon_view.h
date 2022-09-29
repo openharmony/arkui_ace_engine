@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/rect_pattern.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_VIEW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_VIEW_H
 
-#include "core/components_ng/pattern/shape/rect_layout_algorithm.h"
+#include "base/utils/macros.h"
+#include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace::NG {
-bool RectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
-{
-    if (skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
-    }
-    return true;
-}
+
+class ACE_EXPORT PolygonView {
+public:
+    static void Create(bool isPolygon);
+    static void SetPoints(const ShapePoints& points);
+};
+
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_VIEW_H

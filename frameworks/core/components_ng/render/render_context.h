@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -74,6 +75,8 @@ public:
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
+
+    virtual void SyncGeometryProperties(const RectF& rectF) {}
 
     virtual void OnModifyDone() {}
 

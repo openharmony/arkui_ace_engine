@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CIRCLE_PAINTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CIRCLE_PAINTER_H
+#include "core/components_ng/render/ellipse_painter.h"
 
-#include "base/geometry/ng/radius.h"
 #include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/shape_painter.h"
 
 namespace OHOS::Ace::NG {
-
-class CirclePainter {
-public:
-    CirclePainter() = default;
-    ~CirclePainter() = default;
-    static void DrawCircle(RSCanvas& canvas, float radius, const ShapePaintProperty& shapePaintProperty);
-};
-
+void EllipsePainter::DrawEllipse(RSCanvas& canvas, const RectF& rect, const ShapePaintProperty& shapePaintProperty)
+{
+    RSPen pen;
+    RSBrush brush;
+    ShapePainter::SetPan(pen, shapePaintProperty);
+    ShapePainter::SetBrush(brush, shapePaintProperty);
+    canvas.AttachPen(pen);
+    canvas.AttachBrush(brush);
+    canvas.DrawOval(RSRRect(rect.GetX(), rect.GetY(), rect.GetX() + rect.Width(), rect.GetY() + rect.Height()));
+}
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CIRCLE_PAINTER_H

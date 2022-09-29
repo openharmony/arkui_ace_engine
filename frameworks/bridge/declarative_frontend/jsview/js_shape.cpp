@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 
+#include "base/geometry/ng/image_mesh.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/container.h"
@@ -59,18 +60,40 @@ void JSShape::SetViewPort(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("shape is null");
-        return;
-    }
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> leftValue = obj->GetProperty("x");
         JSRef<JSVal> topValue = obj->GetProperty("y");
         JSRef<JSVal> widthValue = obj->GetProperty("width");
         JSRef<JSVal> heightValue = obj->GetProperty("height");
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ShapeViewBox shapeViewBox;
+            Dimension dimLeft;
+            if (ParseJsDimensionVp(leftValue, dimLeft)) {
+                shapeViewBox.SetLeft(dimLeft);
+            }
+            Dimension dimTop;
+            if (ParseJsDimensionVp(topValue, dimTop)) {
+                shapeViewBox.SetTop(dimTop);
+            }
+            Dimension dimWidth;
+            if (ParseJsDimensionVp(widthValue, dimWidth)) {
+                shapeViewBox.SetWidth(dimWidth);
+            }
+            Dimension dimHeight;
+            if (ParseJsDimensionVp(heightValue, dimHeight)) {
+                shapeViewBox.SetHeight(dimHeight);
+            }
+            NG::ShapeView::SetViewPort(shapeViewBox);
+            info.SetReturnValue(info.This());
+            return;
+        }
+        auto stack = ViewStackProcessor::GetInstance();
+        auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+        if (!component) {
+            LOGE("shape is null");
+            return;
+        }
         AnimationOption option = stack->GetImplicitAnimationOption();
         ShapeViewBox viewBox;
         Dimension dimLeft;
@@ -96,6 +119,10 @@ void JSShape::SetViewPort(const JSCallbackInfo& info)
 
 void JSShape::JsWidth(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -124,6 +151,10 @@ void JSShape::JsWidth(const JSRef<JSVal>& jsValue)
 
 void JSShape::JsHeight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -465,6 +496,10 @@ void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
         return;
     }
     if (!ParseJsInteger(rowValue, row)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ShapeView::SetBitmapMesh(NG::ImageMesh(mesh, (int32_t)column, (int32_t)row));
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();

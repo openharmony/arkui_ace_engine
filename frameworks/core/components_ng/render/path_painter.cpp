@@ -13,22 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/rect_layout_algorithm.h"
+#include "core/components_ng/render/path_painter.h"
 
-#include <string>
-
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/shape/path_paint_property.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
-
-std::optional<SizeF> RectLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& pathPaintProperty)
 {
-    if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
+    if (!pathPaintProperty.HasCommands()) {
+        return;
     }
-    return std::nullopt;
+   // SkPainter::DrawPath(canvas, pathPaintProperty.GetCommandsValue(), pathPaintProperty);
 }
-
 } // namespace OHOS::Ace::NG

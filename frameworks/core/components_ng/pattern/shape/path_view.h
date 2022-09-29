@@ -13,16 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/line_pattern.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_VIEW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_VIEW_H
 
-#include "core/components_ng/pattern/shape/line_layout_algorithm.h"
+#include <string>
+
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
-bool LinePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
-{
-    if (skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
-    }
-    return true;
-}
+
+class ACE_EXPORT PathView {
+public:
+    static void Create();
+    static void SetCommands(const std::string& pathCmd);
+};
+
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_VIEW_H

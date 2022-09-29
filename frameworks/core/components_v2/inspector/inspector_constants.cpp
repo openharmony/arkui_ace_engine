@@ -157,14 +157,26 @@ const char PATTERN_LOCK_ETS_TAG[] = "PatternLock";
 const char ROW_COMPONENT_TAG[] = "RowComponent";
 const char ROW_ETS_TAG[] = "Row";
 
-//rect
+// rect
 const char RECT_ETS_TAG[] = "Rect";
 
-//line
+// line
 const char LINE_ETS_TAG[] = "Line";
 
-//circle
+// circle
 const char CIRCLE_ETS_TAG[] = "Circle";
+
+// ellipse
+const char ELLIPSE_ETS_TAG[] = "Ellipse";
+
+// path
+const char PATH_ETS_TAG[] = "Path";
+
+// polygon
+const char POLYGON_ETS_TAG[] = "Polygon";
+
+// polyline
+const char POLYLINE_ETS_TAG[] = "Polyline";
 
 // shape
 const char SHAPE_COMPONENT_TAG[] = "ShapeComponent";

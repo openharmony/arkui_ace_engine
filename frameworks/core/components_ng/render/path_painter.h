@@ -13,16 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/circle_pattern.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PATH_PAINTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PATH_PAINTER_H
 
-#include "core/components_ng/pattern/shape/circle_layout_algorithm.h"
+#include "core/components_ng/pattern/shape/path_paint_property.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-bool CirclePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
-{
-    if (skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
-    }
-    return true;
-}
+
+class PathPainter {
+public:
+    PathPainter() = default;
+    ~PathPainter() = default;
+    static void DrawPath(RSCanvas& canvas, const PathPaintProperty& shapePaintProperty);
+};
+
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PATH_PAINTER_H

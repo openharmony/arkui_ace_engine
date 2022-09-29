@@ -13,22 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CIRCLE_PAINTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CIRCLE_PAINTER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_POLYGON_PAINTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_POLYGON_PAINTER_H
 
 #include "base/geometry/ng/radius.h"
 #include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/pattern/shape/polygon_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
-class CirclePainter {
+class PolygonPainter {
 public:
-    CirclePainter() = default;
-    ~CirclePainter() = default;
-    static void DrawCircle(RSCanvas& canvas, float radius, const ShapePaintProperty& shapePaintProperty);
+    PolygonPainter() = default;
+    ~PolygonPainter() = default;
+    static void DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& polygonPaintProperty, bool isclose);
 };
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CIRCLE_PAINTER_H
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_POLYGON_PAINTER_H

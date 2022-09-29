@@ -19,13 +19,13 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/shape/line_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/line_paint_method.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_pattern.h"
 
 namespace OHOS::Ace::NG {
-class LinePattern : public Pattern {
-    DECLARE_ACE_TYPE(LinePattern, Pattern);
+class LinePattern : public ShapePattern {
+    DECLARE_ACE_TYPE(LinePattern, ShapePattern);
 
 public:
     LinePattern() = default;
@@ -36,18 +36,12 @@ public:
         return MakeRefPtr<LinePaintMethod>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<LineLayoutAlgorithm>();
-    }
-
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<LinePaintProperty>();
     }
 
 private:
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(LinePattern);
 };
 } // namespace OHOS::Ace::NG
