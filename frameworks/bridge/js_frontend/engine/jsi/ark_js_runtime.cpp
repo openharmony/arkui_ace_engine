@@ -20,6 +20,7 @@
 #include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "frameworks/core/common/connect_server_manager.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {
@@ -116,6 +117,7 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName)
     JSExecutionScope executionScope(vm_);
     if (!libPath_.empty()) {
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+        ConnectServerManager::Get().AddInstance(instanceId_);
         JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_,
             debuggerPostTask_);
 #endif
