@@ -108,7 +108,6 @@ void RosenWindow::Destroy()
     LOG_DESTROY();
     rsWindow_ = nullptr;
     vsyncCallback_.reset();
-    rootNode_.Reset();
     rsUIDirector_->Destroy();
     rsUIDirector_.reset();
     callbacks_.clear();
@@ -118,8 +117,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 {
     LOGI("Rosenwindow set root frame node");
     CHECK_NULL_VOID(root);
-    rootNode_ = root;
-    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(rootNode_->GetRenderContext());
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(root->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
     if (rosenRenderContext->GetRSNode()) {
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());

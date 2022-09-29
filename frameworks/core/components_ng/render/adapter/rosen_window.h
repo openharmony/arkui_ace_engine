@@ -45,10 +45,14 @@ public:
 
     void SetTaskRunner(RefPtr<TaskExecutor> taskExecutor, int32_t id);
 
+    bool FlushCustomAnimation(uint64_t timeStamp) override
+    {
+        return rsUIDirector_->RunningCustomAnimation(timeStamp);
+    }
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;
-    RefPtr<NG::FrameNode> rootNode_;
     int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;

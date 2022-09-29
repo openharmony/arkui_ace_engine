@@ -90,7 +90,7 @@ public:
     ACE_DEFINE_COMPONENT_PROP(EdgeEffect, EdgeEffect, EdgeEffect::SPRING);
     ACE_DEFINE_COMPONENT_PROP(ScrollBar, DisplayMode, DisplayMode::OFF);
     ACE_DEFINE_COMPONENT_PROP(InitialIndex, int32_t, 0);
-    ACE_DEFINE_COMPONENT_PROP(CachedCount, int32_t, 1);
+    ACE_DEFINE_COMPONENT_PROP(CachedCount, int32_t, 3);
     ACE_DEFINE_COMPONENT_PROP(EditMode, bool, false);
     ACE_DEFINE_COMPONENT_PROP(ScrollController, RefPtr<ListPositionController>);
     ACE_DEFINE_COMPONENT_PROP(ScrollBarProxy, RefPtr<ScrollBarProxy>);
@@ -219,7 +219,7 @@ private:
     OnItemDragMoveFunc onItemDragMoveId_;
     OnItemDragLeaveFunc onItemDragLeaveId_;
     OnItemDropFunc onItemDropId_;
-    ListItemAlign listItemAlign_ { ListItemAlign::CENTER };
+    ListItemAlign listItemAlign_ { ListItemAlign::START };
     std::optional<std::pair<Dimension, Dimension>> laneContrain_;
     int32_t lanes_ { -1 };
 

@@ -22,19 +22,24 @@
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/resource/ace_res_config.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "bridge/common/manifest/manifest_parser.h"
+#include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/ng/page_router_manager.h"
+#include "bridge/js_frontend/js_ace_page.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/thread_checker.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/common/manifest/manifest_parser.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -86,39 +91,31 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const EventCallback& asyncEventCallback, const EventCallback& syncEventCallback,
     const UpdatePageCallback& updatePageCallback, const ResetStagingPageCallback& resetLoadingPageCallback,
     const DestroyPageCallback& destroyPageCallback, const DestroyApplicationCallback& destroyApplicationCallback,
-    const UpdateApplicationStateCallback& updateApplicationStateCallback,
-    const TimerCallback& timerCallback, const MediaQueryCallback& mediaQueryCallback,
-    const RequestAnimationCallback& requestAnimationCallback, const JsCallback& jsCallback,
-    const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
+    const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
+    const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
+    const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
     const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
-    const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack,
-    const OnNewWantCallBack& onNewWantCallBack,
-    const OnActiveCallBack& onActiveCallBack,
-    const OnInactiveCallBack& onInactiveCallBack, const OnMemoryLevelCallBack& onMemoryLevelCallBack,
-    const OnStartContinuationCallBack& onStartContinuationCallBack,
+    const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack, const OnNewWantCallBack& onNewWantCallBack,
+    const OnActiveCallBack& onActiveCallBack, const OnInactiveCallBack& onInactiveCallBack,
+    const OnMemoryLevelCallBack& onMemoryLevelCallBack, const OnStartContinuationCallBack& onStartContinuationCallBack,
     const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
-    const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
-    const OnSaveDataCallBack& onSaveDataCallBack,
-    const OnRestoreDataCallBack& onRestoreDataCallBack,
-    const ExternalEventCallback& externalEventCallback)
-    : loadJs_(loadCallback), externalEvent_(externalEventCallback),
-      dispatcherCallback_(transferCallback), asyncEvent_(asyncEventCallback),
-      syncEvent_(syncEventCallback), updatePage_(updatePageCallback), resetStagingPage_(resetLoadingPageCallback),
-      destroyPage_(destroyPageCallback), destroyApplication_(destroyApplicationCallback),
-      updateApplicationState_(updateApplicationStateCallback), timer_(timerCallback),
-      mediaQueryCallback_(mediaQueryCallback), requestAnimationCallback_(requestAnimationCallback),
-      jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
-      onConfigurationUpdated_(onConfigurationUpdatedCallBack),
-      onSaveAbilityState_(onSaveAbilityStateCallBack), onRestoreAbilityState_(onRestoreAbilityStateCallBack),
-      onNewWant_(onNewWantCallBack), onActive_(onActiveCallBack),
+    const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack, const OnSaveDataCallBack& onSaveDataCallBack,
+    const OnRestoreDataCallBack& onRestoreDataCallBack, const ExternalEventCallback& externalEventCallback)
+    : loadJs_(loadCallback), externalEvent_(externalEventCallback), dispatcherCallback_(transferCallback),
+      asyncEvent_(asyncEventCallback), syncEvent_(syncEventCallback), updatePage_(updatePageCallback),
+      resetStagingPage_(resetLoadingPageCallback), destroyPage_(destroyPageCallback),
+      destroyApplication_(destroyApplicationCallback), updateApplicationState_(updateApplicationStateCallback),
+      timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback),
+      requestAnimationCallback_(requestAnimationCallback), jsCallback_(jsCallback),
+      onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
+      onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveAbilityState_(onSaveAbilityStateCallBack),
+      onRestoreAbilityState_(onRestoreAbilityStateCallBack), onNewWant_(onNewWantCallBack), onActive_(onActiveCallBack),
       onInactive_(onInactiveCallBack), onMemoryLevel_(onMemoryLevelCallBack),
       onStartContinuationCallBack_(onStartContinuationCallBack),
       onCompleteContinuationCallBack_(onCompleteContinuationCallBack),
-      onRemoteTerminatedCallBack_(onRemoteTerminatedCallBack),
-      onSaveDataCallBack_(onSaveDataCallBack),
-      onRestoreDataCallBack_(onRestoreDataCallBack),
-      manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
+      onRemoteTerminatedCallBack_(onRemoteTerminatedCallBack), onSaveDataCallBack_(onSaveDataCallBack),
+      onRestoreDataCallBack_(onRestoreDataCallBack), manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(taskExecutor)
 {
@@ -154,7 +151,9 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
     } else {
         LOGE("RunPage parse manifest.json failed");
         EventReport::SendPageRouterException(PageRouterExcepType::RUN_PAGE_ERR, url);
+        return;
     }
+
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
@@ -163,6 +162,19 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
             }
         },
         TaskExecutor::TaskType::JS);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->SetManifestParser(manifestParser_);
+        taskExecutor_->PostTask(
+            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params]() {
+                auto pageRouterManager = weakPtr.Upgrade();
+                CHECK_NULL_VOID(pageRouterManager);
+                pageRouterManager->RunPage(url, params);
+            },
+            TaskExecutor::TaskType::JS);
+        return;
+    }
     if (!url.empty()) {
         mainPagePath_ = manifestParser_->GetRouter()->GetPagePath(url);
     } else {
@@ -232,8 +244,8 @@ void FrontendDelegateDeclarative::GetConfigurationCommon(const std::string& file
     }
 }
 
-void FrontendDelegateDeclarative::LoadResourceConfiguration(std::map<std::string, std::string>& mediaResourceFileMap,
-    std::unique_ptr<JsonValue>& currentResourceData)
+void FrontendDelegateDeclarative::LoadResourceConfiguration(
+    std::map<std::string, std::string>& mediaResourceFileMap, std::unique_ptr<JsonValue>& currentResourceData)
 {
     std::vector<std::string> files;
     if (assetManager_) {
@@ -268,7 +280,7 @@ void FrontendDelegateDeclarative::LoadResourceConfiguration(std::map<std::string
             continue;
         }
         auto mediaPathName = file.substr(file.find_first_of("/"));
-        std::regex mediaPattern("^\\/media\\/\\w*(\\.jpg|\\.png|\\.gif|\\.svg|\\.webp|\\.bmp)$");
+        std::regex mediaPattern(R"(^\/media\/\w*(\.jpg|\.png|\.gif|\.svg|\.webp|\.bmp)$)");
         std::smatch result;
         if (std::regex_match(mediaPathName, result, mediaPattern)) {
             mediaFileName.insert(mediaPathName.substr(mediaPathName.find_first_of("/")));
@@ -277,8 +289,8 @@ void FrontendDelegateDeclarative::LoadResourceConfiguration(std::map<std::string
 
     auto currentResTag = AceResConfig::GetCurrentDeviceResTag();
     auto currentResolutionTag = currentResTag.substr(currentResTag.find_last_of("-") + 1);
-    for (auto folderName : sortedResourceFolderPath) {
-        for (auto fileName : mediaFileName) {
+    for (const auto& folderName : sortedResourceFolderPath) {
+        for (const auto& fileName : mediaFileName) {
             if (mediaResourceFileMap.find(fileName) != mediaResourceFileMap.end()) {
                 continue;
             }
@@ -297,7 +309,7 @@ void FrontendDelegateDeclarative::LoadResourceConfiguration(std::map<std::string
 void FrontendDelegateDeclarative::OnJSCallback(const std::string& callbackId, const std::string& data)
 {
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), callbackId, args = std::move(data)] {
+        [weak = AceType::WeakClaim(this), callbackId, args = data] {
             auto delegate = weak.Upgrade();
             if (delegate) {
                 delegate->jsCallback_(callbackId, args);
@@ -313,8 +325,8 @@ void FrontendDelegateDeclarative::SetJsMessageDispatcher(const RefPtr<JsMessageD
         TaskExecutor::TaskType::JS);
 }
 
-void FrontendDelegateDeclarative::TransferComponentResponseData(int32_t callbackId, int32_t code,
-    std::vector<uint8_t>&& data)
+void FrontendDelegateDeclarative::TransferComponentResponseData(
+    int32_t callbackId, int32_t /*code*/, std::vector<uint8_t>&& data)
 {
     LOGD("FrontendDelegateDeclarative TransferComponentResponseData");
     auto pipelineContext = pipelineContextHolder_.Get();
@@ -352,7 +364,7 @@ void FrontendDelegateDeclarative::TransferJsResponseData(
         TaskExecutor::TaskType::JS);
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void FrontendDelegateDeclarative::TransferJsResponseDataPreview(
     int32_t callbackId, int32_t code, ResponseData responseData) const
 {
@@ -380,8 +392,8 @@ void FrontendDelegateDeclarative::TransferJsPluginGetError(
         TaskExecutor::TaskType::JS);
 }
 
-void FrontendDelegateDeclarative::TransferJsEventData(int32_t callbackId, int32_t code,
-    std::vector<uint8_t>&& data) const
+void FrontendDelegateDeclarative::TransferJsEventData(
+    int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
     taskExecutor_->PostTask(
         [callbackId, code, data = std::move(data), groupJsBridge = groupJsBridge_]() mutable {
@@ -421,6 +433,18 @@ void FrontendDelegateDeclarative::LoadPluginJsByteCode(
 
 bool FrontendDelegateDeclarative::OnPageBackPress()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, false);
+        auto pageNode = pageRouterManager_->GetCurrentPageNode();
+        CHECK_NULL_RETURN(pageNode, false);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_RETURN(pagePattern, false);
+        if (pagePattern->OnBackPressed()) {
+            return true;
+        }
+        return pageRouterManager_->Pop();
+    }
+
     auto result = false;
     taskExecutor_->PostSyncTask(
         [weak = AceType::WeakClaim(this), &result] {
@@ -438,8 +462,8 @@ bool FrontendDelegateDeclarative::OnPageBackPress()
     return result;
 }
 
-void FrontendDelegateDeclarative::NotifyAppStorage(const WeakPtr<Framework::JsEngine>& jsEngineWeak,
-    const std::string& key, const std::string& value)
+void FrontendDelegateDeclarative::NotifyAppStorage(
+    const WeakPtr<Framework::JsEngine>& jsEngineWeak, const std::string& key, const std::string& value)
 {
     taskExecutor_->PostTask(
         [jsEngineWeak, key, value] {
@@ -486,9 +510,7 @@ void FrontendDelegateDeclarative::OnForeground()
 void FrontendDelegateDeclarative::OnConfigurationUpdated(const std::string& data)
 {
     taskExecutor_->PostSyncTask(
-        [onConfigurationUpdated = onConfigurationUpdated_, data] {
-            onConfigurationUpdated(data);
-        },
+        [onConfigurationUpdated = onConfigurationUpdated_, data] { onConfigurationUpdated(data); },
         TaskExecutor::TaskType::JS);
     OnMediaQueryUpdate();
 }
@@ -581,20 +603,12 @@ void FrontendDelegateDeclarative::GetPluginsUsed(std::string& data)
 
 void FrontendDelegateDeclarative::OnActive()
 {
-    taskExecutor_->PostTask(
-        [onActive = onActive_]() {
-            onActive();
-        },
-        TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask([onActive = onActive_]() { onActive(); }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnInactive()
 {
-    taskExecutor_->PostTask(
-        [onInactive = onInactive_]() {
-            onInactive();
-        },
-        TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask([onInactive = onInactive_]() { onInactive(); }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnNewRequest(const std::string& data)
@@ -622,47 +636,33 @@ void FrontendDelegateDeclarative::OnApplicationDestroy(const std::string& packag
 
 void FrontendDelegateDeclarative::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    taskExecutor_->PostTask(
-        [updateApplicationState = updateApplicationState_, packageName, state] {
-            updateApplicationState(packageName, state);
-        },
+    taskExecutor_->PostTask([updateApplicationState = updateApplicationState_, packageName,
+                                state] { updateApplicationState(packageName, state); },
         TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
-    taskExecutor_->PostTask(
-        [onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow, data] {
-            onWindowDisplayModeChanged(isShownInMultiWindow, data);
-        },
+    taskExecutor_->PostTask([onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow,
+                                data] { onWindowDisplayModeChanged(isShownInMultiWindow, data); },
         TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnSaveAbilityState(std::string& data)
 {
     taskExecutor_->PostSyncTask(
-        [onSaveAbilityState = onSaveAbilityState_, &data] {
-            onSaveAbilityState(data);
-        },
-        TaskExecutor::TaskType::JS);
+        [onSaveAbilityState = onSaveAbilityState_, &data] { onSaveAbilityState(data); }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnRestoreAbilityState(const std::string& data)
 {
-    taskExecutor_->PostTask(
-        [onRestoreAbilityState = onRestoreAbilityState_, data] {
-            onRestoreAbilityState(data);
-        },
+    taskExecutor_->PostTask([onRestoreAbilityState = onRestoreAbilityState_, data] { onRestoreAbilityState(data); },
         TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnNewWant(const std::string& data)
 {
-    taskExecutor_->PostTask(
-        [onNewWant = onNewWant_, data] {
-            onNewWant(data);
-        },
-        TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask([onNewWant = onNewWant_, data] { onNewWant(data); }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::FireAsyncEvent(
@@ -693,7 +693,7 @@ bool FrontendDelegateDeclarative::FireSyncEvent(
 }
 
 void FrontendDelegateDeclarative::FireExternalEvent(
-    const std::string& eventId, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
+    const std::string& /*eventId*/, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     taskExecutor_->PostSyncTask(
         [weak = AceType::WeakClaim(this), componentId, nodeId, isDestroy] {
@@ -738,35 +738,113 @@ void FrontendDelegateDeclarative::InitializeAccessibilityCallback()
     jsAccessibilityManager_->InitializeCallback();
 }
 
+std::string FrontendDelegateDeclarative::GetCurrentPageUrl()
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return "";
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, "");
+    return pageRouterManager_->GetCurrentPageUrl();
+}
+
+// Get the currently running JS page information in NG structure.
+RefPtr<RevSourceMap> FrontendDelegateDeclarative::GetCurrentPageSourceMap()
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    return pageRouterManager_->GetCurrentPageSourceMap(assetManager_);
+}
+
+// Get the currently running JS page information in NG structure.
+RefPtr<RevSourceMap> FrontendDelegateDeclarative::GetFaAppSourceMap()
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return nullptr;
+    }
+    if (appSourceMap_) {
+        return appSourceMap_;
+    }
+    std::string appMap;
+    if (GetAssetContent("app.js.map", appMap)) {
+        appSourceMap_ = AceType::MakeRefPtr<RevSourceMap>();
+        appSourceMap_->Init(appMap);
+    } else {
+        LOGW("app map load failed!");
+    }
+    return appSourceMap_;
+}
+
+void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback)
+{
+    pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
+    pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
+}
+
 // Start FrontendDelegate overrides.
 void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string& params)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->Push({ uri }, params);
+        OnMediaQueryUpdate();
+        return;
+    }
+
     Push(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
 {
-    Push(PageTarget(uri, RouterMode(routerMode)), params);
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->Push({ uri }, params, static_cast<NG::RouterMode>(routerMode));
+        OnMediaQueryUpdate();
+        return;
+    }
+    Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params);
 }
 
 void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::string& params)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->Replace({ uri }, params);
+        return;
+    }
     Replace(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::ReplaceWithMode(
     const std::string& uri, const std::string& params, uint32_t routerMode)
 {
-    Replace(PageTarget(uri, RouterMode(routerMode)), params);
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->Replace({ uri }, params, static_cast<NG::RouterMode>(routerMode));
+        return;
+    }
+    Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params);
 }
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->BackWithTarget({ uri }, params);
+        OnMediaQueryUpdate();
+        return;
+    }
     BackWithTarget(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::Clear()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->Clear();
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(routerQueueMutex_);
         if (!routerQueue_.empty()) {
@@ -780,12 +858,22 @@ void FrontendDelegateDeclarative::Clear()
 
 int32_t FrontendDelegateDeclarative::GetStackSize() const
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, 0);
+        return pageRouterManager_->GetStackSize();
+    }
     std::lock_guard<std::mutex> lock(mutex_);
     return static_cast<int32_t>(pageRouteStack_.size());
 }
 
 void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, std::string& path)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->GetState(index, name, path);
+        return;
+    }
+
     std::string url;
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -808,11 +896,14 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
 
 std::string FrontendDelegateDeclarative::GetParams()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, "");
+        return pageRouterManager_->GetParams();
+    }
     if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
         return pageParamMap_.find(pageId_)->second;
-    } else {
-        return "";
     }
+    return "";
 }
 
 void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
@@ -1033,7 +1124,7 @@ void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std:
                 }
                 // determine whether the previous page needs to be loaded
                 if (pageRouteStack_[pageRouteSize - 2].isRestore) {
-                    pagePath = manifestParser_->GetRouter()->GetPagePath(pageRouteStack_[pageRouteSize - 2].url);
+                    pagePath = pageRouteStack_[pageRouteSize - 2].url;
                 }
             }
         }
@@ -1044,7 +1135,7 @@ void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std:
         LOGI("run in normal back");
         PopPage();
     } else {
-        std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
+        std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url, ".js");
         LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
             bool isRestore = false;
@@ -1168,10 +1259,25 @@ void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t 
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    auto pipelineContext = pipelineContextHolder_.Get();
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Toast IsCurrentUseNewPipeline.");
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
+        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+        taskExecutor_->PostTask(
+            [durationTime, message, bottom, isRightToLeft, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
+                overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
+            },
+            TaskExecutor::TaskType::UI);
+        return;
+    }
+    auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     taskExecutor_->PostTask(
-        [durationTime, message, bottom, isRightToLeft, context = pipelineContext] {
+        [durationTime, message, bottom, isRightToLeft, context = pipeline] {
             ToastComponent::GetInstance().Show(context, message, durationTime, bottom, isRightToLeft);
         },
         TaskExecutor::TaskType::UI);
@@ -1181,6 +1287,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
+    LOGI("FrontendDelegateDeclarative::ShowDialog");
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     if (callbacks.find(COMMON_SUCCESS) != callbacks.end()) {
         auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
@@ -1219,6 +1326,20 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .buttons = buttons,
         .callbacks = std::move(callbackMarkers),
     };
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Dialog IsCurrentUseNewPipeline.");
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
+        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+        taskExecutor_->PostTask(
+            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
+            },
+            TaskExecutor::TaskType::UI);
+        return;
+    }
     auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(context);
     context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
@@ -1453,7 +1574,10 @@ void FrontendDelegateDeclarative::LoadPage(
     page->SetPageParams(params);
     page->SetFlushCallback([weak = AceType::WeakClaim(this), isMainPage, isRestore](const RefPtr<JsAcePage>& acePage) {
         auto delegate = weak.Upgrade();
-        if (delegate && acePage) {
+        if (!delegate) {
+            return;
+        }
+        if (acePage) {
             delegate->FlushPageCommand(acePage, acePage->GetUrl(), isMainPage, isRestore);
         } else {
             LOGE("flush callback called unexpected");
@@ -1518,7 +1642,7 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
             param.append(info);
             delegate->asyncEvent_("_root", param);
 
-            // request js mediaquery
+            // request js media query
             const auto& listenerId = delegate->mediaQueryInfo_->GetListenerId();
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
@@ -1536,21 +1660,6 @@ void FrontendDelegateDeclarative::OnPageReady(
 
     auto pipelineContext = pipelineContextHolder_.Get();
     page->SetPipelineContext(pipelineContext);
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
-        auto stageManager = context ? context->GetStageManager() : nullptr;
-        if (stageManager) {
-            stageManager->PushPage(page->GetRootNode());
-        } else {
-            LOGE("fail to push page due to stage manager is nullptr");
-        }
-        isStagingPageExist_ = false;
-        if (isMainPage) {
-            OnPageShow();
-        }
-        return;
-    }
-
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, url, jsCommands, isMainPage, isRestore] {
             auto delegate = weak.Upgrade();
@@ -1637,9 +1746,8 @@ void FrontendDelegateDeclarative::OnPushPageSuccess(const RefPtr<JsAcePage>& pag
 void FrontendDelegateDeclarative::RecycleSinglePage()
 {
     LOGI("single page recycle");
-    auto iter = find_if(pageRouteStack_.begin(), pageRouteStack_.end(), [&](const PageInfo& item) {
-        return item.pageId == singlePageId_;
-    });
+    auto iter = find_if(pageRouteStack_.begin(), pageRouteStack_.end(),
+        [&](const PageInfo& item) { return item.pageId == singlePageId_; });
     if (iter != pageRouteStack_.end()) {
         pageMap_.erase(singlePageId_);
         pageParamMap_.erase(singlePageId_);
@@ -1875,7 +1983,7 @@ void FrontendDelegateDeclarative::RestorePopPage(const RefPtr<JsAcePage>& page, 
 void FrontendDelegateDeclarative::RestorePageTransitionListener(
     const TransitionEvent& event, const std::string& url, const RefPtr<JsAcePage>& page)
 {
-    if (event == TransitionEvent::POP_END) {
+    if (event == TransitionEvent::PUSH_END) {
         LOGI("RestorePageTransitionListener %{public}s", url.c_str());
         OnPopToPageSuccess(url);
         {
@@ -2243,8 +2351,8 @@ void FrontendDelegateDeclarative::HandleImage(
     LOGW("Not implement in declarative frontend.");
 }
 
-void FrontendDelegateDeclarative::PushJsCallbackToRenderNode(NodeId id, double ratio,
-    std::function<void(bool, double)>&& callback)
+void FrontendDelegateDeclarative::PushJsCallbackToRenderNode(
+    NodeId id, double ratio, std::function<void(bool, double)>&& callback)
 {
     LOGW("Not implement in declarative frontend.");
 }

@@ -29,10 +29,12 @@
 #include "core/event/axis_event.h"
 #include "core/gestures/raw_recognizer.h"
 #include "base/window/drag_window.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 
 constexpr int32_t MAX_GESTURE_SIZE = 3;
+constexpr int32_t DEFAULT_INDEX_VALUE = -1;
 
 class ACE_EXPORT RenderBox : public RenderBoxBase, public DragDropEvent {
     DECLARE_ACE_TYPE(RenderBox, RenderBoxBase, DragDropEvent);
@@ -243,7 +245,7 @@ private:
     void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);
     void UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration);
     void HandleRemoteMessage(const ClickInfo& clickInfo);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void CalculateScale(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
     void CalculateRotate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
     void CalculateTranslate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
@@ -277,7 +279,7 @@ private:
     OnTouchEventCallback onTouchDownId_;
     OnTouchEventCallback onTouchMoveId_;
     size_t selectedIndex_ = DEFAULT_INDEX;
-    size_t insertIndex_ = DEFAULT_INDEX;
+    int32_t insertIndex_ = DEFAULT_INDEX_VALUE;
     std::function<void(const std::shared_ptr<ClickInfo>&)> remoteMessageEvent_;
     bool enableDragStart_ = true;
 }; // class RenderBox

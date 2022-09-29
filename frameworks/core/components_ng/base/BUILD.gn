@@ -18,6 +18,7 @@ build_component_ng("base_ng") {
   sources = [
     "frame_node.cpp",
     "geometry_node.cpp",
+    "inspector.cpp",
     "ui_node.cpp",
     "view_abstract.cpp",
     "view_stack_processor.cpp",
@@ -25,6 +26,8 @@ build_component_ng("base_ng") {
   component_ng_deps = [
     "event_ng",
     "layout_ng",
+    "manager_ng",
+    "pattern_ability_component_ng",
     "pattern_ng",
     "property_ng",
     "render_ng",

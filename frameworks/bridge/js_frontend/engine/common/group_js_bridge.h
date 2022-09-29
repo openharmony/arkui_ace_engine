@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include "adapter/preview/osal/fetch_manager.h"
 #endif
 #include "base/memory/ace_type.h"
@@ -31,7 +31,7 @@ class GroupJsBridge : public virtual AceType {
 public:
     virtual void TriggerModuleJsCallback(int32_t callbackId, int32_t code,
         std::vector<uint8_t>&& messageData) = 0;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     virtual void TriggerModuleJsCallbackPreview(int32_t callbackId, int32_t code, ResponseData responseData) = 0;
 #endif
 

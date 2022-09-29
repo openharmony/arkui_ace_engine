@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -220,6 +220,79 @@ HWTEST_F(RenderSliderTest, RenderSliderTest005, TestSize.Level1)
     slider->SetCurrentValue(3.0);
     node->Update(slider);
     EXPECT_EQ(renderSlider->GetValue(), 5.0);
+}
+
+/**
+ * @tc.name: RenderSliderTest006
+ * @tc.desc: Test state transfer of the slider component
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC9F
+ */
+HWTEST_F(RenderSliderTest, RenderSliderTest006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderSliderTest RenderSliderTest006 start";
+
+    /**
+     * @tc.steps: step1. Construct a slider component and set current value.
+     */
+    RefPtr<SliderComponent> sliderComponent = AceType::MakeRefPtr<SliderComponent>(50.0, 1.0, 0.0, 100.0);
+
+    /**
+     * @tc.steps: step2. Set value to render.
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+    RefPtr<RenderNode> node = RenderSlider::Create();
+    node->Attach(mockContext);
+    node->Update(sliderComponent);
+    auto renderSlider = AceType::DynamicCast<RenderSlider>(node);
+
+    /**
+     * @tc.steps: step3. Store value of slider component.
+     * @tc.expected: step3. The return string is correct.
+     */
+    std::string info = renderSlider->ProvideRestoreInfo();
+    std::string expectStateResult = "{"
+                                    "\"value\":50,"
+                                    "\"showTips\":false,"
+                                    "\"showSteps\":false,"
+                                    "\"thickness\":4,"
+                                    "\"min\":0,"
+                                    "\"max\":100,"
+                                    "\"step\":1"
+                                    "}";
+    EXPECT_EQ(info, expectStateResult);
+
+    /**
+     * @tc.steps: step4. Restore value of slider component.
+     * @tc.expected: step4. The value is correct.
+     */
+    renderSlider->SetRestoreInfo(expectStateResult);
+    renderSlider->Update(sliderComponent);
+    EXPECT_EQ(renderSlider->GetValue(), 50.0);
+
+    /**
+     * @tc.steps: step5. Second Update doesn't restore the state.
+     * @tc.expected: step5. The stored string is empty.
+     */
+    renderSlider->Update(sliderComponent);
+    EXPECT_TRUE(renderSlider->GetRestoreInfo().empty());
+
+    /**
+     * @tc.steps: step6. Restore state from invalid json string.
+     * @tc.expected: step6. The state is unchanged.
+     */
+    std::string invalidInfo = "value\":60,"
+                              "\"showTips\":false,"
+                              "\"showSteps\":false,"
+                              "\"thickness\":4,"
+                              "\"min\":0,"
+                              "\"max\":100,"
+                              "\"step\":1";
+    renderSlider->SetRestoreInfo(invalidInfo);
+    renderSlider->Update(sliderComponent);
+    EXPECT_EQ(renderSlider->GetValue(), 50.0);
+
+    GTEST_LOG_(INFO) << "RenderSliderTest RenderSliderTest006 stop";
 }
 
 } // namespace OHOS::Ace

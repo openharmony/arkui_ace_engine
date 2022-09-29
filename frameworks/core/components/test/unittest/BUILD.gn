@@ -81,8 +81,10 @@ group("unittest") {
         "plugin:unittest",
         "rating:unittest",
         "select:unittest",
+        "stepper:unittest",
         "tabbar:unittest",
         "text_field:unittest",
+        "toggle:unittest",
         "web:unittest",
 
         #"text_select:unittest",

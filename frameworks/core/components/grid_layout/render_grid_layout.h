@@ -258,6 +258,8 @@ protected:
 
     Size GetTargetLayoutSize(int32_t row, int32_t col);
 
+    std::string PreParseArgs(const std::string& args);
+
     std::string PreParseRows();
 
     std::string PreParseCols();
@@ -609,6 +611,25 @@ protected:
     RefPtr<RenderGridLayoutItem> secondItemWithShift_;
 
     void MultiSelectAllWhenCtrlA();
+
+private:
+    typedef struct {
+        std::string str;
+        bool isRepeat = false;
+    } Value;
+
+    std::vector<double> ParseArgsWithAutoFill(const std::string& args, double size, double gap);
+    std::vector<double> ParseArgsInner(const std::string& args, double size, double gap);
+    void RTrim(std::string& str);
+    std::string TrimTemplate(std::string& str);
+    std::string GetRepeat(const std::string& str);
+    double ParseUnit(const Value& val);
+    bool CheckAutoFillParameter(
+        const std::string& args, double size, std::vector<double>& out,  std::vector<Value>& resultvec);
+    double ConvertVirtualSize(const std::string& size, const DimensionUnit& unit);
+    bool SplitTemplate(const std::string& str, std::vector<Value>& vec, bool isRepeat = false);
+    bool CheckRepeatAndSplitString(
+        std::vector<std::string>& vec, std::string& repeat, std::vector<Value>& resultvec);
 };
 
 } // namespace OHOS::Ace

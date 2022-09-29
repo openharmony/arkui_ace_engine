@@ -20,6 +20,7 @@ template("declarative_frontend") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
@@ -34,6 +35,7 @@ template("declarative_frontend") {
       sources = [
         "declarative_frontend.cpp",
         "frontend_delegate_declarative.cpp",
+        "ng/page_router_manager.cpp",
       ]
     }
 
@@ -65,7 +67,7 @@ jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 
 gen_obj("js_proxyclass") {
   input = "engine/stateMgmt.js"
-  if (use_mac || use_mingw_win || target_os == "ios") {
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
     jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = jsproxyclass_obj_path
@@ -74,7 +76,7 @@ gen_obj("js_proxyclass") {
 
 gen_obj("js_enum_style") {
   input = "engine/jsEnumStyle.js"
-  if (use_mac || use_mingw_win || target_os == "ios") {
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
     jsenumstyle_obj_path = base_output_path + "/js_enum_style.c"
   }
   output = jsenumstyle_obj_path
@@ -83,7 +85,7 @@ gen_obj("js_enum_style") {
 
 gen_obj("js_mock_system_plugin") {
   input = "$root_out_dir/obj/third_party/jsframework/dist/jsMockSystemPlugin.js"
-  if (use_mac || use_mingw_win || target_os == "ios") {
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
     jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
   }
   output = jsmocksystemplugin_obj_path
@@ -95,6 +97,7 @@ template("declarative_js_engine") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
     if (target_cpu == "arm64") {
@@ -244,11 +247,18 @@ template("declarative_js_engine") {
       "view_stack_processor.cpp",
 
       # jsview bindings
-      "jsview/bindings/js_column_binding.cpp",
       "jsview/bindings/js_list_binding.cpp",
-      "jsview/bindings/js_row_binding.cpp",
-      "jsview/bindings/js_stack_binding.cpp",
-      "jsview/bindings/js_text_binding.cpp",
+
+      # Models implemenations for classic fw
+      "jsview/models/column_model_impl.cpp",
+      "jsview/models/flex_model_impl.cpp",
+      "jsview/models/for_each_model_impl.cpp",
+      "jsview/models/if_else_model_impl.cpp",
+      "jsview/models/image_model_impl.cpp",
+      "jsview/models/row_model_impl.cpp",
+      "jsview/models/stack_model_impl.cpp",
+      "jsview/models/text_field_model_impl.cpp",
+      "jsview/models/text_model_impl.cpp",
     ]
 
     # rich components needed by phone and TV. wearable like watch do not need them
@@ -329,12 +339,12 @@ template("declarative_js_engine") {
 
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
-    if (platform == "windows" || platform == "mac") {
+    if (platform == "windows" || platform == "mac" || platform == "linux") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
     } else {
       if (defined(config.plugin_components_support) &&
           config.plugin_components_support) {
-        if (!use_mingw_win && !use_mac) {
+        if (!use_mingw_win && !use_mac && !use_linux) {
           external_deps = [
             "multimedia_image_standard:image",
             "multimedia_image_standard:image_native",
@@ -355,6 +365,7 @@ template("declarative_js_engine_ng") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
     if (target_cpu == "arm64") {
@@ -392,31 +403,27 @@ template("declarative_js_engine_ng") {
       "jsview/js_view_functions.cpp",
       "sharedata/js_share_data.cpp",
 
+      # jsviews
+      "jsview/js_column.cpp",
+      "jsview/js_container_base.cpp",
+      "jsview/js_flex.cpp",
+      "jsview/js_image.cpp",
+      "jsview/js_row.cpp",
+      "jsview/js_stack.cpp",
+      "jsview/js_text.cpp",
+
       # jsview bindings
-      "jsview/bindings/js_column_binding.cpp",
-      "jsview/bindings/js_container_base_binding.cpp",
-      "jsview/bindings/js_image_binding.cpp",
       "jsview/bindings/js_lazy_foreach_binding.cpp",
       "jsview/bindings/js_list_binding.cpp",
       "jsview/bindings/js_list_item_binding.cpp",
-      "jsview/bindings/js_row_binding.cpp",
-      "jsview/bindings/js_stack_binding.cpp",
-      "jsview/bindings/js_text_binding.cpp",
       "jsview/bindings/js_view_abstract_binding.cpp",
       "jsview/bindings/js_view_binding.cpp",
 
       # ng jsviews
-      "ng/jsview/js_column.cpp",
-      "ng/jsview/js_container_base.cpp",
-      "ng/jsview/js_flex.cpp",
-      "ng/jsview/js_image.cpp",
       "ng/jsview/js_interactable_view.cpp",
       "ng/jsview/js_lazy_foreach.cpp",
       "ng/jsview/js_list.cpp",
       "ng/jsview/js_list_item.cpp",
-      "ng/jsview/js_row.cpp",
-      "ng/jsview/js_stack.cpp",
-      "ng/jsview/js_text.cpp",
       "ng/jsview/js_view.cpp",
       "ng/jsview/js_view_abstract.cpp",
     ]

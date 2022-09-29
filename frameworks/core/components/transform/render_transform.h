@@ -187,7 +187,7 @@ private:
     double CovertDimensionToPxBySize(const Dimension& dimension, double size);
     void SetTouchHandle(ClickSpringEffectType type);
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void ResetTransformToAccessibilityNode();
     void UpdateScaleToAccessibilityNode(float maxScale);
     void UpdateTranslateToAccessibilityNode(double translateX, double translateY);

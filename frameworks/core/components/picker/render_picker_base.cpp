@@ -445,7 +445,7 @@ void RenderPickerBase::UpdateAccessibility()
         UpdateButtonAccessibility(okNode, ok_);
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto pickerDialogNode = data_->GetPickerDialogAccessibility();
     if (pickerDialogNode && box_) {
         UpdatePickerDialogAccessibility(pickerDialogNode, box_);

@@ -35,6 +35,16 @@ struct LocaleProxy;
 
 struct LunarDate : Date {
     bool isLeapMonth = false;
+
+    bool operator==(const LunarDate& lunarDate) const
+    {
+        return (isLeapMonth == true);
+    }
+
+    bool operator!=(const LunarDate& lunarDate) const
+    {
+        return !operator==(lunarDate);
+    }
 };
 
 struct DateTime final : Date {

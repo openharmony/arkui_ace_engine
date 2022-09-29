@@ -206,6 +206,8 @@ public:
     {
         return isHover_;
     }
+
+    std::string ProvideRestoreInfo() override;
     
 protected:
     static TouchRegionPoint GetTopTouchRegion(const Vertex& center, double width, double height);
@@ -238,7 +240,7 @@ protected:
     void CalculateTotalRadio();
     void UpdateTipText(double value);
 
-    void Initialize();
+    void Initialize(const RefPtr<SliderComponent>& sliderComponent);
     void RenderBlockPosition(const Offset& touchPosition);
     void UpdateBlockPosition(const Offset& touchPosition, bool isAnimation);
     Vertex FindCenterVertex(double x, double y, double objectHeight, double objectWidth);
@@ -296,6 +298,8 @@ protected:
     RefPtr<RenderNode> track_ = AceType::MakeRefPtr<RenderTrack>();
 
 private:
+    void ApplyRestoreInfo();
+
     // Slider render information
     double value_ = DEFAULT_VALUE;
     double preMovingValue_ = DEFAULT_VALUE;

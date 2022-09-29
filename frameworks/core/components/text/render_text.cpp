@@ -122,7 +122,7 @@ void RenderText::Update(const RefPtr<Component>& component)
 void RenderText::OnPaintFinish()
 {
     UpdateOverlay();
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     UpdateAccessibilityText();
 #endif
 }
@@ -589,9 +589,10 @@ void RenderText::RegisterCallbacksToOverlay()
         textOverlayManager->PushTextOverlayToStack(textOverlay, pipelineContext);
 
         auto text = weak.Upgrade();
-        if (text) {
-            text->UpdateOverlay();
+        if (!text) {
+            return;
         }
+        text->UpdateOverlay();
         text->MarkIsOverlayShowed(true);
     };
     if (clipboard_) {
@@ -649,7 +650,7 @@ void RenderText::HandleOnCopy()
     if (textValue_.GetSelectedText().empty()) {
         return;
     }
-    clipboard_->SetData(textValue_.GetSelectedText());
+    clipboard_->SetData(textValue_.GetSelectedText(), copyOption_);
 
     auto textOverlayManager = GetTextOverlayManager(context_);
     if (textOverlayManager) {
@@ -958,18 +959,10 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
     }
 
     GestureEvent newInfo = info;
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        pipelineContext->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
-    Point newPoint;
-    if (isContainerModal) {
-        newPoint.SetX(startPoint_.GetX() - CONTAINER_BORDER_WIDTH.ConvertToPx() - CONTENT_PADDING.ConvertToPx());
-        newPoint.SetY(startPoint_.GetY() - CONTAINER_TITLE_HEIGHT.ConvertToPx());
-    } else {
-        newPoint = startPoint_;
-    }
+    Point newPoint = UpdatePoint(pipelineContext, startPoint_);
     newInfo.SetGlobalPoint(newPoint);
     auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (!dragItemInfo.pixelMap && !dragItemInfo.customComponent) {
         auto initRenderNode = AceType::Claim(this);
         isDragDropNode_ = true;
@@ -1030,7 +1023,7 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
 
 void RenderText::PanOnActionUpdate(const GestureEvent& info)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_ && dragWindow_) {
         int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
         int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
@@ -1080,7 +1073,7 @@ void RenderText::PanOnActionEnd(const GestureEvent& info)
         LOGE("Context is null.");
         return;
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_) {
         isDragDropNode_ = false;
 
@@ -1150,7 +1143,7 @@ void RenderText::PanOnActionCancel()
         return;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_) {
         isDragDropNode_ = false;
         RestoreCilpboardData(pipelineContext);

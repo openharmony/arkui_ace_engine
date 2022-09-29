@@ -14,9 +14,13 @@
  */
 
 #include "frameworks/core/common/debugger/connect_inspector.h"
+
+#include <shared_mutex>
+
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
+std::shared_mutex g_mutex;
 std::unique_ptr<ConnectInspector> g_inspector = nullptr;
 
 void* HandleDebugManager(void* const server)
@@ -31,15 +35,17 @@ void* HandleDebugManager(void* const server)
 
 void OnMessage(const std::string& message)
 {
+    std::shared_lock<std::shared_mutex> lock(g_mutex);
     if (message.empty()) {
         LOGE("message is empty");
         return;
     }
 
-    std::string checkMessage = "connected";
-    if (message.find(checkMessage, 0) != std::string::npos) {
-        LOGI("Find the target string: %{private}s", message.c_str());
-        if (g_inspector != nullptr && g_inspector->connectServer_ != nullptr) {
+    LOGI("ConnectServer OnMessage: %{public}s", message.c_str());
+    if (g_inspector != nullptr && g_inspector->connectServer_ != nullptr) {
+        g_inspector->ideMsgQueue_.push(message);
+        std::string checkMessage = "connected";
+        if (message.find(checkMessage, 0) != std::string::npos) {
             g_inspector->waitingForDebugger_ = false;
             for (auto &info : g_inspector->infoBuffer_) {
                 g_inspector->connectServer_->SendMessage(info.second);
@@ -78,8 +84,9 @@ void StopServer(const std::string& componentName)
 
 void StoreMessage(int32_t instanceId, const std::string& message)
 {
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
     if (g_inspector->infoBuffer_.count(instanceId) == 1) {
-        LOGE("The message with the current instance id has been existed.");
+        LOGE("The message with the current instance id has existed.");
         return;
     }
     g_inspector->infoBuffer_[instanceId] = message;
@@ -87,6 +94,7 @@ void StoreMessage(int32_t instanceId, const std::string& message)
 
 void RemoveMessage(int32_t instanceId)
 {
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
     if (g_inspector->infoBuffer_.count(instanceId) != 1) {
         LOGE("The message with the current instance id does not exist.");
         return;

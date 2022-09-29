@@ -47,13 +47,20 @@ int main(int argc, const char* argv[])
     std::string appResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/AppResources";
     std::string appResourcesPathStage = "/Volumes/SSD2T/daily-test/preview/js/default_stage";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
-#else
+#elif WINDOWS_PLATFORM
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default";
     std::string assetPathEts = "D:\\Workspace\\preview\\js\\default_2.0";
     std::string assetPathEtsStage = "D:\\Workspace\\preview\\js\\default_stage\\ets";
     std::string appResourcesPath = "D:\\Workspace\\preview\\js\\AppResources\\assets\\entry";
     std::string appResourcesPathStage = "D:\\Workspace\\preview\\js\\default_stage";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
+#else
+    std::string assetPathJs = "/home/ubuntu/demo/preview/js/default";
+    std::string assetPathEts = "/home/ubuntu/demo/preview/js/default_2.0";
+    std::string assetPathEtsStage = "/home/ubuntu/demo/preview/js/default_stage/ets";
+    std::string appResourcesPath = "/home/ubuntu/demo/preview/js/AppResources";
+    std::string appResourcesPathStage = "/home/ubuntu/demo/preview/js/default_stage";
+    std::string systemResourcesPath = "/home/ubuntu/demo/preview/js/SystemResources";
 #endif
     OHOS::Ace::Platform::AceRunArgs args = {
         .assetPath = assetPathJs,
@@ -66,7 +73,6 @@ int main(int argc, const char* argv[])
         .deviceWidth = 1280,
         .deviceHeight = 800,
         .onRender = std::move(renderCallback),
-        .physicalDeviceFontsEnabled = false,
     };
 
     if (argc == MAX_ARGS_COUNT) {

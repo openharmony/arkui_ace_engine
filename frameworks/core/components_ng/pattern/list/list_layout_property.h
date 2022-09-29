@@ -21,6 +21,8 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
+// TODO: need to delete it.
+#include "core/components_v2/list/list_component.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ListLayoutProperty : public LayoutProperty {
@@ -38,10 +40,13 @@ public:
         value->propSpace_ = CloneSpace();
         value->propInitialIndex_ = CloneInitialIndex();
         value->propListDirection_ = CloneListDirection();
+        value->propDivider_ = CloneDivider();
+        value->propEdgeEffect_ = CloneEdgeEffect();
         value->propLanes_ = CloneLanes();
         value->propLaneMinLength_ = CloneLaneMinLength();
         value->propLaneMaxLength_ = CloneLaneMaxLength();
         value->propListItemAlign_ = CloneListItemAlign();
+        value->propCachedCount_ = CloneCachedCount();
         return value;
     }
 
@@ -51,19 +56,31 @@ public:
         ResetSpace();
         ResetInitialIndex();
         ResetListDirection();
+        ResetDivider();
+        ResetEdgeEffect();
         ResetLanes();
         ResetLaneMinLength();
         ResetLaneMaxLength();
         ResetListItemAlign();
+        ResetCachedCount();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Lanes, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMinLength, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMaxLength, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
+
+    bool IsDirectionVertical() override
+    {
+        // Need update
+        return GetListDirection().value_or(Axis::VERTICAL) != Axis::HORIZONTAL;
+    }
 };
 } // namespace OHOS::Ace::NG
 

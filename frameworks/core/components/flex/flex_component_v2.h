@@ -29,7 +29,8 @@ public:
         : FlexComponent(direction, mainAxisAlign, crossAxisAlign, children)
     {}
     ~FlexComponentV2() override = default;
-
+    static void ChangeShrinkValueInFlexComponent(const RefPtr<Component>& component);
+    static RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component);
     void OnChildAppended(const RefPtr<Component>& child) override;
 };
 

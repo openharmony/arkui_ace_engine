@@ -19,7 +19,7 @@
 #include <map>
 #include <string>
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include "adapter/preview/osal/request_data.h"
 #include "adapter/preview/osal/response_data.h"
 #include "frameworks/base/utils/linear_map.h"
@@ -76,7 +76,7 @@ public:
 
     void Destroy() override;
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void TriggerModuleJsCallbackPreview(
         int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData) override;
     void GetRequestData(const shared_ptr<JsValue>& valObject, OHOS::Ace::RequestData& requestData);
@@ -132,7 +132,7 @@ private:
     std::atomic_int pendingCallbackId_;
 
     shared_ptr<JsRuntime> runtime_;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     static const LinearMapNode<void (*)(const char*, RequestData&)> fetchRequestDataMap1[];
     static const LinearMapNode<void (*)(shared_ptr<JsRuntime>,
         const shared_ptr<JsValue>&, RequestData&)> fetchRequestDataMap2[];

@@ -22,6 +22,13 @@
 
 namespace OHOS::Ace::NG {
 class ImagePattern;
+using DimensionPair = std::pair<Dimension, Dimension>;
+struct ImageSizeStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoResize, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SourceSize, DimensionPair);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FitOriginalSize, bool);
+};
+
 class ACE_EXPORT ImageLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ImageLayoutProperty, LayoutProperty);
 
@@ -35,8 +42,9 @@ public:
         auto value = MakeRefPtr<ImageLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propImageSourceInfo_ = CloneImageSourceInfo();
+        value->propAlt_ = CloneAlt();
         value->propImageFit_ = CloneImageFit();
-        value->propAutoResize_ = CloneAutoResize();
+        value->propImageSizeStyle_ = CloneImageSizeStyle();
         return value;
     }
 
@@ -44,13 +52,18 @@ public:
     {
         LayoutProperty::Reset();
         ResetImageSourceInfo();
+        ResetAlt();
         ResetImageFit();
-        ResetAutoResize();
+        ResetImageSizeStyle();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoResize, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Alt, ImageSourceInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_GROUP(ImageSizeStyle, ImageSizeStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, AutoResize, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, SourceSize, DimensionPair, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, FitOriginalSize, bool, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutProperty);

@@ -42,9 +42,12 @@ int main(int argc, const char* argv[])
 #ifdef MAC_PLATFORM
     std::string assetPathJs = "/Volumes/SSD2T/daily-test/preview/js/default";
     std::string assetPathEts = "/Volumes/SSD2T/daily-test/preview/js/default_2.0";
-#else
+#elif WINDOWS_PLATFORM
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default";
     std::string assetPathEts = "D:\\Workspace\\preview\\js\\default_2.0";
+#else
+    std::string assetPathJs = "/home/ubuntu/demo/preview/js/default";
+    std::string assetPathEts = "/home/ubuntu/demo/preview/js/default_2.0";
 #endif
     OHOS::Ace::Platform::AceRunArgs args = {
         .assetPath = assetPathJs,
@@ -55,7 +58,6 @@ int main(int argc, const char* argv[])
         .deviceWidth = 466,
         .deviceHeight = 466,
         .onRender = std::move(renderCallback),
-        .physicalDeviceFontsEnabled = false,
     };
 
     if (argc == MAX_ARGS_COUNT && !std::strcmp(argv[1], ACE_VERSION_2)) {

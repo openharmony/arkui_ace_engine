@@ -67,7 +67,7 @@ void ResourceThemeStyle::ParseContent()
     };
     for (auto& [attrName, attrValue] : rawAttrs_) {
         if (attrName.empty() || attrValue.empty()) {
-            LOGW("theme attr name:%{public}s or value:%{public}s is empty", attrName.c_str(), attrValue.c_str());
+            LOGD("theme attr name:%{public}s or value:%{public}s is empty", attrName.c_str(), attrValue.c_str());
             continue;
         }
         if (attrValue.front() == '#' || attrValue.find(COLOR_VALUE_PREFIX) != std::string::npos) {

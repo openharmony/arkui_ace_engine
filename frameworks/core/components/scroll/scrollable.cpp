@@ -30,7 +30,6 @@ namespace {
 constexpr double SPRING_SCROLL_MASS = 0.5;
 constexpr double SPRING_SCROLL_STIFFNESS = 100.0;
 constexpr double SPRING_SCROLL_DAMPING = 15.55635;
-constexpr double MAX_FRICTION = 0.766;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
 #ifndef WEARABLE_PRODUCT
@@ -81,6 +80,20 @@ Scrollable::~Scrollable()
     // If animation still runs, force stop it.
     controller_->Stop();
     springController_->Stop();
+}
+
+void Scrollable::OnFlushTouchEventsBegin()
+{
+    if (panRecognizer_) {
+        panRecognizer_->OnFlushTouchEventsBegin();
+    }
+}
+
+void Scrollable::OnFlushTouchEventsEnd()
+{
+    if (panRecognizer_) {
+        panRecognizer_->OnFlushTouchEventsEnd();
+    }
 }
 
 void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
@@ -166,25 +179,15 @@ void Scrollable::HandleTouchDown()
 {
     LOGD("handle touch down");
     isTouching_ = true;
-
-    if (outBoundaryCallback_ && !outBoundaryCallback_()) {
-        return;
-    }
     // If animation still runs, first stop it.
     springController_->Stop();
     if (!controller_->IsStopped()) {
         controller_->Stop();
-        if (motion_) {
-            // Don't stop immediately, keep moving with a big friction.
-            motion_->Reset(MAX_FRICTION, motion_->GetCurrentPosition(), motion_->GetCurrentVelocity() / 2);
-            FixScrollMotion(motion_->GetCurrentPosition());
-            controller_->PlayMotion(motion_);
-            currentPos_ = motion_->GetCurrentPosition();
-        }
     } else {
         // Resets values.
         currentPos_ = 0.0;
     }
+    LOGD("handle touch down has already stopped the animation");
 }
 
 void Scrollable::HandleTouchUp()
@@ -290,6 +293,10 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
     LOGD("handle drag end, position is %{public}lf and %{public}lf, velocity is %{public}lf",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
+    if (!moved_) {
+        LOGI("It is not moved now,  no need to handle drag end");
+        return;
+    }
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
     isDragUpdateStop_ = false;

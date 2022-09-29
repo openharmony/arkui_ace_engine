@@ -186,6 +186,21 @@ public:
         itemAlignment_ = alignment;
     }
 
+    const Color& GetIndicatorColor() const
+    {
+        return indicatorColor_.value();
+    }
+
+    void SetIndicatorColor(const Color& color)
+    {
+        indicatorColor_ = color;
+    }
+
+    bool HasIndicatorColor() const
+    {
+        return indicatorColor_.has_value();
+    }
+
 private:
     bool vertical_ { false }; // the tab is vertical or not, default value is false
 
@@ -208,6 +223,7 @@ private:
     TextStyle inactiveTextStyle_;
     Color activeColor_;
     Color inactiveColor_;
+    std::optional<Color> indicatorColor_;
     Alignment itemAlignment_ = Alignment::CENTER;
     EventMarker domChangeEventId_;
     BarPosition barPosition_ = BarPosition::START;

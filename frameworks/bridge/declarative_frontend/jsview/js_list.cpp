@@ -49,6 +49,10 @@ void JSList::SetDirection(int32_t direction)
 
 void JSList::SetScrollBar(int32_t scrollBar)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGW("ScrollBar is not supported");
+        return;
+    }
     JSViewSetProperty(&V2::ListComponent::SetScrollBar, scrollBar, DISPLAY_MODE_TABLE, DisplayMode::OFF);
 }
 
@@ -68,6 +72,10 @@ void JSList::SetEditMode(bool editMode)
 
 void JSList::SetCachedCount(int32_t cachedCount)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetCachedCount(cachedCount);
+        return;
+    }
     JSViewSetProperty(&V2::ListComponent::SetCachedCount, cachedCount);
 }
 
@@ -132,6 +140,9 @@ void JSList::Create(const JSCallbackInfo& args)
 
 void JSList::SetChainAnimation(bool enableChainAnimation)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetChainAnimation(enableChainAnimation);
+    }
     JSViewSetProperty(&V2::ListComponent::SetChainAnimation, enableChainAnimation);
 }
 
@@ -156,7 +167,7 @@ void JSList::JsHeight(const JSCallbackInfo& info)
 void JSList::SetListItemAlign(int32_t itemAlignment)
 {
     JSViewSetProperty(
-        &V2::ListComponent::SetListItemAlign, itemAlignment, LIST_ITEM_ALIGN_TABLE, V2::ListItemAlign::CENTER);
+        &V2::ListComponent::SetListItemAlign, itemAlignment, LIST_ITEM_ALIGN_TABLE, V2::ListItemAlign::START);
 }
 
 void JSList::SetLanes(const JSCallbackInfo& info)
@@ -182,7 +193,8 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         }
         Dimension minLengthValue;
         Dimension maxLengthValue;
-        if (!ParseJsDimensionVp(minLengthParam, minLengthValue) || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+        if (!ParseJsDimensionVp(minLengthParam, minLengthValue) ||
+            !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
             LOGW("minLength param or maxLength param is invalid");
             return;
         }
@@ -222,11 +234,44 @@ void JSList::SetLanes(const JSCallbackInfo& info)
 
 void JSList::SetSticky(int32_t sticky)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetSticky(static_cast<V2::StickyStyle>(sticky));
+    }
     JSViewSetProperty(&V2::ListComponent::SetSticky, static_cast<V2::StickyStyle>(sticky));
 }
 
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        do {
+            if (args.Length() < 1 || !args[0]->IsObject()) {
+                LOGW("Invalid params");
+                break;
+            }
+
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+            Dimension strokeWidth;
+            if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
+                LOGW("Invalid strokeWidth of divider");
+                break;
+            }
+
+            V2::ItemDivider divider;
+            divider.strokeWidth = strokeWidth;
+            if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+                // Failed to get color from param, using default color defined in theme
+                RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
+                if (listTheme) {
+                    divider.color = listTheme->GetDividerColor();
+                }
+            }
+            ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
+            ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
+
+            NG::ListView::SetDivider(divider);
+        } while (0);
+        return;
+    }
     do {
         if (args.Length() < 1 || !args[0]->IsObject()) {
             LOGW("Invalid params");
@@ -260,6 +305,18 @@ void JSList::SetDivider(const JSCallbackInfo& args)
 
 void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                const Dimension& scrollOffset, const V2::ScrollState& scrollState) {
+                auto params = ConvertToJSValues(scrollOffset, scrollState);
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
+                return;
+            };
+            NG::ListView::SetOnScroll(onScroll);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnScroll, args)) {
         LOGW("Failed to bind event");
     }
@@ -268,6 +325,16 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
 
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+                func->Call(JSRef<JSObject>());
+                return;
+            };
+            NG::ListView::SetOnReachStart(onReachStart);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnReachStart, args)) {
         LOGW("Failed to bind event");
     }
@@ -276,6 +343,16 @@ void JSList::ReachStartCallback(const JSCallbackInfo& args)
 
 void JSList::ReachEndCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+                func->Call(JSRef<JSObject>());
+                return;
+            };
+            NG::ListView::SetOnReachEnd(onReachEnd);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnReachEnd, args)) {
         LOGW("Failed to bind event");
     }
@@ -284,6 +361,16 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
 
 void JSList::ScrollStopCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+                func->Call(JSRef<JSObject>());
+                return;
+            };
+            NG::ListView::SetOnScrollStop(onScrollStop);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnScrollStop, args)) {
         LOGW("Failed to bind event");
     }
@@ -308,6 +395,18 @@ void JSList::ItemMoveCallback(const JSCallbackInfo& args)
 
 void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                     const int32_t start, const int32_t end) {
+                auto params = ConvertToJSValues(start, end);
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
+                return;
+            };
+            NG::ListView::SetOnScrollIndex(onScrollIndex);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnScrollIndex, args)) {
         LOGW("Failed to bind event");
     }
@@ -459,35 +558,37 @@ void JSList::SetMultiSelectable(bool multiSelectable)
 void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onScrollBegin =
-            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
-                (const Dimension& dx, const Dimension& dy) -> ScrollInfo {
-                    ScrollInfo scrollInfo { .dx = dx, .dy = dy };
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollInfo);
-                    auto params = ConvertToJSValues(dx, dy);
-                    auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
-                    if (result.IsEmpty()) {
-                        LOGE("Error calling onScrollBegin, result is empty.");
-                        return scrollInfo;
-                    }
+        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const Dimension& dx, const Dimension& dy) -> ScrollInfo {
+            ScrollInfo scrollInfo { .dx = dx, .dy = dy };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollInfo);
+            auto params = ConvertToJSValues(dx, dy);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                LOGE("Error calling onScrollBegin, result is empty.");
+                return scrollInfo;
+            }
 
-                    if (!result->IsObject()) {
-                        LOGE("Error calling onScrollBegin, result is not object.");
-                        return scrollInfo;
-                    }
+            if (!result->IsObject()) {
+                LOGE("Error calling onScrollBegin, result is not object.");
+                return scrollInfo;
+            }
 
-                    auto resObj = JSRef<JSObject>::Cast(result);
-                    auto dxRemainValue = resObj->GetProperty("dxRemain");
-                    if (dxRemainValue->IsNumber()) {
-                        scrollInfo.dx = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
-                    }
-                    auto dyRemainValue = resObj->GetProperty("dyRemain");
-                    if (dyRemainValue->IsNumber()) {
-                        scrollInfo.dy = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
-                    }
-                    return scrollInfo;
-                };
-
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("dxRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollInfo.dx = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            auto dyRemainValue = resObj->GetProperty("dyRemain");
+            if (dyRemainValue->IsNumber()) {
+                scrollInfo.dy = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollInfo;
+        };
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ListView::SetOnScrollBegin(onScrollBegin);
+            return;
+        }
         auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (!component) {
             LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListComponent>());

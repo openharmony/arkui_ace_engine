@@ -355,6 +355,16 @@ void JSCanvasRenderer::JsGetLineCap(const JSCallbackInfo& info)
     return;
 }
 
+void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
+{
+    auto lineDash = pool_->GetLineDash();
+    JSRef<JSObject> lineDashObj = JSRef<JSObject>::New();
+    for (int i = 0; i < lineDash.size(); i++) {
+        lineDashObj->SetProperty<double>(std::to_string(i).c_str(), lineDash[i]);
+    }
+    info.SetReturnValue(lineDashObj);
+}
+
 void JSCanvasRenderer::JsGetLineJoin(const JSCallbackInfo& info)
 {
     return;
@@ -436,10 +446,19 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         std::string colorStr = "";
         JSViewAbstract::ParseJsString(info[0], colorStr);
         auto color = Color::FromString(colorStr);
-        if (isOffscreen_) {
-            offscreenCanvas_->SetFillColor(color);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->UpdateFillColor(color);
+            } else {
+                customPaintPattern_->UpdateFillColor(color);
+            }
         } else {
-            pool_->UpdateFillColor(color);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetFillColor(color);
+            } else {
+                pool_->UpdateFillColor(color);
+            }
         }
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -557,7 +576,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
             imgWidth = jsImage->GetWidth();
             imgHeight = jsImage->GetHeight();
         } else {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
             pixelMap = CreatePixelMapFromNapiValue(info[0]);
 #endif
             if (!pixelMap) {
@@ -814,10 +833,19 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     height = SystemProperties::Vp2Px(height);
 
     std::unique_ptr<ImageData> data;
-    if (isOffscreen_) {
-        data = offscreenCanvas_->GetImageData(left, top, width, height);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            data = offscreenCanvasPattern_->GetImageData(left, top, width, height);
+        } else {
+            data = customPaintPattern_->GetImageData(left, top, width, height);
+        }
     } else {
-        data = pool_->GetImageData(left, top, width, height);
+        if (isOffscreen_) {
+            data = offscreenCanvas_->GetImageData(left, top, width, height);
+        } else {
+            data = pool_->GetImageData(left, top, width, height);
+        }
     }
 
     final_height = static_cast<uint32_t>(data->dirtyHeight);
@@ -877,11 +905,21 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 
     // 1 Get data from canvas
     std::unique_ptr<ImageData> canvasData;
-    if (isOffscreen_) {
-        canvasData = offscreenCanvas_->GetImageData(left, top, width, height);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            canvasData = offscreenCanvasPattern_->GetImageData(left, top, width, height);
+        } else {
+            canvasData = customPaintPattern_->GetImageData(left, top, width, height);
+        }
     } else {
-        canvasData = pool_->GetImageData(left, top, width, height);
+        if (isOffscreen_) {
+            canvasData = offscreenCanvas_->GetImageData(left, top, width, height);
+        } else {
+            canvasData = pool_->GetImageData(left, top, width, height);
+        }
     }
+
     final_height = static_cast<uint32_t>(canvasData->dirtyHeight);
     final_width = static_cast<uint32_t>(canvasData->dirtyWidth);
     uint32_t length = final_height * final_width;
@@ -1492,14 +1530,46 @@ void JSCanvasRenderer::JsStroke(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsClip(const JSCallbackInfo& info)
 {
-    // clip() uses non-zero fillRule for default
+    std::string ruleStr = "";
+    if (info.Length() == 1 && info[0]->IsString()) {
+        // clip(rule) uses fillRule specified by the application developers
+        JSViewAbstract::ParseJsString(info[0], ruleStr);
+    } else if (info.Length() == 2) {
+        // clip(path, rule) uses fillRule specified by the application developers
+        JSViewAbstract::ParseJsString(info[1], ruleStr);
+    }
     auto fillRule = CanvasFillRule::NONZERO;
-    if (isOffscreen_) {
-        offscreenCanvas_->SetFillRuleForPath(fillRule);
-        offscreenCanvas_->Clip();
-    } else {
-        pool_->UpdateFillRuleForPath(fillRule);
-        pool_->Clip();
+    if (ruleStr == "nonzero") {
+        fillRule = CanvasFillRule::NONZERO;
+    } else if (ruleStr == "evenodd") {
+        fillRule = CanvasFillRule::EVENODD;
+    }
+
+    if (info.Length() == 0 ||
+        (info.Length() == 1 && info[0]->IsString())) {
+        if (isOffscreen_) {
+            offscreenCanvas_->SetFillRuleForPath(fillRule);
+            offscreenCanvas_->Clip();
+        } else {
+            pool_->UpdateFillRuleForPath(fillRule);
+            pool_->Clip();
+        }
+    } else if (info.Length() == 2 ||
+        (info.Length() == 1 && info[0]->IsObject())) {
+        JSPath2D* jsCanvasPath = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
+        if (jsCanvasPath == nullptr) {
+            LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
+            return;
+        }
+        auto path = jsCanvasPath->GetCanvasPath2d();
+
+        if (isOffscreen_) {
+            offscreenCanvas_->SetFillRuleForPath2D(fillRule);
+            offscreenCanvas_->Clip(path);
+        } else {
+            pool_->UpdateFillRuleForPath2D(fillRule);
+            pool_->Clip(path);
+        }
     }
 }
 
@@ -1827,10 +1897,19 @@ void JSCanvasRenderer::JsFillRect(const JSCallbackInfo& info)
         height = SystemProperties::Vp2Px(height);
 
         Rect rect = Rect(x, y, width, height);
-        if (isOffscreen_) {
-            offscreenCanvas_->FillRect(rect);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->FillRect(rect);
+            } else {
+                customPaintPattern_->FillRect(rect);
+            }
         } else {
-            pool_->FillRect(rect);
+            if (isOffscreen_) {
+                offscreenCanvas_->FillRect(rect);
+            } else {
+                pool_->FillRect(rect);
+            }
         }
     }
 }
@@ -1857,10 +1936,19 @@ void JSCanvasRenderer::JsStrokeRect(const JSCallbackInfo& info)
         height = SystemProperties::Vp2Px(height);
 
         Rect rect = Rect(x, y, width, height);
-        if (isOffscreen_) {
-            offscreenCanvas_->StrokeRect(rect);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->StrokeRect(rect);
+            } else {
+                customPaintPattern_->StrokeRect(rect);
+            }
         } else {
-            pool_->StrokeRect(rect);
+            if (isOffscreen_) {
+                offscreenCanvas_->StrokeRect(rect);
+            } else {
+                pool_->StrokeRect(rect);
+            }
         }
     }
 }

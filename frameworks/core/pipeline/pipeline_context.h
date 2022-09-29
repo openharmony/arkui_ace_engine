@@ -31,14 +31,12 @@
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
-#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/flush_event.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/animation/schedule_task.h"
-#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/focus_animation_manager.h"
 #include "core/common/platform_res_register.h"
@@ -69,7 +67,6 @@ namespace OHOS::Ace {
 class CardTransitionController;
 class ComposedElement;
 class FontManager;
-enum class FrontendType;
 class OverlayElement;
 class RenderNode;
 class RenderFocusAnimation;
@@ -229,9 +226,6 @@ public:
     // if return false, then this event needs platform to handle it.
     bool OnRotationEvent(const RotationEvent& event) const override;
 
-    // Called by window when received vsync signal.
-    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) override;
-
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
@@ -274,11 +268,6 @@ public:
 
     void OnSurfaceDestroyed() override;
 
-    FrontendType GetFrontendType() const
-    {
-        return frontendType_;
-    }
-
     RefPtr<PlatformResRegister> GetPlatformResRegister() const
     {
         return platformResRegister_;
@@ -306,6 +295,13 @@ public:
         webPaintCallback_.push_back(std::move(listener));
     }
     void NotifyWebPaint() const;
+
+    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
+    void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
+    {
+        virtualKeyBoardCallback_.push_back(std::move(listener));
+    }
+    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const;
 
     float GetViewScale() const
     {
@@ -586,20 +582,6 @@ public:
 
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params);
 
-    void ForceLayoutForImplicitAnimation();
-
-    bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) override;
-
-    void PrepareOpenImplicitAnimation() override;
-
-    void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr) override;
-
-    void PrepareCloseImplicitAnimation() override;
-
-    bool CloseImplicitAnimation() override;
-
     void AddKeyFrame(
         float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) override;
 
@@ -613,7 +595,7 @@ public:
 
     AnimationOption GetExplicitAnimationOption() const override;
 
-    void FlushBuild();
+    void FlushBuild() override;
 
     void SetUseLiteStyle(bool useLiteStyle)
     {
@@ -744,11 +726,6 @@ public:
         contextMenu_ = contextMenu;
     }
 
-    double GetDensity() const
-    {
-        return density_;
-    }
-
     void SetClipHole(double left, double top, double width, double height);
 
     const Rect& GetTransparentHole() const
@@ -801,9 +778,6 @@ public:
         return pluginEventOffset_;
     }
 
-    void SetTouchPipeline(WeakPtr<PipelineContext> context);
-    void RemoveTouchPipeline(WeakPtr<PipelineContext> context);
-
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRSUIDirector();
@@ -839,16 +813,6 @@ public:
     }
 
     void SetShortcutKey(const KeyEvent& event);
-
-    void SetEventManager(const RefPtr<EventManager>& eventManager)
-    {
-        eventManager_ = eventManager;
-    }
-
-    RefPtr<EventManager> GetEventManager() const
-    {
-        return eventManager_;
-    }
 
     void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
     {
@@ -1072,18 +1036,26 @@ public:
         rectCallbackList_.emplace_back(RectCallback(getRectCallback, touchCallback, mouseCallback));
     }
 
-protected:
-    bool OnDumpInfo(const std::vector<std::string>& params) const override;
-    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void SetRootRect(double width, double height, double offset = 0.0) override
     {
         SetRootSizeWithWidthHeight(width, height, offset);
     }
+
+    void SetAppTitle(const std::string& title);
+    void SetAppIcon(const RefPtr<PixelMap>& icon);
+
+protected:
+    bool OnDumpInfo(const std::vector<std::string>& params) const override;
+    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     void FlushReload() override;
     void FlushReloadTransition() override;
+    void FlushUITasks() override
+    {
+        FlushLayout();
+    }
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     bool hasIdleTasks_ = false;
@@ -1116,7 +1088,7 @@ private:
 
     template<typename T>
     struct NodeCompare {
-        bool operator()(const T& nodeLeft, const T& nodeRight)
+        bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
@@ -1130,7 +1102,7 @@ private:
 
     template<typename T>
     struct NodeCompareWeak {
-        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak)
+        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak) const
         {
             auto nodeLeft = nodeLeftWeak.Upgrade();
             auto nodeRight = nodeRightWeak.Upgrade();
@@ -1171,7 +1143,6 @@ private:
     UpdateWindowBlurDrawOpHandler updateWindowBlurDrawOpHandler_;
     DragEventHandler dragEventHandler_;
     InitDragEventListener initDragEventListener_;
-    std::stack<bool> pendingImplicitLayout_;
     std::vector<KeyCode> pressedKeyCodes;
     TouchEvent zoomEventA_;
     TouchEvent zoomEventB_;
@@ -1195,6 +1166,7 @@ private:
     EventTrigger eventTrigger_;
 
     std::list<WebPaintCallback> webPaintCallback_;
+    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
     WeakPtr<RenderNode> requestedRenderNode_;
     // Make page update tasks pending here to avoid block receiving vsync.
     std::queue<std::function<void()>> pageUpdateTasks_;
@@ -1223,6 +1195,7 @@ private:
     bool isFlushingAnimation_ = false;
     bool isMoving_ = false;
     std::atomic<bool> onShow_ = true;
+    std::atomic<bool> onFocus_ = true;
     bool isKeyEvent_ = false;
     bool needWindowBlurRegionRefresh_ = false;
     bool isJsPlugin_ = false;
@@ -1252,7 +1225,6 @@ private:
     bool isFirstPage_ = true;
     bool buildingFirstPage_ = false;
     bool forbidPlatformQuit_ = false;
-    FrontendType frontendType_;
     std::string photoCachePath_;
     AnimationOption explicitAnimationOption_;
     std::map<int32_t, RefPtr<Animator>> explicitAnimators_;
@@ -1262,7 +1234,6 @@ private:
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
-    std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
     Offset pluginOffset_ { 0, 0 };
     Offset pluginEventOffset_ { 0, 0 };
 

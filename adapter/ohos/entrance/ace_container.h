@@ -21,6 +21,7 @@
 #include "ability_context.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
+#include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_ability.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
@@ -44,7 +45,7 @@ public:
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
-        bool useCurrentEventRunner = false, bool isSubContainer = false);
+        bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -246,7 +247,7 @@ public:
     static void OnNewRequest(int32_t instanceId, const std::string& data);
     static void OnDialogUpdated(int32_t instanceId, const std::string& data);
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
-    static void AddLibPath(int32_t instanceId, const std::string& libPath);
+    static void AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath);
     static void SetView(AceView* view, double density, int32_t width, int32_t height,
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
     static void SetViewNew(
@@ -272,6 +273,16 @@ public:
         return windowName_;
     }
 
+    void SetWindowId(uint32_t windowId)
+    {
+        windowId_ = windowId;
+    }
+
+    uint32_t GetWindowId()
+    {
+        return windowId_;
+    }
+
     void SetWindowPos(int32_t left, int32_t top);
 
     void SetIsSubContainer(bool isSubContainer)
@@ -288,13 +299,18 @@ public:
     void UpdateConfiguration(
         const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
 
+    void UpdateFrondend(bool needReloadTransition);
+
+    bool IsUseStageModel() const override
+    {
+        return useStageModel_;
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();
     void InitWindowCallback();
-
-    void UpdateFrondend(bool needReloadTransition);
 
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);
@@ -323,6 +339,7 @@ private:
     bool useCurrentEventRunner_ = false;
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
     std::string windowName_;
+    uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
 
     bool isSubContainer_ = false;
     int32_t parentId_ = 0;

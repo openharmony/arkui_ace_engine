@@ -240,6 +240,8 @@ void RenderToggle::Update(const RefPtr<Component>& component)
     if (toggleComponent_->GetOnChange()) {
         onChangeToggle_ = *toggleComponent_->GetOnChange();
     }
+
+    ApplyRestoreInfo();
     SetAccessibilityClickImpl();
     MarkNeedLayout();
 }
@@ -255,9 +257,11 @@ void RenderToggle::PerformLayout()
     Size childrenSize;
     if (!GetChildren().empty()) {
         child = GetChildren().front();
-        child->Layout(innerLayoutParam);
-        childrenSize.SetWidth(child->GetLayoutSize().Width());
-        childrenSize.SetHeight(child->GetLayoutSize().Height());
+        if (child) {
+            child->Layout(innerLayoutParam);
+            childrenSize.SetWidth(child->GetLayoutSize().Width());
+            childrenSize.SetHeight(child->GetLayoutSize().Height());
+        }
     }
     double width = widthDefined_ ? toggleSize_.Width() : childrenSize.Width();
     double height = toggleSize_.Height();
@@ -288,6 +292,34 @@ void RenderToggle::SetAccessibilityClickImpl()
             }
         });
     }
+}
+
+std::string RenderToggle::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("checked", toggleComponent_->GetCheckedState());
+    jsonObj->Put("isPressed", isPressed_);
+
+    return jsonObj->ToString();
+}
+
+void RenderToggle::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(GetRestoreInfo());
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("RenderRadio:: restore info is invalid");
+        return;
+    }
+
+    auto jsonChecked = info->GetValue("checked");
+    auto jsonIsPressed = info->GetValue("isPressed");
+
+    toggleComponent_->SetCheckedState(jsonChecked->GetBool());
+    isPressed_ = jsonIsPressed->GetBool();
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

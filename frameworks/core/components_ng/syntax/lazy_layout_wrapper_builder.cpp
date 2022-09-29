@@ -15,9 +15,16 @@
 
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 
+#include <iterator>
+#include <list>
+#include <string>
+
 #include "base/log/ace_trace.h"
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
 namespace OHOS::Ace::NG {
@@ -27,18 +34,35 @@ LazyLayoutWrapperBuilder::LazyLayoutWrapperBuilder(
     : builder_(builder), host_(host)
 {}
 
-void LazyLayoutWrapperBuilder::UpdateBuildCacheOnMainThread()
+void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
 {
-    ACE_FUNCTION_TRACE();
+    if (childWrappers_.empty()) {
+        return;
+    }
     auto host = host_.Upgrade();
     CHECK_NULL_VOID(host);
-    std::unordered_set<int32_t> items;
-    for (const auto& child : buildItems_) {
-        if (child.second->IsActive()) {
-            items.emplace(child.first);
-        }
+    // check front active flag.
+    auto item = childWrappers_.front();
+    while (item && !item->IsActive()) {
+        childWrappers_.pop_front();
+        nodeIds_.pop_front();
+        startIndex_ = startIndex_.value() + 1;
+        item = childWrappers_.empty() ? nullptr : childWrappers_.front();
     }
-    host->UpdateCachedItems(items);
+    // check end active flag.
+    item = childWrappers_.empty() ? nullptr : childWrappers_.back();
+    while (item && !item->IsActive()) {
+        nodeIds_.pop_back();
+        childWrappers_.pop_back();
+        endIndex_ = endIndex_.value() - 1;
+        item = childWrappers_.empty() ? nullptr : childWrappers_.back();
+    }
+
+    for (const auto& wrapper : childWrappers_) {
+        wrapper->SwapDirtyLayoutWrapperOnMainThread();
+    }
+
+    host->UpdateCachedItems(startIndex_.value(), endIndex_.value(), std::move(nodeIds_));
 }
 
 int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()
@@ -55,31 +79,100 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int3
         LOGE("index is illegal: %{public}d", index);
         return nullptr;
     }
+
+    // The first time get the item, do not do the range check, and the subsequent get the item
+    // needs to check whether it is in the upper and lower bounds (-1, +1) of the existing index.
+    if (!startIndex_) {
+        startIndex_ = index;
+        endIndex_ = index;
+    } else {
+        if ((index >= startIndex_.value()) && (index <= endIndex_.value())) {
+            auto iter = childWrappers_.begin();
+            std::advance(iter, index - startIndex_.value());
+            return *iter;
+        }
+        if ((index < (startIndex_.value() - 1)) || (index > (endIndex_.value() + 1))) {
+            LOGE("need to obtain the item node in order and by step one: %{public}d", index);
+            return nullptr;
+        }
+    }
+
     CHECK_NULL_RETURN(builder_, nullptr);
-    auto uiNode = builder_->GetChildByIndex(index);
+    RefPtr<UINode> uiNode;
+    std::string id;
+    // get frame node from previous cached.
+    if ((index >= preStartIndex_) && (index <= preEndIndex_)) {
+        auto iter = preNodeIds_.begin();
+        std::advance(iter, index - preStartIndex_);
+        if ((iter != preNodeIds_.end()) && (iter->has_value())) {
+            id = iter->value();
+            uiNode = builder_->GetChildByKey(id);
+        }
+    }
+    if (!uiNode) {
+        // create frame node.
+        auto itemInfo = builder_->CreateChildByIndex(index);
+        id = itemInfo.first;
+        uiNode = itemInfo.second;
+    }
     CHECK_NULL_RETURN(uiNode, nullptr);
+    RefPtr<LayoutWrapper> wrapper;
     auto frameNode = DynamicCast<FrameNode>(uiNode);
     if (frameNode) {
-        return frameNode->CreateLayoutWrapperOnCreate();
+        wrapper = frameNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
+    } else {
+        // TODO: Check only ifelse syntax node can use LazyForEach and get wrapper from ifelse syntax node.
+        LOGW("syntax node is not support yet");
     }
-    // TODO: Check only ifelse syntax node can use LazyForEach and get wrapper from ifelse syntax node.
-    return nullptr;
+    CHECK_NULL_RETURN(wrapper, nullptr);
+    if (index == (startIndex_.value() - 1)) {
+        // insert at begin.
+        startIndex_ = index;
+        childWrappers_.emplace_front(wrapper);
+        nodeIds_.emplace_front(id);
+        return wrapper;
+    }
+    // insert at end.
+    endIndex_ = index;
+    childWrappers_.emplace_back(wrapper);
+    nodeIds_.emplace_back(id);
+    return wrapper;
 }
 
-std::list<RefPtr<LayoutWrapper>> LazyLayoutWrapperBuilder::OnExpandChildLayoutWrapper()
+const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::OnExpandChildLayoutWrapper()
 {
-    std::list<RefPtr<LayoutWrapper>> items;
-    CHECK_NULL_RETURN(builder_, items);
     auto total = GetTotalCount();
+    if (!childWrappers_.empty()) {
+        if (static_cast<int32_t>(childWrappers_.size()) == total) {
+            return childWrappers_;
+        }
+        LOGE("can not mix lazy get and full get method!");
+        childWrappers_.clear();
+        return childWrappers_;
+    }
+
+    CHECK_NULL_RETURN(builder_, childWrappers_);
     for (int32_t index = 0; index < total; ++index) {
-        auto wrapper = OnGetOrCreateWrapperByIndex(index);
+        auto itemInfo = builder_->CreateChildByIndex(index);
+        RefPtr<LayoutWrapper> wrapper;
+        auto frameNode = DynamicCast<FrameNode>(itemInfo.second);
+        if (frameNode) {
+            wrapper = frameNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
+        } else {
+            // TODO: Check only ifelse syntax node can use LazyForEach and get wrapper from ifelse syntax node.
+            LOGW("syntax node is not support yet");
+        }
         if (!wrapper) {
             LOGE("fail to create wrapper");
-            continue;
+            childWrappers_.clear();
+            return childWrappers_;
         }
-        items.emplace_back(wrapper);
+        nodeIds_.emplace_back(itemInfo.first);
+        childWrappers_.emplace_back(wrapper);
     }
-    return items;
+    startIndex_ = 0;
+    endIndex_ = total - 1;
+    return childWrappers_;
 }
 
 } // namespace OHOS::Ace::NG

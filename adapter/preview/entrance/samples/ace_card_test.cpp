@@ -52,13 +52,20 @@ int main(int argc, const char* argv[])
     std::string appResourcesPathStage = "/Volumes/SSD2T/daily-test/preview/js/default_card_stage";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
     constexpr double density = 2;
-#else
+#elif WINDOWS_PLATFORM
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default_card";
     std::string assetPathEtsStage = "D:\\Workspace\\preview\\js\\default_card_stage\\js";
     std::string appResourcesPath = "D:\\Workspace\\preview\\js\\AppResources\\assets\\entry";
     std::string appResourcesPathStage = "D:\\Workspace\\preview\\js\\default_card_stage";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
     constexpr double density = 1;
+#else
+    std::string assetPathJs = "/home/ubuntu/demo/preview/js/default_card";
+    std::string assetPathEtsStage = "/home/ubuntu/demo/preview/js/default_card_stage/js";
+    std::string appResourcesPath = "/home/ubuntu/demo/preview/js/AppResources";
+    std::string appResourcesPathStage = "/home/ubuntu/demo/preview/js/default_card_stage";
+    std::string systemResourcesPath = "/home/ubuntu/demo/preview/js/SystemResources";
+    constexpr double density = 2;
 #endif
     std::string pageProfile = "form_config";
     std::string url = "widget/pages/index/index";
@@ -75,7 +82,6 @@ int main(int argc, const char* argv[])
         .deviceHeight = CARD_DEFAULT_HEIGHT,
         .formsEnabled = true,
         .onRender = std::move(renderCallback),
-        .physicalDeviceFontsEnabled = false,
     };
     if (argc == MAX_ARGS_COUNT && !std::strcmp(argv[1], MODEL_STAGE)) {
         args.assetPath = assetPathEtsStage;

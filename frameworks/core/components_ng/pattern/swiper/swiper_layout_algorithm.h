@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_LAYOUT_ALGORITHM_H
 
-#include <map>
 #include <cstdint>
+#include <optional>
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
@@ -30,12 +30,14 @@ class ACE_EXPORT SwiperLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(SwiperLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    SwiperLayoutAlgorithm(int32_t currentIndex, int32_t startIndex, int32_t endIndex) :
-        currentIndex_(currentIndex), preStartIndex_(startIndex), preEndIndex_(endIndex) {}
-
+    SwiperLayoutAlgorithm(int32_t currentIndex, int32_t startIndex, int32_t endIndex)
+        : currentIndex_(currentIndex), startIndex_(startIndex), endIndex_(endIndex)
+    {}
     ~SwiperLayoutAlgorithm() override = default;
 
     void OnReset() override {}
+    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
     void SetCurrentOffset(float offset)
     {
@@ -47,28 +49,50 @@ public:
         return currentOffset_;
     }
 
-    int32_t GetStartIndex() const
+    void SetTargetIndex(std::optional<int32_t> targetIndex)
     {
-        return startIndex_.value_or(0);
+        targetIndex_ = targetIndex;
     }
 
-    int32_t GetEndIndex() const
+    void SetTotalCount(int32_t totalCount)
     {
-        return endIndex_.value_or(0);
+        totalCount_ = totalCount;
     }
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void ResetTargetIndex()
+    {
+        targetIndex_.reset();
+    }
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    const std::set<int32_t>& GetItemRange()
+    {
+        return itemRange_;
+    }
+
+    void SetPreItemRange(const std::set<int32_t>& preItemRange)
+    {
+        preItemRange_ = preItemRange;
+    }
+
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
 
 private:
-    int32_t currentIndex_ = 0;
-    int32_t preStartIndex_ = 0;
-    int32_t preEndIndex_ = 0;
-    std::optional<int32_t> startIndex_;
-    std::optional<int32_t> endIndex_;
-    float currentOffset_ = 0.0f;
-};
-} // namespace OHOS::Ace::NG
+    void InitItemRange();
 
+    bool isLoop_ = true;
+    int32_t currentIndex_ = 0;
+    int32_t startIndex_;
+    int32_t endIndex_;
+    std::optional<int32_t> targetIndex_;
+    float currentOffset_ = 0.0f;
+    int32_t totalCount_ = 0;
+    std::set<int32_t> itemRange_;
+    std::set<int32_t> preItemRange_;
+    std::vector<int32_t> inActiveItems_;
+};
+
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_LAYOUT_ALGORITHM_H

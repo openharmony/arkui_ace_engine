@@ -18,6 +18,11 @@
 
 #include <list>
 #include <thread>
+#ifdef LINUX_PLATFORM
+#include <mutex>
+#include <functional>
+#include <condition_variable>
+#endif
 
 #include "base/utils/noncopyable.h"
 

@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 
 #include "base/log/ace_trace.h"
+#include "core/components_ng/pattern/relative_container/relative_container_view.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -43,6 +44,11 @@ void JSRelativeContainer::JSBind(BindingTarget globalObj)
 
 void JSRelativeContainer::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::RelativeContainerView::Create();
+        return;
+    }
+    
     std::list<RefPtr<Component>> children;
     RefPtr<OHOS::Ace::RelativeContainerComponent> component = AceType::MakeRefPtr<RelativeContainerComponent>(children);
     ViewStackProcessor::GetInstance()->Push(component);

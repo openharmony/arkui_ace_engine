@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/ace_page.h"
 #include "core/components/box/box_component_helper.h"
@@ -26,7 +27,7 @@
 #include "core/components/padding/padding_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/button/button_view.h"
-#include "core/components_ng/pattern/text/text_view.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -252,6 +253,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
             if ((info.Length() > 1) && info[1]->IsObject()) {
                 SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
             }
+            NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
             return;
         }
         auto textComponent = AceType::MakeRefPtr<TextComponent>(label);
@@ -265,6 +267,18 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         padding->SetChild(textComponent);
         Component::MergeRSNode(padding, textComponent);
         buttonChildren.emplace_back(padding);
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
+        if (!labelSet && info[0]->IsObject()) {
+            SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
+        }
+        if ((info.Length() > 1) && info[1]->IsObject()) {
+            SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
+        }
+        NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
+        return;
     }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
     ViewStackProcessor::GetInstance()->ClaimElementId(buttonComponent);
@@ -287,11 +301,12 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::Create();
+        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
         if (info[0]->IsObject()) {
             auto obj = JSRef<JSObject>::Cast(info[0]);
             SetTypeAndStateEffect(obj);
         }
+        NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
         return;
     }
     std::list<RefPtr<Component>> buttonChildren;
@@ -417,56 +432,62 @@ void JSButton::JsPadding(const JSCallbackInfo& info)
 void JSButton::JsOnClick(const JSCallbackInfo& info)
 {
     LOGD("JSButton JsOnClick");
-    if (info[0]->IsFunction()) {
-        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-        if (!inspector) {
-            LOGE("fail to get inspector for on click event");
-            return;
-        }
-        auto impl = inspector->GetInspectorFunctionImpl();
+    if (!info[0]->IsFunction()) {
+        LOGE("OnClick parameter need a function.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSInteractableView::JsOnClick(info);
+        return;
+    }
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("fail to get inspector for on click event");
+        return;
+    }
+    auto impl = inspector->GetInspectorFunctionImpl();
 
-        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
-                           GestureEvent& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            if (impl) {
-                impl->UpdateEventInfo(info);
-            }
-            ACE_SCORING_EVENT("onClick");
-            func->Execute(info);
-        };
-        RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(DEFAULT_TAP_COUNTS, DEFAULT_TAP_FINGERS);
-        if (!tapGesture) {
-            LOGE("tapGesture is null");
-            return;
+    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
+                        GestureEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        if (impl) {
+            impl->UpdateEventInfo(info);
         }
-        tapGesture->SetOnActionId(clickId);
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        if (tapGesture) {
-            box->SetOnClick(tapGesture);
-        }
+        ACE_SCORING_EVENT("onClick");
+        func->Execute(info);
+    };
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(DEFAULT_TAP_COUNTS, DEFAULT_TAP_FINGERS);
+    if (!tapGesture) {
+        LOGE("tapGesture is null");
+        return;
+    }
+    tapGesture->SetOnActionId(clickId);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (tapGesture) {
+        box->SetOnClick(tapGesture);
+    }
 
-        RefPtr<JsClickFunction> jsClickEventFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        EventMarker clickEventId([execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](
-                                     const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-            auto newInfo = *clickInfo;
-            if (impl) {
-                impl->UpdateEventInfo(newInfo);
-            }
-            ACE_SCORING_EVENT("Button.onClick");
-            func->Execute(newInfo);
-        });
-        auto buttonComponent =
-            AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (buttonComponent) {
-            buttonComponent->SetKeyEnterEventId(clickEventId);
+    RefPtr<JsClickFunction> jsClickEventFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    EventMarker clickEventId([execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](
+                                    const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+        auto newInfo = *clickInfo;
+        if (impl) {
+            impl->UpdateEventInfo(newInfo);
         }
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
-        if (focusableComponent) {
-            focusableComponent->SetOnClickId(clickEventId);
-        }
+        ACE_SCORING_EVENT("Button.onClick");
+        func->Execute(newInfo);
+    });
+    auto buttonComponent =
+        AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (buttonComponent) {
+        buttonComponent->SetKeyEnterEventId(clickEventId);
+    }
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+    if (focusableComponent) {
+        focusableComponent->SetOnClickId(clickEventId);
     }
 }
 
@@ -681,6 +702,10 @@ void JSButton::JsHoverEffect(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
         LOGE("The arg is not a number");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
         return;
     }
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

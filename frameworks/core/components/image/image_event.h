@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_EVENT_H
 
+#include "core/event/ace_events.h"
+
 namespace OHOS::Ace {
 
 class ACE_EXPORT LoadImageSuccessEvent : public BaseEventInfo {

@@ -31,7 +31,6 @@
 #endif
 #include "core/components/page/page_target.h"
 #include "core/components/page_transition/page_transition_component.h"
-#include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/utils/source_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_animation_bridge.h"
@@ -48,6 +47,7 @@ class UINode;
 namespace OHOS::Ace::Framework {
 
 #ifndef NG_BUILD
+class DOMDocument;
 using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
 #endif
 
@@ -188,10 +188,6 @@ public:
     RefPtr<BaseAnimationBridge> GetAnimatorBridge(int32_t bridgeId);
     void RemoveAnimatorBridge(int32_t bridgeId);
     void AddAnimatorBridge(int32_t bridgeId, const RefPtr<BaseAnimationBridge>& animatorBridge);
-
-    RefPtr<Curve> GetCurve(const std::string& curveString);
-    void RemoveCurve(const std::string& curveString);
-    void AddCurve(const std::string& curveString, const RefPtr<Curve>& curve);
 
     RefPtr<AnimatorInfo> GetAnimatorInfo(const std::string& animatorId);
     void RemoveAnimatorInfo(const std::string& animatorId);
@@ -420,7 +416,6 @@ private:
     std::unordered_map<int32_t, RefPtr<BaseCanvasBridge>> offscreenCanvasBridges_;
     std::unordered_map<NodeId, RefPtr<BaseXComponentBridge>> xcomponentBridges_;
     std::unordered_map<int32_t, RefPtr<BaseAnimationBridge>> animatorBridges_;
-    std::unordered_map<std::string, RefPtr<Curve>> curves_;
     std::unordered_map<std::string, RefPtr<AnimatorInfo>> animatorInfos_;
 #ifndef NG_BUILD
     std::shared_ptr<JsPageRadioGroups> radioGroups_;

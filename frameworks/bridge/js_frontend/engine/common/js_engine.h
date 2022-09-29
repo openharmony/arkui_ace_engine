@@ -22,12 +22,13 @@
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 class NativeEngine;
 class NativeReference;
 
 namespace OHOS::Ace::Framework {
+
+class JsAcePage;
 using PixelMapNapiEntry = void* (*)(void*, void*);
 struct JsModule {
     const std::string moduleName;
@@ -63,7 +64,7 @@ class JsEngine : public AceType {
 
 public:
     JsEngine() = default;
-    virtual ~JsEngine() = default;
+    ~JsEngine() override = default;
 
     void RegisterSingleComponent(std::string& command, const std::string& componentName, const std::string& methods);
 
@@ -81,6 +82,18 @@ public:
 
     // Load script in JS engine, and execute in corresponding context.
     virtual void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) = 0;
+
+    // Load the app.js file of the FA model in NG structure..
+    virtual bool LoadFaAppSource()
+    {
+        return false;
+    }
+
+    // Load the je file of the page in NG structure..
+    virtual bool LoadPageSource(const std::string& /*url*/)
+    {
+        return false;
+    }
 
     // Update running page
     virtual void UpdateRunningPage(const RefPtr<JsAcePage>& page) = 0;
@@ -100,8 +113,7 @@ public:
     virtual void FireSyncEvent(const std::string& eventId, const std::string& param) = 0;
 
     // Fire external event on JS thread
-    virtual void FireExternalEvent(
-        const std::string& componentId, const uint32_t nodeId, const bool isDestroy = false) = 0;
+    virtual void FireExternalEvent(const std::string& componentId, uint32_t nodeId, bool isDestroy = false) = 0;
 
     // Timer callback on JS
     virtual void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) = 0;
@@ -232,7 +244,7 @@ public:
 
     void ACE_EXPORT RegisterMediaUpdateCallback(std::function<void(JsEngine*)> cb)
     {
-        mediaUpdateCallback_ = cb;
+        mediaUpdateCallback_ = std::move(cb);
     }
 
     void ACE_EXPORT UnregisterMediaUpdateCallback()
@@ -241,22 +253,24 @@ public:
     }
 
     virtual void RunNativeEngineLoop();
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     static PixelMapNapiEntry GetPixelMapNapiEntry();
 #endif
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     virtual void ReplaceJSContent(const std::string& url, const std::string componentName)
     {
         LOGE("V8 does not support replaceJSContent");
         return;
     }
+
+    virtual void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath, bool isBundle)
+    {
+        LOGE("V8 and QuickJs does not support InitializeModuleSearcher");
+    }
 #endif
 
-    virtual void FlushReload()
-    {
-        return;
-    }
+    virtual void FlushReload() {}
 
 protected:
     NativeEngine* nativeEngine_ = nullptr;

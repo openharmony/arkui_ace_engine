@@ -14,6 +14,7 @@
  */
 
 #include "core/components_v2/inspector/inspector_constants.h"
+
 #include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -50,6 +51,8 @@ const char ATTRS_COMMON_ZINDEX[] = "zIndex";
 
 // root view
 const char ROOT_ETS_TAG[] = "root";
+// stage view
+const char STAGE_ETS_TAG[] = "stage";
 // page view
 const char PAGE_ETS_TAG[] = "page";
 // js custom view
@@ -58,8 +61,12 @@ const char JS_VIEW_ETS_TAG[] = "JsView";
 const char JS_LAZY_FOR_EACH_ETS_TAG[] = "LazyForEach";
 // js lazy foreach node
 const char JS_FOR_EACH_ETS_TAG[] = "ForEach";
+// js lazy foreach node
+const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 // js if lese node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
+// toast view
+const char TOAST_ETS_TAG[] = "Toast";
 
 // column
 const char COLUMN_COMPONENT_TAG[] = "ColumnComponent";
@@ -87,6 +94,10 @@ const char TABS_ETS_TAG[] = "Tabs";
 // tab content item
 const char TAB_CONTENT_ITEM_COMPONENT_TAG[] = "TabContentItemComponent";
 const char TAB_CONTENT_ITEM_ETS_TAG[] = "TabContent";
+
+// tab bar
+const char TAB_BAR_COMPONENT_TAG[] = "TabBarComponent";
+const char TAB_BAR_ETS_TAG[] = "TabBar";
 
 // navigation view
 const char NAVIGATION_VIEW_COMPONENT_TAG[] = "NavigationContainerComponent";
@@ -145,6 +156,15 @@ const char PATTERN_LOCK_ETS_TAG[] = "PatternLock";
 // row
 const char ROW_COMPONENT_TAG[] = "RowComponent";
 const char ROW_ETS_TAG[] = "Row";
+
+//rect
+const char RECT_ETS_TAG[] = "Rect";
+
+//line
+const char LINE_ETS_TAG[] = "Line";
+
+//circle
+const char CIRCLE_ETS_TAG[] = "Circle";
 
 // shape
 const char SHAPE_COMPONENT_TAG[] = "ShapeComponent";
@@ -290,6 +310,10 @@ ACE_EXPORT extern const char GRID_COL_ETS_TAG[] = "GridColComponent";
 ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
 ACE_EXPORT extern const char GRID_ROW_ETS_TAG[] = "GridRowComponent";
 
+// relativeContainer
+ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainer";
+ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
+
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[] = "MenuComponent";
 ACE_EXPORT extern const char MENU_TAG[] = "menu";
@@ -347,6 +371,9 @@ ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[] = "CustomDialog";
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
 
+// Normal dialog
+ACE_EXPORT extern const char DIALOG_ETS_TAG[] = "Dialog";
+
 // sideBar
 ACE_EXPORT extern const char SIDE_BAR_COMPONENT_TAG[] = "SideBarContainerComponent";
 ACE_EXPORT extern const char SIDE_BAR_ETS_TAG[] = "SideBarContainer";
@@ -375,4 +402,14 @@ ACE_EXPORT extern const char RICH_TEXT_ETS_TAG[] = "RichText";
 ACE_EXPORT extern const char XCOMPONENT_TAG[] = "XComponentComponent";
 ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[] = "XComponent";
 
+// ability_component
+ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
+// Popup
+ACE_EXPORT extern const char POPUP_ETS_TAG[] = "Popup";
+
+// bar item
+ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[] = "BarItem";
+
+// title bar
+ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[] = "TitleBar";
 } // namespace OHOS::Ace::V2

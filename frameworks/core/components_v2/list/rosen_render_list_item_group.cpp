@@ -35,41 +35,43 @@ void RosenRenderListItemGroup::PaintDivider(RenderContext& context)
     }
 
     const auto& divider = GetItemDivider();
-    if (divider && divider->color.GetAlpha() > 0x00 && GreatNotEqual(divider->strokeWidth.Value(), 0.0)) {
-        const double mainSize = GetMainSize(layoutSize);
-        const double strokeWidth = NormalizePercentToPx(divider->strokeWidth, IsVertical());
-        const double halfSpaceWidth = std::max(GetSpace(), strokeWidth) / 2.0;
-        const double startCrossAxis = NormalizePercentToPx(divider->startMargin, !IsVertical());
-        const double endCrossAxis = GetCrossSize(layoutSize) - NormalizePercentToPx(divider->endMargin, !IsVertical());
-        const double topOffset = halfSpaceWidth + (strokeWidth / 2.0);
-        const double bottomOffset = topOffset - strokeWidth;
+    if (!divider || divider->color.GetAlpha() <= 0x00 || LessOrEqual(divider->strokeWidth.Value(), 0.0)) {
+        return;
+    }
+    const double mainSize = GetMainSize(layoutSize);
+    const double crossSize = GetCrossSize(layoutSize);
+    const double strokeWidth = NormalizePercentToPx(divider->strokeWidth, IsVertical());
+    const double halfSpaceWidth = std::max(GetSpace(), strokeWidth) / 2.0;
+    const double startMargin = NormalizePercentToPx(divider->startMargin, !IsVertical());
+    const double endMargin = NormalizePercentToPx(divider->endMargin, !IsVertical());
+    const double topOffset = halfSpaceWidth + (strokeWidth / 2.0);
+    const double bottomOffset = topOffset - strokeWidth;
 
-        SkPaint paint;
-        paint.setAntiAlias(true);
-        paint.setColor(divider->color.GetValue());
-        paint.setStyle(SkPaint::Style::kStroke_Style);
-        paint.setStrokeWidth(strokeWidth);
-        bool isFirstItem = (GetStartIndex() == 0);
- 
-        for (const auto& child : GetItems()) {
-            double mainAxis = GetMainAxis(child->GetPosition());
-            if (GreatOrEqual(mainAxis - topOffset, mainSize)) {
-                break;
-            }
-            if (isFirstItem) {
-                isFirstItem = false;
-                continue;
-            }
-            if (LessOrEqual(mainAxis - bottomOffset, 0.0)) {
-                continue;
-            }
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(divider->color.GetValue());
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(strokeWidth);
+    bool isFirstItem = (GetStartIndex() == 0);
+    size_t lane = 0;
+
+    for (const auto& child : GetItems()) {
+        double mainAxis = GetMainAxis(child->GetPosition());
+        if (GreatOrEqual(mainAxis - topOffset, mainSize)) {
+            break;
+        }
+        if (!isFirstItem && GreatNotEqual(mainAxis - bottomOffset, 0.0)) {
+            double start = GetLanes() > 1 ? crossSize / GetLanes() * lane + startMargin : startMargin;
+            double end = GetLanes() > 1 ? crossSize / GetLanes() * (lane + 1) - endMargin : crossSize - endMargin;
             mainAxis -= halfSpaceWidth;
             if (IsVertical()) {
-                canvas->drawLine(startCrossAxis, mainAxis, endCrossAxis, mainAxis, paint);
+                canvas->drawLine(start, mainAxis, end, mainAxis, paint);
             } else {
-                canvas->drawLine(mainAxis, startCrossAxis, mainAxis, endCrossAxis, paint);
+                canvas->drawLine(mainAxis, start, mainAxis, end, paint);
             }
         }
+        lane = (GetLanes() <= 1 || (lane + 1) >= GetLanes()) ? 0 : lane + 1;
+        isFirstItem = isFirstItem ? lane > 0 : false;
     }
 }
 

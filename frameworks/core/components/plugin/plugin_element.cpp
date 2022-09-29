@@ -330,7 +330,6 @@ std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& we
     auto pluginElement = weak.Upgrade();
     if (!pluginElement) {
         LOGE("pluginElement is nullptr.");
-        pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
         return packagePathStr;
     }
 
@@ -355,7 +354,6 @@ void PluginElement::GetModuleNameByWant(const WeakPtr<PluginElement>& weak, Requ
     auto pluginElement = weak.Upgrade();
     if (!pluginElement) {
         LOGE("pluginElement is nullptr.");
-        pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
         return;
     }
 
@@ -404,14 +402,12 @@ void PluginElement::RunPluginTask(const WeakPtr<PluginElement>& weak, const RefP
     auto pluginElement = weak.Upgrade();
     if (!pluginElement) {
         LOGE("pluginElement is nullptr.");
-        pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
         return;
     }
 
     auto container = pluginElement->GetPluginSubContainer();
     if (!container) {
         LOGE("PluginSubContainer is nullptr.");
-        pluginElement->HandleOnErrorEvent("1", "PluginSubContainer is nullptr.");
         return;
     }
 

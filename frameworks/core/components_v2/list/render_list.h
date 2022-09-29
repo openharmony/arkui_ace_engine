@@ -246,7 +246,7 @@ public:
 
     size_t CalculateSelectedIndex(
         const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size& selectedItemSize);
-    size_t CalculateInsertIndex(
+    int32_t CalculateInsertIndex(
         const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size selectedItemSize);
 
     void HandleAxisEvent(const AxisEvent& event) override;
@@ -255,11 +255,17 @@ public:
 
     int32_t RequestNextFocus(bool vertical, bool reverse);
 
+    // distribute
     std::string ProvideRestoreInfo() override;
 
     void SetFocusIndex(int32_t focusIndex)
     {
         focusIndex_ = focusIndex;
+    }
+
+    int32_t GetLanes() const
+    {
+        return lanes_;
     }
 
 protected:
@@ -287,6 +293,8 @@ protected:
 
     RefPtr<RenderListItem> RequestListItem(size_t index);
     void RecycleListItem(size_t index);
+    size_t FindItemStartIndex(size_t index);
+    size_t GetItemRelativeIndex(size_t index);
     size_t TotalCount();
     size_t FindPreviousStickyListItem(size_t index);
 
@@ -415,6 +423,7 @@ protected:
     double prevOffset_ = 0.0;
     double prevMainPos_ = 0.0;
     double estimatedHeight_ = 0.0;
+    bool isRightToLeft_ = false;
 
 private:
     int32_t lanes_ = -1;
@@ -431,6 +440,8 @@ private:
     void LayoutChild(RefPtr<RenderNode> child, double referencePos = 0.0, bool forward = true);
     static void SetChildPosition(RefPtr<RenderNode> child, const Offset& offset);
     void AddChildItem(RefPtr<RenderNode> child);
+    void AdjustForReachEnd(double mainSize, double curMainPos);
+    void AdjustForReachStart(double &curMainPos);
     Dimension listSpace_;
     double realMainSize_ = 0.0; // Real size of main axis.
     size_t startCachedCount_ = 0;
@@ -453,6 +464,7 @@ private:
 
     bool HandleMouseEvent(const MouseEvent& event) override;
     bool isMultiSelectable_ = false;
+    bool forbidMultiSelect_ = false;
     void ClearMultiSelect();
     bool mouseIsHover_ = false;
     bool hasHeight_ = false;
@@ -476,8 +488,13 @@ private:
 
     void MultiSelectAllWhenCtrlA();
 
+    // distribute
     void ApplyRestoreInfo();
+
     void InitScrollable(Axis axis);
+
+    // when window size change, add offset to keep clicked textfield in display area
+    void SizeChangeOffset(double newWindowHeight);
 
     bool hasDragItem_ = false;
     std::map<ListEvents, bool> listEventFlags_;

@@ -19,6 +19,71 @@
 #include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
+class NWebResponseAsyncHandle : public WebResponseAsyncHandle {
+    DECLARE_ACE_TYPE(NWebResponseAsyncHandle, WebResponseAsyncHandle);
+public:
+    explicit NWebResponseAsyncHandle(std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse)
+        :nwebResponse_(nwebResponse) {}
+    ~NWebResponseAsyncHandle() = default;
+    void HandleFileFd(int32_t fd) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseFileHandle(fd);
+    }
+
+    void HandleData(std::string& data) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseData(data);
+    }
+
+    void HandleHeadersVal(const std::map<std::string, std::string>& response_headers) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseHeaders(response_headers);
+    }
+
+    void HandleEncoding(std::string& encoding) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseEncoding(encoding);
+    }
+
+    void HandleMimeType(std::string& mimeType) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseMimeType(mimeType);
+    }
+
+    void HandleStatusCodeAndReason(int32_t statusCode, std::string& reason) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseStateAndStatuscode(statusCode, reason);
+    }
+
+    void HandleResponseStatus(bool isReady) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseDataStatus(isReady);
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse_;
+};
 
 bool OnJsCommonDialog(
     const WebClientImpl* webClientImpl,
@@ -42,7 +107,7 @@ bool OnJsCommonDialog(
         }
         auto delegate = webClientImpl->GetWebDelegate();
         if (delegate) {
-            jsResult = delegate->OnCommonDialog(param.get(), dialogEventType);
+            jsResult = delegate->OnCommonDialog(param, dialogEventType);
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
@@ -143,6 +208,23 @@ void WebClientImpl::OnPageTitle(const std::string &title)
         return;
     }
     delegate->OnReceivedTitle(title);
+}
+
+void WebClientImpl::OnFullScreenExit()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnFullScreenExit();
+}
+
+void WebClientImpl::OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(handler);
+    delegate->OnFullScreenEnter(handler);
 }
 
 void WebClientImpl::OnGeolocationHide()
@@ -258,7 +340,7 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
         return nullptr;
     }
     task->PostSyncTask([&delegate, &webResponse, &param] {
-            webResponse = delegate->OnInterceptRequest(param.get());
+            webResponse = delegate->OnInterceptRequest(param);
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
     if (webResponse == nullptr) {
@@ -273,6 +355,15 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse =
         std::make_shared<OHOS::NWeb::NWebUrlResourceResponse>(webResponse->GetMimeType(), webResponse->GetEncoding(),
         webResponse->GetStatusCode(), webResponse->GetReason(), webResponse->GetHeaders(), data);
+    if (webResponse->IsFileHandle() == true) {
+        nwebResponse->PutResponseFileHandle(webResponse->GetFileHandle());
+    }
+    if (webResponse->GetResponseStatus() == false) {
+        LOGI("intercept response async Handle");
+        std::shared_ptr<NWebResponseAsyncHandle> asyncHandle = std::make_shared<NWebResponseAsyncHandle>(nwebResponse);
+        webResponse->SetAsyncHandle(asyncHandle);
+        nwebResponse->PutResponseDataStatus(false);
+    }
     return nwebResponse;
 }
 
@@ -347,7 +438,7 @@ bool WebClientImpl::OnFileSelectorShow(
         }
         auto delegate = webClient->GetWebDelegate();
         if (delegate) {
-            jsResult = delegate->OnFileSelectorShow(param.get());
+            jsResult = delegate->OnFileSelectorShow(param);
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
@@ -404,11 +495,69 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
             }
             auto delegate = webClient->webDelegate_.Upgrade();
             if (delegate) {
-                jsResult = delegate->OnHttpAuthRequest(param.get());
+                jsResult = delegate->OnHttpAuthRequest(param);
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
     LOGI("OnHttpAuthRequestByJS result:%{public}d", jsResult);
+    return jsResult;
+}
+
+bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+    OHOS::NWeb::SslError error)
+{
+    LOGI("OnSslErrorRequestByJS");
+    ContainerScope scope(instanceId_);
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result), static_cast<int32_t>(error));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnSslErrorRequest(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+
+    LOGI("OnSslErrorRequestByJS result:%{public}d", jsResult);
+    return jsResult;
+}
+
+bool WebClientImpl::OnSslSelectCertRequestByJS(
+    std::shared_ptr<NWeb::NWebJSSslSelectCertResult> result,
+    const std::string& host,
+    int port,
+    const std::vector<std::string>& keyTypes,
+    const std::vector<std::string>& issuers)
+{
+    ContainerScope scope(instanceId_);
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebSslSelectCertEvent>(AceType::MakeRefPtr<SslSelectCertResultOhos>(result),
+        host, port, keyTypes, issuers);
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnSslSelectCertRequest(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+
     return jsResult;
 }
 
@@ -440,7 +589,7 @@ bool WebClientImpl::RunContextMenu(
         }
         auto delegate = webClient->GetWebDelegate();
         if (delegate) {
-            jsResult = delegate->OnContextMenuShow(param.get());
+            jsResult = delegate->OnContextMenuShow(param);
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
@@ -499,5 +648,15 @@ void WebClientImpl::OnTouchSelectionChanged(
     }
     delegate->OnTouchSelectionChanged(
         insertHandle, startSelectionHandle, endSelectionHandle);
+}
+
+bool WebClientImpl::OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->OnDragAndDropData(data, len, opt.width, opt.height);
 }
 } // namespace OHOS::Ace

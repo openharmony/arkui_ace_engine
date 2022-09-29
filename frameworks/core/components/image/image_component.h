@@ -173,6 +173,16 @@ public:
         focusable_ = focusable;
     }
 
+    float GetBlurRadius() const
+    {
+        return blurRadius_;
+    }
+
+    void SetBlur(float radius)
+    {
+        blurRadius_ = radius;
+    }
+
 private:
     std::string src_;
     std::string alt_;
@@ -182,6 +192,7 @@ private:
     std::optional<Color> color_;
     std::optional<Color> fillColor_; // used for paint svg path.
     std::vector<float> colorfilter_;
+    float blurRadius_ = 0.0f;
 
     EventMarker loadSuccessEvent_;
     EventMarker loadFailEvent_;

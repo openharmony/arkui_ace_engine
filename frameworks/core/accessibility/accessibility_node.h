@@ -90,6 +90,16 @@ public:
     void RemoveNode(const RefPtr<AccessibilityNode>& node);
     void Mount(int32_t slot);
 
+    void SetWindowId(int32_t windowId)
+    {
+        windowId_ = windowId;
+    }
+
+    int32_t GetWindowId() const
+    {
+        return windowId_;
+    }
+
     void SetIsRootNode(bool isRootNode)
     {
         isRootNode_ = isRootNode;
@@ -677,7 +687,7 @@ public:
         listItemCounts_ = index;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     // used for inspector node in PC preview
     bool GetClearRectInfoFlag() const
     {
@@ -826,6 +836,7 @@ protected:
     // inner use, don't need to barrierfree
     NodeId nodeId_ = -1;
     int32_t pageId_ = -1;
+    int32_t windowId_ = 0;
     bool isRootNode_ = false;
     std::string inputType_;
     WeakPtr<AccessibilityNode> parentNode_;
@@ -902,7 +913,7 @@ private:
     std::vector<std::pair<std::string, std::string>> attrs_;
     std::vector<std::pair<std::string, std::string>> styles_;
     bool clipFlag_ = false;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     // used for inspector node in PC preview
     bool isClearRectInfo_ = false;
     // focus scale or translateScale for inspector node in PC preview

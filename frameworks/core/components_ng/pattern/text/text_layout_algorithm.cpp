@@ -44,13 +44,14 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto themeManager = pipeline->GetThemeManager();
     TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
         textLayoutProperty->GetTextLineStyle(), themeManager ? themeManager->GetTheme<TextTheme>() : nullptr);
-    if (!CreateParagraph(textStyle, textLayoutProperty->GetContent().value_or(""))) {
-        return std::nullopt;
-    }
-    if (contentConstraint.selfIdealSize.Width()) {
-        paragraph_->Layout(contentConstraint.selfIdealSize.Width().value());
+    if (!textStyle.GetAdaptTextSize()) {
+        if (!CreateParagraphAndLayout(textStyle, textLayoutProperty->GetContent().value_or(""), contentConstraint)) {
+            return std::nullopt;
+        }
     } else {
-        paragraph_->Layout(contentConstraint.maxSize.Width());
+        if (!AdaptMinTextSize(textStyle, textLayoutProperty->GetContent().value_or(""), contentConstraint, pipeline)) {
+            return std::nullopt;
+        }
     }
     auto height = static_cast<float>(paragraph_->GetHeight());
     double baselineOffset = 0.0;
@@ -59,6 +60,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     baselineOffset_ = static_cast<float>(baselineOffset);
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
+    auto baselineDistance = paragraph_->GetAlphabeticBaseline() + std::max(GetBaselineOffset(), 0.0f);
+    layoutWrapper->GetGeometryNode()->SetBaselineDistance(baselineDistance);
     return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
 }
 
@@ -74,7 +77,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
     }
 
-    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance());
+    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
 
     if (spanItemChildren_.empty()) {
@@ -93,6 +96,70 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     auto paragraph = builder->Build();
     paragraph_.reset(paragraph.release());
     return true;
+}
+
+bool TextLayoutAlgorithm::CreateParagraphAndLayout(
+    const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint)
+{
+    if (!CreateParagraph(textStyle, content)) {
+        return false;
+    }
+    CHECK_NULL_RETURN(paragraph_, false);
+    if (contentConstraint.selfIdealSize.Width()) {
+        paragraph_->Layout(contentConstraint.selfIdealSize.Width().value());
+    } else {
+        paragraph_->Layout(contentConstraint.maxSize.Width());
+    }
+    return true;
+}
+
+bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
+        return false;
+    }
+    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
+        return false;
+    }
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        CreateParagraphAndLayout(textStyle, content, contentConstraint);
+    }
+    constexpr Dimension ADAPT_UNIT = 1.0_fp;
+    Dimension step = ADAPT_UNIT;
+    if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
+        step = textStyle.GetAdaptFontSizeStep();
+    }
+    double stepSize = 0.0;
+    if (!step.NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(),
+            contentConstraint.maxSize.Height(), stepSize)) {
+        return false;
+    }
+    while (GreatOrEqual(maxFontSize, minFontSize)) {
+        textStyle.SetFontSize(Dimension(maxFontSize));
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint)) {
+            return false;
+        }
+        if (!DidExceedMaxLines(contentConstraint)) {
+            break;
+        }
+        maxFontSize -= stepSize;
+    }
+    return true;
+}
+
+bool TextLayoutAlgorithm::DidExceedMaxLines(const LayoutConstraintF& contentConstraint)
+{
+    CHECK_NULL_RETURN(paragraph_, false);
+    bool didExceedMaxLines = paragraph_->DidExceedMaxLines();
+    didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph_->GetHeight(), contentConstraint.maxSize.Height());
+    didExceedMaxLines =
+        didExceedMaxLines || GreatNotEqual(paragraph_->GetLongestLine(), contentConstraint.maxSize.Width());
+    return didExceedMaxLines;
 }
 
 TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content)

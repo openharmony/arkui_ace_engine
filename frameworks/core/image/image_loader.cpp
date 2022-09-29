@@ -146,6 +146,7 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(
 sk_sp<SkData> FileImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
+    ACE_FUNCTION_TRACE();
     auto src = imageSourceInfo.GetSrc();
     std::string filePath = RemovePathHead(src);
     if (imageSourceInfo.GetSrcType() == SrcType::INTERNAL) {
@@ -217,6 +218,7 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(
 sk_sp<SkData> AssetImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
+    ACE_FUNCTION_TRACE();
     auto src = imageSourceInfo.GetSrc();
     if (src.empty()) {
         LOGE("image src is empty");

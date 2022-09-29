@@ -24,8 +24,8 @@ type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 // Nativeview
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
-abstract class ViewPU extends NativeViewPartialUpdate implements
-  IMultiPropertiesChangeSubscriber {
+abstract class ViewPU extends NativeViewPartialUpdate
+  implements IViewPropertiesChangeSubscriber {
 
   private id_: number;
 
@@ -35,7 +35,8 @@ abstract class ViewPU extends NativeViewPartialUpdate implements
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: ProvidedVarsMapPU;
 
-  // elmtIds of components/elements with this custom component that need partial update
+  // Set of dependent elmtIds that need partial update
+  // during next re-render
   protected dirtDescendantElementIds_: Set<number>
     = new Set<number>();
 
@@ -129,19 +130,28 @@ abstract class ViewPU extends NativeViewPartialUpdate implements
   }
 
   // implements IMultiPropertiesChangeSubscriber
-  propertyHasChanged(info?: PropertyInfo): void {
-    if (info) {
-      console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
-      this.syncInstanceId();
-      this.markNeedUpdate();
+  viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
+    console.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
+    this.syncInstanceId();
 
-      let cb = this.watchedProps.get(info)
-      if (cb) {
-        console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
-        cb.call(this, info);
+    let cb = this.watchedProps.get(varName)
+    if (cb) {
+      console.debug(`   .. calling @Watch function`);
+      cb.call(this, varName);
+    }
+
+    if (dependentElmtIds.size) {
+      if (!this.dirtDescendantElementIds_.size) {
+        // mark Composedelement dirty when first elmtIds are added
+        // do not need to do this every time
+        this.markNeedUpdate();
       }
-      this.restoreInstanceId();
-    } // if info avail.
+      console.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': elmtIds affected by value change [${Array.from(dependentElmtIds).toString()}].`)
+      const union: Set<number> = new Set<number>([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
+      this.dirtDescendantElementIds_ = union;
+      console.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
+    }
+    this.restoreInstanceId();
   }
 
   /**
@@ -202,7 +212,10 @@ abstract class ViewPU extends NativeViewPartialUpdate implements
    * @param elmtId
    */
   public markElemenDirtyById(elmtId: number): void {
-    this.dirtDescendantElementIds_.add(elmtId)  // add to set of dirty element ids if not already included
+    // TODO ace-ets2bundle, framework, compilated apps need to update together
+    // this function will be removed after a short transiition periode
+    console.error(`markElemenDirtyById no longer supported. 
+        Please update your ace-ets2bundle and recompile your application!`);
   }
 
   /**
@@ -288,6 +301,19 @@ abstract class ViewPU extends NativeViewPartialUpdate implements
 
     this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
     console.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} - DONE.`);
+  }
+
+  // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
+  public ifElseBranchUpdateFunction(branchId : number, branchfunc : () => void ) : void {
+    const oldBranchid : number = If.getBranchId();
+
+    if (branchId == oldBranchid) {
+      console.log(`${this.constructor.name}[${this.id__()}] IfElse branch unchanged, no work to do.`);
+      return;
+    }
+
+    If.branchId(branchId);
+    branchfunc();
   }
 
   /*

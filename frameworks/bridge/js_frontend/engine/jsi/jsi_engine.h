@@ -24,7 +24,6 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -60,13 +59,13 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
-    void SetDebuggerPostTask();
+    void SetDebuggerPostTask(std::string& library_path);
 
     RefPtr<FrontendDelegate> GetDelegate() const
     {
         return frontendDelegate_;
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId);
 #endif
     void SetArkNativeEngine(ArkNativeEngine* nativeEngine)
@@ -74,12 +73,12 @@ public:
         nativeEngine_ = nativeEngine;
     }
 
-    ArkNativeEngine const *  GetArkNativeEngine() const
+    ArkNativeEngine const* GetArkNativeEngine() const
     {
         return static_cast<ArkNativeEngine*>(nativeEngine_);
     }
 
-    void RegisterFaPlugin();              // load ReatureAbility plugin
+    void RegisterFaPlugin(); // load ReatureAbility plugin
 
 private:
     void RegisterAceModule();             // add ace object to global
@@ -109,6 +108,7 @@ private:
 
 class JsiEngine : public JsEngine {
     DECLARE_ACE_TYPE(JsiEngine, JsEngine);
+
 public:
     explicit JsiEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiEngine() override;
@@ -173,7 +173,7 @@ private:
     void RegisterInitWorkerFunc();
     void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
-    bool ExecuteAbc(const std::string &fileName);
+    bool ExecuteAbc(const std::string& fileName);
     bool CallAppFunc(const std::string& appFuncName);
     bool CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv);
 

@@ -50,7 +50,7 @@ template("gen_sa_dialog_js") {
       rebase_path(project_path, root_build_dir),
       rebase_path(target_out_dir, root_build_dir),
       rebase_path(nodejs_path, root_build_dir),
-      rebase_path("//developtools/ace-js2bundle", root_build_dir),
+      rebase_path("//developtools/ace_js2bundle", root_build_dir),
       rebase_path("//interface", root_build_dir),
       rebase_path("//third_party/parse5", root_build_dir),
       rebase_path("//third_party/weex-loader", root_build_dir),

@@ -15,8 +15,13 @@
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
+#include <optional>
+
 #include "base/geometry/ng/size_t.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 
@@ -34,11 +39,40 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Layout(parentOffset);
+        child->Layout();
     }
+}
+
+std::optional<SizeF> BoxLayoutAlgorithm::MeasureContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    if (!host->IsAtomicNode()) {
+        return std::nullopt;
+    }
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto measureType = layoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT);
+    OptionalSizeF contentSize;
+    do {
+        // Use idea size first if it is valid.
+        contentSize.UpdateSizeWithCheck(contentConstraint.selfIdealSize);
+        if (contentSize.IsValid()) {
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT) {
+            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.parentIdealSize);
+            // use max is parent ideal size is invalid.
+            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
+            break;
+        }
+
+        // wrap content case use min size default.
+        contentSize.UpdateIllegalSizeWithCheck(contentConstraint.minSize);
+    } while (false);
+    return contentSize.ConvertToSizeT();
 }
 
 // Called to perform measure current render node.
@@ -47,7 +81,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     OptionalSizeF frameSize;
     do {
@@ -60,6 +94,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         if (measureType == MeasureType::MATCH_PARENT) {
             frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
             if (frameSize.IsValid()) {
+                frameSize.Constrain(minSize, maxSize);
                 break;
             }
         }
@@ -74,13 +109,13 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             // use the max child size.
             auto childFrame = SizeF(-1, -1);
             for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-                auto childSize = child->GetGeometryNode()->GetFrameSize();
+                auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
                 childFrame = childFrame > childSize ? childFrame : childSize;
             }
-            childFrame.Constrain(minSize, maxSize);
             AddPaddingToSize(padding, childFrame);
             frameSize.UpdateIllegalSizeWithCheck(childFrame);
         }
+        frameSize.Constrain(minSize, maxSize);
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
 
@@ -92,20 +127,20 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::TOP_LEFT;
+    auto align = Alignment::CENTER;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
-            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetFrameSize(), align) + paddingOffset;
-        child->GetGeometryNode()->SetFrameOffset(translate);
+            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+        child->GetGeometryNode()->SetMarginFrameOffset(translate);
     }
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();

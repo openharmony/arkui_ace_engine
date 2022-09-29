@@ -18,8 +18,19 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
+
+struct ImagePaintStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageRenderMode, ImageRenderMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageInterpolation, ImageInterpolation);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorFilter, std::vector<float>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MatchTextDirection, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SvgFillColor, Color);
+};
+
 // PaintProperty are used to set render properties.
 class ImageRenderProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ImageRenderProperty, PaintProperty)
@@ -32,19 +43,23 @@ public:
     {
         auto renderProperty = MakeRefPtr<ImageRenderProperty>();
         renderProperty->UpdatePaintProperty(this);
-        renderProperty->propImageRenderMode_ = CloneImageRenderMode();
-        renderProperty->propImageInterpolation_ = CloneImageInterpolation();
+        renderProperty->propImagePaintStyle_ = CloneImagePaintStyle();
         return renderProperty;
     }
 
     void Reset() override
     {
-        propImageRenderMode_.reset();
-        propImageInterpolation_.reset();
+        ResetImagePaintStyle();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageRenderMode, ImageRenderMode, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageInterpolation, ImageInterpolation, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_GROUP(ImagePaintStyle, ImagePaintStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, ImageRenderMode, ImageRenderMode, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        ImagePaintStyle, ImageInterpolation, ImageInterpolation, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, ImageRepeat, ImageRepeat, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, ColorFilter, std::vector<float>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, MatchTextDirection, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, SvgFillColor, Color, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,9 @@
 
 #include "core/components/box/drag_drop_event.h"
 
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
@@ -105,7 +108,7 @@ void DragDropEvent::MergeClipboardData(const RefPtr<PipelineContext>& context, c
                 auto clipboardAllData = JsonUtil::Create(true);
                 clipboardAllData->Put("preData", data.c_str());
                 clipboardAllData->Put("newData", addData.c_str());
-                dragDropNode->clipboard_->SetData(clipboardAllData->ToString());
+                dragDropNode->clipboard_->SetData(clipboardAllData->ToString(), CopyOptions::Local, true);
             }
         };
         clipboardCallback_ = callback;
@@ -130,6 +133,24 @@ void DragDropEvent::RestoreCilpboardData(const RefPtr<PipelineContext>& context)
         deleteDataCallback_ = callback;
     }
     clipboard_->GetData(deleteDataCallback_);
+}
+
+Point DragDropEvent::UpdatePoint(const RefPtr<PipelineContext>& context, const Point& prePoint)
+{
+    if (!context) {
+        return prePoint;
+    }
+
+    auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+        context->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+    Point newPoint;
+    if (isContainerModal) {
+        newPoint.SetX(prePoint.GetX() - CONTAINER_BORDER_WIDTH.ConvertToPx() - CONTENT_PADDING.ConvertToPx());
+        newPoint.SetY(prePoint.GetY() - CONTAINER_TITLE_HEIGHT.ConvertToPx());
+    } else {
+        newPoint = prePoint;
+    }
+    return newPoint;
 }
 
 } // namespace OHOS::Ace

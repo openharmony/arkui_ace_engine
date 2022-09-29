@@ -18,6 +18,7 @@ template("js_engine_qjs") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
 
@@ -66,7 +67,7 @@ template("js_engine_qjs") {
       defines += [ "BUILT_IN_JS_ENGINE" ]
     }
 
-    if (platform == "windows" || platform == "mac") {
+    if (platform == "windows" || platform == "mac" || platform == "linux") {
       defines += [ "ENABLE_JS_DEBUG_PREVIEW" ]
 
       configs += [ "$ace_flutter_engine_root:flutter_config" ]

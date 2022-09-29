@@ -28,7 +28,7 @@ struct PositionParam {
     std::pair<AnimatableDimension, bool> top = { AnimatableDimension(0.0, DimensionUnit::PX), false };
     std::pair<AnimatableDimension, bool> bottom = { AnimatableDimension(0.0, DimensionUnit::PX), false };
     std::pair<Dimension, Dimension> anchor = {0.0_px, 0.0_px};
-    PositionType type = PositionType::RELATIVE;
+    PositionType type = PositionType::PTRELATIVE;
 };
 
 enum class AlignDirection {
@@ -45,6 +45,12 @@ struct AlignRule {
         HorizontalAlign horizontal;
         VerticalAlign vertical;
     };
+    
+    bool operator==(const AlignRule& right) const
+    {
+        return ((this->anchor == right.anchor) && (this->vertical == right.vertical) &&
+                (this->horizontal == right.horizontal));
+    }
 };
 
 } // namespace OHOS::Ace

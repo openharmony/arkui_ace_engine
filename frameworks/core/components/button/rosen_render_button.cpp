@@ -262,7 +262,11 @@ void RosenRenderButton::DrawShape(SkCanvas* canvas, const Offset& offset, bool i
 
 #ifdef OHOS_PLATFORM
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-    recordingCanvas->DrawAdaptiveRRect(rRect.getSimpleRadii().x(), paint);
+    if (buttonComponent_->GetType() == ButtonType::CAPSULE) {
+        recordingCanvas->DrawAdaptiveRRectScale(0.5f, paint);
+    } else {
+        recordingCanvas->DrawAdaptiveRRect(rRect.getSimpleRadii().x(), paint);
+    }
 #else
     canvas->drawRRect(rRect, paint);
 #endif

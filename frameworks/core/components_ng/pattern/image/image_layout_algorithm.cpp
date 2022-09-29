@@ -25,39 +25,53 @@
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     // case 1: image component is set with valid size, return contentConstraint.selfIdealSize as component size
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
     }
-
     // case 2: image component is not set with size, use image source size to determine component size
-    // if image data is not ready, can not decide content size,
+    // if image data and altImage are both not ready, can not decide content size,
     // return std::nullopt and wait for next layout task triggered by [OnImageDataReady]
-    if (!loadingCtx_->GetImageSize().IsPositive()) {
+    if (!loadingCtx_->GetImageSize().IsPositive() && (!altLoadingCtx_ || !altLoadingCtx_->GetImageSize().IsPositive())) {
         return std::nullopt;
     }
-
-    auto rawImageSize = loadingCtx_->GetImageSize();
+    // if image data is valid, use image source, or use altImage data
+    auto imageLoadingContext = loadingCtx_->GetImageSize().IsPositive() ? loadingCtx_ : altLoadingCtx_;
+    auto rawImageSize = imageLoadingContext->GetImageSize();
     SizeF componentSize(rawImageSize);
     do {
         // case 2.1: image component is not set with size, use image source size as image component size
+        //          if isFitMaxSize is true, use image source size as image component size
+        //          if isFitMaxSize is false, use the parent component LayoutConstraint size as image component size
+        const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        SizeF layoutConstraintMaxSize = imageLayoutProperty->GetLayoutConstraint()->maxSize;
+        bool fitOriginalSize =
+            (imageLayoutProperty == nullptr) ? true : imageLayoutProperty->GetFitOriginalSize().value_or(true);
         if (contentConstraint.selfIdealSize.IsNull()) {
+            if (!fitOriginalSize) {
+                componentSize.SetSizeT(layoutConstraintMaxSize);
+            }
             break;
         }
-
-        // case 2.2 image data is ready, use image source size to determine image component size
+        // case 2.2 image component is set with width or height, and
+        //          image data is ready, use image source size to determine image component size
         //          keep the principle of making the component aspect ratio and the image source aspect ratio the same
         auto sizeSet = contentConstraint.selfIdealSize.ConvertToSizeT();
+        componentSize.SetSizeT(sizeSet);
         uint8_t sizeSetStatus = Negative(sizeSet.Width()) << 1 | Negative(sizeSet.Height());
         double aspectRatio = Size::CalcRatio(rawImageSize);
         switch (sizeSetStatus) {
             case 0b01: // width is positive and height is negative
-                componentSize.SetHeight(static_cast<float>(rawImageSize.Width() / aspectRatio));
+                componentSize.SetHeight(fitOriginalSize
+                                            ? static_cast<float>(rawImageSize.Height())
+                                            : static_cast<float>(sizeSet.Width() / aspectRatio));
                 break;
             case 0b10: // width is negative and height is positive
-                componentSize.SetWidth(static_cast<float>(rawImageSize.Height() * aspectRatio));
+                componentSize.SetWidth(fitOriginalSize
+                                           ? static_cast<float>(rawImageSize.Width())
+                                           : static_cast<float>(sizeSet.Height() * aspectRatio));
                 break;
             case 0b11: // both width and height are negative
             default:
@@ -79,14 +93,10 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     bool incomingNeedResize = imageLayoutProperty->GetAutoResize().value_or(true);
     ImageFit incomingImageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
-    bool needMakeCanvasImage = incomingNeedResize != loadingCtx_->GetNeedResize() ||
-                               dstSize != loadingCtx_->GetDstSize() || incomingImageFit != loadingCtx_->GetImageFit();
-    // do [MakeCanvasImage] only when:
-    // 1. [autoResize] changes
-    // 2. component size (aka [dstSize] here) changes.
-    // 3. [ImageFit] changes
-    if (needMakeCanvasImage) {
-        loadingCtx_->MakeCanvasImage(dstSize, incomingNeedResize, incomingImageFit);
+    const std::optional<std::pair<Dimension, Dimension>>& sourceSize = imageLayoutProperty->GetSourceSize();
+    ImageLoadingContext::MakeCanvasImageIfNeed(loadingCtx_, dstSize, incomingNeedResize, incomingImageFit, sourceSize);
+    if (altLoadingCtx_) {
+        ImageLoadingContext::MakeCanvasImageIfNeed(altLoadingCtx_, dstSize, true, incomingImageFit, sourceSize);
     }
 }
 

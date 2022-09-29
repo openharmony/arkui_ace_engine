@@ -54,6 +54,11 @@ public:
         return axis == Axis::HORIZONTAL ? width_ : height_;
     }
 
+    T CrossSize(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? height_ : width_;
+    }
+
     void SetWidth(T width)
     {
         width_ = width;
@@ -98,11 +103,11 @@ public:
         const std::optional<T>& bottom)
     {
         T tempWidth = width_ - left.value_or(0) - right.value_or(0);
-        if (Positive(tempWidth)) {
+        if (NonNegative(tempWidth)) {
             width_ = tempWidth;
         }
         T tempHeight = height_ - top.value_or(0) - bottom.value_or(0);
-        if (Positive(tempHeight)) {
+        if (NonNegative(tempHeight)) {
             height_ = tempHeight;
         }
     }
@@ -202,16 +207,16 @@ public:
     void Constrain(const SizeT& minSize, const SizeT& maxSize)
     {
         if (NonNegative(minSize.width_)) {
-            width_ = width_ > minSize.width_ ? width_ : minSize.width_;
+            width_ = width_ > minSize.Width() ? width_ : minSize.Width();
         }
         if (NonNegative(minSize.height_)) {
-            height_ = height_ > minSize.height_ ? height_ : minSize.height_;
+            height_ = height_ > minSize.Height() ? height_ : minSize.Height();
         }
         if (NonNegative(maxSize.width_)) {
-            width_ = width_ < maxSize.width_ ? width_ : maxSize.width_;
+            width_ = width_ < maxSize.Width() ? width_ : maxSize.Width();
         }
         if (NonNegative(maxSize.height_)) {
-            height_ = height_ < maxSize.height_ ? height_ : maxSize.height_;
+            height_ = height_ < maxSize.Height() ? height_ : maxSize.Height();
         }
     }
 
@@ -337,6 +342,11 @@ public:
     const std::optional<T>& MainSize(Axis axis) const
     {
         return axis == Axis::HORIZONTAL ? width_ : height_;
+    }
+
+    const std::optional<T>& CrossSize(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? height_ : width_;
     }
 
     void SetWidth(T width)
@@ -483,37 +493,45 @@ public:
         return isModified;
     }
 
-    void UpdateIllegalSizeWithCheck(const OptionalSize& size)
+    bool UpdateIllegalSizeWithCheck(const OptionalSize& size)
     {
+        bool isModified = false;
         if (!width_ && size.Width()) {
             width_ = size.Width();
+            isModified = true;
         }
         if (!height_ && size.Height()) {
             height_ = size.Height();
+            isModified = true;
         }
+        return isModified;
     }
 
-    void UpdateIllegalSizeWithCheck(const SizeT<T>& size)
+    bool UpdateIllegalSizeWithCheck(const SizeT<T>& size)
     {
+        bool isModified = false;
         if (!width_.has_value() && NonNegative(size.Width())) {
             width_ = size.Width();
+            isModified = true;
         }
         if (!height_.has_value() && NonNegative(size.Height())) {
             height_ = size.Height();
+            isModified = true;
         }
+        return isModified;
     }
 
     bool UpdateSizeWhenLarger(const SizeT<T>& size)
     {
         bool isModified = false;
-        if (NonNegative(size.Width())) {
+        if (NonNegative(size.Width()) && width_) {
             auto temp = width_.value_or(0) > size.Width() ? width_ : size.Width();
             if (width_ != temp) {
                 isModified = true;
             }
             width_ = temp;
         }
-        if (NonNegative(size.Height())) {
+        if (NonNegative(size.Height()) && height_) {
             auto temp = height_.value_or(0) > size.Height() ? height_ : size.Height();
             if (height_ != temp) {
                 isModified = true;
@@ -555,7 +573,7 @@ public:
             width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
         }
         if (NonNegative(maxSize.Height())) {
-            height_ = height_.value_or(0) < maxSize.height_ ? Height() : maxSize.Height();
+            height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
         }
     }
 

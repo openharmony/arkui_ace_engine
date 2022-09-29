@@ -15,12 +15,15 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 
+template<typename Rect, typename Offset>
 JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
 {
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
@@ -42,13 +45,25 @@ JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
     area->SetProperty<double>("height", SystemProperties::Px2Vp(rect.Height()));
     return area;
 }
+
 } // namespace
 
 void JsOnAreaChangeFunction::Execute(
     const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)
 {
-    auto oldArea = CreateAreaObject(oldRect, oldOrigin);
-    auto area = CreateAreaObject(rect, origin);
+    auto oldArea = CreateAreaObject<Rect, Offset>(oldRect, oldOrigin);
+    auto area = CreateAreaObject<Rect, Offset>(rect, origin);
+    JSRef<JSVal> params[2];
+    params[0] = oldArea;
+    params[1] = area;
+    JsFunction::ExecuteJS(2, params);
+}
+
+void JsOnAreaChangeFunction::Execute(
+    const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect, const NG::OffsetF& origin)
+{
+    auto oldArea = CreateAreaObject<NG::RectF, NG::OffsetF>(oldRect, oldOrigin);
+    auto area = CreateAreaObject<NG::RectF, NG::OffsetF>(rect, origin);
     JSRef<JSVal> params[2];
     params[0] = oldArea;
     params[1] = area;

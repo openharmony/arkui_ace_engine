@@ -18,6 +18,7 @@ template("ace_inspector") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
 
@@ -34,7 +35,7 @@ template("ace_inspector") {
 
 foreach(item, ace_platforms) {
   platform = item.name
-  if (platform == "windows" || platform == "mac") {
+  if (platform == "windows" || platform == "mac" || platform == "linux") {
     ace_inspector("ace_inspector_" + item.name) {
       defines = []
       config = {

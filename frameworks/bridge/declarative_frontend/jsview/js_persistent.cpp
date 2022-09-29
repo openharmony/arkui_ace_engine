@@ -55,7 +55,7 @@ void JSPersistent::DestructorCallback(JSPersistent* persistent)
 
 void JSPersistent::Set(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;
@@ -87,7 +87,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
 
 void JSPersistent::Get(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;
@@ -111,7 +111,7 @@ void JSPersistent::Get(const JSCallbackInfo& args)
 
 void JSPersistent::Delete(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;
@@ -132,7 +132,7 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
 
 void JSPersistent::Clear(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;

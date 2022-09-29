@@ -19,10 +19,14 @@
 #include <list>
 #include <map>
 
+#include "base/memory/referenced.h"
+#include "core/components_ng/render/render_surface.h"
+#include "core/pipeline/pipeline_base.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include <ui/rs_surface_node.h>
 #endif
 
+#include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
@@ -41,7 +45,7 @@ class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
 public:
-    WebMessagePortOhos(WeakPtr<WebDelegate> webDelegate): webDelegate_(webDelegate) {}
+    WebMessagePortOhos(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
     WebMessagePortOhos() = default;
     ~WebMessagePortOhos() = default;
 
@@ -81,11 +85,23 @@ public:
     ResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result) : result_(result) {}
 
     void Confirm() override;
-    void Confirm(const std::string &message) override;
+    void Confirm(const std::string& message) override;
     void Cancel() override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result_;
+};
+
+class FullScreenExitHandlerOhos : public FullScreenExitHandler {
+    DECLARE_ACE_TYPE(FullScreenExitHandlerOhos, FullScreenExitHandler)
+
+public:
+    FullScreenExitHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler,
+        WeakPtr<WebDelegate> webDelegate) : handler_(handler), webDelegate_(webDelegate) {}
+    void ExitFullScreen() override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler_;
+    WeakPtr<WebDelegate> webDelegate_;
 };
 
 class AuthResultOhos : public AuthResult {
@@ -94,7 +110,7 @@ class AuthResultOhos : public AuthResult {
 public:
     AuthResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSHttpAuthResult> result) : result_(result) {}
 
-    bool Confirm(std::string &userName, std::string &pwd) override;
+    bool Confirm(std::string& userName, std::string& pwd) override;
     bool IsHttpAuthInfoSaved() override;
     void Cancel() override;
 
@@ -102,18 +118,47 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebJSHttpAuthResult> result_;
 };
 
+class SslErrorResultOhos : public SslErrorResult {
+    DECLARE_ACE_TYPE(SslErrorResultOhos, SslErrorResult)
+
+public:
+    SslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result) : result_(result) {}
+
+    void HandleConfirm() override;
+    void HandleCancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result_;
+};
+
+class SslSelectCertResultOhos : public SslSelectCertResult {
+    DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult)
+
+public:
+    explicit SslSelectCertResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result)
+        : result_(result) {}
+
+    void HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) override;
+
+    void HandleCancel() override;
+
+    void HandleIgnore() override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result_;
+};
+
 class FileSelectorParamOhos : public WebFileSelectorParam {
     DECLARE_ACE_TYPE(FileSelectorParamOhos, WebFileSelectorParam)
 
 public:
-    FileSelectorParamOhos(std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param)
-        : param_(param) {}
+    FileSelectorParamOhos(std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param) : param_(param) {}
 
     std::string GetTitle() override;
     int GetMode() override;
     std::string GetDefaultFileName() override;
     std::vector<std::string> GetAcceptType() override;
     bool IsCapture() override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param_;
 };
@@ -122,10 +167,10 @@ class FileSelectorResultOhos : public FileSelectorResult {
     DECLARE_ACE_TYPE(FileSelectorResultOhos, FileSelectorResult)
 
 public:
-    FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback)
-        : callback_(callback) {}
+    FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback) : callback_(callback) {}
 
     void HandleFileList(std::vector<std::string>& result) override;
+
 private:
     std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback_;
 };
@@ -134,8 +179,7 @@ class ContextMenuParamOhos : public WebContextMenuParam {
     DECLARE_ACE_TYPE(ContextMenuParamOhos, WebContextMenuParam)
 
 public:
-    ContextMenuParamOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param)
-        : param_(param) {}
+    ContextMenuParamOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param) : param_(param) {}
 
     int32_t GetXCoord() const override;
     int32_t GetYCoord() const override;
@@ -143,6 +187,7 @@ public:
     std::string GetUnfilteredLinkUrl() const override;
     std::string GetSourceUrl() const override;
     bool HasImageContents() const override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
 };
@@ -151,11 +196,11 @@ class ContextMenuResultOhos : public ContextMenuResult {
     DECLARE_ACE_TYPE(ContextMenuResultOhos, ContextMenuResult)
 
 public:
-    ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback)
-        : callback_(callback) {}
+    ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback) : callback_(callback) {}
 
     void Cancel() const override;
     void CopyImage() const override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
 };
@@ -167,6 +212,7 @@ public:
     WebGeolocationOhos(OHOS::NWeb::NWebGeolocationCallbackInterface* callback) : geolocationCallback_(callback) {}
 
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> geolocationCallback_;
 };
@@ -175,8 +221,7 @@ class WebPermissionRequestOhos : public WebPermissionRequest {
     DECLARE_ACE_TYPE(WebPermissionRequestOhos, WebPermissionRequest)
 
 public:
-    WebPermissionRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request)
-        : request_(request) {}
+    WebPermissionRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request) : request_(request) {}
 
     void Deny() const override;
 
@@ -185,9 +230,24 @@ public:
     std::vector<std::string> GetResources() const override;
 
     void Grant(std::vector<std::string>& resources) const override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
+
+enum class DragAction {
+    DRAG_START = 0,
+    DRAG_ENTER,
+    DRAG_LEAVE,
+    DRAG_OVER,
+    DRAG_DROP,
+    DRAG_END,
+    DRAG_CANCEL,
+};
+
+namespace NG {
+class WebPattern;
+}; // namespace NG
 
 class RenderWeb;
 class WebDelegate : public WebResource {
@@ -198,7 +258,7 @@ public:
     using ReleasedCallback = std::function<void(bool)>;
     using EventCallback = std::function<void(const std::string&)>;
     using EventCallbackV2 = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
-    enum class State: char {
+    enum class State : char {
         WAITINGFORSIZE,
         CREATING,
         CREATED,
@@ -208,18 +268,14 @@ public:
 
     WebDelegate() = delete;
     ~WebDelegate() override;
-    WebDelegate(const WeakPtr<PipelineContext>& context, ErrorCallback&& onError, const std::string& type)
-        : WebResource(type, context, std::move(onError)), state_(State::WAITINGFORSIZE)
-    {
-        ACE_DCHECK(!type.empty());
-    }
+    WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
+        : WebResource(type, context, std::move(onError))
+    {}
 
     void SetRenderWeb(const WeakPtr<RenderWeb>& renderWeb);
 
-    void CreatePlatformResource(const Size& size, const Offset& position,
-        const WeakPtr<PipelineContext>& context);
-    void CreatePluginResource(const Size& size, const Offset& position,
-        const WeakPtr<PipelineContext>& context);
+    void CreatePlatformResource(const Size& size, const Offset& position, const WeakPtr<PipelineContext>& context);
+    void CreatePluginResource(const Size& size, const Offset& position, const WeakPtr<PipelineContext>& context);
     void AddCreatedCallback(const CreatedCallback& createdCallback);
     void RemoveCreatedCallback();
     void AddReleasedCallback(const ReleasedCallback& releasedCallback);
@@ -228,7 +284,9 @@ public:
     void Reload();
     void UpdateUrl(const std::string& url);
 #ifdef OHOS_STANDARD_SYSTEM
-    void InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface = nullptr);
+    // TODO: add to separate this file into three file, base file, component impl and ng impl.
+    void InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface);
+    void InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface> surface = nullptr);
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
@@ -250,6 +308,7 @@ public:
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
     void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
+    void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
@@ -267,46 +326,56 @@ public:
     void OnFocus();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
-    bool RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
-                      std::shared_ptr<NWeb::NWebQuickMenuCallback> callback);
+    bool RunQuickMenu(
+        std::shared_ptr<NWeb::NWebQuickMenuParams> params, std::shared_ptr<NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
-    void OnTouchSelectionChanged(
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+    void HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction);
+    RefPtr<PixelMap> GetDragPixelMap();
+    std::string GetUrl();
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
     void OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
-    RefPtr<WebResponse> OnInterceptRequest(const BaseEventInfo* info);
+    RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);
     void OnReceivedTitle(const std::string& param);
+    void ExitFullScreen();
+    void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
-    void OnGeolocationPermissionsShowPrompt(const std::string& origin,
-        OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
+    void OnGeolocationPermissionsShowPrompt(
+        const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
     void OnRequestFocus();
-    bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType);
-    bool OnHttpAuthRequest(const BaseEventInfo* info);
+    bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
+    bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
+    void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
     bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message);
     void OnRouterPush(const std::string& param);
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
-    bool OnFileSelectorShow(const BaseEventInfo* info);
-    bool OnContextMenuShow(const BaseEventInfo* info);
+    bool OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
     void OnScroll(double xOffset, double yOffset);
     bool LoadDataWithRichText();
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
+    bool OnDragAndDropData(const void* data, size_t len, int width, int height);
+
+    void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
 
 private:
     void InitWebEvent();
@@ -358,6 +427,8 @@ private:
     void Backward();
     void Forward();
     void ClearHistory();
+    void ClearSslCache();
+    void ClearClientAuthenticationCache();
     bool AccessStep(int32_t step);
     void BackOrForward(int32_t step);
     bool AccessBackward();
@@ -367,6 +438,8 @@ private:
     void ClearMatches();
     void SearchNext(bool forward);
 
+    void UpdateSettting(bool useNewPipe = false);
+
 #if defined(ENABLE_ROSEN_BACKEND)
     void InitWebViewWithSurface(sptr<Surface> surface);
 #endif
@@ -374,6 +447,9 @@ private:
 
     WeakPtr<WebComponent> webComponent_;
     WeakPtr<RenderWeb> renderWeb_;
+
+    WeakPtr<NG::WebPattern> webPattern_;
+
     std::list<CreatedCallback> createdCallbacks_;
     std::list<ReleasedCallback> releasedCallbacks_;
     EventCallback onPageStarted_;
@@ -385,7 +461,7 @@ private:
     Method routerBackMethod_;
     Method changePageUrlMethod_;
     Method isPagePathInvalidMethod_;
-    State state_ {State::WAITINGFORSIZE};
+    State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
     OHOS::NWeb::NWebCookieManager* cookieManager_ = nullptr;
@@ -396,6 +472,7 @@ private:
     EventCallbackV2 onPageStartedV2_;
     EventCallbackV2 onProgressChangeV2_;
     EventCallbackV2 onTitleReceiveV2_;
+    EventCallbackV2 onFullScreenExitV2_;
     EventCallbackV2 onGeolocationHideV2_;
     EventCallbackV2 onGeolocationShowV2_;
     EventCallbackV2 onRequestFocusV2_;
@@ -412,7 +489,8 @@ private:
 
     std::string bundlePath_;
     std::string bundleDataPath_;
-
+    RefPtr<PixelMap> pixelMap_ = nullptr;
+    bool isRefreshPixelMap_ = false;
 #endif
 };
 

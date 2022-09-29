@@ -15,6 +15,7 @@ import("//build/ohos.gni")
 
 ace_root = "//foundation/arkui/ace_engine"
 ace_engine_part = "ace_engine"
+ace_engine_subsystem = "arkui"
 
 config("uiservicedialog_config") {
   include_dirs = [
@@ -27,6 +28,7 @@ config("uiservicedialog_config") {
 }
 
 ohos_source_set("uiservicedialog_sourceset_ohos") {
+  subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   configs = [ ":uiservicedialog_config" ]
 
@@ -55,11 +57,11 @@ ohos_source_set("uiservicedialog_sourceset_ohos") {
 
   external_deps = [
     "ability_base:want",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
 }
 
@@ -67,5 +69,5 @@ ohos_shared_library("uiservicedialog") {
   deps = [ ":uiservicedialog_sourceset_ohos" ]
   public_deps = deps
   part_name = ace_engine_part
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
 }

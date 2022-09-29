@@ -19,7 +19,7 @@
 #include <map>
 #include <string>
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include "adapter/preview/osal/request_data.h"
 #include "adapter/preview/osal/response_data.h"
 #endif
@@ -58,7 +58,7 @@ public:
     void Uninitialize();
 
     void TriggerModuleJsCallback(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) override;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void GetRequestData(JSContext* ctx, JSValueConst valObject, OHOS::Ace::RequestData& requestData);
 
     ParseJsDataResult ParseRequestData(

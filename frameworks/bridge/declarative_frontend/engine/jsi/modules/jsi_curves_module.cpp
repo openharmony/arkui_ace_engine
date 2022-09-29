@@ -31,15 +31,13 @@ shared_ptr<JsValue> CurvesInterpolate(const shared_ptr<JsRuntime>& runtime, cons
     auto jsCurveString = thisObj->GetProperty(runtime, "__curveString");
     auto curveString = jsCurveString->ToString(runtime);
 
-    double time = argv[0]->ToDouble(runtime);
-    auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
-    if (page == nullptr) {
-        LOGE("page is null.");
+    if (argv.size() == 0) {
         return runtime->NewNull();
     }
-    auto animationCurve = page->GetCurve(curveString);
+    double time = argv[0]->ToDouble(runtime);
+    auto animationCurve = CreateCurve(curveString, false);
     if (!animationCurve) {
-        LOGE("animationCurve is null.");
+        LOGW("created animationCurve is null, curveString:%{public}s", curveString.c_str());
         return runtime->NewNull();
     }
     double curveValue = animationCurve->Move(time);
@@ -63,16 +61,19 @@ shared_ptr<JsValue> CurvesInitInternal(const shared_ptr<JsRuntime>& runtime, con
         curveString = "linear";
     }
     curve = CreateCurve(curveString);
+    curveObj->SetProperty(runtime, "__curveString", runtime->NewString(curveString));
+    if (Container::IsCurrentUseNewPipeline()) {
+        return curveObj;
+    }
+
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     if (page == nullptr) {
         LOGE("page is nullptr");
         return runtime->NewNull();
     }
 
-    page->AddCurve(curveString, curve);
     int32_t pageId = page->GetPageId();
     curveObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
-    curveObj->SetProperty(runtime, "__curveString", runtime->NewString(curveString));
     return curveObj;
 }
 
@@ -214,15 +215,17 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
         return runtime->NewNull();
     }
     auto customCurve = curve->ToString();
+    curveObj->SetProperty(runtime, "__curveString", runtime->NewString(customCurve));
+    if (Container::IsCurrentUseNewPipeline()) {
+        return curveObj;
+    }
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     if (page == nullptr) {
         LOGE("page is nullptr");
         return runtime->NewNull();
     }
-    page->AddCurve(customCurve, curve);
     int32_t pageId = page->GetPageId();
     curveObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
-    curveObj->SetProperty(runtime, "__curveString", runtime->NewString(customCurve));
     return curveObj;
 }
 

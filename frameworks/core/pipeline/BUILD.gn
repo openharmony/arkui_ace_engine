@@ -53,6 +53,7 @@ template("ace_core_pipeline_source_set") {
       "layers/dropfilter_layer.cpp",
       "layers/flutter_scene_builder.cpp",
       "layers/gradient_layer.cpp",
+      "layers/hole_layer.cpp",
       "layers/layer.cpp",
       "layers/offset_layer.cpp",
       "layers/opacity_layer.cpp",

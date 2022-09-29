@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_PAINT_PROPERTY_H
 
-#include "src/core/SkPaintPriv.h"
 #include "core/animation/curve.h"
+#include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
@@ -29,6 +29,9 @@ struct SwiperAnimationStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoPlayInterval, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Duration, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Curve, RefPtr<Curve>);
+
+    static const int32_t DEFAULT_INTERVAL;
+    static const int32_t DEFAULT_DURATION;
 };
 
 class SwiperPaintProperty : public PaintProperty {
@@ -62,12 +65,14 @@ public:
         ResetFadeColor();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     ACE_DEFINE_PROPERTY_GROUP(SwiperAnimationStyle, SwiperAnimationStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, AutoPlay, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, AutoPlayInterval, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, Duration, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, Curve, RefPtr<Curve>, PROPERTY_UPDATE_RENDER);
-    
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Enabled, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_RENDER);

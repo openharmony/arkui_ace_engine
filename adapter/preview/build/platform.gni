@@ -37,3 +37,14 @@ if (use_mac || true) {
 
   platforms += [ mac_platform ]
 }
+
+if (use_linux || true) {
+  linux_platform = {
+    name = "linux"
+    config = {
+      import("config_linux.gni")
+    }
+  }
+
+  platforms += [ linux_platform ]
+}

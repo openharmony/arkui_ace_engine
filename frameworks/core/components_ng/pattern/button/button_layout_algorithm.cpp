@@ -62,8 +62,7 @@ void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
                 auto radiusBottomMax = std::max(radius->radiusBottomLeft, radius->radiusBottomRight);
                 auto radiusMax = std::max(radiusTopMax, radiusBottomMax);
                 auto rrectRadius = radiusMax->ConvertToPx();
-                frameSize.SetSizeT(SizeF { static_cast<float>(rrectRadius * 2),
-                    static_cast<float>(rrectRadius * 2) });
+                frameSize.SetSizeT(SizeF { static_cast<float>(rrectRadius * 2), static_cast<float>(rrectRadius * 2) });
                 break;
             }
             if (!width) {
@@ -100,10 +99,10 @@ void ButtonLayoutAlgorithm::UpdateFrameSizeUsingChild(LayoutWrapper* layoutWrapp
     CHECK_NULL_VOID(layoutConstraint);
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto childFrame = SizeF(-1, -1);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto childSize = child->GetGeometryNode()->GetFrameSize();
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         childFrame = childFrame > childSize ? childFrame : childSize;
     }
     childFrame.Constrain(minSize, maxSize);

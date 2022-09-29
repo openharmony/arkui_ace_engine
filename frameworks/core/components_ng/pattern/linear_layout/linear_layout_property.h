@@ -35,6 +35,7 @@ public:
         auto value = MakeRefPtr<LinearLayoutProperty>(isVertical_);
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propLinearLayoutAttribute_ = CloneLinearLayoutAttribute();
+        value->isVertical_ = isVertical_;
         return value;
     }
 
@@ -49,9 +50,16 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_LAYOUT);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, MainAxisAlign, FlexAlign, PROPERTY_UPDATE_LAYOUT);
+
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, Space, Dimension, PROPERTY_UPDATE_MEASURE);
 
     bool IsVertical() const
+    {
+        return isVertical_;
+    }
+
+    bool IsDirectionVertical() override
     {
         return isVertical_;
     }

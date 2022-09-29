@@ -32,9 +32,28 @@ config("bridge_config") {
   ]
 }
 
+if (use_mac) {
+  platform = "mac"
+} else if (use_linux) {
+  platform = "linux"
+} else {
+  platform = "windows"
+}
+platform_defines = []
+foreach(item, ace_platforms) {
+  if (platform == item.name) {
+    if (defined(item.config)) {
+      platform_config = item.config
+      if (defined(platform_config.defines)) {
+        platform_defines = platform_config.defines
+      }
+    }
+  }
+}
+
 ohos_shared_library("test_bridge") {
   configs = [ ":bridge_config" ]
-
+  defines = platform_defines
   sources = [
     "run_args_parser.cpp",
     "test_bridge.cpp",
@@ -45,7 +64,9 @@ ohos_shared_library("test_bridge") {
   if (use_mingw_win) {
     deps += [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
     libs = [ "pthread" ]
-  } else {
+  } else if (use_mac) {
     deps += [ "$ace_root/adapter/preview/build:libace_engine_mac" ]
+  } else if (use_linux) {
+    deps += [ "$ace_root/adapter/preview/build:libace_engine_linux" ]
   }
 }

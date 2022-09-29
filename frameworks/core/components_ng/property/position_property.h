@@ -22,6 +22,11 @@
 namespace OHOS::Ace::NG {
 struct PositionProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Alignment, Alignment);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("align", propAlignment.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str());
+    }
 };
 } // namespace OHOS::Ace::NG
 

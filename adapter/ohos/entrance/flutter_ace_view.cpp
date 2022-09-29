@@ -150,6 +150,12 @@ void GetMouseEventAction(int32_t action, MouseEvent& events)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
             events.action = MouseAction::RELEASE;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW:
+            events.action = MouseAction::WINDOW_ENTER;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW:
+            events.action = MouseAction::WINDOW_LEAVE;
+            break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
             events.action = MouseAction::MOVE;
             break;
@@ -189,7 +195,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     MMI::PointerEvent::PointerItem item;
     bool ret = pointerEvent->GetPointerItem(pointerID, item);
     if (!ret) {
-        LOGE("get pointer item failed.");
+        LOGE("get pointer: %{public}d item failed.", pointerID);
         return;
     }
 
@@ -250,7 +256,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     MMI::PointerEvent::PointerItem item;
     bool ret = pointerEvent->GetPointerItem(pointerID, item);
     if (!ret) {
-        LOGE("get pointer item failed.");
+        LOGE("get pointer: %{public}d item failed.", pointerID);
         return;
     }
 
@@ -286,7 +292,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     std::chrono::microseconds microseconds(keyEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.timeStamp = time;
-    event.key = KeyToString(static_cast<int32_t>(event.code));
+    event.key = MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode());
     event.deviceId = keyEvent->GetDeviceId();
     event.sourceType = SourceType::KEYBOARD;
     std::string pressedKeyStr = "Pressed Keys: ";

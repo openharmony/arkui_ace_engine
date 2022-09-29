@@ -530,7 +530,7 @@ void JsFrontend::TransferJsResponseData(int callbackId, int32_t code, std::vecto
     }
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void JsFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code, ResponseData responseData) const
 {
     if (delegate_) {
@@ -730,9 +730,10 @@ void JsFrontend::DumpFrontend() const
     int32_t routerIndex = 0;
     std::string routerName;
     std::string routerPath;
-    if (delegate_) {
-        delegate_->GetState(routerIndex, routerName, routerPath);
+    if (!delegate_) {
+        return;
     }
+    delegate_->GetState(routerIndex, routerName, routerPath);
 
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("Components: " + std::to_string(delegate_->GetComponentsCount()));

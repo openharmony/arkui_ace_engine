@@ -16,12 +16,23 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 
 #include <string>
+#include <utility>
 
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-
+#include "core/common/container.h"
+#include "core/components/button/render_button.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/toggle/toggle_component.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/button/toggle_button_view.h"
+#include "core/components_ng/pattern/checkbox/checkbox_view.h"
+#include "core/components_ng/pattern/toggle/switch_pattern.h"
+#include "core/components_ng/render/render_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -36,7 +47,8 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
-    
+    JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
+
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSToggle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -65,9 +77,33 @@ void JSToggle::Create(const JSCallbackInfo& info)
     auto tempIsOn = paramObject->GetProperty("isOn");
     bool isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
+
+    auto toggleTypeInt = static_cast<int32_t>(toggleType);
+    if (Container::IsCurrentUseNewPipeline()) {
+        switch (toggleTypeInt) {
+            case 0:
+                NG::CheckBoxView::Create(std::nullopt, std::nullopt, V2::CHECKBOX_ETS_TAG);
+                NG::CheckBoxView::SetSelect(isOn);
+                break;
+            case 1:
+                NG::ToggleView::Create(NG::ToggleType(toggleTypeInt), isOn);
+                break;
+            case 2:
+                NG::ToggleButtonView::Create(V2::TOGGLE_ETS_TAG);
+                NG::ToggleButtonView::SetIsOn(isOn);
+                break;
+            default:
+                break;
+        }
+        return;
+    }
+
     RefPtr<Component> component;
     if (toggleType == ToggleType::CHECKBOX) {
         RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
+        if (!checkBoxTheme) {
+            return;
+        }
         RefPtr<CheckboxComponent> checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
         checkboxComponent->SetValue(isOn);
         checkboxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
@@ -78,6 +114,9 @@ void JSToggle::Create(const JSCallbackInfo& info)
         component = checkboxComponent;
     } else if (toggleType == ToggleType::SWITCH) {
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
+        if (!switchTheme) {
+            return;
+        }
         RefPtr<SwitchComponent> switchComponent = AceType::MakeRefPtr<OHOS::Ace::SwitchComponent>(switchTheme);
         switchComponent->SetValue(isOn);
         switchComponent->SetMouseAnimationType(HoverAnimationType::NONE);
@@ -88,6 +127,9 @@ void JSToggle::Create(const JSCallbackInfo& info)
         component = switchComponent;
     } else {
         RefPtr<ToggleTheme> toggleTheme = GetTheme<ToggleTheme>();
+        if (!toggleTheme) {
+            return;
+        }
         RefPtr<ToggleComponent> toggleComponent = AceType::MakeRefPtr<ToggleComponent>();
         toggleComponent->SetBackgroundColor(toggleTheme->GetBackgroundColor());
         toggleComponent->SetCheckedColor(toggleTheme->GetCheckedColor());
@@ -102,14 +144,23 @@ void JSToggle::Create(const JSCallbackInfo& info)
     box->SetDeliverMinToChild(true);
     if (toggleType == ToggleType::CHECKBOX) {
         RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
+        if (!checkBoxTheme) {
+            return;
+        }
         box->SetWidth(checkBoxTheme->GetWidth());
         box->SetHeight(checkBoxTheme->GetHeight());
     } else if (toggleType == ToggleType::SWITCH) {
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
+        if (!switchTheme) {
+            return;
+        }
         box->SetWidth(switchTheme->GetWidth());
         box->SetHeight(switchTheme->GetHeight());
     } else {
         RefPtr<ToggleTheme> toggleTheme = GetTheme<ToggleTheme>();
+        if (!toggleTheme) {
+            return;
+        }
         box->SetHeight(toggleTheme->GetHeight().Value(), toggleTheme->GetHeight().Unit());
     }
 }
@@ -130,6 +181,12 @@ void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(jsValue);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     Dimension padding;
     auto box = stack->GetBoxComponent();
@@ -163,6 +220,12 @@ void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(jsValue);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
     Dimension padding;
@@ -199,6 +262,17 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
 
 void JSToggle::OnChange(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Toggle.onChange");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::ToggleView::OnChange(std::move(onChange));
+        return;
+    }
     if (JSViewBindEvent(&ToggleComponent::SetOnChange, args) ||
         JSViewBindEvent(&CheckableComponent::SetOnChange, args)) {
     } else {
@@ -218,6 +292,12 @@ void JSToggle::SelectedColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], selectedColor)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ToggleView::SetSelectedColor(selectedColor);
+        return;
+    }
+
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto toggle = AceType::DynamicCast<ToggleComponent>(mainComponent);
     if (toggle) {
@@ -237,6 +317,14 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+    Color color;
+    if (!ParseJsColor(info[0], color)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ToggleView::SetSwitchPointColor(color);
+        return;
+    }
 
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto switchComponent = AceType::DynamicCast<SwitchComponent>(mainComponent);
@@ -244,10 +332,8 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
         LOGE("pointstyle only support switch");
         return;
     }
-    Color color;
-    if (JSContainerBase::ParseJsColor(info[0], color)) {
-        switchComponent->SetPointColor(color);
-    }
+
+    switchComponent->SetPointColor(color);
 }
 
 void JSToggle::JsPadding(const JSCallbackInfo& info)
@@ -322,6 +408,24 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
         checkableComponent->SetHotZoneVerticalPadding(length);
         checkableComponent->SetHorizontalPadding(length);
     }
+}
+
+void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ToggleButtonView::SetBackgroundColor(backgroundColor);
+        return;
+    }
+    JSViewAbstract::JsBackgroundColor(info);
 }
 
 } // namespace OHOS::Ace::Framework

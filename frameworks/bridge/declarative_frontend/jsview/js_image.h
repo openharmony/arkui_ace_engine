@@ -16,25 +16,9 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 
-#include "core/components/image/image_component.h"
-#include "core/components/image/image_event.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-#include "napi/native_api.h"
-#include "native_engine/native_engine.h"
-#endif
-
-#ifdef USE_QUICKJS_ENGINE
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "third_party/quickjs/quickjs.h"
-#ifdef __cplusplus
-}
-#endif
-#endif
 
 namespace OHOS::Ace::Framework {
 class JSImage : public JSViewAbstract, public JSInteractableView {
@@ -58,9 +42,6 @@ public:
     static void SetSyncLoad(const JSCallbackInfo& info);
     static void SetColorFilter(const JSCallbackInfo& info);
 
-    static void JsPadding(const JSCallbackInfo& info);
-    static void JsMargin(const JSCallbackInfo& info);
-    static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void SetLeftBorderWidth(const Dimension& value);
@@ -69,6 +50,7 @@ public:
     static void SetBottomBorderWidth(const Dimension& value);
     static void SetBorderRadius(const Dimension& value);
     static void JsOpacity(const JSCallbackInfo& info);
+    static void JsBlur(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
@@ -78,38 +60,7 @@ public:
     static void SetCopyOption(const JSCallbackInfo& info);
 
 protected:
-    /**
-     * box properties setter
-     */
-    static RefPtr<Decoration> GetFrontDecoration();
-    static const Border& GetBorder();
-    static BorderEdge GetLeftBorderEdge();
-    static BorderEdge GetTopBorderEdge();
-    static BorderEdge GetRightBorderEdge();
-    static BorderEdge GetBottomBorderEdge();
-    static void SetBorderEdge(const BorderEdge& edge);
-    static void SetLeftBorderEdge(const BorderEdge& edge);
-    static void SetTopBorderEdge(const BorderEdge& edge);
-    static void SetRightBorderEdge(const BorderEdge& edge);
-    static void SetBottomBorderEdge(const BorderEdge& edge);
     static void SetBorder(const Border& border);
-    static void SetWidth(const Dimension& width);
-    static void SetHeight(const Dimension& height);
-    static void SetMarginTop(const std::string& value);
-    static void SetMarginBottom(const std::string& value);
-    static void SetMarginLeft(const std::string& value);
-    static void SetMarginRight(const std::string& value);
-    static void SetMargin(const std::string& value);
-    static void SetPaddingTop(const std::string& value);
-    static void SetPaddingBottom(const std::string& value);
-    static void SetPaddingLeft(const std::string& value);
-    static void SetPaddingRight(const std::string& value);
-    static void SetPadding(const std::string& value);
-    static void SetBackgroundColor(const Color& color);
-    static void SetLeftBorderColor(const Color& color);
-    static void SetTopBorderColor(const Color& color);
-    static void SetRightBorderColor(const Color& color);
-    static void SetBottomBorderColor(const Color& color);
     static void SetAutoResize(bool autoResize);
 
 };

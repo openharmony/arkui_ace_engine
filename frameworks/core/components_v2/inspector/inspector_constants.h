@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H
 
 #include <cstdint>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 #include "base/utils/macros.h"
 
@@ -55,6 +55,8 @@ ACE_EXPORT extern const char ATTRS_COMMON_ZINDEX[];
 
 // root view
 ACE_EXPORT extern const char ROOT_ETS_TAG[];
+// stage view
+ACE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // js custom view
@@ -63,8 +65,12 @@ ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_LAZY_FOR_EACH_ETS_TAG[];
 // js lazy foreach node
 ACE_EXPORT extern const char JS_FOR_EACH_ETS_TAG[];
+// js lazy foreach node
+ACE_EXPORT extern const char JS_SYNTAX_ITEM_ETS_TAG[];
 // js if lese node
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
+// js toast node
+ACE_EXPORT extern const char TOAST_ETS_TAG[];
 
 // column
 ACE_EXPORT extern const char COLUMN_COMPONENT_TAG[];
@@ -92,6 +98,10 @@ ACE_EXPORT extern const char TABS_ETS_TAG[];
 // tab content item
 ACE_EXPORT extern const char TAB_CONTENT_ITEM_COMPONENT_TAG[];
 ACE_EXPORT extern const char TAB_CONTENT_ITEM_ETS_TAG[];
+
+// tab bar
+ACE_EXPORT extern const char TAB_BAR_COMPONENT_TAG[];
+ACE_EXPORT extern const char TAB_BAR_ETS_TAG[];
 
 // navigation view
 ACE_EXPORT extern const char NAVIGATION_VIEW_COMPONENT_TAG[];
@@ -151,6 +161,15 @@ ACE_EXPORT extern const char PATTERN_LOCK_ETS_TAG[];
 ACE_EXPORT extern const char ROW_COMPONENT_TAG[];
 ACE_EXPORT extern const char ROW_ETS_TAG[];
 
+// rect
+ACE_EXPORT extern const char RECT_ETS_TAG[];
+
+// line
+ACE_EXPORT extern const char LINE_ETS_TAG[];
+
+// circle
+ACE_EXPORT extern const char CIRCLE_ETS_TAG[];
+
 // shape
 ACE_EXPORT extern const char SHAPE_COMPONENT_TAG[];
 ACE_EXPORT extern const char SHAPE_ETS_TAG[];
@@ -208,7 +227,6 @@ ACE_EXPORT extern const char TOGGLE_ETS_TAG[];
 // scroll
 ACE_EXPORT extern const char SCROLL_COMPONENT_TAG[];
 ACE_EXPORT extern const char SCROLL_ETS_TAG[];
-
 
 // calendar
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[];
@@ -301,6 +319,10 @@ ACE_EXPORT extern const char GRID_COL_ETS_TAG[];
 ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[];
 ACE_EXPORT extern const char GRID_ROW_ETS_TAG[];
 
+// relativeContainer
+ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[];
+ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
+
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
 ACE_EXPORT extern const char MENU_TAG[];
@@ -358,6 +380,9 @@ ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[];
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[];
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[];
 
+// Normal dialog
+ACE_EXPORT extern const char DIALOG_ETS_TAG[];
+
 // sideBar
 ACE_EXPORT extern const char SIDE_BAR_COMPONENT_TAG[];
 ACE_EXPORT extern const char SIDE_BAR_ETS_TAG[];
@@ -386,6 +411,16 @@ ACE_EXPORT extern const char RICH_TEXT_ETS_TAG[];
 ACE_EXPORT extern const char XCOMPONENT_TAG[];
 ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
 
+// ability_component
+ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[];
+// Popup
+ACE_EXPORT extern const char POPUP_ETS_TAG[];
+
+// bar item
+ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];
+
+// title bar
+ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

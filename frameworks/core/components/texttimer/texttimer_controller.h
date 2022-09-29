@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXTTIMER_TEXTTIMER_CONTROLLER_H
 
 #include "base/memory/ace_type.h"
+#include <functional>
 
 namespace OHOS::Ace {
 using TimerFuncImpl = std::function<void()>;
@@ -62,6 +63,11 @@ public:
         reset_ = reset;
     }
 
+    bool HasInitialized() const
+    {
+        return start_ && pause_ && reset_;
+    }
+    
 private:
     TimerFuncImpl start_;
     TimerFuncImpl pause_;

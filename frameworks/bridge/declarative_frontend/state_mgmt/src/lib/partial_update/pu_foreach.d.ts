@@ -15,6 +15,10 @@
 
 // regular ForEach ===========================
 
+// Note: the API for ForEach with partial update and with full update 
+// are different. Only this declaration file or the one for full update
+// can be used. Using both would lead to syntax error.
+
 declare class ForEach {
   static create(): void;
   static pop(): void;
@@ -22,27 +26,5 @@ declare class ForEach {
   static setIdArray(elmtId: number, newIdArray: string[]): void;
   static createNewChildStart(id: string, parentView: NativeViewPartialUpdate): void;
   static createNewChildFinish(id: string, parentView: NativeViewPartialUpdate): void;
-}
-
-
-// LazyForEach ===========================
-
-declare interface DataChangeListener {
-  onDataReloaded(): void;
-  onDataAdded(index: number): void;
-  onDataMoved(from: number, to: number): void;
-  onDataDeleted(index: number): void;
-  onDataChanged(index: number): void;
-}
-declare interface IDataSource {
-  totalCount(): number;
-  getData(index: number): any;
-  registerDataChangeListener(listener: DataChangeListener): void;
-  unregisterDataChangeListener(listener: DataChangeListener): void;
-}
-
-declare class LazyForEach  {
-  static create(id: string, parent: ViewPU, dataSource: IDataSource, builder: (item: any) => void, idfunc?: (item: any) => string); void;
-  static pop() : void;
 }
 

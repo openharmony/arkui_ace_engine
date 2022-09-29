@@ -45,6 +45,7 @@ struct WebEvent : Event {
     EventMarker permissionRequestId;
     EventMarker searchResultReceiveEventId;
     EventMarker scrollId;
+    EventMarker fullScreenExitEventId;
 };
 
 struct WebMethod : Method {
@@ -120,6 +121,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.titleReceiveEventId;
+    }
+
+    void SetOnFullScreenExitEventId(const EventMarker& fullScreenExitEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.fullScreenExitEventId = fullScreenExitEventId;
+    }
+
+    const EventMarker& GetOnFullScreenExitEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.fullScreenExitEventId;
     }
 
     void SetGeolocationHideEventId(const EventMarker& geolocationHideEventId)

@@ -32,9 +32,9 @@ void JSRemoteWindow::Create(const JSCallbackInfo& info)
     }
 
 #ifdef ENABLE_ROSEN_BACKEND
-    auto obj = CreateRSSurfaceNodeFromNapiValue(info[0]);
+    auto obj = CreateRSProxyNodeFromNapiValue(info[0]);
     if (obj) {
-        specializedComponent->SetRSSurfaceNode(obj);
+        specializedComponent->SetRSProxyNode(obj);
     }
 #endif
 }

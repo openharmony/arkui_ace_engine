@@ -232,6 +232,7 @@ public:
     virtual void Fill() = 0;
     virtual void Fill(const RefPtr<CanvasPath2D>& path) = 0;
     virtual void Clip() = 0;
+    virtual void Clip(const RefPtr<CanvasPath2D>& path) = 0;
     virtual void PutImageData(const ImageData& imageData) = 0;
     virtual void DrawImage(const CanvasImage& image, double width, double height) = 0;
     virtual void DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& image) = 0;

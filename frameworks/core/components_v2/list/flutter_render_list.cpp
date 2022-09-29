@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/painter/flutter_scroll_bar_painter.h"
+#include "core/components_v2/list/render_list_item_group.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 
 namespace OHOS::Ace::V2 {
@@ -48,65 +49,7 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
         }
         PaintChild(child, context, offset);
     }
-
-    const auto& divider = component_->GetItemDivider();
-    if (divider && divider->color.GetAlpha() > 0x00 && GreatNotEqual(divider->strokeWidth.Value(), 0.0)) {
-        auto canvas = ScopedCanvas::Create(context);
-        auto skCanvas = canvas.GetSkCanvas();
-        if (skCanvas == nullptr) {
-            LOGE("skia canvas is null");
-            return;
-        }
-
-        const double mainSize = GetMainSize(layoutSize);
-        const double strokeWidth = NormalizePercentToPx(divider->strokeWidth, vertical_);
-        const double halfSpaceWidth = std::max(spaceWidth_, strokeWidth) / 2.0;
-        const double startCrossAxis = NormalizePercentToPx(divider->startMargin, !vertical_);
-        const double endCrossAxis = GetCrossSize(layoutSize) - NormalizePercentToPx(divider->endMargin, !vertical_);
-        const double topOffset = halfSpaceWidth + (strokeWidth / 2.0);
-        const double bottomOffset = topOffset - strokeWidth;
-
-        SkPaint paint;
-        paint.setAntiAlias(true);
-        paint.setColor(divider->color.GetValue());
-        paint.setStyle(SkPaint::Style::kStroke_Style);
-        paint.setStrokeWidth(strokeWidth);
-        bool isFirstIndex = (startIndex_ == 0);
-
-        for (const auto& child : items_) {
-            if (child == selectedItem_) {
-                continue;
-            }
-
-            if (isFirstIndex) {
-                isFirstIndex = false;
-                continue;
-            }
-
-            double mainAxis = GetMainAxis(child->GetPosition());
-            if (GreatOrEqual(mainAxis - topOffset, mainSize)) {
-                break;
-            }
-            if (LessOrEqual(mainAxis - bottomOffset, 0.0)) {
-                continue;
-            }
-            mainAxis -= halfSpaceWidth;
-            if (vertical_) {
-                skCanvas->drawLine(startCrossAxis, mainAxis, endCrossAxis, mainAxis, paint);
-            } else {
-                skCanvas->drawLine(mainAxis, startCrossAxis, mainAxis, endCrossAxis, paint);
-            }
-        }
-
-        if (selectedItem_) {
-            double mainAxis = targetMainAxis_ - halfSpaceWidth;
-            if (vertical_) {
-                skCanvas->drawLine(startCrossAxis, mainAxis, endCrossAxis, mainAxis, paint);
-            } else {
-                skCanvas->drawLine(mainAxis, startCrossAxis, mainAxis, endCrossAxis, paint);
-            }
-        }
-    }
+    PaintDivider(context);
 
     if (currentStickyItem_) {
         PaintChild(currentStickyItem_, context, offset);
@@ -148,6 +91,76 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
                 scrollBar_->HandleScrollBarEnd();
             }
         }
+    }
+}
+
+void FlutterRenderList::PaintDivider(RenderContext& context)
+{
+    const auto& layoutSize = GetLayoutSize();
+    const auto& divider = component_->GetItemDivider();
+    if (!divider || divider->color.GetAlpha() <= 0x00 || LessOrEqual(divider->strokeWidth.Value(), 0.0)) {
+        return;
+    }
+    auto canvas = ScopedCanvas::Create(context);
+    auto skCanvas = canvas.GetSkCanvas();
+    if (skCanvas == nullptr) {
+        LOGE("skia canvas is null");
+        return;
+    }
+
+    const double crossSize = GetCrossSize(layoutSize);
+    const double strokeWidth = NormalizePercentToPx(divider->strokeWidth, vertical_);
+    const double halfSpaceWidth = std::max(spaceWidth_, strokeWidth) / 2.0;
+    const double startMargin = NormalizePercentToPx(divider->startMargin, !IsVertical());
+    const double endMargin = NormalizePercentToPx(divider->endMargin, !IsVertical());
+    const double topOffset = halfSpaceWidth + (strokeWidth / 2.0);
+    const double bottomOffset = topOffset - strokeWidth;
+
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(divider->color.GetValue());
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(strokeWidth);
+    bool isFirstLine = (startIndex_ == 0);
+    bool lastIsItemGroup = false;
+    int lane = 0;
+
+    for (const auto& child : items_) {
+        auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+        double mainAxis = GetMainAxis(child->GetPosition());
+        if (itemGroup) {
+            mainAxis = GetMainAxis(itemGroup->GetRenderNode()->GetPosition());
+        }
+        if (GreatOrEqual(mainAxis - topOffset, GetMainSize(layoutSize))) {
+            break;
+        }
+        if (!isFirstLine && child != selectedItem_ && GreatNotEqual(mainAxis - bottomOffset, 0.0)) {
+            if (GetLanes() > 1 && !lastIsItemGroup && !itemGroup) {
+                double start = crossSize / GetLanes() * lane + startMargin;
+                double end = crossSize / GetLanes() * (lane + 1) - endMargin;
+                DrawDividerOnNode(skCanvas, paint, vertical_, start, mainAxis, end);
+            } else {
+                DrawDividerOnNode(skCanvas, paint, vertical_, startMargin, mainAxis, crossSize - endMargin);
+            }
+        }
+        lastIsItemGroup = static_cast<bool>(itemGroup);
+        lane = (GetLanes() <= 1 || (lane + 1) >= GetLanes() || itemGroup) ? 0 : lane + 1;
+        isFirstLine = isFirstLine ? lane > 0 : false;
+    }
+
+    if (selectedItem_) {
+        double mainAxis = targetMainAxis_ - halfSpaceWidth;
+        DrawDividerOnNode(skCanvas, paint, vertical_, startMargin, mainAxis, crossSize - endMargin);
+    }
+}
+
+void FlutterRenderList::DrawDividerOnNode(SkCanvas* skCanvas, const SkPaint& paint, bool isVertical,
+    double startCrossAxis, double mainAxis, double endCrossAxis)
+{
+    if (vertical_) {
+        skCanvas->drawLine(startCrossAxis, mainAxis, endCrossAxis, mainAxis, paint);
+    } else {
+        skCanvas->drawLine(mainAxis, startCrossAxis, mainAxis, endCrossAxis, paint);
     }
 }
 

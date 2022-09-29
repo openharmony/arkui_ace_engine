@@ -17,6 +17,7 @@
 
 #include <fstream>
 
+#include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
@@ -27,6 +28,7 @@
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/custom_paint/render_custom_paint.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
@@ -38,6 +40,8 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId)
 {
+    CHECK_NULL_VOID(frontend);
+    frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
@@ -283,6 +287,15 @@ void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::
     }
 }
 
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type)
+{
+    if (taskExecutor_) {
+        taskExecutor_->PostSyncTask(task, type);
+    } else {
+        LOGE("the task executor is nullptr");
+    }
+}
+
 void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
     auto frontend = weakFrontend_.Upgrade();
@@ -358,6 +371,123 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         return true;
     }
     return OnDumpInfo(params);
+}
+
+void PipelineBase::ForceLayoutForImplicitAnimation()
+{
+    if (!pendingImplicitLayout_.empty()) {
+        pendingImplicitLayout_.top() = true;
+    }
+}
+
+bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
+{
+    if (!propertyCallback) {
+        LOGE("failed to create animation, property callback is null!");
+        return false;
+    }
+
+    OpenImplicitAnimation(option, curve, finishCallback);
+    propertyCallback();
+    return CloseImplicitAnimation();
+}
+
+void PipelineBase::PrepareOpenImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled");
+        return;
+    }
+
+    // initialize false for implicit animation layout pending flag
+    pendingImplicitLayout_.push(false);
+    FlushUITasks();
+#endif
+}
+
+void PipelineBase::PrepareCloseImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled!");
+        return;
+    }
+
+    if (pendingImplicitLayout_.empty()) {
+        LOGE("close implicit animation failed, need to open implicit animation first!");
+        return;
+    }
+
+    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
+    if (pendingImplicitLayout_.top()) {
+        FlushUITasks();
+    }
+    pendingImplicitLayout_.pop();
+#endif
+}
+
+void PipelineBase::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    PrepareOpenImplicitAnimation();
+
+    auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
+        auto context = weak.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [finishCallback]() {
+                if (finishCallback) {
+                    finishCallback();
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    };
+    AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
+#endif
+}
+
+bool PipelineBase::CloseImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    PrepareCloseImplicitAnimation();
+    return AnimationUtils::CloseImplicitAnimation();
+#else
+    return false;
+#endif
+}
+
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+    if (onVsyncProfiler_) {
+        AceTracker::Start();
+    }
+    FlushVsync(nanoTimestamp, frameCount);
+    if (onVsyncProfiler_) {
+        onVsyncProfiler_(AceTracker::Stop());
+    }
+}
+
+void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result == touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.emplace_back(context);
+    }
+}
+
+void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result != touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.erase(result);
+    }
 }
 
 } // namespace OHOS::Ace

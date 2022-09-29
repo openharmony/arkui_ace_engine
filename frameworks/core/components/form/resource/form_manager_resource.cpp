@@ -32,15 +32,14 @@ const char FORM_MANAGER_RESULT_FAIL[] = "fail";
 
 void FormManagerResource::Release(const std::function<void(bool)>& onRelease)
 {
-    auto context = context_.Upgrade();
+    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         LOGE("fail to release resource due to context is null");
         return;
     }
 
     auto resRegister = context->GetPlatformResRegister();
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
-                                                         TaskExecutor::TaskType::PLATFORM);
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
     auto releaseTask = [weak = WeakClaim(this), weakRes, onRelease] {
         auto resource = weak.Upgrade();
@@ -74,7 +73,7 @@ void FormManagerResource::CallResRegisterMethod(
         return;
     }
 
-    auto context = context_.Upgrade();
+    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         LOGE("fail to get context to call res register method");
         return;

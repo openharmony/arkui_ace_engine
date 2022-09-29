@@ -232,6 +232,9 @@ public:
     void HandleMouseHoverEvent(const MouseState mouseState) override;
     bool HandleMouseEvent(const MouseEvent& event) override;
 
+    // distribute
+    std::string ProvideRestoreInfo() override;
+
 protected:
     explicit RenderScroll();
 
@@ -301,6 +304,9 @@ private:
     void OnReachEnd() const;
     void OnReachTop() const;
     void OnReachBottom() const;
+
+    // distribute
+    void ApplyRestoreInfo();
 
     FlexDirection direction_ { FlexDirection::COLUMN };
     using OnReachFunc = std::function<void(const std::string&)>;

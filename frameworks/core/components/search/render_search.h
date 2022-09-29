@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <functional>
 
+#include "base/mousestyle/mouse_style.h"
 #include "core/components/box/render_box.h"
 #include "core/components/button/render_button.h"
 #include "core/components/image/render_image.h"
@@ -27,7 +28,6 @@
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
-
 namespace OHOS::Ace {
 
 enum class SearchNodeType {
@@ -51,7 +51,10 @@ public:
     bool HandleEnterEvent();
     bool HandleFocusEvent(bool vertical, bool reverse);
 
-    const RefPtr<SearchComponent>&  GetSearchComponent() const
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    void HandleMouseHoverEvent(MouseState mouseState) override;
+
+    const RefPtr<SearchComponent>& GetSearchComponent() const
     {
         return searchComponent_;
     }
@@ -103,6 +106,8 @@ private:
 
     TextStyle placeHoldStyle_;
     TextStyle editingStyle_;
+    bool isInSearchButton_ = false;
+    bool preIsInSearchButton_ = false;
 };
 
 } // namespace OHOS::Ace

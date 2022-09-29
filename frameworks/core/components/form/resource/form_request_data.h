@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_REQUEST_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_REQUEST_DATA_H
 
+#include <sstream>
 #include <string>
+
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -38,6 +42,15 @@ struct RequestFormInfo {
         std::stringstream paramStream;
         paramStream << bundleName << abilityName << moduleName << cardName << dimension << index << temporary;
         return paramStream.str();
+    }
+
+    bool operator==(const RequestFormInfo& formInfo) const
+    {
+        return id == formInfo.id && cardName == formInfo.cardName && bundleName == formInfo.bundleName &&
+               abilityName == formInfo.abilityName && moduleName == formInfo.moduleName &&
+               temporary == formInfo.temporary && dimension == formInfo.dimension &&
+               allowUpdate == formInfo.allowUpdate && width == formInfo.width && height == formInfo.height &&
+               index == formInfo.index;
     }
 };
 

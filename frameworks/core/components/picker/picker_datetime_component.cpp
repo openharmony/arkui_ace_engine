@@ -131,7 +131,7 @@ void PickerDateTimeComponent::OnSubsidiaryChange(const PickerDate& date)
 void PickerDateTimeComponent::ShowDatePicker()
 {
     InitDatePicker();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     datePicker_->SetPickerBaseId(GetPickerBaseId());
 #endif
     datePicker_->SetShowLunar(lunar_);

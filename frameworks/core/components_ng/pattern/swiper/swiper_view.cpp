@@ -27,8 +27,8 @@ RefPtr<SwiperController> SwiperView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     return pattern ? pattern->GetSwiperController() : nullptr;

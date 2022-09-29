@@ -43,7 +43,7 @@ public:
 
     MenuComponent(const ComposeId& id, const std::string& name) : ComposedComponent(id, name)
     {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         popup_->SetSelectPopupId(StringUtils::StringToInt(id));
 #endif
     }
@@ -157,6 +157,13 @@ public:
     bool IsContextMenu()
     {
         return isContextMenu_;
+    }
+
+    void SetIsCustomMenu(bool isCustomMenu)
+    {
+        if (popup_) {
+            popup_->SetIsCustomMenu(isCustomMenu);
+        }
     }
 
 private:

@@ -40,6 +40,13 @@ public:
         std::lock_guard<std::mutex> lock(mutex_);
         return offscreenCanvasMap_[id];
     }
+
+    static RefPtr<NG::OffscreenCanvasPattern> GetOffscreenCanvasPattern(int32_t id)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return offscreenCanvasPatternMap_[id];
+    }
+
     uint32_t GetId()
     {
         return id;
@@ -50,7 +57,9 @@ public:
 private:
     static std::mutex mutex_;
     static std::unordered_map<uint32_t, RefPtr<OffscreenCanvas>> offscreenCanvasMap_;
+    static std::unordered_map<uint32_t, RefPtr<NG::OffscreenCanvasPattern>> offscreenCanvasPatternMap_;
     static uint32_t offscreenCanvasCount_;
+    static uint32_t offscreenCanvasPatternCount_;
     uint32_t id;
 };
 

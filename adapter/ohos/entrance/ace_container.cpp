@@ -43,7 +43,6 @@
 #include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/watch_dog.h"
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
@@ -108,12 +107,15 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
-    bool useCurrentEventRunner, bool isSubAceContainer)
+    bool useCurrentEventRunner, bool isSubAceContainer, bool useNewPipeline)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), runtimeContext_(std::move(runtimeContext)),
       abilityInfo_(std::move(abilityInfo)), useCurrentEventRunner_(useCurrentEventRunner),
       isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
+    if (useNewPipeline) {
+        SetUseNewPipeline();
+    }
     if (!isSubContainer_) {
         InitializeTask();
     }
@@ -267,7 +269,12 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
         return true;
     }
     ContainerScope scope(instanceId);
-    auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto baseContext = container->GetPipelineContext();
+    auto contextNG = DynamicCast<NG::PipelineContext>(baseContext);
+    if (contextNG) {
+        return contextNG->OnBackPressed();
+    }
+    auto context = DynamicCast<PipelineContext>(baseContext);
     if (!context) {
         return false;
     }
@@ -698,7 +705,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     HdcRegister::Get().StartHdcRegister(instanceId);
-    ConnectServerManager::Get().AddInstance(instanceId);
+    ConnectServerManager::Get();
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
@@ -967,13 +974,13 @@ void AceContainer::AddAssetPath(
     if (flutterAssetManager && !packagePath.empty()) {
         auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
         if (assetProvider->Initialize(packagePath, paths)) {
-            LOGI("Push AssetProvider to queue.");
+            LOGD("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }
 }
 
-void AceContainer::AddLibPath(int32_t instanceId, const std::string& libPath)
+void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     if (!container) {
@@ -1155,9 +1162,11 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         TaskExecutor::TaskType::UI);
     aceView_->Launch();
 
-    // Only MainWindow instance will be registered to watch dog.
     if (!isSubContainer_) {
-        AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+        // Only MainWindow instance in FA model will be registered to watch dog.
+        if (!GetSettings().usingSharedRuntime) {
+            AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+        }
         frontend_->AttachPipelineContext(pipelineContext_);
     } else {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
@@ -1269,14 +1278,14 @@ std::string AceContainer::GetContentInfo(int32_t instanceId)
 
 void AceContainer::SetWindowPos(int32_t left, int32_t top)
 {
-    if (!frontend_ || IsSubContainer()) {
+    if (!frontend_) {
         return;
     }
     auto accessibilityManager = frontend_->GetAccessibilityManager();
     if (!accessibilityManager) {
         return;
     }
-    accessibilityManager->SetWindowPos(left, top);
+    accessibilityManager->SetWindowPos(left, top, windowId_);
 }
 
 void AceContainer::InitializeSubContainer(int32_t parentContainerId)
@@ -1438,4 +1447,16 @@ void AceContainer::UpdateFrondend(bool needReloadTransition)
             }, TaskExecutor::TaskType::UI);
         }, TaskExecutor::TaskType::JS);
 }
+
+extern "C" ACE_EXPORT void OHOS_ACE_HotReloadPage()
+{
+    AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+        auto ace = AceType::DynamicCast<AceContainer>(container);
+        if (ace) {
+            ace->UpdateFrondend(true);
+        }
+        LOGI("frontend rebuild finished");
+    });
+}
+
 } // namespace OHOS::Ace::Platform

@@ -235,6 +235,12 @@ void CanvasTaskPool::Clip()
     PushTask(task);
 }
 
+void CanvasTaskPool::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    auto task = [path](RenderCustomPaint& interface, const Offset& offset) { interface.Clip(path); };
+    PushTask(task);
+}
+
 void CanvasTaskPool::BeginPath()
 {
     auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.BeginPath(); };
@@ -335,6 +341,16 @@ std::string CanvasTaskPool::GetJsonData(const std::string& path)
     }
 
     return paint->GetJsonData(path);
+}
+
+const std::vector<double>& CanvasTaskPool::GetLineDash() const
+{
+    auto paint = renderNode_.Upgrade();
+    if (!paint) {
+        return std::vector<double>();
+    }
+
+    return paint->GetLineDash();
 }
 
 double CanvasTaskPool::GetWidth() const

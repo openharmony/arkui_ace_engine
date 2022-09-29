@@ -720,14 +720,14 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         }
     }
     auto endSize = result.size();
-    return (dispatchSuccess || beforeSize != endSize) && IsNotSiblingAddRecognizerToResult();
+    return dispatchSuccess || (beforeSize != endSize && IsNotSiblingAddRecognizerToResult());
 }
 
 bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Point& globalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     bool dispatchSuccess = false;
-    if (!IsChildrenTouchEnable() || GetHitTestMode() == HitTestMode::BLOCK) {
+    if (!IsChildrenTouchEnable() || GetHitTestMode() == HitTestMode::HTMBLOCK) {
         return dispatchSuccess;
     }
 
@@ -739,14 +739,14 @@ bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Poin
         }
         if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
             dispatchSuccess = true;
-            if (child->GetHitTestMode() != HitTestMode::TRANSPARENT) {
+            if (child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) {
                 break;
             }
         }
         auto interceptTouchEvent = (child->IsTouchable() &&
             (child->InterceptTouchEvent() || IsExclusiveEventForChild()) &&
-            child->GetHitTestMode() != HitTestMode::TRANSPARENT);
-        if (child->GetHitTestMode() == HitTestMode::BLOCK || interceptTouchEvent) {
+            child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT);
+        if (child->GetHitTestMode() == HitTestMode::HTMBLOCK || interceptTouchEvent) {
             auto localTransformPoint = child->GetTransformPoint(localPoint);
             bool isInRegion = false;
             for (const auto& rect : child->GetTouchRectList()) {
@@ -756,7 +756,7 @@ bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Poin
                     break;
                 }
             }
-            if (isInRegion && child->GetHitTestMode() != HitTestMode::DEFAULT) {
+            if (isInRegion && child->GetHitTestMode() != HitTestMode::HTMDEFAULT) {
                 break;
             }
         }
@@ -938,7 +938,6 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
                 MouseHoverExitTest();
             }
             mouseState_ = MouseState::NONE;
-            HandleMouseHoverEvent(MouseState::NONE);
         }
         return false;
     }
@@ -965,12 +964,11 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
             MouseHoverEnterTest();
         }
         mouseState_ = MouseState::HOVER;
-        HandleMouseHoverEvent(MouseState::HOVER);
     }
     return true;
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void RenderNode::SetAccessibilityRect(const Rect& rect)
 {
     Rect parentRect = rect;
@@ -1192,7 +1190,7 @@ double RenderNode::NormalizePercentToPx(const Dimension& dimension, bool isVerti
         if (!parent) {
             referSize = GetLayoutParam().GetMaxSize();
         } else {
-            if (positionParam_.type == PositionType::OFFSET) {
+            if (positionParam_.type == PositionType::PTOFFSET) {
                 referSize = parent->GetLayoutSize();
             } else {
                 referSize = parent->GetLayoutParam().GetMaxSize();
@@ -1327,38 +1325,37 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     disabled_ = component->IsDisabledStatus();
     isFirstNode_ = component->IsFirstNode();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-    positionParam_ = renderComponent->GetPositionParam();
-    if (renderComponent) {
-        motionPathOption_ = renderComponent->GetMotionPathOption();
-#ifdef ENABLE_ROSEN_BACKEND
-        if (SystemProperties::GetRosenBackendEnabled() && motionPathOption_.IsValid()) {
-            if (auto rsNode = GetRSNode()) {
-                auto nativeMotionOption = std::make_shared<Rosen::RSMotionPathOption>(
-                    NativeCurveHelper::ToNativeMotionPathOption(motionPathOption_,
-                        positionParam_.type == PositionType::OFFSET));
-                rsNode->SetMotionPathOption(nativeMotionOption);
-            }
-        }
-#endif
-
-        if (!NearEqual(flexWeight_, renderComponent->GetFlexWeight())) {
-            auto parentFlex = GetParent().Upgrade();
-            if (parentFlex) {
-                parentFlex->MarkNeedLayout();
-            }
-        }
-        flexWeight_ = renderComponent->GetFlexWeight();
-        displayIndex_ = renderComponent->GetDisplayIndex();
-        displayIndexSetted_ = renderComponent->GetDisplayIndexSetted();
-        isIgnored_ = renderComponent->IsIgnored();
-        interceptTouchEvent_ = renderComponent->InterceptEvent();
-        if (renderComponent->IsCustomComponent()) {
-            onLayoutReady_ =
-                AceAsyncEvent<void(const std::string&)>::Create(renderComponent->GetOnLayoutReadyMarker(), context_);
-        }
-    } else {
+    if (!renderComponent) {
         LOGE("renderComponent is null");
         return;
+    }
+    positionParam_ = renderComponent->GetPositionParam();
+    motionPathOption_ = renderComponent->GetMotionPathOption();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && motionPathOption_.IsValid()) {
+        if (auto rsNode = GetRSNode()) {
+            auto nativeMotionOption =
+                std::make_shared<Rosen::RSMotionPathOption>(NativeCurveHelper::ToNativeMotionPathOption(
+                    motionPathOption_, positionParam_.type == PositionType::PTOFFSET));
+            rsNode->SetMotionPathOption(nativeMotionOption);
+        }
+    }
+#endif
+
+    if (!NearEqual(flexWeight_, renderComponent->GetFlexWeight())) {
+        auto parentFlex = GetParent().Upgrade();
+        if (parentFlex) {
+            parentFlex->MarkNeedLayout();
+        }
+    }
+    flexWeight_ = renderComponent->GetFlexWeight();
+    displayIndex_ = renderComponent->GetDisplayIndex();
+    displayIndexSetted_ = renderComponent->GetDisplayIndexSetted();
+    isIgnored_ = renderComponent->IsIgnored();
+    interceptTouchEvent_ = renderComponent->InterceptEvent();
+    if (renderComponent->IsCustomComponent()) {
+        onLayoutReady_ =
+            AceAsyncEvent<void(const std::string&)>::Create(renderComponent->GetOnLayoutReadyMarker(), context_);
     }
     auto context = context_.Upgrade();
     if (context != nullptr) {

@@ -63,6 +63,8 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     mainGap_ = &rowGap_;
     startRankItemIndex_ = 0;
     currentItemIndex_ = 0;
+    // maybe change ItemIndex
+    ApplyRestoreInfo();
     RenderGridLayout::Update(component);
     FindRefreshParent(AceType::WeakClaim(this));
     InitScrollBar(component);
@@ -343,17 +345,17 @@ bool RenderGridScroll::GetGridSize()
 void RenderGridScroll::BuildGrid(std::vector<double>& main, std::vector<double>& cross)
 {
     if (useScrollable_ == SCROLLABLE::NO_SCROLL) {
-        main = ParseArgs(PreParseRows(), rowSize_, rowGap_);
-        cross = ParseArgs(PreParseCols(), colSize_, colGap_);
+        main = ParseArgs(GetRowTemplate(), rowSize_, rowGap_);
+        cross = ParseArgs(GetColumnsTemplate(), colSize_, colGap_);
     } else if (useScrollable_ == SCROLLABLE::VERTICAL) {
-        cross = ParseArgs(PreParseCols(), colSize_, colGap_);
+        cross = ParseArgs(GetColumnsTemplate(), colSize_, colGap_);
         int32_t col = 0;
         for (auto width : cross) {
             metaData_[col] = Size(width, Size::INFINITE_SIZE);
             ++col;
         }
     } else if (useScrollable_ == SCROLLABLE::HORIZONTAL) {
-        cross = ParseArgs(PreParseRows(), rowSize_, rowGap_);
+        cross = ParseArgs(GetRowTemplate(), rowSize_, rowGap_);
         int32_t row = 0;
         for (auto height : cross) {
             metaData_[row] = Size(Size::INFINITE_SIZE, height);
@@ -1615,6 +1617,30 @@ bool RenderGridScroll::IsAxisScrollable(AxisDirection direction)
 
 void RenderGridScroll::HandleAxisEvent(const AxisEvent& event)
 {
+}
+
+std::string RenderGridScroll::ProvideRestoreInfo()
+{
+    int32_t currentItemIndex = 0;
+    auto items = gridMatrix_.find(startIndex_);
+    if (items != gridMatrix_.end() && !items->second.empty()) {
+        currentItemIndex = items->second.begin()->second;
+    }
+
+    if (currentItemIndex > 0) {
+        return std::to_string(currentItemIndex);
+    }
+    return "";
+}
+
+void RenderGridScroll::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    currentItemIndex_ = StringUtils::StringToInt(GetRestoreInfo());
+    startRankItemIndex_ = GetStartingItem(currentItemIndex_);
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace::V2

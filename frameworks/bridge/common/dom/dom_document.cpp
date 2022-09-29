@@ -104,7 +104,7 @@
 #include "frameworks/bridge/common/dom/dom_tool_bar.h"
 #include "frameworks/bridge/common/dom/dom_tool_bar_item.h"
 #include "frameworks/bridge/common/dom/dom_video.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_web.h"
 #endif
@@ -281,7 +281,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #endif
     }
     if (!domNode) {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         if (std::strcmp(tag.c_str(), DOM_NODE_TAG_WEB) == 0 || std::strcmp(tag.c_str(), DOM_NODE_TAG_XCOMPONENT) == 0 ||
             std::strcmp(tag.c_str(), DOM_NODE_TAG_RICH_TEXT) == 0) {
             LOGW("[Engine Log] Unable to use the %{public}s component in the Previewer. Perform this operation on the "
@@ -347,7 +347,7 @@ void DOMDocument::RemoveNodes(const RefPtr<DOMNode>& node, bool scheduleUpdate)
         }
     }
     // Fixed positioned node and navigation bar node need to delete the relative proxy node.
-    if (node->GetPosition() == PositionType::FIXED && rootStackComponent_) {
+    if (node->GetPosition() == PositionType::PTFIXED && rootStackComponent_) {
         rootStackComponent_->RemoveChild(node->GetRootComponent());
         auto context = node->GetPipelineContext().Upgrade();
         if (context && scheduleUpdate) {

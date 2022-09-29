@@ -78,35 +78,60 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
 
 void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
 {
-    if (args[0]->IsFunction()) {
-        RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-        auto onKeyId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
-                ACE_SCORING_EVENT("onKey");
-                func->Execute(*keyInfo);
-            },
-            "onKey", 0);
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-        if (focusableComponent) {
-            focusableComponent->SetOnKeyId(onKeyId);
-        }
+    if (!args[0]->IsFunction()) {
+        LOGE("OnKeyEvent args need a function.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent)](KeyEventInfo& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onKey");
+            func->Execute(info);
+        };
+        NG::ViewAbstract::SetOnKeyEvent(std::move(onKeyEvent));
+        return;
+    }
+
+    RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onKeyId = EventMarker(
+        [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
+            ACE_SCORING_EVENT("onKey");
+            func->Execute(*keyInfo);
+        },
+        "onKey", 0);
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (focusableComponent) {
+        focusableComponent->SetOnKeyId(onKeyId);
     }
 }
 
-void JSInteractableView::JsOnHover(const JSCallbackInfo& args)
+void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 {
-    if (args[0]->IsFunction()) {
-        RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(args[0]));
-        auto onHoverId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool info) {
+    if (!info[0]->IsFunction()) {
+        LOGE("the param is not a function");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onHover");
-            func->Execute(info);
+            func->Execute(param);
         };
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        box->SetOnHoverId(onHoverId);
+        NG::ViewAbstract::SetOnHover(std::move(onHoverId));
+        return;
     }
+    RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onHover");
+        func->Execute(param);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnHoverId(onHoverId);
 }
 
 void JSInteractableView::JsOnPan(const JSCallbackInfo& args)
@@ -142,6 +167,13 @@ void JSInteractableView::JsOnDelete(const JSCallbackInfo& info)
 
 void JSInteractableView::JsTouchable(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsBoolean()) {
+            NG::ViewAbstract::SetTouchable(info[0]->ToBoolean());
+        }
+        return;
+    }
+
     if (info[0]->IsBoolean()) {
         auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
         if (!mainComponent) {
@@ -239,6 +271,10 @@ RefPtr<Gesture> JSInteractableView::GetRemoteMessageTapGesture(const JSCallbackI
 
 void JSInteractableView::SetFocusable(bool focusable)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetFocusable(focusable);
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
     if (focusableComponent) {
         focusableComponent->SetFocusable(focusable);
@@ -246,6 +282,9 @@ void JSInteractableView::SetFocusable(bool focusable)
 }
 void JSInteractableView::SetFocusNode(bool isFocusNode)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
     if (focusableComponent) {
         focusableComponent->SetFocusNode(!isFocusNode);
@@ -257,13 +296,19 @@ void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-
-        auto onAppearId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGI("About to call JsOnAppear method on js");
             ACE_SCORING_EVENT("onAppear");
             func->Execute();
-        });
+        };
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewAbstract::SetOnAppear(std::move(onAppear));
+            return;
+        }
+
+        auto onAppearId = EventMarker(onAppear);
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         component->SetOnAppearEventId(onAppearId);
     }
@@ -274,12 +319,18 @@ void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnDisAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onDisAppearId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGD("Start to call JsOnDisAppear method on js");
             ACE_SCORING_EVENT("onDisAppear");
             func->Execute();
-        });
+        };
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewAbstract::SetOnDisappear(std::move(onDisappear));
+            return;
+        }
+
+        auto onDisAppearId = EventMarker(onDisappear);
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         component->SetOnDisappearEventId(onDisAppearId);
     }

@@ -76,6 +76,8 @@ enable_ability_component = true
 video_components_support = true
 image_components_support = true
 preview_support = false
+enable_system_clipboard = true
+enable_image_compression = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -91,7 +93,6 @@ if (defined(video_components_support) && video_components_support) {
 
 if (defined(is_experiment_build) && is_experiment_build) {
   web_components_support = true
-  enable_system_clipboard = true
   accessibility_support = true
 }
 

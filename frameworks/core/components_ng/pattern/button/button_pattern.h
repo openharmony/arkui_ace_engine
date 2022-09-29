@@ -54,11 +54,22 @@ public:
         return MakeRefPtr<ButtonLayoutProperty>();
     }
 
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    FocusType GetFocusType() override
+    {
+        return FocusType::NODE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
+protected:
     void OnModifyDone() override;
+    void OnAttachToFrameNode() override;
 
 private:
-    void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnTouchDown();
     void OnTouchUp();
 

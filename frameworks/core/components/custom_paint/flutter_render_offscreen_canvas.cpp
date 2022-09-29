@@ -254,6 +254,17 @@ void FlutterRenderOffscreenCanvas::Clip()
     skCanvas_->clipPath(skPath_);
 }
 
+void FlutterRenderOffscreenCanvas::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    if (path == nullptr) {
+        LOGE("Clip failed in offscreenCanvas, target path is null.");
+        return;
+    }
+    ParsePath2D(path);
+    Path2DClip();
+    skPath2d_.reset();
+}
+
 void FlutterRenderOffscreenCanvas::FillRect(Rect rect)
 {
     SkPaint paint;
@@ -522,11 +533,29 @@ void FlutterRenderOffscreenCanvas::Restore()
 
 std::string FlutterRenderOffscreenCanvas::ToDataURL(const std::string& type, const double quality)
 {
+    auto pipeline = pipelineContext_.Upgrade();
+    if (!pipeline) {
+        return UNSUPPORTED;
+    }
     std::string mimeType = GetMimeType(type);
     double qua = GetQuality(type, quality);
+    SkBitmap tempCache;
+    tempCache.allocPixels(SkImageInfo::Make(width_, height_, SkColorType::kBGRA_8888_SkColorType,
+        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
+    SkCanvas tempCanvas(tempCache);
+    double viewScale = pipeline->GetViewScale();
+    tempCanvas.clear(SK_ColorTRANSPARENT);
+    tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
+#ifdef USE_SYSTEM_SKIA_S
+    //The return value of the dual framework interface has no alpha
+    tempCanvas.drawImage(skBitmap_.asImage(), 0.0f, 0.0f);
+#else
+    tempCanvas.drawBitmap(skBitmap_, 0.0f, 0.0f);
+#endif
     SkPixmap src;
-    bool success = skBitmap_.peekPixels(&src);
+    bool success = tempCache.peekPixels(&src);
     if (!success) {
+        LOGE("ToDataURL failed,the bitmap does not have access to pixel data");
         return UNSUPPORTED;
     }
     SkDynamicMemoryWStream dst;
@@ -544,14 +573,17 @@ std::string FlutterRenderOffscreenCanvas::ToDataURL(const std::string& type, con
         success = SkPngEncoder::Encode(&dst, src, options);
     }
     if (!success) {
+        LOGE("ToDataURL failed,image encoding failed");
         return UNSUPPORTED;
     }
     auto result = dst.detachAsData();
     if (result == nullptr) {
+        LOGE("DetachAsData failed when ToDataURL.");
         return UNSUPPORTED;
     }
     size_t len = SkBase64::Encode(result->data(), result->size(), nullptr);
     if (len > MAX_LENGTH) {
+        LOGE("ToDataURL failed,The resolution of the image is greater than the maximum allowed resolution");
         return UNSUPPORTED;
     }
     SkString info(len);
@@ -1003,6 +1035,11 @@ void FlutterRenderOffscreenCanvas::Path2DFill()
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
         cacheBitmap_.eraseColor(0);
     }
+}
+
+void FlutterRenderOffscreenCanvas::Path2DClip()
+{
+    skCanvas_->clipPath(skPath_);
 }
 
 void FlutterRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)

@@ -901,11 +901,11 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
             auto v8NativeEngine = static_cast<V8NativeEngine*>(nativeEngine_);
             v8NativeEngine->SetPackagePath(packagePath);
@@ -1048,7 +1048,7 @@ V8DeclarativeEngine::~V8DeclarativeEngine()
     }
     LOG_DESTROY();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         delete nativeEngine_;

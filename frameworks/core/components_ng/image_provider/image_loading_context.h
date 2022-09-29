@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_LOADING_CONTEXT_H
 
 #include "base/geometry/ng/size_t.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_object.h"
-#include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/image_provider/image_provider.h"
+#include "core/components_ng/image_provider/image_state_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,12 +37,16 @@ public:
     ~ImageLoadingContext() override = default;
 
     static SizeF CalculateResizeTarget(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
+    static void MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
+        bool incomingNeedResize, ImageFit incommingImageFit,
+        const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
 
     void RegisterStateChangeCallbacks();
 
     /* interfaces to drive image loading */
     void LoadImageData();
-    void MakeCanvasImage(const SizeF& dstSize, bool needResize,  ImageFit imageFit = ImageFit::COVER);
+    void MakeCanvasImage(const SizeF& dstSize, bool needResize, ImageFit imageFit = ImageFit::COVER,
+        const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
 
     /* interfaces to get properties */
     SizeF GetImageSize() const;
@@ -52,10 +57,15 @@ public:
     const ImageSourceInfo& GetSourceInfo() const;
     const SizeF& GetDstSize() const;
     bool GetNeedResize() const;
+    std::optional<SizeF> GetSourceSize() const;
+    bool NeedAlt() const;
+    const std::optional<Color>& GetSvgFillColor() const;
+    void SetSvgFillColor(const std::optional<Color>& svgFillColorOpt);
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
     void SetNeedResize(bool needResize);
+    void SetSourceSize(const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult, loadResultNotifierName)                                         \
@@ -75,9 +85,9 @@ private:
     LoadFailCallback GenerateLoadFailCallback();
 
     // things to do when load callback is triggered during image loading
-    void OnDataReady(const ImageSourceInfo &sourceInfo, const RefPtr<ImageObject> imageObj);
-    void OnLoadSuccess(const ImageSourceInfo &sourceInfo);
-    void OnLoadFail(const ImageSourceInfo &sourceInfo, const std::string& errorMsg);
+    void OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject> imageObj);
+    void OnLoadSuccess(const ImageSourceInfo& sourceInfo);
+    void OnLoadFail(const ImageSourceInfo& sourceInfo, const std::string& errorMsg, const ImageLoadingCommand& command);
 
     // generate tasks relative to [ImageLoadingState] which will be run while entering a state
     EnterStateTask CreateOnUnloadedTask();
@@ -102,6 +112,9 @@ private:
     SizeF dstSize_;
     bool needResize_ = true;
     ImageFit imageFit_ = ImageFit::COVER;
+    std::optional<Color> svgFillColorOpt_;
+    std::unique_ptr<std::pair<Dimension, Dimension>> sourceSizePtr_ = nullptr;
+    bool needAlt_ = true;
     std::function<void()> updateParamsCallback_ = nullptr;
 };
 

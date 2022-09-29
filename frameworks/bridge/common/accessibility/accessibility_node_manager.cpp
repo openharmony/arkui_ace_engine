@@ -363,7 +363,7 @@ void AccessibilityNodeManager::ClearNodeRectInfo(RefPtr<AccessibilityNode>& node
     for (auto it = children.begin(); it != children.end(); it++) {
         ClearNodeRectInfo(*it, isPopDialog);
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (isPopDialog) {
         node->SetClearRectInfoFlag(true);
     } else {
@@ -383,7 +383,7 @@ int32_t AccessibilityNodeManager::GenerateNextAccessibilityId()
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateSpecializedNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (IsDeclarative()) {
         return nullptr;
     }
@@ -422,7 +422,7 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
             std::lock_guard<std::mutex> lock(mutex_);
             auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
             if (!result.second) {
-                LOGW("the accessibility node has already in the map");
+                LOGD("the accessibility node has already in the map");
                 return nullptr;
             }
         }
@@ -431,6 +431,13 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
     accessibilityNode->SetIsRootNode(nodeId == rootNodeId_);
     accessibilityNode->SetPageId(rootNodeId_ - DOM_ROOT_NODE_ID_BASE);
     accessibilityNode->SetFocusableState(true);
+    auto container = Container::Current();
+    if (container) {
+        auto context = container->GetPipelineContext();
+        if (context) {
+            accessibilityNode->SetWindowId(context->GetWindowId());
+        }
+    }
     if (parentNode) {
         accessibilityNode->SetParentNode(parentNode);
         accessibilityNode->Mount(itemIndex);
@@ -456,6 +463,13 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateCommonAccessibilityNod
     }
 
     auto accessibilityNode = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
+    auto container = Container::Current();
+    if (container) {
+        auto context = container->GetPipelineContext();
+        if (context) {
+            accessibilityNode->SetWindowId(context->GetWindowId());
+        }
+    }
     accessibilityNode->SetIsRootNode(nodeId == rootNodeId_);
     accessibilityNode->SetPageId(rootNodeId_ - DOM_ROOT_NODE_ID_BASE);
     accessibilityNode->SetParentNode(parentNode);
@@ -465,7 +479,7 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateCommonAccessibilityNod
         auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
 
         if (!result.second) {
-            LOGW("the accessibility node has already in the map");
+            LOGD("the accessibility node has already in the map");
             return nullptr;
         }
     }
@@ -490,6 +504,13 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::GetRootAccessibilityNode()
         if (decor) {
             decor->SetParentNode(parentNode);
             decor->Mount(-1);
+        }
+    }
+    auto container = Container::Current();
+    if (container) {
+        auto context = container->GetPipelineContext();
+        if (context) {
+            parentNode->SetWindowId(context->GetWindowId());
         }
     }
     return parentNode;
@@ -711,10 +732,12 @@ void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
 #endif
 }
 
-void AccessibilityNodeManager::SetWindowPos(int32_t left, int32_t top)
+void AccessibilityNodeManager::SetWindowPos(int32_t left, int32_t top, int32_t windowId)
 {
-    windowLeft_ = left;
-    windowTop_ = top;
+    WindowPos windowPos;
+    windowPos.left = left;
+    windowPos.top = top;
+    windowPosMap_.insert_or_assign(windowId, windowPos);
 }
 
 bool AccessibilityNodeManager::IsDeclarative()
@@ -766,8 +789,8 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetNodeId()));
     DumpLog::GetInstance().AddDesc("compid: " + node->GetJsComponentId());
     DumpLog::GetInstance().AddDesc("text: " + node->GetText());
-    DumpLog::GetInstance().AddDesc("top: " + std::to_string(node->GetTop() + windowTop_));
-    DumpLog::GetInstance().AddDesc("left: " + std::to_string(node->GetLeft() + windowLeft_));
+    DumpLog::GetInstance().AddDesc("top: " + std::to_string(node->GetTop() + GetWindowTop(node->GetWindowId())));
+    DumpLog::GetInstance().AddDesc("left: " + std::to_string(node->GetLeft() + GetWindowLeft(node->GetWindowId())));
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
     DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));

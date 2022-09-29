@@ -84,7 +84,7 @@ public:
             } while (FindNextFile(hFind, &fileInfo) != 0);
             FindClose(hFind);
         }
-#elif defined(MAC_PLATFORM)
+#elif defined(MAC_PLATFORM) || defined(LINUX_PLATFORM)
         std::string dirPath = basePath_ + "/" + path;
         DIR* dp = nullptr;
         if (nullptr == (dp = opendir(dirPath.c_str()))) {

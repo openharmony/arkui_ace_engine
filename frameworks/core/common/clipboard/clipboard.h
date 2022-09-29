@@ -19,6 +19,7 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
@@ -28,9 +29,10 @@ class Clipboard : public AceType {
 public:
     ~Clipboard() override = default;
 
-    virtual void SetData(const std::string& data) = 0;
+    virtual void SetData(
+        const std::string& data, CopyOptions copyOption = CopyOptions::InApp, bool isDragData = false) = 0;
     virtual void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) = 0;
-    virtual void SetPixelMapData(const RefPtr<PixelMap>& pixmap) = 0;
+    virtual void SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption = CopyOptions::InApp) = 0;
     virtual void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback,
         bool syncMode = false) = 0;
     virtual void Clear() = 0;

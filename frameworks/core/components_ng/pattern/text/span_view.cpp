@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/span_view.h"
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/span_node.h"
 
@@ -47,7 +48,7 @@ void SpanView::SetTextColor(const Color& value)
     ACE_UPDATE_SPAN_PROPERTY(TextColor, value);
 }
 
-void SpanView::SetItalicFontStyle(const NG::ItalicFontStyle& value)
+void SpanView::SetItalicFontStyle(const Ace::FontStyle& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(ItalicFontStyle, value);
 }

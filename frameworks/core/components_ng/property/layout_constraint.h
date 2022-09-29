@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_LAYOUT_CONSTRAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_LAYOUT_CONSTRAINT_H
 
+#include <algorithm>
 #include <optional>
 #include <string>
 
@@ -42,8 +43,8 @@ struct LayoutConstraintT {
         selfIdealSize.Reset();
     }
 
-    void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
-        const std::optional<T>& bottom)
+    void MinusPaddingOnBothSize(const std::optional<T>& left, const std::optional<T>& right,
+        const std::optional<T>& top, const std::optional<T>& bottom)
     {
         minSize.MinusPadding(left, right, top, bottom);
         maxSize.MinusPadding(left, right, top, bottom);
@@ -64,12 +65,28 @@ struct LayoutConstraintT {
         return !(*this == layoutConstraint);
     }
 
-    bool UpdateSelfIdealSizeWithCheck(const OptionalSize<T>& size)
+    bool UpdateSelfMarginSizeWithCheck(const OptionalSize<T>& size)
     {
         if (selfIdealSize == size) {
             return false;
         }
         return selfIdealSize.UpdateSizeWithCheck(size);
+    }
+
+    bool UpdateIllegalSelfMarginSizeWithCheck(const OptionalSize<T>& size)
+    {
+        if (selfIdealSize == size) {
+            return false;
+        }
+        return selfIdealSize.UpdateIllegalSizeWithCheck(size);
+    }
+
+    bool UpdateIllegalSelfIdealSizeWithCheck(const OptionalSize<T>& size)
+    {
+        if (selfIdealSize == size) {
+            return false;
+        }
+        return selfIdealSize.UpdateIllegalSizeWithCheck(size);
     }
 
     bool UpdateParentIdealSizeWithCheck(const OptionalSize<T>&& size)
@@ -78,6 +95,14 @@ struct LayoutConstraintT {
             return false;
         }
         return parentIdealSize.UpdateSizeWithCheck(size);
+    }
+
+    bool UpdateIllegalParentIdealSizeWithCheck(const OptionalSize<T>&& size)
+    {
+        if (parentIdealSize == size) {
+            return false;
+        }
+        return parentIdealSize.UpdateIllegalSizeWithCheck(size);
     }
 
     bool UpdateMaxSizeWithCheck(const SizeT<T>& size)

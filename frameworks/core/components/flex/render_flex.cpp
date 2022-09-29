@@ -45,7 +45,8 @@ double GetMainAxisValue(const Size& size, FlexDirection direction)
 
 inline bool IsNonRelativePosition(PositionType pos)
 {
-    return ((pos != PositionType::RELATIVE) && (pos != PositionType::SEMI_RELATIVE) && (pos != PositionType::OFFSET));
+    return (
+        (pos != PositionType::PTRELATIVE) && (pos != PositionType::PTSEMI_RELATIVE) && (pos != PositionType::PTOFFSET));
 }
 
 } // namespace
@@ -61,6 +62,9 @@ void RenderFlex::Update(const RefPtr<Component>& component)
     if (!flex) {
         return;
     }
+    isTabs_ = flex->GetTabsFlag();
+    isTabContent_ = flex->GetTabContentFlag();
+
     direction_ = flex->GetDirection();
     mainAxisAlign_ = flex->GetMainAxisAlign();
     crossAxisAlign_ = flex->GetCrossAxisAlign();
@@ -478,7 +482,7 @@ void RenderFlex::RelayoutForStretchFlexNode(const FlexItemProperties& flexItemPr
             double flexSize = 0.0;
             flexSize = flexItem == flexItemProperties.lastGrowChild ? remainSpace - allocatedFlexSpace
                                                                     : spacePerFlex * flexItem->GetFlexGrow();
-            RelayoutFlexItem(flexItem, flexSize, baselineProperties, allocatedFlexSpace);
+            RedoLayoutFlexItem(flexItem, flexSize, baselineProperties, allocatedFlexSpace);
         } else if (crossAxisAlign_ == FlexAlign::STRETCH && flexItem->GetStretchFlag()) {
             flexItem->Layout(
                 MakeConstrainedLayoutParam(GetMainSize(flexItem), flexItem->GetNormalizedConstraints(), true));
@@ -626,7 +630,7 @@ void RenderFlex::ResizeItems(const FlexItemProperties& flexItemProps, BaselinePr
         double flexSize = (flexItem == lastChild) ? (remainSpace - allocatedFlexSpace)
                                                   : ((remainSpace > 0) ? spacePerFlex * itemFlex
                                                                        : spacePerFlex * itemFlex * GetMainSize(item));
-        RelayoutFlexItem(flexItem, flexSize, baselineProps, allocatedFlexSpace);
+        RedoLayoutFlexItem(flexItem, flexSize, baselineProps, allocatedFlexSpace);
     }
 }
 
@@ -749,13 +753,13 @@ void RenderFlex::PlaceChildren(double frontSpace, double betweenSpace, const Bas
         }
         Offset offset;
         if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
-            if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
+            if (item->GetPositionType() == PositionType::PTSEMI_RELATIVE) {
                 childMainPos = 0.0;
             }
             offset = Offset(childMainPos, childCrossPos);
         } else {
             offset =
-                Offset((item->GetPositionType() == PositionType::SEMI_RELATIVE) ? 0.0 : childCrossPos, childMainPos);
+                Offset((item->GetPositionType() == PositionType::PTSEMI_RELATIVE) ? 0.0 : childCrossPos, childMainPos);
         }
 
         if (!IsStartTopLeft(direction_, GetTextDirection())) {
@@ -799,7 +803,7 @@ void RenderFlex::LayoutFlexItem(RefPtr<RenderFlexItem>& flexItem, FlexItemProper
     flexItemProperties.totalGrow += itemGrow;
 }
 
-void RenderFlex::RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double flexSize,
+void RenderFlex::RedoLayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double flexSize,
     BaselineProperties& baselineProps, double& allocatedFlexSpace)
 {
     bool canItemStretch = flexItem->MustStretch() || ((GetSelfAlign(flexItem) == FlexAlign::STRETCH) &&
@@ -975,7 +979,7 @@ void RenderFlex::ClearChildrenLists()
     stretchNodes_.clear();
 }
 
-void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedSize)
+void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item, double& allocatedSize)
 {
     double mainSize = GetMainSize(item);
     if (NearEqual(mainSize, Size::INFINITE_SIZE)) {
@@ -989,7 +993,7 @@ void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedS
 
     crossSize_ = std::max(crossSize_, GetCrossSize(item));
     // Semi relative and variable allocatedSize is used for grid container.
-    if ((item->GetPositionType() == PositionType::SEMI_RELATIVE) &&
+    if ((item->GetPositionType() == PositionType::PTSEMI_RELATIVE) &&
         (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)) {
         allocatedSize_ = std::max(allocatedSize_, mainSize);
         allocatedSize = mainSize;
@@ -1039,7 +1043,7 @@ double RenderFlex::GetMainSize(const RefPtr<RenderNode>& item) const
     }
     if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         size = item->GetLayoutSize().Width();
-        if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
+        if (item->GetPositionType() == PositionType::PTSEMI_RELATIVE) {
             Offset absoluteOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(const_cast<RenderFlex*>(this)), item);
             size += absoluteOffset.GetX();
         }
@@ -1059,7 +1063,7 @@ double RenderFlex::GetCrossSize(const RefPtr<RenderNode>& item) const
         size = item->GetLayoutSize().Height();
     } else {
         size = item->GetLayoutSize().Width();
-        if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
+        if (item->GetPositionType() == PositionType::PTSEMI_RELATIVE) {
             Offset absoluteOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(const_cast<RenderFlex*>(this)), item);
             size += absoluteOffset.GetX();
         }
@@ -1269,6 +1273,37 @@ void RenderFlex::OnVisibleChanged()
     if (accessibilityNode) {
         accessibilityNode->SetVisible(GetVisible());
     }
+}
+
+std::string RenderFlex::ProvideRestoreInfo()
+{
+    if (isTabs_) {
+        auto childNode = GetChildren().front();
+        if (!childNode || childNode->GetChildren().empty()) {
+            return "";
+        }
+        auto childChildNode = childNode->GetChildren().front();
+        if (!childChildNode) {
+            return "";
+        }
+        isTabs_ = false;
+        return childChildNode->ProvideRestoreInfo();
+    }
+
+    if (isTabContent_) {
+        auto childNode = GetChildren().back();
+        if (!childNode || childNode->GetChildren().empty()) {
+            return "";
+        }
+        auto childChildNode = childNode->GetChildren().front();
+        if (!childChildNode) {
+            return "";
+        }
+        isTabContent_ = false;
+        return childChildNode->ProvideRestoreInfo();
+    }
+    
+    return "";
 }
 
 } // namespace OHOS::Ace

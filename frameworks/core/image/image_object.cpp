@@ -14,6 +14,7 @@
  */
 
 #include "core/image/image_object.h"
+#include "core/image/image_compressor.h"
 
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
@@ -26,6 +27,11 @@
 #include "core/components_ng/render/canvas_image.h"
 #endif
 
+#ifdef APNG_IMAGE_SUPPORT
+#include "core/image/apng/apng_image_decoder.h"
+#include "core/image/apng/apng_image_object.h"
+#endif
+
 namespace OHOS::Ace {
 
 std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size targetImageSize)
@@ -35,7 +41,10 @@ std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size t
 }
 
 RefPtr<ImageObject> ImageObject::BuildImageObject(
-    ImageSourceInfo source, const RefPtr<PipelineBase> context, const sk_sp<SkData>& skData, bool useSkiaSvg)
+    ImageSourceInfo source,
+    const RefPtr<PipelineBase> context,
+    const sk_sp<SkData>& skData,
+    bool useSkiaSvg)
 {
     // build svg image object.
     if (source.IsSvg()) {
@@ -62,6 +71,24 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
         }
 #endif
     }
+
+    //if is png or apng check
+#ifdef APNG_IMAGE_SUPPORT
+    if(source.isPng())
+    {
+        auto apngDecoder = AceType::MakeRefPtr<PNGImageDecoder>(skData);
+        if(apngDecoder && apngDecoder->isApng()){
+            if(!apngDecoder->DecodeImage()){
+                return nullptr;
+            }
+
+            Size imageSize = apngDecoder->GetImageSize();
+            uint32_t frameCount = apngDecoder->GetFrameCount();
+            return MakeRefPtr<ApngImageObject>(source, imageSize, frameCount, skData, apngDecoder);
+        }
+    }
+#endif
+
     // build normal pixel image object.
     auto codec = SkCodec::MakeFromData(skData);
     int32_t totalFrames = 1;
@@ -110,9 +137,14 @@ Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
 }
 #endif
 
-void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder, const UploadSuccessCallback& successCallback,
-    const FailedCallback& failedCallback, const Size& imageSize, bool forceResize, bool syncMode)
+void StaticImageObject::UploadToGpuForRender(
+    const WeakPtr<PipelineBase>& context,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    const UploadSuccessCallback& successCallback,
+    const FailedCallback& failedCallback,
+    const Size& imageSize,
+    bool forceResize,
+    bool syncMode)
 {
     auto task = [context, renderTaskHolder, successCallback, failedCallback, imageSize, forceResize, skData = skData_,
                     imageSource = imageSource_, id = Container::CurrentId()]() mutable {
@@ -129,6 +161,7 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         }
 
         auto key = GenerateCacheKey(imageSource, imageSize);
+        // is already uploaded
         if (!ImageProvider::TryUploadingImage(key, successCallback, failedCallback)) {
             LOGI("other thread is uploading same image to gpu : %{public}s", imageSource.ToString().c_str());
             return;
@@ -147,32 +180,24 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
                 cachedFlutterImage = cachedImage->imagePtr;
             }
         }
+        // found cached image obj (can be rendered)
         if (cachedFlutterImage) {
             LOGD("get cached image success: %{public}s", key.c_str());
             ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, cachedFlutterImage);
             return;
         }
 
-        if (!skData) {
-            LOGD("reload sk data");
-            skData = ImageProvider::LoadImageRawData(imageSource, pipelineContext, imageSize);
-            if (!skData) {
-                LOGE("reload image data failed. imageSource: %{private}s", imageSource.ToString().c_str());
+        auto callback = [successCallback, imageSource, taskExecutor, imageCache,
+                imageSize, key, id = Container::CurrentId()]
+                (flutter::SkiaGPUObject<SkImage> image, sk_sp<SkData> compressData) {
+#ifdef NG_BUILD
+            if (!image.skia_object() && !compressData.get()) {
+#else
+            if (!image.get() && !compressData.get()) {
+#endif
                 ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
-                    "Image data may be broken or absent, please check if image file or image data is valid.");
-                return;
+                    "Image data may be broken or absent in upload callback.");
             }
-        }
-        auto rawImage = SkImage::MakeFromEncoded(skData);
-        if (!rawImage) {
-            LOGE("static image MakeFromEncoded fail! imageSource: %{private}s", imageSource.ToString().c_str());
-            ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
-                "Image data may be broken, please check if image file or image data is broken.");
-            return;
-        }
-        auto image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
-        auto callback = [successCallback, imageSource, taskExecutor, imageCache, imageSize, key,
-                            id = Container::CurrentId()](flutter::SkiaGPUObject<SkImage> image) {
             ContainerScope scope(id);
 #ifdef NG_BUILD
             auto canvasImage = NG::CanvasImage::Create();
@@ -183,6 +208,9 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
 #else
             auto canvasImage = flutter::CanvasImage::Create();
             canvasImage->set_image(std::move(image));
+            int32_t width = static_cast<int32_t>(imageSize.Width() + 0.5);
+            int32_t height = static_cast<int32_t>(imageSize.Height() + 0.5);
+            canvasImage->setCompress(std::move(compressData), width, height);
 #endif
             if (imageCache) {
                 LOGD("cache image key: %{public}s", key.c_str());
@@ -190,7 +218,48 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
             }
             ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, canvasImage);
         };
-        ImageProvider::UploadImageToGPUForRender(image, callback, renderTaskHolder);
+        // here skdata is origin pic, also have 'target size'
+        // if have skdata, means origin pic is rendered first time
+        // if no skdata, means origin pic has shown, and has been cleared
+        // we try to use small image or compressed image instead of origin pic.
+        sk_sp<SkData> stripped;
+        if (ImageCompressor::GetInstance()->CanCompress()) {
+            // load compressed
+            auto compressedData = ImageProvider::LoadImageRawDataFromFileCache(pipelineContext, key, ".astc");
+            stripped = ImageCompressor::StripFileHeader(compressedData);
+        }
+        auto smallData = ImageProvider::LoadImageRawDataFromFileCache(pipelineContext, key);
+        if (smallData) {
+            skData = smallData;
+        }
+
+        if (!skData) {
+            LOGD("reload sk data");
+            skData = ImageProvider::LoadImageRawData(imageSource, pipelineContext);
+            if (!skData) {
+                LOGE("reload image data failed. imageSource: %{private}s", imageSource.ToString().c_str());
+                ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
+                    "Image data may be broken or absent, please check if image file or image data is valid.");
+                return;
+            }
+        }
+
+        // make lazy image from file
+        auto rawImage = SkImage::MakeFromEncoded(skData);
+        if (!rawImage) {
+            LOGE("static image MakeFromEncoded fail! imageSource: %{private}s", imageSource.ToString().c_str());
+            ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
+                "Image data may be broken, please check if image file or image data is broken.");
+            return;
+        }
+        sk_sp<SkImage> image;
+        if (smallData) {
+            image = rawImage;
+        } else {
+            image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
+        }
+        ImageProvider::UploadImageToGPUForRender(image, stripped, callback, renderTaskHolder, key);
+        skData = nullptr;
     };
     if (syncMode) {
         task();
@@ -205,25 +274,38 @@ bool StaticImageObject::CancelBackgroundTasks()
     return uploadForPaintTask_ ? uploadForPaintTask_.Cancel(false) : false;
 }
 
-void AnimatedImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder, const UploadSuccessCallback& successCallback,
-    const FailedCallback& failedCallback, const Size& imageSize, bool forceResize, bool syncMode)
+void AnimatedImageObject::UploadToGpuForRender(
+    const WeakPtr<PipelineBase>& context,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    const UploadSuccessCallback& successCallback,
+    const FailedCallback& failedCallback,
+    const Size& imageSize,
+    bool forceResize,
+    bool syncMode)
 {
+    constexpr float SizeOffset = 0.5f;
     if (!animatedPlayer_ && skData_) {
         auto codec = SkCodec::MakeFromData(skData_);
         int32_t dstWidth = -1;
         int32_t dstHeight = -1;
         if (forceResize) {
-            dstWidth = static_cast<int32_t>(imageSize.Width() + 0.5);
-            dstHeight = static_cast<int32_t>(imageSize.Height() + 0.5);
+            dstWidth = static_cast<int32_t>(imageSize.Width() + SizeOffset);
+            dstHeight = static_cast<int32_t>(imageSize.Height() + SizeOffset);
         }
-        animatedPlayer_ = MakeRefPtr<AnimatedImagePlayer>(imageSource_, successCallback, context,
-            renderTaskHolder->ioManager, renderTaskHolder->unrefQueue, std::move(codec), dstWidth, dstHeight);
+        animatedPlayer_ = MakeRefPtr<AnimatedImagePlayer>(
+            imageSource_,
+            successCallback,
+            context,
+            renderTaskHolder->ioManager,
+            renderTaskHolder->unrefQueue,
+            std::move(codec),
+            dstWidth,
+            dstHeight);
         ClearData();
     } else if (animatedPlayer_ && forceResize && imageSize.IsValid()) {
         LOGI("animated player has been constructed, forceResize: %{public}s", imageSize.ToString().c_str());
-        int32_t dstWidth = static_cast<int32_t>(imageSize.Width() + 0.5);
-        int32_t dstHeight = static_cast<int32_t>(imageSize.Height() + 0.5);
+        int32_t dstWidth = static_cast<int32_t>(imageSize.Width() + SizeOffset);
+        int32_t dstHeight = static_cast<int32_t>(imageSize.Height() + SizeOffset);
         animatedPlayer_->SetTargetSize(dstWidth, dstHeight);
     } else if (!animatedPlayer_ && !skData_) {
         LOGE("animated player is not constructed and image data is null, can not construct animated player!");

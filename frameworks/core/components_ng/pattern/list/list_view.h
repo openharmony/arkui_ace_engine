@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_v2/list/list_component.h"
 
 namespace OHOS::Ace::NG {
@@ -31,10 +32,20 @@ public:
     static void SetInitialIndex(const int32_t& initialIndex);
     static void SetListDirection(Axis axis);
     static void SetEdgeEffect(EdgeEffect edgeEffect);
+    static void SetDivider(const V2::ItemDivider& divider);
+    static void SetChainAnimation(bool enableChainAnimation);
     static void SetLanes(int32_t lanes);
     static void SetLaneMinLength(const Dimension& laneMinLength);
     static void SetLaneMaxLength(const Dimension& laneMaxLength);
     static void SetListItemAlign(V2::ListItemAlign listItemAlign);
+    static void SetCachedCount(const int32_t& cachedCount);
+    static void SetSticky(V2::StickyStyle stickyStyle);
+    static void SetOnScroll(OnScrollEvent&& onScroll);
+    static void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin);
+    static void SetOnScrollStop(OnScrollStopEvent&& onScrollStop);
+    static void SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex);
+    static void SetOnReachStart(OnReachEvent&& onReachStart);
+    static void SetOnReachEnd(OnReachEvent&& onReachEnd);
 };
 
 } // namespace OHOS::Ace::NG

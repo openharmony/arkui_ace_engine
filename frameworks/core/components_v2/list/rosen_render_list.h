@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_ROSEN_RENDER_LIST_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_ROSEN_RENDER_LIST_H
 
+#include "include/core/SkPaint.h"
+
 #include "base/utils/noncopyable.h"
 #include "core/components_v2/list/render_list.h"
 
@@ -34,6 +36,9 @@ public:
 private:
     void PaintSelectedZone(RenderContext& context);
     void PaintItemZone(RenderContext& context, const RefPtr<RenderListItem>& item);
+    void PaintDivider(const std::shared_ptr<RSNode>& rsNode);
+    void DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, const SkPaint& paint, bool isVertical,
+        double startCrossAxis, double mainAxis, double endCrossAxis);
     RefPtr<RenderListItem> prevStickyItem_;
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderList);
 };

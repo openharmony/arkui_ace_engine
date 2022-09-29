@@ -34,20 +34,11 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-const char COMPONENT_PREVIEW[] = "_preview_";
-const char COMPONENT_PREVIEW_LOAD_DOCUMENT[] = "loadDocument";
-const char COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW[] = "loadDocument(new";
-const char LEFT_PARENTHESIS[] = "(";
-constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
-#endif
-} // namespace
 
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();
@@ -80,11 +71,11 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         return false;
     }
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
             auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
             qjsNativeEngine->SetPackagePath(packagePath);
@@ -211,35 +202,18 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     }
 
     std::string pageMap;
-    if (engineInstance_->GetDelegate()->GetAssetContent(url+".map", pageMap)) {
+    if (engineInstance_->GetDelegate()->GetAssetContent(url + ".map", pageMap)) {
         page->SetPageMap(pageMap);
     } else {
         LOGI("the source map of page load failed!");
     }
 
     std::string jsContent;
-
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
         LOGE("js file load failed!");
         return;
     }
-#else
-    std::string::size_type posPreview = url.find(COMPONENT_PREVIEW);
-    if (posPreview != std::string::npos) {
-        std::string::size_type pos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT);
-        if (pos != std::string::npos) {
-            LOGE("js file do not have loadDocument,");
-            jsContent = preContent_;
-        }
-    } else {
-        if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
-            LOGE("js file load failed!");
-            return;
-        }
-    }
-    preContent_ = jsContent;
-#endif
+
     if (jsContent.empty()) {
         LOGE("js file load failed! url=[%{public}s]", url.c_str());
         return;
@@ -248,44 +222,92 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     JSValue compiled = engineInstance_->CompileSource(GetInstanceName(), url, jsContent.c_str(), jsContent.size());
     if (JS_IsException(compiled)) {
         LOGE("js compilation failed url=[%{public}s]", url.c_str());
-        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_,
-            page->GetUrl().c_str(), page, true);
+        QJSUtils::JsStdDumpErrorAce(
+            ctx, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_, page->GetUrl().c_str(), page, true);
         return;
     }
     engineInstance_->ExecuteDocumentJS(compiled);
     js_std_loop(engineInstance_->GetQJSContext());
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+bool QJSDeclarativeEngine::LoadPageSource(const std::string& url)
+{
+    LOGI("QJSDeclarativeEngine LoadPageSource");
+    ACE_SCOPED_TRACE("QJSDeclarativeEngine::LoadJS");
+    ACE_DCHECK(engineInstance_);
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
+
+    std::string jsContent;
+    if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
+        LOGE("js file load failed!");
+        return false;
+    }
+
+    if (jsContent.empty()) {
+        LOGE("js file load failed! url=[%{public}s]", url.c_str());
+        return false;
+    }
+
+    JSValue compiled = engineInstance_->CompileSource(GetInstanceName(), url, jsContent.c_str(), jsContent.size());
+    if (JS_IsException(compiled)) {
+        LOGE("js compilation failed url=[%{public}s]", url.c_str());
+        return false;
+    }
+    engineInstance_->ExecuteDocumentJS(compiled);
+    js_std_loop(engineInstance_->GetQJSContext());
+    return true;
+}
+
+bool QJSDeclarativeEngine::LoadFaAppSource()
+{
+    LOGI("QJSDeclarativeEngine LoadFaAppSource");
+    ACE_SCOPED_TRACE("QJSDeclarativeEngine::LoadJS");
+    ACE_DCHECK(engineInstance_);
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    std::string commonsJsContent;
+    if (engineInstance_->GetDelegate()->GetAssetContent("commons.js", commonsJsContent)) {
+        auto commonsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
+            ctx, commonsJsContent.c_str(), commonsJsContent.length(), "commons.js", JS_EVAL_TYPE_GLOBAL);
+        if (commonsJsResult == -1) {
+            LOGE("fail to execute load commonsjs script");
+            return false;
+        }
+    }
+    std::string vendorsJsContent;
+    if (engineInstance_->GetDelegate()->GetAssetContent("vendors.js", vendorsJsContent)) {
+        auto vendorsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
+            ctx, vendorsJsContent.c_str(), vendorsJsContent.length(), "vendors.js", JS_EVAL_TYPE_GLOBAL);
+        if (vendorsJsResult == -1) {
+            LOGE("fail to execute load vendorsjs script");
+            return false;
+        }
+    }
+    std::string appjsContent;
+    if (!engineInstance_->GetDelegate()->GetAssetContent("app.js", appjsContent)) {
+        LOGE("js file load failed!");
+    }
+
+    auto result = QJSDeclarativeEngineInstance::EvalBuf(
+        ctx, appjsContent.c_str(), appjsContent.length(), "app.js", JS_EVAL_TYPE_GLOBAL);
+    if (result == -1) {
+        LOGE("failed to execute Loadjs script");
+    } else {
+        CallAppFunc("onCreate", 0, nullptr);
+    }
+    return true;
+}
+
+#if defined(PREVIEW)
 void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::string componentName)
 {
-    // replace the component name in the last loadDocument from current js content.
-    std::string::size_type loadDocumentPos = 0;
-    std::string::size_type  lastLoadDocumentPos = 0;
-    while ((loadDocumentPos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocumentPos))
-           != std::string::npos) {
-        lastLoadDocumentPos = loadDocumentPos;
-        loadDocumentPos++;
-    }
-
-    std::string::size_type position = lastLoadDocumentPos + LOAD_DOCUMENT_STR_LENGTH;
-    std::string::size_type finalPostion = 0;
-    while ((position = preContent_.find(LEFT_PARENTHESIS, position)) != std::string::npos) {
-        if (position > loadDocumentPos + LOAD_DOCUMENT_STR_LENGTH) {
-            finalPostion = position;
-            break;
-        }
-        position++;
-    }
-    std::string dstReplaceStr = COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW;
-    dstReplaceStr += " " + componentName;
-    preContent_.replace(lastLoadDocumentPos, finalPostion - lastLoadDocumentPos, dstReplaceStr);
-
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(engineInstance_->GetQJSContext()));
     if (instance == nullptr) {
         LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return;
     }
+    instance->SetPreviewFlag(true);
+    instance->SetRequiredComponent(componentName);
 
     instance->GetDelegate()->Replace(url, "");
 }
@@ -625,8 +647,8 @@ void QJSDeclarativeEngine::FireExternalEvent(
     }
 
     std::string args;
-    auto renderContext = nativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, args,
-        OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
+    auto renderContext = nativeEngine->LoadModuleByName(
+        xcomponent->GetLibraryName(), true, args, OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
 
     JSRef<JSObject> obj = JSRef<JSObject>::Make(renderContext);
     XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);

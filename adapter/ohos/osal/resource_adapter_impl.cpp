@@ -127,7 +127,7 @@ RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
     auto ret = resourceManager_->GetThemeById(themeId, theme->rawAttrs_);
     std::string OHFlag = "ohos_"; // fit with resource/base/theme.json and pattern.json
-    for (int i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
+    for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
         ResourceThemeStyle::RawAttrMap attrMap;
         std::string patternTag = PATTERN_MAP[i];
         std::string patternName = OHFlag + PATTERN_MAP[i];

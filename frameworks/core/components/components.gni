@@ -60,7 +60,7 @@ template("build_component") {
       if (enable_ng_build) {
         deps += [
           "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_$platform",
-          "$ace_flutter_engine_root_new/skia:ace_skia_dev_$platform",
+          "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_$platform",
         ]
       } else {
         deps += [
@@ -103,12 +103,6 @@ template("build_component") {
         defines += invoker.component_defines
       }
 
-      if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
-          defined(invoker.rosen_sources)) {
-        sources += invoker.rosen_sources
-        configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
-      }
-
       if (defined(config.enable_standard_input) &&
           config.enable_standard_input) {
         if (defined(invoker.standard_input_sources)) {
@@ -122,7 +116,28 @@ template("build_component") {
           }
         }
       }
+
+      if (defined(config.web_components_support) &&
+          config.web_components_support && is_standard_system) {
+        if (defined(invoker.standard_web_configs)) {
+          configs += invoker.standard_web_configs
+        }
+        if (defined(invoker.standard_web_deps)) {
+          if (defined(external_deps)) {
+            external_deps += invoker.standard_web_deps
+          } else {
+            external_deps = invoker.standard_web_deps
+          }
+        }
+      }
+
+      if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
+          defined(invoker.rosen_sources)) {
+        sources += invoker.rosen_sources
+        configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
+      }
       part_name = ace_engine_part
+      subsystem_name = ace_engine_subsystem
     }
   }
 

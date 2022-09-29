@@ -38,6 +38,7 @@ struct ListItemLayoutParam {
     bool isVertical;
     StickyStyle sticky;
     int32_t lanes;
+    ListItemAlign align;
 };
 
 class RenderListItemGroup : public RenderListItem {
@@ -101,7 +102,7 @@ public:
         return vertical_;
     }
 
-    int32_t GetStartIndex() const
+    size_t GetStartIndex() const
     {
         return startIndex_;
     }
@@ -109,6 +110,16 @@ public:
     double GetStartIndexOffset() const
     {
         return startIndexOffset_;
+    }
+
+    double GetReferencePos() const
+    {
+        return forwardLayout_ ? forwardReferencePos_ : backwardReferencePos_;
+    }
+
+    size_t GetLanes() const
+    {
+        return lanes_;
     }
 
     template<class T>
@@ -125,6 +136,7 @@ public:
     size_t TotalCount();
     RefPtr<RenderNode> GetRenderNode();
     void SetItemGroupLayoutParam(const ListItemLayoutParam &param);
+    void SetChainOffset(double offset);
     void SetRenderBox(const WeakPtr<RenderNode>& renderBox)
     {
         renderBox_ = renderBox;
@@ -151,6 +163,7 @@ private:
     void RequestNewItemsAtEnd(double& curMainPos);
     void RequestNewItemsAtStart();
     void SetItemsPostion();
+    double CalculateCrossOffset(double crossSize, double childCrossSize);
 
     WeakPtr<ListItemGenerator> itemGenerator_;
     RefPtr<ListItemGroupComponent> component_;
@@ -161,8 +174,8 @@ private:
 
     // param for frontend
     Dimension listSpace_;
-    bool stickHeader_ = false;
-    bool stickFooter_ = false;
+    bool stickyHeader_ = false;
+    bool stickyFooter_ = false;
     WeakPtr<RenderNode> renderBox_;
 
     // layout param
@@ -174,12 +187,15 @@ private:
     double listMainSize_ = 0.0;
     size_t startCacheCount_ = 0;
     size_t endCacheCount_ = 0;
-    int32_t lanes_ = 1;
+    size_t lanes_ = 1;
     bool vertical_ = true;
+    ListItemAlign align_ = V2::ListItemAlign::START;
 
     // layout status
-    int32_t startIndex_ = -1;
+    bool isInitialized_ = false;
+    size_t startIndex_ = 0;
     double startIndexOffset_ = 0.0;
+    double endIndexOffset_ = 0.0;
     size_t currStartCacheCount_ = 0;
     size_t currEndCacheCount_ = 0;
 

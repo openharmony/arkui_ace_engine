@@ -31,10 +31,13 @@
 #include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -84,7 +87,8 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    UITaskScheduler::GetInstance()->AddDirtyLayoutNode(dirty);
+    taskScheduler_.AddDirtyLayoutNode(dirty);
+    ForceLayoutForImplicitAnimation();
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -93,7 +97,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    UITaskScheduler::GetInstance()->AddDirtyRenderNode(dirty);
+    taskScheduler_.AddDirtyRenderNode(dirty);
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -136,7 +140,15 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
-    FlushPipelineWithoutAnimation();
+    FlushBuild();
+    FlushTouchEvents();
+    taskScheduler_.FlushTask();
+    auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
+    if (hasAninmation) {
+        RequestFrame();
+    }
+    FlushMessages();
+    FlushFocus();
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -167,19 +179,64 @@ void PipelineContext::FlushMessages()
     window_->FlushTasks();
 }
 
-void PipelineContext::FlushPipelineWithoutAnimation()
+void PipelineContext::FlushFocus()
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
+    auto focusNode = dirtyFocusNode_.Upgrade();
+    if (!focusNode || focusNode->GetFocusType() != FocusType::NODE) {
+        dirtyFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = focusNode->GetFocusHub();
+        if (focusNodeHub) {
+            focusNodeHub->RequestFocusImmediately();
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
+    }
+    auto focusScope = dirtyFocusScope_.Upgrade();
+    if (!focusScope || focusScope->GetFocusType() != FocusType::SCOPE) {
+        dirtyFocusScope_.Reset();
+    } else {
+        auto focusScopeHub = focusScope->GetFocusHub();
+        if (focusScopeHub) {
+            focusScopeHub->RequestFocusImmediately();
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
+    }
+    if (!RequestDefaultFocus()) {
+        if (rootNode_ && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
+            rootNode_->GetFocusHub()->RequestFocusImmediately();
+        }
+    }
+}
+
+void PipelineContext::FlushPipelineWithoutAnimation() {}
+
+void PipelineContext::FlushBuild()
 {
     FlushDirtyNodeUpdate();
-    FlushTouchEvents();
-    UITaskScheduler::GetInstance()->FlushTask();
-    FlushMessages();
+    FlushBuildFinishCallbacks();
+}
+
+void PipelineContext::FlushBuildFinishCallbacks()
+{
+    decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
+    for (const auto& func : buildFinishCallbacks) {
+        if (func) {
+            func();
+        }
+    }
 }
 
 void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
     rootNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
@@ -188,15 +245,35 @@ void PipelineContext::SetupRootElement()
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
+    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
+    rootFocusHub->SetFocusType(FocusType::SCOPE);
+    rootFocusHub->SetFocusable(true);
     window_->SetRootFrameNode(rootNode_);
-    stageManager_ = MakeRefPtr<StageManager>(rootNode_);
     rootNode_->AttachToMainTree();
+
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode_);
+    stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
+    selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
 
-RefPtr<StageManager> PipelineContext::GetStageManager()
+const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;
+}
+
+const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
+{
+    return overlayManager_;
+}
+
+const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
+{
+    return fullScreenManager_;
 }
 
 void PipelineContext::SetRootRect(double width, double height, double offset)
@@ -219,10 +296,87 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     }
 }
 
+bool PipelineContext::OnBackPressed()
+{
+    LOGD("OnBackPressed");
+    CHECK_RUN_ON(PLATFORM);
+    auto frontend = weakFrontend_.Upgrade();
+    if (!frontend) {
+        // return back.
+        return false;
+    }
+
+    auto result = false;
+    taskExecutor_->PostSyncTask(
+        [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), &result]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (!frontend) {
+                LOGW("frontend is nullptr");
+                result = false;
+                return;
+            }
+            result = frontend->OnBackPressed();
+        },
+        TaskExecutor::TaskType::JS);
+
+    if (result) {
+        // user accept
+        LOGI("CallRouterBackToPopPage(): frontend accept");
+        return true;
+    }
+    LOGI("CallRouterBackToPopPage(): return platform consumed");
+    return false;
+}
+
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
-    touchEvents_.emplace_back(point);
+    auto scalePoint = point.CreateScalePoint(GetViewScale());
+    LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
+        scalePoint.type);
+    if (scalePoint.type == TouchType::DOWN) {
+        LOGD("receive touch down event, first use touch test to collect touch event target");
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
+        eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+
+        for (const auto& weakContext : touchPluginPipelineContext_) {
+            auto pipelineContext = DynamicCast<OHOS::Ace::PipelineContext>(weakContext.Upgrade());
+            if (!pipelineContext) {
+                continue;
+            }
+            auto pluginPoint =
+                point.UpdateScalePoint(viewScale_, static_cast<float>(pipelineContext->GetPluginEventOffset().GetX()),
+                    static_cast<float>(pipelineContext->GetPluginEventOffset().GetY()), point.id);
+            auto eventManager = pipelineContext->GetEventManager();
+            if (eventManager) {
+                eventManager->SetInstanceId(pipelineContext->GetInstanceId());
+            }
+            pipelineContext->OnTouchEvent(pluginPoint, true);
+        }
+    }
+
+    if (scalePoint.type == TouchType::MOVE) {
+        touchEvents_.emplace_back(point);
+        hasIdleTasks_ = true;
+        window_->RequestFrame();
+        return;
+    }
+
+    std::optional<TouchEvent> lastMoveEvent;
+    if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
+        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
+            auto movePoint = (*iter).CreateScalePoint(GetViewScale());
+            if (scalePoint.id == movePoint.id) {
+                lastMoveEvent = movePoint;
+                touchEvents_.erase(iter++);
+            }
+        }
+        if (lastMoveEvent.has_value()) {
+            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
+        }
+    }
+    eventManager_->DispatchTouchEvent(scalePoint);
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -239,6 +393,34 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     }
 }
 
+bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
+{
+    ACE_DCHECK(!params.empty());
+
+    if (params[0] == "-element") {
+    } else if (params[0] == "-render") {
+    } else if (params[0] == "-focus") {
+        if (rootNode_->GetFocusHub()) {
+            rootNode_->GetFocusHub()->DumpFocusTree(0);
+        }
+    } else if (params[0] == "-layer") {
+    } else if (params[0] == "-frontend") {
+#ifndef WEARABLE_PRODUCT
+    } else if (params[0] == "-multimodal") {
+#endif
+    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
+        rootNode_->DumpTree(0);
+    } else if (params[0] == "-rotation" && params.size() >= 2) {
+    } else if (params[0] == "-animationscale" && params.size() >= 2) {
+    } else if (params[0] == "-velocityscale" && params.size() >= 2) {
+    } else if (params[0] == "-scrollfriction" && params.size() >= 2) {
+    } else if (params[0] == "-threadstuck" && params.size() >= 3) {
+    } else {
+        return false;
+    }
+    return true;
+}
+
 void PipelineContext::FlushTouchEvents()
 {
     CHECK_RUN_ON(UI);
@@ -247,21 +429,133 @@ void PipelineContext::FlushTouchEvents()
         return;
     }
     {
-        ACE_SCOPED_TRACE("PipelineContext::DispatchTouchEvent");
+        eventManager_->FlushTouchEventsBegin(touchEvents_);
+        std::unordered_set<int32_t> moveEventIds;
         decltype(touchEvents_) touchEvents(std::move(touchEvents_));
-        for (const auto& touchEvent : touchEvents) {
-            auto scalePoint = touchEvent.CreateScalePoint(GetViewScale());
-            LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
-                scalePoint.type);
-            if (scalePoint.type == TouchType::DOWN) {
-                LOGD("receive touch down event, first use touch test to collect touch event target");
-                TouchRestrict touchRestrict { TouchRestrict::NONE };
-                touchRestrict.sourceType = touchEvent.sourceType;
-                eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+        if (touchEvents.empty()) {
+            return;
+        }
+        std::list<TouchEvent> touchPoints;
+        for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
+            auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
+            auto result = moveEventIds.emplace(scalePoint.id);
+            if (result.second) {
+                touchPoints.emplace_front(scalePoint);
             }
-            eventManager_->DispatchTouchEvent(scalePoint);
+        }
+        auto maxSize = touchPoints.size();
+        for (auto iter = touchPoints.rbegin(); iter != touchPoints.rend(); ++iter) {
+            maxSize--;
+            if (maxSize == 0) {
+                eventManager_->FlushTouchEventsEnd(touchPoints);
+            }
+            eventManager_->DispatchTouchEvent(*iter);
         }
     }
+}
+
+void PipelineContext::OnMouseEvent(const MouseEvent& event)
+{
+    CHECK_RUN_ON(UI);
+
+    if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+            event.action == MouseAction::MOVE) &&
+        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
+        auto touchPoint = event.CreateTouchPoint();
+        LOGD("Mouse event to touch: button is %{public}d, action is %{public}d", event.button, event.action);
+        OnTouchEvent(touchPoint);
+    }
+
+    CHECK_NULL_VOID(rootNode_);
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    LOGD(
+        "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
+    eventManager_->MouseTest(scaleEvent, rootNode_);
+    eventManager_->DispatchMouseEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
+    window_->RequestFrame();
+}
+
+bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+{
+    // Need update while key tab pressed
+    auto lastPage = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, false);
+    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, lastPage)) {
+        return eventManager_->DispatchKeyEventNG(event, rootNode_);
+    }
+    return true;
+}
+
+bool PipelineContext::RequestDefaultFocus()
+{
+    auto lastPage = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, false);
+    auto lastPageFocusHub = lastPage->GetFocusHub();
+    CHECK_NULL_RETURN(lastPageFocusHub, false);
+    if (lastPageFocusHub->IsDefaultHasFocused()) {
+        return false;
+    }
+    auto defaultFocusNode = lastPageFocusHub->GetChildFocusNodeByType();
+    CHECK_NULL_RETURN(defaultFocusNode, false);
+    if (!defaultFocusNode->IsFocusableWholePath()) {
+        return false;
+    }
+    lastPageFocusHub->SetIsDefaultHasFocused(true);
+    LOGD("Focus: request default focus node %{public}s", defaultFocusNode->GetFrameName().c_str());
+    return defaultFocusNode->RequestFocusImmediately();
+}
+
+bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto focusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->RequestFocusImmediatelyById(targetNodeId);
+}
+
+void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(node);
+    if (node->GetFocusType() == FocusType::NODE) {
+        dirtyFocusNode_ = WeakClaim(RawPtr(node));
+    } else {
+        dirtyFocusScope_ = WeakClaim(RawPtr(node));
+    }
+    window_->RequestFrame();
+}
+
+void PipelineContext::OnAxisEvent(const AxisEvent& event)
+{
+    // Need develop here: CTRL+AXIS = Pinch event
+
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), horizontalAxis: %{public}f, verticalAxis: %{public}f, action: "
+         "%{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.horizontalAxis, scaleEvent.verticalAxis, scaleEvent.action);
+
+    // Need develop here: AxisEvent to touchTest pan recognizer
+
+    eventManager_->AxisTest(scaleEvent, rootNode_);
+    eventManager_->DispatchAxisEventNG(scaleEvent);
+}
+
+void PipelineContext::Destroy()
+{
+    taskScheduler_.CleanUp();
+    scheduleTasks_.clear();
+    dirtyNodes_.clear();
+    rootNode_.Reset();
+    stageManager_.Reset();
+    overlayManager_.Reset();
+}
+
+void PipelineContext::AddCallBack(std::function<void()>&& callback)
+{
+    buildFinishCallbacks_.emplace_back(std::move(callback));
 }
 
 } // namespace OHOS::Ace::NG

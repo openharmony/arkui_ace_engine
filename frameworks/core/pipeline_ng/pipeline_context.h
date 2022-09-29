@@ -16,11 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H
 
+#include <functional>
+#include <list>
 #include <utility>
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -47,29 +52,15 @@ public:
 
     void SetupRootElement() override;
 
-    bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) override
+    const RefPtr<FrameNode>& GetRootElement() const
     {
-        return false;
+        return rootNode_;
     }
 
     void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) override
     {}
 
     void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback) override {}
-
-    void PrepareOpenImplicitAnimation() override {}
-
-    void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr) override
-    {}
-
-    void PrepareCloseImplicitAnimation() override {}
-
-    bool CloseImplicitAnimation() override
-    {
-        return false;
-    }
 
     // add schedule task and return the unique mark id.
     uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) override;
@@ -82,28 +73,19 @@ public:
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    bool OnKeyEvent(const KeyEvent& event) override
-    {
-        return false;
-    }
+    bool OnKeyEvent(const KeyEvent& event) override;
 
     // Called by view when mouse event received.
-    void OnMouseEvent(const MouseEvent& event) override {}
+    void OnMouseEvent(const MouseEvent& event) override;
 
     // Called by view when axis event received.
-    void OnAxisEvent(const AxisEvent& event) override {}
+    void OnAxisEvent(const AxisEvent& event) override;
 
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
     bool OnRotationEvent(const RotationEvent& event) const override
     {
         return false;
-    }
-
-    // Called by window when received vsync signal.
-    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) override
-    {
-        FlushVsync(nanoTimestamp, frameCount);
     }
 
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override {}
@@ -128,7 +110,7 @@ public:
         return {};
     }
 
-    void Destroy() override {}
+    void Destroy() override;
 
     void OnShow() override {}
 
@@ -152,8 +134,10 @@ public:
 
     bool CallRouterBackToPopPage() override
     {
-        return false;
+        return OnBackPressed();
     }
+
+    bool OnBackPressed();
 
     void AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode);
 
@@ -165,20 +149,56 @@ public:
 
     void SetRootRect(double width, double height, double offset) override;
 
-    RefPtr<StageManager> GetStageManager();
+    const RefPtr<FullScreenManager>& GetFullScreenManager();
+
+    const RefPtr<StageManager>& GetStageManager();
+
+    const RefPtr<OverlayManager>& GetOverlayManager();
+
+    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager()
+    {
+        return selectOverlayManager_;
+    }
+
+    void FlushBuild() override;
+
+    void AddCallBack(std::function<void()>&& callback);
+
+    bool GetIsFocusingByTab() const
+    {
+        return isFocusingByTab_;
+    }
+
+    void SetIsFocusingByTab(bool isFocusingByTab)
+    {
+        isFocusingByTab_ = isFocusingByTab;
+    }
+
+    bool RequestDefaultFocus();
+    bool RequestFocus(const std::string& targetNodeId) override;
+    void AddDirtyFocus(const RefPtr<FrameNode>& node);
 
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
+    void FlushFocus();
     void FlushAnimation(uint64_t nanoTimestamp) override;
+    bool OnDumpInfo(const std::vector<std::string>& params) const override;
+
+    void FlushUITasks() override
+    {
+        taskScheduler_.FlushTask();
+    }
 
 private:
     void FlushTouchEvents();
 
+    void FlushBuildFinishCallbacks();
+
     template<typename T>
     struct NodeCompare {
-        bool operator()(const T& nodeLeft, const T& nodeRight)
+        bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
@@ -192,7 +212,7 @@ private:
 
     template<typename T>
     struct NodeCompareWeak {
-        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak)
+        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak) const
         {
             auto nodeLeft = nodeLeftWeak.Upgrade();
             auto nodeRight = nodeRightWeak.Upgrade();
@@ -204,14 +224,23 @@ private:
         }
     };
 
+    UITaskScheduler taskScheduler_;
+
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
+    std::list<std::function<void()>> buildFinishCallbacks_;
     std::list<TouchEvent> touchEvents_;
 
-    RefPtr<FrameNode> rootNode_ = nullptr;
-    RefPtr<StageManager> stageManager_ = nullptr;
+    RefPtr<FrameNode> rootNode_;
+    RefPtr<StageManager> stageManager_;
+    RefPtr<OverlayManager> overlayManager_;
+    RefPtr<FullScreenManager> fullScreenManager_;
+    RefPtr<SelectOverlayManager> selectOverlayManager_;
+    WeakPtr<FrameNode> dirtyFocusNode_;
+    WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
+    bool isFocusingByTab_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

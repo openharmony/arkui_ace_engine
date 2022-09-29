@@ -40,12 +40,12 @@ namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 
-void AnimateToForStageMode(const RefPtr<PipelineContext>& pipelineContext, AnimationOption& option,
+void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
 {
     auto triggerId = Container::CurrentId();
     AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
-        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        auto context = container->GetPipelineContext();
         if (!context) {
             // pa container do not have pipeline context.
             return;
@@ -70,7 +70,7 @@ void AnimateToForStageMode(const RefPtr<PipelineContext>& pipelineContext, Anima
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
     AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
-        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        auto context = container->GetPipelineContext();
         if (!context) {
             // pa container do not have pipeline context.
             return;
@@ -93,7 +93,7 @@ void AnimateToForStageMode(const RefPtr<PipelineContext>& pipelineContext, Anima
     pipelineContext->CloseImplicitAnimation();
 }
 
-void AnimateToForFaMode(const RefPtr<PipelineContext>& pipelineContext, AnimationOption& option,
+void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
 {
     pipelineContext->FlushBuild();
@@ -157,17 +157,19 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         return;
     }
     AnimationOption option = AnimationOption();
-    if (info[0]->IsNull()) {
-        LOGE("JSAnimation: info[0] is null.");
-        ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    if (info[0]->IsNull() || !info[0]->IsObject()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            pipelineContextBase->CloseImplicitAnimation();
+        } else {
+            LOGE("JSAnimation: info[0] is null or not object.");
+            ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
+        }
         return;
     }
-    if (!info[0]->IsObject()) {
-        LOGE("JSAnimation: info[0] is not object.");
-        ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
-        return;
-    }
-
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
@@ -180,11 +182,14 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
             func->Execute();
         };
     }
-
     auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
     if (animationArgs->IsNull()) {
         LOGE("Js Parse failed. animationArgs is null.");
-        ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
+        if (Container::IsCurrentUseNewPipeline()) {
+            pipelineContextBase->CloseImplicitAnimation();
+        } else {
+            ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
+        }
         return;
     }
     option = CreateAnimation(animationArgs);
@@ -192,7 +197,11 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
-    ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
+    if (Container::IsCurrentUseNewPipeline()) {
+        pipelineContextBase->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    } else {
+        ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
+    }
 }
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
@@ -238,7 +247,7 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
     AnimationOption option = CreateAnimation(animationArgs);

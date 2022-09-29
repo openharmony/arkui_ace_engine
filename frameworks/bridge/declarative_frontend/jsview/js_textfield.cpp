@@ -15,23 +15,91 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 
+#include <cstdint>
 #include <vector>
 
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/common/ime/text_input_action.h"
-#include "frameworks/core/common/ime/text_input_type.h"
-#include "frameworks/core/components/text_field/text_field_component.h"
-#include "frameworks/core/components/text_field/textfield_theme.h"
+#include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_textinput.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/text_field_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
+#include "core/common/ime/text_input_action.h"
+#include "core/common/ime/text_input_type.h"
+#include "core/components/text_field/text_field_component.h"
+#include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<TextFieldModel> TextFieldModel::instance_ = nullptr;
+
+TextFieldModel* TextFieldModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance.reset(new NG::TextFieldModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::TextFieldModelNG());
+        } else {
+            instance_.reset(new Framework::TextFieldModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
+namespace {
+
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+
+} // namespace
+
+void JSTextField::CreateTextInput(const JSCallbackInfo& info)
+{
+    std::optional<std::string> placeholderSrc;
+    std::optional<std::string> value;
+    JSTextInputController* jsController = nullptr;
+    if (info[0]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        std::string placeholder;
+        if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
+            placeholderSrc = placeholder;
+        }
+        std::string text;
+        if (ParseJsString(paramObject->GetProperty("text"), text)) {
+            value = text;
+        }
+        auto controllerObj = paramObject->GetProperty("controller");
+        if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextInputController>();
+        }
+    }
+
+    auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
+    if (jsController) {
+        jsController->SetController(controller);
+    }
+
+    if (!Container::IsCurrentUseNewPipeline()) {
+        JSInteractableView::SetFocusable(true);
+        JSInteractableView::SetFocusNode(true);
+    }
+}
 
 void JSTextField::SetType(const JSCallbackInfo& info)
 {
@@ -39,16 +107,12 @@ void JSTextField::SetType(const JSCallbackInfo& info)
         LOGE("SetType create error, info is non-valid");
         return;
     }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (!info[0]->IsNumber()) {
         LOGE("The inputType is not number");
         return;
     }
     TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
-    component->SetTextInputType(textInputType);
-    component->SetObscure(textInputType == TextInputType::VISIBLE_PASSWORD);
+    TextFieldModel::GetInstance()->SetType(textInputType);
 }
 
 void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
@@ -63,15 +127,7 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
         LOGE("the info[0] is null");
         return;
     }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetPlaceholderColor(color);
-        component->SetFocusPlaceholderColor(color);
-    } else {
-        LOGE("The component(SetPlaceholderColor) is null");
-    }
+    TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
 
 void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
@@ -80,22 +136,15 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         LOGE("PlaceholderFont create error, info is non-valid");
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The component(SetPlaceholderFont) is null");
-        return;
-    }
+    Font font;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto textStyle = component->GetPlaceHoldStyle();
-
     auto fontSize = paramObject->GetProperty("size");
     if (!fontSize->IsNull()) {
         Dimension size;
         if (!ParseJsDimensionFp(fontSize, size)) {
             LOGE("Parse to dimension FP failed.");
         } else {
-            textStyle.SetFontSize(size);
+            font.fontSize = size;
         }
     }
 
@@ -107,23 +156,22 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         } else {
             ParseJsString(fontWeight, weight);
         }
-        textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
+        font.fontWeight = ConvertStrToFontWeight(weight);
     }
 
     auto fontFamily = paramObject->GetProperty("family");
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
         if (ParseJsFontFamilies(fontFamily, fontFamilies)) {
-            textStyle.SetFontFamilies(fontFamilies);
+            font.fontFamilies = fontFamilies;
         }
     }
 
     auto style = paramObject->GetProperty("style");
     if (!style->IsNull()) {
-        FontStyle fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        textStyle.SetFontStyle(fontStyle);
+        font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
-    component->SetPlaceHoldStyle(textStyle);
+    TextFieldModel::GetInstance()->SetPlaceholderFont(font);
 }
 
 void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
@@ -131,32 +179,18 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The component(SetEnterKeyType) is null");
-        return;
-    }
     if (!info[0]->IsNumber()) {
         LOGE("Info(SetEnterKeyType) is not number");
         return;
     }
     TextInputAction textInputAction = static_cast<TextInputAction>(info[0]->ToNumber<int32_t>());
-    component->SetAction(textInputAction);
+    TextFieldModel::GetInstance()->SetEnterKeyType(textInputAction);
 }
 
 void JSTextField::SetTextAlign(int32_t value)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("textAlign component is not valid");
-        return;
-    }
-
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        component->SetTextAlign(TEXT_ALIGNS[value]);
+        TextFieldModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
     } else {
         LOGE("the value is error");
     }
@@ -168,18 +202,11 @@ void JSTextField::SetInputStyle(const JSCallbackInfo& info)
         LOGE("The arg(SetInputStyle) is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("textAlign component is not valid");
-        return;
-    }
     auto styleString = info[0]->ToString();
     if (styleString == "Inline") {
-        component->SetInputStyle(InputStyle::INLINE);
+        TextFieldModel::GetInstance()->SetInputStyle(InputStyle::INLINE);
     } else {
-        component->SetInputStyle(InputStyle::DEFAULT);
+        TextFieldModel::GetInstance()->SetInputStyle(InputStyle::DEFAULT);
     }
 }
 
@@ -196,22 +223,12 @@ void JSTextField::SetCaretColor(const JSCallbackInfo& info)
         return;
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetCursorColor(color);
-    } else {
-        LOGE("The component(SetCaretColor) is null");
-    }
+    TextFieldModel::GetInstance()->SetCaretColor(color);
 }
 
 void JSTextField::SetMaxLength(uint32_t value)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetMaxLength(value);
-    }
+    TextFieldModel::GetInstance()->SetMaxLength(value);
 }
 
 void JSTextField::SetFontSize(const JSCallbackInfo& info)
@@ -225,30 +242,12 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
         LOGE("Parse to dimension FP failed!");
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("JSTextField::SetFontSize component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetEditingStyle();
-    textStyle.SetFontSize(fontSize);
-    component->SetEditingStyle(textStyle);
+    TextFieldModel::GetInstance()->SetFontSize(fontSize);
 }
 
 void JSTextField::SetFontWeight(const std::string& value)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetEditingStyle();
-    textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    component->SetEditingStyle(textStyle);
+    TextFieldModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
 void JSTextField::SetTextColor(const JSCallbackInfo& info)
@@ -262,33 +261,15 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
         LOGE("Parse to dimension FP failed!");
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetEditingStyle();
-    textStyle.SetTextColor(textColor);
-    component->SetEditingStyle(textStyle);
+    TextFieldModel::GetInstance()->SetTextColor(textColor);
 }
 
 void JSTextField::SetFontStyle(int32_t value)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-        auto textStyle = component->GetEditingStyle();
-        textStyle.SetFontStyle(FONT_STYLES[value]);
-        component->SetEditingStyle(textStyle);
+        TextFieldModel::GetInstance()->SetFontStyle(FONT_STYLES[value]);
     } else {
-        LOGE("TextInput fontStyle(%d) illegal value", value);
+        LOGE("TextInput fontStyle(%{public}d) illegal value", value);
     }
 }
 
@@ -303,16 +284,7 @@ void JSTextField::SetFontFamily(const JSCallbackInfo& info)
         LOGE("Parse FontFamilies failed");
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetEditingStyle();
-    textStyle.SetFontFamilies(fontFamilies);
-    component->SetEditingStyle(textStyle);
+    TextFieldModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
 void JSTextField::SetInputFilter(const JSCallbackInfo& info)
@@ -326,23 +298,16 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
         LOGE("Parse inputFilter failed");
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    component->SetInputFilter(inputFilter);
-
     if (info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
         auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute(info);
         };
-        component->SetOnError(resultId);
+        TextFieldModel::GetInstance()->SetInputFilter(inputFilter, resultId);
+        return;
     }
+    TextFieldModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
 }
 
 void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
@@ -353,17 +318,15 @@ void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
     }
 
     bool isShowPasswordIcon = info[0]->ToBoolean();
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-    component->SetShowPasswordIcon(isShowPasswordIcon);
+    TextFieldModel::GetInstance()->SetShowPasswordIcon(isShowPasswordIcon);
 }
 
 void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsBackgroundColor(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg(SetBackgroundColor) is wrong, it is supposed to have atleast 1 argument");
         return;
@@ -375,7 +338,7 @@ void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
         return;
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     if (component) {
         component->SetBgColor(backgroundColor);
@@ -387,6 +350,9 @@ void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
 void JSTextField::JsHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
@@ -400,7 +366,7 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
         LOGE("dimension value: %{public}f is invalid!", value.Value());
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto textInputComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (!textInputComponent) {
         LOGE("JSTextInput set height failed, textInputComponent is null.");
@@ -411,6 +377,10 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
 
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsPadding(info);
+        return;
+    }
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
         LOGE("arg is not a string, number or object.");
         return;
@@ -434,7 +404,7 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
         ParseJsDimensionVp(object->GetProperty("bottom"), bottom);
         padding = Edge(left, top, right, bottom);
     }
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (component) {
         auto decoration = component->GetDecoration();
@@ -444,6 +414,10 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
 
 void JSTextField::JsBorder(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsBorder(info);
+        return;
+    }
     if (!info[0]->IsObject()) {
         LOGE("args is not a object. %s", info[0]->ToString().c_str());
         return;
@@ -478,6 +452,10 @@ void JSTextField::JsBorder(const JSCallbackInfo& info)
 
 void JSTextField::JsBorderWidth(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsBorderWidth(info);
+        return;
+    }
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
         LOGE("args need a string or number or object");
         return;
@@ -495,6 +473,10 @@ void JSTextField::JsBorderWidth(const JSCallbackInfo& info)
 
 void JSTextField::JsBorderColor(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsBorderColor(info);
+        return;
+    }
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
         LOGE("args need a string or number or object");
         return;
@@ -512,6 +494,10 @@ void JSTextField::JsBorderColor(const JSCallbackInfo& info)
 
 void JSTextField::JsBorderStyle(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsBorderStyle(info);
+        return;
+    }
     if (!info[0]->IsObject() && !info[0]->IsNumber()) {
         LOGE("args need a string or number or object");
         return;
@@ -529,6 +515,10 @@ void JSTextField::JsBorderStyle(const JSCallbackInfo& info)
 
 void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsBorderRadius(info);
+        return;
+    }
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
         LOGE("args need a string or number or object");
         return;
@@ -550,6 +540,10 @@ void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
         LOGE("info[0] is not a number");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
+        return;
+    }
     auto component = AceType::DynamicCast<TextFieldComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (component) {
         component->SetHoverAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
@@ -558,54 +552,52 @@ void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSTextField::SetOnEditChanged(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnEditChanged, info)) {
-        LOGW("Failed(OnEditChanged) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(bool)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnEditChanged(std::move(callback));
 }
 
 void JSTextField::SetOnSubmit(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnSubmit, info)) {
-        LOGW("Failed(OnSubmit) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
 
 void JSTextField::SetOnChange(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnChange, info)) {
-        LOGW("Failed(OnChange) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnChange(std::move(callback));
 }
 
 void JSTextField::SetOnCopy(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnCopy, info)) {
-        LOGW("Failed(OnCopy) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnCopy(std::move(callback));
 }
 
 void JSTextField::SetOnCut(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnCut, info)) {
-        LOGW("Failed(OnCut) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnCut(std::move(callback));
 }
 
 void JSTextField::SetOnPaste(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnPaste, info)) {
-        LOGW("Failed(OnPaste) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnPaste(std::move(callback));
 }
 
 void JSTextField::SetOnClick(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSInteractableView::JsOnClick(info);
+        return;
+    }
     if (!JSViewBindEvent(&TextFieldComponent::SetOnClick, info)) {
         LOGW("Failed(OnPaste) to bind event");
     }
@@ -622,8 +614,7 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
         auto emunNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
-    LOGI("copy option: %{public}d", copyOptions);
-    JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOptions);
+    TextFieldModel::GetInstance()->SetCopyOption(copyOptions);
 }
 
 void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,

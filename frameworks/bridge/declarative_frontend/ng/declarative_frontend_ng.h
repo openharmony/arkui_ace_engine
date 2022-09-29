@@ -63,7 +63,7 @@ public:
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const override {}
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void RunNativeEngineLoop() override
     {
         if (jsEngine_) {
@@ -113,6 +113,8 @@ public:
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override {}
+
+    RefPtr<NG::PageRouterManager> GetPageRouterManager() const;
 
     RefPtr<AceEventHandler> GetEventHandler() override
     {

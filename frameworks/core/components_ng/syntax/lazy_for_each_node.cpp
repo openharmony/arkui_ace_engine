@@ -15,7 +15,16 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
+#include <algorithm>
+#include <cstdint>
+#include <iterator>
+#include <optional>
+#include <utility>
+
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -42,32 +51,165 @@ void LazyForEachNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& paren
 {
     CHECK_NULL_VOID(builder_);
     auto lazyLayoutWrapperBuilder = MakeRefPtr<LazyLayoutWrapperBuilder>(builder_, WeakClaim(this));
-    const auto& cachedItems = builder_->GetCacheItems();
-    for (const auto& iter : cachedItems) {
-        auto frameNode = DynamicCast<FrameNode>(iter.second.second);
-        if (frameNode) {
-            lazyLayoutWrapperBuilder->AddCachedItem(
-                iter.first, frameNode->CreateLayoutWrapper(forceMeasure, forceLayout));
-        }
-        // TODO: add ifelse syntax node.
-    }
-
+    lazyLayoutWrapperBuilder->UpdateIndexRange(startIndex_, endIndex_, ids_);
+    lazyLayoutWrapperBuilder->UpdateForceFlag(forceMeasure, forceLayout);
     parent->SetLayoutWrapperBuilder(lazyLayoutWrapperBuilder);
 }
 
-void LazyForEachNode::UpdateCachedItems(const std::unordered_set<int32_t>& activeIndexes)
+void LazyForEachNode::UpdateCachedItems(
+    int32_t newStartIndex, int32_t newEndIndex, std::list<std::optional<std::string>>&& nodeIds)
 {
-    children_.clear();
-    auto& cachedItems = builder_->ModifyCacheItems();
-    for (auto iter = cachedItems.begin(); iter != cachedItems.end();) {
-        if (activeIndexes.count(iter->first) > 0) {
-            AddChild(iter->second.second);
-            ++iter;
-        } else {
-            iter = cachedItems.erase(iter);
-        }
+    ACE_FUNCTION_TRACE();
+    CHECK_NULL_VOID(builder_);
+    std::list<std::optional<std::string>> newIds(std::move(nodeIds));
+    // clean current children.
+    Clean();
+
+    // delete all.
+    if (newIds.empty()) {
+        builder_->Clean();
+        startIndex_ = -1;
+        endIndex_ = -1;
+        ids_.clear();
+        return;
     }
-    LOGD("cachedItems size is %{public}d", static_cast<int32_t>(cachedItems.size()));
+
+    auto newSize = static_cast<int32_t>(newIds.size());
+    if ((newEndIndex - newStartIndex + 1) != newSize) {
+        LOGE("the index is illegal, %{public}d, %{public}d, %{public}d", newStartIndex, newEndIndex, newSize);
+        return;
+    }
+
+    // use new ids to create new child tree.
+    for (const auto& id : newIds) {
+        CHECK_NULL_VOID(id);
+        auto uiNode = builder_->GetChildByKey(*id);
+        CHECK_NULL_VOID(uiNode);
+        AddChild(uiNode);
+    }
+
+    // delete useless items.
+    builder_->UpdateCachedItems(newIds);
+
+    startIndex_ = newStartIndex;
+    endIndex_ = newEndIndex;
+    std::swap(ids_, newIds);
+    LOGD("cachedItems size is %{public}d", static_cast<int32_t>(newIds.size()));
+}
+
+void LazyForEachNode::OnDataReloaded()
+{
+    startIndex_ = -1;
+    endIndex_ = -1;
+    ids_.clear();
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::OnDataAdded(size_t index)
+{
+    auto insertIndex = static_cast<int32_t>(index);
+    // check if insertIndex is in the range [startIndex_, endIndex_ + 1]
+    if ((insertIndex < startIndex_)) {
+        LOGI("insertIndex is out of begin range, ignored, %{public}d, %{public}d", insertIndex, startIndex_);
+        startIndex_++;
+        endIndex_++;
+        return;
+    }
+    if (insertIndex > (endIndex_ + 1)) {
+        LOGI("insertIndex is out of end range, ignored, %{public}d, %{public}d", insertIndex, endIndex_);
+        return;
+    }
+    if (insertIndex == startIndex_) {
+        // insert at begin.
+        ids_.emplace_front(std::nullopt);
+    } else if (insertIndex == (endIndex_ + 1)) {
+        // insert at end.
+        ids_.emplace_back(std::nullopt);
+    } else {
+        // insert at middle.
+        auto iter = ids_.begin();
+        std::advance(iter, index - startIndex_);
+        ids_.insert(iter, std::nullopt);
+    }
+    endIndex_++;
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::OnDataDeleted(size_t index)
+{
+    auto deletedIndex = static_cast<int32_t>(index);
+    if (deletedIndex > endIndex_) {
+        LOGI("deletedIndex is out of end range, ignored, %{public}d, %{public}d", deletedIndex, endIndex_);
+        return;
+    }
+    if (deletedIndex < startIndex_) {
+        LOGI("deletedIndex is out of begin range, ignored, %{public}d, %{public}d", deletedIndex, startIndex_);
+        startIndex_--;
+        endIndex_--;
+        return;
+    }
+    if (deletedIndex == startIndex_) {
+        // delete at begin.
+        ids_.pop_front();
+    } else if (deletedIndex == endIndex_) {
+        // delete at end.
+        ids_.pop_back();
+    } else {
+        // delete at middle.
+        auto iter = ids_.begin();
+        std::advance(iter, index - startIndex_);
+        ids_.erase(iter);
+    }
+    endIndex_--;
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::OnDataChanged(size_t index)
+{
+    auto changeIndex = static_cast<int32_t>(index);
+    if ((changeIndex < startIndex_) || (changeIndex > endIndex_)) {
+        LOGI("changeIndex is out of range, ignored, %{public}d, %{public}d, %{public}d", changeIndex, startIndex_,
+            endIndex_);
+        return;
+    }
+    auto iter = ids_.begin();
+    std::advance(iter, index - startIndex_);
+    *iter = std::nullopt;
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::OnDataMoved(size_t from, size_t to)
+{
+    auto fromIndex = static_cast<int32_t>(from);
+    auto toIndex = static_cast<int32_t>(to);
+    auto fromOutOfRange = (fromIndex < startIndex_) || (fromIndex > endIndex_);
+    auto toOutOfRange = (toIndex < startIndex_) || (toIndex > endIndex_);
+    if (fromOutOfRange && toOutOfRange) {
+        LOGI("both out of range, ignored");
+        return;
+    }
+    if (fromOutOfRange && !toOutOfRange) {
+        auto iter = ids_.begin();
+        std::advance(iter, toIndex - startIndex_);
+        *iter = std::nullopt;
+        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        return;
+    }
+    if (!fromOutOfRange && toOutOfRange) {
+        auto iter = ids_.begin();
+        std::advance(iter, fromIndex - startIndex_);
+        *iter = std::nullopt;
+        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        return;
+    }
+    auto formIter = ids_.begin();
+    std::advance(formIter, fromIndex - startIndex_);
+    auto toIter = ids_.begin();
+    std::advance(toIter, toIndex - startIndex_);
+    auto temp = *formIter;
+    *formIter = *toIter;
+    *toIter = temp;
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 } // namespace OHOS::Ace::NG

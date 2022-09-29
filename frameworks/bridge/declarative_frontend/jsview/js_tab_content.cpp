@@ -16,6 +16,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 
 #include "base/log/ace_trace.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/tabs/tab_content_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -27,15 +29,18 @@ constexpr char DEFAULT_TAB_BAR_NAME[] = "TabBar";
 
 void JSTabContent::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateForNG(info);
+        return;
+    }
+
+    bool usePartialUpdate = Container::IsCurrentUsePartialUpdate();
     std::list<RefPtr<Component>> components;
     auto tabContentItemComponent = AceType::MakeRefPtr<V2::TabContentItemComponent>(components);
     tabContentItemComponent->SetCrossAxisSize(CrossAxisSize::MAX);
     ViewStackProcessor::GetInstance()->ClaimElementId(tabContentItemComponent);
 
-    RefPtr<V2::TabsComponent>  tabsComponent = nullptr;
-
-    bool usePartialUpdate = Container::IsCurrentUsePartialUpdate();
-
+    RefPtr<V2::TabsComponent> tabsComponent = nullptr;
     if (!usePartialUpdate) {
         tabsComponent = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetTopTabs());
         if (!tabsComponent) {
@@ -59,8 +64,8 @@ void JSTabContent::Create(const JSCallbackInfo& info)
     if (usePartialUpdate && info.Length() > 0 && info[0]->IsFunction()) {
         JSRef<JSVal> builderFunctionJS = info[0];
         LOGD("We have a build function for a tab");
-        auto jsWrapperFunc =
-            [context = info.GetExecutionContext(), builder = builderFunctionJS]() -> RefPtr<Component> {
+        auto jsWrapperFunc = [context = info.GetExecutionContext(),
+                                 builder = builderFunctionJS]() -> RefPtr<Component> {
             JAVASCRIPT_EXECUTION_SCOPE(context)
             JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
             return ViewStackProcessor::GetInstance()->Finish();
@@ -71,8 +76,42 @@ void JSTabContent::Create(const JSCallbackInfo& info)
     LOGE("No build function for a tab provided");
 }
 
+void JSTabContent::CreateForNG(const JSCallbackInfo& info)
+{
+    bool usePartialUpdate = Container::IsCurrentUsePartialUpdate();
+    if (!usePartialUpdate) {
+        NG::TabContentView::Create();
+        return;
+    }
+
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGW("Param should be a function.");
+        NG::TabContentView::Create();
+        return;
+    }
+
+    RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(info[0]));
+    auto tabContentDeepRenderFunc = [execCtx = info.GetExecutionContext(),
+                                        jsDeepRenderFunc = std::move(jsDeepRender)]() {
+        if (!jsDeepRenderFunc) {
+            LOGE("Func is null.");
+            return;
+        }
+
+        ACE_SCOPED_TRACE("JSTabContent::ExecuteDeepRender");
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        jsDeepRenderFunc->ExecuteJS();
+    };
+    NG::TabContentView::Create(std::move(tabContentDeepRenderFunc));
+}
+
 void JSTabContent::SetTabBar(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        SetTabBarForNG(info);
+        return;
+    }
+
     auto tabContentItemComponent =
         AceType::DynamicCast<V2::TabContentItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!tabContentItemComponent) {
@@ -143,22 +182,64 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     if (tabContentItemComponent->GetBarElementId() == ElementRegister::UndefinedElementId) {
         const auto id = ElementRegister::GetInstance()->MakeUniqueId();
         tabContentItemComponent->SetBarElementId(id);
-        LOGD("Setting ID for tab bar item to %{public}d tabContentItemComponent id %{public}d",
-            id, tabContentItemComponent->GetBarElementId());
+        LOGD("Setting ID for tab bar item to %{public}d tabContentItemComponent id %{public}d", id,
+            tabContentItemComponent->GetBarElementId());
     }
 }
 
-RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(const JSCallbackInfo& info,
-    RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc)
+void JSTabContent::SetTabBarForNG(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0) {
+        return;
+    }
+
+    std::string content;
+    if (ParseJsString(info[0], content)) {
+        auto textVal = content.empty() ? DEFAULT_TAB_BAR_NAME : content;
+        NG::TabContentView::SetTabBar(textVal, "", nullptr);
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
+    JSRef<JSVal> textParam = paramObject->GetProperty("text");
+    JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
+
+    if (builderFuncParam->IsFunction()) {
+        auto tabBarBuilder = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderFuncParam));
+        auto tabBarBuilderFunc = [execCtx = info.GetExecutionContext(),
+                                     tabBarBuilderFunc = std::move(tabBarBuilder)]() {
+            if (tabBarBuilderFunc) {
+                ACE_SCOPED_TRACE("JSTabContent::Execute TabBar builder");
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                tabBarBuilderFunc->ExecuteJS();
+            }
+        };
+        NG::TabContentView::SetTabBar("", "", std::move(tabBarBuilderFunc));
+        return;
+    }
+
+    std::string text;
+    std::string icon;
+    ParseJsString(textParam, text);
+    ParseJsMedia(iconParam, icon);
+    NG::TabContentView::SetTabBar(text.empty() ? DEFAULT_TAB_BAR_NAME : text, icon, nullptr);
+}
+
+RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
+    const JSCallbackInfo& info, RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc)
 {
     tabContent->SetBarText("custom");
     if (Container::IsCurrentUsePartialUpdate()) {
         auto jsWrapperFunc = [context = info.GetExecutionContext(), builder = builderFunc]() -> RefPtr<Component> {
-                ACE_SCORING_EVENT("TabContent.tabBarBuilder");
-                JAVASCRIPT_EXECUTION_SCOPE(context)
-                JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
-                return ViewStackProcessor::GetInstance()->Finish();
-            };
+            ACE_SCORING_EVENT("TabContent.tabBarBuilder");
+            JAVASCRIPT_EXECUTION_SCOPE(context)
+            JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
+            return ViewStackProcessor::GetInstance()->Finish();
+        };
 
         tabContent->SetBarBuilder(jsWrapperFunc);
         return nullptr;
@@ -170,7 +251,6 @@ RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(const JSCallbackInf
     jsBuilderFunc.Execute();
     RefPtr<Component> builderGeneratedRootComponent = ViewStackProcessor::GetInstance()->Finish();
     return builderGeneratedRootComponent;
-
 }
 
 RefPtr<Component> JSTabContent::CreateTabBarLabelComponent(
@@ -215,10 +295,22 @@ RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
     return nullptr;
 }
 
+void JSTabContent::Pop()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto tabContent = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
+        NG::TabContentView::Pop(tabContent);
+    } else {
+        JSContainerBase::Pop();
+    }
+}
+
 void JSTabContent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabContent>::Declare("TabContent");
     JSClass<JSTabContent>::StaticMethod("create", &JSTabContent::Create);
+    JSClass<JSTabContent>::StaticMethod("pop", &JSTabContent::Pop);
     JSClass<JSTabContent>::StaticMethod("tabBar", &JSTabContent::SetTabBar);
     JSClass<JSTabContent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabContent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);

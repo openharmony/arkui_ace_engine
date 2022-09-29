@@ -18,18 +18,33 @@
 
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "core/components_ng/syntax/if_else_model.h"
 
 namespace OHOS::Ace::Framework {
 
 class JSIfElse {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void Create(const JSCallbackInfo& info);
-    static void Pop();
-    static void SetBranchId(int32_t value);
 
-    static void ComponentToElementLocalizedUpdate(
-        const RefPtr<Component>& component, RefPtr<Element>& element);
+    static void Create()
+    {
+        IfElseModel::GetInstance()->Create();
+    }
+
+    static void Pop()
+    {
+        IfElseModel::GetInstance()->Pop();
+    }
+
+    static void SetBranchId(int32_t value)
+    {
+         IfElseModel::GetInstance()->SetBranchId(value);
+    }
+
+    static int32_t GetBranchId()
+    {
+        return  IfElseModel::GetInstance()->GetBranchId();
+    }
 };
 
 } // namespace OHOS::Ace::Framework

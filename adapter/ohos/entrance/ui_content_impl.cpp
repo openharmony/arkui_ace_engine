@@ -27,6 +27,7 @@
 #include "js_runtime_utils.h"
 #include "native_reference.h"
 #include "service_extension_context.h"
+#include "adapter/ohos/osal/pixel_map_ohos.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -38,6 +39,7 @@
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
+#include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/log/ace_trace.h"
@@ -203,6 +205,7 @@ public:
             return;
         }
 
+        ContainerScope scope(instanceId_);
         taskExecutor->PostTask([] { SubwindowManager::GetInstance()->ClearMenu(); }, TaskExecutor::TaskType::UI);
     }
 
@@ -315,9 +318,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         ImageCache::SetImageCacheFilePath(context->GetCacheDir());
         ImageCache::SetCacheFileInfo();
     });
-
+    bool useNewPipe = AceApplicationInfo::GetInstance().GetPackageName() == SystemProperties::GetNewPipePkg();
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
-    if (SystemProperties::GetRosenBackendEnabled()) {
+    if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
         rsUiDirector->SetCacheDir(context->GetCacheDir());
@@ -454,15 +457,22 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     }
     if (appInfo && flutterAssetManager) {
+        /* Note: DO NOT modify the sequence of adding libPath  */
         std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+        std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
+        std::vector<std::string> libPaths;
+        if (!quickFixLibraryPath.empty()) {
+            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), quickFixLibraryPath);
+            libPaths.push_back(libPath);
+            LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
+        }
         if (!nativeLibraryPath.empty()) {
-            if (nativeLibraryPath.back() == '/') {
-                nativeLibraryPath.pop_back();
-            }
-            std::string libPath = context->GetBundleCodeDir();
-            libPath += (libPath.back() == '/') ? nativeLibraryPath : "/" + nativeLibraryPath;
+            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), nativeLibraryPath);
+            libPaths.push_back(libPath);
             LOGI("napi lib path = %{private}s", libPath.c_str());
-            flutterAssetManager->SetLibPath(libPath);
+        }
+        if (!libPaths.empty()) {
+            flutterAssetManager->SetLibPath(libPaths);
         }
     }
     std::string hapPath; // hap path in sandbox
@@ -511,12 +521,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 want.SetParam("address", address);
                 abilityContext->StartAbility(want, REQUEST_CODE);
             }
-        }));
+        }), false, false, useNewPipe);
     if (!container) {
         LOGE("Create container is null.");
         return;
     }
     container->SetWindowName(window_->GetWindowName());
+    container->SetWindowId(window_->GetWindowId());
 
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -557,29 +568,32 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     auto flutterAceView =
         Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
-
-    Ace::Platform::UIEnvCallback callback = nullptr;
+    if (!useNewPipe) {
+        Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-    callback = [window, id = instanceId_, container, flutterAceView, rsUiDirector](
-                    const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
-        if (rsUiDirector) {
-            ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
-                rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
-                        ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                    });
-                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-                if (context != nullptr) {
-                    context->SetRSUIDirector(rsUiDirector);
-                }
-                flutterAceView->InitIOManager(container->GetTaskExecutor());
-                LOGD("UIContent Init Rosen Backend");
-        }
-    };
+        callback = [window, id = instanceId_, container, flutterAceView, rsUiDirector](
+                        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
+            if (rsUiDirector) {
+                ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
+                    rsUiDirector->SetUITaskRunner(
+                        [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
+                            ContainerScope scope(id);
+                            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                        });
+                    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+                    if (context != nullptr) {
+                        context->SetRSUIDirector(rsUiDirector);
+                    }
+                    flutterAceView->InitIOManager(container->GetTaskExecutor());
+                    LOGD("UIContent Init Rosen Backend");
+            }
+        };
 #endif
-    // set view
-    Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_, callback);
+        // set view
+        Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_, callback);
+    } else {
+        Platform::AceContainer::SetViewNew(flutterAceView, density, 0, 0, window_);
+    }
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     // Set sdk version in module json mode
     if (isModelJson) {
@@ -975,4 +989,23 @@ void UIContentImpl::NotifyMemoryLevel(int32_t level)
     LOGI("Receive memory level notification, level: %{public}d", level);
 }
 
+void UIContentImpl::SetAppWindowTitle(const std::string& title)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    LOGI("set app title");
+    pipelineContext->SetAppTitle(title);
+}
+
+void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    LOGI("set app icon");
+    pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
+}
 } // namespace OHOS::Ace

@@ -79,6 +79,8 @@ public:
     void OnLoadingProgress(int newProgress) override;
     void OnPageTitle(const std::string &title) override;
     void OnGeolocationHide() override;
+    void OnFullScreenExit() override;
+    void OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler) override;
     void OnGeolocationShow(const std::string& origin,
         OHOS::NWeb::NWebGeolocationCallbackInterface* callback) override;
 
@@ -113,6 +115,14 @@ public:
     void OnScroll(double xOffset, double yOffset) override;
     bool OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
         const std::string &realm) override;
+    bool OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+        OHOS::NWeb::SslError error) override;
+    bool OnSslSelectCertRequestByJS(
+        std::shared_ptr<NWeb::NWebJSSslSelectCertResult> result,
+        const std::string& host,
+        int32_t port,
+        const std::vector<std::string>& keyTypes,
+        const std::vector<std::string>& issuers) override;
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
     bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
         std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
@@ -123,7 +133,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle) override;
-
+    bool OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt) override;
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;

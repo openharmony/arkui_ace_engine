@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
@@ -20,7 +22,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_view.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,7 +32,7 @@ namespace {
 const std::string CREATE_VALUE = "Hello World";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
-const NG::ItalicFontStyle ITALIC_FONT_STYLE_VALUE = NG::ItalicFontStyle::ITALIC;
+const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Ace::TextAlign TEXT_ALIGN_VALUE = Ace::TextAlign::CENTER;
@@ -41,12 +43,14 @@ const Ace::TextDecoration TEXT_DECORATION_VALUE = Ace::TextDecoration::INHERIT;
 const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Dimension BASELINE_OFFSET_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
+const Dimension ADAPT_MIN_FONT_SIZE_VALUE = Dimension(50, DimensionUnit::PX);
+const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
 } // namespace
 
 struct TestProperty {
     std::optional<Dimension> fontSizeValue = std::nullopt;
     std::optional<Color> textColorValue = std::nullopt;
-    std::optional<NG::ItalicFontStyle> italicFontStyleValue = std::nullopt;
+    std::optional<Ace::FontStyle> italicFontStyleValue = std::nullopt;
     std::optional<Ace::FontWeight> fontWeightValue = std::nullopt;
     std::optional<std::vector<std::string>> fontFamilyValue = std::nullopt;
     std::optional<Ace::TextAlign> textAlignValue = std::nullopt;
@@ -57,6 +61,8 @@ struct TestProperty {
     std::optional<Color> textDecorationColorValue = std::nullopt;
     std::optional<Dimension> baselineOffsetValue = std::nullopt;
     std::optional<Ace::TextCase> textCaseValue = std::nullopt;
+    std::optional<Dimension> adaptMinFontSize = std::nullopt;
+    std::optional<Dimension> adaptMaxFontSize = std::nullopt;
 };
 
 class TextPatternTestNg : public testing::Test {
@@ -78,45 +84,52 @@ void TextPatternTestNg::TearDown() {}
 RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(
     const std::string& createValue, const TestProperty& testProperty)
 {
-    TextView::Create(createValue);
+    TextModelNG textModel;
+    textModel.Create(createValue);
     if (testProperty.fontSizeValue.has_value()) {
-        TextView::SetFontSize(testProperty.fontSizeValue.value());
+        textModel.SetFontSize(testProperty.fontSizeValue.value());
     }
     if (testProperty.textColorValue.has_value()) {
-        TextView::SetTextColor(testProperty.textColorValue.value());
+        textModel.SetTextColor(testProperty.textColorValue.value());
     }
     if (testProperty.italicFontStyleValue.has_value()) {
-        TextView::SetItalicFontStyle(testProperty.italicFontStyleValue.value());
+        textModel.SetItalicFontStyle(testProperty.italicFontStyleValue.value());
     }
     if (testProperty.fontWeightValue.has_value()) {
-        TextView::SetFontWeight(testProperty.fontWeightValue.value());
+        textModel.SetFontWeight(testProperty.fontWeightValue.value());
     }
     if (testProperty.fontFamilyValue.has_value()) {
-        TextView::SetFontFamily(testProperty.fontFamilyValue.value());
+        textModel.SetFontFamily(testProperty.fontFamilyValue.value());
     }
     if (testProperty.textAlignValue.has_value()) {
-        TextView::SetTextAlign(testProperty.textAlignValue.value());
+        textModel.SetTextAlign(testProperty.textAlignValue.value());
     }
     if (testProperty.textOverflowValue.has_value()) {
-        TextView::SetTextOverflow(testProperty.textOverflowValue.value());
+        textModel.SetTextOverflow(testProperty.textOverflowValue.value());
     }
     if (testProperty.maxLinesValue.has_value()) {
-        TextView::SetMaxLines(testProperty.maxLinesValue.value());
+        textModel.SetMaxLines(testProperty.maxLinesValue.value());
     }
     if (testProperty.lineHeightValue.has_value()) {
-        TextView::SetLineHeight(testProperty.lineHeightValue.value());
+        textModel.SetLineHeight(testProperty.lineHeightValue.value());
     }
     if (testProperty.textDecorationValue.has_value()) {
-        TextView::SetTextDecoration(testProperty.textDecorationValue.value());
+        textModel.SetTextDecoration(testProperty.textDecorationValue.value());
     }
     if (testProperty.textDecorationColorValue.has_value()) {
-        TextView::SetTextDecorationColor(testProperty.textDecorationColorValue.value());
+        textModel.SetTextDecorationColor(testProperty.textDecorationColorValue.value());
     }
     if (testProperty.baselineOffsetValue.has_value()) {
-        TextView::SetBaselineOffset(testProperty.baselineOffsetValue.value());
+        textModel.SetBaselineOffset(testProperty.baselineOffsetValue.value());
     }
     if (testProperty.textCaseValue.has_value()) {
-        TextView::SetTextCase(testProperty.textCaseValue.value());
+        textModel.SetTextCase(testProperty.textCaseValue.value());
+    }
+    if (testProperty.adaptMinFontSize.has_value()) {
+        textModel.SetAdaptMinFontSize(testProperty.adaptMinFontSize.value());
+    }
+    if (testProperty.adaptMaxFontSize.has_value()) {
+        textModel.SetAdaptMaxFontSize(testProperty.adaptMaxFontSize.value());
     }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
@@ -144,6 +157,8 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
     testProperty.textDecorationColorValue = std::make_optional(TEXT_DECORATION_COLOR_VALUE);
     testProperty.baselineOffsetValue = std::make_optional(BASELINE_OFFSET_VALUE);
     testProperty.textCaseValue = std::make_optional(TEXT_CASE_VALUE);
+    testProperty.adaptMinFontSize = std::make_optional(ADAPT_MIN_FONT_SIZE_VALUE);
+    testProperty.adaptMaxFontSize = std::make_optional(ADAPT_MAX_FONT_SIZE_VALUE);
 
     RefPtr<FrameNode> frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     EXPECT_EQ(frameNode == nullptr, false);
@@ -170,5 +185,9 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(textStyle.GetBaselineOffset(), BASELINE_OFFSET_VALUE);
     EXPECT_EQ(textStyle.GetTextCase(), TEXT_CASE_VALUE);
+    EXPECT_EQ(textStyle.GetAdaptMinFontSize(), ADAPT_MIN_FONT_SIZE_VALUE);
+    EXPECT_EQ(textStyle.GetAdaptMaxFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
+    EXPECT_EQ(textStyle.GetAdaptTextSize(),
+        testProperty.adaptMinFontSize.has_value() || testProperty.adaptMaxFontSize.has_value());
 }
 } // namespace OHOS::Ace::NG

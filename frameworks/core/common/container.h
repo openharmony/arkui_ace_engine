@@ -30,6 +30,7 @@
 #include "core/common/settings.h"
 #include "core/common/window.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 
 namespace OHOS::Ace {
 
@@ -112,7 +113,7 @@ public:
         createTime_ = time;
     }
 
-    bool IsFirstUpdate()
+    bool IsFirstUpdate() const
     {
         return firstUpdateData_;
     }
@@ -187,6 +188,11 @@ public:
         useNewPipeline_ = true;
     }
 
+    bool IsUseNewPipeline() const
+    {
+        return useNewPipeline_;
+    }
+
     static bool IsCurrentUseNewPipeline()
     {
         auto container = Current();
@@ -198,23 +204,26 @@ public:
     static bool IsCurrentUsePartialUpdate()
     {
         auto container = Current();
-        return container ? container-> usePartialUpdate_ : false;
+        return container ? container->usePartialUpdate_ : false;
     }
-
 
     static void SetCurrentUsePartialUpdate(bool useIt = false)
     {
         auto container = Current();
-        if (container)
-        {
+        if (container) {
             container->usePartialUpdate_ = useIt;
         }
     }
-    
-    Window* GetWindow()
+
+    Window* GetWindow() const
     {
         auto context = GetPipelineContext();
         return context ? context->GetWindow() : nullptr;
+    }
+
+    virtual bool IsUseStageModel() const
+    {
+        return false;
     }
 
 protected:

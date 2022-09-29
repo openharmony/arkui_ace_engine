@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+
 #include "core/pipeline/layers/layer.h"
 
 #include "base/log/dump_log.h"

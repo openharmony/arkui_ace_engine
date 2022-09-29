@@ -15,10 +15,14 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
+#include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -158,6 +162,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/core/common/container.h"
+#include "frameworks/core/components_ng/base/inspector.h"
 #include "frameworks/core/components_v2/inspector/inspector.h"
 #if defined(PREVIEW)
 #include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
@@ -167,9 +172,46 @@ namespace OHOS::Ace::Framework {
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
-    JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         LOGE("loadDocument: argument provided is not a View!");
+        return;
+    }
+
+    auto container = Container::Current();
+    if (container && container->IsUseNewPipeline()) {
+        Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+        auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
+        CHECK_NULL_VOID(frontEnd);
+        auto pageRouterManager = frontEnd->GetPageRouterManager();
+        CHECK_NULL_VOID(pageRouterManager);
+        auto pageNode = pageRouterManager->GetCurrentPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pageRootNode = view->CreateUINode();
+        CHECK_NULL_VOID(pageRootNode);
+        pageRootNode->MountToParent(pageNode);
+        // update page life cycle function.
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnShow();
+            }
+        });
+        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnHide();
+            }
+        });
+        pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            if (view) {
+                return view->FireOnBackPress();
+            }
+            return false;
+        });
         return;
     }
 
@@ -178,25 +220,19 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     JsiDeclarativeEngineInstance::RootViewHandle(obj);
 
     LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
-    if (Container::IsCurrentUseNewPipeline()) {
-        Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
-        auto pageRootNode = view->CreateUINode();
-        page->SetRootNode(pageRootNode);
-    } else {
-        Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
-        LOGD("Loading page root component: Setting pipeline to use %{public}s.",
-            view->isFullUpdate() ? "Full Update" : "Partial Update");
-        auto rootComponent = view->CreateComponent();
-        std::list<RefPtr<Component>> stackChildren;
-        stackChildren.emplace_back(rootComponent);
-        auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
-            Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, stackChildren);
-        rootStackComponent->SetMainStackSize(MainStackSize::MAX);
-        auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
-        rootComposed->SetChild(rootStackComponent);
-        page->SetRootComponent(rootComposed);
-        page->SetPageTransition(view->BuildPageTransitionComponent());
-    }
+    Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+    LOGD("Loading page root component: Setting pipeline to use %{public}s.",
+        view->isFullUpdate() ? "Full Update" : "Partial Update");
+    auto rootComponent = view->CreateComponent();
+    std::list<RefPtr<Component>> stackChildren;
+    stackChildren.emplace_back(rootComponent);
+    auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
+        Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, stackChildren);
+    rootStackComponent->SetMainStackSize(MainStackSize::MAX);
+    auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
+    rootComposed->SetChild(rootStackComponent);
+    page->SetRootComponent(rootComposed);
+    page->SetPageTransition(view->BuildPageTransitionComponent());
 
     // We are done, tell to the JSAgePage
     page->SetPageCreated();
@@ -232,7 +268,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 panda::Local<panda::JSValueRef> JsPreviewerComponent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     LOGD("PreviewerComponent start");
@@ -466,6 +502,11 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
+
+    if (container->IsUseNewPipeline()) {
+        auto nodeInfos = NG::Inspector::GetInspectorTree();
+        return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+    }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipeline is null");
@@ -478,7 +519,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
 panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -493,13 +534,16 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
+    std::string key = firstArg->ToString(vm)->ToString();
+    if (container->IsUseNewPipeline()) {
+        auto resultStr = NG::Inspector::GetInspectorNodeByKey(key);
+        return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
+    }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
-
-    std::string key = firstArg->ToString(vm)->ToString();
     auto resultStr = V2::Inspector::GetInspectorNodeByKey(pipelineContext, key);
     return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
 }
@@ -507,7 +551,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
 panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -522,15 +566,19 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runt
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
+
+    std::string key = firstArg->ToString(vm)->ToString();
+    auto action = runtimeCallInfo->GetCallArgRef(1)->Int32Value(vm);
+    auto params = runtimeCallInfo->GetCallArgRef(2)->ToString(vm)->ToString();
+    if (container->IsUseNewPipeline()) {
+        auto result = NG::Inspector::SendEventByKey(key, action, params);
+        return panda::BooleanRef::New(vm, result);
+    }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
-
-    std::string key = firstArg->ToString(vm)->ToString();
-    auto action = runtimeCallInfo->GetCallArgRef(1)->Int32Value(vm);
-    auto params = runtimeCallInfo->GetCallArgRef(2)->ToString(vm)->ToString();
     auto result = V2::Inspector::SendEventByKey(pipelineContext, key, action, params);
     return panda::BooleanRef::New(vm, result);
 }
@@ -559,7 +607,7 @@ static TouchEvent GetTouchPointFromJS(const JsiObject& value)
 panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -587,17 +635,18 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     return panda::BooleanRef::New(vm, result);
 }
 
-static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
+static KeyEvent GetKeyEventFromJS(const JsiObject& value)
 {
-    V2::JsKeyEvent keyEvent;
     auto type = value->GetProperty("type");
-    keyEvent.action = static_cast<KeyAction>(type->ToNumber<int32_t>());
+    auto action = static_cast<KeyAction>(type->ToNumber<int32_t>());
 
     auto jsKeyCode = value->GetProperty("keyCode");
-    keyEvent.code = static_cast<KeyCode>(jsKeyCode->ToNumber<int32_t>());
+    auto code = static_cast<KeyCode>(jsKeyCode->ToNumber<int32_t>());
+
+    KeyEvent keyEvent(code, action);
 
     auto jsKeySource = value->GetProperty("keySource");
-    keyEvent.sourceDevice = jsKeySource->ToNumber<int32_t>();
+    keyEvent.sourceType = static_cast<SourceType>(jsKeySource->ToNumber<int32_t>());
 
     auto jsDeviceId = value->GetProperty("deviceId");
     keyEvent.deviceId = jsDeviceId->ToNumber<int32_t>();
@@ -606,7 +655,8 @@ static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
     keyEvent.metaKey = jsMetaKey->ToNumber<int32_t>();
 
     auto jsTimestamp = value->GetProperty("timestamp");
-    keyEvent.timeStamp = jsTimestamp->ToNumber<int64_t>();
+    auto timeStamp = jsTimestamp->ToNumber<int64_t>();
+    keyEvent.SetTimeStamp(timeStamp);
 
     return keyEvent;
 }
@@ -614,7 +664,7 @@ static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
 panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -630,13 +680,15 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext == nullptr) {
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
     JsiObject obj(firstArg);
-    auto result = V2::Inspector::SendKeyEvent(pipelineContext, GetKeyEventFromJS(obj));
+    KeyEvent keyEvent = GetKeyEventFromJS(obj);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); }, TaskExecutor::TaskType::UI);
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -666,7 +718,7 @@ static MouseEvent GetMouseEventFromJS(const JsiObject& value)
 panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -893,17 +945,9 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     }
     std::string inspectorKey = firstArg->ToString(vm)->ToString();
 
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return panda::JSValueRef::Undefined(vm);
-    }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (pipelineContext == nullptr) {
-        LOGE("pipelineContext==nullptr");
-        return panda::JSValueRef::Undefined(vm);
-    }
     bool result = false;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, panda::BooleanRef::New(vm, result));
     if (!pipelineContext->GetTaskExecutor()) {
         LOGE("pipelineContext's task excutor is null");
         return panda::BooleanRef::New(vm, result);
@@ -1027,6 +1071,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RotationGesture", JSGesture::JSBind },
     { "GestureGroup", JSGesture::JSBind },
     { "PanGestureOption", JSPanGestureOption::JSBind },
+    { "PanGestureOptions", JSPanGestureOption::JSBind },
     { "CustomDialogController", JSCustomDialogController::JSBind },
     { "Scroller", JSScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
@@ -1165,11 +1210,12 @@ void JsRegisterViews(BindingTarget globalObj)
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
         LOGE("JsRegisterViews can't find runtime");
+        return;
     }
     auto vm = runtime->GetEcmaVm();
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewComponent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsPreviewerComponent));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPreviewComponentFlag"),

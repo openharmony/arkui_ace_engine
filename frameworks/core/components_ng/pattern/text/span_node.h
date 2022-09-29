@@ -61,7 +61,7 @@ public:                                                                      \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
-        MarkNeedFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);                \
+        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);           \
     }
 
 namespace OHOS::Ace::NG {
@@ -101,7 +101,7 @@ public:
             return;
         }
         spanItem_->content = content;
-        MarkNeedFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
@@ -111,7 +111,7 @@ public:
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
-    DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, ItalicFontStyle);
+    DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);

@@ -364,7 +364,7 @@ void RenderBoxBase::CalculateGridLayoutSize()
         if (IsHeadRenderNode()) {
             auto context = context_.Upgrade();
             positionParam_.type =
-                (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE;
+                (context && context->GetIsDeclarative()) ? PositionType::PTSEMI_RELATIVE : PositionType::PTABSOLUTE;
             std::pair<AnimatableDimension, bool>& edge =
                 (GetTextDirection() == TextDirection::RTL) ? positionParam_.right : positionParam_.left;
             edge.first = offset;
@@ -374,7 +374,8 @@ void RenderBoxBase::CalculateGridLayoutSize()
             if (headRenderNode) {
                 auto context = headRenderNode->GetContext().Upgrade();
                 headRenderNode->SetPositionType(
-                    (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE);
+                    (context && context->GetIsDeclarative()) ? PositionType::PTSEMI_RELATIVE :
+                        PositionType::PTABSOLUTE);
                 headRenderNode->GetTextDirection() == TextDirection::RTL ? headRenderNode->SetRight(offset)
                                                                          : headRenderNode->SetLeft(offset);
             }
@@ -383,7 +384,7 @@ void RenderBoxBase::CalculateGridLayoutSize()
 #ifndef ENABLE_ROSEN_BACKEND
         auto context = context_.Upgrade();
         positionParam_.type =
-            (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE;
+            (context && context->GetIsDeclarative()) ? PositionType::PTSEMI_RELATIVE : PositionType::PTABSOLUTE;
         std::pair<AnimatableDimension, bool>& edge =
             (GetTextDirection() == TextDirection::RTL) ? positionParam_.right : positionParam_.left;
         edge.first = offset;

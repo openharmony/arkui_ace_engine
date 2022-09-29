@@ -21,12 +21,12 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
-#include "core/gestures/gesture_info.h"
-#include "core/gestures/pan_recognizer.h"
+#include "core/components_ng/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 
 class GestureEventHub;
+class PanRecognizer;
 
 class PanEvent : public Referenced {
 public:
@@ -96,6 +96,11 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
+
+    PanDirection GetDirection() const
+    {
+        return direction_;
+    }
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

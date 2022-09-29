@@ -84,7 +84,8 @@ public:
         return GetTotalIndexCount();
     }
 
-    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(int32_t index) override
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
+        int32_t index, const std::unordered_map<std::string, RefPtr<NG::UINode>>& cachedItems) override
     {
         std::pair<std::string, RefPtr<NG::UINode>> info;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, info);
@@ -94,6 +95,13 @@ public:
 
         JSRef<JSVal> result = CallJSFunction(getDataFunc_, dataSourceObj_, index);
         std::string key = keyGenFunc_(result, index);
+
+        auto cachedIter = cachedItems.find(key);
+        if (cachedIter != cachedItems.end()) {
+            info.first = key;
+            info.second = cachedIter->second;
+            return info;
+        }
 
         auto* viewStack = NG::ViewStackProcessor::GetInstance();
         if (parentView_) {
@@ -108,6 +116,21 @@ public:
         info.first = key;
         info.second = viewStack->Finish();
         return info;
+    }
+
+    void OnExpandChildrenOnInitialInNG() override
+    {
+        auto totalIndex = GetTotalIndexCount();
+        auto* stack = NG::ViewStackProcessor::GetInstance();
+        JSRef<JSVal> params[2];
+        for (auto index = 0; index < totalIndex; index++) {
+            params[0] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+            params[1] = JSRef<JSVal>::Make(ToJSValue(index));
+            std::string key = keyGenFunc_(params[0], index);
+            stack->PushKey(key);
+            itemGenFunc_->Call(JSRef<JSObject>(), 2, params);
+            stack->PopKey();
+        }
     }
 
     void ReleaseChildGroupById(const std::string& id) override

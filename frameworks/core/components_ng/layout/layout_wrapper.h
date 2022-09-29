@@ -19,6 +19,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -50,14 +51,11 @@ public:
     {}
     ~LayoutWrapper() override = default;
 
-    void AppendChild(const RefPtr<LayoutWrapper>& child, int32_t slot = -1)
+    void AppendChild(const RefPtr<LayoutWrapper>& child)
     {
         CHECK_NULL_VOID(child);
-        auto result = children_.try_emplace(currentChildCount_, child);
-        if (!result.second) {
-            LOGE("fail to append child");
-            return;
-        }
+        children_.emplace_back(child);
+        childrenMap_.try_emplace(currentChildCount_, child);
         ++currentChildCount_;
     }
 
@@ -83,16 +81,11 @@ public:
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint);
 
     // Called to perform layout children.
-    void Layout(const std::optional<OffsetF>& parentGlobalOffset);
+    void Layout();
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
         return geometryNode_;
-    }
-
-    RefPtr<GeometryNode> MoveGeometryNode()
-    {
-        return std::move(geometryNode_);
     }
 
     const RefPtr<LayoutProperty>& GetLayoutProperty() const
@@ -105,6 +98,7 @@ public:
     // can call the RemoveChildInRenderTree method to explicitly remove the node from the area to be rendered.
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(int32_t index, bool addToRenderTree = true);
     std::list<RefPtr<LayoutWrapper>> GetAllChildrenWithBuild(bool addToRenderTree = true);
+
     int32_t GetTotalChildCount() const
     {
         return currentChildCount_;
@@ -112,7 +106,7 @@ public:
 
     std::list<RefPtr<FrameNode>> GetChildrenInRenderArea() const;
 
-    void RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper);
+    static void RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper);
     void RemoveChildInRenderTree(int32_t index);
 
     void ResetHostNode();
@@ -123,6 +117,21 @@ public:
     bool IsActive() const
     {
         return isActive_;
+    }
+
+    void SetActive(bool active = true)
+    {
+        isActive_ = active;
+    }
+
+    bool IsRootMeasureNode() const
+    {
+        return isRootNode_;
+    }
+
+    void SetRootMeasureNode()
+    {
+        isRootNode_ = true;
     }
 
     bool CheckShouldRunOnMain()
@@ -142,7 +151,7 @@ public:
         if ((taskThread & MAIN_TASK) == MAIN_TASK) {
             return MAIN_TASK;
         }
-        for (const auto& [index, child] : children_) {
+        for (const auto& child : children_) {
             taskThread = taskThread | child->CanRunOnWhichThread();
         }
         return taskThread;
@@ -160,20 +169,43 @@ public:
     void MountToHostOnMainThread();
     void SwapDirtyLayoutWrapperOnMainThread();
 
+    bool IsForceSyncRenderTree() const
+    {
+        return needForceSyncRenderTree_;
+    }
+
+    float GetBaselineDistance() const
+    {
+        if (children_.empty()) {
+            return geometryNode_->GetBaselineDistance();
+        }
+        float distance = 0.0;
+        for (const auto& child : children_) {
+            float childBaseline = child->GetBaselineDistance();
+            childBaseline += child->GetGeometryNode()->GetFrameRect().GetY();
+            distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
+        }
+        return distance;
+    }
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
+    std::list<RefPtr<LayoutWrapper>> children_;
+    // Speed up the speed of getting child by index.
+    std::unordered_map<int32_t, RefPtr<LayoutWrapper>> childrenMap_;
     // The Wrapper Created by LazyForEach stores in the LayoutWrapperBuilder object.
-    std::map<int32_t, RefPtr<LayoutWrapper>> children_;
-    std::map<int32_t, RefPtr<LayoutWrapper>> pendingRender_;
+    RefPtr<LayoutWrapperBuilder> layoutWrapperBuilder_;
+
     WeakPtr<FrameNode> hostNode_;
     RefPtr<GeometryNode> geometryNode_;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
-    RefPtr<LayoutWrapperBuilder> layoutWrapperBuilder_;
 
     int32_t currentChildCount_ = 0;
     bool isContraintNoChanged_ = false;
     bool isActive_ = false;
+    bool needForceSyncRenderTree_ = false;
+    bool isRootNode_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

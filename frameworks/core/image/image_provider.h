@@ -111,8 +111,10 @@ public:
     // upload image data to gpu context for painting asynchronously.
     static void UploadImageToGPUForRender(
         const sk_sp<SkImage>& image,
-        const std::function<void(flutter::SkiaGPUObject<SkImage>)>&& callback,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder);
+        const sk_sp<SkData>& data,
+        const std::function<void(flutter::SkiaGPUObject<SkImage>, sk_sp<SkData>)>&& callback,
+        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+        const std::string src);
 
     // get out source image data asynchronously.
     static void FetchImageObject(
@@ -156,8 +158,12 @@ public:
 
     static sk_sp<SkData> LoadImageRawData(
         const ImageSourceInfo& imageInfo,
+        const RefPtr<PipelineBase> context);
+
+    static sk_sp<SkData> LoadImageRawDataFromFileCache(
         const RefPtr<PipelineBase> context,
-        const Size& targetSize = Size());
+        const std::string key,
+        const std::string suffix = "");
 
     static RefPtr<ImageObject> QueryImageObjectFromCache(
         const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase>& pipelineContext);

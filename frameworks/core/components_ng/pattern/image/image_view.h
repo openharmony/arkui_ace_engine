@@ -18,10 +18,13 @@
 
 #include <string>
 
+#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/image/image_event_hub.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT ImageView {
 public:
     static void Create(const std::string& src);
@@ -29,6 +32,15 @@ public:
     static void SetAutoResize(bool autoResize);
     static void SetImageRenderMode(ImageRenderMode imageRenderMode);
     static void SetImageInterpolation(ImageInterpolation imageInterpolation);
+    static void SetImageRepeat(ImageRepeat imageRepeat);
+    static void SetImageSourceSize(const std::pair<Dimension, Dimension>& sourceSize);
+    static void SetFitOriginalSize(bool fitOriginalSize);
+    static void SetAlt(const std::string& altSrc);
+    static void SetOnError(ErrorEvent&& onError);
+    static void SetOnComplete(CompleteEvent&& onComplete);
+    static void SetColorFilterMatrix(const std::vector<float>& matrix);
+    static void SetMatchTextDirection(bool matchTextDirection);
+    static void SetSvgFillColor(const Color& color);
 };
 } // namespace OHOS::Ace::NG
 

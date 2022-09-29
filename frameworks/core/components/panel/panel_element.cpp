@@ -61,7 +61,7 @@ void PanelElement::ShowPanel()
     }
     auto slidingPanel = SlidingPanelComponent::Create(panel_);
     stackElement->PushPanel(slidingPanel, panel_->GetPanelType() == PanelType::TEMP_DISPLAY);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto manager = context->GetAccessibilityManager();
     if (manager) {
         auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(panel_->GetId()));
@@ -85,7 +85,7 @@ void PanelElement::ClosePanel()
         return;
     }
     lastStack->PopPanel();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto manager = context->GetAccessibilityManager();
     if (manager) {
         auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(panel_->GetId()));

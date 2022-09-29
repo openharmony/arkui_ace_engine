@@ -138,7 +138,7 @@ bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
     AppendChild(text_);
     SetNode((!manager ? nullptr
                   : manager->CreateAccessibilityNode("option", StringUtils::StringToInt(GetId()), GetParentId(), -1)));
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (node_) {
         node_->SetAttr(GetAttr());
         node_->SetStyle(GetStyle());

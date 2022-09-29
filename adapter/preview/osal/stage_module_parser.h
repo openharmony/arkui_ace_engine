@@ -65,9 +65,11 @@ class StageModuleInfo : public Referenced {
 public:
     StageModuleInfo() = default;
     ~StageModuleInfo() override = default;
-    void ModuleInfoParse(const std::unique_ptr<JsonValue>& root) {}
+    void ModuleInfoParse(const std::unique_ptr<JsonValue>& root);
+    const std::string& GetCompileMode() const;
 
 private:
+    std::string compileMode_;
     ACE_DISALLOW_COPY_AND_MOVE(StageModuleInfo);
 };
 

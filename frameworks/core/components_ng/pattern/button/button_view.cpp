@@ -52,12 +52,12 @@ void ButtonView::CreateWithLabel(const std::string& label)
     stack->Push(frameNode);
 }
 
-void ButtonView::Create()
+void ButtonView::Create(const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     stack->Push(frameNode);
 }
 
@@ -77,7 +77,7 @@ void ButtonView::SetStateEffect(bool stateEffect)
 
 void ButtonView::SetFontSize(const Dimension& fontSize)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
         return;
     }
@@ -90,7 +90,7 @@ void ButtonView::SetFontSize(const Dimension& fontSize)
 
 void ButtonView::SetFontWeight(Ace::FontWeight fontWeight)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
         return;
     }
@@ -103,7 +103,7 @@ void ButtonView::SetFontWeight(Ace::FontWeight fontWeight)
 
 void ButtonView::SetItalicFontStyle(Ace::FontStyle fontStyle)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
         return;
     }
@@ -116,7 +116,7 @@ void ButtonView::SetItalicFontStyle(Ace::FontStyle fontStyle)
 
 void ButtonView::SetFontFamily(const std::vector<std::string>& fontFamilies)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
         return;
     }
@@ -129,7 +129,7 @@ void ButtonView::SetFontFamily(const std::vector<std::string>& fontFamilies)
 
 void ButtonView::SetTextColor(const Color& textColor)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
         return;
     }
@@ -139,4 +139,5 @@ void ButtonView::SetTextColor(const Color& textColor)
     ACE_DCHECK(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(textColor);
 }
+
 } // namespace OHOS::Ace::NG

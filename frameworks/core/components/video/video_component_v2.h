@@ -16,83 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_VIDEO_COMPONENT_V2_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_VIDEO_COMPONENT_V2_H
 
-#include "core/components/video/video_component.h"
+#include "core/components/video/video_controller_v2.h"
 
 namespace OHOS::Ace {
-
-class VideoControllerV2 : public virtual AceType {
-    DECLARE_ACE_TYPE(VideoControllerV2, AceType);
-
-public:
-    void Start()
-    {
-        for (const auto& item : controllers_) {
-            item->Start();
-        }
-    }
-
-    void Pause()
-    {
-        for (const auto& item : controllers_) {
-            item->Pause();
-        }
-    }
-
-    void Stop()
-    {
-        for (const auto& item : controllers_) {
-            item->Stop();
-        }
-    }
-
-    void SeekTo(float pos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC)
-    {
-        for (const auto& item : controllers_) {
-            item->SeekTo(pos, seekMode);
-        }
-    }
-
-    void RequestFullscreen(bool isPortrait)
-    {
-        for (const auto& item : controllers_) {
-            item->RequestFullscreen(isPortrait);
-        }
-    }
-
-    void ExitFullscreen(bool isSync)
-    {
-        for (const auto& item : controllers_) {
-            item->ExitFullscreen(isSync);
-        }
-    }
-
-    void AddVideoController(const RefPtr<VideoController>& videoController)
-    {
-        auto it = std::find(controllers_.begin(), controllers_.end(), videoController);
-        if (it != controllers_.end()) {
-            LOGW("Controller is already existed");
-            return;
-        }
-
-        controllers_.emplace_back(videoController);
-    }
-
-    void RemoveVideoController(const RefPtr<VideoController>& videoController)
-    {
-        if (videoController) {
-            controllers_.remove(videoController);
-        }
-    }
-
-    void Clear()
-    {
-        controllers_.clear();
-    }
-
-private:
-    std::list<RefPtr<VideoController>> controllers_;
-};
-
 // A component can show Video.
 class ACE_EXPORT VideoComponentV2 : public VideoComponent {
     DECLARE_ACE_TYPE(VideoComponentV2, VideoComponent);

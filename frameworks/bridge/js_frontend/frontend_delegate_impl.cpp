@@ -279,7 +279,7 @@ void FrontendDelegateImpl::TransferJsResponseData(int32_t callbackId, int32_t co
     }, TaskExecutor::TaskType::JS);
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void FrontendDelegateImpl::TransferJsResponseDataPreview(
     int32_t callbackId, int32_t code, ResponseData responseData) const
 {
@@ -1699,6 +1699,13 @@ void FrontendDelegateImpl::OnPageDestroy(int32_t pageId)
         [weak = AceType::WeakClaim(this), pageId] {
             auto delegate = weak.Upgrade();
             if (delegate) {
+                auto iter = delegate->pageMap_.find(pageId);
+                if (iter != delegate->pageMap_.end()) {
+                    auto page = iter->second;
+                    if (page) {
+                        page->OnJsEngineDestroy();
+                    }
+                }
                 delegate->destroyPage_(pageId);
                 delegate->RecyclePageId(pageId);
             }

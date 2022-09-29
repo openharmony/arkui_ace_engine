@@ -27,13 +27,13 @@ class FlutterRenderWeb final : public RenderWeb {
 
 public:
     void DumpTree(int32_t depth) override;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#if !defined(PREVIEW) and defined(OHOS_STANDARD_SYSTEM)
     void OnPaintFinish() override;
 #endif
 
 private:
     void PerformLayout() override;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#if !defined(PREVIEW) and defined(OHOS_STANDARD_SYSTEM)
     bool isCreateWebView_ = false;
 #endif
 };

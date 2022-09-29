@@ -66,6 +66,7 @@ public:
     void Stroke(const Offset& offset) override;
     void Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path) override;
     void Clip() override;
+    void Clip(const RefPtr<CanvasPath2D>& path) override;
     void BeginPath() override;
     void ClosePath() override;
     void Restore() override;
@@ -115,6 +116,7 @@ private:
     void Path2DClosePath(const Offset& offset, const PathArgs& args);
     void Path2DStroke(const Offset& offset);
     void Path2DFill(const Offset& offset);
+    void Path2DClip();
     void ParsePath2D(const Offset& offset, const RefPtr<CanvasPath2D>& path);
 
     bool antiAlias_ = false;

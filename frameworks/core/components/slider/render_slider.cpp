@@ -52,7 +52,7 @@ void RenderSlider::Update(const RefPtr<Component>& component)
     }
     sliderComponent_ = slider;
     if (!blockActive_) {
-        Initialize();
+        Initialize(slider);
         if (!slider) {
             LOGE("RenderSlider update with nullptr");
             EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
@@ -79,6 +79,10 @@ void RenderSlider::Update(const RefPtr<Component>& component)
         scaleValue_ = mode_ == SliderMode::INSET ? thickness_ / NormalizeToPx(DEFAULT_INSET_TRACK_THICKNESS) :
             thickness_ / NormalizeToPx(DEFAULT_OUTSET_TRACK_THICKNESS);
         SyncValueToComponent(std::clamp(slider->GetValue(), min_, max_));
+
+        ApplyRestoreInfo();
+        slider->SetCurrentValue(value_);
+
         if (min_ >= max_ || step_ > (max_ - min_) || step_ <= 0.0) {
             isValueError_ = true;
             LOGE("RenderSlider update min, max, value, step error");
@@ -272,29 +276,31 @@ Size RenderSlider::Measure()
     }
 }
 
-void RenderSlider::Initialize()
+void RenderSlider::Initialize(const RefPtr<SliderComponent>& sliderComponent)
 {
-    if (!dragDetector_) {
+    if (sliderComponent && sliderComponent->GetDirection() == Axis::VERTICAL) {
+        dragDetector_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
+    } else {
         dragDetector_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
-        dragDetector_->SetOnDragStart([weakSlider = AceType::WeakClaim(this)](const DragStartInfo& info) {
-            auto slider = weakSlider.Upgrade();
-            if (slider) {
-                slider->HandleDragStart(info.GetLocalLocation());
-            }
-        });
-        dragDetector_->SetOnDragUpdate([weakSlider = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
-            auto slider = weakSlider.Upgrade();
-            if (slider) {
-                slider->HandleDragUpdate(info.GetLocalLocation());
-            }
-        });
-        dragDetector_->SetOnDragEnd([weakSlider = AceType::WeakClaim(this)](const DragEndInfo& info) {
-            auto slider = weakSlider.Upgrade();
-            if (slider) {
-                slider->HandleDragEnd();
-            }
-        });
     }
+    dragDetector_->SetOnDragStart([weakSlider = AceType::WeakClaim(this)](const DragStartInfo& info) {
+        auto slider = weakSlider.Upgrade();
+        if (slider) {
+            slider->HandleDragStart(info.GetLocalLocation());
+        }
+    });
+    dragDetector_->SetOnDragUpdate([weakSlider = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
+        auto slider = weakSlider.Upgrade();
+        if (slider) {
+            slider->HandleDragUpdate(info.GetLocalLocation());
+        }
+    });
+    dragDetector_->SetOnDragEnd([weakSlider = AceType::WeakClaim(this)](const DragEndInfo& info) {
+        auto slider = weakSlider.Upgrade();
+        if (slider) {
+            slider->HandleDragEnd();
+        }
+    });
     if (!clickDetector_) {
         clickDetector_ = AceType::MakeRefPtr<ClickRecognizer>();
         clickDetector_->SetOnClick([weakSlider = AceType::WeakClaim(this)](const ClickInfo& info) {
@@ -814,6 +820,49 @@ void RenderSlider::UpdateAnimation()
     }));
     controller_->SetDuration(DEFAULT_SLIDER_ANIMATION_DURATION);
     controller_->AddInterpolator(translate_);
+}
+
+std::string RenderSlider::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("value", value_);
+    jsonObj->Put("showTips", showTips_);
+    jsonObj->Put("showSteps", showSteps_);
+    jsonObj->Put("thickness", thickness_);
+    jsonObj->Put("min", min_);
+    jsonObj->Put("max", max_);
+    jsonObj->Put("step", step_);
+    return jsonObj->ToString();
+}
+
+void RenderSlider::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(GetRestoreInfo());
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("RenderSlider:: restore info is invalid");
+        return;
+    }
+
+    auto jsonValue = info->GetValue("value");
+    auto jsonShowTips = info->GetValue("showTips");
+    auto jsonShowSteps = info->GetValue("showSteps");
+    auto jsonThickness = info->GetValue("thickness");
+    auto jsonMin = info->GetValue("min");
+    auto jsonMax = info->GetValue("max");
+    auto jsonStep = info->GetValue("step");
+
+    value_ = jsonValue->GetDouble();
+    showTips_ = jsonShowTips->GetBool();
+    showSteps_ = jsonShowSteps->GetBool();
+    thickness_ = jsonThickness->GetDouble();
+    min_ = jsonMin->GetDouble();
+    max_ = jsonMax->GetDouble();
+    step_ = jsonStep->GetDouble();
+
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

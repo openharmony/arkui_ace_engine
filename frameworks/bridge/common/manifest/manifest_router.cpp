@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
+#include <string>
 
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -31,6 +32,29 @@ std::string ManifestRouter::GetEntry(const std::string& suffix) const
         return "";
     }
     return pages_.front() + suffix;
+}
+
+std::string ManifestRouter::GetPagePath(std::string& uri) const
+{
+    const std::string suffix = ".js";
+    if (uri.empty()) {
+        LOGW("page uri is empty");
+        return "";
+    }
+    if (pages_.empty()) {
+        LOGE("pages list is empty");
+        return "";
+    }
+    // the case uri is starts with "/" and "/" is the mainPage
+    if (uri == "/") {
+        uri = pages_.front();
+        return pages_.front() + suffix;
+    }
+    if (std::find(pages_.begin(), pages_.end(), uri) != pages_.end()) {
+        return uri + suffix;
+    }
+    LOGE("[Engine Log] can't find this page %{public}s path", uri.c_str());
+    return "";
 }
 
 std::string ManifestRouter::GetPagePath(const std::string& uri, const std::string& suffix) const
@@ -61,7 +85,7 @@ const std::list<std::string>& ManifestRouter::GetPageList()
     return pages_;
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void ManifestRouter::InsertPageList(const std::string& uri)
 {
     pages_.emplace_back(uri);

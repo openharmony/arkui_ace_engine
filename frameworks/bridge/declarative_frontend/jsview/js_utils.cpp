@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
 
@@ -26,7 +26,7 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Framework {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 {
@@ -69,16 +69,16 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 
-const std::shared_ptr<Rosen::RSSurfaceNode> CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj)
+const std::shared_ptr<Rosen::RSProxyNode> CreateRSProxyNodeFromNapiValue(JSRef<JSVal> obj)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
-        LOGE("info[0] is not an object when try CreateRSSurfaceNodeFromNapiValue");
+        LOGE("info[0] is not an object when try CreateRSProxyNodeFromNapiValue");
         return nullptr;
     }
     auto engine = EngineHelper::GetCurrentEngine();
     if (!engine) {
-        LOGE("CreateRSSurfaceNodeFromNapiValue engine is null");
+        LOGE("CreateRSProxyNodeFromNapiValue engine is null");
         return nullptr;
     }
     auto nativeEngine = engine->GetNativeEngine();
@@ -104,7 +104,7 @@ const std::shared_ptr<Rosen::RSSurfaceNode> CreateRSSurfaceNodeFromNapiValue(JSR
         return nullptr;
     }
 
-    auto nodePtr = static_cast<std::shared_ptr<Rosen::RSSurfaceNode>*>(object->GetNativePointer());
+    auto nodePtr = static_cast<std::shared_ptr<Rosen::RSProxyNode>*>(object->GetNativePointer());
     if (nodePtr == nullptr) {
         return nullptr;
     }

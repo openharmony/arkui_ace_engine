@@ -28,7 +28,7 @@ ohos_unittest("AnimationDomTest") {
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = "ace_engine_full"
 }
 

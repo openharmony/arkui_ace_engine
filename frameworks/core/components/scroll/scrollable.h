@@ -70,6 +70,7 @@ class Scrollable : public TouchEventTarget, public RelatedChild {
 public:
     Scrollable() = default;
     Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis) {}
+    Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis) {}
     ~Scrollable() override;
 
     static void SetVelocityScale(double sVelocityScale);
@@ -292,6 +293,9 @@ public:
     {
         scrollBeginCallback_ = scrollBeginCallback;
     }
+
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
 
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;

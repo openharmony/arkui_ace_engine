@@ -24,17 +24,14 @@ class HdcJdwpSimulator;
 
 class HdcJdwpSimulator {
 public:
-    explicit HdcJdwpSimulator(uv_loop_t *loopIn, string pkgName);
+    explicit HdcJdwpSimulator(string pkgName);
     ~HdcJdwpSimulator();
     bool Connect();
     void FreeContext();
-    uv_loop_t *loop_;
 
 protected:
     struct ContextJdwpSimulator {
-        uv_pipe_t pipe;
-        uv_tcp_t newFd;
-        bool hasNewFd;
+        int cfd;
         HdcJdwpSimulator *thisClass;
     };
     using HCtxJdwpSimulator = struct ContextJdwpSimulator *;
@@ -45,18 +42,10 @@ private:
         uint32_t pid;
     };
     void *MallocContext();
-    static void ConnectJdwp(uv_connect_t *connection, int status);
-    static void FinishWriteCallback(uv_write_t *req, int status);
-#ifndef JS_JDWP_CONNECT
-    static void ReceiveNewFd(uv_stream_t *q, ssize_t nread, const uv_buf_t *buf);
-    static void ProcessIncoming(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf);
-#endif // JS_JDWP_CONNECT
-    static RetErrCode SendToStream(uv_stream_t *handleStream, const uint8_t *buf, const int bufLen,
-                                   const void *finishCallback);
-    bool exit_ = false;
+    static void ConnectJpid(void *param);
+    static void SendToJpid(int fd, const uint8_t *buf, const int bufLen);
     HCtxJdwpSimulator ctxPoint_;
     string pkgName_;
-    uv_connect_t *connect_;
 };
 } // namespace OHOS::Ace
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_REGISTER_HDC_JDWP_H

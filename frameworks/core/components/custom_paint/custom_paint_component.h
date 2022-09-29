@@ -100,6 +100,7 @@ public:
     void Stroke();
     void Stroke(const RefPtr<CanvasPath2D>& path);
     void Clip();
+    void Clip(const RefPtr<CanvasPath2D>& path);
     void BeginPath();
     void ClosePath();
     void Restore();
@@ -116,6 +117,7 @@ public:
     std::string GetJsonData(const std::string& path);
     double GetWidth() const;
     double GetHeight() const;
+    const std::vector<double>& GetLineDash() const;
 
     void UpdateFillRuleForPath(const CanvasFillRule rule);
     void UpdateFillRuleForPath2D(const CanvasFillRule rule);

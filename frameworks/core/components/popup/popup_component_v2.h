@@ -22,12 +22,6 @@
 
 namespace OHOS::Ace {
 
-struct ButtonProperties {
-    bool showButton = false;
-    std::string value;
-    EventMarker actionId;
-};
-
 class ACE_EXPORT PopupComponentV2 : public PopupComponent {
     DECLARE_ACE_TYPE(PopupComponentV2, PopupComponent);
 

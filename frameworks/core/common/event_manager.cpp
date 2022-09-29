@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/key_event.h"
@@ -37,7 +38,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
         return;
     }
     // first clean.
-    GestureReferee::GetInstance()->CleanGestureScope(touchPoint.id);
+    referee_->CleanGestureScope(touchPoint.id);
     // collect
     TouchTestResult hitTestResult;
     const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
@@ -68,7 +69,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         return;
     }
     // first clean.
-    GestureReferee::GetInstance()->CleanGestureScope(touchPoint.id);
+    refereeNG_->CleanGestureScope(touchPoint.id);
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
@@ -219,7 +220,8 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
         }
 
         if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
-            GestureReferee::GetInstance()->CleanGestureScope(point.id);
+            referee_->CleanGestureScope(point.id);
+            refereeNG_->CleanGestureScope(point.id);
             touchTestResults_.erase(point.id);
         }
 
@@ -245,124 +247,59 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
     return true;
 }
 
-void EventManager::CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode)
+bool EventManager::DispatchTabIndexEvent(
+    const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage)
 {
-    if (!rootNode) {
-        LOGE("param is null.");
-        return;
+    CHECK_NULL_RETURN(focusNode, false);
+    CHECK_NULL_RETURN(curPage, false);
+    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
+        event.action, event.repeatTime);
+    if (focusNode->HandleFocusByTabIndex(event, curPage)) {
+        LOGI("Tab index focus system handled this event");
+        return true;
     }
-    RefPtr<FocusGroup> rootScope = AceType::DynamicCast<FocusGroup>(rootNode);
-    if (rootScope && rootScope->IsFocusable()) {
-        auto children = rootScope->GetChildrenList();
-        if (children.size() == 1 && !AceType::DynamicCast<FocusGroup>(children.front())) {
-            if (rootScope->GetTabIndex() > 0) {
-                tabIndexNodes_.emplace_back(rootScope->GetTabIndex(), WeakClaim(AceType::RawPtr(rootScope)));
-            }
-            return;
-        }
-        for (auto& child : children) {
-            CollectTabIndexNodes(child);
-        }
-    }
-    if (rootNode->IsFocusable() && rootNode->GetTabIndex() > 0) {
-        tabIndexNodes_.emplace_back(rootNode->GetTabIndex(), WeakClaim(AceType::RawPtr(rootNode)));
-    }
-}
-
-void EventManager::AdjustTabIndexNodes()
-{
-    tabIndexNodes_.sort([](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
-        return a.first < b.first;
-    });
-    curTabFocusedIndex_ = NONE_TAB_FOCUSED_INDEX;
-    int32_t i = 0;
-    for (auto& wpNode : tabIndexNodes_) {
-        auto node = wpNode.second.Upgrade();
-        if (node && node->IsCurrentFocus()) {
-            curTabFocusedIndex_ = i;
-            break;
-        }
-        ++i;
-    }
-    if (!isTabNodesCollected_) {
-        isTabNodesCollected_ = true;
-        curTabFocusedIndex_ = DEFAULT_TAB_FOCUSED_INDEX;
-    }
-}
-
-bool EventManager::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
-{
-    if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
-        return false;
-    }
-    tabIndexNodes_.clear();
-    CollectTabIndexNodes(focusNode);
-    AdjustTabIndexNodes();
-    if ((curTabFocusedIndex_ < 0 || curTabFocusedIndex_ >= static_cast<int32_t>(tabIndexNodes_.size())) &&
-        curTabFocusedIndex_ != DEFAULT_TAB_FOCUSED_INDEX) {
-        LOGI("Not focusing on any tab index node. Use default focus system.");
-        return false;
-    }
-    if (curTabFocusedIndex_ == DEFAULT_TAB_FOCUSED_INDEX) {
-        curTabFocusedIndex_ = 0;
-    } else {
-        if (event.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
-            event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
-            LOGI("RequestNextFocus by 'SHIFT-TAB'");
-            --curTabFocusedIndex_;
-        } else {
-            LOGI("RequestNextFocus by 'TAB'");
-            ++curTabFocusedIndex_;
-        }
-    }
-    if (curTabFocusedIndex_ < 0 || curTabFocusedIndex_ >= static_cast<int32_t>(tabIndexNodes_.size())) {
-        LOGI("Focus from tab index node to normal node. Use default focus system.");
-        return false;
-    }
-    auto iter = tabIndexNodes_.begin();
-    std::advance(iter, curTabFocusedIndex_);
-    if (iter == tabIndexNodes_.end()) {
-        LOGE("Tab index node is not found");
-        return false;
-    }
-    auto nodeNeedToFocus = (*iter).second.Upgrade();
-    if (!nodeNeedToFocus) {
-        LOGE("Tab index node is null");
-        return false;
-    }
-    LOGI("Focus on tab index node(%{public}d)", curTabFocusedIndex_);
-    auto scopeNeedToFoucs = AceType::DynamicCast<FocusGroup>(nodeNeedToFocus);
-    if (scopeNeedToFoucs && !scopeNeedToFoucs->IsGroupDefaultFocused()) {
-        auto defaultFocusNode = nodeNeedToFocus->GetChildDefaultFoucsNode(false);
-        if (defaultFocusNode) {
-            if (!defaultFocusNode->IsFocusableWholePath()) {
-                LOGW("node(%{public}d) is not focusable", curTabFocusedIndex_);
-                return false;
-            }
-            scopeNeedToFoucs->SetIsGroupDefaultFocused(true);
-            return defaultFocusNode->RequestFocusImmediately();
-        }
-    }
-    if (!nodeNeedToFocus->IsFocusableWholePath()) {
-        LOGW("node(%{public}d) is not focusable", curTabFocusedIndex_);
-        return false;
-    }
-    return nodeNeedToFocus->RequestFocusImmediately();
+    return false;
 }
 
 bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
 {
-    if (!focusNode) {
-        LOGW("focusNode is null.");
-        return false;
-    }
+    CHECK_NULL_RETURN(focusNode, false);
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
-    if (HandleFocusByTabIndex(event, focusNode)) {
+    if (focusNode->HandleKeyEvent(event)) {
+        LOGI("Default focus system handled this event");
+        return true;
+    }
+    LOGI("Use platform to handle this event");
+    return false;
+}
+
+bool EventManager::DispatchTabIndexEventNG(
+    const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& curPage)
+{
+    CHECK_NULL_RETURN(focusNode, false);
+    CHECK_NULL_RETURN(curPage, false);
+    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
+        event.action, event.repeatTime);
+    auto focusNodeHub = focusNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    auto curPageFocusHub = curPage->GetFocusHub();
+    CHECK_NULL_RETURN(curPageFocusHub, false);
+    if (focusNodeHub->HandleFocusByTabIndex(event, curPageFocusHub)) {
         LOGI("Tab index focus system handled this event");
         return true;
     }
-    if (focusNode->HandleKeyEvent(event)) {
+    return false;
+}
+
+bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode)
+{
+    CHECK_NULL_RETURN(focusNode, false);
+    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
+        event.action, event.repeatTime);
+    auto focusNodeHub = focusNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    if (focusNodeHub->HandleKeyEvent(event)) {
         LOGI("Default focus system handled this event");
         return true;
     }
@@ -383,8 +320,16 @@ void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& 
     if (hitTestResult.empty()) {
         LOGD("mouse hover test result is empty");
     }
-    mouseHoverTestResultsPre_ = std::move(mouseHoverTestResults_);
-    mouseHoverTestResults_ = std::move(hitTestResult);
+    if (event.action == MouseAction::WINDOW_LEAVE) {
+        mouseHoverTestResultsPre_ = std::move(mouseHoverTestResults_);
+        mouseHoverTestResults_.clear();
+    } else if (event.action == MouseAction::WINDOW_ENTER) {
+        mouseHoverTestResultsPre_.clear();
+        mouseHoverTestResults_ = std::move(hitTestResult);
+    } else {
+        mouseHoverTestResultsPre_ = std::move(mouseHoverTestResults_);
+        mouseHoverTestResults_ = std::move(hitTestResult);
+    }
     mouseHoverNodePre_ = mouseHoverNode_;
     mouseHoverNode_ = hoverNode;
     LOGI("MouseDetect hit test last/new result size = %{public}zu/%{public}zu", mouseHoverTestResultsPre_.size(),
@@ -410,28 +355,17 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
     return false;
 }
 
-bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
+void EventManager::DispatchMouseHoverAnimation(const MouseEvent& event)
 {
     auto hoverNodeCur = mouseHoverNode_.Upgrade();
     auto hoverNodePre = mouseHoverNodePre_.Upgrade();
     if (event.action == MouseAction::PRESS) {
         if (hoverNodeCur) {
             hoverNodeCur->AnimateMouseHoverExit();
-            hoverNodeCur->OnMouseClickDownAnimation();
         }
     } else if (event.action == MouseAction::RELEASE) {
         if (hoverNodeCur) {
-            hoverNodeCur->OnMouseClickUpAnimation();
             hoverNodeCur->AnimateMouseHoverEnter();
-        }
-    } else if (event.button != MouseButton::NONE_BUTTON && event.action == MouseAction::MOVE) {
-        if (hoverNodeCur != hoverNodePre) {
-            if (hoverNodePre) {
-                hoverNodePre->OnMouseClickUpAnimation();
-            }
-            if (hoverNodeCur) {
-                hoverNodeCur->OnMouseClickDownAnimation();
-            }
         }
     } else if (event.button == MouseButton::NONE_BUTTON && event.action == MouseAction::MOVE) {
         if (hoverNodeCur != hoverNodePre) {
@@ -442,7 +376,19 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
                 hoverNodePre->AnimateMouseHoverExit();
             }
         }
+    } else if (event.action == MouseAction::WINDOW_ENTER) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateMouseHoverEnter();
+        }
+    } else if (event.action == MouseAction::WINDOW_LEAVE) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateMouseHoverExit();
+        }
     }
+}
+
+bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
+{
     for (const auto& wp : mouseHoverTestResultsPre_) {
         // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hover
         auto it = std::find(mouseHoverTestResults_.begin(), mouseHoverTestResults_.end(), wp);
@@ -461,6 +407,104 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
             if (hoverNode) {
                 hoverNode->HandleMouseHoverEvent(MouseState::HOVER);
             }
+        }
+    }
+    return true;
+}
+
+void EventManager::MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode)
+{
+    if (!frameNode) {
+        LOGW("renderNode is null.");
+        return;
+    }
+    const NG::PointF point { event.x, event.y };
+    MouseTestResult mouseTestResult;
+    MouseTestResult hoverTestResult;
+    RefPtr<NG::FrameNode> hoverNode = nullptr;
+    frameNode->MouseTest(point, point, mouseTestResult, hoverTestResult, hoverNode);
+    if (mouseTestResult.empty()) {
+        LOGD("mouse hover test result is empty");
+    }
+    if (event.action == MouseAction::WINDOW_LEAVE) {
+        lastHoverTestResults_ = std::move(currHoverTestResults_);
+        currHoverTestResults_.clear();
+    } else if (event.action == MouseAction::WINDOW_ENTER) {
+        lastHoverTestResults_.clear();
+        currHoverTestResults_ = std::move(hoverTestResult);
+    } else {
+        lastHoverTestResults_ = std::move(currHoverTestResults_);
+        currHoverTestResults_ = std::move(hoverTestResult);
+    }
+    currMouseTestResults_ = std::move(mouseTestResult);
+    lastHoverNode_ = currHoverNode_;
+    currHoverNode_ = WeakClaim(AceType::RawPtr(hoverNode));
+    LOGI("MouseTest hit test last/new result size = %{public}zu/%{public}zu.",
+        lastHoverTestResults_.size(), currHoverTestResults_.size());
+}
+
+bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
+{
+    if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
+        event.action == MouseAction::MOVE) {
+        LOGD("RenderBox::HandleMouseEvent, button is %{public}d, action is %{public}d", event.button, event.action);
+        for (const auto& mouseTarget : currMouseTestResults_) {
+            if (mouseTarget) {
+                if (mouseTarget->HandleMouseEvent(event)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
+{
+    auto hoverNodeCur = currHoverNode_.Upgrade();
+    auto hoverNodePre = lastHoverNode_.Upgrade();
+    if (event.action == MouseAction::PRESS) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateHoverEffect(false);
+        }
+    } else if (event.action == MouseAction::RELEASE) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateHoverEffect(true);
+        }
+    } else if (event.button == MouseButton::NONE_BUTTON && event.action == MouseAction::MOVE) {
+        if (hoverNodeCur != hoverNodePre) {
+            if (hoverNodeCur) {
+                hoverNodeCur->AnimateHoverEffect(true);
+            }
+            if (hoverNodePre) {
+                hoverNodePre->AnimateHoverEffect(false);
+            }
+        }
+    } else if (event.action == MouseAction::WINDOW_ENTER) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateHoverEffect(true);
+        }
+    } else if (event.action == MouseAction::WINDOW_LEAVE) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateHoverEffect(false);
+        }
+    }
+}
+
+bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
+{
+    for (const auto& hoverResult : lastHoverTestResults_) {
+        // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hover
+        auto it = std::find(currHoverTestResults_.begin(), currHoverTestResults_.end(), hoverResult);
+        if (it == currHoverTestResults_.end()) {
+            hoverResult->HandleHoverEvent(false);
+        }
+    }
+    for (const auto& hoverResult : currHoverTestResults_) {
+        // get all current hover nodes while it's not in previous hover nodes. Those nodes are new hover
+        auto it = std::find(lastHoverTestResults_.begin(), lastHoverTestResults_.end(), hoverResult);
+        if (it == lastHoverTestResults_.end()) {
+            hoverResult->HandleHoverEvent(true);
         }
     }
     return true;
@@ -488,6 +532,31 @@ bool EventManager::DispatchAxisEvent(const AxisEvent& event)
     return true;
 }
 
+void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode)
+{
+    if (!frameNode) {
+        LOGW("renderNode is null.");
+        return;
+    }
+    const NG::PointF point { event.x, event.y };
+    frameNode->AxisTest(point, point, axisTestResults_);
+}
+
+bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
+{
+    if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0) {
+        return false;
+    }
+    LOGD("DispatchAxisEventNG, action is %{public}d, axis is %{public}f / %{public}f / %{public}f", event.action,
+        event.horizontalAxis, event.verticalAxis, event.pinchAxisScale);
+    for (const auto& axisTarget : axisTestResults_) {
+        if (axisTarget && axisTarget->HandleAxisEvent(event)) {
+            return true;
+        }
+    }
+    return true;
+}
+
 bool EventManager::DispatchRotationEvent(
     const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode)
 {
@@ -509,6 +578,13 @@ void EventManager::ClearResults()
 {
     touchTestResults_.clear();
     mouseTestResults_.clear();
+}
+
+EventManager::EventManager()
+{
+    LOGD("EventManger Constructor.");
+    referee_ = AceType::MakeRefPtr<GestureReferee>();
+    refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
 }
 
 } // namespace OHOS::Ace

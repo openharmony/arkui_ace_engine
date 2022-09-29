@@ -193,6 +193,14 @@ bool RenderScroll::UpdateOffset(Offset& delta, int32_t source)
     if (IsAtTop() && HandleRefreshEffect(-delta.GetY(), source, currentOffset_.GetY())) {
         return true;
     }
+    if ((IsAtBottom() && GetMainOffset(delta) > 0.0) || (IsAtTop() && GetMainOffset(delta) < 0.0)) {
+        if (!scrollEffect_) {
+            return false;
+        }
+        if (scrollEffect_->IsNoneEffect()) {
+            return false;
+        }
+    }
     if (!ScrollPageCheck(delta, source)) {
         return false;
     }
@@ -866,6 +874,8 @@ void RenderScroll::Update(const RefPtr<Component>& component)
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
+    // ApplyRestoreInfo maybe change currentOffset_
+    ApplyRestoreInfo();
     lastOffset_ = currentOffset_;
     // Send scroll none when first build.
     HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
@@ -1064,6 +1074,29 @@ bool RenderScroll::IsAxisScrollable(AxisDirection direction)
 
 void RenderScroll::HandleAxisEvent(const AxisEvent& event)
 {
+}
+
+std::string RenderScroll::ProvideRestoreInfo()
+{
+    if (!NearZero(currentOffset_.GetY()) && axis_ == Axis::VERTICAL) {
+        return std::to_string(currentOffset_.GetY());
+    } else if (!NearZero(currentOffset_.GetX()) && axis_ == Axis::HORIZONTAL) {
+        return std::to_string(currentOffset_.GetX());
+    }
+    return "";
+}
+
+void RenderScroll::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    if (axis_ == Axis::VERTICAL) {
+        currentOffset_.SetY(StringUtils::StringToDouble(GetRestoreInfo()));
+    } else {
+        currentOffset_.SetX(StringUtils::StringToDouble(GetRestoreInfo()));
+    }
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

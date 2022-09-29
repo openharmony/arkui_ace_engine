@@ -18,9 +18,12 @@
 #include "base/geometry/axis.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/bilateral_spring_node.h"
+#include "core/common/text_field_manager.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/scroll/scroll_spring_effect.h"
@@ -106,6 +109,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     component_ = AceType::DynamicCast<ListComponent>(component);
     ACE_DCHECK(component_);
 
+    isRightToLeft_ = component_->GetTextDirection() == TextDirection::RTL ? true : false;
     RemoveAllItems();
 
     auto axis = component_->GetDirection();
@@ -119,6 +123,7 @@ void RenderList::Update(const RefPtr<Component>& component)
         startIndex_ = initialIndex_ > 0 ? initialIndex_ : 0;
         useEstimateCurrentOffset_ = true;
     }
+    // maybe change startIndex
     ApplyRestoreInfo();
 
     const auto& divider = component_->GetItemDivider();
@@ -441,11 +446,9 @@ void RenderList::CalculateLanes()
         LOGE("unexpected situation, set lanes to 1, maxLanes: %{public}f, minLanes: %{public}f, minLaneLength_: "
             "%{public}f, maxLaneLength_: %{public}f", maxLanes, minLanes, minLaneLength_, maxLaneLength_);
     } while (0);
-    if (lanes_ != lanes) { // if lanes changes, layout from item 0
-        lanes_ = lanes;
-        currentOffset_ = 0.0;
-        startIndex_ = 0;
-        startIndexOffset_ = 0.0;
+    lanes_ = lanes;
+    if (lanes > 1) { // if lanes changes, adjust startIndex_
+        startIndex_ -= GetItemRelativeIndex(startIndex_) % lanes;
     }
 }
 
@@ -487,9 +490,7 @@ void RenderList::RequestNewItemsAtEndForLaneList(double& curMainPos, double main
         }
         if (itemGroup) {
             double size = GetMainSize(itemGroup->GetLayoutSize());
-            if (GreatNotEqual(size, 0.0)) {
-                curMainPos += size + spaceWidth_;
-            }
+            curMainPos += size + spaceWidth_;
         }
         if (breakWhenRequestNewItem) {
             break;
@@ -542,7 +543,7 @@ void RenderList::RequestNewItemsAtStartForLaneList()
                 breakWhenRequestNewItem = true;
                 break;
             }
-            auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_, false);
+            auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_ - spaceWidth_, false);
             if (!child) {
                 breakWhenRequestNewItem = true;
                 break;
@@ -561,9 +562,9 @@ void RenderList::RequestNewItemsAtStartForLaneList()
             ++newItemCntInLine;
         } while (0);
         bool singleLaneDoneAddItem = (lanes_ == 1) && !breakWhenRequestNewItem;
-        bool multiLaneDoneSupplyOneLine = (lanes_ > 1) && (newItemCntInLine == lanes_);
-        bool multiLaneStartSupplyLine = (itemGroup || breakWhenRequestNewItem) && (newItemCntInLine >= 1);
-        if (singleLaneDoneAddItem || multiLaneDoneSupplyOneLine || multiLaneStartSupplyLine) {
+        bool isLaneStart = !itemGroup && (lanes_ > 1) && (GetItemRelativeIndex(startIndex_ - 1) % lanes_ == 0);
+        bool multiLaneSupplyLine = (itemGroup || breakWhenRequestNewItem || isLaneStart) && (newItemCntInLine >= 1);
+        if (singleLaneDoneAddItem || multiLaneSupplyLine) {
             currentOffset_ -= lineMainSize + spaceWidth_;
             startIndexOffset_ -= lineMainSize + spaceWidth_;
             newItemCntInLine = 0;
@@ -571,10 +572,8 @@ void RenderList::RequestNewItemsAtStartForLaneList()
         }
         if (itemGroup) {
             double size = GetMainSize(itemGroup->GetLayoutSize());
-            if (GreatNotEqual(size, 0.0)) {
-                currentOffset_ -= size + spaceWidth_;
-                startIndexOffset_ -= size + spaceWidth_;
-            }
+            currentOffset_ -= size + spaceWidth_;
+            startIndexOffset_ -= size + spaceWidth_;
         }
         if (breakWhenRequestNewItem) {
             break;
@@ -594,7 +593,7 @@ void RenderList::RequestNewItemsAtStart()
                 break;
             }
         }
-        auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_, false);
+        auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_ - spaceWidth_, false);
         if (!child) {
             break;
         }
@@ -645,7 +644,9 @@ void RenderList::PerformLayout()
         curMainPos += GetMainSize(selectedItem_->GetLayoutSize()) + spaceWidth_;
     }
 
-    curMainPos -= spaceWidth_;
+    if (startIndex_ + items_.size() >= TotalCount()) {
+        curMainPos -= spaceWidth_;
+    }
 
     // Check if reach the end of list
     reachEnd_ = LessOrEqual(curMainPos, mainSize);
@@ -653,7 +654,9 @@ void RenderList::PerformLayout()
         (scrollable_ && scrollable_->IsAnimationNotRunning()) || !scrollEffect_ || autoScrollingForItemMove_;
     if (noEdgeEffect && reachEnd_) {
         // Adjust end of list to match the end of layout
-        currentOffset_ += mainSize - curMainPos;
+        if (LessNotEqual(curMainPos, mainSize)) {
+            AdjustForReachEnd(mainSize, curMainPos);
+        }
         curMainPos = mainSize;
     }
 
@@ -667,7 +670,9 @@ void RenderList::PerformLayout()
     // Check if reach the start of list
     reachStart_ = GreatOrEqual(currentOffset_, 0.0);
     if (noEdgeEffect && reachStart_) {
-        curMainPos -= currentOffset_;
+        if (GreatOrEqual(currentOffset_, 0.0)) {
+            AdjustForReachStart(curMainPos);
+        }
         currentOffset_ = 0;
         if (isLaneList_) {
             RequestNewItemsAtEndForLaneList(curMainPos, mainSize);
@@ -778,15 +783,13 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
     size_t lastIdx = 0;
     double selectedItemMainSize = selectedItem_ ? GetMainSize(selectedItem_->GetLayoutSize()) : 0.0;
 
-    double totalLaneCrossSize = 0;
     for (auto iter = items_.begin(); iter != items_.end();) {
         RefPtr<RenderListItem> child;
         double childMainSize = 0.0;
         double childCrossSize = 0.0;
         std::vector<RefPtr<RenderListItem>> itemSet;
         // start set child position in a row
-        int32_t rowIndex;
-        for (rowIndex = 0; rowIndex < lanes_; rowIndex++) {
+        for (int32_t rowIndex = 0; rowIndex < lanes_; rowIndex++) {
             child = *iter;
             auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
             if (itemGroup && rowIndex > 0) {
@@ -801,15 +804,33 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
                 break;
             }
         }
-        totalLaneCrossSize = std::max(childCrossSize, totalLaneCrossSize);
-        auto offsetCross = CalculateLaneCrossOffset(crossSize, totalLaneCrossSize);
-        auto offset = MakeValue<Offset>(curMainPos, offsetCross);
+        if (!fixedCrossSize_) {
+            crossSize = std::max(crossSize, childCrossSize);
+        }
+        auto offset = MakeValue<Offset>(curMainPos, 0.0);
         if (chainAnimation_) {
-            offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
+            double chainDelta = GetChainDelta(index);
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                itemGroup->SetChainOffset(-chainDelta);
+            }
+            offset += MakeValue<Offset>(-chainDelta, 0.0);
         }
         // set item position for one row
         for (size_t i = 0; i < itemSet.size(); i++) {
-            auto position = offset + MakeValue<Offset>(0.0, childCrossSize / itemSet.size() * i);
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(itemSet[i]);
+            double itemCrossSize = itemGroup ? crossSize : crossSize / lanes_;
+            auto offsetCross = CalculateLaneCrossOffset(itemCrossSize, GetCrossSize(itemSet[i]->GetLayoutSize()));
+            auto position = offset + MakeValue<Offset>(0.0, itemCrossSize * i + offsetCross);
+            if (isRightToLeft_) {
+                if (IsVertical()) {
+                    position = MakeValue<Offset>(
+                        GetMainAxis(position), crossSize - childCrossSize / itemSet.size() - GetCrossAxis(position));
+                } else {
+                    position = MakeValue<Offset>(
+                        mainSize - childMainSize - GetMainAxis(position), GetCrossAxis(position));
+                }
+            }
             SetChildPosition(itemSet[i], position);
         }
 
@@ -855,9 +876,6 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
 
         childMainSize += spaceWidth_;
         if (LessNotEqual(curMainPos, mainSize) && GreatNotEqual(curMainPos + childMainSize, 0.0)) {
-            if (!fixedCrossSize_) {
-                crossSize = std::max(crossSize, childCrossSize);
-            }
             firstIdx = std::min(firstIdx, index);
             lastIdx = std::max(lastIdx, index);
         }
@@ -891,7 +909,17 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
             const auto& stickyItemLayoutSize = currentStickyItem_->GetLayoutSize();
             const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
             if (nextStickyItem && LessNotEqual(nextStickyMainAxis, mainStickySize)) {
-                currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0));
+                auto position = MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0);
+                if (isRightToLeft_) {
+                    if (IsVertical()) {
+                        position = MakeValue<Offset>(
+                            GetMainAxis(position), crossSize - GetCrossSize(stickyItemLayoutSize) - GetCrossAxis(position));
+                    } else {
+                        position = MakeValue<Offset>(
+                            mainSize - mainStickySize - GetMainAxis(position), GetCrossAxis(position));
+                    }
+                }
+                currentStickyItem_->SetPosition(position);
             } else {
                 currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, 0.0));
             }
@@ -955,9 +983,21 @@ Size RenderList::SetItemsPosition(double mainSize)
         auto offsetCross = CalculateLaneCrossOffset(crossSize, GetCrossSize(childLayoutSize));
         auto offset = MakeValue<Offset>(curMainPos, offsetCross);
         if (chainAnimation_) {
-            offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
+            double chainDelta = GetChainDelta(index);
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                itemGroup->SetChainOffset(-chainDelta);
+            }
+            offset += MakeValue<Offset>(-chainDelta, 0.0);
         }
 
+        if (isRightToLeft_) {
+            if (IsVertical()) {
+                offset = MakeValue<Offset>(GetMainAxis(offset), crossSize - GetCrossSize(childLayoutSize) - GetCrossAxis(offset));
+            } else {
+                offset = MakeValue<Offset>(mainSize - GetMainSize(childLayoutSize) - GetMainAxis(offset), GetCrossAxis(offset));
+            }
+        }
         SetChildPosition(child, offset);
         // Disable sticky mode while expand all items
         if (fixedMainSize_ && child->GetSticky() != StickyMode::NONE) {
@@ -1006,10 +1046,21 @@ Size RenderList::SetItemsPosition(double mainSize)
     if (currentStickyItem_) {
         const auto& stickyItemLayoutSize = currentStickyItem_->GetLayoutSize();
         const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
+        auto offsetCross = CalculateLaneCrossOffset(crossSize, GetCrossSize(currentStickyItem_->GetLayoutSize()));
         if (nextStickyItem && LessNotEqual(nextStickyMainAxis, mainStickySize)) {
-            currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0));
+            auto position = MakeValue<Offset>(nextStickyMainAxis - mainStickySize, offsetCross);
+            if (isRightToLeft_) {
+                if (IsVertical()) {
+                    position = MakeValue<Offset>(
+                        GetMainAxis(position), crossSize - GetCrossSize(stickyItemLayoutSize) - GetCrossAxis(position));
+                } else {
+                    position = MakeValue<Offset>(
+                        mainSize - mainStickySize - GetMainAxis(position), GetCrossAxis(position));
+                }
+            }
+            currentStickyItem_->SetPosition(position);
         } else {
-            currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, 0.0));
+            currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, offsetCross));
         }
 
         if (!fixedCrossSize_) {
@@ -1243,6 +1294,7 @@ double RenderList::ApplyLayoutParam()
             startMainPos_ = (1.0 - VIEW_PORT_SCALE) / 2 * maxMainSize;
             endMainPos_ = startMainPos_ + (maxMainSize * VIEW_PORT_SCALE);
             fixedMainSizeByLayoutParam_ = NearEqual(maxMainSize, GetMainSize(GetLayoutParam().GetMinSize()));
+            SizeChangeOffset(maxMainSize);
         }
 
         fixedCrossSize_ = !NearEqual(GetCrossSize(maxLayoutSize), Size::INFINITE_SIZE);
@@ -1295,8 +1347,8 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(double mainSize)
     double curMainPos = currentOffset_;
     size_t curIndex = startIndex_ - 1;
     std::vector<RefPtr<RenderListItem>> itemsInOneRow;
-    int32_t lackItemCount = 0;
     for (auto it = items_.begin(); it != items_.end();) {
+        int32_t lackItemCount = 0;
         // 1. layout children in a row
         double mainSize = 0.0;
         itemsInOneRow.clear();
@@ -1326,7 +1378,7 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(double mainSize)
             }
             // reach end of [items_]
             if (it == items_.end()) {
-                lackItemCount = lanes_ - i;
+                lackItemCount = lanes_ - i - 1;
                 break;
             }
         }
@@ -1570,6 +1622,10 @@ RefPtr<RenderListItem> RenderList::RequestListItem(size_t index)
         newItem->SetVisible(true);
     }
 
+    if (newItem->GetHidden()) {
+        newItem->SetHidden(false);
+    }
+
     return newItem;
 }
 
@@ -1579,6 +1635,20 @@ void RenderList::RecycleListItem(size_t index)
     if (generator) {
         generator->RecycleListItem(index);
     }
+}
+
+size_t RenderList::FindItemStartIndex(size_t index)
+{
+    auto generator = itemGenerator_.Upgrade();
+    if (generator) {
+        return generator->FindItemStartIndex(index);
+    }
+    return 0;
+}
+
+size_t RenderList::GetItemRelativeIndex(size_t index)
+{
+    return index - FindItemStartIndex(index);
 }
 
 size_t RenderList::TotalCount()
@@ -1868,11 +1938,8 @@ void RenderList::CalculateMainScrollExtent(double curMainPos, double mainSize)
         useEstimateCurrentOffset_ = false;
         startIndexOffset_ = startIndex_ * averageItemHeight;
     }
-    if (estimatedHeight_ <= GetMainSize(GetLayoutSize()) && scrollBar_) {
-        LOGD("SetScrollable false, do not show scroll bar.");
-        scrollBar_->SetScrollable(false);
-    } else {
-        scrollBar_->SetScrollable(true);
+    if (scrollBar_) {
+        scrollBar_->SetScrollable(estimatedHeight_ > GetMainSize(GetLayoutSize()));
     }
 }
 
@@ -2137,7 +2204,10 @@ void RenderList::UpdateAccessibilityVisible()
         if (!listItem || listItem->GetChildren().empty()) {
             continue;
         }
-        auto node = listItem->GetAccessibilityNode().Upgrade();
+        // RenderListItem's accessibility node is List's in v2, see ViewStackProcessor::WrapComponents() and
+        // RenderElement::SetAccessibilityNode
+        auto listItemWithAccessibilityNode = listItem->GetFirstChild();
+        auto node = listItemWithAccessibilityNode->GetAccessibilityNode().Upgrade();
         if (!node) {
             continue;
         }
@@ -2147,10 +2217,10 @@ void RenderList::UpdateAccessibilityVisible()
             listItemRect.SetOffset(globalOffset + listItem->GetPosition());
             visible = listItemRect.IsIntersectWith(viewPortRect);
         }
-        listItem->SetAccessibilityVisible(visible);
+        listItemWithAccessibilityNode->SetAccessibilityVisible(visible);
         if (visible) {
             Rect clampRect = listItemRect.Constrain(viewPortRect);
-            listItem->SetAccessibilityRect(clampRect);
+            listItemWithAccessibilityNode->SetAccessibilityRect(clampRect);
         } else {
             listItem->NotifyPaintFinish();
         }
@@ -2567,7 +2637,7 @@ size_t RenderList::CalculateSelectedIndex(
     return DEFAULT_INDEX;
 }
 
-size_t RenderList::CalculateInsertIndex(
+int32_t RenderList::CalculateInsertIndex(
     const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size selectedItemSize)
 {
     if (targetRenderlist->TotalCount() == 0) {
@@ -2592,16 +2662,16 @@ size_t RenderList::CalculateInsertIndex(
             return 0;
         }
         if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) > -1) {
-            return targetRenderlist->GetIndexByListItem(listItem) + 1;
+            return static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) + 1;
         }
-        return DEFAULT_INDEX;
+        return DEFAULT_INDEX_VALUE;
     }
 
     if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) > -1) {
-        return targetRenderlist->GetIndexByListItem(listItem);
+        return static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem));
     }
 
-    return DEFAULT_INDEX;
+    return DEFAULT_INDEX_VALUE;
 }
 
 bool RenderList::IsAxisScrollable(AxisDirection direction)
@@ -2615,6 +2685,23 @@ void RenderList::HandleAxisEvent(const AxisEvent& event) {}
 bool RenderList::HandleMouseEvent(const MouseEvent& event)
 {
     if (!isMultiSelectable_) {
+        return false;
+    }
+    scrollable_->MarkAvailable(false);
+
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS) {
+            Point mousePoint(event.GetOffset().GetX(), event.GetOffset().GetY());
+            auto listItem = FindChildNodeOfClass<RenderListItem>(mousePoint, mousePoint);
+            if (listItem && listItem->IsDragStart()) {
+                forbidMultiSelect_ = true;
+            }
+        } else if (event.action == MouseAction::RELEASE) {
+            forbidMultiSelect_ = false;
+        }
+    }
+
+    if (forbidMultiSelect_) {
         return false;
     }
 
@@ -2956,7 +3043,10 @@ int32_t RenderList::RequestNextFocus(bool vertical, bool reverse)
 
 std::string RenderList::ProvideRestoreInfo()
 {
-    return std::to_string(firstDisplayIndex_);
+    if (firstDisplayIndex_ > 0) {
+        return std::to_string(firstDisplayIndex_);
+    }
+    return "";
 }
 
 void RenderList::ApplyRestoreInfo()
@@ -2976,8 +3066,8 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
     if (listItemGroup) {
         renderNode = listItemGroup->GetRenderNode();
         ListItemLayoutParam param = {
-            .startCacheCount = cachedCount_ > 0 ? cachedCount_ - startCachedCount_ : 0,
-            .endCacheCount = cachedCount_ > 0 ? cachedCount_ - endCachedCount_ : 0,
+            .startCacheCount = (cachedCount_ > 0 && !isLaneList_) ? cachedCount_ - startCachedCount_ : 0,
+            .endCacheCount = (cachedCount_ > 0 && !isLaneList_) ? cachedCount_ - endCachedCount_ : 0,
             .startMainPos = (cachedCount_ == 0 || isLaneList_) ? startMainPos_ : 0,
             .endMainPos = (cachedCount_ == 0 || isLaneList_) ? endMainPos_ : mainSize_,
             .listMainSize = mainSize_,
@@ -2985,7 +3075,8 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
             .forwardLayout = forward,
             .isVertical = vertical_,
             .sticky = sticky_,
-            .lanes = isLaneList_ ? lanes_ : 1
+            .lanes = isLaneList_ ? lanes_ : 1,
+            .align = component_->GetAlignListItemAlign(),
         };
         listItemGroup->SetItemGroupLayoutParam(param);
         listItemGroup->SetNeedLayout(true);
@@ -3029,6 +3120,61 @@ void RenderList::AddChildItem(RefPtr<RenderNode> child)
         renderNode = listItemGroup->GetRenderNode();
     }
     AddChild(renderNode);
+}
+
+void RenderList::SizeChangeOffset(double newWindowHeight)
+{
+    LOGD("list newWindowHeight = %{public}f", newWindowHeight);
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
+    // only need to offset vertical lists
+    if (textFieldManager && vertical_) {
+        // only when textField is onFocus
+        if (!textFieldManager->GetOnFocusTextField().Upgrade()) {
+            return;
+        }
+        auto position = textFieldManager->GetClickPosition().GetY();
+        double offset = newWindowHeight - position;
+        if (LessOrEqual(offset, 0.0)) {
+            // negative offset to scroll down
+            currentOffset_ += offset;
+            startIndexOffset_ += offset;
+        }
+        LOGD("size change offset applied, %{public}f", offset);
+    }
+}
+
+void RenderList::AdjustForReachEnd(double mainSize, double curMainPos)
+{
+    double delta = mainSize - curMainPos;
+    for (auto rit = items_.rbegin(); rit != items_.rend(); rit++) {
+        auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(*rit);
+        if (itemGroup) {
+            double size = GetMainSize(itemGroup->GetLayoutSize());
+            LayoutChild(itemGroup, itemGroup->GetReferencePos() + delta, itemGroup->IsForwardLayout());
+            double newSize = GetMainSize(itemGroup->GetLayoutSize());
+            delta -= (newSize - size);
+        }
+    }
+    currentOffset_ += delta;
+}
+
+void RenderList::AdjustForReachStart(double &curMainPos)
+{
+    double delta = currentOffset_;
+    for (const auto& child : items_) {
+        auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+        if (itemGroup) {
+            double size = GetMainSize(itemGroup->GetLayoutSize());
+            LayoutChild(itemGroup, itemGroup->GetReferencePos() - delta, itemGroup->IsForwardLayout());
+            double newSize = GetMainSize(itemGroup->GetLayoutSize());
+            delta -= (newSize - size);
+        }
+    }
+    curMainPos -= delta;
 }
 
 } // namespace OHOS::Ace::V2

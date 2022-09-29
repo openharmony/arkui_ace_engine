@@ -18,6 +18,7 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -32,10 +33,6 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        if (isBuildDone_) {
-            return MakeRefPtr<CustomNodeLayoutAlgorithm>(nullptr);
-        }
-        isBuildDone_ = true;
         return MakeRefPtr<CustomNodeLayoutAlgorithm>(renderFunction_);
     }
 
@@ -44,11 +41,10 @@ public:
         renderFunction_ = renderFunction;
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 private:
     RenderFunction renderFunction_;
-    bool isBuildDone_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(CustomNodePattern);
 };

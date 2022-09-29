@@ -28,6 +28,7 @@
 #include "base/utils/time_util.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
@@ -56,7 +57,7 @@
 #include "pixel_map_napi.h"
 #endif
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW) || defined(ANDROID_PLATFORM)
 extern const char _binary_strip_native_min_abc_start[];
 extern const char _binary_strip_native_min_abc_end[];
 #endif
@@ -65,7 +66,9 @@ namespace OHOS::Ace::Framework {
 
 const int SYSTEM_BASE = 10;
 
-#ifdef APP_USE_ARM
+#if defined(ANDROID_PLATFORM)
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
+#elif defined(APP_USE_ARM)
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
@@ -77,7 +80,7 @@ static int32_t globalNodeId = 100000;
 std::map<const std::string, std::string> JsiEngineInstance::dataMap_;
 RefPtr<Clipboard> clipboard;
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue> jsValue)
 {
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
@@ -2397,7 +2400,7 @@ shared_ptr<JsValue> AppSetDataImage(const shared_ptr<JsRuntime>& runtime, const 
     if (argv.empty() || argc != 3) {
         return runtime->NewBoolean(false);
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     DOMDocument::pixelMap_ = CreatePixelMapFromNapiValue(runtime, argv[0]);
     if (argv[1] && argv[1]->IsInt32(runtime)) {
         DOMDocument::pixelMapOffsetX_ = argv[1]->ToInt32(runtime);
@@ -2930,6 +2933,7 @@ void JsiEngineInstance::RegisterFaPlugin()
     shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime_, "requireNapi");
     if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime_)) {
         LOGW("requireNapi func not found");
+        return;
     }
     std::vector<shared_ptr<JsValue>> argv = { runtime_->NewString("FeatureAbility") };
     requireNapiFunc->Call(runtime_, global, argv, argv.size());
@@ -2948,19 +2952,20 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     runtime_->SetLogPrint(PrintLog);
     std::string library_path = "";
     if (debugger_mode) {
-        library_path = ARK_DEBUGGER_LIB_PATH;
-        SetDebuggerPostTask();
+        SetDebuggerPostTask(library_path);
     }
     if (!runtime_->Initialize(library_path, isDebugMode_, GetInstanceId())) {
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
+
+    runtime_->StartDebugger();
 #endif
 
     RegisterAceModule();
@@ -2972,7 +2977,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     RegisterI18nPluralRulesModule();
 
     // load jsfwk
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
         return false;
@@ -3006,7 +3011,7 @@ void JsiEngineInstance::InitGroupJsBridge()
 
 bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
 {
-    LOGI("JsiEngineInstance FireJsEvent");
+    LOGD("JsiEngineInstance FireJsEvent");
     if (!runningPage_) {
         LOGW("js engine instance running page is not valid.");
         return false;
@@ -3079,7 +3084,7 @@ void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string&
     func->Call(runtime_, global, argv, argv.size());
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
 {
     auto dispatcher = dispatcher_.Upgrade();
@@ -3093,8 +3098,9 @@ bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestDa
 }
 #endif
 
-void JsiEngineInstance::SetDebuggerPostTask()
+void JsiEngineInstance::SetDebuggerPostTask(std::string& library_path)
 {
+    library_path = ARK_DEBUGGER_LIB_PATH;
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(frontendDelegate_));
     auto&& postTask = [weakDelegate](std::function<void()>&& task) {
         auto delegate = weakDelegate.Upgrade();
@@ -3133,13 +3139,13 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     nativeEngine_ = nativeEngine;
     engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
 #endif
 
     ACE_DCHECK(delegate);
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
             nativeEngine->SetPackagePath(packagePath);
         }
@@ -3152,7 +3158,6 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
 void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
 {
-    LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
     auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
@@ -3203,7 +3208,7 @@ void JsiEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid());
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
@@ -3220,7 +3225,7 @@ void JsiEngine::RegisterInitWorkerFunc()
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
 void JsiEngine::RegisterOffWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
@@ -3270,7 +3275,7 @@ void JsiEngine::RegisterAssetFunc()
 void JsiEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
     RegisterOffWorkerFunc();
 #endif
     RegisterAssetFunc();
@@ -3280,7 +3285,7 @@ JsiEngine::~JsiEngine()
 {
     LOG_DESTROY();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();
@@ -3332,7 +3337,7 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     std::string basePath = delegate->GetAssetPath(fileName);
     if (!basePath.empty()) {
         std::string abcPath = basePath.append(fileName);
@@ -3348,7 +3353,7 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
         LOGD("GetAssetContent \"%{private}s\" failed.", fileName.c_str());
         return true;
     }
-    if (!runtime->EvaluateJsCode(content.data(), content.size())) {
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), fileName)) {
         LOGE("EvaluateJsCode \"%{private}s\" failed.", fileName.c_str());
         return false;
     }

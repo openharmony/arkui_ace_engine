@@ -16,8 +16,10 @@ import(
 
 build_component_ng("syntax_ng") {
   sources = [
-    "for_each.cpp",
+    "for_each_model_ng.cpp",
     "for_each_node.cpp",
+    "if_else_model_ng.cpp",
+    "if_else_node.cpp",
     "lazy_for_each_node.cpp",
     "lazy_layout_wrapper_builder.cpp",
   ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,6 +166,27 @@ public:
         return alignPtr_;
     }
 
+    void SetTabsFlag(bool flag)
+    {
+        isTabs_ = flag;
+    }
+
+    bool GetTabsFlag() const
+    {
+        return isTabs_;
+    }
+
+    void SetTabContentFlag(bool flag)
+    {
+        isTabContent_ = flag;
+    }
+
+    bool GetTabContentFlag() const
+    {
+        return isTabContent_;
+    }
+
+
 private:
     FlexDirection direction_ = FlexDirection::ROW;
     FlexAlign mainAxisAlign_ = FlexAlign::FLEX_START;
@@ -181,6 +202,9 @@ private:
     bool stretchToParent_ = false;
     bool useViewPort_ = false;
     bool containsNavigation_ = false;
+
+    bool isTabs_ = false;
+    bool isTabContent_ = false;
 };
 
 class RowComponent : public FlexComponent {

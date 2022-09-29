@@ -14,12 +14,29 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-module_output_path = "ace_engine_full/jsframework/manifest_window"
+module_output_path = "ace_engine_full/jsframework/manifest"
 
 ohos_unittest("ManifestWindowTest") {
   module_out_path = module_output_path
 
   sources = [ "manifest_window_test.cpp" ]
+
+  configs = [
+    ":config_manifest_test",
+    "$ace_root:ace_test_config",
+  ]
+
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+
+  external_deps = [ "ability_base:configuration" ]
+
+  part_name = ace_engine_part
+}
+
+ohos_unittest("ManifestRouterTest") {
+  module_out_path = module_output_path
+
+  sources = [ "manifest_router_test.cpp" ]
 
   configs = [
     ":config_manifest_test",
@@ -42,5 +59,8 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [ ":ManifestWindowTest" ]
+  deps += [
+    ":ManifestRouterTest",
+    ":ManifestWindowTest",
+  ]
 }

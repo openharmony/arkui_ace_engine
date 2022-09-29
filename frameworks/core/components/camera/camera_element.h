@@ -22,7 +22,7 @@
 #include "core/components/camera/large_system/camera.h"
 #endif
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include "core/components/align/align_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components/theme/theme_manager.h"
@@ -105,7 +105,7 @@ private:
     bool isSetResolution_ = false;
     std::string cameraId_;
 #endif
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void UpdateChildInner(const RefPtr<Component>& childComponent);
     const RefPtr<Component> CreateErrorText(const std::string& errorMsg);
     TextDirection textDirection_ = TextDirection::LTR;

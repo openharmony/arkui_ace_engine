@@ -79,6 +79,22 @@ std::optional<float> ConvertToPx(const Dimension& dimension, const ScaleProperty
     return static_cast<float>(result);
 }
 
+std::optional<float> ConvertToPx(
+    const std::optional<Dimension>& dimension, const ScaleProperty& scaleProperty, float percentReference)
+{
+    if (!dimension) {
+        return std::nullopt;
+    }
+    double result = -1.0;
+    if (!dimension.value().NormalizeToPx(
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+        LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
+            scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
+        return std::nullopt;
+    }
+    return static_cast<float>(result);
+}
+
 SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize)
 {
     float height = std::max(minSize.Height(), size.Height());
@@ -90,25 +106,6 @@ SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSiz
         width = std::min(maxSize.Width(), width);
     }
     return { width, height };
-}
-
-void MinusPaddingToConstraint(const std::unique_ptr<PaddingProperty>& padding, LayoutConstraintF& size)
-{
-    if (!padding) {
-        return;
-    }
-    MinusPaddingToConstraint(*padding, size);
-}
-
-void MinusPaddingToConstraint(const PaddingProperty& padding, LayoutConstraintF& size)
-{
-    auto width = size.percentReference.Width();
-    auto height = size.percentReference.Height();
-    auto left = ConvertToPx(padding.left, size.scaleProperty, width);
-    auto right = ConvertToPx(padding.right, size.scaleProperty, width);
-    auto top = ConvertToPx(padding.top, size.scaleProperty, height);
-    auto bottom = ConvertToPx(padding.bottom, size.scaleProperty, height);
-    size.MinusPadding(left, right, top, bottom);
 }
 
 PaddingPropertyF ConvertToPaddingPropertyF(
@@ -128,6 +125,38 @@ PaddingPropertyF ConvertToPaddingPropertyF(
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
     return PaddingPropertyF { left, right, top, bottom };
+}
+
+MarginPropertyF ConvertToMarginPropertyF(
+    const std::unique_ptr<MarginProperty>& margin, const ScaleProperty& scaleProperty, float percentReference)
+{
+    return ConvertToPaddingPropertyF(margin, scaleProperty, percentReference);
+}
+
+MarginPropertyF ConvertToMarginPropertyF(
+    const MarginProperty& margin, const ScaleProperty& scaleProperty, float percentReference)
+{
+    return ConvertToPaddingPropertyF(margin, scaleProperty, percentReference);
+}
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(
+    const std::unique_ptr<BorderWidthProperty>& borderWidth, const ScaleProperty& scaleProperty, float percentReference)
+{
+    if (!borderWidth) {
+        return {};
+    }
+    return ConvertToBorderWidthPropertyF(*borderWidth, scaleProperty, percentReference);
+}
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(
+    const BorderWidthProperty& borderWidth, const ScaleProperty& scaleProperty, float percentReference)
+{
+    auto left = ConvertToPx(borderWidth.leftDimen, scaleProperty, percentReference);
+    auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
+    auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
+    auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
+
+    return BorderWidthPropertyF { left, top, right, bottom };
 }
 
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,
@@ -246,21 +275,34 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
 
         if (measureType == MeasureType::MATCH_PARENT) {
             idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.parentIdealSize);
+            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
             break;
         }
 
         if (measureType == MeasureType::MATCH_PARENT_CROSS_AXIS) {
-            auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
-            if (parentCrossSize) {
-                SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+            auto selfSize = GetCrossAxisSize(idealSize, axis);
+            if (!selfSize) {
+                auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
+                if (parentCrossSize) {
+                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+                } else {
+                    parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
+                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+                }
             }
             break;
         }
 
         if (measureType == MeasureType::MATCH_PARENT_MAIN_AXIS) {
-            auto parentCrossSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
-            if (parentCrossSize) {
-                SetMainAxisSize(parentCrossSize.value(), axis, idealSize);
+            auto selfSize = GetMainAxisSize(idealSize, axis);
+            auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
+            if (!selfSize) {
+                if (parentMainSize) {
+                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+                } else {
+                    parentMainSize = GetMainAxisSize(layoutConstraint.maxSize, axis);
+                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+                }
             }
             break;
         }

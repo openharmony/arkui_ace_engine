@@ -16,12 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_SWIPER_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_SWIPER_CONTROLLER_H
 
+#include <functional>
+
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
 
 using CommonFunc = std::function<void()>;
 using SwipeToImpl = std::function<void(const int32_t, bool)>;
+using SwipeToWithoutAnimationImpl = std::function<void(const int32_t)>;
 
 class SwiperController : public virtual AceType {
     DECLARE_ACE_TYPE(SwiperController, AceType);
@@ -37,6 +40,18 @@ public:
     void SetSwipeToImpl(const SwipeToImpl& swipeToImpl)
     {
         swipeToImpl_ = swipeToImpl;
+    }
+
+    void SwipeToWithoutAnimation(int32_t index)
+    {
+        if (swipeToWithoutAnimationImpl_) {
+            swipeToWithoutAnimationImpl_(index);
+        }
+    }
+
+    void SetSwipeToWithoutAnimationImpl(const SwipeToWithoutAnimationImpl& swipeToWithoutAnimationImpl)
+    {
+        swipeToWithoutAnimationImpl_ = swipeToWithoutAnimationImpl;
     }
 
     void ShowPrevious()
@@ -92,6 +107,7 @@ public:
 
 private:
     SwipeToImpl swipeToImpl_;
+    SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
     CommonFunc showPrevImpl_;
     CommonFunc showNextImpl_;
     CommonFunc finishImpl_;

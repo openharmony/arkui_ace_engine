@@ -22,6 +22,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/image_provider/image_data.h"
+#include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -46,9 +47,12 @@ struct LoadNotifier {
 };
 
 class ImageObject;
+class StaticImageObject;
+class SvgImageObject;
 using DataReadyCallback = std::function<void(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject>& imageObj)>;
 using LoadSuccessCallback = std::function<void(const ImageSourceInfo& sourceInfo)>;
-using LoadFailCallback = std::function<void(const ImageSourceInfo& sourceInfo, const std::string& errorMsg)>;
+using LoadFailCallback = std::function<void(
+    const ImageSourceInfo& sourceInfo, const std::string& errorMsg, ImageLoadingCommand imageLoadingCommand)>;
 
 struct LoadCallbacks {
     LoadCallbacks(DataReadyCallback&& dataReadyCallback, LoadSuccessCallback&& loadSuccessCallback,
@@ -71,6 +75,7 @@ public:
     ~ImageEncodedInfo() override = default;
 
     static RefPtr<ImageEncodedInfo> CreateImageEncodedInfo(const RefPtr<NG::ImageData>& data);
+    static RefPtr<ImageEncodedInfo> CreateSvgEncodedInfo(const RefPtr<NG::ImageData>& data);
     const SizeF& GetImageSize() const
     {
         return imageSize_;
@@ -105,9 +110,15 @@ class ImageProvider : public virtual AceType {
 
 public:
     static RefPtr<RenderTaskHolder> CreateRenderTaskHolder();
-    static void CreateImageObject(const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks);
+    static void MakeSvgDom(const RefPtr<SvgImageObject>& imageObj, const LoadCallbacks& loadCallbacks,
+        const std::optional<Color>& svgFillColor);
+    static void PrepareImageData(const RefPtr<ImageObject>& imageObj, const LoadCallbacks& loadCallbacks);
+    static void CreateImageObject(const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks,
+        const std::optional<Color>& svgFillColor = std::nullopt);
     static void MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
-        const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder);
+        const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
+    static void MakeCanvasImageForSVG(
+        const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
     static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
         std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder);
 

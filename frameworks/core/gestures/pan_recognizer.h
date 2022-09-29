@@ -109,6 +109,8 @@ public:
 
     void OnAccepted() override;
     void OnRejected() override;
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
 
 private:
     enum class GestureAcceptResult {
@@ -158,6 +160,7 @@ private:
     int32_t newFingers_ = 1;
     double newDistance_ = 0.0;
     PanDirection newDirection_;
+    bool isFlushTouchEventsEnd_ = false;
 };
 
 } // namespace OHOS::Ace

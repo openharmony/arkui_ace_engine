@@ -53,4 +53,57 @@ void ImageView::SetImageInterpolation(ImageInterpolation imageInterpolation)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, imageInterpolation);
 }
 
+void ImageView::SetImageRepeat(ImageRepeat imageRepeat)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat);
+}
+
+void ImageView::SetImageSourceSize(const std::pair<Dimension, Dimension>& sourceSize)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize);
+}
+
+void ImageView::SetFitOriginalSize(bool fitOriginalSize)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, fitOriginalSize);
+}
+
+void ImageView::SetAlt(const std::string& altSrc)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(altSrc));
+}
+
+void ImageView::SetOnError(ErrorEvent&& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError(std::move(onError));
+}
+
+void ImageView::SetOnComplete(CompleteEvent&& onComplete)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(onComplete));
+}
+
+void ImageView::SetColorFilterMatrix(const std::vector<float>& matrix)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
+}
+
+void ImageView::SetMatchTextDirection(bool matchTextDirection)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, matchTextDirection);
+}
+
+void ImageView::SetSvgFillColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
+}
+
 } // namespace OHOS::Ace::NG

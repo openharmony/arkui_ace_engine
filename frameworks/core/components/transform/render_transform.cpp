@@ -40,7 +40,7 @@ void RenderTransform::Translate(const Dimension& x, const Dimension& y, const Di
     if (context) {
         context->MarkForcedRefresh();
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     UpdateTranslateToAccessibilityNode(x.Value(), y.Value());
 #endif
 }
@@ -63,7 +63,7 @@ void RenderTransform::Scale(float x, float y, float z)
     if (context) {
         context->MarkForcedRefresh();
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (!NearEqual(maxScaleXY_, -1.0)) {
         UpdateScaleToAccessibilityNode(maxScaleXY_);
     }
@@ -94,7 +94,7 @@ void RenderTransform::Rotate(float angle, float x, float y, float z)
     if (context) {
         context->MarkForcedRefresh();
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (!NearEqual(angle, 0.0) && !NearEqual(z, 0.0)) {
         UpdateRotateToAccessibilityNode(angle, RotateAxis::AXIS_Z);
     }
@@ -114,7 +114,7 @@ void RenderTransform::RotateY(float angle)
 void RenderTransform::RotateZ(float angle)
 {
     Rotate(angle, 0.0f, 0.0f, 1.0f);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (!NearEqual(angle, 0.0)) {
         UpdateRotateToAccessibilityNode(angle, RotateAxis::AXIS_Z);
     }
@@ -149,12 +149,12 @@ void RenderTransform::Perspective(const Dimension& distance)
 void RenderTransform::ResetTransform()
 {
     transform_ = Matrix4::CreateIdentity();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     ResetTransformToAccessibilityNode();
 #endif
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void RenderTransform::ResetTransformToAccessibilityNode()
 {
     const auto& context = context_.Upgrade();

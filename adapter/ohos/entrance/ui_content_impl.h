@@ -80,6 +80,8 @@ public:
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
 
+    void SetAppWindowTitle(const std::string& title) override;
+    void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info);

@@ -16,9 +16,31 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 
 #include "base/log/ace_trace.h"
-#include "core/components/wrap/wrap_component.h"
-#include "core/components_ng/pattern/linear_layout/column_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/linear_layout/column_model.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/column_model_impl.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ColumnModel> ColumnModel::instance_ = nullptr;
+
+ColumnModel* ColumnModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ColumnModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ColumnModelNG());
+        } else {
+            instance_.reset(new Framework::ColumnModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 std::string JSColumn::inspectorTag_ = "";
@@ -34,49 +56,21 @@ void JSColumn::Create(const JSCallbackInfo& info)
             space = value;
         }
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ColumnView::Create(space);
-        return;
-    }
-    std::list<RefPtr<Component>> children;
-    RefPtr<ColumnComponent> columnComponent =
-        AceType::MakeRefPtr<OHOS::Ace::ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
-    ViewStackProcessor::GetInstance()->ClaimElementId(columnComponent);
-    columnComponent->SetMainAxisSize(MainAxisSize::MIN);
-    columnComponent->SetCrossAxisSize(CrossAxisSize::MIN);
-    if (space.has_value()) {
-        columnComponent->SetSpace(space.value());
-    }
 
+    HorizontalAlignDeclaration* declaration = nullptr;
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> useAlign = obj->GetProperty("useAlign");
         if (useAlign->IsObject()) {
-            HorizontalAlignDeclaration* declaration =
-                JSRef<JSObject>::Cast(useAlign)->Unwrap<HorizontalAlignDeclaration>();
-            if (declaration != nullptr) {
-                columnComponent->SetAlignDeclarationPtr(declaration);
-            }
+            declaration = JSRef<JSObject>::Cast(useAlign)->Unwrap<HorizontalAlignDeclaration>();
         }
     }
-    columnComponent->SetInspectorTag(inspectorTag_);
-    ViewStackProcessor::GetInstance()->Push(columnComponent, false);
-    JSInteractableView::SetFocusNode(true);
+    ColumnModel::GetInstance()->Create(space, declaration, inspectorTag_);
 }
 
 void JSColumn::CreateWithWrap(const JSCallbackInfo& info)
 {
-    std::list<RefPtr<Component>> children;
-    RefPtr<OHOS::Ace::WrapComponent> component = AceType::MakeRefPtr<WrapComponent>(0.0, 0.0, children);
-    ViewStackProcessor::GetInstance()->ClaimElementId(component);
-
-    component->SetDirection(WrapDirection::VERTICAL);
-    component->SetMainAlignment(WrapAlignment::START);
-    component->SetCrossAlignment(WrapAlignment::START);
-    component->SetAlignment(WrapAlignment::START);
-    component->SetDialogStretch(false);
-
-    ViewStackProcessor::GetInstance()->Push(component);
+    ColumnModel::GetInstance()->CreateWithWrap();
 }
 
 void JSColumn::SetInspectorTag(const std::string& inspectorTag)
@@ -94,15 +88,56 @@ void JSColumn::SetAlignItems(int32_t value)
     if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
         (value == static_cast<int32_t>(FlexAlign::FLEX_END)) || (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
         (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ColumnView::AlignItems(static_cast<FlexAlign>(value));
-            return;
-        }
-        JSFlex::SetAlignItems(value);
+        ColumnModel::GetInstance()->SetAlignItems(static_cast<FlexAlign>(value));
     } else {
         // FIXME: we have a design issue here, setters return void, can not signal error to JS
         LOGE("invalid value for justifyContent");
     }
+}
+
+void JSColumn::SetJustifyContent(int32_t value)
+{
+    if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
+        (value == static_cast<int32_t>(FlexAlign::FLEX_END)) || (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
+        (value == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN)) ||
+        (value == static_cast<int32_t>(FlexAlign::SPACE_AROUND)) ||
+        (value == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
+        ColumnModel::GetInstance()->SetJustifyContent(static_cast<FlexAlign>(value));
+    } else {
+        LOGE("invalid value for justifyContent");
+    }
+}
+
+void JSColumn::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSColumn>::Declare("Column");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSColumn>::StaticMethod("create", &JSColumn::Create, opt);
+    JSClass<JSColumn>::StaticMethod("createWithWrap", &JSColumn::CreateWithWrap, opt);
+    JSClass<JSColumn>::StaticMethod("fillParent", &JSFlex::SetFillParent, opt);
+    JSClass<JSColumn>::StaticMethod("wrapContent", &JSFlex::SetWrapContent, opt);
+    JSClass<JSColumn>::StaticMethod("justifyContent", &JSColumn::SetJustifyContent, opt);
+    JSClass<JSColumn>::StaticMethod("alignItems", &JSColumn::SetAlignItems, opt);
+    JSClass<JSColumn>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
+    JSClass<JSColumn>::StaticMethod("height", &JSFlex::JsHeight, opt);
+    JSClass<JSColumn>::StaticMethod("width", &JSFlex::JsWidth, opt);
+    JSClass<JSColumn>::StaticMethod("size", &JSFlex::JsSize, opt);
+    JSClass<JSColumn>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSColumn>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSColumn>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSColumn>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSColumn>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSColumn>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSColumn>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSColumn>::StaticMethod("onPan", &JSInteractableView::JsOnPan);
+    JSClass<JSColumn>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSColumn>::Inherit<JSContainerBase>();
+    JSClass<JSColumn>::Inherit<JSViewAbstract>();
+    JSClass<JSColumn>::Bind<>(globalObj);
+
+    JSClass<HorizontalAlignDeclaration>::Declare("HorizontalAlignDeclaration");
+    JSClass<HorizontalAlignDeclaration>::Bind(
+        globalObj, HorizontalAlignDeclaration::ConstructorCallback, HorizontalAlignDeclaration::DestructorCallback);
 }
 
 void HorizontalAlignDeclaration::ConstructorCallback(const JSCallbackInfo& args)

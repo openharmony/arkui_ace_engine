@@ -92,6 +92,7 @@ public:
     virtual void Stroke(const Offset& offset) = 0;
     virtual void Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path) = 0;
     virtual void Clip() = 0;
+    virtual void Clip(const RefPtr<CanvasPath2D>& path) = 0;
     virtual void BeginPath() = 0;
     virtual void ClosePath() = 0;
 
@@ -200,6 +201,12 @@ public:
     void SetLineDash(const std::vector<double>& segments)
     {
         strokeState_.SetLineDash(segments);
+        lineDash_ = segments;
+    }
+
+    const std::vector<double>& GetLineDash() const
+    {
+        return lineDash_;
     }
 
     void SetTextAlign(TextAlign align)
@@ -309,6 +316,7 @@ protected:
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
+    std::vector<double> lineDash_;
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     std::stack<PaintHolder> saveStates_;

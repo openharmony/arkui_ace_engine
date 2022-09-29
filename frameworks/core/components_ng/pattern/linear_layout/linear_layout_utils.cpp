@@ -19,37 +19,40 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-float GetMainSize(LayoutWrapper* layoutWrapper, bool isVertical)
+float GetChildMainAxisSize(LayoutWrapper* layoutWrapper, bool isVertical)
 {
     float size = 0.0f;
     if (!isVertical) {
-        size = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     } else {
-        size = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
+        size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
     }
     return size;
 }
 
-float GetCrossSize(LayoutWrapper* layoutWrapper, bool isVertical)
+float GetChildCrossAxisSize(LayoutWrapper* layoutWrapper, bool isVertical)
 {
     float size = 0.0f;
     if (!isVertical) {
-        size = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
+        size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
     } else {
-        size = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     }
     return size;
 }
 
-float GetMainSize(const SizeF& size, bool isVertical)
+float GetMainAxisSize(const SizeF& size, bool isVertical)
 {
     if (!isVertical) {
         return size.Width();
@@ -61,9 +64,9 @@ void SetIdealMainSize(LayoutConstraintF& origin, float value, bool isVertical)
 {
     origin.selfIdealSize.Reset();
     if (!isVertical) {
-        origin.UpdateSelfIdealSizeWithCheck({ value, std::nullopt });
+        origin.UpdateSelfMarginSizeWithCheck({ value, std::nullopt });
     } else {
-        origin.UpdateSelfIdealSizeWithCheck({ std::nullopt, value });
+        origin.UpdateSelfMarginSizeWithCheck({ std::nullopt, value });
     }
 }
 
@@ -90,21 +93,21 @@ void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, LinearMeasureProperty
 
 float CalculateCrossOffset(float parent, float child, FlexAlign flexAlign)
 {
-    float offfset = 0;
+    float offset = 0;
     switch (flexAlign) {
         case FlexAlign::FLEX_START:
-            offfset = 0;
+            offset = 0;
             break;
         case FlexAlign::FLEX_END:
-            offfset = parent - child;
+            offset = parent - child;
             break;
         case FlexAlign::CENTER:
-            offfset = (parent - child) / 2;
+            offset = (parent - child) / 2;
             break;
         default:
             break;
     }
-    return offfset;
+    return offset;
 }
 
 } // namespace
@@ -115,7 +118,7 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
     const auto& parentIdeaSize = layoutConstraint->parentIdealSize;
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     OptionalSizeF realSize;
     LinearMeasureProperty linearMeasureProperty;
@@ -148,8 +151,8 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     // measure normal node.
     for (auto& child : linearMeasureProperty.relativeNodes) {
         child->Measure(childConstraint);
-        linearMeasureProperty.allocatedSize += GetMainSize(AceType::RawPtr(child), isVertical);
-        auto crossSize = GetCrossSize(AceType::RawPtr(child), isVertical);
+        linearMeasureProperty.allocatedSize += GetChildMainAxisSize(AceType::RawPtr(child), isVertical);
+        auto crossSize = GetChildCrossAxisSize(AceType::RawPtr(child), isVertical);
         linearMeasureProperty.crossSize =
             linearMeasureProperty.crossSize > crossSize ? linearMeasureProperty.crossSize : crossSize;
     }
@@ -160,11 +163,11 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
 
     // measure weight node.
     if (!linearMeasureProperty.weightNodes.empty()) {
-        float remainSize = GetMainSize(idealSize, isVertical) - linearMeasureProperty.allocatedSize -
+        float remainSize = GetMainAxisSize(idealSize, isVertical) - linearMeasureProperty.allocatedSize -
                            linearMeasureProperty.space * static_cast<float>(linearMeasureProperty.weightNodes.size());
         if (LessNotEqual(remainSize, 0.0)) {
             LOGW("the remain size is less than zero, use mainSize to measure weight node");
-            remainSize = GetMainSize(idealSize, isVertical);
+            remainSize = GetMainAxisSize(idealSize, isVertical);
         }
         for (auto& child : linearMeasureProperty.weightNodes) {
             auto childMainSize = remainSize *
@@ -172,9 +175,9 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
                                  linearMeasureProperty.totalFlexWeight;
             SetIdealMainSize(childConstraint, childMainSize, isVertical);
             child->Measure(childConstraint);
-            linearMeasureProperty.allocatedSize += GetMainSize(AceType::RawPtr(child), isVertical);
+            linearMeasureProperty.allocatedSize += GetChildMainAxisSize(AceType::RawPtr(child), isVertical);
             linearMeasureProperty.allocatedSize += linearMeasureProperty.space;
-            auto crossSize = GetCrossSize(AceType::RawPtr(child), isVertical);
+            auto crossSize = GetChildCrossAxisSize(AceType::RawPtr(child), isVertical);
             linearMeasureProperty.crossSize =
                 linearMeasureProperty.crossSize > crossSize ? linearMeasureProperty.crossSize : crossSize;
         }
@@ -182,12 +185,12 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
 
     // measure self size.
     auto childTotalSize = CreateSize(linearMeasureProperty.allocatedSize, linearMeasureProperty.crossSize, isVertical);
+    AddPaddingToSize(padding, childTotalSize);
     linearMeasureProperty.realSize.UpdateIllegalSizeWithCheck(ConstrainSize(childTotalSize, minSize, maxSize));
-
     layoutWrapper->GetGeometryNode()->SetFrameSize((linearMeasureProperty.realSize.ConvertToSizeT()));
 }
 
-void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign flexAlign)
+void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign crossAlign, FlexAlign mainAlign)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     auto linearLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -195,33 +198,145 @@ void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, Fl
     auto space = ConvertToPx(spaceDimension, layoutConstraint->scaleProperty).value_or(0);
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     if (isVertical) {
-        float yPos = 0;
+        float yPos = 0.0f;
+        if (mainAlign == FlexAlign::FLEX_START) {
+            for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+                auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
+                float xOffset = CalculateCrossOffset(size.Width(), frameSize.Width(), crossAlign);
+                child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + OffsetF(xOffset, yPos));
+                LOGD("Set %{public}s Child Position: %{public}s", child->GetHostTag().c_str(),
+                    child->GetGeometryNode()->GetMarginFrameOffset().ToString().c_str());
+                yPos += frameSize.Height();
+                yPos += space;
+            }
+            return;
+        }
+        LayoutConditions layoutConditions { layoutWrapper, isVertical, crossAlign, mainAlign, size, paddingOffset,
+            space };
+        LinearLayoutUtils::LayoutCondition(layoutConditions);
+        return;
+    }
+    float xPos = 0.0f;
+    if (mainAlign == FlexAlign::FLEX_START) {
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-            auto frameSize = child->GetGeometryNode()->GetFrameSize();
-            float xOffset = CalculateCrossOffset(size.Width(), frameSize.Width(), flexAlign);
-            child->GetGeometryNode()->SetFrameOffset(paddingOffset + OffsetF(xOffset, yPos));
+            auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
+            float yOffset = CalculateCrossOffset(size.Height(), frameSize.Height(), crossAlign);
+            child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + OffsetF(xPos, yOffset));
             LOGD("Set %{public}s Child Position: %{public}s", child->GetHostTag().c_str(),
-                child->GetGeometryNode()->GetFrameOffset().ToString().c_str());
-            yPos += frameSize.Height();
-            yPos += space;
+                child->GetGeometryNode()->GetMarginFrameOffset().ToString().c_str());
+            xPos += frameSize.Width();
+            xPos += space;
         }
         return;
     }
-    float xPos = 0;
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto frameSize = child->GetGeometryNode()->GetFrameSize();
-        float yOffset = CalculateCrossOffset(size.Height(), frameSize.Height(), flexAlign);
-        child->GetGeometryNode()->SetFrameOffset(paddingOffset + OffsetF(xPos, yOffset));
+    LayoutConditions layoutConditions { layoutWrapper, isVertical, crossAlign, mainAlign, size, paddingOffset, space };
+    LinearLayoutUtils::LayoutCondition(layoutConditions);
+}
+
+void LinearLayoutUtils::LayoutCondition(LayoutConditions& layoutConditions)
+{
+    if (layoutConditions.isVertical) {
+        float yPos = 0.0f;
+        float frameHeightSum = 0.0f;
+        float childNum = 0.0f;
+        float blankSpace = 0.0f;
+        for (const auto& child : layoutConditions.layoutWrapper->GetAllChildrenWithBuild()) {
+            auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
+            frameHeightSum += frameSize.Height();
+            childNum++;
+        }
+        switch (layoutConditions.mainAlign) {
+            case OHOS::Ace::FlexAlign::CENTER:
+                blankSpace =
+                    (layoutConditions.size.Height() - frameHeightSum - (childNum - 1) * layoutConditions.space) / 2;
+                yPos += blankSpace;
+                break;
+            case OHOS::Ace::FlexAlign::FLEX_END:
+                blankSpace = layoutConditions.size.Height() - frameHeightSum - (childNum - 1) * layoutConditions.space;
+                yPos += blankSpace;
+                break;
+            case OHOS::Ace::FlexAlign::SPACE_BETWEEN:
+                blankSpace = (layoutConditions.size.Height() - frameHeightSum) / (childNum - 1);
+                break;
+            case OHOS::Ace::FlexAlign::SPACE_AROUND:
+                blankSpace = (layoutConditions.size.Height() - frameHeightSum) / childNum;
+                yPos += blankSpace / 2;
+                break;
+            case OHOS::Ace::FlexAlign::SPACE_EVENLY:
+                blankSpace = (layoutConditions.size.Height() - frameHeightSum) / (childNum + 1);
+                yPos += blankSpace;
+                break;
+            default:
+                break;
+        }
+        for (const auto& child : layoutConditions.layoutWrapper->GetAllChildrenWithBuild()) {
+            auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
+            float xOffset =
+                CalculateCrossOffset(layoutConditions.size.Width(), frameSize.Width(), layoutConditions.crossAlign);
+            child->GetGeometryNode()->SetMarginFrameOffset(layoutConditions.paddingOffset + OffsetF(xOffset, yPos));
+            LOGD("Set %{public}s Child Position: %{public}s", child->GetHostTag().c_str(),
+                child->GetGeometryNode()->GetMarginFrameOffset().ToString().c_str());
+            yPos += frameSize.Height();
+            if ((layoutConditions.mainAlign == FlexAlign::CENTER) ||
+                (layoutConditions.mainAlign == FlexAlign::FLEX_END)) {
+                yPos += layoutConditions.space;
+            } else {
+                yPos += blankSpace;
+            }
+        }
+        return;
+    }
+    float xPos = 0.0f;
+    float frameWidthSum = 0.0f;
+    float childNum = 0.0f;
+    float blankSpace = 0.0f;
+    for (const auto& child : layoutConditions.layoutWrapper->GetAllChildrenWithBuild()) {
+        auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
+        frameWidthSum += frameSize.Width();
+        childNum++;
+    }
+    switch (layoutConditions.mainAlign) {
+        case OHOS::Ace::FlexAlign::CENTER:
+            blankSpace = (layoutConditions.size.Width() - frameWidthSum - layoutConditions.space * (childNum - 1)) / 2;
+            xPos += blankSpace;
+            break;
+        case OHOS::Ace::FlexAlign::FLEX_END:
+            blankSpace = layoutConditions.size.Width() - frameWidthSum - layoutConditions.space * (childNum - 1);
+            xPos += blankSpace;
+            break;
+        case OHOS::Ace::FlexAlign::SPACE_BETWEEN:
+            blankSpace = (layoutConditions.size.Width() - frameWidthSum) / (childNum - 1);
+            break;
+        case OHOS::Ace::FlexAlign::SPACE_AROUND:
+            blankSpace = (layoutConditions.size.Width() - frameWidthSum) / childNum;
+            xPos += blankSpace / 2;
+            break;
+        case OHOS::Ace::FlexAlign::SPACE_EVENLY:
+            blankSpace = (layoutConditions.size.Width() - frameWidthSum) / (childNum + 1);
+            xPos += blankSpace;
+            break;
+        default:
+            break;
+    }
+    for (const auto& child : layoutConditions.layoutWrapper->GetAllChildrenWithBuild()) {
+        auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
+        float yOffset =
+            CalculateCrossOffset(layoutConditions.size.Height(), frameSize.Height(), layoutConditions.crossAlign);
+        child->GetGeometryNode()->SetMarginFrameOffset(layoutConditions.paddingOffset + OffsetF(xPos, yOffset));
         LOGD("Set %{public}s Child Position: %{public}s", child->GetHostTag().c_str(),
-            child->GetGeometryNode()->GetFrameOffset().ToString().c_str());
+            child->GetGeometryNode()->GetMarginFrameOffset().ToString().c_str());
         xPos += frameSize.Width();
-        xPos += space;
+        if ((layoutConditions.mainAlign == FlexAlign::CENTER) || (layoutConditions.mainAlign == FlexAlign::FLEX_END)) {
+            xPos += layoutConditions.space;
+        } else {
+            xPos += blankSpace;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

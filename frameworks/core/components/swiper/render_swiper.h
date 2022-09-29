@@ -231,7 +231,7 @@ public:
     void StopZoomDotAnimation();
     void StartDragRetractionAnimation(); // on handle drag end
     void StopDragRetractionAnimation();
-    void FinishAllSwipeAnimation(bool useFinish = false);
+    void FinishAllSwipeAnimation(bool useFinish = false, bool surfaceChanged = false);
     bool IsZoomAnimationStopped();
     bool IsZoomOutAnimationStopped();
     bool IsZoomOutDotAnimationStopped();
@@ -306,9 +306,24 @@ public:
         return cachedCount_;
     }
 
+    int32_t GetDisplayCount() const
+    {
+        return displayCount_;
+    }
+    SwiperDisplayMode GetDisplayMode() const
+    {
+        return displayMode_;
+    }
+
+    EdgeEffect GetEdgeEffect() const
+    {
+        return edgeEffect_;
+    }
+
     bool HandleMouseEvent(const MouseEvent& event) override;
     bool RefuseUpdatePosition(int32_t index);
     void OnPaintFinish() override;
+    std::string ProvideRestoreInfo() override;
 protected:
     struct IndicatorProperties final {
         IndicatorProperties(const Offset& normalPaddingStart, const Offset& normalPaddingEnd,
@@ -461,6 +476,7 @@ private:
     void SetSwiperHidden(int32_t forwardNum, int32_t backNum);
     void SetSwiperEffect(double dragOffset);
     void SwipeTo(int32_t index, bool reverse);
+    void OnSurfaceChanged();
     int32_t GetPrevIndex() const;
     int32_t GetNextIndex() const;
     int32_t GetPrevIndex(int32_t index) const;
@@ -508,6 +524,7 @@ private:
     void LoadLazyItems(bool swipeToNext);
     double CalculateFriction(double gamma);
     void ClearItems(const RefPtr<Component>& lazyForEachComponent, int32_t index);
+    void ApplyRestoreInfo();
 
     RefPtr<SwiperComponent> swiper_;
 
@@ -542,6 +559,7 @@ private:
     bool disableSwipe_ = false;
     bool disableRotation_ = false;
     bool catchMode_ = true;
+    bool needRestore_ = false;
     Dimension itemSpace_;
     int32_t index_ = 0;
     int32_t swipeToIndex_ = -1;
@@ -549,6 +567,9 @@ private:
     double prevMargin_ = 0.0;
     double nextMargin_ = 0.0;
     int32_t cachedCount_ = -1;
+    int32_t displayCount_ = 1;
+    SwiperDisplayMode displayMode_ = SwiperDisplayMode::STRETCH;
+    EdgeEffect edgeEffect_ = EdgeEffect::SPRING;
 
     // need timer for autoplay
     RefPtr<Scheduler> scheduler_;
@@ -597,6 +618,7 @@ private:
     int32_t cacheStart_ = 0;
     int32_t cacheEnd_ = 0;
     int32_t lazyLoadCacheSize_ = 5; // default lazy load cache number: 5
+    int32_t callbackId_ = 0;
     double dragOffset_ = 0.0;
     int32_t nextIndex_ = 0;
 

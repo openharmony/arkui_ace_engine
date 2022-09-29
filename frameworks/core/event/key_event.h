@@ -16,18 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H
 
-#include <cstdint>
-#include <initializer_list>
-#include <list>
-#include <string>
-#include <vector>
-
-#include "stdarg.h"
-
-#include "base/utils/type_definition.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
+
 enum class KeyCode : int32_t {
     KEY_UNKNOWN = -1,
     KEY_FN = 0, // New
@@ -445,17 +437,11 @@ constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
 ACE_FORCE_EXPORT_WITH_PREVIEW const char* KeyToString(int32_t code);
 
 struct KeyEvent final {
-    KeyEvent()
-    {
-        key = KeyToString(static_cast<int32_t>(code));
-    }
+    KeyEvent() = default;
     KeyEvent(KeyCode code, KeyAction action, std::vector<KeyCode> pressedCodes, int32_t repeatTime, TimeStamp timeStamp,
         int32_t metaKey, int64_t deviceId, SourceType sourceType)
-        : code(code), action(action), pressedCodes(pressedCodes), repeatTime(repeatTime), timeStamp(timeStamp),
-          metaKey(metaKey), deviceId(deviceId), sourceType(sourceType)
-    {
-        key = KeyToString(static_cast<int32_t>(code));
-    }
+        : code(code), action(action), pressedCodes(std::move(pressedCodes)), repeatTime(repeatTime), timeStamp(timeStamp),
+          metaKey(metaKey), deviceId(deviceId), sourceType(sourceType) {}
     KeyEvent(KeyCode code, KeyAction action, int32_t repeatTime = 0, int64_t timeStamp = 0, int64_t deviceId = 0,
         SourceType sourceType = SourceType::KEYBOARD)
     {
@@ -475,7 +461,7 @@ struct KeyEvent final {
 
     bool IsKey(std::vector<KeyCode> expectCodes) const
     {
-        if (expectCodes.size() > pressedCodes.size() || pressedCodes.size() <= 0) {
+        if (expectCodes.size() > pressedCodes.size() || pressedCodes.empty()) {
             return false;
         }
         auto curExpectCode = expectCodes.rbegin();
@@ -511,21 +497,22 @@ struct KeyEvent final {
     {
         if (KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) {
             return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_0));
-        } else if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
+        }
+        if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
             return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_NUMPAD_0));
-        } else if (IsLetterKey()) {
+        }
+        if (IsLetterKey()) {
             int32_t codeValue = static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_A);
-            if (IsKey({ KeyCode::KEY_SHIFT_LEFT, code }) || IsKey({ KeyCode::KEY_SHIFT_RIGHT, code })) {
+            if (IsShiftWith(code)) {
                 return std::string(1, static_cast<char>(codeValue + ASCII_START_UPPER_CASE_LETTER));
-            } else {
-                return std::string(1, static_cast<char>(codeValue + ASCII_START_LOWER_CASE_LETTER));
             }
+            return std::string(1, static_cast<char>(codeValue + ASCII_START_LOWER_CASE_LETTER));
         }
         return "";
     }
 
     KeyCode code { KeyCode::KEY_UNKNOWN };
-    const char* key = nullptr;
+    const char* key = "";
     KeyAction action { KeyAction::UNKNOWN };
     std::vector<KeyCode> pressedCodes;
     // When the key is held down for a long period of time, it will be accumulated once in a while.
@@ -544,9 +531,9 @@ class ACE_EXPORT KeyEventInfo : public BaseEventInfo {
 public:
     explicit KeyEventInfo(const KeyEvent& event) : BaseEventInfo("keyEvent")
     {
-        keyType_ = event.action;
         keyCode_ = event.code;
         keyText_ = event.key;
+        keyType_ = event.action;
         keySource_ = event.sourceType;
         SetDeviceId(event.deviceId);
         SetTimeStamp(event.timeStamp);
@@ -575,11 +562,17 @@ public:
     }
 
 private:
-    KeyAction keyType_ = KeyAction::UNKNOWN;
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
-    const char* keyText_ = nullptr;
+    const char* keyText_ = "";
+    KeyAction keyType_ = KeyAction::UNKNOWN;
     int32_t metaKey_ = 0;
     SourceType keySource_ = SourceType::NONE;
 };
+
+using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;
+using OnKeyCallbackFunc = std::function<void(KeyEventInfo&)>;
+using OnFocusFunc = std::function<void()>;
+using OnBlurFunc = std::function<void()>;
+using OnPreFocusFunc = std::function<void()>;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

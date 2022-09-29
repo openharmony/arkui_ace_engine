@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,6 +69,7 @@ enum class CursorMoveSkip {
 
 class RenderTextField : public RenderNode, public TextInputClient, public ValueChangeObserver {
     DECLARE_ACE_TYPE(RenderTextField, RenderNode, TextInputClient, ValueChangeObserver);
+
 public:
     ~RenderTextField() override;
 
@@ -88,7 +89,7 @@ public:
     void Dump() override;
 
     bool OnKeyEvent(const KeyEvent& event);
-    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false);
+    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false, bool needShowSoftKeyboard = true);
     bool CloseKeyboard(bool forceClose = false);
     void ShowError(const std::string& errorText, bool resetToStart = true);
     void ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse = false);
@@ -102,7 +103,10 @@ public:
     void SetIsOverlayShowed(bool isOverlayShowed, bool needStartTwinkling = true);
     void UpdateFocusAnimation();
     const TextEditingValue& GetEditingValue() const;
-    const TextEditingValue& GetPreEditingValue() const;
+    const TextEditingValue& GetPreEditingValue() const;   
+    double GetEditingBoxY() const override;
+    double GetEditingBoxTopY() const override;
+    bool GetEditingBoxModel() const override;
     void Delete(int32_t start, int32_t end);
     void CursorMoveLeft(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
     void CursorMoveRight(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
@@ -177,6 +181,11 @@ public:
     double GetHeight() const
     {
         return height_.Value();
+    }
+
+    const Dimension& GetDimensionHeight() const
+    {
+        return height_;
     }
 
     void SetHeight(double height)
@@ -307,7 +316,7 @@ public:
         needNotifyChangeEvent_ = needNotifyChangeEvent;
     }
 
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     void SetInputMethodStatus(bool imeAttached)
     {
         imeAttached_ = imeAttached;
@@ -315,12 +324,9 @@ public:
 
     void UpdateConfiguration();
 #endif
-    std::string ProvideRestoreInfo() override;
 
-    void SetOnIsCurrentFocus(const std::function<bool()>& onIsCurrentFocus)
-    {
-        onIsCurrentFocus_ = onIsCurrentFocus;
-    }
+    // distribute
+    std::string ProvideRestoreInfo() override;
 
     int32_t instanceId_ = -1;
 
@@ -345,6 +351,7 @@ public:
     {
         return inputStyle_;
     }
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -379,6 +386,7 @@ protected:
     void OnDoubleClick(const ClickInfo& clickInfo);
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
+    void HandleMouseHoverEvent(MouseState mouseState) override;
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
 
@@ -401,7 +409,7 @@ protected:
 
     bool HasConnection() const
     {
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         return imeAttached_;
 #else
         return connection_;
@@ -413,7 +421,7 @@ protected:
     static bool IsSelectiveDevice()
     {
         return (SystemProperties::GetDeviceType() != DeviceType::TV &&
-            SystemProperties::GetDeviceType() != DeviceType::WATCH);
+                SystemProperties::GetDeviceType() != DeviceType::WATCH);
     }
 
     void AddOutOfRectCallbackToContext();
@@ -457,7 +465,7 @@ protected:
     // multiply by [twinklingInterval]. For example, 3 * 500ms = 1500ms.
     int32_t obscureTickPendings_ = 0;
     // What the keyboard should appears.
-    TextInputType keyboard_ = TextInputType::TEXT;
+    TextInputType keyboard_ = TextInputType::UNSPECIFIED;
     // Action when "enter" pressed.
     TextInputAction action_ = TextInputAction::UNSPECIFIED;
     std::string actionLabel_;
@@ -496,14 +504,15 @@ protected:
     int32_t cursorPositionForShow_ = 0;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
+    CopyOptions copyOption_ = CopyOptions::Distributed;
 
     bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
-    bool showCounter_ = false; // Whether show counter, 10/100 means maxlength is 100 and 10 has been inputted.
-    bool overCount_ = false;   // Whether count of text is over limit.
-    bool obscure_ = false;     // Obscure the text, for example, password.
+    bool showCounter_ = false;     // Whether show counter, 10/100 means maxlength is 100 and 10 has been inputted.
+    bool overCount_ = false;       // Whether count of text is over limit.
+    bool obscure_ = false;         // Obscure the text, for example, password.
     bool passwordRecord_ = true;   // Record the status of password display or non-display.
-    bool enabled_ = true;      // Whether input is disable of enable.
-    bool needFade_ = false;    // Fade in/out text when overflow.
+    bool enabled_ = true;          // Whether input is disable of enable.
+    bool needFade_ = false;        // Fade in/out text when overflow.
     bool blockRightShade_ = false;
     bool isValueFromFront_ = false;           // Is value from developer-set.
     bool isValueFromRemote_ = false;          // Remote value coming form typing, other is from clopboard.
@@ -593,7 +602,9 @@ private:
 
     void AttachIme();
 
+    // distribute
     void ApplyRestoreInfo();
+    void OnTapCallback();
 
     int32_t initIndex_ = 0;
     bool isOverlayFocus_ = false;
@@ -605,11 +616,11 @@ private:
     bool softKeyboardEnabled_ = true;
     bool isInEditStatus_ = false;
     bool isFocusOnTouch_ = true;
+    bool onTapCallbackResult_ = false;
     Color pressColor_;
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
-    CopyOptions copyOption_ = CopyOptions::Distributed;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
     std::function<void(const Rect&)> onClipRectChanged_;
@@ -630,7 +641,6 @@ private:
     std::function<void()> onLongPressEvent_;
     std::function<void()> moveNextFocusEvent_;
     std::function<void(bool)> onOverlayFocusChange_;
-    std::function<bool()> onIsCurrentFocus_;
     std::function<void(std::string)> onCopy_;
     std::function<void(std::string)> onCut_;
     std::function<void(std::string)> onPaste_;
@@ -659,7 +669,7 @@ private:
     RefPtr<Animator> animator_;
     std::vector<TextEditingValue> operationRecords_;
     std::vector<TextEditingValue> inverseOperationRecords_;
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
 #endif
 

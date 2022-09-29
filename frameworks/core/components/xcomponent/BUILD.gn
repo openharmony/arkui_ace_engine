@@ -29,7 +29,7 @@ build_component("xcomponent") {
 
   rosen_sources = [ "rosen_render_xcomponent.cpp" ]
 
-  if (is_standard_system && !use_mingw_win && !use_mac) {
+  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     include_dirs = [
       "//drivers/peripheral/display/interfaces/include",
       "//foundation/graphic/graphic_2d/interfaces/innerkits/wmclient",

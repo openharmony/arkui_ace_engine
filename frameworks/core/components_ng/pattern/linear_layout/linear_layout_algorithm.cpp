@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 
 namespace OHOS::Ace::NG {
+
 void LinearLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto linearLayoutProperty = DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -32,16 +33,16 @@ void LinearLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto linearLayoutProperty = DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
     if (linearLayoutProperty) {
         LinearLayoutUtils::Layout(layoutWrapper, linearLayoutProperty->IsVertical(),
-            linearLayoutProperty->GetCrossAxisAlignValue(FlexAlign::CENTER));
+            linearLayoutProperty->GetCrossAxisAlignValue(FlexAlign::CENTER),
+            linearLayoutProperty->GetMainAxisAlignValue(FlexAlign::FLEX_START));
     } else {
         LOGW("fail to cast to LinearLayoutProperty");
     }
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
 
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     for (auto&& child : children) {
-        child->Layout(parentOffset);
+        child->Layout();
     }
 }
+
 } // namespace OHOS::Ace::NG

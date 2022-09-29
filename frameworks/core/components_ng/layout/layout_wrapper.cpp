@@ -16,6 +16,8 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 #include "base/log/ace_trace.h"
+#include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -30,11 +32,10 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
         LOGI("index is of out boundary, total count: %{public}d, target index: %{public}d", currentChildCount_, index);
         return nullptr;
     }
-    auto iter = children_.find(index);
-    if (iter != children_.end()) {
+    auto iter = childrenMap_.find(index);
+    if (iter != childrenMap_.end()) {
         if (addToRenderTree) {
             iter->second->isActive_ = true;
-            pendingRender_.emplace(index, iter->second);
         }
         return iter->second;
     }
@@ -43,18 +44,13 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
     CHECK_NULL_RETURN(wrapper, nullptr);
     if (addToRenderTree) {
         wrapper->isActive_ = true;
-        pendingRender_.emplace(index, wrapper);
     }
     return wrapper;
 }
 
 std::list<RefPtr<LayoutWrapper>> LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
 {
-    std::list<RefPtr<LayoutWrapper>> childLayoutWrappers;
-    for (const auto& [index, wrapper] : children_) {
-        wrapper->isActive_ = true;
-        childLayoutWrappers.emplace_back(wrapper);
-    }
+    std::list<RefPtr<LayoutWrapper>> childLayoutWrappers = children_;
     if (layoutWrapperBuilder_) {
         auto buildItems = layoutWrapperBuilder_->ExpandAllChildWrappers();
         auto index = layoutWrapperBuilder_->GetStartIndex();
@@ -63,10 +59,10 @@ std::list<RefPtr<LayoutWrapper>> LayoutWrapper::GetAllChildrenWithBuild(bool add
         childLayoutWrappers.splice(insertIter, buildItems);
     }
     if (addToRenderTree) {
-        int32_t index = 0;
         for (const auto& child : childLayoutWrappers) {
-            child->isActive_ = true;
-            pendingRender_.emplace(index++, child);
+            if (!child->isActive_) {
+                child->isActive_ = true;
+            }
         }
     }
     return childLayoutWrappers;
@@ -74,25 +70,15 @@ std::list<RefPtr<LayoutWrapper>> LayoutWrapper::GetAllChildrenWithBuild(bool add
 
 void LayoutWrapper::RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper)
 {
-    auto iter = std::find_if(
-        pendingRender_.begin(), pendingRender_.end(), [wrapper](const auto& value) { return value.second == wrapper; });
-    if (iter == pendingRender_.end()) {
-        LOGW("can not find current wrapper in pending render map");
-        return;
-    }
-    iter->second->isActive_ = false;
-    pendingRender_.erase(iter);
+    CHECK_NULL_VOID(wrapper);
+    wrapper->isActive_ = false;
 }
 
 void LayoutWrapper::RemoveChildInRenderTree(int32_t index)
 {
-    auto iter = pendingRender_.find(index);
-    if (iter == pendingRender_.end()) {
-        LOGW("can not find current wrapper in pending render map");
-        return;
-    }
-    iter->second->isActive_ = false;
-    pendingRender_.erase(iter);
+    auto wrapper = GetOrCreateChildByIndex(index, false);
+    CHECK_NULL_VOID(wrapper);
+    wrapper->isActive_ = false;
 }
 
 void LayoutWrapper::ResetHostNode()
@@ -141,11 +127,12 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     }
     layoutProperty_->UpdateContentConstraint();
+    geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
 
     LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
-    if (isContraintNoChanged_ && !CheckMeasureFlag(layoutProperty_->GetPropertyChangeFlag())) {
+    if (isContraintNoChanged_ && !CheckNeedMeasure(layoutProperty_->GetPropertyChangeFlag())) {
         LOGD("%{public}s skip measure content, constrain flag: %{public}d, measure flag: %{public}d",
             host->GetTag().c_str(), isContraintNoChanged_, layoutProperty_->GetPropertyChangeFlag());
     } else {
@@ -157,12 +144,27 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 
     layoutAlgorithm_->Measure(this);
 
+    // check aspect radio.
+    const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
+    auto hasAspectRatio = magicItemProperty ? magicItemProperty->HasAspectRatio() : false;
+    if (hasAspectRatio) {
+        auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+        // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and aspectRatio
+        // are all set, the height is not used.
+        auto width = geometryNode_->GetFrameSize().Width();
+        LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
+            geometryNode_->GetFrameSize().Height());
+        auto height = width / aspectRatio;
+        LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
+        geometryNode_->SetFrameSize(SizeF({ width, height }));
+    }
+
     LOGD("on Measure Done: %{public}s, Size: %{public}s", GetHostTag().c_str(),
         geometryNode_->GetFrameSize().ToString().c_str());
 }
 
 // Called to perform layout children.
-void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
+void LayoutWrapper::Layout()
 {
     if (!layoutAlgorithm_ || layoutAlgorithm_->SkipLayout()) {
         LOGD("the layoutAlgorithm skip layout");
@@ -187,10 +189,6 @@ void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
         }
         layoutProperty_->UpdateContentConstraint();
     }
-
-    if (parentGlobalOffset) {
-        geometryNode_->SetParentGlobalOffset(parentGlobalOffset.value());
-    }
     layoutAlgorithm_->Layout(this);
     LOGD("On Layout Done: %{public}s, Offset: %{public}s", GetHostTag().c_str(),
         geometryNode_->GetFrameOffset().ToString().c_str());
@@ -204,21 +202,6 @@ bool LayoutWrapper::SkipMeasureContent() const
     return isContraintNoChanged_;
 }
 
-std::list<RefPtr<FrameNode>> LayoutWrapper::GetChildrenInRenderArea() const
-{
-    std::list<RefPtr<FrameNode>> frameNodes;
-    for (const auto& [index, wrapper] : pendingRender_) {
-        if (!wrapper) {
-            continue;
-        }
-        auto host = wrapper->GetHostNode();
-        if (host) {
-            frameNodes.emplace_back(host);
-        }
-    }
-    return frameNodes;
-}
-
 void LayoutWrapper::MountToHostOnMainThread()
 {
     SwapDirtyLayoutWrapperOnMainThread();
@@ -226,14 +209,14 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    for (const auto& [index, wrapper] : pendingRender_) {
-        if (wrapper) {
-            wrapper->SwapDirtyLayoutWrapperOnMainThread();
+    for (const auto& child : children_) {
+        if (child) {
+            child->SwapDirtyLayoutWrapperOnMainThread();
         }
     }
 
     if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->UpdateBuildCacheOnMainThread();
+        layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
     }
 
     auto host = hostNode_.Upgrade();

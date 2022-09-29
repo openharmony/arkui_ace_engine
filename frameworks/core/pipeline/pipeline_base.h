@@ -18,15 +18,18 @@
 
 #include <functional>
 #include <memory>
+#include <stack>
 #include <string>
 #include <utility>
 
 #include "base/geometry/dimension.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/window_animation_config.h"
@@ -47,6 +50,7 @@ class OffscreenCanvas;
 class Window;
 class FontManager;
 class ManagerInterface;
+enum class FrontendType;
 
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -63,22 +67,24 @@ public:
 
     virtual uint64_t GetTimeFromExternalTimer();
 
-    virtual bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) = 0;
+    bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
 
     virtual void AddKeyFrame(
         float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) = 0;
 
     virtual void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback) = 0;
 
-    virtual void PrepareOpenImplicitAnimation() = 0;
+    void PrepareOpenImplicitAnimation();
 
-    virtual void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr) = 0;
+    void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallBack = nullptr);
 
-    virtual void PrepareCloseImplicitAnimation() = 0;
+    void PrepareCloseImplicitAnimation();
 
-    virtual bool CloseImplicitAnimation() = 0;
+    bool CloseImplicitAnimation();
+
+    void ForceLayoutForImplicitAnimation();
 
     // add schedule task and return the unique mark id.
     virtual uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) = 0;
@@ -104,7 +110,7 @@ public:
     virtual bool OnRotationEvent(const RotationEvent& event) const = 0;
 
     // Called by window when received vsync signal.
-    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
+    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by view
     virtual void OnDragEvent(int32_t x, int32_t y, DragEventAction action) = 0;
@@ -446,6 +452,16 @@ public:
         return isRightToLeft_;
     }
 
+    void SetEventManager(const RefPtr<EventManager>& eventManager)
+    {
+        eventManager_ = eventManager;
+    }
+
+    RefPtr<EventManager> GetEventManager() const
+    {
+        return eventManager_;
+    }
+
     bool IsRebuildFinished() const
     {
         return isRebuildFinished_;
@@ -463,9 +479,24 @@ public:
 
     void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
+    void PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+
     virtual void FlushReload() {}
+    virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
+    FrontendType GetFrontendType() const
+    {
+        return frontendType_;
+    }
+
+    double GetDensity() const
+    {
+        return density_;
+    }
+
+    void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
+    void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
@@ -476,6 +507,7 @@ protected:
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
     virtual void FlushMessages() = 0;
+    virtual void FlushUITasks() = 0;
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
     bool isRebuildFinished_ = false;
@@ -490,7 +522,9 @@ protected:
     double dipScale_ = 1.0;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
+    FrontendType frontendType_;
 
+    std::stack<bool> pendingImplicitLayout_;
     std::unique_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
@@ -509,6 +543,8 @@ protected:
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
+
+    std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

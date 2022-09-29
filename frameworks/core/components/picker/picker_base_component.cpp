@@ -49,164 +49,6 @@ const char PickerBaseComponent::PICKER_TEXT_COLUMN[] = "text";
 const char PickerBaseComponent::PICKER_MONTHDAY_COLUMN[] = "monthDay";
 const char PickerBaseComponent::PICKER_AMPM_COLUMN[] = "amPm";
 
-PickerDate PickerDate::Current()
-{
-    PickerDate date;
-    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto local = std::localtime(&now);
-    if (local == nullptr) {
-        LOGE("get localtime failed.");
-        return date;
-    }
-    date.SetYear(local->tm_year + 1900); // local date start from 1900
-    date.SetMonth(local->tm_mon + 1);    // local month start from 0 to 11, need add one.
-    date.SetDay(local->tm_mday);
-    date.SetWeek(local->tm_wday);
-    return date;
-}
-
-uint32_t PickerDate::GetMaxDay(uint32_t year, uint32_t month)
-{
-    if (month == 2) { // days count in february is different between leap year and other.
-        bool leapYear = IsLeapYear(year);
-        return (leapYear ? 29 : 28); // leap year's february has 29 days, other has 28 days.
-    }
-
-    switch (month) {
-        case 1:        // january
-        case 3:        // march
-        case 5:        // may
-        case 7:        // july
-        case 8:        // august
-        case 10:       // october
-        case 12:       // december
-            return 31; // upper months has 31 days
-        default:
-            return 30; // other month has 30 days
-    }
-}
-
-bool PickerDate::IsLeapYear(uint32_t year)
-{
-    if (year % 100 == 0) {        // special case: year can divided by 100
-        return (year % 400 == 0); // leap year equal that can divided by 400.
-    }
-
-    return (year % 4 == 0); // other case, leap year equal that can divided by 4.
-}
-
-std::string PickerDate::ToString(bool jsonFormat, int32_t status) const
-{
-    if (!jsonFormat) {
-        DateTime date;
-        date.year = year_;
-        date.month = month_ - 1; // W3C's month start from 0 to 11
-        date.day = day_;
-        return Localization::GetInstance()->FormatDateTime(date, DateTimeStyle::FULL, DateTimeStyle::NONE);
-    }
-
-    return std::string("{\"year\":") + std::to_string(year_) + ",\"month\":" + std::to_string(month_) +
-           ",\"day\":" + std::to_string(day_) + ",\"status\":" + std::to_string(status) + "}";
-}
-
-uint32_t PickerDate::ToDays() const
-{
-    uint32_t days = 0;
-    days += day_ - 1; // day start from 1
-    // month start from 1
-    for (uint32_t month = 1; month < month_; ++month) {
-        days += PickerDate::GetMaxDay(year_, month);
-    }
-    // year start from 1900
-    for (uint32_t year = 1900; year < year_; ++year) {
-        // leap year has 366 days, other year has 365 days.
-        days += (PickerDate::IsLeapYear(year) ? 366 : 365);
-    }
-    return days;
-}
-
-void PickerDate::FromDays(uint32_t days)
-{
-    for (year_ = 1900; year_ <= 2100; ++year_) { // year start from 1900 to 2100.
-        // leap year has 366 days, other year has 365 days;
-        uint32_t daysInYear = (PickerDate::IsLeapYear(year_) ? 366 : 365);
-        if (days < daysInYear) {
-            break;
-        } else {
-            days -= daysInYear;
-        }
-    }
-
-    for (month_ = 1; month_ <= 12; ++month_) { // month start from 1 to 12
-        uint32_t daysInMonth = PickerDate::GetMaxDay(year_, month_);
-        if (days < daysInMonth) {
-            break;
-        } else {
-            days -= daysInMonth;
-        }
-    }
-
-    day_ = days + 1; // days is index start form 0 and day start form 1.
-}
-
-PickerTime PickerTime::Current()
-{
-    PickerTime time;
-    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto local = std::localtime(&now);
-    if (local == nullptr) {
-        LOGE("get localtime failed.");
-        return time;
-    }
-    time.SetHour(local->tm_hour);
-    time.SetMinute(local->tm_min);
-    time.SetSecond(local->tm_sec);
-    return time;
-}
-
-std::string PickerTime::ToString(bool jsonFormat, bool hasSecond, int32_t status) const
-{
-    if (!jsonFormat) {
-        if (!hasSecond) {
-            // use char ':' to split.
-            return std::to_string(hour_) + ":" + std::to_string(minute_);
-        }
-        // use char ':' to split.
-        return std::to_string(hour_) + ":" + std::to_string(minute_) + ":" + std::to_string(second_);
-    }
-
-    if (!hasSecond) {
-        // use json format chars
-        return std::string("{\"hour\":") + std::to_string(hour_) + ",\"minute\":" + std::to_string(minute_) +
-            ",\"status\":" + std::to_string(status) + "}";
-    }
-    // use json format chars
-    return std::string("{\"hour\":") + std::to_string(hour_) + ",\"minute\":" + std::to_string(minute_) +
-            ",\"second\":" + std::to_string(second_) + ",\"status\":" + std::to_string(status) + "}";
-}
-
-PickerDateTime PickerDateTime::Current()
-{
-    PickerDateTime dateTime;
-    dateTime.SetDate(PickerDate::Current());
-    dateTime.SetTime(PickerTime::Current());
-    return dateTime;
-}
-
-std::string PickerDateTime::ToString(bool jsonFormat, int32_t status) const
-{
-    if (!jsonFormat) {
-        return date_.ToString(jsonFormat);
-    }
-
-    return std::string("{\"year\":") + std::to_string(date_.GetYear()) +
-           ",\"month\":" + std::to_string(date_.GetMonth()) +
-           ",\"day\":" + std::to_string(date_.GetDay()) +
-           ",\"hour\":" + std::to_string(time_.GetHour()) +
-           ",\"minute\":" + std::to_string(time_.GetMinute()) +
-           ",\"status\":" + std::to_string(status) + "}";
-}
-
 RefPtr<RenderNode> PickerBaseComponent::CreateRenderNode()
 {
     return RenderPickerBase::Create();
@@ -419,7 +261,7 @@ void PickerBaseComponent::InitializeTitle(std::list<RefPtr<Component>>& outChild
         LOGE("theme is null.");
         return;
     }
-    if (isDialog_ && hasTitle_) {
+    if ((isDialog_ || isCreateDialogComponent_) && hasTitle_) {
         auto triangle = AceType::MakeRefPtr<TriangleComponent>();
         triangle->SetPadding(8.0_vp); // all padding
         triangle->SetWidth(25.0_vp); // left padding + it width + right padding = 8dp + 9dp + 8dp
@@ -517,7 +359,7 @@ void PickerBaseComponent::ClearAccessibilityNodes()
     for (const auto& column : columns_) {
         column->SetNodeId(-1); // reset id.
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (accessibilityManager) {
         auto node = accessibilityManager->GetAccessibilityNodeById(GetPickerBaseId());
         if (node) {
@@ -742,7 +584,7 @@ void PickerBaseComponent::Initialize(
     // picker need build rootAccessibilityNode but picker-view don't need.
     if (!rootAccessibility_ && isDialog_) {
         rootAccessibilityId_ = accessibilityManager->GenerateNextAccessibilityId();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         rootAccessibility_ = accessibilityManager->CreateSpecializedNode(
             "picker-dialog", rootAccessibilityId_, GetPickerBaseId());
 #else

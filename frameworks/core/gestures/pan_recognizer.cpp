@@ -202,8 +202,20 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         }
 
         LOGD("pan recognizer detected successful");
-        SendCallbackMsg(onActionUpdate_);
+        if (isFlushTouchEventsEnd_) {
+            SendCallbackMsg(onActionUpdate_);
+        }
     }
+}
+
+void PanRecognizer::OnFlushTouchEventsBegin()
+{
+    isFlushTouchEventsEnd_ = false;
+}
+
+void PanRecognizer::OnFlushTouchEventsEnd()
+{
+    isFlushTouchEventsEnd_ = true;
 }
 
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
@@ -341,7 +353,11 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetTimeStamp(time_);
         info.SetOffsetX(averageDistance_.GetX());
         info.SetOffsetY(averageDistance_.GetY());
-        info.SetGlobalPoint(globalPoint_);
+        TouchEvent touchPoint = {};
+        if (!touchPoints_.empty()) {
+            touchPoint = touchPoints_.begin()->second;
+        }
+        info.SetGlobalPoint(globalPoint_).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetDelta(delta_);

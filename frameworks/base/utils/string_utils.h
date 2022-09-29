@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_UTILS_H
 
+#include <climits>
 #include <cmath>
 #include <codecvt>
 #include <locale>
 #include <sstream>
 #include <string>
 #include <vector>
+
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/calc_dimension.h"
@@ -161,7 +163,7 @@ inline uint32_t StringToUint(const std::string& value, uint32_t defaultErr = 0)
 {
     errno = 0;
     char* pEnd = nullptr;
-    uint64_t result = std::strtoul(value.c_str(), &pEnd, 10);
+    uint64_t result = std::strtoull(value.c_str(), &pEnd, 10);
     if (pEnd == value.c_str() || result > UINT32_MAX || errno == ERANGE) {
         return defaultErr;
     } else {
@@ -325,7 +327,11 @@ inline std::string DoubleToString(double value, int32_t precision = 2)
 {
     std::ostringstream result;
     result.precision(precision);
-    result << std::fixed << value;
+    if (NearEqual(value, Infinity<double>())) {
+        result << "Infinity";
+    } else {
+        result << std::fixed << value;
+    }
     return result.str();
 }
 
@@ -421,9 +427,20 @@ inline bool StartWith(const std::string& dst, const std::string& prefix)
     return dst.compare(0, prefix.size(), prefix) == 0;
 }
 
+inline bool StartWith(const std::string& str, const char* prefix, size_t prefixLen)
+{
+    return ((str.length() >= prefixLen) && (str.compare(0, prefixLen, prefix) == 0));
+}
+
 inline bool EndWith(const std::string& dst, const std::string& suffix)
 {
     return (dst.size() >= suffix.size()) && dst.compare(dst.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+inline bool EndWith(const std::string& str, const char* suffix, size_t suffixLen)
+{
+    size_t len = str.length();
+    return ((len >= suffixLen) && (str.compare(len - suffixLen, suffixLen, suffix) == 0));
 }
 
 inline void TransformStrCase(std::string& str, int32_t textCase)

@@ -37,7 +37,7 @@ const char START_STR[] = "[\"";
 DOMCamera::DOMCamera(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     cameraComponent_ = AceType::MakeRefPtr<CameraComponent>();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (IsRightToLeft()) {
         cameraComponent_->SetTextDirection(TextDirection::RTL);
     }

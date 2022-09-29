@@ -35,7 +35,7 @@ constexpr char CANVAS_TYPE_WEBGL[] = "webgl";
 constexpr char CANVAS_TYPE_WEBGL2[] = "webgl2";
 constexpr char CANVAS_WEBGL_SO[] = "webglnapi";
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue> jsValue)
 {
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
@@ -1123,7 +1123,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsDrawImage(const shared_ptr<JsRuntime>& ru
     double height = 0.0;
     auto src = argv[0]->GetProperty(runtime, DOM_SRC);
     if (src->IsUndefined(runtime)) {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         pixelMap = CreatePixelMapFromNapiValue(runtime, argv[0]);
         if (!pixelMap) {
             LOGE("pixelMap is null");

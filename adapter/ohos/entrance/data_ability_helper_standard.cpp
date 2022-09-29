@@ -12,22 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
-
-#include "adapter/ohos/entrance/data_ability_helper_standard.h"
 
 #include "data_ability_helper.h"
 #include "datashare_helper.h"
 #include "pixel_map.h"
 
+#include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "base/utils/string_utils.h"
 
 namespace OHOS::Ace {
 namespace {
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 using ThumbnaiNapiEntry = void* (*)(const char*, void*);
 ThumbnaiNapiEntry GetThumbnailNapiEntry()
 {
@@ -58,17 +57,17 @@ ThumbnaiNapiEntry GetThumbnailNapiEntry()
 }
 #endif
 
-}
+} // namespace
 
 DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS::AppExecFwk::Context>& context,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& runtimeContext, bool useStageModel)
+    : useStageModel_(useStageModel)
 {
-    useStageModel_ = useStageModel;
     if (useStageModel) {
         runtimeContext_ = runtimeContext;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        dataAbilityThumbnailQueryImpl_ =
-            [runtimeContextWp = runtimeContext_] (const std::string& uri) -> std::unique_ptr<Media::PixelMap> {
+#if !defined(PREVIEW)
+        dataAbilityThumbnailQueryImpl_ = [runtimeContextWp = runtimeContext_](
+                                             const std::string& uri) -> std::unique_ptr<Media::PixelMap> {
             ThumbnaiNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry();
             if (!thumbnailNapiEntry) {
                 LOGE("thumbnailNapiEntry is null");
@@ -88,16 +87,16 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
         };
 #endif
     } else {
-        dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(context);
-        dataShareHelper_ = DataShare::DataShareHelper::Creator(context, "");
+        context_ = context;
     }
 }
- 
+
 void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::string& uri)
 {
     if (!dataAbilityThumbnailQueryImpl_) {
         LOGW("no impl for thumbnail data query, please make sure you are using thumbnail resource on stage mode. "
-            "uri: %{private}s", uri.c_str());
+             "uri: %{private}s",
+            uri.c_str());
         return nullptr;
     }
     pixmap_ = dataAbilityThumbnailQueryImpl_(uri);
@@ -111,9 +110,11 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
 int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std::string& mode)
 {
     LOGD("DataAbilityHelperStandard::OpenFile start uri: %{private}s, mode: %{private}s", uriStr.c_str(), mode.c_str());
-    if (StringUtils::StartWith(uriStr, "dataability://")) {
+    // FA model always uses DataAbility
+    if (!useStageModel_ || StringUtils::StartWith(uriStr, "dataability://")) {
         return OpenFileWithDataAbility(uriStr, mode);
-    } else if (StringUtils::StartWith(uriStr, "datashare://")) {
+    }
+    if (StringUtils::StartWith(uriStr, "datashare://")) {
         return OpenFileWithDataShare(uriStr, mode);
     }
     LOGE("DataAbilityHelperStandard::OpenFile uri is not support.");
@@ -123,9 +124,13 @@ int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std
 int32_t DataAbilityHelperStandard::OpenFileWithDataAbility(const std::string& uriStr, const std::string& mode)
 {
     Uri uri = Uri(uriStr);
-    if (useStageModel_ && !dataAbilityHelper_) {
-        uri_ = std::make_shared<Uri>(uriStr);
-        dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(runtimeContext_.lock(), uri_, false);
+    uri_ = std::make_shared<Uri>(uriStr);
+    if (!dataAbilityHelper_) {
+        if (useStageModel_) {
+            dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(runtimeContext_.lock(), uri_, false);
+        } else {
+            dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(context_.lock(), uri_);
+        }
     }
 
     if (dataAbilityHelper_) {

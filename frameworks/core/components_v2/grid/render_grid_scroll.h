@@ -145,6 +145,9 @@ public:
 
     bool IsAxisScrollable(AxisDirection direction) override;
 
+    // distribute
+    std::string ProvideRestoreInfo() override;
+
 protected:
     int32_t GetItemMainIndex(const RefPtr<RenderNode>& child, bool isMain) const;
     void SetMainSize(Size& dst, const Size& src);
@@ -206,6 +209,9 @@ protected:
     int32_t GetIndexByPosition(double position) const;
 
     void OnScrolled(int32_t scrolled) const;
+
+    // distribute
+    void ApplyRestoreInfo();
 
     enum class SCROLLABLE : uint32_t {
         NO_SCROLL = 0,

@@ -20,6 +20,7 @@
 #include <string>
 
 #include "viewport_config.h"
+#include "foundation/multimedia/image_framework/interfaces/innerkits/include/pixel_map.h"
 
 namespace OHOS {
 
@@ -101,6 +102,9 @@ public:
 
     // Receive memory level notification
     virtual void NotifyMemoryLevel(int32_t level) = 0;
+
+    virtual void SetAppWindowTitle(const std::string& title) = 0;
+    virtual void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
 };
 
 } // namespace OHOS::Ace

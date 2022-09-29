@@ -21,17 +21,18 @@
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/skia/include/core/SkStream.h"
 
+#include "base/log/ace_trace.h"
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/event/ace_event_helper.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
+#include "image_compressor.h"
 
 namespace OHOS::Ace {
 namespace {
 
-constexpr double RESIZE_MAX_PROPORTION = 0.5 * 0.5; // Cache image when resize exceeds 25%
 // If a picture is a wide color gamut picture, its area value will be larger than this threshold.
 constexpr double SRGB_GAMUT_AREA = 0.104149;
 
@@ -244,8 +245,9 @@ RefPtr<ImageObject> ImageProvider::GeneratorAceImageObject(
 }
 
 sk_sp<SkData> ImageProvider::LoadImageRawData(
-    const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase> context, const Size& targetSize)
+    const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase> context)
 {
+    ACE_FUNCTION_TRACE();
     auto imageCache = context->GetImageCache();
     if (imageCache) {
         // 1. try get data from cache.
@@ -254,22 +256,8 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
             LOGD("sk data from memory cache.");
             return AceType::DynamicCast<SkiaCachedImageData>(cacheData)->imageData;
         }
-        // 2 try get data from file cache.
-        if (targetSize.IsValid()) {
-            LOGD("size valid try load from cache.");
-            std::string cacheFilePath =
-                ImageCache::GetImageCacheFilePath(ImageObject::GenerateCacheKey(imageInfo, targetSize));
-            LOGD("cache file path: %{private}s", cacheFilePath.c_str());
-            auto data = imageCache->GetDataFromCacheFile(cacheFilePath);
-            if (data) {
-                LOGD("cache file found : %{public}s", cacheFilePath.c_str());
-                return AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
-            }
-        } else {
-            LOGD("target size is not valid, load raw image file.");
-        }
     }
-    // 3. try load raw image file.
+    // 2. try load raw image file.
     auto imageLoader = ImageLoader::CreateImageLoader(imageInfo);
     if (!imageLoader) {
         LOGE("imageLoader create failed. imageInfo: %{private}s", imageInfo.ToString().c_str());
@@ -281,6 +269,23 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
         imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(data));
     }
     return data;
+}
+
+sk_sp<SkData> ImageProvider::LoadImageRawDataFromFileCache(
+    const RefPtr<PipelineBase> context,
+    const std::string key,
+    const std::string suffix)
+{
+    ACE_FUNCTION_TRACE();
+    auto imageCache = context->GetImageCache();
+    if (imageCache) {
+        std::string cacheFilePath = ImageCache::GetImageCacheFilePath(key) + suffix;
+        auto data = imageCache->GetDataFromCacheFile(cacheFilePath);
+        if (data) {
+            return AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
+        }
+    }
+    return nullptr;
 }
 
 #ifndef NG_BUILD
@@ -364,8 +369,10 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
 #endif
 
 void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
-    const std::function<void(flutter::SkiaGPUObject<SkImage>)>&& callback,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder)
+    const sk_sp<SkData>& data,
+    const std::function<void(flutter::SkiaGPUObject<SkImage>, sk_sp<SkData>)>&& callback,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    const std::string src)
 {
     if (!renderTaskHolder) {
         LOGW("renderTaskHolder has been released.");
@@ -373,9 +380,14 @@ void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
     }
 #ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.
-    callback({ image, renderTaskHolder->unrefQueue });
+    callback({ image, renderTaskHolder->unrefQueue }, nullptr);
 #else
-    auto task = [image, callback, renderTaskHolder] () {
+    if (data && ImageCompressor::GetInstance()->CanCompress()) {
+        LOGI("use astc cache %{public}s %{public}d * %{public}d", src.c_str(), image->width(), image->height());
+        callback({ image, renderTaskHolder->unrefQueue }, data);
+        return;
+    }
+    auto task = [image, callback, renderTaskHolder, src] () {
         if (!renderTaskHolder) {
             LOGW("renderTaskHolder has been released.");
             return;
@@ -383,37 +395,52 @@ void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
         // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
         if (!renderTaskHolder->ioManager) {
             // Shell is closing.
-            callback({ image, renderTaskHolder->unrefQueue });
+            callback({ image, renderTaskHolder->unrefQueue }, nullptr);
             return;
         }
         ACE_DCHECK(!image->isTextureBacked());
-        auto resContext = renderTaskHolder->ioManager->GetResourceContext();
-        if (!resContext) {
-            callback({ image, renderTaskHolder->unrefQueue });
+        bool needRaster = ImageCompressor::GetInstance()->CanCompress()
+            || renderTaskHolder->ioManager->GetResourceContext();
+        if (!needRaster) {
+            callback({ image, renderTaskHolder->unrefQueue }, nullptr);
             return;
-        }
-        auto rasterizedImage = image->makeRasterImage();
-        if (!rasterizedImage) {
-            LOGW("Rasterize image failed. callback.");
-            callback({ image, renderTaskHolder->unrefQueue });
-            return;
-        }
-        SkPixmap pixmap;
-        if (!rasterizedImage->peekPixels(&pixmap)) {
-            LOGW("Could not peek pixels of image for texture upload.");
-            callback({ rasterizedImage, renderTaskHolder->unrefQueue });
-            return;
-        }
-        auto textureImage =
+        } else {
+            auto rasterizedImage = image->isLazyGenerated() ? image->makeRasterImage() : image;
+            if (!rasterizedImage) {
+                LOGW("Rasterize image failed. callback.");
+                callback({ image, renderTaskHolder->unrefQueue }, nullptr);
+                return;
+            }
+            SkPixmap pixmap;
+            if (!rasterizedImage->peekPixels(&pixmap)) {
+                LOGW("Could not peek pixels of image for texture upload.");
+                callback({ rasterizedImage, renderTaskHolder->unrefQueue }, nullptr);
+                return;
+            }
+            int32_t width = static_cast<int32_t>(pixmap.width());
+            int32_t height = static_cast<int32_t>(pixmap.height());
+            sk_sp<SkData> compressData;
+            if (ImageCompressor::GetInstance()->CanCompress()) {
+                compressData = ImageCompressor::GetInstance()->GpuCompress(src, pixmap, width, height);
+                ImageCompressor::GetInstance()->WriteToFile(src, compressData, {width, height});
+                renderTaskHolder->ioTaskRunner->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
+                    fml::TimeDelta::FromMilliseconds(ImageCompressor::releaseTimeMs));
+            }
+            auto resContext = renderTaskHolder->ioManager->GetResourceContext();
+            if (!resContext) {
+                callback({ image, renderTaskHolder->unrefQueue }, compressData);
+            } else {
+                auto textureImage =
 #ifdef NG_BUILD
-            SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, true);
+                    SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, true);
 #else
-            SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, pixmap.colorSpace(), true);
+                    SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, pixmap.colorSpace(), true);
 #endif
-        callback({ textureImage ? textureImage : rasterizedImage, renderTaskHolder->unrefQueue });
-
-        // Trigger purge cpu bitmap resource, after image upload to gpu.
-        SkGraphics::PurgeResourceCache();
+                callback({ textureImage ? textureImage : rasterizedImage, renderTaskHolder->unrefQueue }, compressData);
+            }
+            // Trigger purge cpu bitmap resource, after image upload to gpu.
+            SkGraphics::PurgeResourceCache();
+        }
     };
     renderTaskHolder->ioTaskRunner->PostTask(std::move(task));
 #endif
@@ -454,6 +481,7 @@ sk_sp<SkImage> ImageProvider::ResizeSkImage(
 sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
     const sk_sp<SkImage>& rawImage, int32_t dstWidth, int32_t dstHeight, const std::string& srcKey)
 {
+    ACE_FUNCTION_TRACE();
     auto scaledImageInfo =
         SkImageInfo::Make(dstWidth, dstHeight, rawImage->colorType(), rawImage->alphaType(), rawImage->refColorSpace());
     SkBitmap scaledBitmap;
@@ -478,6 +506,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
     scaledBitmap.setImmutable();
     auto scaledImage = SkImage::MakeFromBitmap(scaledBitmap);
     if (scaledImage) {
+        const double RESIZE_MAX_PROPORTION = ImageCompressor::GetInstance()->CanCompress() ? 1.0 : 0.25;
         bool needCacheResizedImageFile =
             (1.0 * dstWidth * dstHeight) / (rawImage->width() * rawImage->height()) < RESIZE_MAX_PROPORTION;
         if (needCacheResizedImageFile && !srcKey.empty()) {
@@ -545,6 +574,9 @@ void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineBase>& context, const 
 bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
 {
     skcms_ICCProfile encodedProfile;
+    if (!colorSpace)
+        return false;
+    
     colorSpace->toProfile(&encodedProfile);
     if (!encodedProfile.has_toXYZD50) {
         LOGI("This profile's gamut can not be represented by a 3x3 transform to XYZD50");

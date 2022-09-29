@@ -61,6 +61,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("transform", &JSCanvasRenderer::JsTransform);
     JSClass<JSRenderingContext>::CustomMethod("translate", &JSCanvasRenderer::JsTranslate);
     JSClass<JSRenderingContext>::CustomMethod("setLineDash", &JSCanvasRenderer::JsSetLineDash);
+    JSClass<JSRenderingContext>::CustomMethod("getLineDash", &JSCanvasRenderer::JsGetLineDash);
     JSClass<JSRenderingContext>::CustomMethod("drawImage", &JSCanvasRenderer::JsDrawImage);
     JSClass<JSRenderingContext>::CustomMethod("createPattern", &JSCanvasRenderer::JsCreatePattern);
     JSClass<JSRenderingContext>::CustomMethod("createImageData", &JSCanvasRenderer::JsCreateImageData);
@@ -177,8 +178,13 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
             JSRef<JSVal> widthId = obj->GetProperty("__id");
             JSViewAbstract::ParseJsInteger(widthId, id);
-            RefPtr<OffscreenCanvas> offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
-            pool_->TransferFromImageBitmap(offscreenCanvas);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto offscreenCanvasPattern = JSOffscreenRenderingContext::GetOffscreenCanvasPattern(id);
+                customPaintPattern_->TransferFromImageBitmap(offscreenCanvasPattern);
+            } else {
+                RefPtr<OffscreenCanvas> offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
+                pool_->TransferFromImageBitmap(offscreenCanvas);
+            }
         }
     }
 }

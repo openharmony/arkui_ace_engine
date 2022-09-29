@@ -43,7 +43,6 @@ namespace {
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t DASHED_LINE_LENGTH = 3;
 constexpr int32_t DEL_NUM = 2;
-constexpr float BLUR_SIGMA_SCALE = 0.57735f;
 constexpr float TOP_START = 225.0f;
 constexpr float TOP_END = 270.0f;
 constexpr float RIGHT_START = 315.0f;
@@ -1729,9 +1728,9 @@ void RosenDecorationPainter::PaintShadow(
     rsNode->SetShadowColor(shadow.GetColor().GetValue());
     rsNode->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode->SetShadowOffsetY(shadow.GetOffset().GetY());
-    if (shadow.GetHardwareAcceleration()) {
-        rsNode->SetShadowElevation(shadow.GetElevation());
-    } else {
+    // rosen requires a non-zero elevation
+    rsNode->SetShadowElevation(shadow.GetElevation());
+    if (!shadow.GetHardwareAcceleration()) {
         rsNode->SetShadowRadius(ConvertRadiusToSigma(shadow.GetBlurRadius()));
     }
 }
@@ -1840,11 +1839,6 @@ sk_sp<SkShader> RosenDecorationPainter::CreateGradientShader(
             break;
     }
     return ptr->CreateGradientShader();
-}
-
-float RosenDecorationPainter::ConvertRadiusToSigma(float radius)
-{
-    return radius > 0.0f ? BLUR_SIGMA_SCALE * radius + SK_ScalarHalf : 0.0f;
 }
 
 bool RosenDecorationPainter::CheckBorderEdgeForRRect(const Border& border)

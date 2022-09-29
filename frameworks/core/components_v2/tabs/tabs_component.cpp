@@ -30,6 +30,8 @@ TabsComponent::TabsComponent(
     std::list<RefPtr<Component>>& children, BarPosition barPosition, const RefPtr<TabController>& controller)
     : FlexComponent(FlexDirection::COLUMN, FlexAlign::FLEX_START, FlexAlign::CENTER, children)
 {
+    SetTabsFlag(true);
+
     if (!controller) {
         controller_ = TabController::GetController(++g_tabControllerId);
     } else {

@@ -27,7 +27,7 @@ build_component("custom_paint") {
     "rosen_render_custom_paint.cpp",
     "rosen_render_offscreen_canvas.cpp",
   ]
-  if (is_standard_system && !use_mingw_win && !use_mac) {
+  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     deps = [ "$ace_root/frameworks/core/common/graphic:graphic" ]
   }
 }

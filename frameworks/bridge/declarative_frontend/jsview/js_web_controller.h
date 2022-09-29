@@ -59,6 +59,7 @@ public:
     void SearchAllAsync(const JSCallbackInfo& args);
     void ClearMatches(const JSCallbackInfo& args);
     void SearchNext(const JSCallbackInfo& args);
+    void GetUrl(const JSCallbackInfo& args);
 
     // Backward and Forward for web page
     void Backward(const JSCallbackInfo& args);
@@ -68,6 +69,8 @@ public:
     void AccessBackward(const JSCallbackInfo& args);
     void AccessForward(const JSCallbackInfo& args);
     void ClearHistory(const JSCallbackInfo& args);
+    void ClearSslCache(const JSCallbackInfo& args);
+    void ClearClientAuthenticationCache(const JSCallbackInfo& args);
 
     const RefPtr<WebController>& GetController() const
     {

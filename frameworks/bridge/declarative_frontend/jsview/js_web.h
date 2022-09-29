@@ -28,6 +28,8 @@ public:
     static void OnAlert(const JSCallbackInfo& args);
     static void OnBeforeUnload(const JSCallbackInfo& args);
     static void OnConfirm(const JSCallbackInfo& args);
+    static void OnFullScreenEnter(const JSCallbackInfo& args);
+    static void OnFullScreenExit(const JSCallbackInfo& args);
     static void OnPrompt(const JSCallbackInfo& args);
     static void OnConsoleLog(const JSCallbackInfo& args);
     static void OnPageStart(const JSCallbackInfo& args);
@@ -75,11 +77,19 @@ public:
     static void TableData(bool tableData);
     static void OnFileSelectorShowAbandoned(const JSCallbackInfo& args);
     static void OnHttpAuthRequest(const JSCallbackInfo& args);
+    static void OnSslErrorRequest(const JSCallbackInfo& args);
+    static void OnSslSelectCertRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
     static void OnContextMenuShow(const JSCallbackInfo& args);
     static void OnSearchResultReceive(const JSCallbackInfo& args);
     static void MediaPlayGestureAccess(bool isNeedGestureAccess);
     static void OnKeyEvent(const JSCallbackInfo& args);
+    static void JsOnDragStart(const JSCallbackInfo& info);
+    static void JsOnDragEnter(const JSCallbackInfo& info);
+    static void JsOnDragMove(const JSCallbackInfo& info);
+    static void JsOnDragLeave(const JSCallbackInfo& info);
+    static void JsOnDrop(const JSCallbackInfo& info);
+    static void PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

@@ -29,6 +29,15 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+struct DirtySwapConfig {
+    bool frameSizeChange = false;
+    bool frameOffsetChange = false;
+    bool contentSizeChange = false;
+    bool contentOffsetChange = false;
+    bool skipMeasure = false;
+    bool skipLayout = false;
+};
+
 // Pattern is the base class for different measure, layout and paint behavior.
 class Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -44,10 +53,15 @@ public:
         return true;
     }
 
-    void DetachFromFrameNode()
+    virtual std::optional<std::string> GetSurfaceNodeName() const
     {
+        return std::nullopt;
+    }
+
+    void DetachFromFrameNode(FrameNode* frameNode)
+    {
+        OnDetachFromFrameNode(frameNode);
         frameNode_.Reset();
-        OnDetachFromFrameNode();
     }
 
     void AttachToFrameNode(const WeakPtr<FrameNode>& frameNode)
@@ -88,6 +102,8 @@ public:
 
     virtual void OnModifyDone() {}
 
+    virtual void OnMountToParentDone() {}
+
     virtual bool IsRootPattern() const
     {
         return false;
@@ -103,9 +119,16 @@ public:
         return true;
     }
 
-    // Called on main thread to check if need rerender of the content.
+    // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
+    {
+        return false;
+    }
+
+    // Called on main thread to check if need rerender of the content.
+    virtual bool OnDirtyLayoutWrapperSwap(
+        const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*changeConfig*/)
     {
         return false;
     }
@@ -116,7 +139,7 @@ public:
         if (!frameNode) {
             return std::nullopt;
         }
-        return frameNode->GetGeometryNode()->GetFrameSize();
+        return frameNode->GetGeometryNode()->GetMarginFrameSize();
     }
 
     std::optional<OffsetF> GetHostFrameOffset() const
@@ -126,6 +149,15 @@ public:
             return std::nullopt;
         }
         return frameNode->GetGeometryNode()->GetFrameOffset();
+    }
+
+    std::optional<OffsetF> GetHostFrameGlobalOffset() const
+    {
+        auto frameNode = frameNode_.Upgrade();
+        if (!frameNode) {
+            return std::nullopt;
+        }
+        return frameNode->GetGeometryNode()->GetFrameOffset() + frameNode->GetGeometryNode()->GetParentGlobalOffset();
     }
 
     std::optional<SizeF> GetHostContentSize() const
@@ -178,9 +210,18 @@ public:
     // Called before frameNode CreatePaintWrapper.
     virtual void BeforeCreatePaintWrapper() {}
 
+    virtual FocusType GetFocusType()
+    {
+        return FocusType::DISABLE;
+    }
+    virtual bool GetFocusable()
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
-    virtual void OnDetachFromFrameNode() {}
+    virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
 
 private:
     WeakPtr<FrameNode> frameNode_;

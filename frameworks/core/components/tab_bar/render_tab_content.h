@@ -158,6 +158,8 @@ public:
         return scrollDuration_;
     }
 
+    std::string ProvideRestoreInfo() override;
+
 private:
     // for handle scroll tabContent
     void OnTouchTestHit(
@@ -195,6 +197,8 @@ private:
     // used to get the previous index or the next index
     int32_t GetPrevIndex() const;
     int32_t GetNextIndex() const;
+
+    void ApplyRestoreInfo();
 
     // dragRecognizer and the animation
     RefPtr<DragRecognizer> dragDetector_;

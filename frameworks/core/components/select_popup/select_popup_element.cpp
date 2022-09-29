@@ -44,7 +44,7 @@ void SelectPopupElement::PerformBuild()
     if (render) {
         render->UpdateRenders();
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (context && component) {
         auto manager = context->GetAccessibilityManager();
         if (manager) {

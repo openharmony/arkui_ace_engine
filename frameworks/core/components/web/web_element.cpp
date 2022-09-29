@@ -58,12 +58,13 @@ void WebElement::OnFocus()
         return;
     }
     renderWeb->GetDelegate()->OnFocus();
+    renderWeb->SetWebIsFocus(true);
     FocusNode::OnFocus();
 }
 
 void WebElement::OnBlur()
 {
-    LOGI("web element onblur");
+    LOGI("web element onBlur");
     auto renderWeb = AceType::DynamicCast<RenderWeb>(renderNode_);
     if (!renderWeb) {
         return;
@@ -73,6 +74,7 @@ void WebElement::OnBlur()
         return;
     }
     renderWeb->GetDelegate()->OnBlur();
+    renderWeb->SetWebIsFocus(false);
     renderWeb->OnQuickMenuDismissed();
     FocusNode::OnBlur();
 }

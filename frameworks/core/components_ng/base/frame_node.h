@@ -25,9 +25,13 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -68,21 +72,34 @@ public:
 
     ~FrameNode() override;
 
+    int32_t FrameCount() const override
+    {
+        return 1;
+    }
+
     void InitializePatternAndContext();
 
     void MarkModifyDone();
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+
     void FlushUpdateAndMarkDirty() override;
+
+    void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override
+    {
+        MarkDirtyNode(extraFlag);
+    }
+
+    void OnMountToParentDone();
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapperOnCreate();
-
     RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
-    std::optional<UITask> CreateLayoutTask(bool onCreate = false, bool forceUseMainThread = false);
+    std::optional<UITask> CreateLayoutTask(bool forceUseMainThread = false);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 
@@ -92,7 +109,7 @@ public:
     {
         return geometryNode_;
     }
-    void SetGeometryNode(RefPtr<GeometryNode>&& node);
+    void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
     const RefPtr<RenderContext>& GetRenderContext() const
     {
@@ -130,6 +147,28 @@ public:
         return eventHub_->GetOrCreateGestureEventHub();
     }
 
+    RefPtr<InputEventHub> GetOrCreateInputEventHub() const
+    {
+        return eventHub_->GetOrCreateInputEventHub();
+    }
+
+    RefPtr<FocusHub> GetOrCreateFocusHub() const;
+
+    RefPtr<FocusHub> GetFocusHub() const
+    {
+        return eventHub_->GetFocusHub();
+    }
+
+    FocusType GetFocusType() const
+    {
+        FocusType type = FocusType::DISABLE;
+        auto focusHub = GetFocusHub();
+        if (focusHub) {
+            type = focusHub->GetFocusType();
+        }
+        return type;
+    }
+
     const RefPtr<LayoutProperty>& GetLayoutProperty() const
     {
         return layoutProperty_;
@@ -138,17 +177,66 @@ public:
     static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
-    bool TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result) override;
+    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+        const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+
+    HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
+        MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
+
+    HitTestResult AxisTest(
+        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
+
+    void AnimateHoverEffect(bool isHovered) const
+    {
+        auto renderContext = GetRenderContext();
+        if (!renderContext) {
+            return;
+        }
+        HoverEffectType animationType = HoverEffectType::UNKNOWN;
+        if (eventHub_->GetInputEventHub()) {
+            animationType = eventHub_->GetInputEventHub()->GetHoverEffect();
+        }
+        if (animationType == HoverEffectType::SCALE) {
+            renderContext->AnimateHoverEffectScale(isHovered);
+        } else if (animationType == HoverEffectType::BOARD) {
+            renderContext->AnimateHoverEffectBoard(isHovered);
+        }
+    }
 
     bool IsAtomicNode() const override;
 
-private:
+    void MarkNeedSyncRenderTree() override
+    {
+        needSyncRenderTree_ = true;
+    }
+
+    void RebuildRenderContextTree() override;
+
+    bool IsVisible() const
+    {
+        return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
+    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
-    void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    std::string& GetNodeName()
+    {
+        return nodeName_;
+    }
 
+    void SetNodeName(std::string& nodeName)
+    {
+        nodeName_ = nodeName;
+    }
+    bool IsResponseRegion() const;
+    void MarkResponseRegion(bool isResponseRegion);
+
+private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
 
@@ -160,21 +248,21 @@ private:
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
 
-    void MarkNeedSyncRenderTree() override
-    {
-        needSyncRenderTree_ = true;
-    }
-
-    void RebuildRenderContextTree(const std::list<RefPtr<FrameNode>>& children);
+    void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
 
-    void OnDetachFromMainTree() override {}
+    void OnDetachFromMainTree() override;
     void OnAttachToMainTree() override;
 
     // dump self info.
     void DumpInfo() override;
+
+    HitTestMode GetHitTestMode() const override;
+    bool GetTouchable() const;
+    std::vector<RectF> GetResponseRegionList();
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
@@ -190,6 +278,11 @@ private:
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
+
+    bool isActive_ = false;
+    bool isResponseRegion_ = false;
+
+    std::string nodeName_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

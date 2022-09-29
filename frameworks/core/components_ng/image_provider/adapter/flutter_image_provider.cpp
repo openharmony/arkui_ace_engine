@@ -30,7 +30,9 @@
 #include "core/common/thread_checker.h"
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/components_ng/image_provider/svg_image_object.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
+#include "core/components_ng/render/adapter/skia_svg_canvas_image.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -151,42 +153,47 @@ RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfo(const RefPtr<N
     return MakeRefPtr<ImageEncodedInfo>(imageSize, totalFrames);
 }
 
-void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
-    const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder)
+RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateSvgEncodedInfo(const RefPtr<NG::ImageData>& data)
 {
-    auto canvasImageMakingTask = [objWp = imageObjWp, loadCallbacks, resizeTarget, renderTaskHolder] {
+    auto skiaImageData = DynamicCast<SkiaImageData>(data);
+    CHECK_NULL_RETURN(skiaImageData, nullptr);
+    // TODO: Encode svg
+    int32_t totalFrames = 1;
+    return MakeRefPtr<ImageEncodedInfo>(SizeF(), totalFrames);
+}
+
+void ImageProvider::MakeCanvasImageForSVG(
+    const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks)
+{
+    auto canvasImageMakingTask = [objWp = imageObjWp, loadCallbacks] {
+        auto obj = objWp.Upgrade();
+        CHECK_NULL_VOID(obj);
+        CHECK_NULL_VOID(obj->GetSVGDom());
+        // update SVGSkiaDom to ImageObject and trigger loadSuccessCallback_
+        auto notifyLoadSuccessTask = [objWp, loadCallbacks] {
+            auto obj = objWp.Upgrade();
+            CHECK_NULL_VOID(obj);
+            // upload canvasImage, in order to set svgDom
+            obj->SetCanvasImage(MakeRefPtr<NG::SkiaSvgCanvasImage>(obj->GetSVGDom()));
+            loadCallbacks.loadSuccessCallback_(obj->GetSourceInfo());
+        };
+        ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadSuccessTask));
+    };
+    // TODO: add sync load
+    ImageProvider::WrapTaskAndPostToBackground(std::move(canvasImageMakingTask));
+}
+
+void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
+    const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize)
+{
+    auto canvasImageMakingTask = [objWp = imageObjWp, loadCallbacks, resizeTarget, renderTaskHolder, forceResize] {
         auto obj = objWp.Upgrade();
         CHECK_NULL_VOID(obj);
         CHECK_NULL_VOID(renderTaskHolder);
         auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
         CHECK_NULL_VOID(flutterRenderTaskHolder);
         // TODO: add cache
-        // if image object has no skData, reload data.
-        std::string errorMessage("");
-        if (!obj->GetData()) {
-            do {
-                auto imageLoader = ImageLoader::CreateImageLoader(obj->GetSourceInfo());
-                if (!imageLoader) {
-                    LOGE("Fail to create image loader. source info: %{private}s",
-                        obj->GetSourceInfo().ToString().c_str());
-                    errorMessage = "Image source type is not supported";
-                    break;
-                }
-                auto newLoadedData = imageLoader->GetImageData(
-                    obj->GetSourceInfo(), WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
-                if (!newLoadedData) {
-                    errorMessage = "Fail to load data, please check if data source is invalid";
-                    break;
-                }
-                obj->SetData(newLoadedData);
-            } while (0);
-            if (!obj->GetData()) {
-                auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), sourceInfo = obj->GetSourceInfo(),
-                                              loadCallbacks] { loadCallbacks.loadFailCallback_(sourceInfo, errorMsg); };
-                ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
-                return;
-            }
-        }
+        ImageProvider::PrepareImageData(obj, loadCallbacks);
         // resize image
         auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());
         ACE_DCHECK(skiaImageData);
@@ -197,13 +204,13 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, cons
             std::string errorMessage("The image format is not supported, please check image format.");
             auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), loadCallbacks,
                                           sourceInfo = obj->GetSourceInfo()] {
-                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg);
+                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::MAKE_CANVAS_IMAGE_FAIL);
             };
             ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
             return;
         }
         // upload to gpu for render
-        auto image = ResizeSkImage(rawImage, obj->GetSourceInfo().GetSrc(), resizeTarget, false);
+        auto image = ResizeSkImage(rawImage, obj->GetSourceInfo().GetSrc(), resizeTarget, forceResize);
         flutter::SkiaGPUObject<SkImage> skiaGpuObjSkImage({ image, flutterRenderTaskHolder->unrefQueue });
 #ifdef NG_BUILD
         auto canvasImage = CanvasImage::Create();
@@ -216,7 +223,7 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, cons
         flutterCanvasImage->set_image(std::move(skiaGpuObjSkImage));
         auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
 #endif
-        auto uploadTask = [objWp, loadCallbacks](RefPtr<CanvasImage> canvasImage) {
+        auto uploadTask = [objWp, loadCallbacks](const RefPtr<CanvasImage>& canvasImage) {
             // when upload success, update canvas image to ImageObject and trigger loadSuccessCallback_
             auto obj = objWp.Upgrade();
             CHECK_NULL_VOID(obj);

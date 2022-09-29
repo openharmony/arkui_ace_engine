@@ -27,19 +27,22 @@ namespace OHOS::Ace::NG {
 using PropertyChangeFlag = uint32_t;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_NORMAL = 0;
-// Affects self size.
+// Mark self, parent, children to remeasure.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE = 1;
-// Affects the child position.
+// Mark self to reLayout.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_LAYOUT = 1 << 1;
-// Affects self position.
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_POSITION = 1 << 2;
 
-// Mark self be measure boundry to remeasure.
-inline constexpr PropertyChangeFlag PROPERTY_REQUEST_NEW_CHILD_NODE = 1 << 3;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 4;
+// Mark self to remeasure.
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF = 1 << 3;
 
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER = 1 << 5;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 << 6;
+// Mark self and parent to remeasure.
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT = 1 << 4;
+
+// Mark self remeasure due to child size may change, which may mark parent, self and children to remeasure.
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 5;
+
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER = 1 << 6;
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 << 7;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
@@ -47,15 +50,19 @@ bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckNeedRequestParent(PropertyChangeFlag propertyChangeFlag);
+bool CheckNeedRequestParentMeasure(PropertyChangeFlag propertyChangeFlag);
+
+bool CheckNeedMeasure(PropertyChangeFlag propertyChangeFlag);
+
+bool CheckNeedLayout(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckPositionFlag(PropertyChangeFlag propertyChangeFlag);
+bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckRequestNewChildNodeFlag(PropertyChangeFlag propertyChangeFlag);
+bool CheckMeasureSelfAndParentFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag);
 
@@ -87,7 +94,7 @@ public:                                                     \
         return prop##group##_.reset();                      \
     }                                                       \
                                                             \
-private:                                                    \
+protected:                                                  \
     std::unique_ptr<type> prop##group##_;
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_GET(group, name, type) \
@@ -119,6 +126,37 @@ public:                                                            \
         return defaultValue;                                       \
     }
 
+// For different members of the same type, such as the same foreground and background color types, but the interface
+// names provided to the outside world need to be different.
+#define ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM_GET(group, groupItem, name, type) \
+public:                                                                            \
+    std::optional<type> Get##name() const                                          \
+    {                                                                              \
+        auto& groupProperty = Get##group();                                        \
+        if (groupProperty) {                                                       \
+            return groupProperty->Get##groupItem();                                \
+        }                                                                          \
+        return std::nullopt;                                                       \
+    }                                                                              \
+    bool Has##name() const                                                         \
+    {                                                                              \
+        auto& groupProperty = Get##group();                                        \
+        if (groupProperty) {                                                       \
+            return groupProperty->Has##groupItem();                                \
+        }                                                                          \
+        return false;                                                              \
+    }                                                                              \
+    type Get##name##Value(const type& defaultValue) const                          \
+    {                                                                              \
+        auto& groupProperty = Get##group();                                        \
+        if (groupProperty) {                                                       \
+            if (groupProperty->Has##groupItem()) {                                 \
+                return groupProperty->Get##groupItem##Value();                     \
+            }                                                                      \
+        }                                                                          \
+        return defaultValue;                                                       \
+    }
+
 #define ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(group, name, type, changeFlag) \
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_GET(group, name, type)             \
     void Update##name(const type& value)                                   \
@@ -130,6 +168,19 @@ public:                                                            \
         }                                                                  \
         groupProperty->Update##name(value);                                \
         UpdatePropertyChangeFlag(changeFlag);                              \
+    }
+
+#define ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(group, groupItem, name, type, changeFlag) \
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM_GET(group, groupItem, name, type)             \
+    void Update##name(const type& value)                                                   \
+    {                                                                                      \
+        auto& groupProperty = GetOrCreate##group();                                        \
+        if (groupProperty->Check##groupItem(value)) {                                      \
+            LOGD("the %{public}s is same, just ignore", #name);                            \
+            return;                                                                        \
+        }                                                                                  \
+        groupProperty->Update##groupItem(value);                                           \
+        UpdatePropertyChangeFlag(changeFlag);                                              \
     }
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_AND_CALLBACK(group, name, type, changeFlag) \
@@ -159,30 +210,37 @@ public:                                                            \
         On##name##Update(value);                                \
     }
 
-#define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type) \
-public:                                                        \
-    const std::optional<type>& Get##name()                     \
-    {                                                          \
-        return prop##name##_;                                  \
-    }                                                          \
-    bool Has##name() const                                     \
-    {                                                          \
-        return prop##name##_.has_value();                      \
-    }                                                          \
-    const type& Get##name##Value() const                       \
-    {                                                          \
-        return prop##name##_.value();                          \
-    }                                                          \
-    std::optional<type> Clone##name() const                    \
-    {                                                          \
-        return prop##name##_;                                  \
-    }                                                          \
-    void Reset##name()                                         \
-    {                                                          \
-        return prop##name##_.reset();                          \
-    }                                                          \
-                                                               \
-private:                                                       \
+#define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type)   \
+public:                                                          \
+    const std::optional<type>& Get##name() const                 \
+    {                                                            \
+        return prop##name##_;                                    \
+    }                                                            \
+    bool Has##name() const                                       \
+    {                                                            \
+        return prop##name##_.has_value();                        \
+    }                                                            \
+    const type& Get##name##Value() const                         \
+    {                                                            \
+        return prop##name##_.value();                            \
+    }                                                            \
+    const type& Get##name##Value(const type& defaultValue) const \
+    {                                                            \
+        if (!Has##name()) {                                      \
+            return defaultValue;                                 \
+        }                                                        \
+        return prop##name##_.value();                            \
+    }                                                            \
+    std::optional<type> Clone##name() const                      \
+    {                                                            \
+        return prop##name##_;                                    \
+    }                                                            \
+    void Reset##name()                                           \
+    {                                                            \
+        return prop##name##_.reset();                            \
+    }                                                            \
+                                                                 \
+protected:                                                         \
     std::optional<type> prop##name##_;
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(name, type, changeFlag) \
@@ -264,6 +322,16 @@ public:                                                             \
         }                                               \
         return NearEqual(prop##name.value(), value);    \
     }
+
+#define ACE_PROPERTY_TO_JSON_VALUE(target, type) \
+    do {                                         \
+        if (target) {                            \
+            (target)->ToJsonValue(json);         \
+        } else {                                 \
+            type p;                              \
+            p.ToJsonValue(json);                 \
+        }                                        \
+    } while (false)
 
 class ACE_EXPORT Property : public virtual AceType {
     DECLARE_ACE_TYPE(Property, AceType);

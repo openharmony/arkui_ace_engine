@@ -41,6 +41,7 @@ constexpr double DEFAULT_PAN_DISTANCE = 5.0;
 constexpr double DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 300.0;
+constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 100;
 } // namespace
 
 class GestureRecognizer;
@@ -600,6 +601,16 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionEndId_;
     std::unique_ptr<GestureEventNoParameter> onActionCancelId_;
 };
+
+class ClickInfo : public BaseEventInfo, public TouchLocationInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ClickInfo, BaseEventInfo, TouchLocationInfo);
+
+public:
+    explicit ClickInfo(int32_t fingerId) : BaseEventInfo("onClick"), TouchLocationInfo(fingerId) {}
+    ~ClickInfo() override = default;
+};
+using ClickCallback = std::function<void(const ClickInfo&)>;
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H

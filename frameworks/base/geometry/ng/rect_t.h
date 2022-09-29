@@ -43,6 +43,14 @@ public:
         SetSize(size);
     }
 
+    RectT(const OffsetF& topLeftPoint, const OffsetF& bottomRightPoint)
+    {
+        SetOffset(topLeftPoint);
+        OffsetF sizeOffset = bottomRightPoint - topLeftPoint;
+        SizeF size(sizeOffset.GetX(), sizeOffset.GetY());
+        SetSize(size);
+    }
+
     void Reset()
     {
         x_ = 0;
@@ -324,6 +332,27 @@ public:
         ss << width_;
         ss << " x ";
         ss << height_;
+        ss << "]";
+        std::string output = ss.str();
+        return output;
+    }
+
+    std::string ToBounds() const
+    {
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << "[" << std::fixed << std::setprecision(precision) << x_ << ", " << y_ << "][";
+        if (NearEqual(width_, Infinity<T>())) {
+            ss << "INFINITE";
+        } else {
+            ss << (x_ + width_);
+        }
+        ss << ",";
+        if (NearEqual(height_, Infinity<T>())) {
+            ss << "INFINITE";
+        } else {
+            ss << (y_ + height_);
+        }
         ss << "]";
         std::string output = ss.str();
         return output;

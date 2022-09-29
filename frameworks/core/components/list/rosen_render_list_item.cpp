@@ -76,7 +76,7 @@ void RosenRenderListItem::Paint(RenderContext& context, const Offset& offset)
 
 void RosenRenderListItem::OnPaintFinish()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto accessibilityNode = GetAccessibilityNode().Upgrade();
     if (!accessibilityNode) {
         LOGE("RosenRenderListItem::accessibilityNode is null");

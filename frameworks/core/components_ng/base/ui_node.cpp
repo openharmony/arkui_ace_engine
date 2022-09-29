@@ -15,10 +15,15 @@
 
 #include "core/components_ng/base/ui_node.h"
 
+#include <algorithm>
+#include <cstdint>
+#include <iterator>
+
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -40,38 +45,126 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
 
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGW("Child element is already existed");
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d", 
+            (*it)->GetId(), child->GetId());
         return;
     }
 
     it = children_.begin();
     std::advance(it, slot);
     children_.insert(it, child);
+
+    child->SetParent(Claim(this));
+    child->SetDepth(GetDepth() + 1);
     if (onMainTree_) {
         child->AttachToMainTree();
     }
-    OnChildAdded(child);
     MarkNeedSyncRenderTree();
 }
 
-void UINode::RemoveChild(const RefPtr<UINode>& child)
+std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
 {
-    CHECK_NULL_VOID(child);
+    CHECK_NULL_RETURN(child, children_.end());
 
-    children_.remove(child);
-    if (onMainTree_) {
-        child->DetachFromMainTree();
+    auto iter = std::find(children_.begin(), children_.end(), child);
+    if (iter == children_.end()) {
+        LOGE("child is not exist.");
+        return children_.end();
     }
-    OnChildRemoved(child);
+    auto result = children_.erase(iter);
+    MarkNeedSyncRenderTree();
+    return result;
+}
+
+int32_t UINode::RemoveChildAndReturnIndex(const RefPtr<UINode>& child)
+{
+    auto result = RemoveChild(child);
+    return std::distance(children_.begin(), result);
+}
+
+void UINode::RemoveChildAtIndex(int32_t index)
+{
+    if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
+        return;
+    }
+    auto iter = children_.begin();
+    std::advance(iter, index);
+    children_.erase(iter);
+    MarkNeedSyncRenderTree();
+}
+
+RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
+{
+    if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
+        return nullptr;
+    }
+    auto iter = children_.begin();
+    std::advance(iter, index);
+    if (iter != children_.end()) {
+        return *iter;
+    }
+    return nullptr;
+}
+
+void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode)
+{
+    if (!oldNode) {
+        if (newNode) {
+            AddChild(newNode);
+        }
+        return;
+    }
+
+    auto iter = RemoveChild(oldNode);
+    children_.insert(iter, newNode);
+    newNode->SetParent(Claim(this));
+    newNode->SetDepth(GetDepth() + 1);
+    if (onMainTree_) {
+        newNode->AttachToMainTree();
+    }
+    MarkNeedSyncRenderTree();
+}
+
+void UINode::Clean()
+{
+    children_.clear();
     MarkNeedSyncRenderTree();
 }
 
 void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 {
-    SetParent(parent);
-    SetDepth(parent != nullptr ? parent->GetDepth() + 1 : 1);
-    if (parent) {
-        parent->AddChild(AceType::Claim(this), slot);
+    CHECK_NULL_VOID(parent);
+    parent->AddChild(AceType::Claim(this), slot);
+}
+
+RefPtr<FrameNode> UINode::GetFocusParent() const
+{
+    auto parentUi = GetParent();
+    auto parentFrame = parentUi ? AceType::DynamicCast<FrameNode>(parentUi) : nullptr;
+    while (parentFrame) {
+        auto type = parentFrame->GetFocusType();
+        if (type == FocusType::SCOPE) {
+            return parentFrame;
+        }
+        if (type == FocusType::NODE) {
+            return nullptr;
+        }
+        parentUi = parentFrame->GetParent();
+        parentFrame = parentUi ? AceType::DynamicCast<FrameNode>(parentUi) : nullptr;
+    }
+    return nullptr;
+}
+
+void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
+{
+    auto uiChildren = GetChildren();
+    for (const auto& uiChild : uiChildren) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild);
+        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
+            children.emplace_back(frameChild);
+        } else {
+            uiChild->GetFocusChildren(children);
+        }
     }
 }
 
@@ -92,11 +185,11 @@ void UINode::DetachFromMainTree()
     if (!onMainTree_) {
         return;
     }
+    onMainTree_ = false;
+    OnDetachFromMainTree();
     for (const auto& child : children_) {
         child->DetachFromMainTree();
     }
-    onMainTree_ = false;
-    OnDetachFromMainTree();
 }
 
 void UINode::MovePosition(int32_t slot)
@@ -112,6 +205,7 @@ void UINode::MovePosition(int32_t slot)
         std::advance(it, slot);
         if ((it != children.end()) && (*it == this)) {
             // Already at the right place
+            LOGD("Already at the right place");
             return;
         }
 
@@ -119,7 +213,6 @@ void UINode::MovePosition(int32_t slot)
         if (itSelf != children.end()) {
             children.erase(itSelf);
         } else {
-            LOGW("Should NOT be here");
             children.remove(self);
             ++it;
         }
@@ -127,7 +220,7 @@ void UINode::MovePosition(int32_t slot)
         children.remove(self);
     }
     children.insert(it, self);
-    MarkNeedSyncRenderTree();
+    parentNode->MarkNeedSyncRenderTree();
 }
 
 void UINode::UpdateLayoutPropertyFlag()
@@ -151,11 +244,11 @@ void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
     }
 }
 
-void UINode::MarkNeedFlushDirty(PropertyChangeFlag extraFlag)
+void UINode::MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag)
 {
     auto parent = parent_.Upgrade();
     if (parent) {
-        parent->MarkDirtyNode(extraFlag);
+        parent->MarkNeedFrameFlushDirty(extraFlag);
     }
 }
 
@@ -167,19 +260,16 @@ void UINode::MarkNeedSyncRenderTree()
     }
 }
 
-void UINode::OnDetachFromMainTree()
+void UINode::RebuildRenderContextTree()
 {
-    for (const auto& child : children_) {
-        child->OnDetachFromMainTree();
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        parent->RebuildRenderContextTree();
     }
 }
+void UINode::OnDetachFromMainTree() {}
 
-void UINode::OnAttachToMainTree()
-{
-    for (const auto& child : children_) {
-        child->OnAttachToMainTree();
-    }
-}
+void UINode::OnAttachToMainTree() {}
 
 void UINode::DumpTree(int32_t depth)
 {
@@ -203,23 +293,94 @@ void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool f
     }
 }
 
+void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
+{
+    for (const auto& child : children_) {
+        child->OnGenerateOneDepthVisibleFrame(visibleList);
+    }
+}
+
 RefPtr<PipelineContext> UINode::GetContext()
 {
     return PipelineContext::GetCurrentContext();
 }
 
-bool UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
-    TouchTestResult& result)
+HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    bool preventBubbling = false;
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
-        if (child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result)) {
-            preventBubbling = true;
-            break;
+        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
         }
     }
-    return preventBubbling;
+    return hitTestResult;
+}
+
+HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
+{
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
+    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+        auto& child = *iter;
+        auto hitResult = child->MouseTest(globalPoint, parentLocalPoint, onMouseResult, onHoverResult, hoverNode);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
+        }
+    }
+    return hitTestResult;
+}
+
+HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+{
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
+    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+        auto& child = *iter;
+        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
+        }
+    }
+    return hitTestResult;
+}
+
+int32_t UINode::FrameCount() const
+{
+    return TotalChildCount();
+}
+
+int32_t UINode::TotalChildCount() const
+{
+    int32_t count = 0;
+    for (const auto& child : GetChildren()) {
+        count += child->FrameCount();
+    }
+    return count;
+}
+
+int32_t UINode::GetChildIndexById(int32_t id)
+{
+    int32_t pos = 0;
+    auto iter = children_.begin();
+    while (iter != GetChildren().end()) {
+        if (id == (*iter)->GetId()) {
+            return pos;
+        }
+        pos++;
+        iter++;
+    }
+    return -1;
 }
 
 } // namespace OHOS::Ace::NG

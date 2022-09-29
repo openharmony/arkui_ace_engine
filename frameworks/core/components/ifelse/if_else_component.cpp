@@ -24,7 +24,7 @@ RefPtr<Element> IfElseComponent::CreateElement()
     return AceType::MakeRefPtr<IfElseElement>(GetId());
 }
 
-int32_t IfElseComponent::BranchId()
+int32_t IfElseComponent::GetBranchId()
 {
     return branchId_;
 }

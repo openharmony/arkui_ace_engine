@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PLATFORM_RES_REGISTER_H
 
 #include <string>
+#include <functional>
 #include <unordered_map>
 
 #include "base/log/log.h"

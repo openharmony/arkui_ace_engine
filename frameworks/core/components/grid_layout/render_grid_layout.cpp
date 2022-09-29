@@ -48,6 +48,7 @@ constexpr int32_t GAP_DIVIDE_CONSTEXPR = 2;
 constexpr int32_t CELL_EMPTY = -1;
 constexpr int32_t CELL_FOR_INSERT = -2;
 const char UNIT_PIXEL[] = "px";
+const char UNIT_VP[] = "vp";
 const char UNIT_PERCENT[] = "%";
 const char UNIT_RATIO[] = "fr";
 const char UNIT_AUTO[] = "auto";
@@ -55,6 +56,13 @@ const char UNIT_AUTO_FILL[] = "auto-fill";
 const char REPEAT_PREFIX[] = "repeat";
 const std::regex REPEAT_NUM_REGEX(R"(^repeat\((\d+),(.+)\))", std::regex::icase); // regex for "repeat(2, 100px)"
 const std::regex AUTO_REGEX(R"(^repeat\((.+),(.+)\))", std::regex::icase);        // regex for "repeat(auto-fill, 10px)"
+const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)", std::regex::icase);
+const char TRIM_TEMPLATE[] = "$1$2";
+const char INVALID_PATTERN[] = "((repeat)\\(\\s{0,}(auto-fill)\\s{0,},)";
+const char SIZE_PATTERN[] = "\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}";
+const char PREFIX_PATTERN[] = "\\S{1,}(repeat)|(px|%|vp)\\d{1,}|\\)\\d{1,}";
+const char REPEAT_WITH_AUTOFILL[] =
+           "((repeat)\\(\\s{0,}(auto-fill)\\s{0,},(\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\\s{0,}\\))";
 
 // first bool mean if vertical, second bool mean if reverse
 // false, false --> RIGHT
@@ -91,7 +99,9 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
     rowsArgs_ = grid->GetRowsArgs();
     userColGap_ = grid->GetColumnGap();
     userRowGap_ = grid->GetRowGap();
-    rightToLeft_ = grid->GetRightToLeft();
+    if (TextDirection::RTL == grid->GetTextDirection()) {
+        rightToLeft_ = true;
+    }
     scrollBarWidth_ = grid->GetScrollBarWidth();
     scrollBarColor_ = grid->GetScrollBarColor();
     displayMode_ = grid->GetScrollBar();
@@ -465,6 +475,28 @@ std::string RenderGridLayout::PreParseCols()
     return colsArgs;
 }
 
+std::string RenderGridLayout::PreParseArgs(const std::string& args)
+{
+    if (args.empty() || args.find(UNIT_AUTO) == std::string::npos) {
+        return args;
+    }
+    std::string arg;
+    std::vector<std::string> strs;
+    StringUtils::StringSplitter(args, ' ', strs);
+    std::string current;
+    int32_t argSize = strs.size();
+    for (int32_t i = 0; i < argSize; ++i) {
+        current = strs[i];
+        if (strs[i] == std::string(UNIT_AUTO)) {
+            Size layoutSize = GetTargetLayoutSize(i, 0);
+            current = StringUtils::DoubleToString(layoutSize.Height()) + std::string(UNIT_PIXEL);
+            gridMatrix_.clear();
+        }
+        arg += ' ' + current;
+    }
+    return arg;
+}
+
 void RenderGridLayout::InitialGridProp()
 {
     // Not first time layout after update, no need to initial.
@@ -486,10 +518,8 @@ void RenderGridLayout::InitialGridProp()
         (colsArgs_.find(UNIT_PERCENT) != std::string::npos || colsArgs_.find(UNIT_RATIO) != std::string::npos)) {
         colSize_ = viewPort_.Width();
     }
-    LOGD("Row[%{public}s]: %{public}lf %{public}lf", rowsArgs_.c_str(), rowSize_, rowGap_);
-    LOGD("Col[%{public}s]: %{public}lf %{public}lf", colsArgs_.c_str(), colSize_, colGap_);
-    std::vector<double> rows = ParseArgs(PreParseRows(), rowSize_, rowGap_);
-    std::vector<double> cols = ParseArgs(PreParseCols(), colSize_, colGap_);
+    std::vector<double> rows = ParseArgs(GetRowTemplate(), rowSize_, rowGap_);
+    std::vector<double> cols = ParseArgs(GetColumnsTemplate(), colSize_, colGap_);
     if (rows.empty()) {
         rows.push_back(rowSize_);
     }
@@ -546,7 +576,7 @@ void RenderGridLayout::UpdateAccessibilityAttr()
 // (3) 30% 20% 50%
 // (4) repeat(2,100px 20%) -- will be prebuilt by JS Engine to --- 100px 20% 100px 20%
 // (5) repeat(auto-fill, 100px 300px)  -- will be prebuilt by JS Engine to --- auto-fill 100px 300px
-std::vector<double> RenderGridLayout::ParseArgs(const std::string& args, double size, double gap)
+std::vector<double> RenderGridLayout::ParseArgsInner(const std::string& args, double size, double gap)
 {
     std::vector<double> lens;
     if (args.empty()) {
@@ -609,6 +639,7 @@ void RenderGridLayout::ConvertRepeatArgs(std::string& handledArg)
     handledArg.erase(0, handledArg.find_first_not_of(" ")); // trim the input str
     std::smatch matches;
     if (handledArg.find(UNIT_AUTO_FILL) != std::string::npos) {
+        // VP vs PX vs no other rules
         if (handledArg.size() > REPEAT_MIN_SIZE && std::regex_match(handledArg, matches, AUTO_REGEX)) {
             handledArg = matches[1].str() + matches[2].str();
         }
@@ -617,7 +648,7 @@ void RenderGridLayout::ConvertRepeatArgs(std::string& handledArg)
             auto count = StringUtils::StringToInt(matches[1].str());
             std::string repeatString = matches[2].str();
             while (count > 1) {
-                repeatString.append(std::string(matches[2].str()));
+                repeatString.append(" " + std::string(matches[2].str()));
                 --count;
             }
             handledArg = repeatString;
@@ -1631,7 +1662,7 @@ void RenderGridLayout::CalculateVerticalSize(
         colSize_ = viewPort_.Width();
     }
     // Get item width
-    cols = ParseArgs(PreParseCols(), colSize_, colGap_);
+    cols = ParseArgs(GetColumnsTemplate(), colSize_, colGap_);
     if (cols.empty()) {
         cols.push_back(colSize_);
     }
@@ -1657,7 +1688,7 @@ void RenderGridLayout::CalculateHorizontalSize(
         rowSize_ = viewPort_.Height();
     }
     // Get item width
-    rows = ParseArgs(PreParseRows(), rowSize_, rowGap_);
+    rows = ParseArgs(GetRowTemplate(), rowSize_, rowGap_);
     if (rows.empty()) {
         rows.push_back(rowSize_);
     }
@@ -2948,7 +2979,7 @@ bool RenderGridLayout::HandleMouseEvent(const MouseEvent& event)
         });
     }
 
-    if (context->IsCtrlDown()) {
+    if (context && context->IsCtrlDown()) {
         if (context->IsKeyboardA()) {
             MultiSelectAllWhenCtrlA();
             return true;
@@ -2958,7 +2989,7 @@ bool RenderGridLayout::HandleMouseEvent(const MouseEvent& event)
     }
     selectedItemsWithCtrl_.clear();
 
-    if (context->IsShiftDown()) {
+    if (context && context->IsShiftDown()) {
         HandleMouseEventWhenShiftDown(event);
         return true;
     }
@@ -3256,4 +3287,205 @@ void RenderGridLayout::MultiSelectAllWhenCtrlA()
     MarkNeedRender();
 }
 
+std::string RenderGridLayout::TrimTemplate(std::string& str)
+{
+    return std::regex_replace(str, TRIM_REGEX, TRIM_TEMPLATE);
+}
+
+void RenderGridLayout::RTrim(std::string& str)
+{
+    str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
+        return !std::isspace(ch);
+        }).base(), str.end());
+}
+
+bool RenderGridLayout::SplitTemplate(const std::string& str, std::vector<Value>& vec, bool isRepeat)
+{
+    std::string merge;
+    std::string regexResult;
+    std::smatch result;
+    std::regex pattern(SIZE_PATTERN, std::regex::icase);
+    std::string::const_iterator iterStart = str.begin();
+    std::string::const_iterator iterEnd = str.end();
+
+    while (std::regex_search(iterStart, iterEnd, result, pattern)) {
+        regexResult = result[0];
+        merge += regexResult;
+        Value value;
+        value.str = TrimTemplate(regexResult);
+        value.isRepeat = isRepeat;
+        vec.emplace_back(value);
+        iterStart = result[0].second;
+    }
+    return (merge.length() == str.length());
+}
+
+std::string RenderGridLayout::GetRepeat(const std::string& str)
+{
+    std::smatch result;
+    std::regex pattern(REPEAT_WITH_AUTOFILL, std::regex::icase);
+    std::string::const_iterator iterStart = str.begin();
+    std::string::const_iterator iterEnd = str.end();
+    std::string regexResult;
+    size_t count = 0;
+    while (std::regex_search(iterStart, iterEnd, result, pattern)) {
+        regexResult = result[0];
+        iterStart = result[0].second;
+        ++count;
+    }
+    if (count == 1) {
+        return regexResult;
+    } else {
+        return std::string("");
+    }
+}
+
+bool RenderGridLayout::CheckRepeatAndSplitString(
+    std::vector<std::string>& vec, std::string& repeat, std::vector<Value>& resultvec)
+{
+    if (repeat.length() == 0 && vec.size() == 0) {
+        return false;
+    }
+    std::string regexResult;
+    std::regex pattern(INVALID_PATTERN, std::regex::icase);
+
+    for (auto it = vec.begin(); it != vec.end(); it++) {
+        RTrim(*it);
+        bool ret = SplitTemplate(*it, resultvec);
+        if (!ret) {
+            return ret;
+        }
+        if (it == vec.begin()) {
+            regexResult = std::regex_replace(repeat, pattern, "");
+            if (regexResult.length() == 0) {
+                return false;
+            }
+            regexResult.erase(regexResult.end() - 1);
+            RTrim(regexResult);
+            ret = SplitTemplate(regexResult, resultvec, true);
+            if (!ret) {
+                return ret;
+            }
+        }
+    }
+    return true;
+}
+
+double RenderGridLayout::ConvertVirtualSize(const std::string& size, const DimensionUnit& unit)
+{
+    double ret = StringUtils::StringToDouble(size);
+    switch (unit) {
+        case DimensionUnit::PERCENT:
+            ret = NormalizePercentToPx(Dimension(ret / FULL_PERCENT, DimensionUnit::PERCENT), !isVertical_);
+            break;
+        case DimensionUnit::VP:
+            ret = NormalizeToPx(Dimension(ret, DimensionUnit::VP));
+            break;
+        case DimensionUnit::PX:
+            break;
+        default:
+            ret = 0.0;
+            break;
+    }
+    return ret;
+}
+
+double RenderGridLayout::ParseUnit(const Value& val)
+{
+    double ret = 0;
+    if (val.str.find(UNIT_PIXEL) != std::string::npos) {
+        ret = ConvertVirtualSize(val.str, DimensionUnit::PX);
+    } else if (val.str.find(UNIT_PERCENT) != std::string::npos) {
+        ret = ConvertVirtualSize(val.str, DimensionUnit::PERCENT);
+    } else if (val.str.find(UNIT_VP) != std::string::npos || StringUtils::IsNumber(val.str)) {
+        ret = ConvertVirtualSize(val.str, DimensionUnit::VP);
+    }
+    return ret;
+}
+
+bool RenderGridLayout::CheckAutoFillParameter(
+    const std::string& args, double size, std::vector<double>& out, std::vector<Value>& resultvec)
+{
+    out.clear();
+    if (args.empty()) {
+        return false;
+    }
+    std::smatch result;
+    std::regex patternFilter(PREFIX_PATTERN, std::regex::icase);
+    if(std::regex_search(args, result, patternFilter)) {
+        out.push_back(size);
+        return false;
+    }
+
+    std::regex pattern(REPEAT_WITH_AUTOFILL, std::regex::icase);
+    std::vector<std::string> vec(
+        std::sregex_token_iterator(args.begin(), args.end(), pattern, -1), std::sregex_token_iterator());
+
+    std::string repeat = GetRepeat(args);
+    bool bRet = CheckRepeatAndSplitString(vec, repeat, resultvec);
+    if (!bRet && out.size() == 0) {
+        out.push_back(size);
+    }
+    return bRet;
+}
+
+std::vector<double> RenderGridLayout::ParseArgsWithAutoFill(const std::string& args, double size, double gap)
+{
+    std::vector<double> lens;
+    if (args.find(UNIT_AUTO_FILL) == std::string::npos) {
+        return ParseArgsInner(PreParseArgs(args), size, gap);
+    }
+    std::vector<Value> retTemplates;
+    if (!CheckAutoFillParameter(args, size, lens, retTemplates)) {
+        return lens;
+    }
+    int countNonRepeat = 0;
+    double sizeRepeat = 0.0;
+    double sizeNonRepeat = 0.0;
+    bool bRepeat = false;
+    std::vector<double> prefixLens;
+    std::vector<double> repeatLens;
+    std::vector<double> suffixLens;
+    for (auto ret : retTemplates) {
+        double sizeItem = ParseUnit(ret);
+        if (ret.isRepeat) {
+            bRepeat = true;
+            sizeRepeat += sizeItem;
+            repeatLens.push_back(sizeItem);
+        } else {
+            ++countNonRepeat;
+            sizeNonRepeat += sizeItem;
+            if (bRepeat) {
+                suffixLens.push_back(sizeItem);
+            } else {
+                prefixLens.push_back(sizeItem);
+            }
+        }
+    }
+    double sizeNonRepeatGap = GreatNotEqual(countNonRepeat, 0) ? (countNonRepeat - 1) * gap : 0;
+    double sizeLeft = size - sizeNonRepeatGap - sizeNonRepeat;
+    int count = 0;
+    if (!NearZero(sizeRepeat)) {
+        count = LessOrEqual(sizeLeft / sizeRepeat, 1) ? 1 : floor(sizeLeft / sizeRepeat);
+    } else {
+        if (GetChildren().size() >= countNonRepeat && retTemplates.size() > 0) {
+            count = ceil((GetChildren().size() - countNonRepeat) * 1.0 / (retTemplates.size() - countNonRepeat));
+        }
+    }
+    lens.insert(lens.end(), prefixLens.begin(), prefixLens.end());
+    for (int i = 0; i < count; i++) {
+        lens.insert(lens.end(), repeatLens.begin(), repeatLens.end());
+    }
+    lens.insert(lens.end(), suffixLens.begin(), suffixLens.end());
+    return lens;
+}
+
+std::vector<double> RenderGridLayout::ParseArgs(const std::string& args, double size, double gap)
+{
+    if (args.find(REPEAT_PREFIX) != std::string::npos && args.find(UNIT_AUTO_FILL) != std::string::npos) {
+        return ParseArgsWithAutoFill(args, size, gap);
+    } else {
+        return ParseArgsInner(PreParseArgs(args), size, gap);
+    }
+}
 } // namespace OHOS::Ace

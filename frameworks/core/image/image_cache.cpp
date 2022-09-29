@@ -152,7 +152,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
     }
     auto iter = imageDataCache_.find(key);
     if (iter == imageDataCache_.end()) {
-        if (!processImageDataCacheInner(dataSize)) {
+        if (!ProcessImageDataCacheInner(dataSize)) {
             return;
         }
         dataCacheList_.emplace_front(key, imageData);
@@ -161,7 +161,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
         auto oldSize = iter->second->imageDataPtr->GetSize();
         if (oldSize != dataSize) {
             curDataSize_ -= oldSize;
-            if (!processImageDataCacheInner(dataSize)) {
+            if (!ProcessImageDataCacheInner(dataSize)) {
                 return;
             }
         }
@@ -171,7 +171,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
     }
 }
 
-bool ImageCache::processImageDataCacheInner(size_t dataSize)
+bool ImageCache::ProcessImageDataCacheInner(size_t dataSize)
 {
     while (dataSize + curDataSize_ > dataSizeLimit_ && !dataCacheList_.empty()) {
         curDataSize_ -= dataCacheList_.back().imageDataPtr->GetSize();
@@ -198,10 +198,11 @@ RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
     }
 }
 
-void ImageCache::WriteCacheFile(const std::string& url, const void* const data, const size_t size)
+void ImageCache::WriteCacheFile(const std::string& url, const void* const data,
+    const size_t size, const std::string suffix)
 {
     std::vector<std::string> removeVector;
-    std::string cacheNetworkFilePath = GetImageCacheFilePath(url);
+    std::string cacheNetworkFilePath = GetImageCacheFilePath(url) + suffix;
 
     std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
     // 1. first check if file has been cached.
@@ -221,6 +222,7 @@ void ImageCache::WriteCacheFile(const std::string& url, const void* const data, 
         return;
     }
     outFile.write(reinterpret_cast<const char*>(data), size);
+    LOGI("write image cache: %{public}s %{private}s", url.c_str(), cacheNetworkFilePath.c_str());
 
     cacheFileSize_ += size;
     cacheFileInfo_.emplace_back(cacheNetworkFilePath, size, time(nullptr));

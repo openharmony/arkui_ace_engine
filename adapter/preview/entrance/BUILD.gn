@@ -20,6 +20,7 @@ template("preview_entrance_source") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
@@ -64,13 +65,18 @@ template("preview_entrance_source") {
         include_dirs = [ "//commonlibrary/c_utils/base/include" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac" ]
       }
+
+      if (platform == "linux") {
+        include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux" ]
+      }
     }
   }
 }
 
 foreach(item, ace_platforms) {
   platform = item.name
-  if (platform == "windows" || platform == "mac") {
+  if (platform == "windows" || platform == "mac" || platform == "linux") {
     preview_entrance_source("ace_preview_entrance_" + item.name) {
       platform = item.name
       defines = []

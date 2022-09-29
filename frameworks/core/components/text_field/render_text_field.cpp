@@ -19,6 +19,8 @@
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -33,6 +35,7 @@
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
+#include "core/event/mouse_event.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
@@ -204,6 +207,9 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     if (textField->HasSetResetToStart() && textField->GetUpdateType() == UpdateType::ALL) {
         resetToStart_ = textField->GetResetToStart();
     }
+    if (keyboard_ != TextInputType::UNSPECIFIED && keyboard_ != textField->GetTextInputType()) {
+        CloseKeyboard();
+    }
     if (keyboard_ != textField->GetTextInputType()) {
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative()) {
@@ -214,17 +220,16 @@ void RenderTextField::Update(const RefPtr<Component>& component)
             }
         }
         keyboard_ = textField->GetTextInputType();
-        CloseKeyboard();
     }
 
-    if (action_ != textField->GetAction()) {
+    if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative()) {
             CloseKeyboard();
-            action_ = textField->GetAction();
-        } else {
-            action_ = textField->GetAction();
         }
+    }
+    if (action_ != textField->GetAction()) {
+        action_ = textField->GetAction();
     }
 
     actionLabel_ = textField->GetActionLabel();
@@ -263,6 +268,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
             controller_->SetText(textField->GetValue(), false);
         }
     }
+    // maybe change text and selection
     ApplyRestoreInfo();
     extend_ = textField->IsExtend();
     softKeyboardEnabled_ = textField->IsSoftKeyboardEnabled();
@@ -323,9 +329,9 @@ void RenderTextField::OnPaintFinish()
     UpdateOverlay();
     InitAccessibilityEventListener();
     UpdateAccessibilityPosition();
-    auto layoutParamChanged = lastLayoutParam_.value() == GetLayoutParam();
+    auto layoutParamChanged = lastLayoutParam_.has_value() ? lastLayoutParam_.value() == GetLayoutParam() : true;
     if (layoutParamChanged) {
-        lastLayoutParam_ = std::make_optional(GetLayoutParam());
+        lastLayoutParam_ = GetLayoutParam();
     }
     bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
     // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
@@ -353,7 +359,7 @@ void RenderTextField::OnPaintFinish()
 void RenderTextField::PerformLayout()
 {
     if (!lastLayoutParam_.has_value()) {
-        lastLayoutParam_ = std::make_optional(GetLayoutParam());
+        lastLayoutParam_.emplace(GetLayoutParam());
     }
 
     if (GetEditingValue().text.empty()) {
@@ -411,7 +417,6 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
     if (event.button == MouseButton::LEFT_BUTTON) {
         if (event.action == MouseAction::PRESS) {
             UpdateStartSelection(DEFAULT_SELECT_INDEX, event.GetOffset(), true, false);
-            AddOutOfRectCallbackToContext();
         } else if (event.action == MouseAction::MOVE) {
             int32_t start = GetEditingValue().selection.baseOffset;
             int32_t end = GetCursorPositionForClick(event.GetOffset());
@@ -425,10 +430,26 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
         ShowTextOverlay(rightClickOffset, false, true);
-        AddOutOfRectCallbackToContext();
     }
 
     return false;
+}
+
+void RenderTextField::HandleMouseHoverEvent(MouseState mouseState)
+{
+    auto pipeline = context_.Upgrade();
+    if (!pipeline) {
+        return;
+    }
+    int32_t windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    MouseFormat defaultStyle = MouseFormat::DEFAULT;
+    MouseFormat textCursorStyle = MouseFormat::TEXT_CURSOR;
+    if (mouseState == MouseState::HOVER) {
+        mouseStyle->SetPointerStyle(windowId, textCursorStyle);
+    } else {
+        mouseStyle->SetPointerStyle(windowId, defaultStyle);
+    }
 }
 
 void RenderTextField::OnTouchTestHit(
@@ -497,6 +518,7 @@ void RenderTextField::OnTouchTestHit(
             auto textField = weak.Upgrade();
             if (textField) {
                 textField->StartPressAnimation(false);
+                textField->OnTapCallback();
             }
         });
 
@@ -589,10 +611,8 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (SearchAction(globalPosition, globalOffset)) {
         return;
     }
-    if (isFocusOnTouch_ && tapCallback_) {
-        if (!tapCallback_()) {
-            return;
-        }
+    if (!onTapCallbackResult_) {
+        return;
     }
     if (onTapEvent_) {
         onTapEvent_();
@@ -609,11 +629,17 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
         StartTwinkling();
         ShowTextOverlay(globalPosition, true);
     }
+}
+
+void RenderTextField::OnTapCallback()
+{
     auto context = GetContext().Upgrade();
     if (context) {
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
     }
-    AddOutOfRectCallbackToContext();
+    if (isFocusOnTouch_ && tapCallback_) {
+        onTapCallbackResult_ = tapCallback_();
+    }
 }
 
 void RenderTextField::OnEditChange(bool isInEditStatus)
@@ -661,13 +687,11 @@ void RenderTextField::GetFieldAndOverlayTouchRect(std::vector<Rect>& resRectList
     for (auto& rect : fieldTouchRectList) {
         rect.SetOffset(GetGlobalOffset());
     }
-    resRectList.insert(
-        resRectList.end(), fieldTouchRectList.begin(), fieldTouchRectList.end());
+    resRectList.insert(resRectList.end(), fieldTouchRectList.begin(), fieldTouchRectList.end());
     auto textOverlayManager = context->GetTextOverlayManager();
     if (textOverlayManager) {
         auto overlayTouchRectList = textOverlayManager->GetTextOverlayRect();
-        resRectList.insert(
-            resRectList.end(), overlayTouchRectList.begin(), overlayTouchRectList.end());
+        resRectList.insert(resRectList.end(), overlayTouchRectList.begin(), overlayTouchRectList.end());
     }
 }
 
@@ -706,7 +730,6 @@ void RenderTextField::OnDoubleClick(const ClickInfo& clickInfo)
     LOGI("text field accept double click, position: %{public}d, selection: %{public}s", clickPosition,
         selection.ToString().c_str());
     MarkNeedRender();
-    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
@@ -734,7 +757,6 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
     bool isPassword = (keyboard_ == TextInputType::VISIBLE_PASSWORD);
     UpdateStartSelection(DEFAULT_SELECT_INDEX, longPressPosition, singleHandle || isPassword, true);
     ShowTextOverlay(longPressPosition, false);
-    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse)
@@ -997,7 +1019,7 @@ void RenderTextField::ResetOnFocusForTextFieldManager()
     }
 }
 
-bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling)
+bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     if (!enabled_) {
         LOGD("TextField is not enabled.");
@@ -1022,7 +1044,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
             LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
             inputMethod->SetCallingWindow(context->GetWindowId());
         }
-        inputMethod->Attach(textChangeListener_);
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard);
 #else
         if (!HasConnection()) {
             AttachIme();
@@ -1144,6 +1166,26 @@ const TextEditingValue& RenderTextField::GetEditingValue() const
 const TextEditingValue& RenderTextField::GetPreEditingValue() const
 {
     return controller_->GetPreValue();
+}
+
+double RenderTextField::GetEditingBoxY() const
+{
+    return GetGlobalOffset().GetY() + height_.Value();
+}
+
+double RenderTextField::GetEditingBoxTopY() const
+{
+    return GetGlobalOffset().GetY();
+}
+
+bool RenderTextField::GetEditingBoxModel() const
+{
+    bool isDeclarative = false;
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        isDeclarative = true;
+    }
+    return isDeclarative;
 }
 
 void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent, bool isClearRecords)
@@ -1406,7 +1448,7 @@ void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeybo
         onSubmitEvent_(controller_->GetValue().text);
     }
     if (onSubmit_) {
-        onSubmit_(static_cast<int32_t>(action_));
+        onSubmit_(static_cast<int32_t>(action));
     }
 }
 
@@ -1584,6 +1626,7 @@ void RenderTextField::UpdateIcon(const RefPtr<TextFieldComponent>& textField)
             imageComponent = AceType::MakeRefPtr<ImageComponent>(iconSrc_);
             imageComponent->SetImageFill(imageFill_);
         }
+        imageComponent->SetSyncMode(true);
         imageComponent->SetWidth(textField->GetIconSize());
         imageComponent->SetHeight(textField->GetIconSize());
         if (textDirection_ == TextDirection::RTL) {
@@ -1623,6 +1666,7 @@ void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textF
     } else {
         showImage = AceType::MakeRefPtr<ImageComponent>(showIconSrc_);
     }
+    showImage->SetSyncMode(true);
     showImage->SetWidth(textField->GetIconSize());
     showImage->SetHeight(textField->GetIconSize());
 
@@ -1642,6 +1686,7 @@ void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textF
     } else {
         hideImage = AceType::MakeRefPtr<ImageComponent>(hideIconSrc_);
     }
+    hideImage->SetSyncMode(true);
     hideImage->SetWidth(textField->GetIconSize());
     hideImage->SetHeight(textField->GetIconSize());
 
@@ -2018,7 +2063,7 @@ void RenderTextField::HandleOnCut()
     }
     if (copyOption_ != CopyOptions::None) {
         LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
-        clipboard_->SetData(GetEditingValue().GetSelectedText());
+        clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCut_) {
         onCut_(GetEditingValue().GetSelectedText());
@@ -2043,7 +2088,7 @@ void RenderTextField::HandleOnCopy()
     }
     if (copyOption_ != CopyOptions::None) {
         LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
-        clipboard_->SetData(GetEditingValue().GetSelectedText());
+        clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCopy_) {
         onCopy_(GetEditingValue().GetSelectedText());
@@ -2130,9 +2175,13 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
 {
     std::string appendElement;
     if (event.action == KeyAction::DOWN) {
-        if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER) {
+        if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER ||
+            event.code == KeyCode::KEY_DPAD_CENTER) {
             if (keyboard_ == TextInputType::MULTILINE) {
                 appendElement = "\n";
+            } else {
+                // normal enter should trigger onSubmit
+                PerformAction(action_, true);
             }
         } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();
@@ -2426,13 +2475,14 @@ void RenderTextField::Delete(int32_t start, int32_t end)
 
 std::string RenderTextField::ProvideRestoreInfo()
 {
-    if (!onIsCurrentFocus_ || !onIsCurrentFocus_()) {
-        return "";
-    }
     auto value = GetEditingValue();
     auto jsonObj = JsonUtil::Create(true);
-    jsonObj->Put("start", value.selection.GetStart());
-    jsonObj->Put("end", value.selection.GetEnd());
+    if (controller_) {
+        jsonObj->Put("text", controller_->GetText().c_str());
+    } else {
+        return "";
+    }
+    jsonObj->Put("position", value.selection.baseOffset);
     return jsonObj->ToString();
 }
 
@@ -2446,10 +2496,13 @@ void RenderTextField::ApplyRestoreInfo()
         LOGW("RenderTextField:: restore info is invalid");
         return;
     }
-    auto jsonStart = info->GetValue("start");
-    auto jsonEnd = info->GetValue("end");
-    UpdateSelection(jsonStart->GetInt(), jsonEnd->GetInt());
-    StartTwinkling();
+    auto jsonPosition = info->GetValue("position");
+    auto jsonText = info->GetValue("text");
+    if (!jsonText->GetString().empty() && controller_) {
+        controller_->SetText(jsonText->GetString());
+        UpdateSelection(std::max(jsonPosition->GetInt(), 0));
+        cursorPositionType_ = CursorPositionType::NORMAL;
+    }
     SetRestoreInfo("");
 }
 

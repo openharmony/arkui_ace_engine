@@ -42,7 +42,7 @@ class MotionPathEvaluator final : public AceType {
 public:
     explicit MotionPathEvaluator(const MotionPathOption& option = MotionPathOption(),
         const Offset& start = Offset(0.0, 0.0), const Offset& end = Offset(0.0, 0.0),
-        PositionType type = PositionType::RELATIVE);
+        PositionType type = PositionType::PTRELATIVE);
     ~MotionPathEvaluator() override = default;
 
     MotionPathPosition Evaluate(float fraction);
@@ -96,7 +96,7 @@ private:
     MotionPathOption motionPathOption_;
     Offset startPoint_ { 0.0, 0.0 };
     Offset endPoint_ { 0.0, 0.0 };
-    PositionType positionType_ = PositionType::RELATIVE;
+    PositionType positionType_ = PositionType::PTRELATIVE;
 };
 
 // MotionPathEvaluator adapter for dimension

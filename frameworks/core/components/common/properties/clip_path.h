@@ -21,7 +21,9 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_offset.h"
 #include "base/memory/ace_type.h"
-#include "frameworks/core/components/common/properties/radius.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/radius.h"
+
 
 namespace OHOS::Ace {
 
@@ -105,6 +107,27 @@ public:
     Color GetColor() const
     {
         return color_;
+    }
+
+    bool operator==(const BasicShape& other) const
+    {
+        return (basicShapeType_ == other.GetBasicShapeType() &&
+                width_ == other.GetWidth() &&
+                height_ == other.GetHeight() &&
+                offset_ == other.GetOffset() &&
+                color_ == other.GetColor());
+    }
+
+    BasicShape& operator=(const BasicShape& other)
+    {
+        if (this != &other) {
+            basicShapeType_ = other.basicShapeType_;
+            width_ = other.width_;
+            height_ = other.height_;
+            offset_ = other.offset_;
+            color_ = other.color_;
+        }
+        return *this;
     }
 
 protected:
@@ -284,6 +307,13 @@ public:
         axisY_ = axisY;
     }
 
+    bool operator==(const Circle& other) const
+    {
+        return (radius_ == other.GetRadius() &&
+                axisX_ == other.GetAxisX() &&
+                axisY_ == other.GetAxisY());
+    }
+
 private:
     Dimension radius_;
     Dimension axisX_ = Dimension(0.5, DimensionUnit::PERCENT);
@@ -342,6 +372,14 @@ public:
         axisY_ = axisY;
     }
 
+    bool operator==(const Ellipse& other) const
+    {
+        return (radiusX_ == other.GetRadiusX() &&
+                radiusY_ == other.GetRadiusY() &&
+                axisX_ == other.GetAxisX() &&
+                axisY_ == other.GetAxisY());
+    }
+
 private:
     Dimension radiusX_;
     Dimension radiusY_;
@@ -372,6 +410,11 @@ public:
         return !points_.empty();
     }
 
+    bool operator==(const Polygon& other) const
+    {
+        return points_ == other.GetPoints();
+    }
+
 private:
     std::vector<std::pair<Dimension, Dimension>> points_;
 };
@@ -392,6 +435,11 @@ public:
     void SetValue(const std::string& value)
     {
         value_ = value;
+    }
+
+    bool operator==(const Path& other) const
+    {
+        return value_ == other.GetValue();
     }
 
 private:

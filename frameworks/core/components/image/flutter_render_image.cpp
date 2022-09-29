@@ -20,6 +20,7 @@
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkShader.h"
+#include "third_party/skia/include/effects/SkImageFilters.h"
 
 #include "base/utils/utils.h"
 
@@ -281,10 +282,8 @@ void FlutterRenderImage::UpdatePixmap(const RefPtr<PixelMap>& pixmap)
     LOGD("update pixmap");
     imageObj_ = MakeRefPtr<PixelMapImageObject>(pixmap);
     image_ = nullptr;
-    curSourceInfo_.Reset();
     rawImageSize_ = imageObj_->GetImageSize();
     rawImageSizeUpdated_ = true;
-    imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     MarkNeedLayout();
 }
 
@@ -425,6 +424,9 @@ void FlutterRenderImage::ProcessPixmapForPaint()
         imageObj_->ClearData();
         return;
     }
+    // pixelMap render finished
+    curSourceInfo_ = sourceInfo_;
+    imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     FireLoadEvent(rawImageSize_);
     renderAltImage_ = nullptr;
 }
@@ -549,6 +551,7 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     ApplyColorFilter(paint);
+    ApplyBlur(paint);
     ApplyInterpolation(paint);
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
     if (image_) {
@@ -624,6 +627,13 @@ void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
     paint.paint()->setColorFilter(SkColorFilters::Blend(
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #endif
+}
+
+void FlutterRenderImage::ApplyBlur(flutter::Paint& paint)
+{
+    if (GreatNotEqual(blurRadius_, 0.0)) {
+        paint.paint()->setImageFilter(SkImageFilters::Blur(blurRadius_, blurRadius_, nullptr));
+    }
 }
 
 void FlutterRenderImage::ApplyInterpolation(flutter::Paint& paint)

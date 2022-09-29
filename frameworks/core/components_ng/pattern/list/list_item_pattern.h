@@ -39,6 +39,7 @@ public:
     {
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
             shallowBuilder_->ExecuteDeepRender();
+            shallowBuilder_.Reset();
         }
     }
 

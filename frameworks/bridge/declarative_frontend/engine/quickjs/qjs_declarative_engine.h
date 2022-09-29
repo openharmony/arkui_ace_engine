@@ -37,6 +37,12 @@ public:
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
 
+    // Load the je file of the page in NG structure..
+    bool LoadPageSource(const std::string& url) override;
+
+    // Load the app.js file of the FA model in NG structure..
+    bool LoadFaAppSource() override;
+
     // Update running page
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;
 
@@ -107,12 +113,13 @@ public:
         return engineInstance_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
 #endif
 
-     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
-     OH_NativeXComponent *nativeXComponent_ = nullptr;
+    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
+    OH_NativeXComponent* nativeXComponent_ = nullptr;
+
 private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
@@ -121,10 +128,6 @@ private:
 
     RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
     int32_t instanceId_ = 0;
-
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    std::string preContent_ = "";
-#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(QJSDeclarativeEngine);
 };

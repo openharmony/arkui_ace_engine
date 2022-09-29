@@ -23,6 +23,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t INIT_VALUE_UT_TEST = -2;
+constexpr double BOXDEFAULT = 100.0;
 class MockRenderBox final : public RenderBox {
     DECLARE_ACE_TYPE(MockRenderBox, RenderBox);
 
@@ -128,6 +129,7 @@ public:
     static RefPtr<Component> CreateDragComponent(std::string rows, std::string cols);
     static RefPtr<RenderNode> CreateRenderItem(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
     static RefPtr<RenderNode> CreateDragRenderItem();
+    static RefPtr<RenderBox> CreateRenderBox(double width, double height);
 };
 
 } // namespace OHOS::Ace

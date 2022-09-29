@@ -37,29 +37,15 @@ std::string GetJsStringVal(JSContext* ctx, JSValueConst value)
 JSValue CurvesInterpolate(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     QJSHandleScope handleScope(ctx);
-    int32_t pageId;
-    JS_ToInt32(ctx, &pageId, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
     std::string curveString = GetJsStringVal(ctx, QJSUtils::GetPropertyStr(ctx, value, "__curveString"));
     double time;
+    if (argc == 0) {
+        return JS_NULL;
+    }
     JS_ToFloat64(ctx, &time, argv[0]);
-    auto instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
-    if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
-        return JS_NULL;
-    }
-    auto delegate = instance->GetDelegate();
-    if (delegate == nullptr) {
-        LOGE("delegate is null.");
-        return JS_NULL;
-    }
-    auto page = delegate->GetPage(pageId);
-    if (page == nullptr) {
-        LOGE("page is null.");
-        return JS_NULL;
-    }
-    auto animationCurve = page->GetCurve(curveString);
+    auto animationCurve = CreateCurve(curveString, false);
     if (!animationCurve) {
-        LOGE("animationCurve is null.");
+        LOGW("created animationCurve is null, curveString:%{public}s", curveString.c_str());
         return JS_NULL;
     }
     double curveValue = animationCurve->Move(time);
@@ -83,6 +69,11 @@ JSValue CurvesInitInternal(JSContext* ctx, JSValueConst value, int32_t argc, JSV
         curveString = "linear";
     }
     curve = CreateCurve(curveString);
+    JS_SetPropertyStr(ctx, value, "__curveString", JS_NewString(ctx, curveString.c_str()));
+    if (Container::IsCurrentUseNewPipeline()) {
+        JS_DupValue(ctx, value);
+        return value;
+    }
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
@@ -93,10 +84,8 @@ JSValue CurvesInitInternal(JSContext* ctx, JSValueConst value, int32_t argc, JSV
         LOGE("page is nullptr");
         return JS_NULL;
     }
-    page->AddCurve(curveString, curve);
     int32_t pageId = page->GetPageId();
     JS_SetPropertyStr(ctx, value, "__pageId", JS_NewInt32(ctx, pageId));
-    JS_SetPropertyStr(ctx, value, "__curveString", JS_NewString(ctx, curveString.c_str()));
     JS_DupValue(ctx, value);
     return value;
 }
@@ -188,7 +177,7 @@ bool CreateStepsCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
 bool CreateSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
     JSValueConst* argv, RefPtr<Curve>& curve)
 {
-    if (!argv || argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
+    if (!argv || argc > static_cast<int32_t>(RESPONSIVE_SPRING_MOTION_PARAMS_SIZE)) {
         LOGW("SpringMotionCurve: the number of parameters is illegal");
         return false;
     }
@@ -201,7 +190,7 @@ bool CreateSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
     if (argc > 1) {
         JS_ToFloat64(ctx, &dampingRatio, argv[1]);
     }
-    if (argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1) {
+    if (argc > static_cast<int32_t>(RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) - 1) {
         JS_ToFloat64(ctx, &blendDuration, argv[RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1]);
     }
     curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(static_cast<float>(response), static_cast<float>(dampingRatio),
@@ -212,7 +201,7 @@ bool CreateSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
 bool CreateResponsiveSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
     JSValueConst* argv, RefPtr<Curve>& curve)
 {
-    if (!argv || argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
+    if (!argv || argc > static_cast<int32_t>(RESPONSIVE_SPRING_MOTION_PARAMS_SIZE)) {
         LOGW("ResponsiveSpringMotionCurve: the number of parameters is illegal");
         return false;
     }
@@ -225,7 +214,7 @@ bool CreateResponsiveSpringMotionCurve(JSContext* ctx, JSValueConst& value, int3
     if (argc > 1) {
         JS_ToFloat64(ctx, &dampingRatio, argv[1]);
     }
-    if (argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1) {
+    if (argc > static_cast<int32_t>(RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) - 1) {
         JS_ToFloat64(ctx, &blendDuration, argv[RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1]);
     }
     curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(static_cast<float>(response), static_cast<float>(dampingRatio),
@@ -255,6 +244,11 @@ JSValue ParseCurves(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
         return JS_NULL;
     }
     auto customCurve = curve->ToString();
+    JS_SetPropertyStr(ctx, value, "__curveString", JS_NewString(ctx, curveString.c_str()));
+    if (Container::IsCurrentUseNewPipeline()) {
+        JS_DupValue(ctx, value);
+        return value;
+    }
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
@@ -265,10 +259,8 @@ JSValue ParseCurves(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
         LOGE("page is nullptr");
         return JS_NULL;
     }
-    page->AddCurve(customCurve, curve);
     int32_t pageId = page->GetPageId();
     JS_SetPropertyStr(ctx, value, "__pageId", JS_NewInt32(ctx, pageId));
-    JS_SetPropertyStr(ctx, value, "__curveString", JS_NewString(ctx, customCurve.c_str()));
     JS_DupValue(ctx, value);
     return value;
 }

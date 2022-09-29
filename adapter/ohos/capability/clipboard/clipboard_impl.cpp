@@ -27,17 +27,39 @@ std::string g_clipboard;
 RefPtr<PixelMap> g_pixmap;
 }
 #endif
-void ClipboardImpl::SetData(const std::string& data)
+MiscServices::ShareOption TransitionCopyOption(CopyOptions copyOption)
+{
+    auto shareOption = MiscServices::ShareOption::InApp;
+    switch (copyOption) {
+        case CopyOptions::InApp:
+            shareOption = MiscServices::ShareOption::InApp;
+            break;
+        case CopyOptions::Local:
+            shareOption = MiscServices::ShareOption::LocalDevice;
+            break;
+        case CopyOptions::Distributed:
+            shareOption = MiscServices::ShareOption::CrossDevice;
+            break;
+        default:
+            break;
+    }
+    return shareOption;
+}
+
+void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    auto shareOption = TransitionCopyOption(copyOption);
     if (taskExecutor_) {
         taskExecutor_->PostTask(
-            [data]() {
+            [data, shareOption, isDragData]() {
                 auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePlainTextData(data);
                 if (!pasteData) {
                     LOGE("create SystemKeyboardData fail from MiscServices");
                     return;
                 }
+                pasteData->SetShareOption(shareOption);
+                pasteData->SetDraggedDataFlag(isDragData);
                 OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
             },
             TaskExecutor::TaskType::PLATFORM);
@@ -48,12 +70,13 @@ void ClipboardImpl::SetData(const std::string& data)
 #endif
 }
 
-void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap)
+void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    auto shareOption = TransitionCopyOption(copyOption);
     if (taskExecutor_) {
         taskExecutor_->PostTask(
-            [pixmap]() {
+            [pixmap, shareOption]() {
                 if (!pixmap) {
                     LOGE("pixmap is nullptr");
                     return;
@@ -68,6 +91,7 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap)
                     LOGE("create SystemKeyboardData fail from MiscServices");
                     return;
                 }
+                pasteData->SetShareOption(shareOption);
                 LOGI("Set pixmap to system clipboard");
                 OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
             },
@@ -138,18 +162,18 @@ void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& c
         [&result]() {
             auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
             if (!has) {
-                LOGE("SystemKeyboardData is not exist from MiscServices");
+                LOGE("GetDataSync: SystemKeyboardData is not exist from MiscServices");
                 return;
             }
             OHOS::MiscServices::PasteData pasteData;
             auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
             if (!ok) {
-                LOGE("Get SystemKeyboardData fail from MiscServices");
+                LOGE("GetDataSync: Get SystemKeyboardData fail from MiscServices");
                 return;
             }
             auto textData = pasteData.GetPrimaryText();
             if (!textData) {
-                LOGE("Get SystemKeyboardTextData fail from MiscServices");
+                LOGE("GetDataSync: Get SystemKeyboardTextData fail from MiscServices");
                 return;
             }
             result = *textData;
@@ -164,25 +188,25 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
         [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_))]() {
             auto taskExecutor = weakExecutor.Upgrade();
             if (!taskExecutor) {
-                LOGE("TaskExecutor is not exist");
+                LOGE("GetDataAsync: TaskExecutor is not exist");
                 return;
             }
             auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
             if (!has) {
-                LOGE("SystemKeyboardData is not exist from MiscServices");
+                LOGE("GetDataAsync: SystemKeyboardData is not exist from MiscServices");
                 taskExecutor->PostTask([callback]() { callback(""); }, TaskExecutor::TaskType::UI);
                 return;
             }
             OHOS::MiscServices::PasteData pasteData;
             auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
             if (!ok) {
-                LOGE("Get SystemKeyboardData fail from MiscServices");
+                LOGE("GetDataAsync: Get SystemKeyboardData fail from MiscServices");
                 taskExecutor->PostTask([callback]() { callback(""); }, TaskExecutor::TaskType::UI);
                 return;
             }
             auto textData = pasteData.GetPrimaryText();
             if (!textData) {
-                LOGE("Get SystemKeyboardTextData fail from MiscServices");
+                LOGE("GetDataAsync: Get SystemKeyboardTextData fail from MiscServices");
                 taskExecutor->PostTask([callback]() { callback(""); }, TaskExecutor::TaskType::UI);
                 return;
             }

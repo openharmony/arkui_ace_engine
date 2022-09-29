@@ -34,8 +34,8 @@ ohos_shared_library("hdc_register") {
   external_deps = hilog_deps
 
   deps += [
-    "//commonlibrary/c_utils/base:utilsecurec",
-    "//third_party/libuv:uv_static",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/libuv:uv",
   ]
 
   external_deps += [ "c_utils:utils" ]
@@ -55,6 +55,6 @@ ohos_shared_library("hdc_register") {
 
   configs = [ ":hdc_register_config" ]
 
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }

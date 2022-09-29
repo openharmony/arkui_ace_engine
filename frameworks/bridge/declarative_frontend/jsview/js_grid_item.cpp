@@ -16,14 +16,32 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/pattern/grid/grid_item_view.h"
+#include "core/components_ng/pattern/grid/grid_view.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::Framework {
 
+#define SET_PROP_FOR_NG(propName, propType, propValue)                         \
+    do {                                                                       \
+        if (Container::IsCurrentUseNewPipeline()) {                            \
+            NG::GridItemView::Set##propName(static_cast<propType>(propValue)); \
+            return;                                                            \
+        }                                                                      \
+    } while (0);
+
 void JSGridItem::Create(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (Container::IsCurrentUsePartialUpdate()) {
+            CreateForNGPartialUpdate(args);
+            return;
+        }
+        NG::GridItemView::Create();
+        return;
+    }
     auto container = Container::Current();
     if (!container) {
         LOGE("fail to get container");
@@ -79,8 +97,39 @@ void JSGridItem::Create(const JSCallbackInfo& args)
     itemComponent->SetIsLazyCreating(isLazy);
 }
 
+void JSGridItem::CreateForNGPartialUpdate(const JSCallbackInfo& args)
+{
+    if (args.Length() < 2 || !args[0]->IsFunction()) {
+        LOGW("Expected deep render function parameter");
+         NG::GridItemView::Create();
+        return;
+    }
+    if (!args[1]->IsBoolean()) {
+        LOGE("Expected isLazy parameter");
+        return;
+    }
+    const bool isLazy = args[1]->ToBoolean();
+    if (!isLazy) {
+        NG::GridItemView::Create();
+    } else {
+        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+        auto gridItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
+                                          jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
+            LOGD("GridItem elmtId %{public}d DeepRender JS function execution start ....", nodeId);
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            JSRef<JSVal> jsParams[2];
+            jsParams[0] = JSRef<JSVal>::Make(ToJSValue(nodeId));
+            jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
+            jsDeepRenderFunc->ExecuteJS(2, jsParams);
+        }; // gridItemDeepRenderFunc lambda
+        NG::GridItemView::Create(std::move(gridItemDeepRenderFunc));
+    }
+    args.ReturnSelf();
+}
+
 void JSGridItem::SetColumnStart(int32_t columnStart)
 {
+    SET_PROP_FOR_NG(ColumnStart, int32_t, std::max(0, columnStart));
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (gridItem) {
@@ -91,6 +140,7 @@ void JSGridItem::SetColumnStart(int32_t columnStart)
 
 void JSGridItem::SetColumnEnd(int32_t columnEnd)
 {
+    SET_PROP_FOR_NG(ColumnEnd, int32_t, std::max(0, columnEnd));
     // column end must be set after start. loader needs to make the method in order.
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -102,6 +152,7 @@ void JSGridItem::SetColumnEnd(int32_t columnEnd)
 
 void JSGridItem::SetRowStart(int32_t rowStart)
 {
+    SET_PROP_FOR_NG(RowStart, int32_t, std::max(0, rowStart));
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (gridItem) {
@@ -112,6 +163,7 @@ void JSGridItem::SetRowStart(int32_t rowStart)
 
 void JSGridItem::SetRowEnd(int32_t rowEnd)
 {
+    SET_PROP_FOR_NG(RowEnd, int32_t, std::max(0, rowEnd));
     // row end must be set after start. loader needs to make the method in order.
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -123,6 +175,7 @@ void JSGridItem::SetRowEnd(int32_t rowEnd)
 
 void JSGridItem::ForceRebuild(bool forceRebuild)
 {
+    SET_PROP_FOR_NG(ForceRebuild, bool, forceRebuild);
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (gridItem) {
@@ -162,6 +215,7 @@ void JSGridItem::JSBind(BindingTarget globalObj)
 
 void JSGridItem::SetSelectable(bool selectable)
 {
+    SET_PROP_FOR_NG(Selectable, bool, selectable);
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (gridItem) {
@@ -173,6 +227,17 @@ void JSGridItem::SelectCallback(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
         LOGE("fail to bind onSelect event due to info is not function");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsOnSelectFunc = AceType::MakeRefPtr<JsMouseFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onSelect = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc)](bool isSelected) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("GridItem.onSelect");
+            func->SelectExecute(isSelected);
+        };
+        NG::GridItemView::SetOnSelect(std::move(onSelect));
         return;
     }
 

@@ -27,7 +27,6 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
-    "$ace_root/frameworks/core/common/watch_dog.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/bubble/bubble_element.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
@@ -97,7 +96,6 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
-    "$ace_root/frameworks/core/common/watch_dog.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/bubble/bubble_element.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
@@ -146,6 +144,7 @@ ohos_unittest("ImageProviderTest") {
   configs = [
     ":config_image_provider_test",
     "$ace_root:ace_test_config",
+    "$ace_root:ace_test_coverage_config",
   ]
 
   deps = [
@@ -166,10 +165,53 @@ config("config_image_provider_test") {
   include_dirs = []
 }
 
+ohos_unittest("ImageCompressorTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/frameworks/core/components/display/display_component.cpp",
+    "$ace_root/frameworks/core/components/display/render_display.cpp",
+    "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
+    "$ace_root/frameworks/core/image/image_cache.cpp",
+    "$ace_root/frameworks/core/image/image_compressor.cpp",
+    "$ace_root/frameworks/core/image/image_loader.cpp",
+    "$ace_root/frameworks/core/image/image_provider.cpp",
+    "$ace_root/frameworks/core/image/image_source_info.cpp",
+    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/mock/mock_ace_container.cpp",
+    "image_compressor_test.cpp",
+  ]
+
+  configs = [
+    ":config_image_cache_test",
+    "$ace_root:ace_test_config",
+    "$ace_root:ace_test_coverage_config",
+  ]
+
+  deps = [
+    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
+    "$ace_root/frameworks/base/resource:ace_resource",
+    "//third_party/googletest:gtest_main",
+    "//third_party/opencl-headers:libcl",
+  ]
+  defines = [ "ENABLE_OPENCL" ]
+  external_deps = [ "c_utils:utils" ]
+  part_name = ace_engine_part
+  resource_config_file = "//foundation/arkui/ace_engine/test/resource/graphicalbasicability/ohos_test.xml"
+}
+
 group("unittest") {
   testonly = true
   deps = [
-    ":ImageCacheTest",
+    # ":ImageCacheTest",
     # ":ImageProviderTest",
+    ":ImageCompressorTest",
   ]
 }

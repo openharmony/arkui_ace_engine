@@ -121,6 +121,29 @@ public:
     }
 };
 
+class JSWebSslError : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebSslError>::Declare("WebSslErrorResult");
+        JSClass<JSWebSslError>::StaticMethod("handleConfirm", &JSWeb::Mock);
+        JSClass<JSWebSslError>::StaticMethod("handleCancel", &JSWeb::Mock);
+        JSClass<JSWebSslError>::Bind(globalObj);
+    }
+};
+
+class JSWebSslSelectCert : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebSslSelectCert>::Declare("WebSelectCertResult");
+        JSClass<JSWebSslSelectCert>::StaticMethod("confirm", &JSWeb::Mock);
+        JSClass<JSWebSslSelectCert>::StaticMethod("cancel", &JSWeb::Mock);
+        JSClass<JSWebSslSelectCert>::StaticMethod("ignore", &JSWeb::Mock);
+        JSClass<JSWebSslSelectCert>::Bind(globalObj);
+    }
+};
+
 class JSWebConsoleLog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -271,6 +294,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::Mock);
+    JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::Mock);
+    JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::Mock);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
 
@@ -283,6 +308,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSFileSelectorParam::JSBind(globalObj);
     JSFileSelectorResult::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
+    JSWebSslError::JSBind(globalObj);
+    JSWebSslSelectCert::JSBind(globalObj);
 }
 
 class JSWebCookie : public Referenced {
@@ -330,6 +357,8 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::StaticMethod("accessForward", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("accessBackward", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("clearHistory", &JSWeb::Mock);
+    JSClass<JSWebController>::StaticMethod("clearSslCache", &JSWeb::Mock);
+    JSClass<JSWebController>::StaticMethod("clearClientAuthenticationCache", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("getCookieManager", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("getHitTestValue", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("backOrForward", &JSWeb::Mock);

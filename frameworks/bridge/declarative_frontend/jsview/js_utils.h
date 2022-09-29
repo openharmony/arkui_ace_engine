@@ -18,18 +18,18 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
 #endif
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 namespace OHOS::Rosen {
-class RSSurfaceNode;
+class RSProxyNode;
 }
 namespace OHOS::Ace::Framework {
     RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
-    const std::shared_ptr<Rosen::RSSurfaceNode> CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj);
+    const std::shared_ptr<Rosen::RSProxyNode> CreateRSProxyNodeFromNapiValue(JSRef<JSVal> obj);
 } // namespace OHOS::Ace::Framework
 #endif
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

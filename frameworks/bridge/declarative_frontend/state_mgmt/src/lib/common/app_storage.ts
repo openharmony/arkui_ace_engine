@@ -21,7 +21,7 @@ class AppStorage extends LocalStorage {
    */
   public static CreateSingleton(initializingPropersties?: Object): void {
     if (!AppStorage.Instance_) {
-      console.log("Creating AppStorage instance.");
+      console.debug("Creating AppStorage instance.");
       AppStorage.Instance_ = new AppStorage(initializingPropersties);
     } else {
       console.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!")
@@ -159,6 +159,10 @@ class AppStorage extends LocalStorage {
    */
   public static Size(): number {
     return AppStorage.GetOrCreate().size();
+  }
+
+  public static StaticClear(): boolean {
+    return AppStorage.GetOrCreate().clear();
   }
 
   public static Clear(): boolean {

@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component.h"
 
+#include "core/components_ng/pattern/ability_component/ability_component_view.h"
 #include "frameworks/base/json/json_util.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -51,18 +52,28 @@ void JSAbilityComponent::Create(const JSCallbackInfo& info)
     // Parse want
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     if (wantValue->IsObject()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::AbilityComponentView::Create();
+            NG::AbilityComponentView::SetWant(wantValue->ToString());
+            return;
+        }
         component = AceType::MakeRefPtr<OHOS::Ace::AbilityComponent>();
         component->SetWant(wantValue->ToString());
     } else {
-        RefPtr<V2::AbilityComponent> ability = AceType::MakeRefPtr<OHOS::Ace::V2::AbilityComponent>();
         auto jsonStr = JsonUtil::Create(true);
         if (obj->GetProperty("bundleName")->IsNull() || obj->GetProperty("bundleName")->IsUndefined() ||
             obj->GetProperty("abilityName")->IsNull() || obj->GetProperty("abilityName")->IsUndefined()) {
             LOGI("bundleName or abilityName is undefined");
             return;
         }
-        jsonStr->Put("bundle", obj->GetProperty("bundleName")->ToString().c_str());
-        jsonStr->Put("ability", obj->GetProperty("abilityName")->ToString().c_str());
+        jsonStr->Put("bundleName", obj->GetProperty("bundleName")->ToString().c_str());
+        jsonStr->Put("abilityName", obj->GetProperty("abilityName")->ToString().c_str());
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::AbilityComponentView::Create();
+            NG::AbilityComponentView::SetWant(jsonStr->ToString());
+            return;
+        }
+        RefPtr<V2::AbilityComponent> ability = AceType::MakeRefPtr<OHOS::Ace::V2::AbilityComponent>();
         ability->SetWant(jsonStr->ToString());
         ViewStackProcessor::GetInstance()->Push(ability);
         return;
@@ -92,11 +103,33 @@ void JSAbilityComponent::JsOnDestroy(const JSCallbackInfo& info)
 
 void JSAbilityComponent::JsOnConnect(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("AbilityComponent.onConnect");
+            auto newJSVal = JSRef<JSVal>::Make();
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::AbilityComponentView::SetOnConnect(std::move(onConnect));
+        return;
+    }
     JSViewBindEvent(&V2::AbilityComponent::SetOnConnected, info);
 }
 
 void JSAbilityComponent::JsOnDisconnect(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onDisConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("AbilityComponent.onDisConnect");
+            auto newJSVal = JSRef<JSVal>::Make();
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::AbilityComponentView::SetOnDisConnect(std::move(onDisConnect));
+        return;
+    }
     JSViewBindEvent(&V2::AbilityComponent::SetOnDisconnected, info);
 }
 
@@ -118,6 +151,9 @@ void JSAbilityComponent::JsOnAbilityWillRemove(const JSCallbackInfo& info)
 void JSAbilityComponent::Width(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto component = AceType::DynamicCast<V2::AbilityComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (component) {
         Dimension value;
@@ -131,6 +167,9 @@ void JSAbilityComponent::Width(const JSCallbackInfo& info)
 void JSAbilityComponent::Height(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto component = AceType::DynamicCast<V2::AbilityComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (component) {
         Dimension value;

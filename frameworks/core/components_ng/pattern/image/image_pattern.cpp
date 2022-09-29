@@ -23,12 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-ImagePattern::ImagePattern(const ImageSourceInfo& imageSourceInfo)
-{
-    LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
-    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(imageSourceInfo, std::move(loadNotifier));
-    loadingCtx_->LoadImageData();
-}
+ImagePattern::ImagePattern(const ImageSourceInfo&  /*imageSourceInfo*/) {}
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
 {
@@ -37,9 +32,10 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
-        if (imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo("")) != sourceInfo) {
-            LOGW("sourceInfo does not match, ignore current callback. current: %{private}s vs callback's: %{private}s",
-                pattern->sourceInfo_.ToString().c_str(), sourceInfo.ToString().c_str());
+        auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+        if (currentSourceInfo != sourceInfo) {
+            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
+                currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
         pattern->OnImageDataReady();
@@ -54,9 +50,10 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
-        if (imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo("")) != sourceInfo) {
-            LOGW("sourceInfo does not match, ignore current callback. current: %{private}s vs callback's: %{private}s",
-                pattern->sourceInfo_.ToString().c_str(), sourceInfo.ToString().c_str());
+        auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+        if (currentSourceInfo != sourceInfo) {
+            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
+                currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
         pattern->OnImageLoadSuccess();
@@ -71,9 +68,10 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
-        if (imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo("")) != sourceInfo) {
-            LOGW("sourceInfo does not match, ignore current callback. current: %{private}s vs callback's: %{private}s",
-                pattern->sourceInfo_.ToString().c_str(), sourceInfo.ToString().c_str());
+        auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+        if (currentSourceInfo != sourceInfo) {
+            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
+                currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
         pattern->OnImageLoadFail();
@@ -85,9 +83,23 @@ void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
+        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
+        geometryNode->GetFrameSize().Height(), 1);
+    imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
+    // update src data
     lastCanvasImage_ = loadingCtx_->GetCanvasImage();
     lastSrcRect_ = loadingCtx_->GetSrcRect();
     lastDstRect_ = loadingCtx_->GetDstRect();
+    // clear alt data
+    altLoadingCtx_ = nullptr;
+    lastAltCanvasImage_ = nullptr;
+    lastAltDstRect_.reset();
+    lastAltSrcRect_.reset();
     // TODO: only do paint task when the pattern is active
     // figure out why here is always inactive
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -107,7 +119,15 @@ void ImagePattern::OnImageDataReady()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
-    if (!geometryNode->GetContent()) {
+    CHECK_NULL_VOID(geometryNode);
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
+        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
+        geometryNode->GetFrameSize().Height(), 0);
+    imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
+
+    if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
@@ -116,22 +136,50 @@ void ImagePattern::OnImageDataReady()
 
 void ImagePattern::OnImageLoadFail()
 {
-    // TODO: fire load fail event
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageFailEvent loadImageFailEvent_(
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), "");
+    // TODO: remove errorMsg in fail event
+    imageEventHub->FireErrorEvent(std::move(loadImageFailEvent_));
 }
 
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
-    CHECK_NULL_RETURN(lastCanvasImage_, nullptr);
     auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(imageRenderProperty, nullptr);
     ImagePaintConfig imagePaintConfig(lastSrcRect_, lastDstRect_);
     imagePaintConfig.renderMode_ = imageRenderProperty->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
-    return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_, imagePaintConfig);
+    imagePaintConfig.imageInterpolation_ =
+        imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
+    imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    bool isRightToLeft = pipelineCtx ? pipelineCtx->IsRightToLeft() : false;
+    imagePaintConfig.needFlipCanvasHorizontally_ =
+        isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
+    auto colorFilterMatrix = imageRenderProperty->GetColorFilter();
+    if (colorFilterMatrix.has_value()) {
+        imagePaintConfig.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
+    }
+    if (lastCanvasImage_) {
+        imagePaintConfig.isSvg = loadingCtx_->GetSourceInfo().IsSvg();
+        return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_, imagePaintConfig);
+    }
+    if (lastAltCanvasImage_ && lastAltDstRect_ && lastAltSrcRect_) {
+        imagePaintConfig.srcRect_ = *lastAltSrcRect_;
+        imagePaintConfig.dstRect_ = *lastAltDstRect_;
+        imagePaintConfig.isSvg = altLoadingCtx_->GetSourceInfo().IsSvg();
+        return MakeRefPtr<ImagePaintMethod>(lastAltCanvasImage_, imagePaintConfig);
+    }
+    return nullptr;
 }
 
-bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     return lastCanvasImage_;
@@ -141,13 +189,90 @@ void ImagePattern::OnModifyDone()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    if (loadingCtx_->GetSourceInfo() == imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""))) {
-        return;
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    std::optional<Color> svgFillColorOpt = std::nullopt;
+    if (currentSourceInfo.IsSvg()) {
+        svgFillColorOpt = imageRenderProperty->GetSvgFillColor() ? imageRenderProperty->GetSvgFillColor()
+                                                                 : currentSourceInfo.GetFillColor();
     }
-    LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
-    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
-        imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo("")), std::move(loadNotifier));
-    loadingCtx_->LoadImageData();
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
+        (currentSourceInfo.IsSvg() && svgFillColorOpt.has_value() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
+        LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
+        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier));
+        loadingCtx_->SetSvgFillColor(svgFillColorOpt);
+        loadingCtx_->LoadImageData();
+    }
+    if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
+        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        std::optional<Color> altSvgFillColorOpt = std::nullopt;
+        if (altImageSourceInfo.IsSvg()) {
+            altSvgFillColorOpt = imageRenderProperty->GetSvgFillColor() ? imageRenderProperty->GetSvgFillColor()
+                                                                        : altImageSourceInfo.GetFillColor();
+        }
+        LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
+        if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
+            (altLoadingCtx_ && altImageSourceInfo.IsSvg() && altSvgFillColorOpt.has_value() &&
+                altLoadingCtx_->GetSvgFillColor() != altSvgFillColorOpt)) {
+            altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, std::move(altLoadNotifier));
+            altLoadingCtx_->SetSvgFillColor(altSvgFillColorOpt);
+            altLoadingCtx_->LoadImageData();
+        }
+    }
+}
+
+DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        if (currentAltSourceInfo != sourceInfo) {
+            LOGW("alt image sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: "
+                 "%{public}s",
+                currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
+            return;
+        }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        const auto& geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        if (!geometryNode->GetContent()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+
+        // calculate params for [altLoadingCtx] to do [MakeCanvasImage] if component size is already settled
+        ImageLoadingContext::MakeCanvasImageIfNeed(pattern->altLoadingCtx_, geometryNode->GetContentSize(), true,
+            imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
+    };
+    return task;
+}
+
+LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        if (currentAltSourceInfo != sourceInfo) {
+            LOGW("alt image sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: "
+                 "%{public}s",
+                currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
+            return;
+        }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        pattern->lastAltCanvasImage_ = pattern->altLoadingCtx_->GetCanvasImage();
+        pattern->lastAltSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
+        pattern->lastAltDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
+    };
+    return task;
 }
 
 } // namespace OHOS::Ace::NG

@@ -38,7 +38,7 @@ void StageCardParser::Parse(const std::string& contents, const std::string& sele
             }
         }
     }
-    if (index == formConfigs->GetArraySize()) {
+    if (formConfigs && index == formConfigs->GetArraySize()) {
         LOGE("The configuration information for the url %{public}s does not exist", selectUrl.c_str());
         return;
     }

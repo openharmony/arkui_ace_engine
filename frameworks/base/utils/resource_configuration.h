@@ -152,7 +152,7 @@ public:
         return packagePath_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void SetSystemPackagePath(const std::string& systemPackagePath)
     {
         systemPackagePath_ = systemPackagePath;
@@ -179,7 +179,7 @@ private:
     std::vector<int64_t> resourcehandlers_;
     std::string hapPath_;
     std::string packagePath_;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string systemPackagePath_;
 #endif
     int32_t themeId_ = -1;

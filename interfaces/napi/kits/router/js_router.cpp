@@ -18,12 +18,11 @@
 #include "napi/native_api.h"
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
+#include "uv.h"
 
 #include "frameworks/base/log/log.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
-
-#include "uv.h"
 
 namespace OHOS::Ace::Napi {
 const char EN_ALERT_APPROVE[] = "enableAlertBeforeBackPage:ok";
@@ -50,25 +49,27 @@ static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
 
 static void ParseParams(napi_env env, napi_value params, std::string& paramsString)
 {
-    if (params != nullptr) {
-        napi_value globalValue;
-        napi_get_global(env, &globalValue);
-        napi_value jsonValue;
-        napi_get_named_property(env, globalValue, "JSON", &jsonValue);
-        napi_value stringifyValue;
-        napi_get_named_property(env, jsonValue, "stringify", &stringifyValue);
-        napi_value funcArgv[1] = { params };
-        napi_value returnValue;
-        napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
-        auto nativeValue = reinterpret_cast<NativeValue*>(returnValue);
-        auto resultValue = nativeValue->ToString();
-        auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
-        size_t len = nativeString->GetLength() + 1;
-        std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len);
-        size_t ret = 0;
-        napi_get_value_string_utf8(env, returnValue, paramsChar.get(), len, &ret);
-        paramsString = paramsChar.get();
+    // TODO: Save the original data instead of making the serial number.
+    if (params == nullptr) {
+        return;
     }
+    napi_value globalValue;
+    napi_get_global(env, &globalValue);
+    napi_value jsonValue;
+    napi_get_named_property(env, globalValue, "JSON", &jsonValue);
+    napi_value stringifyValue;
+    napi_get_named_property(env, jsonValue, "stringify", &stringifyValue);
+    napi_value funcArgv[1] = { params };
+    napi_value returnValue;
+    napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
+    auto nativeValue = reinterpret_cast<NativeValue*>(returnValue);
+    auto resultValue = nativeValue->ToString();
+    auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
+    size_t len = nativeString->GetLength() + 1;
+    std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len);
+    size_t ret = 0;
+    napi_get_value_string_utf8(env, returnValue, paramsChar.get(), len, &ret);
+    paramsString = paramsChar.get();
 }
 
 static napi_value JSRouterPush(napi_env env, napi_callback_info info)
@@ -346,8 +347,7 @@ void CallBackToJSTread(RouterAsyncContext* context)
             if (work != nullptr) {
                 delete work;
             }
-        }
-    );
+        });
 }
 
 static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_info info)
