@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_layout_algorithm.h"
+#include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
@@ -55,7 +56,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return nullptr;
+        return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_);
     }
 
     const ObtainedMonth& GetMonthData() const
