@@ -187,7 +187,9 @@ void LayoutProperty::CheckAspectRatio()
 void LayoutProperty::UpdateGridConstraint(const RefPtr<FrameNode>& host)
 {
     const auto& gridProperty = GetGridProperty();
-    CHECK_NULL_VOID(gridProperty);
+    if (!gridProperty) {
+        return;
+    }
     bool gridflag = false;
     auto parent = host->GetParent();
     while (parent) {
