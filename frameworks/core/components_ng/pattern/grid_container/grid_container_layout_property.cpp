@@ -27,16 +27,14 @@ void GridContainerLayoutProperty::RegistGridChild(const RefPtr<FrameNode>& child
 void GridContainerLayoutProperty::OnContainerInfoUpdate(const GridContainerInfo& info)
 {
     LOGD("GridContainer layout info update.");
-    for (auto p = childrenFramenode_.begin(); p != childrenFramenode_.end(); ++p) {
-        RefPtr<FrameNode> child;
-        do {
-            child = p->Upgrade();
-            if (child) {
-                LOGD("MarkDirtyNode, %{public}s", child->GetTag().c_str());
-                child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_LAYOUT);
-            }
-            p = childrenFramenode_.erase(p);
-        } while (p != childrenFramenode_.end());
+    auto p = childrenFramenode_.begin();
+    while (p != childrenFramenode_.end()) {
+        RefPtr<FrameNode> child = p->Upgrade();
+        if (child) {
+            LOGD("MarkDirtyNode, %{public}s", child->GetTag().c_str());
+            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_LAYOUT);
+        }
+        p = childrenFramenode_.erase(p);
     }
 }
 
