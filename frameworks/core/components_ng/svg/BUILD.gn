@@ -18,6 +18,9 @@ build_component_ng("svg_ng") {
   sources = [
     "parse/svg_g.cpp",
     "parse/svg_gradient.cpp",
+    "parse/svg_graphic.cpp",
+    "parse/svg_line.cpp",
+    "parse/svg_mask.cpp",
     "parse/svg_node.cpp",
     "parse/svg_path.cpp",
     "parse/svg_stop.cpp",

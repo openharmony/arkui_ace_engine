@@ -17,8 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_NODE_H
 
 #include <vector>
-#include "include/core/SkPath.h"
+
 #include "include/core/SkCanvas.h"
+#include "include/core/SkPath.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
@@ -66,12 +67,12 @@ public:
 
     virtual SkPath AsPath(const Size& viewPort) const
     {
-        return SkPath();
+        return {};
     }
 
     virtual RSPath AsRSPath(const Size& viewPort) const
     {
-        return RSPath();
+        return {};
     }
 
     const Rect AsBounds(const Size& viewPort) const
@@ -112,6 +113,7 @@ protected:
     void OnTransform(RSCanvas& canvas, const Size& viewPort);
 
     double ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const;
+    double ConvertDimensionToPx(const Dimension& value, double baseValue) const;
 
     std::optional<Gradient> GetGradient(const std::string& href);
     const Rect& GetRootViewBox() const;
@@ -138,11 +140,11 @@ protected:
     std::string transform_;
     uint8_t opacity_ = 0xFF;
 
-    bool hrefFill_ = true; // 需要根据svg_xx特殊处理
+    bool hrefFill_ = true;   // 需要根据svg_xx特殊处理
     bool hrefRender_ = true; // 需要根据svg_xx特殊处理
     bool childStyleTraversed_ = true; // 样式继承传递时，是否传递给子标签， 图形标签 circle/path/line/... = false
     bool styleTraversed_ = true; // 样式继承传递时，是否支持被遍历 mask/defs/pattern/filter = false
-    bool drawTraversed_ = true; // 绘制时，是否支持被遍历 mask/defs/pattern/filter = false
+    bool drawTraversed_ = true;  // 绘制时，是否支持被遍历 mask/defs/pattern/filter = false
 
     SkCanvas* skCanvas_ = nullptr;
 };
