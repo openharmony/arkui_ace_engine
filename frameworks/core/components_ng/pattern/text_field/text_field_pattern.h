@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
-
+#include "base/geometry/ng/offset_t.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -30,6 +30,7 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_method.h"
@@ -39,6 +40,7 @@
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "commonlibrary/c_utils/base/include/refbase.h"
+
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
 }
@@ -54,12 +56,17 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextFieldPaintMethod>(paragraph_, baselineOffset_);
+        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this));
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TextFieldLayoutProperty>();
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<TextFieldEventHub>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -97,9 +104,10 @@ public:
 
     const TextEditingValue& GetEditingValue() const;
 
-    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true);
+    void SetEditingValue(const TextEditingValue& newValue, bool needFireChangeEvent = true);
 
-    void UpdateCaretPosition(int32_t caretPosition);
+    void UpdatePositionOfParagraph(int32_t pos);
+    void UpdateCaretPositionByTouch(const Offset& offset);
 
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose);
@@ -112,8 +120,76 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
 
+    float GetBaseLineOffset() const
+    {
+        return baselineOffset_;
+    }
+
+    const std::shared_ptr<RSParagraph>& GetParagraph() const
+    {
+        return paragraph_;
+    }
+
+    bool GetCursorVisible() const
+    {
+        return cursorVisible_;
+    }
+
+    bool DisplayPlaceHolder();
+
+    const Offset& GetLastTouchOffset()
+    {
+        return lastTouchOffset_;
+    }
+
+    TextDirection GetTextDirection()
+    {
+        return textDirection_;
+    }
+
+    float GetCaretOffsetX() const
+    {
+        return caretOffsetX_;
+    }
+
+    void SetCaretOffsetX(float offsetX)
+    {
+        caretOffsetX_ = offsetX;
+    }
+
+    bool GetTextModifiedByInputMethod() const
+    {
+        return textModifiedByInputMethod_;
+    }
+
+    void SetBasicPadding(float padding)
+    {
+        basicPadding_ = padding;
+    }
+
+    float GetBasicPadding() const
+    {
+        return basicPadding_;
+    }
+
 private:
-    void OnClick();
+    bool focusEventInitialized_ = false;
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDown(const Offset& offset);
+    void HandleTouchUp();
+    void InitFocusEvent();
+    void InitTouchEvent();
+    void CursorMoveOnClick(const Offset& offset);
+
+    void ScheduleCursorTwinkling();
+    void OnCursorTwinkling();
+    void StartTwinkling();
+    void StopTwinkling();
+
+    void UpdateTextFieldManager(const Offset& offset);
     void OnTextInputActionUpdate(TextInputAction value);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -136,8 +212,20 @@ private:
     TextInputType keyboard_ = TextInputType::UNSPECIFIED;
     // Action when "enter" pressed.
     TextInputAction action_ = TextInputAction::UNSPECIFIED;
+    TextDirection textDirection_ = TextDirection::LTR;
 
+    Offset lastTouchOffset_;
+    float basicPadding_ = 0.0f;
     float baselineOffset_ = 0.0f;
+    float caretOffsetX_ = 0.0f;
+    bool cursorVisible_ = false;
+    bool textModifiedByInputMethod_ = false;
+    uint32_t twinklingInterval_ = 0;
+    int32_t obscureTickCountDown_ = 0;
+
+    Offset lastClickOffset_;
+
+    CancelableCallback<void()> cursorTwinklingTask_;
 
     RefPtr<TextFieldController> textFieldController_;
     RefPtr<TextEditController> textEditingController_;

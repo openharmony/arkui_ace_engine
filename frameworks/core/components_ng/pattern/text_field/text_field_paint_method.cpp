@@ -31,6 +31,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -44,9 +45,38 @@ constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension CURSOR_PADDING = 4.0_vp;
 } // namespace
 
-void TextFieldPaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper)
+CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, nullptr);
+    CHECK_NULL_RETURN(textFieldPattern->GetParagraph(), nullptr);
+    auto offset = paintWrapper->GetContentOffset();
+    auto paintOffset = offset - OffsetF(-static_cast<float>(textFieldPattern->GetBasicPadding()),
+                                    textFieldPattern->GetBaseLineOffset());
+    return [paragraph = textFieldPattern->GetParagraph(), paintOffset](
+               RSCanvas& canvas) { paragraph->Paint(&canvas, paintOffset.GetX(), paintOffset.GetY()); };
+}
+
+CanvasDrawFunction TextFieldPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
+{
+    return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
+        auto textField = weak.Upgrade();
+        if (textField) {
+            textField->PaintCursor(canvas, paintWrapper);
+        }
+    };
+}
+
+void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    if (!textFieldPattern->GetCursorVisible()) {
+        return;
+    }
+    auto paragraph = textFieldPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
     auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -59,9 +89,16 @@ void TextFieldPaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrappe
     brush.SetAntiAlias(true);
     brush.SetColor(cursorColor.GetValue());
     canvas.AttachBrush(brush);
-    auto top = paintWrapper->GetContentOffset().GetY() + CURSOR_PADDING.ConvertToPx();
-    canvas.DrawRect(RSRect(paragraph_->GetLongestLine(), CURSOR_PADDING.ConvertToPx(),
-        paragraph_->GetLongestLine() + CURSOR_WIDTH.ConvertToPx(), paragraph_->GetHeight() + top));
+    auto top = static_cast<float>(paintWrapper->GetContentOffset().GetY() + CURSOR_PADDING.ConvertToPx());
+    if (textFieldPattern->DisplayPlaceHolder()) {
+        canvas.DrawRect(RSRect(textFieldPattern->GetBasicPadding(), paintWrapper->GetContentOffset().GetY(),
+            textFieldPattern->GetBasicPadding() + CURSOR_WIDTH.ConvertToPx(),
+            top + paragraph->GetHeight() + CURSOR_PADDING.ConvertToPx()));
+    } else {
+        auto cursorOffsetX = textFieldPattern->GetCaretOffsetX() + textFieldPattern->GetBasicPadding();
+        canvas.DrawRect(RSRect(cursorOffsetX, CURSOR_PADDING.ConvertToPx(), cursorOffsetX + CURSOR_WIDTH.ConvertToPx(),
+            paragraph->GetHeight() + top));
+    }
     canvas.Restore();
 }
 
