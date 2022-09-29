@@ -27,7 +27,7 @@ RefPtr<SvgNode> SvgClipPath::Create()
 SkPath SvgClipPath::AsPath(const Size& viewPort) const
 {
     SkPath path;
-    for (auto child : children_) {
+    for (const auto& child : children_) {
         const SkPath childPath = child->AsPath(viewPort);
         Op(path, childPath, kUnion_SkPathOp, &path);
     }

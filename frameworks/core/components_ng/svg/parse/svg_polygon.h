@@ -32,7 +32,7 @@ public:
     SkPath AsPath(const Size& viewPort) const override;
 
 private:
-    bool isClose_;
+    bool isClose_ = true;
 };
 
 } // namespace OHOS::Ace::NG

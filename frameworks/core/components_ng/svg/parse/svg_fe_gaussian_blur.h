@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_CIRCLE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_CIRCLE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_GAUSSIAN_BLUR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_GAUSSIAN_BLUR_H
 
-#include "frameworks/core/components_ng/svg/parse/svg_graphic.h"
+#include "frameworks/core/components_ng/svg/parse/svg_fe.h"
 
 namespace OHOS::Ace::NG {
 
-class SvgCircle : public SvgGraphic {
-    DECLARE_ACE_TYPE(SvgCircle, SvgGraphic);
+class SvgFeGaussianBlur : public SvgFe {
+    DECLARE_ACE_TYPE(SvgFeGaussianBlur, SvgFe);
 
 public:
-    SvgCircle();
-    ~SvgCircle() override = default;
-
+    SvgFeGaussianBlur();
+    ~SvgFeGaussianBlur() override = default;
     static RefPtr<SvgNode> Create();
 
-    SkPath AsPath(const Size& viewPort) const override;
+    void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
+        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const override;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_CIRCLE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_GAUSSIAN_BLUR_H
