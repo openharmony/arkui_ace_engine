@@ -34,7 +34,7 @@ union SkColorEx {
 };
 
 class SkiaSvgDom : public SvgDom {
-    DECLARE_ACE_TYPE(SvgDom, SvgDom);
+    DECLARE_ACE_TYPE(SkiaSvgDom, SvgDom);
 
 public:
     SkiaSvgDom() = default;
