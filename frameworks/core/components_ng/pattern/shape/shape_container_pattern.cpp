@@ -17,7 +17,6 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 
 namespace OHOS::Ace::NG {

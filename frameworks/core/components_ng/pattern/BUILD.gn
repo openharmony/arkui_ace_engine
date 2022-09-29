@@ -148,7 +148,7 @@ build_component_ng("pattern_ng") {
     "shape/path_view.cpp",
     "shape/polygon_view.cpp",
     "shape/rect_view.cpp",
-    "shape/shape__container_pattern.cpp",
+    "shape/shape_container_pattern.cpp",
     "shape/shape_layout_algorithm.cpp",
     "shape/shape_paint_property.cpp",
     "shape/shape_view.cpp",
