@@ -42,11 +42,45 @@ public:
         fillState_.SetTextColor(color);
     }
 
+    const LineDashParam& GetLineDash() const
+    {
+        return strokeState_.GetLineDash();
+    }
+
+    void SetLineDash(const std::vector<double>& segments)
+    {
+        strokeState_.SetLineDash(segments);
+    }
+
+    void SaveStates()
+    {
+        PaintHolder holder;
+        holder.shadow = shadow_;
+        holder.fillState = fillState_;
+        holder.globalState = globalState_;
+        holder.strokeState = strokeState_;
+        saveStates_.push(holder);
+    }
+
+    void RestoreStates()
+    {
+        if (saveStates_.empty()) {
+            return;
+        }
+        auto saveState = saveStates_.top();
+        shadow_ = saveState.shadow;
+        fillState_ = saveState.fillState;
+        strokeState_ = saveState.strokeState;
+        globalState_ = saveState.globalState;
+        saveStates_.pop();
+    }
+
     void SetFillRuleForPath(const CanvasFillRule& rule);
     void SetFillRuleForPath2D(const CanvasFillRule& rule);
 
     void FillRect(PaintWrapper* paintWrapper, const Rect& rect);
     void StrokeRect(PaintWrapper* paintWrapper, const Rect& rect);
+    void ClearRect(PaintWrapper* paintWrapper, const Rect& rect);
     void Fill(PaintWrapper* paintWrapper);
     void Fill(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
     void Stroke(PaintWrapper* paintWrapper);
@@ -66,6 +100,14 @@ public:
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     virtual std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height) = 0;
     void PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData);
+
+    void Save();
+    void Restore();
+    void Scale(double x, double y);
+    void Rotate(double angle);
+    void SetTransform(const TransformParam& param);
+    void Transform(const TransformParam& param);
+    void Translate(double x, double y);
 
 protected:
     bool HasShadow() const;
@@ -103,11 +145,15 @@ protected:
     // save alpha and compositeType in GlobalPaintState
     GlobalPaintState globalState_;
 
+    // PaintHolder includes fillState, strokeState, globalState and shadow for save
+    std::stack<PaintHolder> saveStates_;
+
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
     Shadow shadow_;
     bool isOffscreen_ = false;
+    std::unique_ptr<txt::Paragraph> paragraph_;
 
     RefPtr<PipelineContext> context_;
 

@@ -37,6 +37,11 @@ void OffscreenCanvasPattern::StrokeRect(const Rect& rect)
     offscreenPaintMethod_->StrokeRect(nullptr, rect);
 }
 
+void OffscreenCanvasPattern::ClearRect(const Rect& rect)
+{
+    offscreenPaintMethod_->ClearRect(nullptr, rect);
+}
+
 void OffscreenCanvasPattern::Fill()
 {
     offscreenPaintMethod_->Fill(nullptr);
@@ -107,6 +112,31 @@ void OffscreenCanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     offscreenPaintMethod_->QuadraticCurveTo(nullptr, param);
 }
 
+void OffscreenCanvasPattern::FillText(const std::string& text, double x, double y, const PaintState& state)
+{
+    offscreenPaintMethod_->FillText(text, x, y, state);
+}
+
+void OffscreenCanvasPattern::StrokeText(const std::string& text, double x, double y, const PaintState& state)
+{
+    offscreenPaintMethod_->StrokeText(text, x, y, state);
+}
+
+double OffscreenCanvasPattern::MeasureText(const std::string& text, const PaintState& state)
+{
+    return offscreenPaintMethod_->MeasureText(text, state);
+}
+
+double OffscreenCanvasPattern::MeasureTextHeight(const std::string& text, const PaintState& state)
+{
+    return offscreenPaintMethod_->MeasureTextHeight(text, state);
+}
+
+TextMetrics OffscreenCanvasPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)
+{
+    return offscreenPaintMethod_->MeasureTextMetrics(text, state);
+}
+
 void OffscreenCanvasPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
 {
     offscreenPaintMethod_->DrawImage(nullptr, image, width, height);
@@ -151,5 +181,55 @@ int32_t OffscreenCanvasPattern::GetWidth()
 int32_t OffscreenCanvasPattern::GetHeight()
 {
     return offscreenPaintMethod_->GetHeight();
+}
+
+const LineDashParam& OffscreenCanvasPattern::GetLineDash() const
+{
+    return offscreenPaintMethod_->GetLineDash();
+}
+
+void OffscreenCanvasPattern::SetLineDash(const std::vector<double>& segments)
+{
+    offscreenPaintMethod_->SetLineDash(segments);
+}
+
+void OffscreenCanvasPattern::Save()
+{
+    offscreenPaintMethod_->Save();
+}
+
+void OffscreenCanvasPattern::Restore()
+{
+    offscreenPaintMethod_->Restore();
+}
+
+void OffscreenCanvasPattern::Scale(double x, double y)
+{
+    offscreenPaintMethod_->Scale(x, y);
+}
+
+void OffscreenCanvasPattern::Rotate(double angle)
+{
+    offscreenPaintMethod_->Rotate(angle);
+}
+
+void OffscreenCanvasPattern::SetTransform(const TransformParam& param)
+{
+    offscreenPaintMethod_->SetTransform(param);
+}
+
+void OffscreenCanvasPattern::Transform(const TransformParam& param)
+{
+    offscreenPaintMethod_->Transform(param);
+}
+
+void OffscreenCanvasPattern::Translate(double x, double y)
+{
+    offscreenPaintMethod_->Translate(x, y);
+}
+
+std::string OffscreenCanvasPattern::ToDataURL(const std::string& type, const double quality)
+{
+    return offscreenPaintMethod_->ToDataURL(type, quality);
 }
 } // namespace OHOS::Ace::NG

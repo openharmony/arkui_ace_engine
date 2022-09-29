@@ -29,6 +29,13 @@ public:
     ~OffscreenCanvasPaintMethod() override = default;
 
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height) override;
+    std::string ToDataURL(const std::string& type, const double quality);
+
+    void FillText(const std::string& text, double x, double y, const PaintState& state);
+    void StrokeText(const std::string& text, double x, double y, const PaintState& state);
+    double MeasureText(const std::string& text, const PaintState& state);
+    double MeasureTextHeight(const std::string& text, const PaintState& state);
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
 
     int32_t GetWidth()
     {
@@ -60,6 +67,13 @@ private:
     void ImageObjFailed() override;
 
     sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }
+
+    void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
+    double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
+    bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
+    void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
+    TextDirection GetTextDirection(const std::string& content);
 
     int32_t width_;
     int32_t height_;

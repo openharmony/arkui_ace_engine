@@ -33,6 +33,7 @@ public:
 
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
+    void ClearRect(const Rect& rect);
     void Fill();
     void Fill(const RefPtr<CanvasPath2D>& path);
     void Stroke();
@@ -47,6 +48,12 @@ public:
     void Ellipse(const EllipseParam& param);
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
+
+    void FillText(const std::string& text, double x, double y, const PaintState& state);
+    void StrokeText(const std::string& text, double x, double y, const PaintState& state);
+    double MeasureText(const std::string& text, const PaintState& state);
+    double MeasureTextHeight(const std::string& text, const PaintState& state);
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     
     void DrawImage(const Ace::CanvasImage& image, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image);
@@ -59,6 +66,17 @@ public:
     int32_t GetWidth();
     int32_t GetHeight();
 
+    const LineDashParam& GetLineDash() const;
+    void SetLineDash(const std::vector<double>& segments);
+
+    void Save();
+    void Restore();
+    void Scale(double x, double y);
+    void Rotate(double angle);
+    void SetTransform(const TransformParam& param);
+    void Transform(const TransformParam& param);
+    void Translate(double x, double y);
+    std::string ToDataURL(const std::string& type, const double quality);
 private:
     RefPtr<OffscreenCanvasPaintMethod> offscreenPaintMethod_;
 

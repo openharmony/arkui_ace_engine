@@ -56,8 +56,25 @@ public:
         return !tasks_.empty();
     }
 
+    double GetWidth()
+    {
+        return lastLayoutSize_.Width();
+    }
+
+    double GetHeight()
+    {
+        return lastLayoutSize_.Height();
+    }
+
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height) override;
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
+    std::string ToDataURL(const std::string& args);
+
+    void FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y);
+    void StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y);
+    double MeasureText(const std::string& text, const PaintState& state);
+    double MeasureTextHeight(const std::string& text, const PaintState& state);
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
 
 private:
     void PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper);
@@ -66,6 +83,12 @@ private:
     void ImageObjReady(const RefPtr<ImageObject>& imageObj) override;
     void ImageObjFailed() override;
     sk_sp<SkImage> GetImage(const std::string& src) override;
+
+    void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = true);
+    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
+    bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = true);
+    void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
 
     std::list<TaskFunc> tasks_;
     SizeF lastLayoutSize_;

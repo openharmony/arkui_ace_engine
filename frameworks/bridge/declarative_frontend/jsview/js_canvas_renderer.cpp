@@ -232,11 +232,13 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
         x = SystemProperties::Vp2Px(x);
         y = SystemProperties::Vp2Px(y);
 
-        if (isOffscreen_) {
-            offscreenCanvas_->FillText(text, x, y, paintState_);
-        } else {
-            pool_->FillText(text, Offset(x, y));
+        if (Container::IsCurrentUseNewPipeline()) {
+            isOffscreen_ ? offscreenCanvasPattern_->FillText(text, x, y, paintState_)
+                         : customPaintPattern_->FillText(text, x, y);
+            return;
         }
+        isOffscreen_ ? offscreenCanvas_->FillText(text, x, y, paintState_)
+                     : pool_->FillText(text, Offset(x, y));
     }
 }
 
@@ -257,11 +259,13 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         x = SystemProperties::Vp2Px(x);
         y = SystemProperties::Vp2Px(y);
 
-        if (isOffscreen_) {
-            offscreenCanvas_->StrokeText(text, x, y, paintState_);
-        } else {
-            pool_->StrokeText(text, Offset(x, y));
+        if (Container::IsCurrentUseNewPipeline()) {
+            isOffscreen_ ? offscreenCanvasPattern_->StrokeText(text, x, y, paintState_)
+                         : customPaintPattern_->StrokeText(text, x, y);
+            return;
         }
+        isOffscreen_ ? offscreenCanvas_->StrokeText(text, x, y, paintState_)
+                     : pool_->StrokeText(text, Offset(x, y));
     }
 }
 
@@ -357,7 +361,16 @@ void JSCanvasRenderer::JsGetLineCap(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
 {
-    auto lineDash = pool_->GetLineDash();
+    std::vector<double> lineDash{};
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            lineDash = offscreenCanvasPattern_->GetLineDash().lineDash;
+        } else {
+            lineDash = customPaintPattern_->GetLineDash().lineDash;
+        }
+    } else {
+        lineDash = pool_->GetLineDash();
+    }
     JSRef<JSObject> lineDashObj = JSRef<JSObject>::New();
     for (int i = 0; i < lineDash.size(); i++) {
         lineDashObj->SetProperty<double>(std::to_string(i).c_str(), lineDash[i]);
@@ -631,19 +644,17 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
                 break;
         }
 
-        if (isOffscreen_) {
-            if (isImage) {
-                offscreenCanvas_->DrawImage(image, imgWidth, imgHeight);
-            } else {
-                offscreenCanvas_->DrawPixelMap(pixelMap, image);
-            }
-        } else {
-            if (isImage) {
-                pool_->DrawImage(image, imgWidth, imgHeight);
-            } else {
-                pool_->DrawPixelMap(pixelMap, image);
-            }
+        if (Container::IsCurrentUseNewPipeline()) {
+            isOffscreen_ ? isImage ? offscreenCanvasPattern_->DrawImage(image, imgWidth, imgHeight)
+                                   : offscreenCanvasPattern_->DrawPixelMap(pixelMap, image)
+                         : isImage ? customPaintPattern_->DrawImage(image, imgWidth, imgHeight)
+                                   : customPaintPattern_->DrawPixelMap(pixelMap, image);
+            return;
         }
+        isOffscreen_ ? isImage ? offscreenCanvas_->DrawImage(image, imgWidth, imgHeight)
+                               : offscreenCanvas_->DrawPixelMap(pixelMap, image)
+                     : isImage ? pool_->DrawImage(image, imgWidth, imgHeight)
+                               : pool_->DrawPixelMap(pixelMap, image);
     }
 }
 
@@ -757,11 +768,12 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
         }
     }
 
-    if (isOffscreen_) {
-        offscreenCanvas_->PutImageData(imageData);
-    } else {
-        pool_->PutImageData(imageData);
+    if (Container::IsCurrentUseNewPipeline()) {
+        isOffscreen_ ? offscreenCanvasPattern_->PutImageData(imageData)
+                        : customPaintPattern_->PutImageData(imageData);
+        return;
     }
+    isOffscreen_ ? offscreenCanvas_->PutImageData(imageData) : pool_->PutImageData(imageData);
 }
 
 void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array)
@@ -1034,10 +1046,19 @@ void JSCanvasRenderer::JsToDataUrl(const JSCallbackInfo& info)
     if (info.Length() > 1 && info[1]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[1], quality);
     }
-    if (isOffscreen_) {
-        result = offscreenCanvas_->ToDataURL(dataUrl, quality);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            result = offscreenCanvasPattern_->ToDataURL(dataUrl, quality);
+        } else {
+            result = customPaintPattern_->ToDataURL(dataUrl + "," + std::to_string(quality));
+        }
     } else {
-        result = pool_->ToDataURL(dataUrl + "," + std::to_string(quality));
+        if (isOffscreen_) {
+            result = offscreenCanvas_->ToDataURL(dataUrl, quality);
+        } else {
+            result = pool_->ToDataURL(dataUrl + "," + std::to_string(quality));
+        }
     }
     auto returnValue = JSVal(ToJSValue(result));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
@@ -1664,10 +1685,19 @@ void JSCanvasRenderer::JsRestore(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    if (isOffscreen_) {
-        offscreenCanvas_->Restore();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            offscreenCanvasPattern_->Restore();
+        } else {
+            customPaintPattern_->Restore();
+        }
     } else {
-        pool_->Restore();
+        if (isOffscreen_) {
+            offscreenCanvas_->Restore();
+        } else {
+            pool_->Restore();
+        }
     }
 }
 
@@ -1677,10 +1707,19 @@ void JSCanvasRenderer::JsSave(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    if (isOffscreen_) {
-        offscreenCanvas_->Save();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            offscreenCanvasPattern_->Save();
+        } else {
+            customPaintPattern_->Save();
+        }
     } else {
-        pool_->Save();
+        if (isOffscreen_) {
+            offscreenCanvas_->Save();
+        } else {
+            pool_->Save();
+        }
     }
 }
 
@@ -1692,10 +1731,19 @@ void JSCanvasRenderer::JsRotate(const JSCallbackInfo& info)
     }
     double angle = 0.0;
     JSViewAbstract::ParseJsDouble(info[0], angle);
-    if (isOffscreen_) {
-        offscreenCanvas_->Rotate(angle);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            offscreenCanvasPattern_->Rotate(angle);
+        } else {
+            customPaintPattern_->Rotate(angle);
+        }
     } else {
-        pool_->Rotate(angle);
+        if (isOffscreen_) {
+            offscreenCanvas_->Rotate(angle);
+        } else {
+            pool_->Rotate(angle);
+        }
     }
 }
 
@@ -1711,10 +1759,19 @@ void JSCanvasRenderer::JsScale(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
-        if (isOffscreen_) {
-            offscreenCanvas_->Scale(x, y);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->Scale(x, y);
+            } else {
+                customPaintPattern_->Scale(x, y);
+            }
         } else {
-            pool_->Scale(x, y);
+            if (isOffscreen_) {
+                offscreenCanvas_->Scale(x, y);
+            } else {
+                pool_->Scale(x, y);
+            }
         }
     }
 }
@@ -1734,10 +1791,18 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
             param.translateX = SystemProperties::Vp2Px(param.translateX);
             param.translateY = SystemProperties::Vp2Px(param.translateY);
 
-            if (isOffscreen_) {
-                offscreenCanvas_->SetTransform(param);
+            if (Container::IsCurrentUseNewPipeline()) {
+                if (isOffscreen_) {
+                    offscreenCanvasPattern_->SetTransform(param);
+                } else {
+                    customPaintPattern_->SetTransform(param);
+                }
             } else {
-                pool_->SetTransform(param);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetTransform(param);
+                } else {
+                    pool_->SetTransform(param);
+                }
             }
         }
     } else if (info.Length() == 1) {
@@ -1751,10 +1816,18 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
                 param.scaleY = jsContext->JsGetScaleY();
                 param.translateX = jsContext->JsGetTranslateX();
                 param.translateY = jsContext->JsGetTranslateY();
-                if (isOffscreen_) {
-                    offscreenCanvas_->SetTransform(param);
+                if (Container::IsCurrentUseNewPipeline()) {
+                    if (isOffscreen_) {
+                        offscreenCanvasPattern_->SetTransform(param);
+                    } else {
+                        customPaintPattern_->SetTransform(param);
+                    }
                 } else {
-                    pool_->SetTransform(param);
+                    if (isOffscreen_) {
+                        offscreenCanvas_->SetTransform(param);
+                    } else {
+                        pool_->SetTransform(param);
+                    }
                 }
             }
         }
@@ -1783,10 +1856,18 @@ void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
         param.translateX = SystemProperties::Vp2Px(param.translateX);
         param.translateY = SystemProperties::Vp2Px(param.translateY);
 
-        if (isOffscreen_) {
-            offscreenCanvas_->Transform(param);
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->Transform(param);
+            } else {
+                customPaintPattern_->Transform(param);
+            }
         } else {
-            pool_->Transform(param);
+            if (isOffscreen_) {
+                offscreenCanvas_->Transform(param);
+            } else {
+                pool_->Transform(param);
+            }
         }
     }
 }
@@ -1805,10 +1886,19 @@ void JSCanvasRenderer::JsTranslate(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         x = SystemProperties::Vp2Px(x);
         y = SystemProperties::Vp2Px(y);
-        if (isOffscreen_) {
-            offscreenCanvas_->Translate(x, y);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->Translate(x, y);
+            } else {
+                customPaintPattern_->Translate(x, y);
+            }
         } else {
-            pool_->Translate(x, y);
+            if (isOffscreen_) {
+                offscreenCanvas_->Translate(x, y);
+            } else {
+                pool_->Translate(x, y);
+            }
         }
     }
 }
@@ -1822,10 +1912,19 @@ void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
         lineDash.insert(lineDash.end(), lineDash.begin(), lineDash.end());
     }
 
-    if (isOffscreen_) {
-        offscreenCanvas_->SetLineDash(lineDash);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            offscreenCanvasPattern_->SetLineDash(lineDash);
+        } else {
+            customPaintPattern_->UpdateLineDash(lineDash);
+        }
     } else {
-        pool_->UpdateLineDash(lineDash);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetLineDash(lineDash);
+        } else {
+            pool_->UpdateLineDash(lineDash);
+        }
     }
 }
 
@@ -1898,12 +1997,23 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
     double fontBoundingBoxDescent = 0.0;
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], text);
-        if (isOffscreen_) {
-            width = offscreenCanvas_->MeasureText(text, paintState_);
-            height = offscreenCanvas_->MeasureTextHeight(text, paintState_);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                width = offscreenCanvasPattern_->MeasureText(text, paintState_);
+                height = offscreenCanvasPattern_->MeasureTextHeight(text, paintState_);
+            } else {
+                width = customPaintPattern_->MeasureText(text, paintState_);
+                height = customPaintPattern_->MeasureTextHeight(text, paintState_);
+            }
         } else {
-            width = pool_->MeasureText(text, paintState_);
-            height = pool_->MeasureTextHeight(text, paintState_);
+            if (isOffscreen_) {
+                width = offscreenCanvas_->MeasureText(text, paintState_);
+                height = offscreenCanvas_->MeasureTextHeight(text, paintState_);
+            } else {
+                width = pool_->MeasureText(text, paintState_);
+                height = pool_->MeasureTextHeight(text, paintState_);
+            }
         }
 
         auto retObj = JSRef<JSObject>::New();
@@ -2024,10 +2134,19 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
         height = SystemProperties::Vp2Px(height);
 
         Rect rect = Rect(x, y, width, height);
-        if (isOffscreen_) {
-            offscreenCanvas_->ClearRect(rect);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->ClearRect(rect);
+            } else {
+                customPaintPattern_->ClearRect(rect);
+            }
         } else {
-            pool_->ClearRect(rect);
+            if (isOffscreen_) {
+                offscreenCanvas_->ClearRect(rect);
+            } else {
+                pool_->ClearRect(rect);
+            }
         }
     }
 }

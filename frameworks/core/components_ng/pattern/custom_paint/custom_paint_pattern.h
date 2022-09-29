@@ -53,6 +53,7 @@ public:
 
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
+    void ClearRect(const Rect& rect);
     void Fill();
     void Fill(const RefPtr<CanvasPath2D>& path);
     void Stroke();
@@ -68,6 +69,12 @@ public:
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
 
+    void FillText(const std::string& text, double x, double y);
+    void StrokeText(const std::string& text, double x, double y);
+    double MeasureText(const std::string& text, const PaintState& state);
+    double MeasureTextHeight(const std::string& text, const PaintState& state);
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
+
     void DrawImage(const Ace::CanvasImage& image, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
@@ -77,6 +84,20 @@ public:
     void UpdateFillColor(const Color& color);
     void UpdateFillRuleForPath(const CanvasFillRule rule);
     void UpdateFillRuleForPath2D(const CanvasFillRule rule);
+    double GetWidth();
+    double GetHeight();
+
+    const LineDashParam& GetLineDash() const;
+    void UpdateLineDash(const std::vector<double>& segments);
+
+    void Save();
+    void Restore();
+    void Scale(double x, double y);
+    void Rotate(double angle);
+    void SetTransform(const TransformParam& param);
+    void Transform(const TransformParam& param);
+    void Translate(double x, double y);
+    std::string ToDataURL(const std::string& args);
 
 private:
     void OnAttachToFrameNode() override;
