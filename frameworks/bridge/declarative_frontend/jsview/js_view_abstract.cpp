@@ -199,7 +199,9 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy
     double dxVal = 0.0;
     double dyVal = 0.0;
     double dzVal = 0.0;
-    GetDefaultRotateVector(dxVal, dyVal, dzVal);
+    if (!argsPtrItem->Contains("x") && !argsPtrItem->Contains("y") && !argsPtrItem->Contains("z")) {
+        GetDefaultRotateVector(dxVal, dyVal, dzVal);
+    }
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), dxVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), dyVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), dzVal);
