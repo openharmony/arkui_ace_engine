@@ -102,6 +102,12 @@ const char TAB_BAR_ETS_TAG[] = "TabBar";
 // navigation view
 const char NAVIGATION_VIEW_COMPONENT_TAG[] = "NavigationContainerComponent";
 const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
+const char BAR_ITEM_ETS_TAG[] = "BarItem";
+const char TITLE_BAR_ETS_TAG[] = "TitleBar";
+const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
+const char TOOL_BAR_ETS_TAG[] = "ToolBar";
+const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
+const char BACK_BUTTON_ETS_TAG[] = "BackButton";
 
 // row split
 const char ROW_SPLIT_COMPONENT_TAG[] = "RowSplitComponent";
@@ -407,9 +413,4 @@ ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
 // Popup
 ACE_EXPORT extern const char POPUP_ETS_TAG[] = "Popup";
 
-// bar item
-ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[] = "BarItem";
-
-// title bar
-ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[] = "TitleBar";
 } // namespace OHOS::Ace::V2

@@ -34,6 +34,26 @@ public:
         return false;
     }
 
+    void SetTextNode(const RefPtr<UINode>& text)
+    {
+        text_ = text;
+    }
+
+    const RefPtr<UINode>& GetTextNode() const
+    {
+        return text_;
+    }
+
+    void SetIconNode(const RefPtr<UINode>& icon)
+    {
+        icon_ = icon;
+    }
+
+    const RefPtr<UINode>& GetIconNode() const
+    {
+        return icon_;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(IconIndex, int32_t);
     void OnIconIndexUpdate(int32_t value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextIndex, int32_t);
@@ -42,6 +62,10 @@ public:
     void OnIconSrcUpdate(const std::string& value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Text, std::string);
     void OnTextUpdate(const std::string& value) {}
+
+private:
+    RefPtr<UINode> text_;
+    RefPtr<UINode> icon_;
 };
 
 } // namespace OHOS::Ace::NG

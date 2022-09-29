@@ -106,6 +106,12 @@ ACE_EXPORT extern const char TAB_BAR_ETS_TAG[];
 // navigation view
 ACE_EXPORT extern const char NAVIGATION_VIEW_COMPONENT_TAG[];
 ACE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
+ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];
+ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[];
+ACE_EXPORT extern const char NAVIGATION_CONTENT_ETS_TAG[];
+ACE_EXPORT extern const char TOOL_BAR_ETS_TAG[];
+ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
+ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
 
 // row split
 ACE_EXPORT extern const char ROW_SPLIT_COMPONENT_TAG[];
@@ -416,11 +422,6 @@ ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[];
 // Popup
 ACE_EXPORT extern const char POPUP_ETS_TAG[];
 
-// bar item
-ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];
-
-// title bar
-ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H
