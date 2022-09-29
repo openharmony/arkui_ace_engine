@@ -63,10 +63,10 @@ public:
         return inputEventHub_;
     }
 
-    const RefPtr<FocusHub>& GetOrCreateFocusHub()
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type = FocusType::DISABLE, bool focusable = false)
     {
         if (!focusHub_) {
-            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this));
+            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable);
         }
         return focusHub_;
     }

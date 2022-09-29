@@ -84,6 +84,15 @@ public:
         progressRate_ = progressRate;
     }
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::NODE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

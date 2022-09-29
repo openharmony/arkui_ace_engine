@@ -274,6 +274,24 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
     return false;
 }
 
+bool EventManager::DispatchTabIndexEventNG(
+    const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& curPage)
+{
+    CHECK_NULL_RETURN(focusNode, false);
+    CHECK_NULL_RETURN(curPage, false);
+    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
+        event.action, event.repeatTime);
+    auto focusNodeHub = focusNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    auto curPageFocusHub = curPage->GetFocusHub();
+    CHECK_NULL_RETURN(curPageFocusHub, false);
+    if (focusNodeHub->HandleFocusByTabIndex(event, curPageFocusHub)) {
+        LOGI("Tab index focus system handled this event");
+        return true;
+    }
+    return false;
+}
+
 bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode)
 {
     CHECK_NULL_RETURN(focusNode, false);

@@ -197,6 +197,10 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node)
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     pagePattern->OnHide();
+
+    auto pageFocusHub = pageNode->GetFocusHub();
+    CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->SetParentFocusable(false);
 }
 
 void StageManager::FirePageShow(const RefPtr<UINode>& node)
@@ -206,6 +210,11 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node)
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     pagePattern->OnShow();
+
+    auto pageFocusHub = pageNode->GetFocusHub();
+    CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->SetParentFocusable(true);
+    pageFocusHub->RequestFocus();
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()

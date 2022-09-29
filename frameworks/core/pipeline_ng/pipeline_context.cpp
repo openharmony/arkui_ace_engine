@@ -184,7 +184,7 @@ void PipelineContext::FlushFocus()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     auto focusNode = dirtyFocusNode_.Upgrade();
-    if (!focusNode || focusNode->GetFocusType() == FocusType::DISABLE) {
+    if (!focusNode || focusNode->GetFocusType() != FocusType::NODE) {
         dirtyFocusNode_.Reset();
     } else {
         auto focusNodeHub = focusNode->GetFocusHub();
@@ -196,7 +196,7 @@ void PipelineContext::FlushFocus()
         return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
-    if (!focusScope || focusNode->GetFocusType() == FocusType::DISABLE) {
+    if (!focusScope || focusScope->GetFocusType() != FocusType::SCOPE) {
         dirtyFocusScope_.Reset();
     } else {
         auto focusScopeHub = focusScope->GetFocusHub();
@@ -207,8 +207,10 @@ void PipelineContext::FlushFocus()
         dirtyFocusScope_.Reset();
         return;
     }
-    if (rootNode_ && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
-        rootNode_->GetFocusHub()->RequestFocusImmediately();
+    if (!RequestDefaultFocus()) {
+        if (rootNode_ && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
+            rootNode_->GetFocusHub()->RequestFocusImmediately();
+        }
     }
 }
 
@@ -478,7 +480,52 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
-    return eventManager_->DispatchKeyEventNG(event, rootNode_);
+    // Need update while key tab pressed
+    auto lastPage = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, false);
+    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, lastPage)) {
+        return eventManager_->DispatchKeyEventNG(event, rootNode_);
+    }
+    return true;
+}
+
+bool PipelineContext::RequestDefaultFocus()
+{
+    auto lastPage = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, false);
+    auto lastPageFocusHub = lastPage->GetFocusHub();
+    CHECK_NULL_RETURN(lastPageFocusHub, false);
+    if (lastPageFocusHub->IsDefaultHasFocused()) {
+        return false;
+    }
+    auto defaultFocusNode = lastPageFocusHub->GetChildFocusNodeByType();
+    CHECK_NULL_RETURN(defaultFocusNode, false);
+    if (!defaultFocusNode->IsFocusableWholePath()) {
+        return false;
+    }
+    lastPageFocusHub->SetIsDefaultHasFocused(true);
+    LOGD("Focus: request default focus node %{public}s", defaultFocusNode->GetFrameName().c_str());
+    return defaultFocusNode->RequestFocusImmediately();
+}
+
+bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto focusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->RequestFocusImmediatelyById(targetNodeId);
+}
+
+void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(node);
+    if (node->GetFocusType() == FocusType::NODE) {
+        dirtyFocusNode_ = WeakClaim(RawPtr(node));
+    } else {
+        dirtyFocusScope_ = WeakClaim(RawPtr(node));
+    }
+    window_->RequestFrame();
 }
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event)

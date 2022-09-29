@@ -56,6 +56,15 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::NODE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

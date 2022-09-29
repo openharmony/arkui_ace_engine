@@ -30,8 +30,6 @@ void WebView::Create(const std::string& src, const RefPtr<WebController>& webCon
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
         [src, webController]() { return AceType::MakeRefPtr<WebPattern>(src, webController); });
     stack->Push(frameNode);
-    NG::ViewAbstract::SetFocusType(NG::FocusType::NODE);
-    NG::ViewAbstract::SetFocusable(true);
 
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);

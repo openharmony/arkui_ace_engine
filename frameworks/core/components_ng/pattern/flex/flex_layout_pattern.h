@@ -43,6 +43,15 @@ public:
         return false;
     }
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::SCOPE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutPattern);
 };

@@ -271,6 +271,10 @@ RefPtr<Gesture> JSInteractableView::GetRemoteMessageTapGesture(const JSCallbackI
 
 void JSInteractableView::SetFocusable(bool focusable)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetFocusable(focusable);
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
     if (focusableComponent) {
         focusableComponent->SetFocusable(focusable);
@@ -278,6 +282,9 @@ void JSInteractableView::SetFocusable(bool focusable)
 }
 void JSInteractableView::SetFocusNode(bool isFocusNode)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
     if (focusableComponent) {
         focusableComponent->SetFocusNode(!isFocusNode);

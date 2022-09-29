@@ -61,6 +61,15 @@ public:
     {
         isTouch_ = isTouch;
     }
+
+    FocusType GetFocusType() override
+    {
+        return FocusType::NODE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
     
 private:
     void OnModifyDone() override;

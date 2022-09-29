@@ -100,11 +100,15 @@ public:
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
-    static void SetFocusType(FocusType type);
+    static void SetEnabled(bool enabled);
     static void SetFocusable(bool focusable);
     static void SetOnFocus(OnFocusFunc&& onFocusCallback);
     static void SetOnBlur(OnBlurFunc&& onBlurCallback);
     static void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback);
+    static void SetTabIndex(int32_t index);
+    static void SetFocusOnTouch(bool isSet);
+    static void SetDefaultFocus(bool isSet);
+    static void SetGroupDefaultFocus(bool isSet);
     static void SetOnAppear(std::function<void()>&& onAppear);
     static void SetOnDisappear(std::function<void()>&& onDisappear);
     static void SetOnAreaChanged(

@@ -79,6 +79,15 @@ public:
     ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(StepSize, double);
     ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(StarNum, int32_t);
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::NODE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
 private:
     void OnModifyDone() override;
 

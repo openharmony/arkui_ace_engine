@@ -123,6 +123,15 @@ public:
         return GetEventHub<WebEventHub>();
     }
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::NODE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
