@@ -496,6 +496,16 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     frameNode->UpdateInspectorId(inspectorId);
 }
 
+void ViewAbstract::SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    // frame node is mounted to parent when pop from stack later, no grid-container is added here
+    layoutProperty->UpdateGridProperty(span, offset, type);
+}
+
 void ViewAbstract::Pop()
 {
     ViewStackProcessor::GetInstance()->Pop();

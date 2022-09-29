@@ -3682,9 +3682,14 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsGridSpan", info, checkList)) {
         return;
     }
+    auto span = info[0]->ToNumber<uint32_t>();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetGrid(span, std::nullopt);
+        return;
+    }
     auto gridContainerInfo = JSGridContainer::GetContainer();
     if (gridContainerInfo != nullptr) {
-        auto span = info[0]->ToNumber<uint32_t>();
         auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
         builder->SetParent(gridContainerInfo);
         builder->SetColumns(span);
@@ -3693,16 +3698,20 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
+    if (!CheckJSCallbackInfo("JsGridOffset", info, checkList)) {
+        return;
+    }
+    auto offset = info[0]->ToNumber<int32_t>();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetGrid(std::nullopt, offset);
         return;
     }
 
     auto gridContainerInfo = JSGridContainer::GetContainer();
-    if (info[0]->IsNumber() && gridContainerInfo != nullptr) {
+    if (gridContainerInfo != nullptr) {
         auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
         builder->SetParent(gridContainerInfo);
-        int32_t offset = info[0]->ToNumber<int32_t>();
         builder->SetOffset(offset);
     }
 }
@@ -3733,6 +3742,25 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsUseSizeType", info, checkList)) {
         return;
     }
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    // keys order must be strictly refer to GridSizeType
+    const char* keys[] = { "", "xs", "sm", "md", "lg" };
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
+            JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
+            if (val->IsNull() || val->IsEmpty()) {
+                continue;
+            }
+            uint32_t span = 0;
+            int32_t offset = 0;
+            if (ParseSpanAndOffset(val, span, offset)) {
+                NG::ViewAbstract::SetGrid(span, offset, static_cast<GridSizeType>(i));
+            }
+        }
+        return;
+    }
+
     auto gridContainerInfo = JSGridContainer::GetContainer();
     if (gridContainerInfo == nullptr) {
         LOGE("No valid grid container.");
@@ -3740,10 +3768,6 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
     }
     auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
     builder->SetParent(gridContainerInfo);
-
-    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    // keys order must be strictly refer to GridSizeType
-    const char* keys[] = { "", "xs", "sm", "md", "lg" };
     for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
         JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
         if (val->IsNull() || val->IsEmpty()) {

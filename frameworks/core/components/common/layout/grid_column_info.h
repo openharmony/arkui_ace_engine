@@ -66,6 +66,8 @@ public:
                 SetMdSizeColumn(column, offset);
             } else if (type == GridSizeType::LG) {
                 SetLgSizeColumn(column, offset);
+            } else if (type == GridSizeType::UNDEFINED) {
+                SetColumns(column);
             }
         }
 

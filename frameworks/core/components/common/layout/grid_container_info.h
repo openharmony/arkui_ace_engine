@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_GRID_CONTAINER_INFO_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_GRID_CONTAINER_INFO_H
 
+#include <string>
+
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/grid_layout_info.h"
 
@@ -90,6 +92,11 @@ public:
     private:
         RefPtr<GridContainerInfo> containerInfo_;
     };
+
+    GridContainerInfo(const GridContainerInfo& info)
+    {
+        *this = info;
+    }
     ~GridContainerInfo() override = default;
 
     double GetColumnWidth() const
@@ -112,6 +119,38 @@ public:
      */
     void ACE_EXPORT BuildColumnWidth();
     void BuildColumnWidth(double width);
+    bool operator==(const GridContainerInfo& info) const
+    {
+        if (&info == this) {
+            return true;
+        }
+
+        return ((templateType_ == info.templateType_) && (currentSizeType_ == info.currentSizeType_) &&
+                (sizeType_ == info.sizeType_) && (columns_ == info.columns_) && (gutterWidth_ == info.gutterWidth_) &&
+                (marginLeft_ == info.marginLeft_) && (marginRight_ == info.marginRight_) &&
+                (paddingLeft_ == info.paddingLeft_) && (paddingRight_ == info.paddingRight_) &&
+                (containerWidth_ == info.containerWidth_) && (columnWidth_ == info.columnWidth_) &&
+                (columnType_ == info.columnType_));
+    }
+
+    GridContainerInfo& operator=(const GridContainerInfo& info)
+    {
+        if (&info != this) {
+            templateType_ = info.templateType_;
+            currentSizeType_ = info.currentSizeType_;
+            sizeType_ = info.sizeType_;
+            columns_ = info.columns_;
+            gutterWidth_ = info.gutterWidth_;
+            marginLeft_ = info.marginLeft_;
+            marginRight_ = info.marginRight_;
+            paddingLeft_ = info.paddingLeft_;
+            paddingRight_ = info.paddingRight_;
+            containerWidth_ = info.containerWidth_;
+            columnWidth_ = info.columnWidth_;
+            columnType_ = info.columnType_;
+        }
+        return *this;
+    }
 
 private:
     GridContainerInfo() = default;
