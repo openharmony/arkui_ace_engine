@@ -104,6 +104,9 @@ public:
         return false;
     }
 
+    virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
+    virtual void SetBounds(float positionX, float positionY, float width, float height) {}
+
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}

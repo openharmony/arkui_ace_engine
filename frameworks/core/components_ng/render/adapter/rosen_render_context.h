@@ -126,6 +126,9 @@ public:
 
     void FlushModifier(const RefPtr<Modifier>& modifier) override;
 
+    void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
+    void SetBounds(float positionX, float positionY, float width, float height) override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
