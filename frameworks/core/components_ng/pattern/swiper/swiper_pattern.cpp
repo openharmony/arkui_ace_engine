@@ -147,6 +147,7 @@ void SwiperPattern::FireChangeEvent() const
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireChangeEvent(currentIndex_);
+    swiperEventHub->FireChangeDoneEvent(moveDirection_);
 }
 
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
@@ -542,6 +543,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
 
     PlayTranslateAnimation(start, end, nextIndex);
+    moveDirection_ = dragVelocity <= 0;
 }
 
 void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay)
