@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -35,13 +36,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void RemoveChildByIndex(const RefPtr<UINode>& parent, int32_t index)
-{
-    auto iter = parent->GetChildren().begin();
-    std::advance(iter, index);
-    parent->RemoveChild(*iter);
-}
-
 void BuildTitleAndSubtitle(
     const RefPtr<NavigationGroupNode>& navigationGroupNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
@@ -50,25 +44,24 @@ void BuildTitleAndSubtitle(
     }
     if (navigationGroupNode->GetTitle() && navigationGroupNode->HasTitleNodeOperation()) {
         if (navigationGroupNode->GetTitleNodeOperationValue() != ChildNodeOperation::NONE) {
-            if (navigationGroupNode->GetTitleNodeOperationValue() == ChildNodeOperation::REPLACE &&
-                navigationGroupNode->HasTitleIndex()) {
-                RemoveChildByIndex(titleBarNode, navigationGroupNode->GetTitleIndexValue());
+            if (navigationGroupNode->GetTitleNodeOperationValue() == ChildNodeOperation::REPLACE) {
+                navigationGroupNode->RemoveChild(titleBarNode->GetTitle());
             }
-            titleBarNode->UpdateTitleIndex(static_cast<int32_t>(titleBarNode->GetChildren().size()));
-            titleBarNode->AddChild(navigationGroupNode->GetTitle());
+            titleBarNode->SetTitle(navigationGroupNode->GetTitle());
+            titleBarNode->AddChild(titleBarNode->GetTitle());
         }
     }
     if (navigationGroupNode->GetSubtitle() && navigationGroupNode->HasSubtitleNodeOperation()) {
         if (navigationGroupNode->GetSubtitleNodeOperationValue() == ChildNodeOperation::NONE) {
             return;
         }
-        if (navigationGroupNode->GetTitleNodeOperationValue() == ChildNodeOperation::REPLACE &&
-            navigationGroupNode->HasSubtitleIndex()) {
-            RemoveChildByIndex(titleBarNode, navigationGroupNode->GetSubtitleIndexValue());
+        if (navigationGroupNode->GetSubtitleNodeOperationValue() == ChildNodeOperation::REPLACE) {
+            navigationGroupNode->RemoveChild(titleBarNode->GetSubtitle());
         }
-        titleBarNode->UpdateSubtitleIndex(static_cast<int32_t>(titleBarNode->GetChildren().size()));
-        titleBarNode->AddChild(navigationGroupNode->GetSubtitle());
+        titleBarNode->SetSubtitle(navigationGroupNode->GetSubtitle());
+        titleBarNode->AddChild(titleBarNode->GetSubtitle());
     }
+    titleBarNode->MarkModifyDone();
 }
 
 void BuildMenu(const RefPtr<NavigationGroupNode>& navigationGroupNode, const RefPtr<TitleBarNode>& titleBarNode)
@@ -77,20 +70,25 @@ void BuildMenu(const RefPtr<NavigationGroupNode>& navigationGroupNode, const Ref
         if (navigationGroupNode->GetMenuNodeOperationValue() == ChildNodeOperation::NONE) {
             return;
         }
-        if (navigationGroupNode->GetMenuNodeOperationValue() == ChildNodeOperation::REPLACE &&
-            navigationGroupNode->HasMenuIndex()) {
-            RemoveChildByIndex(titleBarNode, navigationGroupNode->GetMenuIndexValue());
+        if (navigationGroupNode->GetMenuNodeOperationValue() == ChildNodeOperation::REPLACE) {
+            navigationGroupNode->RemoveChild(titleBarNode->GetMenu());
         }
-        titleBarNode->UpdateMenuIndex(static_cast<int32_t>(titleBarNode->GetChildren().size()));
-        titleBarNode->AddChild(navigationGroupNode->GetMenu());
+        titleBarNode->SetMenu(navigationGroupNode->GetMenu());
+        titleBarNode->AddChild(titleBarNode->GetMenu());
     }
+    titleBarNode->MarkModifyDone();
 }
 
 void BuildTitleBar(const RefPtr<NavigationGroupNode>& navigationGroupNode, const RefPtr<TitleBarNode>& titleBarNode,
     RefPtr<NavigationLayoutProperty>& navigationLayoutProperty)
 {
-    if (!navigationGroupNode->GetTitleBarNode() || !navigationGroupNode->HasTitleBarIndex()) {
+    if (!navigationGroupNode->GetTitleBarNode()) {
         return;
+    }
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (navigationLayoutProperty->HasHideBackButton()) {
+        titleBarLayoutProperty->UpdateHideBackButton(navigationLayoutProperty->GetHideBackButtonValue());
     }
     do {
         if (!navigationGroupNode->HasBackButtonNodeOperation() ||
@@ -99,19 +97,28 @@ void BuildTitleBar(const RefPtr<NavigationGroupNode>& navigationGroupNode, const
             break;
         }
         if (navigationGroupNode->GetBackButtonNodeOperationValue() == ChildNodeOperation::REMOVE) {
-            RemoveChildByIndex(titleBarNode, navigationGroupNode->GetTitleBarIndexValue());
-            titleBarNode->ResetBackButtonIndex();
+            auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+            CHECK_NULL_VOID(backButtonNode);
+            auto textLayoutProperty = backButtonNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateVisibility(VisibleType::GONE);
             break;
         }
         // TODO: fix error for update condition when add or delete child
-        titleBarNode->UpdateBackButtonIndex(static_cast<int32_t>(titleBarNode->GetChildren().size()));
-        titleBarNode->AddChild(navigationGroupNode->GetBackButton());
+        if (titleBarNode->GetBackButton()) {
+            auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+            CHECK_NULL_VOID(backButtonNode);
+            auto textLayoutProperty = backButtonNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+            break;
+        }
+        titleBarNode->SetBackButton(navigationGroupNode->GetBackButton());
+        titleBarNode->AddChild(titleBarNode->GetBackButton());
     } while (false);
-    auto titleBarProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarProperty);
-    titleBarProperty->UpdateTitleMode(navigationLayoutProperty->GetTitleModeValue());
+    titleBarLayoutProperty->UpdateTitleMode(navigationLayoutProperty->GetTitleModeValue());
     if (navigationLayoutProperty->HasHideTitleBar()) {
-        titleBarProperty->UpdateHideTitleBar(navigationLayoutProperty->GetHideTitleBarValue());
+        titleBarLayoutProperty->UpdateHideTitleBar(navigationLayoutProperty->GetHideTitleBarValue());
     }
     BuildTitleAndSubtitle(navigationGroupNode, titleBarNode);
     BuildMenu(navigationGroupNode, titleBarNode);
@@ -125,18 +132,9 @@ void MountTitleBar(const RefPtr<NavigationGroupNode>& hostNode)
         navigationLayoutProperty->GetTitleModeValue() != NavigationTitleMode::MINI) {
         return;
     }
-    if (!hostNode->HasTitleBarIndex()) {
-        int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>(V2::TITLE_BAR_ETS_TAG, nodeId);
-        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-        if (navigationLayoutProperty->HasHideBackButton()) {
-            titleBarLayoutProperty->UpdateHideBackButton(navigationLayoutProperty->GetHideBackButtonValue());
-        }
-        hostNode->SetTitleBarNode(titleBarNode);
-        hostNode->UpdateTitleBarIndex(static_cast<int32_t>(hostNode->GetChildren().size()));
-        hostNode->AddChild(titleBarNode);
-    }
-    BuildTitleBar(hostNode, AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode()), navigationLayoutProperty);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    BuildTitleBar(hostNode, titleBarNode, navigationLayoutProperty);
 }
 
 void MountToolBar(const RefPtr<NavigationGroupNode>& hostNode)
@@ -145,13 +143,9 @@ void MountToolBar(const RefPtr<NavigationGroupNode>& hostNode)
         if (hostNode->GetToolBarNodeOperationValue() == ChildNodeOperation::NONE) {
             return;
         }
-        if (hostNode->GetToolBarNodeOperationValue() == ChildNodeOperation::REPLACE &&
-            hostNode->HasToolBarIndex()) {
-            RemoveChildByIndex(hostNode, hostNode->GetToolBarIndexValue());
+        if (hostNode->GetToolBarNodeOperationValue() == ChildNodeOperation::REPLACE) {
+            hostNode->RemoveChild(hostNode->GetPreToolBarNode());
         }
-        auto node = AceType::DynamicCast<FrameNode>(hostNode->GetToolBarNode());
-        CHECK_NULL_VOID(node);
-        hostNode->UpdateToolBarIndex(static_cast<int32_t>(hostNode->GetChildren().size()));
         hostNode->AddChild(hostNode->GetToolBarNode());
     }
 }

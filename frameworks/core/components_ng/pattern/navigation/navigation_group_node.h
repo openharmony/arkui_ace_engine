@@ -118,23 +118,15 @@ public:
         return toolBarNode_;
     }
 
-    // title bar children
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackButtonIndex, int32_t);
-    void OnBackButtonIndexUpdate(int32_t value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TitleIndex, int32_t);
-    void OnTitleIndexUpdate(int32_t value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SubtitleIndex, int32_t);
-    void OnSubtitleIndexUpdate(int32_t value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MenuIndex, int32_t);
-    void OnMenuIndexUpdate(int32_t value) {}
+    void SetPreToolBarNode(const RefPtr<UINode>& preToolBarNode)
+    {
+        preToolBarNode_ = preToolBarNode;
+    }
 
-    // navigation direct children
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TitleBarIndex, int32_t);
-    void OnTitleBarIndexUpdate(int32_t value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ContentIndex, int32_t);
-    void OnContentIndexUpdate(int32_t value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ToolBarIndex, int32_t);
-    void OnToolBarIndexUpdate(int32_t value) {}
+    const RefPtr<UINode>& GetPreToolBarNode() const
+    {
+        return preToolBarNode_;
+    }
 
     // custom node checking
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
@@ -164,6 +156,7 @@ private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> toolBarNode_;
+    RefPtr<UINode> preToolBarNode_;
 };
 
 } // namespace OHOS::Ace::NG

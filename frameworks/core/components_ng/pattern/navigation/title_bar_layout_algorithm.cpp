@@ -33,75 +33,104 @@ namespace {
 void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
 {
-    if (!titleBarNode->HasBackButtonIndex()) {
-        return;
-    }
-    auto backButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetBackButtonIndexValue());
+    auto backButtonNode = titleBarNode->GetBackButton();
+    CHECK_NULL_VOID(backButtonNode);
+    auto index = titleBarNode->GetChildIndexById(backButtonNode->GetId());
+    auto backButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(backButtonWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
-    if (!titleBarLayoutProperty->HasTitleMode() ||
-        titleBarLayoutProperty->GetTitleModeValue() != NavigationTitleMode::MINI ||
-        (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue())) {
-        constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
-        backButtonWrapper->Measure(constraint);
-        return;
+    if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+        if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
+            constraint.selfIdealSize = OptionalSizeF(
+                static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()), static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()));
+            backButtonWrapper->Measure(constraint);
+            return;
+        }
     }
-    constraint.selfIdealSize = OptionalSizeF(BACK_BUTTON_WIDTH, TITLEBAR_HEIGHT);
+    constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
     backButtonWrapper->Measure(constraint);
 }
 
 void MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
-    const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
+    const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize)
 {
-    if (!titleBarNode->HasSubtitleIndex()) {
-        return;
-    }
-    auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetSubtitleIndexValue());
+    auto subtitleNode = titleBarNode->GetSubtitle();
+    CHECK_NULL_VOID(subtitleNode);
+    auto index = titleBarNode->GetChildIndexById(subtitleNode->GetId());
+    auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(subtitleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
-    constraint.maxSize.SetHeight(SUBTITLE_HEIGHT);
-    constraint.minSize.SetHeight(SUBTITLE_HEIGHT);
+
+    if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+        if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
+            auto size = SizeF(
+                titleBarSize.Width() - static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()),
+                static_cast<float>(SUBTITLE_HEIGHT.ConvertToPx()));
+            constraint.maxSize.SetSizeT(size);
+            subtitleWrapper->Measure(constraint);
+            return;
+        }
+    }
+    auto size = SizeF(titleBarSize.Width(), static_cast<float>(SUBTITLE_HEIGHT.ConvertToPx()));
+    constraint.maxSize.SetSizeT(size);
     subtitleWrapper->Measure(constraint);
 }
 
 void MeasureTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
-    const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
+    const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize)
 {
-    if (!titleBarNode->HasTitleIndex()) {
-        return;
-    }
-    auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetTitleIndexValue());
+    auto titleNode = titleBarNode->GetTitle();
+    CHECK_NULL_VOID(titleNode);
+    auto index = titleBarNode->GetChildIndexById(titleNode->GetId());
+    auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(titleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
-    constraint.maxSize.SetHeight(TITLE_HEIGHT);
+
+    if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+        if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
+            auto size = SizeF(
+                titleBarSize.Width() - static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()),
+                static_cast<float>(TITLE_HEIGHT.ConvertToPx()));
+            constraint.maxSize.SetSizeT(size);
+            titleWrapper->Measure(constraint);
+            return;
+        }
+    }
+    auto size = SizeF(titleBarSize.Width(), static_cast<float>(TITLE_HEIGHT.ConvertToPx()));
+    constraint.maxSize.SetSizeT(size);
     titleWrapper->Measure(constraint);
 }
 
 void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
-    const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
+    const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize)
 {
-    if (!titleBarNode->HasMenuIndex()) {
-        return;
-    }
-    auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetMenuIndexValue());
+    auto menuNode = titleBarNode->GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto index = titleBarNode->GetChildIndexById(menuNode->GetId());
+    auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(menuWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
-    auto menuMaxWidth = constraint.maxSize.Width();
+
     if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
-        menuMaxWidth -= TITLE_WIDTH + BACK_BUTTON_WIDTH;
+        if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
+            auto size = SizeF(
+                titleBarSize.Width() - static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()),
+                static_cast<float>(SUBTITLE_HEIGHT.ConvertToPx()));
+            constraint.maxSize.SetSizeT(size);
+            menuWrapper->Measure(constraint);
+            return;
+        }
     }
-    SizeF menuSize(menuMaxWidth, BAR_ITEM_HEIGHT);
-    constraint.maxSize.SetSizeT(menuSize);
-    constraint.parentIdealSize = OptionalSizeF(constraint.maxSize.Width(), constraint.maxSize.Height());
+    constraint.maxSize.SetSizeT(titleBarSize);
     menuWrapper->Measure(constraint);
 }
 
 void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    if (!titleBarNode->HasBackButtonIndex()) {
-        return;
-    }
-    auto backButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetBackButtonIndexValue());
+    auto backButtonNode = titleBarNode->GetBackButton();
+    CHECK_NULL_VOID(backButtonNode);
+    auto index = titleBarNode->GetChildIndexById(backButtonNode->GetId());
+    auto backButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(backButtonWrapper);
     backButtonWrapper->Layout();
 }
@@ -109,15 +138,24 @@ void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& 
 void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
 {
-    if (!titleBarNode->HasSubtitleIndex()) {
-        return;
-    }
-    auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetSubtitleIndexValue());
+    auto subtitleNode = titleBarNode->GetSubtitle();
+    CHECK_NULL_VOID(subtitleNode);
+    auto index = titleBarNode->GetChildIndexById(subtitleNode->GetId());
+    auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(subtitleWrapper);
-    OffsetF subtitleOffset(0.0f, TITLEBAR_HEIGHT - SUBTITLE_HEIGHT);
+    auto geometryNode = subtitleWrapper->GetGeometryNode();
+
     if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
-        subtitleOffset.SetX(BACK_BUTTON_WIDTH);
+        if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
+            OffsetF subtitleOffset = OffsetF(static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()),
+                static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()));
+            subtitleWrapper->GetGeometryNode()->SetMarginFrameOffset(subtitleOffset);
+            subtitleWrapper->Layout();
+            return;
+        }
     }
+    OffsetF subtitleOffset = OffsetF(geometryNode->GetFrameOffset().GetX(),
+        static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()));
     subtitleWrapper->GetGeometryNode()->SetMarginFrameOffset(subtitleOffset);
     subtitleWrapper->Layout();
 }
@@ -125,27 +163,28 @@ void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& ti
 void LayoutTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
 {
-    if (!titleBarNode->HasTitleIndex()) {
-        return;
-    }
-    auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetTitleIndexValue());
+    auto titleNode = titleBarNode->GetTitle();
+    CHECK_NULL_VOID(titleNode);
+    auto index = titleBarNode->GetChildIndexById(titleNode->GetId());
+    auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(titleWrapper);
-    OffsetF titleOffset(0.0f, 0.0f);
+    auto geometryNode = titleWrapper->GetGeometryNode();
+
     if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
-        titleOffset.SetX(BACK_BUTTON_WIDTH);
-    } else {
-        titleOffset.SetY(titleOffset.GetY() + BAR_ITEM_HEIGHT);
+        if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
+            OffsetF offset = OffsetF(static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()), 0.0f);
+            titleWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+        }
     }
-    titleWrapper->GetGeometryNode()->SetMarginFrameOffset(titleOffset);
     titleWrapper->Layout();
 }
 
 void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    if (!titleBarNode->HasMenuIndex()) {
-        return;
-    }
-    auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetMenuIndexValue());
+    auto menuNode = titleBarNode->GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto index = titleBarNode->GetChildIndexById(menuNode->GetId());
+    auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(menuWrapper);
     auto menuWidth = menuWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     auto geometryNode = menuWrapper->GetGeometryNode();
@@ -163,16 +202,16 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(titleBarNode);
     auto layoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->HasHideTitleBar() && layoutProperty->GetHideTitleBarValue()) {
+    if (layoutProperty->GetHideTitleBar().value_or(false)) {
         return;
     }
-    MeasureBackButton(layoutWrapper, titleBarNode, layoutProperty);
-    MeasureTitle(layoutWrapper, titleBarNode, layoutProperty);
-    MeasureSubtitle(layoutWrapper, titleBarNode, layoutProperty);
-    MeasureMenu(layoutWrapper, titleBarNode, layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS, true);
+    auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    MeasureBackButton(layoutWrapper, titleBarNode, layoutProperty);
+    MeasureMenu(layoutWrapper, titleBarNode, layoutProperty, size);
+    MeasureTitle(layoutWrapper, titleBarNode, layoutProperty, size);
+    MeasureSubtitle(layoutWrapper, titleBarNode, layoutProperty, size);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
@@ -181,7 +220,7 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(titleBarNode);
     auto layoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    if (layoutProperty->HasHideTitleBar() && layoutProperty->GetHideTitleBarValue()) {
+    if (layoutProperty->GetHideTitleBar().value_or(false)) {
         return;
     }
     if (layoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {

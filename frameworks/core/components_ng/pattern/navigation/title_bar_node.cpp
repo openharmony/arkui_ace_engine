@@ -25,4 +25,18 @@ TitleBarNode::TitleBarNode(const std::string& tag, int32_t nodeId)
     : FrameNode(tag, nodeId, MakeRefPtr<TitleBarPattern>())
 {}
 
+RefPtr<TitleBarNode> TitleBarNode::GetOrCreateTitleBarNode(
+    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+{
+    auto frameNode = GetFrameNode(tag, nodeId);
+    if (frameNode && AceType::InstanceOf<TitleBarNode>(frameNode)) {
+        return AceType::DynamicCast<TitleBarNode>(frameNode);
+    }
+    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>(tag, nodeId, pattern);
+    titleBarNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(titleBarNode);
+    return titleBarNode;
+}
+
 } // namespace OHOS::Ace::NG
