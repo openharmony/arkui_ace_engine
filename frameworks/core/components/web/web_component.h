@@ -45,6 +45,7 @@ public:
     using ErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using MethodCall = std::function<void(const std::string&)>;
     using Method = std::string;
+    using SetWebIdCallback = std::function<void(int32_t)>;
 
     WebComponent() = default;
     explicit WebComponent(const std::string& type);
@@ -283,6 +284,16 @@ public:
     void SetWebController(const RefPtr<WebController>& webController)
     {
         webController_ = webController;
+    }
+
+    void SetSetWebIdCallback(SetWebIdCallback&& SetIdCallback)
+    {
+        setWebIdCallback_ = std::move(SetIdCallback);
+    }
+
+    SetWebIdCallback GetSetWebIdCallback() const
+    {
+        return setWebIdCallback_;
     }
 
     bool GetJsEnabled() const
@@ -775,6 +786,7 @@ private:
     CreatedCallback createdCallback_ = nullptr;
     ReleasedCallback releasedCallback_ = nullptr;
     ErrorCallback errorCallback_ = nullptr;
+    SetWebIdCallback setWebIdCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebController> webController_;
     OnCommonDialogImpl onAlertImpl_;
