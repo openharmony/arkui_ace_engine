@@ -97,10 +97,6 @@ void CheckBoxGroupPattern::OnClick()
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     bool isSelected = false;
-    if (paintProperty->HasCheckBoxGroupSelect()) {
-        isSelected = paintProperty->GetCheckBoxGroupSelectValue();
-    }
-
     auto status = paintProperty->GetSelectStatus();
     if (status == CheckBoxGroupPaintProperty::SelectStatus::ALL) {
         isSelected = false;
