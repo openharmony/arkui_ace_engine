@@ -30,6 +30,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/rosen_modifier_property.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -105,6 +106,7 @@ public:
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateBackShadow(const Shadow& shadow) override;
 
+    void OnTransformMatrixUpdate(const Matrix4& matrix) override;
     void UpdateTransition(const TransitionOptions& options) override;
     bool HasAppearingTransition() const
     {
@@ -180,6 +182,8 @@ private:
     Color hoveredColor_ = Color::TRANSPARENT;
     std::shared_ptr<Rosen::RSTransitionEffect> transitionAppearingEffect_ = nullptr;
     std::shared_ptr<Rosen::RSTransitionEffect> transitionDisappearingEffect_ = nullptr;
+
+    std::optional<TransformMatrixModifier> transformMatrixModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/matrix4.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -107,6 +108,9 @@ public:
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}
 
+    // transform matrix
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
+
     // Transform
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
@@ -178,6 +182,8 @@ protected:
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
+
+    virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}

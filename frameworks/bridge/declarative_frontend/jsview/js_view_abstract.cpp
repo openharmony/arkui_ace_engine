@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/json/json_util.h"
@@ -1085,6 +1086,12 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
         double value = 0.0;
         ParseJsonDouble(array->GetArrayItem(i), value);
         matrix[i] = static_cast<float>(value);
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetTransformMatrix(
+            Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13],
+                matrix[2], matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]));
+        return;
     }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();

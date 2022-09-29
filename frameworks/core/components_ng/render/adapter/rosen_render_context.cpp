@@ -98,7 +98,7 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::strin
     }
     rsNode_->SetBounds(0, 0, 0, 0);
     rsNode_->SetFrame(0, 0, 0, 0);
-    rsNode_->SetPivot(0.0F, 0.0F);
+    rsNode_->SetPivot(0.5F, 0.5F); // default pivot is center
 }
 
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
@@ -290,6 +290,45 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
 }
 
 void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center) {}
+
+void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (!transformMatrixModifier_.has_value()) {
+        transformMatrixModifier_ = TransformMatrixModifier();
+    }
+    DecomposedTransform transform;
+    if (!TransformUtil::DecomposeTransform(transform, matrix)) {
+        // fallback to basic matrix decompose
+        Rosen::Vector2f xyTranslateValue { static_cast<float>(matrix.Get(0, 3)),
+            static_cast<float>(matrix.Get(1, 3)) };
+        float zTranslateValue = static_cast<float>(matrix.Get(2, 3));
+        Rosen::Vector2f scaleValue { 0.0f, 0.0f };
+        AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
+            transformMatrixModifier_->translateXYValue, xyTranslateValue);
+        AddOrChangeTranslateZModifier(
+            rsNode_, transformMatrixModifier_->translateZ, transformMatrixModifier_->translateZValue, zTranslateValue);
+        AddOrChangeScaleModifier(
+            rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
+    } else {
+        Rosen::Vector2f xyTranslateValue { transform.translate[0], transform.translate[1] };
+        float zTranslateValue = transform.translate[2];
+        Rosen::Quaternion quaternion { static_cast<float>(transform.quaternion.GetX()),
+            static_cast<float>(transform.quaternion.GetY()),
+            static_cast<float>(transform.quaternion.GetZ()),
+            static_cast<float>(transform.quaternion.GetW()) };
+        Rosen::Vector2f scaleValue { transform.scale[0], transform.scale[1] };
+        AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
+            transformMatrixModifier_->translateXYValue, xyTranslateValue);
+        AddOrChangeTranslateZModifier(
+            rsNode_, transformMatrixModifier_->translateZ, transformMatrixModifier_->translateZValue, zTranslateValue);
+        AddOrChangeScaleModifier(
+            rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
+        AddOrChangeQuaternionModifier(
+            rsNode_, transformMatrixModifier_->quaternion, transformMatrixModifier_->quaternionValue, quaternion);
+    }
+    RequestNextFrame();
+}
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {

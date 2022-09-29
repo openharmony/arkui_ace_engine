@@ -20,6 +20,7 @@
 #include <functional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
@@ -99,6 +100,8 @@ public:
     static void SetPivot(const DimensionOffset& value);
     static void SetTranslate(const NG::Vector3F& value);
     static void SetRotate(const NG::Vector4F& value);
+
+    static void SetTransformMatrix(const Matrix4& matrix);
 
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);

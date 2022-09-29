@@ -427,6 +427,11 @@ void ViewAbstract::SetRotate(const NG::Vector4F& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
 }
 
+void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
+{
+    ACE_UPDATE_RENDER_CONTEXT(TransformMatrix, matrix);
+}
+
 void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
 {
     auto msg = param->GetMessage();
