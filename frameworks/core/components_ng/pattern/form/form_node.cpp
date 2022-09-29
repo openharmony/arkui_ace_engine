@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    const auto& rect = GetGeometryNode()->GetFrame().GetRect();
+    const auto& rect = GetGeometryNode()->GetFrameRect();
     if (!rect.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
     }

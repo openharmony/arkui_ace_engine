@@ -33,6 +33,9 @@ public:
     static void JsControlButton(const JSCallbackInfo& info);
     static void JsAutoHide(bool autoHide);
     static void JsSideBarPosition(const JSCallbackInfo& info);
+    static void CreateForNG(const JSCallbackInfo& info);
+    static void JsControlButtonForNG(const JSCallbackInfo& info);
+    static void Pop();
 };
 
 } // namespace OHOS::Ace::Framework

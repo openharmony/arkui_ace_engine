@@ -117,6 +117,11 @@ public:
         return forwardLayout_ ? forwardReferencePos_ : backwardReferencePos_;
     }
 
+    size_t GetLanes() const
+    {
+        return lanes_;
+    }
+
     template<class T>
     T MakeValue(double mainValue, double crossValue) const
     {

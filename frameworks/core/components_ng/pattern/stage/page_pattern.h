@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/animation/page_transition_common.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
@@ -87,6 +88,17 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<PageEventHub>();
+    }
+
+    bool TriggerPageTransition(PageTransitionType type) const;
+
+    FocusType GetFocusType() override
+    {
+        return FocusType::SCOPE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
     }
 
 private:

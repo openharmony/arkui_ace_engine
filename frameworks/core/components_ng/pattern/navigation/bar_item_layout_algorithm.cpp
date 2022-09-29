@@ -45,7 +45,7 @@ void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetIconIndexValue());
         auto iconSize = SizeF(ICON_SIZE, ICON_SIZE);
         auto imageLayoutProperty = iconWrapper->GetLayoutProperty();
-        childConstraint.UpdateSelfIdealSizeWithCheck(OptionalSizeF(ICON_SIZE, ICON_SIZE));
+        childConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(ICON_SIZE, ICON_SIZE));
         iconWrapper->Measure(childConstraint);
     }
     if (hostNode->HasTextIndex()) {
@@ -64,21 +64,18 @@ void BarItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(barItemLayoutProperty);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
     if (hostNode->HasIconIndex()) {
         auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetIconIndexValue());
         auto iconGeometryNode = iconWrapper->GetGeometryNode();
-        iconGeometryNode->SetFrameOffset(OffsetF(ICON_PADDING, 0.0f));
-        iconWrapper->Layout(parentOffset);
+        iconGeometryNode->SetMarginFrameOffset(OffsetF(ICON_PADDING, 0.0f));
+        iconWrapper->Layout();
     }
     if (hostNode->HasTextIndex()) {
         auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetTextIndexValue());
         auto textGeometryNode = textWrapper->GetGeometryNode();
         auto textOffsetX = ICON_SIZE + ICON_PADDING * 2 - textGeometryNode->GetContentSize().Width();
-        textGeometryNode->SetFrameOffset(OffsetF(textOffsetX / 2.0f, ICON_SIZE + TEXT_TOP_PADDING));
-        textWrapper->Layout(parentOffset);
+        textGeometryNode->SetMarginFrameOffset(OffsetF(textOffsetX / 2.0f, ICON_SIZE + TEXT_TOP_PADDING));
+        textWrapper->Layout();
     }
 }
 

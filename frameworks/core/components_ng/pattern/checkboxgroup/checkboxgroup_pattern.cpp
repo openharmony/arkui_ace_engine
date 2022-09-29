@@ -52,9 +52,7 @@ void CheckBoxGroupPattern::OnAttachToFrameNode()
 
 void CheckBoxGroupPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    // TODO memory leak may occur
-    auto host = Claim(frameNode);
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(frameNode);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -65,9 +63,9 @@ void CheckBoxGroupPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
     CHECK_NULL_VOID(pageEventHub);
 
-    auto checkBoxGroupEventHub = host->GetEventHub<NG::CheckBoxGroupEventHub>();
+    auto checkBoxGroupEventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(checkBoxGroupEventHub);
-    pageEventHub->RemoveCheckBoxFromGroup(checkBoxGroupEventHub->GetGroupName(), host);
+    pageEventHub->RemoveCheckBoxFromGroup(checkBoxGroupEventHub->GetGroupName(), frameNode->GetId());
 }
 
 void CheckBoxGroupPattern::OnModifyDone()

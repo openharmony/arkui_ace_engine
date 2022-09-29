@@ -638,15 +638,9 @@ static JSValue RequestFocus(JSContext* ctx, JSValueConst new_target, int argc, J
     std::string inspectorKey = targetString.get();
 
     QJSContext::Scope scp(ctx);
-    auto container = Container::Current();
-    if (!container) {
-        return JS_ThrowSyntaxError(ctx, "container is null");
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        return JS_ThrowSyntaxError(ctx, "pipeline is null");
-    }
     bool result = false;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, JS_NewBool(ctx, result));
     if (!pipelineContext->GetTaskExecutor()) {
         LOGE("pipelineContext's task executor is null");
         return JS_NewBool(ctx, result);

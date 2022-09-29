@@ -45,6 +45,15 @@ public:
         return MakeRefPtr<LinearLayoutAlgorithm>();
     }
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::SCOPE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
 private:
     bool isVertical_ = false;
 };

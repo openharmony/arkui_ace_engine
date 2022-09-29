@@ -430,8 +430,9 @@ void RenderListItemGroup::SetChainOffset(double offset)
     }
 
     if (header_ && stickyHeader_) {
+        double crossSize = GetCrossSize(GetLayoutParam().GetMaxSize());
         double layoutPos = forwardLayout_ ? (startIndexOffset_ - forwardReferencePos_) : spaceWidth_;
-        double crossOffset = GetCrossAxis(header_->GetPosition());
+        double crossOffset = CalculateCrossOffset(crossSize, GetCrossSize(header_->GetLayoutSize()));
         double headerSize = GetMainSize(header_->GetLayoutSize());
         if (Negative(forwardReferencePos_ + offset)) {
             double headerPos = backwardReferencePos_ + offset - headerSize;
@@ -446,7 +447,8 @@ void RenderListItemGroup::SetChainOffset(double offset)
         }
     }
     if (footer_ && stickyFooter_) {
-        double crossOffset = GetCrossAxis(footer_->GetPosition());
+        double crossSize = GetCrossSize(GetLayoutParam().GetMaxSize());
+        double crossOffset = CalculateCrossOffset(crossSize, GetCrossSize(footer_->GetLayoutSize()));
         if (GreatNotEqual(backwardReferencePos_ + offset, listMainSize_)) {
             double footerSize = GetMainSize(footer_->GetLayoutSize());
             double footerPos = forwardReferencePos_ + offset;

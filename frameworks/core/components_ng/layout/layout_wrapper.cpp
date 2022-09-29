@@ -119,14 +119,17 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 
     if (parentConstraint) {
         geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
+        layoutProperty_->UpdateGridConstraint(GetHostNode());
         layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
     } else {
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
         layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+        layoutProperty_->UpdateGridConstraint(GetHostNode());
         layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     }
     layoutProperty_->UpdateContentConstraint();
+    geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
 
     LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
@@ -163,7 +166,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 }
 
 // Called to perform layout children.
-void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
+void LayoutWrapper::Layout()
 {
     if (!layoutAlgorithm_ || layoutAlgorithm_->SkipLayout()) {
         LOGD("the layoutAlgorithm skip layout");
@@ -189,8 +192,15 @@ void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
         layoutProperty_->UpdateContentConstraint();
     }
 
-    if (parentGlobalOffset) {
-        geometryNode_->SetParentGlobalOffset(parentGlobalOffset.value());
+    // TODO: delete following to use constraint offset
+    {
+        const auto& gridProp = layoutProperty_->GetGridProperty();
+        if (gridProp) {
+            OffsetF gridOffset = geometryNode_->GetFrameOffset();
+            gridOffset.SetX(gridProp->GetOffset().Value());
+            LOGD("On grid layout Done: %{public}s, Offset: %{public}f", GetHostTag().c_str(), gridOffset.GetX());
+            geometryNode_->SetMarginFrameOffset(gridOffset);
+        }
     }
     layoutAlgorithm_->Layout(this);
     LOGD("On Layout Done: %{public}s, Offset: %{public}s", GetHostTag().c_str(),

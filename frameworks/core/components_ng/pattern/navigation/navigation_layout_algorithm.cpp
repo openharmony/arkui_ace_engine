@@ -101,9 +101,7 @@ void LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     }
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetTitleBarIndexValue());
     CHECK_NULL_VOID(titleBarWrapper);
-    auto geometryNode = titleBarWrapper->GetGeometryNode();
-    auto parentOffset = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
-    titleBarWrapper->Layout(parentOffset);
+    titleBarWrapper->Layout();
 }
 
 void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
@@ -115,13 +113,12 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetContentIndexValue());
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
-    auto parentOffset = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
     auto contentOffset = geometryNode->GetFrameOffset();
     if (!navigationLayoutProperty->HasHideTitleBar() || !navigationLayoutProperty->GetHideTitleBarValue()) {
         contentOffset.SetY(TITLEBAR_HEIGHT);
     }
-    geometryNode->SetFrameOffset(contentOffset);
-    contentWrapper->Layout(parentOffset);
+    geometryNode->SetMarginFrameOffset(contentOffset);
+    contentWrapper->Layout();
 }
 
 void LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
@@ -136,11 +133,10 @@ void LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto toolBarWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetToolBarIndexValue());
     CHECK_NULL_VOID(toolBarWrapper);
     auto geometryNode = toolBarWrapper->GetGeometryNode();
-    auto parentOffset = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
     auto toolBarOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - TOOLBAR_HEIGHT;
-    auto toolBarOffset = OffsetT<float>(parentOffset.GetX(), toolBarOffsetY);
-    geometryNode->SetFrameOffset(toolBarOffset);
-    toolBarWrapper->Layout(parentOffset);
+    auto toolBarOffset = OffsetT<float>(0.0f, toolBarOffsetY);
+    geometryNode->SetMarginFrameOffset(toolBarOffset);
+    toolBarWrapper->Layout();
 }
 } // namespace
 

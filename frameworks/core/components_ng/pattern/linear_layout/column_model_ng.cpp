@@ -39,8 +39,6 @@ void ColumnModelNG::Create(const std::optional<Dimension>& space, AlignDeclarati
     } else {
         LOGE("Column: the space value is illegal due to space is less than zero");
     }
-    ViewAbstract::SetFocusType(FocusType::SCOPE);
-    ViewAbstract::SetFocusable(true);
 }
 
 void ColumnModelNG::SetAlignItems(FlexAlign flexAlign)

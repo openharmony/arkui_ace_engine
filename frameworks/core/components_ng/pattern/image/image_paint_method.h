@@ -40,6 +40,10 @@ public:
         auto contentSize = paintWrapper->GetContentSize();
         ImagePainter imagePainter(canvasImage_);
         return [imagePainter, offset, ImagePaintConfig = imagePaintConfig_, contentSize](RSCanvas& canvas) {
+            if (ImagePaintConfig.isSvg) {
+                imagePainter.DrawSVGImage(canvas, offset, contentSize, ImagePaintConfig);
+                return;
+            }
             if (ImagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
                 imagePainter.DrawImage(canvas, offset, ImagePaintConfig);
                 return;

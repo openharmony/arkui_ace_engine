@@ -117,6 +117,15 @@ public:
 
     Axis GetDirection() const;
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::SCOPE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

@@ -64,7 +64,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childWrapper->Measure(childLayoutConstraint);
 
     // Use child size when self idea size of scroll is not setted.
-    auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
+    auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
     if (!idealSize.Width()) {
         idealSize.SetWidth(childSize.Width());
     }
@@ -89,17 +89,15 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
 
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
     auto size = geometryNode->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-    auto childSize = childGeometryNode->GetFrameSize();
+    auto childSize = childGeometryNode->GetMarginFrameSize();
     auto scrollableDistance = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);
     currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
-    childGeometryNode->SetFrameOffset(padding.Offset() + currentOffset);
-    childWrapper->Layout(parentOffset);
+    childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset);
+    childWrapper->Layout();
 }
 
 } // namespace OHOS::Ace::NG

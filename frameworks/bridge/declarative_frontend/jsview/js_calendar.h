@@ -29,9 +29,13 @@ public:
 
     static void SetCalendarData(
         const JSRef<JSObject>& obj, MonthState monthState, const RefPtr<CalendarComponentV2>& component);
+    static ObtainedMonth GetCalendarData(const JSRef<JSObject>& obj, MonthState monthState);
     static void SetCurrentData(const JSRef<JSObject>& obj, const RefPtr<CalendarComponentV2>& component);
+    static ObtainedMonth GetCurrentData(const JSRef<JSObject>& obj);
     static void SetPreData(const JSRef<JSObject>& obj, const RefPtr<CalendarComponentV2>& component);
+    static ObtainedMonth GetPreData(const JSRef<JSObject>& obj);
     static void SetNextData(const JSRef<JSObject>& obj, const RefPtr<CalendarComponentV2>& component);
+    static ObtainedMonth GetNextData(const JSRef<JSObject>& obj);
     static void SetCardCalendar(bool cardCalendar);
     static void SetDate(const JSRef<JSObject>& obj, const RefPtr<CalendarComponentV2>& component);
     static void SetHolidays(const std::string& holidays);

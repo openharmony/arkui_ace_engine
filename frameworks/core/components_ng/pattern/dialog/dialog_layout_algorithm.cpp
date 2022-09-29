@@ -173,10 +173,10 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     auto child = children.front();
-    auto childSize = child->GetGeometryNode()->GetFrameSize();
+    auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
     topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
     UpdateTouchRegion();
-    child->GetGeometryNode()->SetFrameOffset(topLeftPoint_);
+    child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
 }
 
 OffsetF DialogLayoutAlgorithm::ComputeChildPosition(

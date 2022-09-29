@@ -203,7 +203,8 @@ void ListLayoutAlgorithm::LayoutForward(
     } else {
         // Calculate the end pos of the priv item ahead of the StartIndex.
         // the child frame offset is include list padding and border, need to delete it first to match content origin.
-        currentEndPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetFrameOffset(), axis) - paddingBeforeContent_;
+        currentEndPos =
+            GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) - paddingBeforeContent_;
     }
     float currentStartPos = currentEndPos;
     auto currentIndex = preStartIndex_ - 1;
@@ -224,7 +225,7 @@ void ListLayoutAlgorithm::LayoutForward(
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
             wrapper->Measure(layoutConstraint);
         }
-        auto mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis);
+        auto mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
         currentEndPos = currentStartPos + mainLength;
         // out of display area, mark inactive.
         if (LessNotEqual(currentEndPos, startMainPos_ - cacheSize)) {
@@ -303,8 +304,9 @@ void ListLayoutAlgorithm::LayoutBackward(
     }
     // Calculate the start pos of the next item behind the EndIndex.
     // the child frame offset is include list padding and border, need to delete it first to match content origin.
-    float currentStartPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetFrameOffset(), axis) +
-                            GetMainAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis) - paddingBeforeContent_;
+    float currentStartPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) +
+                            GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis) -
+                            paddingBeforeContent_;
     float currentEndPos = currentStartPos;
     auto currentIndex = preEndIndex_ + 1;
     float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
@@ -324,7 +326,7 @@ void ListLayoutAlgorithm::LayoutBackward(
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
             wrapper->Measure(layoutConstraint);
         }
-        auto mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis);
+        auto mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
         currentStartPos = currentEndPos - mainLength;
 
         // out of display area, mark inactive.
@@ -391,9 +393,6 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto top = padding.top.value_or(0.0f);
     auto paddingOffset = OffsetF(left, top);
 
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-
     // layout items.
     for (auto index = startIndex_.value_or(preStartIndex_) - startCachedCount_;
          index <= endIndex_.value_or(preEndIndex_) + endCachedCount_; ++index) {
@@ -406,7 +405,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (lanes_.has_value() && lanes_.value() > 1) {
             int32_t laneIndex = (index - startIndex_.value()) % lanes_.value();
             float laneCrossOffset = CalculateLaneCrossOffset(GetCrossAxisSize(size, axis),
-                GetCrossAxisSize(wrapper->GetGeometryNode()->GetFrameSize() * lanes_.value(), axis));
+                GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize() * lanes_.value(), axis));
             if (axis == Axis::VERTICAL) {
                 offset = offset + OffsetF(0, itemPosition_[index].first - currentOffset_) +
                          OffsetF(size.Width() / lanes_.value() * laneIndex, 0) + OffsetF(laneCrossOffset, 0) +
@@ -419,7 +418,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         } else {
             lanes_ = 1;
             float crossSize = GetCrossAxisSize(size, axis);
-            float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis);
+            float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
             float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
             if (axis == Axis::VERTICAL) {
                 offset = offset + OffsetF(0, itemPosition_[index].first - currentOffset_) +
@@ -429,8 +428,8 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                          OffsetF(0, laneCrossOffset) + OffsetF(edgeEffectOffset_, 0);
             }
         }
-        wrapper->GetGeometryNode()->SetFrameOffset(offset);
-        wrapper->Layout(parentOffset);
+        wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+        wrapper->Layout();
     }
 }
 
@@ -555,7 +554,8 @@ void ListLayoutAlgorithm::LayoutForwardForLaneList(
     } else {
         // Calculate the end pos of the priv item ahead of the StartIndex.
         // the child frame offset is include list padding and border, need to delete it first to match content origin.
-        currentEndPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetFrameOffset(), axis) - paddingBeforeContent_;
+        currentEndPos =
+            GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) - paddingBeforeContent_;
     }
     float currentStartPos = currentEndPos;
     auto currentIndex = preStartIndex_ - 1;
@@ -580,7 +580,7 @@ void ListLayoutAlgorithm::LayoutForwardForLaneList(
                 ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
                 wrapper->Measure(layoutConstraint);
             }
-            mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis);
+            mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
             // out of display area, mark inactive.
             if (LessNotEqual(currentStartPos + mainLength, startMainPos_ - cacheSize)) {
                 inActiveItems.emplace(currentIndex);
@@ -659,8 +659,9 @@ void ListLayoutAlgorithm::LayoutBackwardForLaneList(
     }
     // Calculate the start pos of the next item behind the EndIndex.
     // the child frame offset is include list padding and border, need to delete it first to match content origin.
-    float currentStartPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetFrameOffset(), axis) +
-                            GetMainAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis) - paddingBeforeContent_;
+    float currentStartPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) +
+                            GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis) -
+                            paddingBeforeContent_;
     float currentEndPos = currentStartPos;
     auto currentIndex = preEndIndex_ + 1;
     float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
@@ -681,7 +682,7 @@ void ListLayoutAlgorithm::LayoutBackwardForLaneList(
                 ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
                 wrapper->Measure(layoutConstraint);
             }
-            mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis);
+            mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
             // out of display area, mark inactive.
             if (GreatNotEqual(currentEndPos - mainLength, endMainPos_ + cacheSize)) {
                 inActiveItems.emplace(currentIndex);

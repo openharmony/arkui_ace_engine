@@ -103,9 +103,7 @@ void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& 
     }
     auto backButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetBackButtonIndexValue());
     CHECK_NULL_VOID(backButtonWrapper);
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    backButtonWrapper->Layout(parentOffset);
+    backButtonWrapper->Layout();
 }
 
 void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
@@ -120,10 +118,8 @@ void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& ti
     if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
         subtitleOffset.SetX(BACK_BUTTON_WIDTH);
     }
-    subtitleWrapper->GetGeometryNode()->SetFrameOffset(subtitleOffset);
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    subtitleWrapper->Layout(parentOffset);
+    subtitleWrapper->GetGeometryNode()->SetMarginFrameOffset(subtitleOffset);
+    subtitleWrapper->Layout();
 }
 
 void LayoutTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
@@ -140,10 +136,8 @@ void LayoutTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& title
     } else {
         titleOffset.SetY(titleOffset.GetY() + BAR_ITEM_HEIGHT);
     }
-    titleWrapper->GetGeometryNode()->SetFrameOffset(titleOffset);
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    titleWrapper->Layout(parentOffset);
+    titleWrapper->GetGeometryNode()->SetMarginFrameOffset(titleOffset);
+    titleWrapper->Layout();
 }
 
 void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode)
@@ -153,13 +147,13 @@ void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleB
     }
     auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(titleBarNode->GetMenuIndexValue());
     CHECK_NULL_VOID(menuWrapper);
-    auto menuWidth = menuWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto menuWidth = menuWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     auto geometryNode = menuWrapper->GetGeometryNode();
     auto maxWidth = geometryNode->GetParentLayoutConstraint()->maxSize.Width();
     auto parentWidth = geometryNode->GetParentLayoutConstraint()->parentIdealSize.Width().value_or(maxWidth);
     OffsetF menuOffset(parentWidth - menuWidth, 0.0f);
-    menuWrapper->GetGeometryNode()->SetFrameOffset(menuOffset);
-    menuWrapper->Layout(layoutWrapper->GetGeometryNode()->GetParentGlobalOffset());
+    menuWrapper->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
+    menuWrapper->Layout();
 }
 } // namespace
 

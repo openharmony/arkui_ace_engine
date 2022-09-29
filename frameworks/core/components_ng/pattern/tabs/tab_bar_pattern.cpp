@@ -177,7 +177,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info) const
     }
     auto index = isRTL_ ? std::distance(tabItemOffsets_.begin(), pos) : std::distance(tabItemOffsets_.begin(), pos) - 1;
     if (index >= 0 && index < totalCount && swiperController_) {
-        swiperController_->SwipeTo(index);
+        swiperController_->SwipeToWithoutAnimation(index);
     }
 }
 

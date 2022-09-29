@@ -41,9 +41,9 @@ struct GridLayoutInfo {
     bool reachEnd_ = false;
     bool reachStart_ = false;
 
-    // in vertical grid, this map is like: [rowIndex: [itemIndex: fractionCount], [itemIndex: fractionCount]]
-    // for e.g, when a vertical grid has two [GridItem]s in first row, [gridMatrix_] is like [0: [0: 1fr], [1: 2fr]]
-    std::map<int32_t, std::map<int32_t, uint32_t>> gridMatrix_;
+    // Map structure: [mainIndex, [crossIndex, index]],
+    // when vertical, mainIndex is rowIndex and crossIndex is columnIndex.
+    std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;
     // in vertical grid, this map is like: [rowIndex: rowHeight]
     std::map<int32_t, float> lineHeightMap_;
 };

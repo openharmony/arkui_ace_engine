@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
@@ -190,6 +191,31 @@ public:
         panEventActuator_->RemovePanEvent(panEvent);
     }
 
+    // Set by user define, which will replace old one.
+    void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
+    {
+        if (!dragEventActuator_) {
+            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
+        }
+        dragEventActuator_->ReplaceDragEvent(dragEvent);
+    }
+
+    void AddDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
+    {
+        if (!dragEventActuator_ || direction.type != dragEventActuator_->GetDirection().type) {
+            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
+        }
+        dragEventActuator_->AddDragEvent(dragEvent);
+    }
+
+    void RemoveDragEvent(const RefPtr<DragEvent>& dragEvent)
+    {
+        if (!dragEventActuator_) {
+            return;
+        }
+        dragEventActuator_->RemoveDragEvent(dragEvent);
+    }
+
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult);
@@ -254,6 +280,7 @@ private:
     RefPtr<ClickEventActuator> clickEventActuator_;
     RefPtr<LongPressEventActuator> longPressEventActuator_;
     RefPtr<PanEventActuator> panEventActuator_;
+    RefPtr<DragEventActuator> dragEventActuator_;
     RefPtr<ExclusiveRecognizer> innerExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> externalExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> nodeExclusiveRecognizer_;

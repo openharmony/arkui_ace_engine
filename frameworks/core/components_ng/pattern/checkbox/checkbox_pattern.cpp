@@ -91,8 +91,7 @@ void CheckBoxPattern::OnClick()
 
 void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = Claim(frameNode);
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(frameNode);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -103,9 +102,9 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
     CHECK_NULL_VOID(pageEventHub);
 
-    auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
+    auto checkBoxEventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(checkBoxEventHub);
-    pageEventHub->RemoveCheckBoxFromGroup(checkBoxEventHub->GetGroupName(), host);
+    pageEventHub->RemoveCheckBoxFromGroup(checkBoxEventHub->GetGroupName(), frameNode->GetId());
 }
 
 void CheckBoxPattern::UpdateState()
@@ -133,10 +132,10 @@ void CheckBoxPattern::UpdateState()
     auto preGroup = pattern->GetPreGroup();
     auto group = eventHub->GetGroupName();
     if (!preGroup.has_value()) {
-        pageEventHub->AddCheckBoxToGroup(group, host);
+        pageEventHub->AddCheckBoxToGroup(group, host->GetId());
         auto callback = [weak = WeakClaim(this)]() {
             auto checkbox = weak.Upgrade();
-            if(checkbox){
+            if (checkbox) {
                 checkbox->CheckBoxGroupIsTrue();
             }
         };
@@ -145,8 +144,8 @@ void CheckBoxPattern::UpdateState()
         return;
     }
     if (preGroup.value() != group) {
-        pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host);
-        pageEventHub->AddCheckBoxToGroup(group, host);
+        pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
+        pageEventHub->AddCheckBoxToGroup(group, host->GetId());
     }
 
     pattern->SetPreGroup(group);

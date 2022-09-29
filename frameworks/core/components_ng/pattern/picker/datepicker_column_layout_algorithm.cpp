@@ -31,17 +31,15 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
 
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
     auto children = layoutWrapper->GetAllChildrenWithBuild();
 
     float childStartCoordinate = 0.0;
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
-        auto childSize = childGeometryNode->GetFrameSize();
+        auto childSize = childGeometryNode->GetMarginFrameSize();
         auto childOffset = padding.Offset() + OffsetF(0.0f, childStartCoordinate);
-        childGeometryNode->SetFrameOffset(childOffset);
-        child->Layout(parentOffset);
+        childGeometryNode->SetMarginFrameOffset(childOffset);
+        child->Layout();
         childStartCoordinate += childSize.Height();
     }
 }

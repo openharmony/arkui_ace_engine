@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 
-using RSModifierBase = Rosen::RSModifierBase;
+using RSModifier = Rosen::RSModifier;
 using RSNode = Rosen::RSNode;
 using RSAnimationTimingProtocol = Rosen::RSAnimationTimingProtocol;
 using RSAnimationTimingCurve = Rosen::RSAnimationTimingCurve;
@@ -39,19 +39,17 @@ template<typename T>
 using RSAnimatableProperty = Rosen::RSAnimatableProperty<T>;
 template<typename T>
 using RSAnimatableArithmetic = Rosen::RSAnimatableArithmetic<T>;
-template<typename T>
-using RSContentStyleModifier = Rosen::RSContentStyleModifier<T>;
-template<typename T>
-using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier<T>;
+using RSContentStyleModifier = Rosen::RSContentStyleModifier;
+using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;
 using RSDrawingContext = Rosen::RSDrawingContext;
 
 template<typename T>
-class ContentModifierAdapter : public RSContentStyleModifier<RSAnimatableProperty<T>> {
+class ContentModifierAdapter : public RSContentStyleModifier {
 public:
     ContentModifierAdapter() = default;
     ContentModifierAdapter(
         const RefPtr<ContentModifier<T>>& modifier, const std::shared_ptr<RSAnimatableProperty<T>>& property)
-        : Rosen::RSContentStyleModifier<RSAnimatableProperty<float>>(property), modifier_(modifier), property_(property)
+        : Rosen::RSContentStyleModifier(property), modifier_(modifier), property_(property)
     {
         if (modifier) {
             modifier->SetUpdateFunc(
@@ -96,7 +94,7 @@ private:
             castModifier, std::make_shared<RSAnimatableProperty<propertyType>>(castModifier->GetInitValue())); \
     }
 
-inline std::shared_ptr<RSModifierBase> ConvertModifier(const RefPtr<Modifier>& modifier)
+inline std::shared_ptr<RSModifier> ConvertModifier(const RefPtr<Modifier>& modifier)
 {
     // should manually add convert type here
     CONVERT_MODIFIER(modifier, ContentModifierFloat, ContentModifierAdapter, float);

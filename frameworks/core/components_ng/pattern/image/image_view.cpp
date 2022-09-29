@@ -101,4 +101,9 @@ void ImageView::SetMatchTextDirection(bool matchTextDirection)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, matchTextDirection);
 }
 
+void ImageView::SetSvgFillColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
+}
+
 } // namespace OHOS::Ace::NG

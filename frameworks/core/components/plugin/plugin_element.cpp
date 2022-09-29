@@ -354,7 +354,6 @@ void PluginElement::GetModuleNameByWant(const WeakPtr<PluginElement>& weak, Requ
     auto pluginElement = weak.Upgrade();
     if (!pluginElement) {
         LOGE("pluginElement is nullptr.");
-        pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
         return;
     }
 

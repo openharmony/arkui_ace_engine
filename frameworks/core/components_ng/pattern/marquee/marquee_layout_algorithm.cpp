@@ -58,7 +58,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             // use the max child size.
             auto childFrame = SizeF(-1, -1);
             for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-                auto childSize = child->GetGeometryNode()->GetFrameSize();
+                auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
                 childFrame = childFrame > childSize ? childFrame : childSize;
             }
             childFrame.Constrain(minSize, maxSize);
@@ -97,8 +97,8 @@ void MarqueeLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper) const
     auto childPosition = OffsetF(childOffset_, 0.0);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
-            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetFrameSize(), align) + paddingOffset;
-        child->GetGeometryNode()->SetFrameOffset(translate + childPosition);
+            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+        child->GetGeometryNode()->SetMarginFrameOffset(translate + childPosition);
     }
 }
 } // namespace OHOS::Ace::NG

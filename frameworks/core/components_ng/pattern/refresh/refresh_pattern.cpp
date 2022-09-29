@@ -241,7 +241,7 @@ void RefreshPattern::HandleDragEnd()
     refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 0));
     refreshLayoutProperty->UpdateLoadingProcessOffset(OffsetF(0, static_cast<float>(indicatorOffset)));
     refreshLayoutProperty->UpdateShowTimeOffset(OffsetF(0, static_cast<float>(triggerShowTimeDistance)));
-    LOGI("triggerShowTimeDistance = %{public}f = %{public}f", triggerShowTimeDistance,indicatorOffset);
+    LOGI("triggerShowTimeDistance = %{public}f = %{public}f", triggerShowTimeDistance, indicatorOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     host->MarkNeedSyncRenderTree();
     host->RebuildRenderContextTree();

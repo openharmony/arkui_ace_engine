@@ -178,8 +178,13 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
             JSRef<JSVal> widthId = obj->GetProperty("__id");
             JSViewAbstract::ParseJsInteger(widthId, id);
-            RefPtr<OffscreenCanvas> offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
-            pool_->TransferFromImageBitmap(offscreenCanvas);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto offscreenCanvasPattern = JSOffscreenRenderingContext::GetOffscreenCanvasPattern(id);
+                customPaintPattern_->TransferFromImageBitmap(offscreenCanvasPattern);
+            } else {
+                RefPtr<OffscreenCanvas> offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
+                pool_->TransferFromImageBitmap(offscreenCanvas);
+            }
         }
     }
 }

@@ -29,6 +29,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/geometry_property.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -74,6 +75,11 @@ public:
         return padding_;
     }
 
+    const std::unique_ptr<MarginProperty>& GetMarginProperty() const
+    {
+        return margin_;
+    }
+
     const std::unique_ptr<BorderWidthProperty>& GetBorderWidthProperty() const
     {
         return borderWidth_;
@@ -93,9 +99,20 @@ public:
     {
         return flexItemProperty_;
     }
+
+    const std::unique_ptr<GridProperty>& GetGridProperty() const
+    {
+        return gridProperty_;
+    }
+
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
         return measureType_.value_or(defaultType);
+    }
+
+    virtual bool IsDirectionVertical()
+    {
+        return true;
     }
 
     void UpdatePadding(const PaddingProperty& value)
@@ -104,6 +121,16 @@ public:
             padding_ = std::make_unique<PaddingProperty>();
         }
         if (padding_->UpdateWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateMargin(const MarginProperty& value)
+    {
+        if (!margin_) {
+            margin_ = std::make_unique<MarginProperty>();
+        }
+        if (margin_->UpdateWithCheck(value)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
         }
     }
@@ -192,12 +219,12 @@ public:
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
-    void UpdateSelfIdealSize(const SizeF& value)
+    void UpdateMarginSelfIdealSize(const SizeF& value)
     {
         if (!layoutConstraint_.has_value()) {
             layoutConstraint_ = LayoutConstraintF();
         }
-        if (layoutConstraint_->UpdateSelfIdealSizeWithCheck(OptionalSizeF(value))) {
+        if (layoutConstraint_->UpdateSelfMarginSizeWithCheck(OptionalSizeF(value))) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
@@ -232,6 +259,16 @@ public:
         }
     }
 
+    void UpdateAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
+    {
+        if (!flexItemProperty_) {
+            flexItemProperty_ = std::make_unique<FlexItemProperty>();
+        }
+        if (flexItemProperty_->UpdateAlignRules(alignRules)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+    
     void UpdateDisplayIndex(int32_t displayIndex)
     {
         if (!flexItemProperty_) {
@@ -241,6 +278,22 @@ public:
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
+
+    void UpdateGridProperty(
+        std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED)
+    {
+        if (!gridProperty_) {
+            gridProperty_ = std::make_unique<GridProperty>();
+        }
+
+        bool isSpanUpdated = (span.has_value() && gridProperty_->UpdateSpan(span.value(), type));
+        bool isOffsetUpdated = (offset.has_value() && gridProperty_->UpdateOffset(offset.value(), type));
+        if (isSpanUpdated || isOffsetUpdated) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateGridConstraint(const RefPtr<FrameNode>& host);
 
     void UpdateContentConstraint();
 
@@ -255,6 +308,8 @@ public:
 
     PaddingPropertyF CreatePaddingWithoutBorder();
     PaddingPropertyF CreatePaddingAndBorder();
+
+    MarginPropertyF CreateMargin();
 
     void SetHost(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
@@ -278,13 +333,16 @@ private:
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
     std::unique_ptr<PaddingProperty> padding_;
+    std::unique_ptr<MarginProperty> margin_;
     std::unique_ptr<BorderWidthProperty> borderWidth_;
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
     std::unique_ptr<FlexItemProperty> flexItemProperty_;
+    std::unique_ptr<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
 
     WeakPtr<FrameNode> host_;
+
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG

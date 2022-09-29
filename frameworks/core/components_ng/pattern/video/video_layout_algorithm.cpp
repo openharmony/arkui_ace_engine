@@ -72,19 +72,17 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
 
     auto frameLayoutOffset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    auto parentGlobalOffset = layoutWrapper->GetGeometryNode()->GetParentGlobalOffset();
     auto contentOffset = layoutWrapper->GetGeometryNode()->GetContentOffset();
-    auto offset = frameLayoutOffset + parentGlobalOffset;
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Layout(offset);
+        child->Layout();
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
-            child->GetGeometryNode()->SetFrameOffset(offset);
+            child->GetGeometryNode()->SetMarginFrameOffset(frameLayoutOffset);
             child->GetGeometryNode()->SetContentOffset(contentOffset);
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
-            auto controlTabOffset = offset;
+            auto controlTabOffset = frameLayoutOffset;
             controlTabOffset.SetY(controlTabOffset.GetY() + frameSize.Height() / COEFFICIENT);
-            child->GetGeometryNode()->SetFrameOffset(controlTabOffset);
+            child->GetGeometryNode()->SetMarginFrameOffset(controlTabOffset);
         }
     }
 }
@@ -97,7 +95,7 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             auto layoutConstraintForImage = layoutConstraint;
-            layoutConstraintForImage.UpdateSelfIdealSizeWithCheck(OptionalSizeF(contentSize));
+            layoutConstraintForImage.UpdateSelfMarginSizeWithCheck(OptionalSizeF(contentSize));
             layoutConstraintForImage.UpdateMaxSizeWithCheck(contentSize);
             layoutConstraintForImage.UpdateMinSizeWithCheck(contentSize);
             child->Measure(layoutConstraintForImage);

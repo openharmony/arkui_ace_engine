@@ -36,12 +36,17 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         std::swap(crossCount, mainCount);
     }
 
+    // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
     if (!rows.empty() && !cols.empty()) {
         return MakeRefPtr<GridLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
+
+    // When rowsTemplate and columnsTemplate is both not setting, use adaptive layout algorithm.
     if (rows.empty() && cols.empty()) {
         return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(gridLayoutInfo_);
     }
+
+    // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
     return MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
 }
 
@@ -119,7 +124,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto gridLayoutAlgorithm = DynamicCast<GridLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
     gridLayoutInfo_ = gridLayoutAlgorithm->GetGridLayoutInfo();
     return false;

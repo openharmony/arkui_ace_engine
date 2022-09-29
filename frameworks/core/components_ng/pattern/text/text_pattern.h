@@ -69,6 +69,15 @@ public:
         spanItemChildren_.emplace_back(child->GetSpanItem());
     }
 
+    FocusType GetFocusType() override
+    {
+        return FocusType::SCOPE;
+    }
+    bool GetFocusable() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;

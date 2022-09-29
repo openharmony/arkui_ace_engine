@@ -569,7 +569,7 @@ private:
     SourceType keySource_ = SourceType::NONE;
 };
 
-using HandleKeyEventFunc = std::function<bool(const KeyEvent&)>;
+using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;
 using OnKeyCallbackFunc = std::function<void(KeyEventInfo&)>;
 using OnFocusFunc = std::function<void()>;
 using OnBlurFunc = std::function<void()>;

@@ -15,8 +15,7 @@
 
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
+#include "core/components_ng/image_provider/adapter/skia_svg_dom.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,6 +55,11 @@ sk_sp<SkData> SkiaImageData::GetSkData() const
 {
     CHECK_NULL_RETURN(skData_, nullptr);
     return skData_;
+}
+
+RefPtr<SvgDom> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
+{
+    return SkiaSvgDom::CreateSkiaSvgDom(skData_, svgFillColor);
 }
 
 } // namespace OHOS::Ace::NG

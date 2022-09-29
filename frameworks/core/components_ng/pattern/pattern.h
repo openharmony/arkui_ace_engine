@@ -150,7 +150,7 @@ public:
         if (!frameNode) {
             return std::nullopt;
         }
-        return frameNode->GetGeometryNode()->GetFrameSize();
+        return frameNode->GetGeometryNode()->GetMarginFrameSize();
     }
 
     std::optional<OffsetF> GetHostFrameOffset() const
@@ -220,6 +220,15 @@ public:
     virtual void BeforeCreateLayoutWrapper() {}
     // Called before frameNode CreatePaintWrapper.
     virtual void BeforeCreatePaintWrapper() {}
+
+    virtual FocusType GetFocusType()
+    {
+        return FocusType::DISABLE;
+    }
+    virtual bool GetFocusable()
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

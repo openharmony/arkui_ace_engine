@@ -36,6 +36,7 @@ public:
 private:
     void PaintSelectedZone(RenderContext& context);
     void PaintItemZone(RenderContext& context, const RefPtr<RenderListItem>& item);
+    void PaintDivider(const std::shared_ptr<RSNode>& rsNode);
     void DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, const SkPaint& paint, bool isVertical,
         double startCrossAxis, double mainAxis, double endCrossAxis);
     RefPtr<RenderListItem> prevStickyItem_;

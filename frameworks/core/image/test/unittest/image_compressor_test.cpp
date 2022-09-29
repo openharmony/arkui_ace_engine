@@ -84,7 +84,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor002, TestSize.Level1)
     path = "";
     instance->Init();
     auto image = LoadImage();
-    if (image) {
+    if (image && instance->CanCompress()) {
         SkPixmap pixmap;
         image->peekPixels(&pixmap);
         std::string key = "key2";
@@ -107,7 +107,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor003, TestSize.Level1)
 {
     instance->Init();
     auto image = LoadImage();
-    if (image) {
+    if (image && instance->CanCompress()) {
         SkPixmap pixmap;
         image->peekPixels(&pixmap);
         std::string key = "key3";
@@ -130,7 +130,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor004, TestSize.Level1)
     instance->Init();
     instance->maxErr_ = 0;
     auto image = LoadImage();
-    if (image) {
+    if (image && instance->CanCompress()) {
         SkPixmap pixmap;
         image->peekPixels(&pixmap);
         std::string key = "key4";
@@ -152,7 +152,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor005, TestSize.Level1)
 {
     instance->Init();
     auto image = LoadImage();
-    if (image) {
+    if (image && instance->CanCompress()) {
         SkPixmap pixmap;
         image->peekPixels(&pixmap);
         std::string key = "key5";
@@ -178,7 +178,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor006, TestSize.Level1)
 {
     instance->Init();
     auto image = LoadImage();
-    if (image) {
+    if (image && instance->CanCompress()) {
         SkPixmap pixmap;
         image->peekPixels(&pixmap);
         std::string key = "key6";
@@ -199,7 +199,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor007, TestSize.Level1)
 {
     instance->Init();
     auto image = LoadImage();
-    if (image) {
+    if (image && instance->CanCompress()) {
         SkPixmap pixmap;
         image->peekPixels(&pixmap);
         std::string key = "key7";
@@ -223,6 +223,7 @@ HWTEST_F(ImageCompressorTest, TestSwitch001, TestSize.Level1)
     instance->switch_ = false;
     ASSERT_TRUE(!instance->CanCompress());
     instance->switch_ = true;
+    instance->clOk_ = true;
     ASSERT_TRUE(instance->CanCompress());
 }
 

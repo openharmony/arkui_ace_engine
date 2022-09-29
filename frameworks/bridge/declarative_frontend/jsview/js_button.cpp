@@ -254,8 +254,6 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
                 SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
             }
             NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
-            NG::ViewAbstract::SetFocusType(NG::FocusType::NODE);
-            NG::ViewAbstract::SetFocusable(true);
             return;
         }
         auto textComponent = AceType::MakeRefPtr<TextComponent>(label);
@@ -280,8 +278,6 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
             SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
         }
         NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
-        NG::ViewAbstract::SetFocusType(NG::FocusType::NODE);
-        NG::ViewAbstract::SetFocusable(true);
         return;
     }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
@@ -311,8 +307,6 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
             SetTypeAndStateEffect(obj);
         }
         NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
-        NG::ViewAbstract::SetFocusType(NG::FocusType::NODE);
-        NG::ViewAbstract::SetFocusable(true);
         return;
     }
     std::list<RefPtr<Component>> buttonChildren;

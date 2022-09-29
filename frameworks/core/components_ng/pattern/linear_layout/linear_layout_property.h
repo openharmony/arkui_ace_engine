@@ -33,9 +33,7 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<LinearLayoutProperty>(isVertical_);
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propLinearLayoutAttribute_ = CloneLinearLayoutAttribute();
-        value->isVertical_ = isVertical_;
+        Clone(value);
         return value;
     }
 
@@ -57,6 +55,20 @@ public:
     bool IsVertical() const
     {
         return isVertical_;
+    }
+
+    bool IsDirectionVertical() override
+    {
+        return isVertical_;
+    }
+
+protected:
+    void Clone(RefPtr<LayoutProperty> property) const override
+    {
+        auto value = DynamicCast<LinearLayoutProperty>(property);
+        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propLinearLayoutAttribute_ = CloneLinearLayoutAttribute();
+        value->isVertical_ = isVertical_;
     }
 
 private:

@@ -646,6 +646,7 @@ std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const
     SkPixmap src;
     bool success = tempCache.peekPixels(&src);
     if (!success) {
+        LOGE("ToDataURL failed,the bitmap does not have access to pixel data");
         return UNSUPPORTED;
     }
     SkDynamicMemoryWStream dst;
@@ -663,14 +664,17 @@ std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const
         success = SkPngEncoder::Encode(&dst, src, options);
     }
     if (!success) {
+        LOGE("ToDataURL failed,image encoding failed");
         return UNSUPPORTED;
     }
     auto result = dst.detachAsData();
     if (result == nullptr) {
+        LOGE("DetachAsData failed when ToDataURL.");
         return UNSUPPORTED;
     }
     size_t len = SkBase64::Encode(result->data(), result->size(), nullptr);
     if (len > MAX_LENGTH) {
+        LOGE("ToDataURL failed,The resolution of the image is greater than the maximum allowed resolution");
         return UNSUPPORTED;
     }
     SkString info(len);

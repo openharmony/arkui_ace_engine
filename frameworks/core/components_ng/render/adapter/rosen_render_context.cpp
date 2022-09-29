@@ -27,6 +27,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
+#include "core/animation/page_transition_common.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -131,9 +132,9 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         PaintBackground();
     }
 
-    if (propBackDecoration_) {
+    if (propGradient_) {
         SizeF frameSize(paintRect.Width(), paintRect.Height());
-        PaintDecoration(frameSize);
+        PaintGradient(frameSize);
     }
 
     if (propClip_) {
@@ -517,6 +518,7 @@ void RosenRenderContext::Restore()
 void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
 {
     ReCreateRsNodeTree(children);
+    RequestNextFrame();
 }
 
 std::list<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes(
@@ -837,30 +839,70 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     return effect;
 }
 
-void RosenRenderContext::PaintDecoration(const SizeF& frameSize)
+void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->HasLinearGradient()) {
-        auto gradient = backDecoration->GetLinearGradientValue();
+    auto& gradientProperty = GetOrCreateGradient();
+    if (gradientProperty->HasLinearGradient()) {
+        auto gradient = gradientProperty->GetLinearGradientValue();
+        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
+        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+    }
+    if (gradientProperty->HasRadialGradient()) {
+        auto gradient = gradientProperty->GetRadialGradientValue();
+        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
+        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+    }
+    if (gradientProperty->HasSweepGradient()) {
+        auto gradient = gradientProperty->GetSweepGradientValue();
         auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
         rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
     }
 }
 
-void RosenRenderContext::UpdateLinearGradient(const NG::Gradient& gradient)
+void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->UpdateLinearGradient(gradient)) {
-        auto frameNode = GetHost();
-        if (frameNode) {
-            SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-            if (frameSize.Width() != 0 && frameSize.Height() != 0) {
-                PaintDecoration(frameSize);
-            }
-            RequestNextFrame();
-        }
+    auto& gradientProperty = GetOrCreateGradient();
+    if (!gradientProperty || !gradientProperty->UpdateLinearGradient(gradient)) {
+        return;
     }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
+        PaintGradient(frameSize);
+    }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnRadialGradientUpdate(const NG::Gradient& gradient)
+{
+    auto& gradientProperty = GetOrCreateGradient();
+    if (!gradientProperty || !gradientProperty->UpdateRadialGradient(gradient)) {
+        return;
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
+        PaintGradient(frameSize);
+    }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnSweepGradientUpdate(const NG::Gradient& gradient)
+{
+    auto& gradientProperty = GetOrCreateGradient();
+    if (!gradientProperty || !gradientProperty->UpdateSweepGradient(gradient)) {
+        return;
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
+        PaintGradient(frameSize);
+    }
+    RequestNextFrame();
 }
 
 void RosenRenderContext::PaintClip(const SizeF& frameSize)
@@ -887,16 +929,16 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
 void RosenRenderContext::OnClipShapeUpdate(const ClipPathNG& clipPath)
 {
     auto& clip = GetOrCreateClip();
-    if (clip->UpdateClipShape(clipPath)) {
-        auto frameNode = GetHost();
-        if (frameNode) {
-            SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-            if (frameSize.Width() != 0 && frameSize.Height() != 0) {
-                PaintClip(frameSize);
-            }
-            RequestNextFrame();
-        }
+    if (!clip || !clip->UpdateClipShape(clipPath)) {
+        return;
     }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
+        PaintClip(frameSize);
+    }
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
@@ -904,6 +946,45 @@ void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetClipToBounds(isClip);
     RequestNextFrame();
+}
+
+bool RosenRenderContext::TriggerPageTransition(PageTransitionType type) const
+{
+    CHECK_NULL_RETURN(rsNode_, false);
+    const int32_t PAGE_TRANSITION_DURATION = 300;
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(PAGE_TRANSITION_DURATION);
+    auto pipelineBase = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineBase, false);
+    const double width = pipelineBase->GetRootWidth();
+    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
+    bool transitionIn = true;
+    switch (type) {
+        case PageTransitionType::ENTER_PUSH:
+            effect->Translate({width, 0, 0});
+            transitionIn = true;
+            break;
+        case PageTransitionType::ENTER_POP:
+            effect->Translate({-width, 0, 0});
+            transitionIn = true;
+            break;
+        case PageTransitionType::EXIT_PUSH:
+            effect->Translate({-width, 0, 0});
+            transitionIn = false;
+            break;
+        case PageTransitionType::EXIT_POP:
+            effect->Translate({width, 0, 0});
+            transitionIn = false;
+            break;
+        default:
+            LOGI("unexpected transition type");
+            return false;
+    }
+    AnimationUtils::Animate(option, [rsNode = rsNode_, effect, transitionIn]() {
+        rsNode->NotifyTransition(effect, transitionIn);
+    });
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

@@ -43,15 +43,17 @@ OptionalSizeF ConvertToOptionalSize(
 
 SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize);
 
-void MinusPaddingToConstraint(const std::unique_ptr<PaddingProperty>& padding, LayoutConstraintF& size);
-
-void MinusPaddingToConstraint(const PaddingProperty& padding, LayoutConstraintF& size);
-
 PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
 PaddingPropertyF ConvertToPaddingPropertyF(
     const PaddingProperty& padding, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
+
+MarginPropertyF ConvertToMarginPropertyF(const std::unique_ptr<MarginProperty>& margin,
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f);
+
+MarginPropertyF ConvertToMarginPropertyF(
+    const MarginProperty& margin, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
 BorderWidthPropertyF ConvertToBorderWidthPropertyF(const std::unique_ptr<BorderWidthProperty>& borderWidth,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f);

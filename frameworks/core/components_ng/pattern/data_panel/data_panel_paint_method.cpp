@@ -60,6 +60,9 @@ void DataPanelPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) c
     auto paintProperty = DynamicCast<DataPanelPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
 
+    canvas.Save();
+    auto offset = paintWrapper->GetContentOffset();
+    canvas.Translate(offset.GetX(), offset.GetY());
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
@@ -72,7 +75,7 @@ void DataPanelPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) c
         return;
     }
     ArcData arcData;
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = paintWrapper->GetContentSize();
     arcData.center = Offset(frameSize.Width() / 2.0f, frameSize.Height() / 2.0f);
     arcData.radius = std::min(frameSize.Width(), frameSize.Height()) / 2.0f;
     auto theme = themeManager->GetTheme<DataPanelTheme>();
@@ -121,11 +124,12 @@ void DataPanelPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) c
         PaintProgress(canvas, arcData, useEffect_, false, 0.0);
         totalValue -= values[i] * proportions;
     }
+    canvas.Restore();
 }
 
 void DataPanelPaintMethod::PaintLinearProgress(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = paintWrapper->GetGeometryNode()->GetMarginFrameSize();
     auto offset = paintWrapper->GetContentOffset();
     auto totalWidth = frameSize.Width();
     auto paintProperty = DynamicCast<DataPanelPaintProperty>(paintWrapper->GetPaintProperty());

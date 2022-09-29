@@ -14,6 +14,7 @@
  */
 
 #include "core/components_v2/list/rosen_render_list.h"
+#include "core/components_v2/list/render_list_item_group.h"
 
 #include "render_service_client/core/ui/rs_node.h"
 
@@ -54,8 +55,6 @@ void RosenRenderList::DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, c
 
 void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
 {
-    const auto& layoutSize = GetLayoutSize();
-
     for (const auto& child : items_) {
         if (child == currentStickyItem_ || child == selectedItem_) {
             continue;
@@ -81,56 +80,7 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
     // own seperate recording. In order to accomplish the effect that [divider] is covered by [currentStickyItem_], we
     // should draw it before [currentStickyItem_] being painted.
     rsNode->SetPaintOrder(true);
-    const auto& divider = component_->GetItemDivider();
-    if (divider && divider->color.GetAlpha() > 0x00 && GreatNotEqual(divider->strokeWidth.Value(), 0.0)) {
-        const double mainSize = GetMainSize(layoutSize);
-        const double strokeWidth = NormalizePercentToPx(divider->strokeWidth, vertical_);
-        const double halfSpaceWidth = std::max(spaceWidth_, strokeWidth) / 2.0;
-        const double startCrossAxis = NormalizePercentToPx(divider->startMargin, !vertical_);
-        const double endCrossAxis = GetCrossSize(layoutSize) - NormalizePercentToPx(divider->endMargin, !vertical_);
-        const double topOffset = halfSpaceWidth + (strokeWidth / 2.0);
-        const double bottomOffset = topOffset - strokeWidth;
-
-        SkPaint paint;
-        paint.setAntiAlias(true);
-        paint.setColor(divider->color.GetValue());
-        paint.setStyle(SkPaint::Style::kStroke_Style);
-        paint.setStrokeWidth(strokeWidth);
-        bool isFirstIndex = (startIndex_ == 0);
-        double lastMainAxis = INFINITY;
-
-        for (const auto& child : items_) {
-            if (child == selectedItem_) {
-                continue;
-            }
-
-            double mainAxis = GetMainAxis(child->GetPosition());
-            if (isFirstIndex) {
-                lastMainAxis = mainAxis;
-                isFirstIndex = false;
-                continue;
-            }
-
-            if (GreatOrEqual(mainAxis - topOffset, mainSize)) {
-                break;
-            }
-            if (LessOrEqual(mainAxis - bottomOffset, 0.0)) {
-                continue;
-            }
-            if (NearEqual(lastMainAxis, mainAxis)) {
-                continue;
-            }
-            lastMainAxis = mainAxis;
-
-            mainAxis -= halfSpaceWidth;
-            DrawDividerOnNode(rsNode, paint, vertical_, startCrossAxis, mainAxis, endCrossAxis);
-        }
-
-        if (selectedItem_) {
-            double mainAxis = targetMainAxis_ - halfSpaceWidth;
-            DrawDividerOnNode(rsNode, paint, vertical_, startCrossAxis, mainAxis, endCrossAxis);
-        }
-    }
+    PaintDivider(rsNode);
 
     if (currentStickyItem_) {
         PaintChild(currentStickyItem_, context, offset);
@@ -165,6 +115,58 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
     }
 
     PaintSelectedZone(context);
+}
+
+void RosenRenderList::PaintDivider(const std::shared_ptr<RSNode>& rsNode)
+{
+    const auto& layoutSize = GetLayoutSize();
+    const auto& divider = component_->GetItemDivider();
+    if (!divider || divider->color.GetAlpha() <= 0x00 || LessOrEqual(divider->strokeWidth.Value(), 0.0)) {
+        return;
+    }
+    const double mainSize = GetMainSize(layoutSize);
+    const double crossSize = GetCrossSize(layoutSize);
+    const double strokeWidth = NormalizePercentToPx(divider->strokeWidth, vertical_);
+    const double halfSpaceWidth = std::max(spaceWidth_, strokeWidth) / 2.0;
+    const double startMargin = NormalizePercentToPx(divider->startMargin, !vertical_);
+    const double endMargin = NormalizePercentToPx(divider->endMargin, !vertical_);
+    const double topOffset = halfSpaceWidth + (strokeWidth / 2.0);
+    const double bottomOffset = topOffset - strokeWidth;
+
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(divider->color.GetValue());
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(strokeWidth);
+    bool lastIsItemGroup = false;
+    bool isFirstItem = (startIndex_ == 0);
+    int lane = 0;
+
+    for (const auto& child : items_) {
+        bool isItemGroup = static_cast<bool>(AceType::DynamicCast<RenderListItemGroup>(child));
+        double mainAxis = GetMainAxis(child->GetPosition());
+        if (GreatOrEqual(mainAxis - topOffset, mainSize)) {
+            break;
+        }
+        if (!isFirstItem && child != selectedItem_ && GreatNotEqual(mainAxis - bottomOffset, 0.0)) {
+            mainAxis -= halfSpaceWidth;
+            if (GetLanes() > 1 && !lastIsItemGroup && !isItemGroup) {
+                double start = crossSize / GetLanes() * lane + startMargin;
+                double end = crossSize / GetLanes() * (lane + 1) - endMargin;
+                DrawDividerOnNode(rsNode, paint, vertical_, start, mainAxis, end);
+            } else {
+                DrawDividerOnNode(rsNode, paint, vertical_, startMargin, mainAxis, crossSize - endMargin);
+            }
+        }
+        lastIsItemGroup = isItemGroup;
+        lane = (GetLanes() <= 1 || (lane + 1) >= GetLanes() || isItemGroup) ? 0 : lane + 1;
+        isFirstItem = isFirstItem ? lane > 0 : false;
+    }
+
+    if (selectedItem_) {
+        double mainAxis = targetMainAxis_ - halfSpaceWidth;
+        DrawDividerOnNode(rsNode, paint, vertical_, startMargin, mainAxis, crossSize - endMargin);
+    }
 }
 
 void RosenRenderList::PaintSelectedZone(RenderContext& context)

@@ -24,14 +24,17 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
 void LayoutProperty::Reset()
 {
     layoutConstraint_.reset();
     calcLayoutConstraint_.reset();
     padding_.reset();
+    margin_.reset();
     borderWidth_.reset();
     magicItemProperty_.reset();
     positionProperty_.reset();
@@ -62,11 +65,17 @@ void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 {
     layoutConstraint_ = layoutProperty->layoutConstraint_;
+    if (layoutProperty->gridProperty_) {
+        gridProperty_ = std::make_unique<GridProperty>(*layoutProperty->gridProperty_);
+    }
     if (layoutProperty->calcLayoutConstraint_) {
         calcLayoutConstraint_ = std::make_unique<MeasureProperty>(*layoutProperty->calcLayoutConstraint_);
     }
     if (layoutProperty->padding_) {
         padding_ = std::make_unique<PaddingProperty>(*layoutProperty->padding_);
+    }
+    if (layoutProperty->margin_) {
+        margin_ = std::make_unique<PaddingProperty>(*layoutProperty->margin_);
     }
     if (layoutProperty->borderWidth_) {
         borderWidth_ = std::make_unique<BorderWidthProperty>(*layoutProperty->borderWidth_);
@@ -103,6 +112,13 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
+    if (margin_) {
+        // TODO: add margin is negative case.
+        auto margin = CreateMargin();
+        MinusPaddingToSize(margin, layoutConstraint_->maxSize);
+        MinusPaddingToSize(margin, layoutConstraint_->minSize);
+        MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
+    }
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
@@ -120,6 +136,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
                     parentConstraint.percentReference));
         }
     }
+
     CheckSelfIdealSize();
     CheckAspectRatio();
 }
@@ -167,10 +184,29 @@ void LayoutProperty::CheckAspectRatio()
     // TODO: after measure done, need to check AspectRatio again.
 }
 
+void LayoutProperty::UpdateGridConstraint(const RefPtr<FrameNode>& host)
+{
+    const auto& gridProperty = GetGridProperty();
+    CHECK_NULL_VOID(gridProperty);
+    bool gridflag = false;
+    auto parent = host->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
+            auto containerLayout = AceType::DynamicCast<FrameNode>(parent)->GetLayoutProperty();
+            gridflag = gridProperty->UpdateContainer(containerLayout, host);
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    if (gridflag) {
+        UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty->GetWidth()), std::nullopt));
+    }
+}
+
 void LayoutProperty::CheckSelfIdealSize()
 {
     if (measureType_ == MeasureType::MATCH_PARENT) {
-        layoutConstraint_->UpdateSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
+        layoutConstraint_->UpdateSelfMarginSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
     if (!calcLayoutConstraint_) {
         return;
@@ -225,12 +261,12 @@ void LayoutProperty::UpdateContentConstraint()
     if (padding_) {
         auto paddingF = ConvertToPaddingPropertyF(
             *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        contentConstraint_->MinusPaddingOnBothSize(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
             *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(
+        contentConstraint_->MinusPaddingOnBothSize(
             borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
     }
 }
@@ -268,6 +304,17 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 
     return ConvertToPaddingPropertyF(
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+}
+
+MarginPropertyF LayoutProperty::CreateMargin()
+{
+    if (layoutConstraint_.has_value()) {
+        return ConvertToMarginPropertyF(
+            margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    }
+
+    return ConvertToMarginPropertyF(
+        margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
 
 void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)

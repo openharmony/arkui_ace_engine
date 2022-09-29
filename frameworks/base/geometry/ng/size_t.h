@@ -103,11 +103,11 @@ public:
         const std::optional<T>& bottom)
     {
         T tempWidth = width_ - left.value_or(0) - right.value_or(0);
-        if (Positive(tempWidth)) {
+        if (NonNegative(tempWidth)) {
             width_ = tempWidth;
         }
         T tempHeight = height_ - top.value_or(0) - bottom.value_or(0);
-        if (Positive(tempHeight)) {
+        if (NonNegative(tempHeight)) {
             height_ = tempHeight;
         }
     }

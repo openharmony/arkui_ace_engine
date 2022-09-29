@@ -157,7 +157,7 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(
 {
     auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
     auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
     auto columnsGap =
@@ -261,9 +261,6 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, frameSize);
 
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
@@ -274,8 +271,9 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (childPosition != itemsPosition_.end()) {
             childOffset = itemsPosition_.at(index);
         }
-        childWrapper->GetGeometryNode()->SetFrameOffset(padding.Offset() + childOffset);
-        childWrapper->Layout(parentOffset);
+        // TODO: add center position when grid item is less than ceil.
+        childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
+        childWrapper->Layout();
     }
 }
 

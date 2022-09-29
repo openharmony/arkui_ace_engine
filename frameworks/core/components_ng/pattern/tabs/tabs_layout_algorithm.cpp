@@ -50,7 +50,7 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF tabBarSize;
     if (tabBarWrapper) {
         tabBarWrapper->Measure(childLayoutConstraint);
-        tabBarSize = tabBarWrapper->GetGeometryNode()->GetFrameSize();
+        tabBarSize = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize();
     }
 
     // Measure swiper.
@@ -90,7 +90,7 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto barPosition = GetBarPosition(layoutWrapper);
     auto tabBarGeometryNode = tabBarWrapper->GetGeometryNode();
     CHECK_NULL_VOID(tabBarGeometryNode);
-    auto tabBarFrameSize = tabBarGeometryNode->GetFrameSize();
+    auto tabBarFrameSize = tabBarGeometryNode->GetMarginFrameSize();
 
     OffsetF tabBarOffset;
     OffsetF swiperOffset;
@@ -113,12 +113,11 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
 
-    auto parentOffset = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
-    tabBarGeometryNode->SetFrameOffset(tabBarOffset);
-    tabBarWrapper->Layout(parentOffset);
+    tabBarGeometryNode->SetMarginFrameOffset(tabBarOffset);
+    tabBarWrapper->Layout();
 
-    swiperWrapper->GetGeometryNode()->SetFrameOffset(swiperOffset);
-    swiperWrapper->Layout(parentOffset);
+    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);
+    swiperWrapper->Layout();
 }
 
 BarPosition TabsLayoutAlgorithm::GetBarPosition(LayoutWrapper* layoutWrapper) const

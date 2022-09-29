@@ -86,6 +86,7 @@ void JSTabContent::CreateForNG(const JSCallbackInfo& info)
 
     if (info.Length() < 1 || !info[0]->IsFunction()) {
         LOGW("Param should be a function.");
+        NG::TabContentView::Create();
         return;
     }
 

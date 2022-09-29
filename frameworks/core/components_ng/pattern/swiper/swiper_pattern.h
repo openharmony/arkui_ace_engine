@@ -83,6 +83,11 @@ public:
         return swiperController_;
     }
 
+    int GetCurrentIndex() const
+    {
+        return currentIndex_;
+    }
+
     void UpdateCurrentOffset(float offset);
 
 private:
@@ -115,6 +120,7 @@ private:
     void PlayFadeAnimation();
 
     // Implement of swiper controller
+    void SwipeToWithoutAnimation(int32_t index);
     void SwipeTo(int32_t index);
     void ShowNext();
     void ShowPrevious();
@@ -166,6 +172,8 @@ private:
     std::set<int32_t> preItemRange_;
 
     float currentOffset_ = 0.0f;
+
+    bool moveDirection_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 

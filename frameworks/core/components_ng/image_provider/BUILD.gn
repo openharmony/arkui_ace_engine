@@ -22,5 +22,7 @@ build_component_ng("image_provider_ng") {
     "image_object.cpp",
     "image_provider.cpp",
     "image_state_manager.cpp",
+    "static_image_object.cpp",
+    "svg_image_object.cpp",
   ]
 }

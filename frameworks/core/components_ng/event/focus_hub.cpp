@@ -15,6 +15,8 @@
 
 #include "core/components_ng/event/focus_hub.h"
 
+#include <cinttypes>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
@@ -23,7 +25,6 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,6 +38,15 @@ RefPtr<GeometryNode> FocusHub::GetGeometryNode() const
 {
     auto frameNode = GetFrameNode();
     return frameNode ? frameNode->GetGeometryNode() : nullptr;
+}
+
+std::optional<std::string> FocusHub::GetInspectorKey() const
+{
+    auto frameNode = GetFrameNode();
+    if (frameNode) {
+        return frameNode->GetInspectorId();
+    }
+    return std::nullopt;
 }
 
 RefPtr<FocusHub> FocusHub::GetParentFocusHub() const
@@ -80,24 +90,7 @@ bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
     if (!IsCurrentFocus()) {
         return false;
     }
-    if (OnKeyEvent(keyEvent)) {
-        return true;
-    }
-
-    auto context = NG::PipelineContext::GetCurrentContext();
-
-    switch (keyEvent.code) {
-        case KeyCode::KEY_ENTER:
-        case KeyCode::KEY_NUMPAD_ENTER:
-        case KeyCode::KEY_DPAD_CENTER:
-            if (keyEvent.action != KeyAction::DOWN) {
-                return false;
-            }
-            OnClick(keyEvent);
-            return true;
-        default:
-            return false;
-    }
+    return OnKeyEvent(keyEvent);
 }
 
 void FocusHub::DumpFocusTree(int32_t depth)
@@ -113,7 +106,7 @@ void FocusHub::DumpFocusNodeTree(int32_t depth)
 {
     if (DumpLog::GetInstance().GetDumpFile()) {
         // DumpFocus();
-        std::string information = GetFrameNode()->GetTag();
+        std::string information = GetFrameName();
         if (IsCurrentFocus()) {
             information += "(Node*)";
         } else {
@@ -131,7 +124,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
     FlushChildrenFocusHub();
     if (DumpLog::GetInstance().GetDumpFile()) {
         // DumpFocus();
-        std::string information = GetFrameNode()->GetTag();
+        std::string information = GetFrameName();
         if (IsCurrentFocus()) {
             information += "(Scope*)";
         } else {
@@ -151,6 +144,11 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
 bool FocusHub::RequestFocusImmediately()
 {
     auto context = NG::PipelineContext::GetCurrentContext();
+    if (context && context->GetIsFocusingByTab()) {
+        if (!IsFocusableByTab()) {
+            return false;
+        }
+    }
 
     if (IsCurrentFocus()) {
         return true;
@@ -176,7 +174,10 @@ bool FocusHub::RequestFocusImmediately()
     return true;
 }
 
-void FocusHub::UpdateAccessibilityFocusInfo() {}
+void FocusHub::UpdateAccessibilityFocusInfo()
+{
+    // Need update
+}
 
 void FocusHub::LostFocus()
 {
@@ -186,6 +187,57 @@ void FocusHub::LostFocus()
         OnBlur();
     }
 }
+
+void FocusHub::LostSelfFocus()
+{
+    if (IsCurrentFocus()) {
+        SetFocusable(false);
+        SetFocusable(true);
+    }
+}
+
+void FocusHub::RemoveSelf()
+{
+    auto parent = GetParentFocusHub();
+    if (parent) {
+        parent->RemoveChild(AceType::Claim(this));
+    }
+}
+
+void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
+{
+    // Not belong to this focus scope.
+    if (!focusNode || focusNode->GetParentFocusHub() != this) {
+        return;
+    }
+
+    FlushChildrenFocusHub();
+    if (focusNode->IsCurrentFocus()) {
+        // Try to goto next focus, otherwise goto previous focus.
+        if (!GoToNextFocusLinear(true) && !GoToNextFocusLinear(false)) {
+            itLastFocusNode_ = focusNodes_.end();
+            lastWeakFocusNode_ = nullptr;
+        }
+        focusNode->LostFocus();
+    } else {
+        if (itLastFocusNode_ != focusNodes_.end() && (*itLastFocusNode_) == focusNode) {
+            itLastFocusNode_ = focusNodes_.end();
+            lastWeakFocusNode_ = nullptr;
+        }
+    }
+
+    auto it = std::find(focusNodes_.begin(), focusNodes_.end(), focusNode);
+    if (it == focusNodes_.end()) {
+        return;
+    }
+    if (itLastFocusNode_ == it) {
+        itLastFocusNode_ = focusNodes_.end();
+        lastWeakFocusNode_ = nullptr;
+    }
+    focusNode->SetFocusType(FocusType::DISABLE);
+}
+
+// Need update RebuildChild function
 
 bool FocusHub::IsFocusable()
 {
@@ -211,7 +263,7 @@ bool FocusHub::IsFocusableScope()
 
 bool FocusHub::IsFocusableNode()
 {
-    return focusable_ && parentFocusable_;
+    return enabled_ && show_ && focusable_ && parentFocusable_;
 }
 
 void FocusHub::SetFocusable(bool focusable)
@@ -222,6 +274,85 @@ void FocusHub::SetFocusable(bool focusable)
     focusable_ = focusable;
     RefreshParentFocusable(IsFocusable());
     RefreshFocus();
+}
+
+void FocusHub::SetEnabled(bool enabled)
+{
+    if (focusType_ == FocusType::NODE) {
+        SetEnabledNode(enabled);
+    } else if (focusType_ == FocusType::SCOPE) {
+        SetEnabledScope(enabled);
+    }
+}
+
+void FocusHub::SetEnabledNode(bool enabled)
+{
+    enabled_ = enabled;
+    if (!enabled) {
+        RefreshFocus();
+    }
+}
+
+void FocusHub::SetEnabledScope(bool enabled)
+{
+    SetEnabledNode(enabled);
+    RefreshParentFocusable(IsFocusableNode());
+}
+
+void FocusHub::SetShow(bool show)
+{
+    if (focusType_ == FocusType::NODE) {
+        SetShowNode(show);
+    } else if (focusType_ == FocusType::SCOPE) {
+        SetShowScope(show);
+    }
+}
+
+void FocusHub::SetShowNode(bool show)
+{
+    show_ = show;
+    if (!show) {
+        RefreshFocus();
+    }
+}
+
+void FocusHub::SetShowScope(bool show)
+{
+    SetShowNode(show);
+    RefreshParentFocusable(IsFocusableNode());
+}
+
+void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
+{
+    if (!focusCallbackEvents_) {
+        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+    }
+    if (focusCallbackEvents_->IsFocusOnTouch() == isFocusOnTouch) {
+        return;
+    }
+    focusCallbackEvents_->SetIsFocusOnTouch(isFocusOnTouch);
+
+    auto frameNode = GetFrameNode();
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+
+    if (!isFocusOnTouch && !focusOnTouchListener_) {
+        return;
+    }
+    if (!isFocusOnTouch && focusOnTouchListener_) {
+        gesture->RemoveTouchEvent(focusOnTouchListener_);
+        return;
+    }
+    if (!focusOnTouchListener_) {
+        auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+            auto focusHub = weak.Upgrade();
+            if (focusHub && info.GetTouches().front().GetTouchType() == TouchType::UP) {
+                focusHub->RequestFocusImmediately();
+            }
+        };
+        focusOnTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    }
+    gesture->AddTouchEvent(focusOnTouchListener_);
 }
 
 void FocusHub::RefreshFocus()
@@ -252,9 +383,6 @@ void FocusHub::RefreshFocus()
 
 bool FocusHub::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (handleKeyEvent_ && handleKeyEvent_(keyEvent)) {
-        return true;
-    }
     if (focusType_ == FocusType::SCOPE) {
         return OnKeyEventScope(keyEvent);
     }
@@ -267,12 +395,35 @@ bool FocusHub::OnKeyEvent(const KeyEvent& keyEvent)
 
 bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 {
+    ACE_DCHECK(IsCurrentFocus());
+    if (keyEvent.action == KeyAction::DOWN) {
+        switch (keyEvent.code) {
+            case KeyCode::KEY_SPACE:
+                OnClick(keyEvent);
+                break;
+            default:
+                LOGD("KeyCode is %{public}d. Do nothing", keyEvent.code);
+        }
+    }
+
+    auto retInternal = false;
+    if (onKeyEventInternal_) {
+        retInternal = onKeyEventInternal_(keyEvent);
+    }
+
     auto info = KeyEventInfo(keyEvent);
-    if (!onKeyEventCallback_) {
+    auto onKeyEventCallback = GetOnKeyCallback();
+    if (!onKeyEventCallback) {
         return false;
     }
-    onKeyEventCallback_(info);
-    return info.IsStopPropagation();
+    LOGD("FocusHub::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
+         "Action(%{public}d), "
+         "SourceType(%{public}d), DeviceId(%{public}" PRId64 ") }. Return: %{public}d",
+        GetFrameName().c_str(), info.GetKeyCode(), info.GetKeyType(), info.GetSourceDevice(), info.GetDeviceId(),
+        info.IsStopPropagation());
+    onKeyEventCallback(info);
+    auto retCallback = info.IsStopPropagation();
+    return retInternal || retCallback;
 }
 
 bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
@@ -313,10 +464,14 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
             bool ret = false;
             if (keyEvent.pressedCodes.size() == 1) {
                 LOGI("Node: %{public}s request next focus by Key-'TAB'", GetFrameName().c_str());
+                context->SetIsFocusingByTab(true);
                 ret = RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
+                context->SetIsFocusingByTab(false);
             } else if (keyEvent.IsShiftWith(KeyCode::KEY_TAB)) {
                 LOGI("Node: %{public}s request next focus by Key-'SHIFT-TAB'", GetFrameName().c_str());
+                context->SetIsFocusingByTab(true);
                 ret = RequestNextFocus(false, true, GetRect()) || RequestNextFocus(true, true, GetRect());
+                context->SetIsFocusingByTab(false);
             }
             return ret;
         }
@@ -325,9 +480,22 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     }
 }
 
+void FocusHub::RequestFocus() const
+{
+    if (IsCurrentFocus()) {
+        return;
+    }
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddDirtyFocus(GetFrameNode());
+}
+
 bool FocusHub::RequestNextFocus(bool vertical, bool reverse, const RectF& rect)
 {
-    return GoToNextFocus(reverse, rect);
+    if (scopeVertical_ != vertical) {
+        return false;
+    }
+    return GoToNextFocusLinear(reverse, rect);
 }
 
 void FocusHub::RefreshParentFocusable(bool focusable)
@@ -344,7 +512,26 @@ void FocusHub::RefreshParentFocusable(bool focusable)
     }
 }
 
-void FocusHub::OnClick(const KeyEvent& event) {}
+void FocusHub::OnClick(const KeyEvent& event)
+{
+    auto onClickCallback = GetOnClickCallback();
+    if (onClickCallback) {
+        auto info = GestureEvent();
+        info.SetTimeStamp(event.timeStamp);
+        auto rect = GetGeometryNode()->GetFrameRect();
+        info.SetGlobalLocation(
+            Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
+        info.SetLocalLocation(
+            Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
+        info.SetSourceDevice(event.sourceType);
+        info.SetDeviceId(event.deviceId);
+        LOGD("FocusHub::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
+             "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}" PRId64 ") }",
+            GetFrameName().c_str(), info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(),
+            info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetSourceDevice(), info.GetDeviceId());
+        onClickCallback(info);
+    }
+}
 
 void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
 {
@@ -368,7 +555,7 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
     }
 }
 
-bool FocusHub::GoToNextFocus(bool reverse, const RectF& rect)
+bool FocusHub::GoToNextFocusLinear(bool reverse, const RectF& rect)
 {
     FlushChildrenFocusHub();
     if (focusNodes_.empty()) {
@@ -477,8 +664,9 @@ void FocusHub::OnFocusNode()
     if (onFocusInternal_) {
         onFocusInternal_();
     }
-    if (onFocusCallback_) {
-        onFocusCallback_();
+    auto onFocusCallback = GetOnFocusCallback();
+    if (onFocusCallback) {
+        onFocusCallback();
     }
 }
 void FocusHub::OnBlurNode()
@@ -487,8 +675,9 @@ void FocusHub::OnBlurNode()
     if (onBlurInternal_) {
         onBlurInternal_();
     }
-    if (onBlurCallback_) {
-        onBlurCallback_();
+    auto onBlurCallback = GetOnBlurCallback();
+    if (onBlurCallback) {
+        onBlurCallback();
     }
 }
 
@@ -576,5 +765,193 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     rect.SetRect(
         childGeometryNode->GetFrameOffset() - geometryNode->GetFrameOffset(), childGeometryNode->GetFrameSize());
     return true;
+}
+
+bool FocusHub::IsFocusableByTab()
+{
+    auto parent = GetParentFocusHub();
+    if (parent) {
+        return (GetTabIndex() == 0) && (parent->GetTabIndex() == 0);
+    }
+    return GetTabIndex() == 0;
+}
+
+bool FocusHub::IsFocusableWholePath()
+{
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        if (!parent->IsFocusable()) {
+            return false;
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return IsFocusable();
+}
+
+void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
+{
+    FlushChildrenFocusHub();
+    if (GetFocusType() == FocusType::SCOPE && IsFocusable()) {
+        if (focusNodes_.size() == 1 && focusNodes_.front()->GetFocusType() != FocusType::SCOPE) {
+            if (GetTabIndex() > 0) {
+                tabIndexNodes.emplace_back(GetTabIndex(), WeakClaim(this));
+            }
+            return;
+        }
+        for (auto& child : focusNodes_) {
+            child->CollectTabIndexNodes(tabIndexNodes);
+        }
+    }
+    if (IsFocusable() && GetTabIndex() > 0) {
+        tabIndexNodes.emplace_back(GetTabIndex(), WeakClaim(this));
+    }
+}
+
+bool FocusHub::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx)
+{
+    auto iter = tabIndexNodes.begin();
+    std::advance(iter, tabNodeIdx);
+    if (iter == tabIndexNodes.end()) {
+        LOGE("Tab index node is not found");
+        return false;
+    }
+    auto nodeNeedToFocus = (*iter).second.Upgrade();
+    if (!nodeNeedToFocus) {
+        LOGE("Tab index node is null");
+        return false;
+    }
+    LOGI("Focus on tab index node(%{public}d)", tabNodeIdx);
+    if (nodeNeedToFocus->GetFocusType() == FocusType::SCOPE && !nodeNeedToFocus->IsDefaultGroupHasFocused()) {
+        auto defaultFocusNode = nodeNeedToFocus->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT);
+        if (defaultFocusNode) {
+            if (!defaultFocusNode->IsFocusableWholePath()) {
+                LOGW("node(%{public}d) is not focusable", tabNodeIdx);
+                return false;
+            }
+            nodeNeedToFocus->SetIsDefaultGroupHasFocused(true);
+            return defaultFocusNode->RequestFocusImmediately();
+        }
+    }
+    if (!nodeNeedToFocus->IsFocusableWholePath()) {
+        LOGW("node(%{public}d) is not focusable", tabNodeIdx);
+        return false;
+    }
+    return nodeNeedToFocus->RequestFocusImmediately();
+}
+
+RefPtr<FocusHub> FocusHub::GetChildFocusNodeByType(FocusNodeType nodeType)
+{
+    if (nodeType == FocusNodeType::DEFAULT && IsDefaultFocus() && IsFocusable()) {
+        return AceType::Claim(this);
+    }
+    if (nodeType == FocusNodeType::GROUP_DEFAULT && IsDefaultGroupFocus() && IsFocusable()) {
+        return AceType::Claim(this);
+    }
+    if (focusType_ != FocusType::SCOPE) {
+        return nullptr;
+    }
+    FlushChildrenFocusHub();
+    for (const auto& child : focusNodes_) {
+        auto findNode = child->GetChildFocusNodeByType(nodeType);
+        if (findNode) {
+            return findNode;
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<FocusHub> FocusHub::GetChildFocusNodeById(const std::string& id)
+{
+    if (id.empty()) {
+        return nullptr;
+    }
+    if (GetInspectorKey().has_value() && GetInspectorKey().value() == id) {
+        return AceType::Claim(this);
+    }
+    if (focusType_ == FocusType::SCOPE) {
+        FlushChildrenFocusHub();
+        for (const auto& child : focusNodes_) {
+            auto findNode = child->GetChildFocusNodeById(id);
+            if (findNode) {
+                return findNode;
+            }
+        }
+    }
+    return nullptr;
+}
+
+bool FocusHub::RequestFocusImmediatelyById(const std::string& id)
+{
+    auto focusNode = GetChildFocusNodeById(id);
+    if (!focusNode) {
+        LOGW("Can not find focus node by id: %{public}s", id.c_str());
+        return false;
+    }
+    if (!focusNode->IsFocusableWholePath()) {
+        return false;
+    }
+    return focusNode->RequestFocusImmediately();
+}
+
+int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes)
+{
+    if (tabIndexNodes.empty()) {
+        LOGD("No tabIndex node exist in this page.");
+        return NONE_TAB_FOCUSED_INDEX;
+    }
+    if (isFirstFocusInPage_) {
+        isFirstFocusInPage_ = false;
+        return DEFAULT_TAB_FOCUSED_INDEX;
+    }
+    int32_t res = NONE_TAB_FOCUSED_INDEX;
+    int32_t i = 0;
+    for (auto& wpNode : tabIndexNodes) {
+        auto node = wpNode.second.Upgrade();
+        if (node && node->IsCurrentFocus()) {
+            res = i;
+            break;
+        }
+        ++i;
+    }
+    return res;
+}
+
+bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& curPage)
+{
+    if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (!curPage) {
+        LOGE("Current page node is not exit. Can't handle focus by tabIndex.");
+        return false;
+    }
+    TabIndexNodeList tabIndexNodes;
+    tabIndexNodes.clear();
+    curPage->CollectTabIndexNodes(tabIndexNodes);
+    tabIndexNodes.sort([](std::pair<int32_t, WeakPtr<FocusHub>>& a, std::pair<int32_t, WeakPtr<FocusHub>>& b) {
+        return a.first < b.first;
+    });
+    int32_t curTabFocusIndex = curPage->GetFocusingTabNodeIdx(tabIndexNodes);
+    if ((curTabFocusIndex < 0 || curTabFocusIndex >= static_cast<int32_t>(tabIndexNodes.size())) &&
+        curTabFocusIndex != DEFAULT_TAB_FOCUSED_INDEX) {
+        LOGI("Current focused tabIndex node: %{public}d. Use default focus system.", curTabFocusIndex);
+        return false;
+    }
+    if (curTabFocusIndex == DEFAULT_TAB_FOCUSED_INDEX) {
+        curTabFocusIndex = 0;
+    } else {
+        if (event.IsShiftWith(KeyCode::KEY_TAB)) {
+            LOGI("RequestNextFocus by 'SHIFT-TAB'");
+            --curTabFocusIndex;
+        } else {
+            LOGI("RequestNextFocus by 'TAB'");
+            ++curTabFocusIndex;
+        }
+    }
+    if (curTabFocusIndex < 0 || curTabFocusIndex >= static_cast<int32_t>(tabIndexNodes.size())) {
+        LOGI("Focus from tab index node to normal node. Use default focus system.");
+        return false;
+    }
+    return GoToFocusByTabNodeIdx(tabIndexNodes, curTabFocusIndex);
 }
 } // namespace OHOS::Ace::NG
