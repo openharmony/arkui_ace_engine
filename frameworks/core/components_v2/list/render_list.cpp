@@ -3080,7 +3080,9 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
         };
         listItemGroup->SetItemGroupLayoutParam(param);
         listItemGroup->SetNeedLayout(true);
-        renderNode->SetNeedLayout(true);
+        if (renderNode) {
+            renderNode->SetNeedLayout(true);
+        }
     } else if (isLaneList_) {
         innerLayout = MakeInnerLayoutForLane();
     }
