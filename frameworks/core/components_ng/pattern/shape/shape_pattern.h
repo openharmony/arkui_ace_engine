@@ -24,8 +24,8 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/shape/container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_view_box.h"
 
 namespace OHOS::Ace::NG {
@@ -43,55 +43,32 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return MakeRefPtr<ContainerPaintProperty>();
+        return MakeRefPtr<ShapePaintProperty>();
     }
 
-    bool NeedOverridePaintRect() override
+protected:
+    RefPtr<ShapePaintProperty> GetAncestorPaintProperty()
     {
-        auto frameNode = GetHost();
-        if (!frameNode) {
-            return false;
+        auto curFrameNode = GetHost();
+        CHECK_NULL_RETURN(curFrameNode, nullptr);
+        ShapePaintProperty propertiesFromAncestor;
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
+        while (parentFrameNode) {
+            auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
+            if (parentPaintProperty) {
+                propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
+            }
+            curFrameNode = parentFrameNode;
+            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
         }
-        auto containerProperty = frameNode->GetPaintProperty<ContainerPaintProperty>();
-        if (!containerProperty) {
-            return false;
-        }
-        auto shapeViewBoxOpt = containerProperty->CloneShapeViewBox();
-        return (shapeViewBoxOpt.has_value() && shapeViewBoxOpt->IsValid());
-    }
-
-    std::optional<RectF> GetOverridePaintRect() const override
-    {
-        auto frameNode = GetHost();
-        if (!frameNode) {
-            return std::nullopt;
-        }
-        auto containerProperty = frameNode->GetPaintProperty<ContainerPaintProperty>();
-        if (!containerProperty) {
-            return std::nullopt;
-        }
-        auto shapeViewBoxOpt = containerProperty->CloneShapeViewBox();
-        auto geoNode = frameNode->GetGeometryNode();
-        if (!geoNode) {
-            return std::nullopt;
-        }
-        OffsetF offsetF = geoNode->GetFrameOffset();
-        if (shapeViewBoxOpt.has_value() && shapeViewBoxOpt->IsValid()) {
-            double viewBoxWidth = shapeViewBoxOpt->Width().ConvertToPx();
-            double viewBoxHeight = shapeViewBoxOpt->Height().ConvertToPx();
-            return RectF(offsetF.GetX(), offsetF.GetY(), viewBoxWidth, viewBoxHeight);
-        }
-        return std::nullopt;
-    }
-
-    bool IsAtomicNode() const override
-    {
-        return false;
+        return MakeRefPtr<ShapePaintProperty>(propertiesFromAncestor);
     }
 
 private:
-    void ViewPortTansform();
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override
+    {
+        return !(skipMeasure || dirty->SkipMeasureContent());
+    }
     ACE_DISALLOW_COPY_AND_MOVE(ShapePattern);
 };
 } // namespace OHOS::Ace::NG

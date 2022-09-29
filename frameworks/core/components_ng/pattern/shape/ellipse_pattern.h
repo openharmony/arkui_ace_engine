@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_PATTERN_H
 
@@ -23,10 +22,11 @@
 #include "core/components_ng/pattern/shape/ellipse_paint_method.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_pattern.h"
 
 namespace OHOS::Ace::NG {
-class EllipsePattern : public Pattern {
-    DECLARE_ACE_TYPE(EllipsePattern, Pattern);
+class EllipsePattern : public ShapePattern {
+    DECLARE_ACE_TYPE(EllipsePattern, ShapePattern);
 
 public:
     EllipsePattern() = default;
@@ -34,33 +34,10 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto curFrameNode = GetHost();
-        CHECK_NULL_RETURN(curFrameNode, nullptr);
-        ShapePaintProperty propertiesFromAncestor;
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
-        while (parentFrameNode) {
-            auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
-            if (parentPaintProperty) {
-                propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
-            }
-            curFrameNode = parentFrameNode;
-            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
-        }
-        return MakeRefPtr<EllipsePaintMethod>(DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()));
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<ShapeLayoutAlgorithm>();
-    }
-
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<ShapePaintProperty>();
+        return MakeRefPtr<EllipsePaintMethod>(GetAncestorPaintProperty());
     }
 
 private:
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(EllipsePattern);
 };
 } // namespace OHOS::Ace::NG

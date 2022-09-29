@@ -19,45 +19,28 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/shape/rect_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/rect_paint_method.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class RectPattern : public Pattern {
-    DECLARE_ACE_TYPE(RectPattern, Pattern);
+class RectPattern : public ShapePattern {
+    DECLARE_ACE_TYPE(RectPattern, ShapePattern);
 
 public:
     RectPattern() = default;
     ~RectPattern() override = default;
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto curFrameNode = GetHost();
-        CHECK_NULL_RETURN(curFrameNode, nullptr);
-        ShapePaintProperty propertiesFromAncestor;
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
-        while (parentFrameNode) {
-            auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
-            if (parentPaintProperty) {
-                propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
-            }
-            curFrameNode = parentFrameNode;
-            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
-        }
-        return MakeRefPtr<RectPaintMethod>(DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()));
+        return MakeRefPtr<RectPaintMethod>(GetAncestorPaintProperty());
     }
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<RectPaintProperty>();
     }
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<RectLayoutAlgorithm>();
-    }
 
 private:
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(RectPattern);
 };
 

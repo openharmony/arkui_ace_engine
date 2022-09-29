@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H
 
@@ -22,9 +22,10 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/polygon_paint_method.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
+#include "core/components_ng/pattern/shape/shape_pattern.h"
 
 namespace OHOS::Ace::NG {
-class PolygonPattern : public Pattern {
+class PolygonPattern : public ShapePattern {
     DECLARE_ACE_TYPE(PolygonPattern, Pattern);
 
 public:
@@ -34,25 +35,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto curFrameNode = GetHost();
-        CHECK_NULL_RETURN(curFrameNode, nullptr);
-        ShapePaintProperty propertiesFromAncestor;
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
-        while (parentFrameNode) {
-            auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
-            if (parentPaintProperty) {
-                propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
-            }
-            curFrameNode = parentFrameNode;
-            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
-        }
-        return MakeRefPtr<PolygonPaintMethod>(
-            DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()), isPolygon_);
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<ShapeLayoutAlgorithm>();
+        return MakeRefPtr<PolygonPaintMethod>(GetAncestorPaintProperty(), isPolygon_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -61,9 +44,8 @@ public:
     }
 
 private:
-    bool isPolygon_ {};
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(PolygonPattern);
+    bool isPolygon_ {};
 };
 
 } // namespace OHOS::Ace::NG

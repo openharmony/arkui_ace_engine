@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_PATTERN_H
 
@@ -24,10 +24,11 @@
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_pattern.h"
 
 namespace OHOS::Ace::NG {
-class PathPattern : public Pattern {
-    DECLARE_ACE_TYPE(PathPattern, Pattern);
+class PathPattern : public ShapePattern {
+    DECLARE_ACE_TYPE(PathPattern, ShapePattern);
 
 public:
     PathPattern() = default;
@@ -35,24 +36,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto curFrameNode = GetHost();
-        CHECK_NULL_RETURN(curFrameNode, nullptr);
-        ShapePaintProperty propertiesFromAncestor;
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
-        while (parentFrameNode) {
-            auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
-            if (parentPaintProperty) {
-                propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
-            }
-            curFrameNode = parentFrameNode;
-            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
-        }
-        return MakeRefPtr<PathPaintMethod>(DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()));
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<ShapeLayoutAlgorithm>();
+        return MakeRefPtr<PathPaintMethod>(GetAncestorPaintProperty());
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -61,7 +45,6 @@ public:
     }
 
 private:
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(PathPattern);
 };
 } // namespace OHOS::Ace::NG
