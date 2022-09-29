@@ -138,8 +138,8 @@ public:
 
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask([container, keyboardRect] {
-                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-                if (context != nullptr) {
+                auto context = container->GetPipelineContext();
+                if (context) {
                     context->OnVirtualKeyboardAreaChange(keyboardRect);
                 }
             }, TaskExecutor::TaskType::UI);

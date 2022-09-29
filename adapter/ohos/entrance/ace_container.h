@@ -292,7 +292,7 @@ public:
     void UpdateConfiguration(
         const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
 
-    void UpdateFrondend(bool needReloadTransition);
+    void NotifyConfigurationChange(bool needReloadTransition);
 
     bool IsUseStageModel() const override
     {

@@ -229,7 +229,7 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void OnVirtualKeyboardAreaChange(Rect keyboardArea);
+    void OnVirtualKeyboardHeightChange(double keyboardHeight) override;
 
     // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
@@ -295,13 +295,6 @@ public:
         webPaintCallback_.push_back(std::move(listener));
     }
     void NotifyWebPaint() const;
-
-    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
-    void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
-    {
-        virtualKeyBoardCallback_.push_back(std::move(listener));
-    }
-    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const;
 
     float GetViewScale() const
     {
@@ -392,7 +385,7 @@ public:
 
     BaseId::IdType AddPageTransitionListener(const PageTransitionListenable::CallbackFuncType& funcObject);
 
-    const RefPtr<OverlayElement> GetOverlayElement() const;
+    const RefPtr<OverlayElement>& GetOverlayElement() const;
 
     void RemovePageTransitionListener(typename BaseId::IdType id);
 
@@ -1166,7 +1159,7 @@ private:
     EventTrigger eventTrigger_;
 
     std::list<WebPaintCallback> webPaintCallback_;
-    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
+
     WeakPtr<RenderNode> requestedRenderNode_;
     // Make page update tasks pending here to avoid block receiving vsync.
     std::queue<std::function<void()>> pageUpdateTasks_;

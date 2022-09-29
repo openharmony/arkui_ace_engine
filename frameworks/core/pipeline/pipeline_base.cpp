@@ -490,4 +490,13 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
     }
 }
 
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea)
+{
+    double keyboardHeight = keyboardArea.Height();
+    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
+        return;
+    }
+    OnVirtualKeyboardHeightChange(keyboardHeight);
+}
+
 } // namespace OHOS::Ace

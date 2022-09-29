@@ -159,10 +159,10 @@ void AceContainer::Destroy()
         }
 
         if (isSubContainer_) {
-            // SubAcecontainer just return.
+            // SubAceContainer just return.
             return;
         }
-        
+
         // 2. Destroy Frontend on JS thread.
         RefPtr<Frontend> frontend;
         frontend_.Swap(frontend);
@@ -650,13 +650,11 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 
-    auto&& viewPositionChangeCallback = [context = pipelineContext_, id = instanceId_](
-        int32_t posX, int32_t posY) {
+    auto&& viewPositionChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t posX, int32_t posY) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewPositionChangeCallback(%d, %d)", posX, posY);
         context->GetTaskExecutor()->PostTask(
-            [context, posX, posY]() { context->OnSurfacePositionChanged(posX, posY); },
-            TaskExecutor::TaskType::UI);
+            [context, posX, posY]() { context->OnSurfacePositionChanged(posX, posY); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewPositionChangeCallback(viewPositionChangeCallback);
 
@@ -762,8 +760,7 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window =
-        std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
@@ -776,8 +773,7 @@ void AceContainer::SetViewNew(
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window =
-        std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
 }
 
@@ -1340,8 +1336,8 @@ void AceContainer::InitWindowCallback()
     pipelineContext->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
 }
 
-std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(const std::string& bundle,
-    const std::string& module)
+std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
+    const std::string& bundle, const std::string& module)
 {
     auto context = runtimeContext_.lock();
     if (!context) {
@@ -1396,48 +1392,42 @@ void AceContainer::UpdateConfiguration(
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
-    UpdateFrondend(!deviceAccess.empty());
+    NotifyConfigurationChange(!deviceAccess.empty());
 }
 
-void AceContainer::UpdateFrondend(bool needReloadTransition)
+void AceContainer::NotifyConfigurationChange(bool needReloadTransition)
 {
     auto taskExecutor = GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("AceContainer::UpdateConfiguration taskExecutor is null.");
-        return;
-    }
-    taskExecutor->PostTask([instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition]() {
-        ContainerScope scope(instanceId);
-        auto container = weak.Upgrade();
-        if (!container) {
-            return;
-        }
-        auto frontend = container->GetFrontend();
-        if (frontend) {
-            LOGI("AceContainer::UpdateConfiguration frontend MarkNeedUpdate");
-            frontend->FlushReload();
-        }
-        auto taskExecutor = container->GetTaskExecutor();
-        if (!taskExecutor) {
-            return;
-        }
-        taskExecutor->PostTask([instanceId, weak, needReloadTransition]() {
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition]() {
             ContainerScope scope(instanceId);
             auto container = weak.Upgrade();
-            if (!container) {
-                return;
+            CHECK_NULL_VOID(container);
+            auto frontend = container->GetFrontend();
+            if (frontend) {
+                LOGI("AceContainer::UpdateConfiguration frontend MarkNeedUpdate");
+                frontend->FlushReload();
             }
-            auto pipeline = container->GetPipelineContext();
-            if (!pipeline) {
-                return;
-            }
-            pipeline->FlushReload();
-            if (needReloadTransition) {
-                // reload transition animation
-                pipeline->FlushReloadTransition();
-            }
-            }, TaskExecutor::TaskType::UI);
-        }, TaskExecutor::TaskType::JS);
+            auto taskExecutor = container->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [instanceId, weak, needReloadTransition]() {
+                    ContainerScope scope(instanceId);
+                    auto container = weak.Upgrade();
+                    CHECK_NULL_VOID(container);
+                    auto pipeline = container->GetPipelineContext();
+                    CHECK_NULL_VOID(pipeline);
+                    pipeline->NotifyConfigurationChange();
+                    pipeline->FlushReload();
+                    if (needReloadTransition) {
+                        // reload transition animation
+                        pipeline->FlushReloadTransition();
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 extern "C" ACE_EXPORT void OHOS_ACE_HotReloadPage()
@@ -1445,7 +1435,7 @@ extern "C" ACE_EXPORT void OHOS_ACE_HotReloadPage()
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         auto ace = AceType::DynamicCast<AceContainer>(container);
         if (ace) {
-            ace->UpdateFrondend(true);
+            ace->NotifyConfigurationChange(true);
         }
         LOGI("frontend rebuild finished");
     });

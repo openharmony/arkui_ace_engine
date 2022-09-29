@@ -498,6 +498,38 @@ public:
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
+    void OnVirtualKeyboardAreaChange(Rect keyboardArea);
+
+    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
+    void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
+    {
+        virtualKeyBoardCallback_.push_back(std::move(listener));
+    }
+    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
+    {
+        for (const auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
+            if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    using configChangedCallback = std::function<void()>;
+    void SetConfigChangedCallback(configChangedCallback&& listener)
+    {
+        configChangedCallback_.push_back(std::move(listener));
+    }
+
+    void NotifyConfigurationChange()
+    {
+        for (const auto& callback : configChangedCallback_) {
+            if (callback) {
+                callback();
+            }
+        }
+    }
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -508,7 +540,12 @@ protected:
     virtual void FlushPipelineWithoutAnimation() = 0;
     virtual void FlushMessages() = 0;
     virtual void FlushUITasks() = 0;
+    virtual void OnVirtualKeyboardHeightChange(double keyboardHeight) {}
+
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
+
+    std::list<configChangedCallback> configChangedCallback_;
+    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
