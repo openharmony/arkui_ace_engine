@@ -135,6 +135,15 @@ public:
         MarkNeedRender();
     }
 
+    void NeedMaterial(bool needMaterial)
+    {
+        needMaterial_ = needMaterial;
+    }
+
+    bool GetNeedMaterial() const
+    {
+        return needMaterial_;
+    }
     void OnMouseHoverEnterAnimation() override;
     void OnMouseHoverExitAnimation() override;
     void StopMouseHoverAnimation() override;
@@ -282,6 +291,7 @@ private:
     int32_t insertIndex_ = DEFAULT_INDEX_VALUE;
     std::function<void(const std::shared_ptr<ClickInfo>&)> remoteMessageEvent_;
     bool enableDragStart_ = true;
+    bool needMaterial_ = false;
 }; // class RenderBox
 } // namespace OHOS::Ace
 

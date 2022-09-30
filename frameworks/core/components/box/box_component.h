@@ -360,6 +360,15 @@ public:
         return enableDragStart_;
     }
 
+    void NeedMaterial(bool needMaterial)
+    {
+        needMaterial_ = needMaterial;
+    }
+
+    bool GetNeedMaterial() const
+    {
+        return needMaterial_;
+    }
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
@@ -389,6 +398,7 @@ private:
     OnDropFunc onDragMoveId_;
     OnDropFunc onDragLeaveId_;
     OnDropFunc onDropId_;
+    bool needMaterial_ = false;
 };
 
 } // namespace OHOS::Ace
