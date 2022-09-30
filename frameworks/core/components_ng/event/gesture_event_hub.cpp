@@ -65,7 +65,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
     }
     if (dragEventActuator_) {
-        dragEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+        dragEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
     }
 
     return false;
