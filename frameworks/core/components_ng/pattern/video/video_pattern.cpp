@@ -96,6 +96,9 @@ void VideoPattern::PrepareMediaPlayer()
     }
     RegisterMediaPlayerEvent();
     PrepareSurface();
+    if (mediaPlayer_->PrepareAsync() != 0) {
+        LOGE("Player prepare failed");
+    }
 }
 
 bool VideoPattern::SetSourceForMediaPlayer()
@@ -273,6 +276,8 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
         sliderPaintProperty->UpdateMin(0.0f);
         sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
         sliderNode->MarkModifyDone();
+        auto playBtn = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(0));
+        ChangePlayButtonTag(false, playBtn);
     }
 
     if (needFireEvent) {
@@ -365,10 +370,6 @@ void VideoPattern::PrepareSurface()
         LOGE("Player SetVideoSurface failed");
         return;
     };
-    if (mediaPlayer_->PrepareAsync() != 0) {
-        LOGE("Player prepare failed");
-        return;
-    }
 }
 
 void VideoPattern::OnAttachToFrameNode()
