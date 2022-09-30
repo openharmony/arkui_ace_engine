@@ -51,8 +51,9 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 
+    auto parentWidth = idealSize.Width();
     if (needInitRealSideBarWidth_) {
-        InitRealSideBarWidth(layoutWrapper, idealSize.Width());
+        InitRealSideBarWidth(layoutWrapper, parentWidth);
     }
 
     auto begin = children.begin();
@@ -60,10 +61,10 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureSideBar(layoutProperty, sideBarLayoutWrapper);
 
     auto contentLayoutWrapper = children.front();
-    MeasureSideBarContent(layoutProperty, contentLayoutWrapper);
+    MeasureSideBarContent(layoutProperty, contentLayoutWrapper, parentWidth);
 
     auto imgLayoutWrapper = children.back();
-    MeasureControlButton(layoutProperty, imgLayoutWrapper);
+    MeasureControlButton(layoutProperty, imgLayoutWrapper, parentWidth);
 }
 
 void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth)
@@ -103,12 +104,12 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
 }
 
 void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
-    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& contentLayoutWrapper)
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& contentLayoutWrapper,
+    float parentWidth)
 {
     auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto parentWidth = constraint->selfIdealSize.Width().value();
     auto contentWidth = parentWidth;
 
     if (type == SideBarContainerType::EMBED) {
@@ -129,14 +130,11 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
     contentLayoutWrapper->Measure(contentConstraint);
 }
 
-void SideBarContainerLayoutAlgorithm::MeasureControlButton(
-    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& buttonLayoutWrapper)
+void SideBarContainerLayoutAlgorithm::MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
+    const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto controlButtonIdealSize = CreateIdealSize(
-        constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     auto scaleProperty = constraint->scaleProperty;
-    auto parentWidth = controlButtonIdealSize.Width();
 
     auto controlButtonWidth = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
     auto controlButtonHeight = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
@@ -144,9 +142,8 @@ void SideBarContainerLayoutAlgorithm::MeasureControlButton(
     auto controlButtonHeightPx = ConvertToPx(controlButtonHeight, scaleProperty, parentWidth).value_or(0);
 
     auto controlButtonLayoutConstraint = layoutProperty->CreateChildConstraint();
-    controlButtonIdealSize.SetWidth(controlButtonWidthPx);
-    controlButtonIdealSize.SetHeight(controlButtonHeightPx);
-    controlButtonLayoutConstraint.selfIdealSize = OptionalSizeF(controlButtonIdealSize);
+    controlButtonLayoutConstraint.selfIdealSize.SetWidth(controlButtonWidthPx);
+    controlButtonLayoutConstraint.selfIdealSize.SetHeight(controlButtonHeightPx);
     buttonLayoutWrapper->Measure(controlButtonLayoutConstraint);
 }
 
@@ -173,8 +170,10 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
 {
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+
+    CHECK_NULL_VOID (layoutWrapper->GetGeometryNode());
+    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto parentWidth = constraint->selfIdealSize.Width().value_or(0);
     auto scaleProperty = constraint->scaleProperty;
 
     auto controlButtonLeft = layoutProperty->GetControlButtonLeft().value_or(DEFAULT_CONTROL_BUTTON_LEFT);
@@ -193,8 +192,8 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    auto parentWidth = constraint->selfIdealSize.Width().value_or(0);
+    CHECK_NULL_VOID (layoutWrapper->GetGeometryNode());
+    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
     float sideBarOffsetX = 0.0f;
 
