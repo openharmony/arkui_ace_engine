@@ -15,14 +15,21 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 
+#include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/shape/shape_component.h"
+#include "core/components_ng/pattern/shape/ellipse_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSEllipse::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::EllipseView::Create();
+        JSShapeAbstract::SetNgSize(info);
+        return;
+    }
     RefPtr<Component> ellipseComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::ELLIPSE);
     ViewStackProcessor::GetInstance()->ClaimElementId(ellipseComponent);
     ViewStackProcessor::GetInstance()->Push(ellipseComponent);

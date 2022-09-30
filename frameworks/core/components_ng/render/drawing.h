@@ -18,6 +18,7 @@
 
 #include "utils/camera3d.h"
 #include "draw/canvas.h"
+#include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "drawing/engine_adapter/impl_interface/bitmap_impl.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "image/image.h"
@@ -52,6 +53,7 @@ using RSColorType = Rosen::Drawing::ColorType;
 using RSAlphaType = Rosen::Drawing::AlphaType;
 using RSScalar = Rosen::Drawing::scalar;
 using RSClipOp = Rosen::Drawing::ClipOp;
+using RSSkCanvas = Rosen::Drawing::SkiaCanvas;
 using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
 

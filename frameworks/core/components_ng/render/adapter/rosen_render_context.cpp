@@ -107,6 +107,14 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
         return;
     }
     auto paintRect = AdjustPaintRect();
+    SyncGeometryProperties(paintRect);
+}
+
+void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
+{
+    if (!rsNode_) {
+        return;
+    }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
 
@@ -134,7 +142,6 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
         PaintClip(frameSize);
     }
 }
-
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     if (!rsNode_) {
@@ -949,6 +956,13 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
         }
         rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
     }
+}
+
+void RosenRenderContext::ClipWithRect(const RectF& rectF)
+{
+    SkPath skPath;
+    skPath.addRect(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 }
 
 void RosenRenderContext::OnClipShapeUpdate(const ClipPathNG& clipPath)

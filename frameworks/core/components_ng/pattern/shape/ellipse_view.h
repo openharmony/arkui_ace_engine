@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/line_layout_algorithm.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_VIEW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_VIEW_H
 
-#include <string>
-
-#include "base/utils/utils.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
 
-std::optional<SizeF> LineLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
-{
-    if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
-    }
-    return std::nullopt;
-}
+class ACE_EXPORT EllipseView {
+public:
+    static void Create();
+};
+
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_VIEW_H

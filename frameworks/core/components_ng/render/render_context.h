@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -75,6 +76,8 @@ public:
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
 
+    virtual void SyncGeometryProperties(const RectF& rectF) {}
+
     virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) {}
@@ -110,6 +113,8 @@ public:
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}
+    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+    virtual void ClipWithRect(const RectF& rectF) {}
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -183,7 +188,6 @@ protected:
 
     virtual void OnTransformScaleUpdate(const VectorF& value) {}
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
-    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
 
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}

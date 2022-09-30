@@ -12,34 +12,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_PATTERN_H
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/shape/circle_paint_method.h"
+#include "core/components_ng/pattern/shape/polygon_paint_method.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
-#include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
 
 namespace OHOS::Ace::NG {
-class CirclePattern : public ShapePattern {
-    DECLARE_ACE_TYPE(CirclePattern, Pattern);
+class PolygonPattern : public ShapePattern {
+    DECLARE_ACE_TYPE(PolygonPattern, Pattern);
 
 public:
-    CirclePattern() = default;
-    ~CirclePattern() override = default;
+    PolygonPattern() = default;
+    explicit PolygonPattern(bool isPolygon) : isPolygon_(isPolygon) {}
+    ~PolygonPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<CirclePaintMethod>(GetAncestorPaintProperty());
+        return MakeRefPtr<PolygonPaintMethod>(GetAncestorPaintProperty(), isPolygon_);
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<PolygonPaintProperty>();
     }
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(CirclePattern);
+    ACE_DISALLOW_COPY_AND_MOVE(PolygonPattern);
+    bool isPolygon_ {};
 };
+
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H

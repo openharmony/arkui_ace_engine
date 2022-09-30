@@ -30,4 +30,5 @@ public:
     static void SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty);
 };
 } // namespace OHOS::Ace::NG
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SHAPE_PAINTER_H

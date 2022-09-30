@@ -26,6 +26,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -43,6 +44,8 @@ public:
     void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
+
+    void SyncGeometryProperties(const RectF& rectF) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
@@ -116,6 +119,7 @@ public:
     {
         return transitionDisappearingEffect_ != nullptr;
     }
+    void ClipWithRect(const RectF& rectF) override;
 
     bool TriggerPageTransition(PageTransitionType type) const override;
 
@@ -128,6 +132,7 @@ public:
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
+    void OnTransformTranslateUpdate(const Vector3F& value) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -145,7 +150,6 @@ private:
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
-    void OnTransformTranslateUpdate(const Vector3F& value) override;
     void OnTransformRotateUpdate(const Vector4F& value) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;

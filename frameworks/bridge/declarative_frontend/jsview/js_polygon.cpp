@@ -15,14 +15,21 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 
+#include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/shape/shape_component.h"
+#include "core/components_ng/pattern/shape/polygon_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSPolygon::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::PolygonView::Create(true);
+        JSShapeAbstract::SetNgSize(info);
+        return;
+    }
     RefPtr<Component> polygonComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::POLYGON);
     ViewStackProcessor::GetInstance()->ClaimElementId(polygonComponent);
     ViewStackProcessor::GetInstance()->Push(polygonComponent);
@@ -49,14 +56,9 @@ void JSPolygon::JsPoints(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
-    auto polygon = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     ShapePoint shapePoint;
     ShapePoints shapePoints;
     JSRef<JSArray> pointsArray = JSRef<JSArray>::Cast(info[0]);
-    if (!polygon) {
-        LOGE("ShapeComponent is null.");
-        return;
-    }
     if (pointsArray->Length() < 3) {
         LOGE("Less than three parameters");
         return;
@@ -80,6 +82,15 @@ void JSPolygon::JsPoints(const JSCallbackInfo& info)
                 return;
             }
             shapePoints.push_back(shapePoint);
+        }
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::PolygonView::SetPoints(shapePoints);
+            return;
+        }
+        auto polygon = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        if (!polygon) {
+            LOGE("ShapeComponent is null.");
+            return;
         }
         polygon->SetPoints(shapePoints);
     }
