@@ -679,7 +679,7 @@ FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutW
 
 TextDirection FlexLayoutAlgorithm::AdjustTextDirectionByDir() const
 {
-    auto textDir = TextDirection::RTL;
+    auto textDir = TextDirection::LTR;
     if (direction_ == FlexDirection::ROW_REVERSE) {
         textDir = textDir == TextDirection::RTL ? TextDirection::LTR : TextDirection::RTL;
     }
