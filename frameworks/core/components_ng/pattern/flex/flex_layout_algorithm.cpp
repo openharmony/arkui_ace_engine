@@ -404,12 +404,28 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(FlexItemProperties& flexIte
         lastChild = flexItemProperties.lastShrinkChild;
     }
     auto iter = secondaryMeasureList_.rbegin();
+    /**
+     * get the real cross axis size.
+     */
+    auto padding = layoutWrapper_->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto paddingLeft = padding.left.value_or(0.0f);
+    auto paddingRight = padding.right.value_or(0.0f);
+    auto paddingTop = padding.top.value_or(0.0f);
+    auto paddingBottom = padding.bottom.value_or(0.0f);
+    auto crossAxisSize = crossAxisSize_;
+    if (!NearEqual(selfIdealCrossAxisSize_, -1.0f)) {
+        if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
+            crossAxisSize = selfIdealCrossAxisSize_ - paddingTop - paddingBottom;
+        } else {
+            crossAxisSize = selfIdealCrossAxisSize_ - paddingLeft - paddingRight;
+        }
+    }
     while (iter != secondaryMeasureList_.rend()) {
         auto child = *iter;
         bool needSecondaryLayout = false;
         auto childLayoutWrapper = child.layoutWrapper;
         if (GetSelfAlign(childLayoutWrapper) == FlexAlign::STRETCH) {
-            UpdateLayoutConstraintOnCrossAxis(child.layoutConstraint, crossAxisSize_);
+            UpdateLayoutConstraintOnCrossAxis(child.layoutConstraint, crossAxisSize);
             needSecondaryLayout = true;
         }
         if (LessOrEqual(totalFlexWeight_, 0.0f)) {
@@ -455,11 +471,6 @@ void FlexLayoutAlgorithm::UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& l
 void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.empty()) {
-        layoutWrapper->GetGeometryNode()->SetFrameSize(realSize_.ConvertToSizeT());
-        return;
-    }
-    InitFlexProperties(layoutWrapper);
     /**
      * Obtain the main axis size and cross axis size based on user setting.
      */
@@ -470,13 +481,25 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                                                                      : Axis::VERTICAL,
         measureType)
                         .ConvertToSizeT();
-    realSize.UpdateSizeWhenSmaller(layoutConstraint->maxSize);
+    if (children.empty()) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
+        return;
+    }
+    InitFlexProperties(layoutWrapper);
+    mainAxisSize_ = GetMainAxisSizeHelper(realSize, direction_);
+    /**
+     * The user has not set the main axis size
+     */
+    if (NearEqual(mainAxisSize_, -1.0f)) {
+        mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
+                            ? layoutConstraint->maxSize.Width()
+                            : layoutConstraint->maxSize.Height();
+    }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto paddingLeft = padding.left.value_or(0.0f);
     auto paddingRight = padding.right.value_or(0.0f);
     auto paddingTop = padding.top.value_or(0.0f);
     auto paddingBottom = padding.bottom.value_or(0.0f);
-    mainAxisSize_ = GetMainAxisSizeHelper(realSize, direction_);
     if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         mainAxisSize_ -= paddingLeft + paddingRight;
     } else {
@@ -579,6 +602,7 @@ void FlexLayoutAlgorithm::PlaceChildren(LayoutWrapper* layoutWrapper, float fron
     LOGD("Place children, direction %{public}d, frontSpace %{public}f, betweenSpace %{public}f", direction_, frontSpace,
         betweenSpace);
     float childMainPos = IsStartTopLeft(direction_, TextDirection::LTR) ? frontSpace : mainAxisSize_ - frontSpace;
+    float crossAxisSize = NearEqual(selfIdealCrossAxisSize_, -1.0f) ? crossAxisSize_ : selfIdealCrossAxisSize_;
     float childCrossPos = 0.0f;
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     const auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
@@ -596,20 +620,20 @@ void FlexLayoutAlgorithm::PlaceChildren(LayoutWrapper* layoutWrapper, float fron
                     (IsStartTopLeft(FlipAxis(direction_), textDirection) == (alignItem == FlexAlign::FLEX_START))
                         ? direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE ? paddingLeft
                                                                                                        : paddingTop
-                        : (crossAxisSize_ - GetChildCrossAxisSize(child) -
+                        : (crossAxisSize - GetChildCrossAxisSize(child) -
                               (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                       ? paddingRight
                                       : paddingBottom));
                 break;
             case FlexAlign::CENTER:
-                childCrossPos = (crossAxisSize_ / 2) - (GetChildCrossAxisSize(child) / 2);
+                childCrossPos = (crossAxisSize / 2) - (GetChildCrossAxisSize(child) / 2);
                 break;
             case FlexAlign::STRETCH:
                 childCrossPos = IsStartTopLeft(FlipAxis(direction_), textDirection)
                                     ? direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                           ? paddingLeft
                                           : paddingTop
-                                    : (crossAxisSize_ - GetChildCrossAxisSize(child) -
+                                    : (crossAxisSize - GetChildCrossAxisSize(child) -
                                           (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                                   ? paddingRight
                                                   : paddingBottom));
