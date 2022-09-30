@@ -248,7 +248,9 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
         },
         TaskExecutor::TaskType::UI);
 
-    frontend_->AttachPipelineContext(pipelineContext_);
+    if (frontend_) {
+        frontend_->AttachPipelineContext(pipelineContext_);
+    }
 
     auto cardFronted = AceType::DynamicCast<CardFrontend>(frontend_);
     if (frontend_) {

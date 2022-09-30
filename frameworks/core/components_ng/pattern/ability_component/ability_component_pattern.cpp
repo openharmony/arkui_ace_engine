@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 void AbilityComponentPattern::OnModifyDone()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     int32_t windowId = pipelineContext->GetWindowId();
     adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
     if (adapter_) {

@@ -91,6 +91,7 @@ void RenderWaterFlowTest::CreateWaterFlow(int32_t itemMainSpan, int32_t itemCros
     waterflowComponent->SetMainLength(height);
     if (renderNode_ == nullptr) {
         GTEST_LOG_(INFO) << "renderNode_ == nullptr!";
+        return;
     }
     renderNode_->mainSize_ = view_height;
     renderNode_->crossSize_ = view_width;

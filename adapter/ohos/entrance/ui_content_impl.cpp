@@ -323,9 +323,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-        rsUiDirector->SetCacheDir(context->GetCacheDir());
-        rsUiDirector->Init();
+        if (rsUiDirector) {
+            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+            rsUiDirector->SetCacheDir(context->GetCacheDir());
+            rsUiDirector->Init();
+        }
     }
 
     int32_t deviceWidth = 0;

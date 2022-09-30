@@ -550,7 +550,9 @@ void QjsPaEngine::RegisterWorker()
 QjsPaEngine::~QjsPaEngine()
 {
     UnloadLibrary();
-    engineInstance_->GetDelegate()->RemoveTaskObserver();
+    if (engineInstance_ && engineInstance_->GetDelegate()) {
+        engineInstance_->GetDelegate()->RemoveTaskObserver();
+    }
     if (nativeEngine_ != nullptr) {
 #if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();

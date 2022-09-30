@@ -134,6 +134,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 void XComponentPattern::OnPaint()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateBackgroundColor(Color::BLACK);
 }
