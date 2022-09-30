@@ -512,29 +512,7 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
     bool isGpuEnable = false;
     bool success = false;
-#ifdef CANVAS_USE_GPU
-    if (surface_) {
-        isGpuEnable = true;
-        auto pipeline = context_.Upgrade();
-        if (!pipeline) {
-            return UNSUPPORTED;
-        }
-        double viewScale = pipeline->GetViewScale();
-        SkBitmap bitmap;
-        auto imageInfo = SkImageInfo::Make(lastLayoutSize_.Width() * viewScale, lastLayoutSize_.Height() * viewScale,
-            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
-        bitmap.allocPixels(imageInfo);
-        if (!surface_->readPixels(bitmap, 0, 0)) {
-            LOGE("surface readPixels failed when ToDataURL.");
-            return UNSUPPORTED;
-        }
-        success = bitmap.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
-        if (!success) {
-            LOGE("scalePixels failed when ToDataURL.");
-            return UNSUPPORTED;
-        }
-    }
-#endif
+
     if (!isGpuEnable) {
         if (canvasCache_.empty()) {
             LOGE("Bitmap is empty");

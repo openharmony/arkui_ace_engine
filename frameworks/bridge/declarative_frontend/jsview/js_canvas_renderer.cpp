@@ -574,19 +574,19 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         std::string colorStr = "";
         JSViewAbstract::ParseJsString(info[0], colorStr);
         auto color = Color::FromString(colorStr);
-            if (Container::IsCurrentUseNewPipeline()) {
-                if (isOffscreen_) {
-                    offscreenCanvasPattern_->SetStrokeColor(color);
-                } else {
-                    customPaintPattern_->UpdateStrokeColor(color);
-                }
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetStrokeColor(color);
             } else {
-                if (isOffscreen_) {
-                    offscreenCanvas_->SetStrokeColor(color);
-                } else {
-                    pool_->UpdateStrokeColor(color);
-                }
+                customPaintPattern_->UpdateStrokeColor(color);
             }
+        } else {
+            if (isOffscreen_) {
+                offscreenCanvas_->SetStrokeColor(color);
+            } else {
+                pool_->UpdateStrokeColor(color);
+            }
+        }
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> typeValue = obj->GetProperty("__type");

@@ -668,11 +668,11 @@ std::string CustomPaintPattern::ToDataURL(const std::string& args)
 
 double CustomPaintPattern::GetWidth()
 {
-    return paintMethod_->GetWidth();
+    return canvasSize_->Width();
 }
 
 double CustomPaintPattern::GetHeight()
 {
-    return paintMethod_->GetHeight();
+    return canvasSize_->Height();
 }
 } // namespace OHOS::Ace::NG

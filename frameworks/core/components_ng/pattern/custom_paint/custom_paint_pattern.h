@@ -51,6 +51,11 @@ public:
         return false;
     }
 
+    void SetCanvasSize(std::optional<SizeF> canvasSize)
+    {
+        canvasSize_ = canvasSize;
+    }
+
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
     void ClearRect(const Rect& rect);
@@ -128,6 +133,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     RefPtr<CanvasPaintMethod> paintMethod_;
+    std::optional<SizeF> canvasSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CustomPaintPattern);
 };
