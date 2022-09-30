@@ -1094,6 +1094,12 @@ void RosenRenderBox::SyncDecorationToRSNode()
     rsNode->SetForegroundColor(frontDecoration_ ? frontDecoration_->GetBackgroundColor().GetValue() : 0);
     rsNode->SetBackgroundFilter(backFilter);
     rsNode->SetFilter(filter);
+    if (GetNeedMaterial() && Rosen::RSSystemProperties::GetUniRenderEnabled()) {
+        backFilter = Rosen::RSFilter::CreateMaterialFilter(
+            static_cast<int>(BlurStyle::THICK), dipScale_);
+        rsNode->SetBackgroundFilter(backFilter);
+        rsNode->SetBackgroundColor(0x00000000);
+    }
 }
 
 void RosenRenderBox::OnAttachContext()
