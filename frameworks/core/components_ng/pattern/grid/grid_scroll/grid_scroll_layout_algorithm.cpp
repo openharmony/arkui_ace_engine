@@ -22,8 +22,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -65,7 +65,6 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childFrameOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     childFrameOffset += gridLayoutProperty->IsVertical() ? OffsetF(0.0f, gridLayoutInfo_.currentOffset_)
                                                          : OffsetF(gridLayoutInfo_.currentOffset_, 0.0f);
-    float crossFrWidth = GetCrossAxisSize(size, gridLayoutInfo_.axis_) / static_cast<float>(crossCount_);
 
     float prevLineHeight = 0.0f;
     for (const auto& line : gridLayoutInfo_.gridMatrix_) {
@@ -82,19 +81,19 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (itemIdex == iter->second) {
                 continue;
             }
-            itemIdex = iter->first;
-            auto crossOffset = itemsCrossPosition_.at(iter->second);
+            itemIdex = iter->second;
+            auto crossOffset = itemsCrossPosition_.at(itemIdex);
             if (axis_ == Axis::VERTICAL) {
                 offset.SetX(crossOffset);
             } else {
                 offset.SetY(crossOffset);
             }
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(iter->second);
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
             if (!wrapper) {
-                LOGE("item wrapper of index: %{public}d is null, please check.", iter->second);
+                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
                 continue;
             }
-            auto frSize = static_cast<float>(iter->second) * crossFrWidth;
+            auto frSize = itemsCrossSize_.at(itemIdex % static_cast<int32_t>(crossCount_));
             SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
             auto translate = Alignment::GetAlignPosition(
                 blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::CENTER);
@@ -135,7 +134,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper)
 {
     crossIndex_ = 0;
-    mainIndex_ = currentMainLineIndex_;
+    mainIndex_ = gridLayoutInfo_.startMainLineIndex_;
     itemsCrossPosition_.clear();
     float mainLength = gridLayoutInfo_.currentOffset_;
 
@@ -229,16 +228,19 @@ void GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cross
             break;
         }
         float lineHeight = -1.0f;
-        int32_t currentIndex = 0;
-
+        int32_t currentIndex = -1;
         for (const auto& gridItemRecord : gridMatrixIter->second) {
+            if (currentIndex == gridItemRecord.second) {
+                continue;
+            }
             currentIndex = gridItemRecord.second;
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
             if (!itemWrapper) {
                 LOGE("GridItem wrapper of index %{public}u null", currentIndex);
                 break;
             }
-            MeasureChild(mainSize, crossSize, currentIndex, layoutWrapper, itemWrapper);
+            auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
+            MeasureChildPlaced(frameSize, currentIndex, gridItemRecord.first, layoutWrapper, itemWrapper);
             auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
             lineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), lineHeight);
             // Record end index. When fill new line, the [endIndex_] will be the first item index to request
@@ -296,7 +298,8 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(
         }
         // Step2. Measure child
         // TODO: need to use [isScrollable_]
-        i += MeasureChild(mainSize, crossSize, currentIndex, layoutWrapper, itemWrapper);
+        auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
+        i += MeasureChild(frameSize, currentIndex, layoutWrapper, itemWrapper, true);
 
         // Step3. Measure [GridItem]
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -331,7 +334,8 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             break;
         }
         // Step2. Measure child
-        i += MeasureChild(mainSize, crossSize, currentIndex, layoutWrapper, itemWrapper);
+        auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
+        i += MeasureChild(frameSize, currentIndex, layoutWrapper, itemWrapper, false);
 
         // Step3. Measure [GridItem]
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -410,23 +414,34 @@ LayoutConstraintF GridScrollLayoutAlgorithm::CreateChildConstraint(float mainSiz
     itemConstraint.percentReference = SizeF(widthPercentBase, heightPercentBase);
     itemConstraint.maxSize = itemIdealSize;
     itemConstraint.UpdateIllegalSelfMarginSizeWithCheck(axis_ == Axis::VERTICAL
-                                                           ? OptionalSizeF(itemCrossSize, std::nullopt)
-                                                           : OptionalSizeF(std::nullopt, itemCrossSize));
+                                                            ? OptionalSizeF(itemCrossSize, std::nullopt)
+                                                            : OptionalSizeF(std::nullopt, itemCrossSize));
     return itemConstraint;
 }
 
-void GridScrollLayoutAlgorithm::GetNextGrid(int32_t& curMain, int32_t& curCross) const
+void GridScrollLayoutAlgorithm::GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const
 {
-    ++curCross;
-    if (curCross >= static_cast<int32_t>(crossCount_)) {
-        curCross = 0;
-        ++curMain;
+    if (!reverse) {
+        ++curCross;
+        if (curCross >= static_cast<int32_t>(crossCount_)) {
+            curCross = 0;
+            ++curMain;
+        }
+        return;
+    }
+
+    --curCross;
+    if (curCross < 0) {
+        curCross = static_cast<int32_t>(crossCount_) - 1;
+        --curMain;
     }
 }
 
-int32_t GridScrollLayoutAlgorithm::MeasureChild(float mainSize, float crossSize, int32_t itemIndex,
-    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper)
+int32_t GridScrollLayoutAlgorithm::MeasureChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, bool reverse)
 {
+    float mainSize = GetMainAxisSize(frameSize, gridLayoutInfo_.axis_);
+    float crossSize = GetCrossAxisSize(frameSize, gridLayoutInfo_.axis_);
     auto gridLayoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(gridLayoutProperty, 0);
     auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
@@ -449,7 +464,7 @@ int32_t GridScrollLayoutAlgorithm::MeasureChild(float mainSize, float crossSize,
         itemsCrossPosition_.try_emplace(itemIndex, ComputeItemCrossPosition(layoutWrapper, crossStart));
     } else {
         while (!CheckGridPlaced(itemIndex, mainIndex_, crossIndex_, mainSpan, crossSpan)) {
-            GetNextGrid(mainIndex_, crossIndex_);
+            GetNextGrid(mainIndex_, crossIndex_, reverse);
             if (mainIndex_ >= mainCount || crossIndex_ >= crossCount) {
                 break;
             }
@@ -461,6 +476,24 @@ int32_t GridScrollLayoutAlgorithm::MeasureChild(float mainSize, float crossSize,
             CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossIndex_, crossSpan));
         itemsCrossPosition_.try_emplace(itemIndex, ComputeItemCrossPosition(layoutWrapper, crossIndex_));
     }
+    return crossSpan - 1;
+}
+
+int32_t GridScrollLayoutAlgorithm::MeasureChildPlaced(const SizeF& frameSize, int32_t itemIndex, int32_t crossStart,
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper)
+{
+    auto gridLayoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    float mainSize = GetMainAxisSize(frameSize, gridLayoutInfo_.axis_);
+    float crossSize = GetCrossAxisSize(frameSize, gridLayoutInfo_.axis_);
+    auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(childLayoutProperty, 0);
+    int32_t itemRowStart = childLayoutProperty->GetRowStart().value_or(-1);
+    int32_t itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
+    int32_t itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
+    int32_t itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+    auto crossSpan = axis_ == Axis::VERTICAL ? itemColSpan : itemRowSpan;
+    childLayoutWrapper->Measure(CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossStart, crossSpan));
+    itemsCrossPosition_.try_emplace(itemIndex, ComputeItemCrossPosition(layoutWrapper, crossStart));
     return crossSpan - 1;
 }
 
