@@ -82,6 +82,11 @@ public:
 
     // Load script in JS engine, and execute in corresponding context.
     virtual void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) = 0;
+    // Load ets card script in JS engine, and execute in corresponding context.
+    virtual bool LoadCard(const std::string& url, uint64_t cardId)
+    {
+        return false;
+    }
 
     // Load the app.js file of the FA model in NG structure..
     virtual bool LoadFaAppSource()

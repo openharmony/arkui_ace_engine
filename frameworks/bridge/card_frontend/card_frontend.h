@@ -37,6 +37,14 @@ public:
     CardFrontend() = default;
     ~CardFrontend() override;
 
+    virtual void SetLoadCardCallBack(WeakPtr<PipelineBase> outSidePipelineContext) {}
+    virtual void UpdateData(const std::string& dataList);
+    virtual void OnPageLoaded(const RefPtr<Framework::JsAcePage>& page);
+    virtual void HandleSurfaceChanged(int32_t width, int32_t height);
+    virtual void UpdatePageData(const std::string& dataList);
+    virtual void OnMediaFeatureUpdate();
+    std::string GetFormSrcPath(const std::string& uri, const std::string& suffix) const;
+
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
 
     void Destroy() override;
@@ -61,7 +69,6 @@ public:
 
     void LoadPluginJsCode(std::string&& jsCode) const override {}
     void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override {}
-    std::string GetFormSrcPath(const std::string& uri, const std::string& suffix) const;
 
     // application lifecycle.
     void UpdateState(Frontend::State state) override {}
@@ -106,7 +113,6 @@ public:
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void DumpFrontend() const override {}
     WindowConfig& GetWindowConfig() override;
-    void UpdateData(const std::string& dataList);
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
 
@@ -170,15 +176,13 @@ public:
         cardWindowConfig_ = cardWindowConfig;
     }
 
-private:
-    void UpdatePageData(const std::string& dataList);
-    void LoadPage(const std::string& urlPath, const std::string& params);
-    void ParsePage(const RefPtr<PipelineBase>& context, const std::string& pageContent, const std::string& params,
-        const RefPtr<Framework::JsAcePage>& page);
-    void OnPageLoaded(const RefPtr<Framework::JsAcePage>& page);
+    void SetRunningCardId(uint64_t cardId)
+    {
+        cardId_ = cardId;
+    }
+
+protected:
     void ParseManifest() const;
-    void HandleSurfaceChanged(int32_t width, int32_t height);
-    void OnMediaFeatureUpdate();
 
     ColorMode colorMode_ = ColorMode::LIGHT;
     FrontendType type_ = FrontendType::JS_CARD;
@@ -194,11 +198,18 @@ private:
     mutable std::once_flag onceFlag_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AceEventHandler> eventHandler_;
-    RefPtr<Framework::CardFrontendDelegate> delegate_;
     Framework::PageIdPool pageIdPool_;
-    RefPtr<Framework::JsCardParser> parseJsCard_;
     std::string formSrc_;
     WindowConfig cardWindowConfig_;
+    uint64_t cardId_ = 0;
+
+private:
+    RefPtr<Framework::CardFrontendDelegate> delegate_;
+    void LoadPage(const std::string& urlPath, const std::string& params);
+    void ParsePage(const RefPtr<PipelineBase>& context, const std::string& pageContent, const std::string& params,
+        const RefPtr<Framework::JsAcePage>& page);
+
+    RefPtr<Framework::JsCardParser> parseJsCard_;
 };
 
 class CardEventHandler : public AceEventHandler {

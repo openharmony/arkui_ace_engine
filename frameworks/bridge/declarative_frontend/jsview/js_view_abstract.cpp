@@ -32,6 +32,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/common/card_scope.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
 
@@ -5858,6 +5859,22 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
             moduleName = module->ToString();
         }
     }
+    auto cardId = CardScope::CurrentId();
+    if (cardId != INVALID_CARD_ID) {
+        auto container = Container::Current();
+        auto cardPipelineContext = container->GetCardPipeline(cardId);
+        if (!cardPipelineContext) {
+            LOGE("card pipelineContext is null!");
+            return nullptr;
+        }
+        auto cardThemeManager = cardPipelineContext->GetThemeManager();
+        if (!cardThemeManager) {
+            LOGE("card themeManager is null!");
+            return nullptr;
+        }
+        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
+    }
+
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
         auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());

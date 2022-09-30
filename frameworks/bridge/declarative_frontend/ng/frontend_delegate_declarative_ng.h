@@ -178,6 +178,16 @@ public:
         return manifestParser_->GetWindowConfig();
     }
 
+    const RefPtr<Framework::ManifestParser>& GetManifestParser() const
+    {
+        return manifestParser_;
+    }
+
+    const RefPtr<TaskExecutor>& GetTaskExecutor() const
+    {
+        return taskExecutor_;
+    }
+
     bool OnPageBackPress();
 
     void OnPageShow();

@@ -35,6 +35,7 @@ public:
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
 
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
+
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
 
     // Load the je file of the page in NG structure..

@@ -69,6 +69,34 @@ public:
         return frontend_;
     }
 
+    void SetCardFrontendDelegate(WeakPtr<Framework::FrontendDelegate> delegate, uint64_t cardId) override
+    {
+        cardFrontendMap_.try_emplace(cardId, delegate);
+    }
+
+    WeakPtr<Framework::FrontendDelegate> GetCardFrontendDelegate(uint64_t cardId) const override
+    {
+        auto it = cardFrontendMap_.find(cardId);
+        if (it != cardFrontendMap_.end()) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    virtual RefPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const override
+    {
+        auto it = cardFrontendMap_.find(cardId);
+        if (it == cardFrontendMap_.end()) {
+            return nullptr;
+        }
+        auto weak = it->second;
+        auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return nullptr;
+        }
+        return delegate->GetPipelineContext();
+    }
+
     RefPtr<TaskExecutor> GetTaskExecutor() const override
     {
         return taskExecutor_;
@@ -318,6 +346,8 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
+    std::unordered_map<uint64_t, WeakPtr<Framework::FrontendDelegate>> cardFrontendMap_;
+    
     FrontendType type_ = FrontendType::JS;
     bool isArkApp_ = false;
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;

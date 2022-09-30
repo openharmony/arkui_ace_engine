@@ -23,7 +23,9 @@
 #include "core/common/frontend.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
+#include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/core/pipeline/pipeline_context.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT SubContainer : public virtual AceType {
@@ -40,7 +42,8 @@ public:
 
     void Initialize();
     void RunCard(int64_t id, const std::string& path, const std::string& module, const std::string& data,
-        const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc);
+        const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
+        const FrontendType& cardType);
     void UpdateCard(
         const std::string& content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap);
     void Destroy();
@@ -120,13 +123,15 @@ public:
 private:
     RefPtr<CardFrontend> frontend_;
     RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<PipelineContext> pipelineContext_;
+    RefPtr<PipelineBase> pipelineContext_;
     WeakPtr<PipelineBase> outSidePipelineContext_;
     RefPtr<AssetManager> assetManager_;
     int32_t instanceId_;
 
     int64_t runningCardId_ = 0;
     bool allowUpdate_ = true;
+
+    FrontendType cardType_ = FrontendType::JS_CARD;
 
     RefPtr<Component> formComponent_;
     WeakPtr<Element> formElement_;

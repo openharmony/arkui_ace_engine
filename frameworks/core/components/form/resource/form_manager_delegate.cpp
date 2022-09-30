@@ -21,6 +21,7 @@
 
 #include "base/log/log.h"
 #include "frameworks/base/json/json_util.h"
+#include "frameworks/core/common/frontend.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_callback_client.h"
@@ -416,8 +417,12 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
             return;
         }
         hasCreated_ = true;
+        OHOS::Ace::FrontendType type = OHOS::Ace::FrontendType::JS_CARD;
+        if (formJsInfo.type == AppExecFwk::FormType::ETS) {
+            type = OHOS::Ace::FrontendType::ETS_CARD;
+        }
         onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath, formJsInfo.formName,
-            formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo);
+            formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo, type);
     } else {
         if (formJsInfo.formData.empty()) {
             LOGE("update form data success, but data is empty!!!");
