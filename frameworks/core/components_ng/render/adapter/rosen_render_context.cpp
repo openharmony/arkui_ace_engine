@@ -88,18 +88,22 @@ void RosenRenderContext::StopRecordingIfNeeded()
     }
 }
 
-void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName)
+void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode)
 {
-    if (!rsNode_) {
-        if (surfaceName.has_value()) {
-            struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceName.value() };
-            rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-        } else if (isRoot) {
-            LOGI("create RSRootNode");
-            rsNode_ = Rosen::RSRootNode::Create();
-        } else {
-            rsNode_ = Rosen::RSCanvasNode::Create();
-        }
+    // skip if useExternalNode is true or node already created
+    if (useExternalNode || rsNode_ != nullptr) {
+        return;
+    }
+
+    // create proper RSNode base on input
+    if (surfaceName.has_value()) {
+        struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceName.value() };
+        rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    } else if (isRoot) {
+        LOGI("create RSRootNode");
+        rsNode_ = Rosen::RSRootNode::Create();
+    } else {
+        rsNode_ = Rosen::RSCanvasNode::Create();
     }
 }
 
@@ -819,6 +823,13 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     auto option = pipeline->GetExplicitAnimationOption();
     // if no explicit animation, cannot animate
     if (!option.GetCurve()) {
+        std::vector<OHOS::Rosen::NodeId> childNodeIds;
+        for (auto& child : nowRSNodes) {
+            childNodeIds.emplace_back(child->GetId());
+        }
+        if (childNodeIds == rsNode_->GetChildren()) {
+            return;
+        }
         rsNode_->ClearChildren();
         for (const auto& rsnode : nowRSNodes) {
             rsNode_->AddChild(rsnode, -1);
@@ -1349,4 +1360,20 @@ void RosenRenderContext::ClearDrawCommands()
     StopRecordingIfNeeded();
 }
 
+void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
+{
+    // Update rsNode_ to externalNode.
+    if (externalNode == rsNode_) {
+        return;
+    }
+    rsNode_ = externalNode;
+
+    // after update, tell parent to update RSNode hierarchy.
+    auto uiNode = GetHost();
+    CHECK_NULL_VOID(uiNode);
+    auto parentUINode = uiNode->GetParent();
+    CHECK_NULL_VOID(parentUINode);
+    parentUINode->MarkNeedSyncRenderTree();
+    parentUINode->RebuildRenderContextTree();
+}
 } // namespace OHOS::Ace::NG

@@ -41,7 +41,7 @@ public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;
 
-    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) override;
+    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
@@ -70,10 +70,7 @@ public:
 
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
-    void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode)
-    {
-        rsNode_ = rsNode;
-    }
+    void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
 
     void StartRecording() override;
 
@@ -122,6 +119,7 @@ public:
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
+
     void UpdateTransition(const TransitionOptions& options) override;
     bool HasAppearingTransition() const
     {

@@ -31,8 +31,11 @@
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
 
-namespace OHOS::Rosen::Drawing {
+namespace OHOS::Rosen {
+class RSNode;
+namespace Drawing {
 class Canvas;
+}
 }
 namespace OHOS::Ace::NG {
 class GeometryNode;
@@ -40,6 +43,7 @@ class RenderPropertyNode;
 class FrameNode;
 class Modifier;
 
+using RSNode = Rosen::RSNode;
 using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
@@ -80,7 +84,8 @@ public:
 
     virtual void OnModifyDone() {}
 
-    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) {}
+    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
+    {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
