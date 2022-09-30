@@ -38,7 +38,7 @@ function Observed<C extends Object>(target: Type<C>): any {
   var original = target;
   // the new constructor behaviour
   var f: any = function (...args: any[]) {
-    console.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
+    stateMgmtConsole.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
     return new ObservedObject<C>(new original(...args), undefined);
   };
 
@@ -61,11 +61,11 @@ class SubscribableHandler {
     if (owningProperty) {
       this.addOwningProperty(owningProperty);
     }
-    console.debug(`SubscribableHandler: construcstor done`);
+    stateMgmtConsole.debug(`SubscribableHandler: construcstor done`);
   }
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
-    console.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
+    stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
     this.owningProperties_.add(subscriber.id__());
   }
 
@@ -77,13 +77,13 @@ class SubscribableHandler {
   }
 
   public removeOwningPropertyById(subscriberId: number): void {
-    console.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`)
+    stateMgmtConsole.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`)
     this.owningProperties_.delete(subscriberId);
   }
 
 
   protected notifyPropertyHasChanged(propName: string, newValue: any) {
-    console.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`)
+    stateMgmtConsole.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`)
     var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = registry!.get(subscribedId)
@@ -95,7 +95,7 @@ class SubscribableHandler {
           (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
         }
       } else {
-        console.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+        stateMgmtConsole.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
       }
     });
   }
@@ -215,7 +215,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     super(obj, handler);
 
     if (ObservedObject.IsObservedObject(obj)) {
-      console.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+      stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
     }
   } // end of constructor
 

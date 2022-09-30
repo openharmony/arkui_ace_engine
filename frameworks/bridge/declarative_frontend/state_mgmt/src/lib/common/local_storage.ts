@@ -36,7 +36,7 @@ class LocalStorage extends NativeLocalStorage {
    */
   constructor(initializingProperties: Object = {}) {
     super();
-    console.debug(`${this.constructor.name} constructor.`)
+    stateMgmtConsole.debug(`${this.constructor.name} constructor.`)
     this.storage_ = new Map<string, ObservedPropertyAbstract<any>>();
     if (Object.keys(initializingProperties).length) {
       this.initializeProps(initializingProperties);
@@ -48,7 +48,7 @@ class LocalStorage extends NativeLocalStorage {
    * @param initializingProperties 
    */
   public initializeProps(initializingProperties: Object = {}) {
-    console.debug(`${this.constructor.name} initializing with Object keys: [${Object.keys(initializingProperties)}].`)
+    stateMgmtConsole.debug(`${this.constructor.name} initializing with Object keys: [${Object.keys(initializingProperties)}].`)
     this.storage_.clear();
     Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) =>
       this.addNewPropertyInternal(propName, initializingProperties[propName])
@@ -125,12 +125,12 @@ class LocalStorage extends NativeLocalStorage {
    */
   public set<T>(propName: string, newValue: T): boolean {
     if (newValue == undefined) {
-      console.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+      stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
       return false;
     }
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
-      console.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+      stateMgmtConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
       return false;
     }
     p.set(newValue);
@@ -149,16 +149,16 @@ class LocalStorage extends NativeLocalStorage {
    */
   public setOrCreate<T>(propName: string, newValue: T): boolean {
     if (newValue == undefined) {
-      console.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+      stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
       return false;
     }
 
     var p: ObservedPropertyAbstract<T> = this.storage_.get(propName);
     if (p) {
-      console.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
+      stateMgmtConsole.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
       p.set(newValue);
     } else {
-      console.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
+      stateMgmtConsole.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
       this.addNewPropertyInternal<T>(propName, newValue);
     }
     return true;
@@ -191,7 +191,7 @@ class LocalStorage extends NativeLocalStorage {
   public link<T>(propName: string, linkUser?: IPropertySubscriber, subscribersName?: string): ObservedPropertyAbstract<T> | undefined {
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
-      console.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+      stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
       return undefined;
     }
     let linkResult = p.createLink(linkUser, propName);
@@ -230,7 +230,7 @@ class LocalStorage extends NativeLocalStorage {
   public prop<S>(propName: string, propUser?: IPropertySubscriber, subscribersName?: string): ObservedPropertyAbstract<S> | undefined {
     var p: ObservedPropertyAbstract<S> | undefined = this.storage_.get(propName);
     if (p == undefined) {
-      console.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+      stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
       return undefined;
     }
     let propResult = p.createProp(propUser, propName)
@@ -276,7 +276,7 @@ class LocalStorage extends NativeLocalStorage {
     var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
     if (p) {
       if (p.numberOfSubscrbers()) {
-        console.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
+        stateMgmtConsole.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
           ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
         return false;
       }
@@ -284,7 +284,7 @@ class LocalStorage extends NativeLocalStorage {
       this.storage_.delete(propName);
       return true;
     } else {
-      console.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+      stateMgmtConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
       return false;
     }
   }
@@ -299,7 +299,7 @@ class LocalStorage extends NativeLocalStorage {
     for (let propName of this.keys()) {
       var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
       if (p.numberOfSubscrbers()) {
-        console.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
+        stateMgmtConsole.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
           has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
         return false;
       }
@@ -308,7 +308,7 @@ class LocalStorage extends NativeLocalStorage {
       var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
       p.aboutToBeDeleted();
     }
-    console.debug(`${this.constructor.name}.deleteAll: success`);
+    stateMgmtConsole.debug(`${this.constructor.name}.deleteAll: success`);
   }
 
   /**
@@ -366,7 +366,7 @@ class LocalStorage extends NativeLocalStorage {
       // property named 'storagePropName' not yet in storage
       // add new property to storage
       if (defaultValue === undefined) {
-        console.error(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
+        stateMgmtConsole.error(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
         return undefined;
       }
 

@@ -36,7 +36,7 @@ abstract class View extends NativeViewFullUpdate implements
   protected localStoragebackStore_: LocalStorage = undefined;
   protected get localStorage_() {
     if (!this.localStoragebackStore_) {
-      console.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
+      stateMgmtConsole.info(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
       this.localStoragebackStore_ = new LocalStorage({ /* emty */ });
     }
     return this.localStoragebackStore_;
@@ -47,7 +47,7 @@ abstract class View extends NativeViewFullUpdate implements
       return;
     }
     if (this.localStoragebackStore_) {
-      console.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+      stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
     }
     this.localStoragebackStore_ = instance;
   }
@@ -80,15 +80,15 @@ abstract class View extends NativeViewFullUpdate implements
     this.localStoragebackStore_ = undefined;
     if (parent) {
       // this View is not a top-level View
-      console.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+      stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
       this.localStorage_ = parent.localStorage_;
     } else if (localStorage) {
       this.localStorage_ = localStorage;
-      console.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
+      stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
     }
 
     SubscriberManager.Get().add(this);
-    console.debug(`${this.constructor.name}: constructor done`);
+    stateMgmtConsole.debug(`${this.constructor.name}: constructor done`);
   }
 
   // globally unique id, this is different from compilerAssignedUniqueChildId!
@@ -115,14 +115,14 @@ abstract class View extends NativeViewFullUpdate implements
       // need to sync container instanceId to switch instanceId in C++ side.
       this.syncInstanceId();
       if (this.propsUsedForRender.has(info)) {
-        console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
+        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
         this.markNeedUpdate();
       } else {
-        console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View does NOT need update`);
+        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View does NOT need update`);
       }
       let cb = this.watchedProps.get(info)
       if (cb) {
-        console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
+        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
         cb.call(this, info);
       }
       this.restoreInstanceId();
@@ -130,7 +130,7 @@ abstract class View extends NativeViewFullUpdate implements
   }
 
   propertyRead(info?: PropertyInfo): void {
-    console.debug(`${this.constructor.name}: propertyRead ['${info || "unknowm"}'].`);
+    stateMgmtConsole.debug(`${this.constructor.name}: propertyRead ['${info || "unknowm"}'].`);
     if (info && (info != "unknown") && this.isRenderingInProgress) {
       this.propsUsedForRender.add(info);
     }
@@ -143,7 +143,7 @@ abstract class View extends NativeViewFullUpdate implements
   }
 
   public aboutToRender(): void {
-    console.debug(`${this.constructor.name}: aboutToRender`);
+    stateMgmtConsole.debug(`${this.constructor.name}: aboutToRender`);
     // reset
     this.propsUsedForRender = new Set<string>();
     this.isRenderingInProgress = true;
@@ -156,7 +156,7 @@ abstract class View extends NativeViewFullUpdate implements
 
   public onRenderDone(): void {
     this.isRenderingInProgress = false;
-    console.debug(`${this.constructor.name}: onRenderDone: render performed get access to these properties: ${JSON.stringify(Array.from(this.propsUsedForRender))}.`);
+    stateMgmtConsole.debug(`${this.constructor.name}: onRenderDone: render performed get access to these properties: ${JSON.stringify(Array.from(this.propsUsedForRender))}.`);
   }
 
 
