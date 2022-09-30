@@ -262,7 +262,7 @@ void ListLayoutAlgorithm::LayoutForward(
         currentEndPos =
             GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) - paddingBeforeContent_;
     }
-    float currentStartPos = currentEndPos;
+    float currentStartPos;
     auto currentIndex = preStartIndex_ - 1;
     float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
     if (cachedCount_ > 0) {
@@ -363,7 +363,7 @@ void ListLayoutAlgorithm::LayoutBackward(
     float currentStartPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) +
                             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis) -
                             paddingBeforeContent_;
-    float currentEndPos = currentStartPos;
+    float currentEndPos;
     auto currentIndex = preEndIndex_ + 1;
     float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
     if (cachedCount_ > 0) {
@@ -613,7 +613,7 @@ void ListLayoutAlgorithm::LayoutForwardForLaneList(
         currentEndPos =
             GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) - paddingBeforeContent_;
     }
-    float currentStartPos = currentEndPos;
+    float currentStartPos;
     auto currentIndex = preStartIndex_ - 1;
     float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
     if (cachedCount_ > 0) {
@@ -718,7 +718,7 @@ void ListLayoutAlgorithm::LayoutBackwardForLaneList(
     float currentStartPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) +
                             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis) -
                             paddingBeforeContent_;
-    float currentEndPos = currentStartPos;
+    float currentEndPos;
     auto currentIndex = preEndIndex_ + 1;
     float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
     if (cachedCount_ > 0) {

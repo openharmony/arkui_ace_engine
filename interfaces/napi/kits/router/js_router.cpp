@@ -413,7 +413,9 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
             delete routerAsyncContext;
             return;
         }
-        routerAsyncContext->callbackType = callbackType;
+        if (routerAsyncContext) {
+            routerAsyncContext->callbackType = callbackType;
+        }
         CallBackToJSTread(routerAsyncContext);
     };
     delegate->EnableAlertBeforeBackPage(messageChar.get(), std::move(dilogCallback));

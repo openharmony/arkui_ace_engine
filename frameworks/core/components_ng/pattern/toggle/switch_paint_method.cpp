@@ -63,9 +63,7 @@ void SwitchPaintMethod::PaintContent(
     auto yOffset = contentOffset.GetY();
 
     auto borderWidth_ = static_cast<float>(switchTheme->GetBorderWidth().Value());
-    auto hoverRadius_ = static_cast<float>(switchTheme->GetHoverRadius().Value());
-
-    hoverRadius_ = radius - radiusGap_;
+    auto hoverRadius_ = radius - radiusGap_;
 
     RSBrush brush;
     brush.SetColor(ToRSColor(switchTheme->GetInactiveColor()));
