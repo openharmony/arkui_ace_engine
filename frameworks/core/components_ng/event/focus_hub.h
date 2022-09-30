@@ -39,6 +39,43 @@ enum class FocusNodeType : int32_t {
     DEFAULT = 0,
     GROUP_DEFAULT = 1,
 };
+enum class ScopeType : int32_t {
+    OTHERS = 0,
+    FLEX = 1,
+};
+enum class FocusStep : int32_t {
+    LEFT = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3,
+};
+using GetNextFocusNodeFunc = std::function<WeakPtr<FocusHub>(FocusStep, WeakPtr<FocusHub>)>;
+
+struct FocusPattern final {
+    FocusPattern() = default;
+    FocusPattern(FocusType focusType, bool focusable) : focusType(focusType), focusable(focusable) {}
+    ~FocusPattern() = default;
+
+    FocusType focusType = FocusType::DISABLE;
+    bool focusable = false;
+};
+
+struct ScopeFocusAlgorithm final {
+    ScopeFocusAlgorithm() = default;
+    ScopeFocusAlgorithm(bool isVertical, bool isLeftToRight, ScopeType scopeType)
+        : isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType)
+    {}
+    ScopeFocusAlgorithm(bool isVertical, bool isLeftToRight, ScopeType scopeType, GetNextFocusNodeFunc&& function)
+        : isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType),
+          getNextFocusNode(std::move(function))
+    {}
+    ~ScopeFocusAlgorithm() = default;
+
+    bool isVertical { true };
+    bool isLeftToRight { true };
+    ScopeType scopeType { ScopeType::OTHERS };
+    GetNextFocusNodeFunc getNextFocusNode;
+};
 
 class ACE_EXPORT FocusCallbackEvents : public AceType {
 public:
@@ -179,6 +216,9 @@ public:
     bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect);
 
     bool AcceptFocusByRectOfLastFocus(const RectF& rect);
+    bool AcceptFocusByRectOfLastFocusNode(const RectF& rect);
+    bool AcceptFocusByRectOfLastFocusScope(const RectF& rect);
+    bool AcceptFocusByRectOfLastFocusFlex(const RectF& rect);
 
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
@@ -189,6 +229,9 @@ public:
     bool RequestFocusImmediatelyById(const std::string& id);
 
     bool IsFocusableByTab();
+    bool IsFocusableNodeByTab();
+    bool IsFocusableScopeByTab();
+
     bool IsFocusableWholePath();
 
     bool IsFocusable();
@@ -395,14 +438,9 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    void SetScopeVertical(bool scpeVertical)
+    void SetScopeFocusAlgorithm(ScopeFocusAlgorithm focusAlgorithm)
     {
-        scopeVertical_ = scpeVertical;
-    }
-
-    void SetScopeReverse(bool scopeReverse)
-    {
-        scopeReverse_ = scopeReverse;
+        focusAlgorithm_ = focusAlgorithm;
     }
 
 protected:
@@ -422,6 +460,7 @@ protected:
 
     void HandleFocus()
     {
+        // Need update: void RenderNode::MoveWhenOutOfViewPort(bool hasEffect)
         OnFocus();
     }
 
@@ -449,11 +488,10 @@ private:
     bool isFirstFocusInPage_ { true };
     bool show_ { true };
     bool enabled_ { true };
-    bool scopeVertical_ { true };
-    bool scopeReverse_ { true };
 
     FocusType focusType_ = FocusType::DISABLE;
     RectF rectFromOrigin_;
+    ScopeFocusAlgorithm focusAlgorithm_;
 };
 } // namespace OHOS::Ace::NG
 

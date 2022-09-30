@@ -92,13 +92,9 @@ public:
 
     bool TriggerPageTransition(PageTransitionType type) const;
 
-    FocusType GetFocusType() override
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::SCOPE;
-    }
-    bool GetFocusable() override
-    {
-        return true;
+        return { FocusType::SCOPE, true };
     }
 
 private:

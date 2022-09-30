@@ -57,11 +57,6 @@ public:
         return isVertical_;
     }
 
-    bool IsDirectionVertical() override
-    {
-        return isVertical_;
-    }
-
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {

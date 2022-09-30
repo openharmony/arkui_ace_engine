@@ -50,15 +50,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, MainAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);
 
-    bool IsDirectionVertical() override
-    {
-        if (GetFlexDirection().has_value()) {
-            return GetFlexDirection().value() == FlexDirection::COLUMN ||
-                   GetFlexDirection().value() == FlexDirection::COLUMN_REVERSE;
-        }
-        return true;
-    }
-
 private:
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutProperty);
 };

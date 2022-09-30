@@ -223,13 +223,14 @@ public:
     // Called before frameNode CreatePaintWrapper.
     virtual void BeforeCreatePaintWrapper() {}
 
-    virtual FocusType GetFocusType()
+    virtual FocusPattern GetFocusPattern() const
     {
-        return FocusType::DISABLE;
+        return { FocusType::DISABLE, false };
     }
-    virtual bool GetFocusable()
+
+    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm() const
     {
-        return false;
+        return ScopeFocusAlgorithm();
     }
 
 protected:
