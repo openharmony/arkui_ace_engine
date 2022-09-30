@@ -445,9 +445,9 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     SkCanvas tempCanvas(tempCache);
 #ifdef USE_SYSTEM_SKIA_S
     tempCanvas.drawImageRect(
-        cacheBitmap_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
+        canvasCache_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
 #else
-    tempCanvas.drawBitmapRect(cacheBitmap_, srcRect, dstRect, nullptr);
+    tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
 #endif
     // write color
     std::unique_ptr<uint8_t[]> pixels = std::make_unique<uint8_t[]>(size * 4);
