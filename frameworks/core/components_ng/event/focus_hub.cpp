@@ -258,7 +258,7 @@ bool FocusHub::IsFocusableScope()
     FlushChildrenFocusHub();
     // TODO: Contaner without child can be focusable
     return std::any_of(focusNodes_.begin(), focusNodes_.end(),
-        [](const RefPtr<FocusHub>& focusNode) { return focusNode->IsFocusableNode(); });
+        [](const RefPtr<FocusHub>& focusNode) { return focusNode->IsFocusable(); });
 }
 
 bool FocusHub::IsFocusableNode()
@@ -492,10 +492,13 @@ void FocusHub::RequestFocus() const
 
 bool FocusHub::RequestNextFocus(bool vertical, bool reverse, const RectF& rect)
 {
-    if (scopeVertical_ != vertical) {
-        return false;
+    if (!focusAlgorithm_.getNextFocusNode) {
+        if (focusAlgorithm_.isVertical != vertical) {
+            return false;
+        }
+        return GoToNextFocusLinear(reverse, rect);
     }
-    return GoToNextFocusLinear(reverse, rect);
+    return false;
 }
 
 void FocusHub::RefreshParentFocusable(bool focusable)
@@ -624,7 +627,7 @@ bool FocusHub::CalculatePosition()
     }
 
     if ((*itLastFocusNode_)->IsChild()) {
-        auto lastFocusGeometryNode = GetGeometryNode();
+        auto lastFocusGeometryNode = (*itLastFocusNode_)->GetGeometryNode();
         CHECK_NULL_RETURN(lastFocusGeometryNode, false);
         RectF rect(childRect.GetOffset(), lastFocusGeometryNode->GetFrameSize());
         (*itLastFocusNode_)->SetRect(rect);
@@ -668,6 +671,13 @@ void FocusHub::OnFocusNode()
     if (onFocusCallback) {
         onFocusCallback();
     }
+    if (focusType_ == FocusType::NODE) {
+        auto frameNode = GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->BlendBorderColor(Color(0xFF254FF7));
+    }
 }
 void FocusHub::OnBlurNode()
 {
@@ -678,6 +688,13 @@ void FocusHub::OnBlurNode()
     auto onBlurCallback = GetOnBlurCallback();
     if (onBlurCallback) {
         onBlurCallback();
+    }
+    if (focusType_ == FocusType::NODE) {
+        auto frameNode = GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetBlendBorderColor();
     }
 }
 
@@ -721,9 +738,24 @@ void FocusHub::OnBlurScope()
 bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
 {
     if (focusType_ == FocusType::NODE) {
-        return IsFocusable();
+        return AcceptFocusByRectOfLastFocusNode(rect);
     }
+    if (focusType_ == FocusType::SCOPE) {
+        if (focusAlgorithm_.scopeType == ScopeType::FLEX) {
+            return AcceptFocusByRectOfLastFocusFlex(rect);
+        }
+        return AcceptFocusByRectOfLastFocusScope(rect);
+    }
+    return false;
+}
 
+bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF &rect)
+{
+    return IsFocusable();
+}
+
+bool FocusHub::AcceptFocusByRectOfLastFocusScope(const RectF& rect)
+{
     FlushChildrenFocusHub();
     if (focusNodes_.empty()) {
         return false;
@@ -749,8 +781,48 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
     } while ((++itLastFocusNode_) != itFocusNode);
     if (itLastFocusNode_ == focusNodes_.end()) {
         lastWeakFocusNode_ = nullptr;
+    } else {
+        lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*itLastFocusNode_));
     }
 
+    return false;
+}
+
+bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
+{
+    if (!rect.IsValid()) {
+        LOGE("the rect is not valid");
+        return false;
+    }
+
+    FlushChildrenFocusHub();
+    OffsetF offset;
+    auto itNewFocusNode = focusNodes_.end();
+    double minVal = std::numeric_limits<double>::max();
+    for (auto it = focusNodes_.begin(); it != focusNodes_.end(); ++it) {
+        if (!(*it)->IsFocusable()) {
+            continue;
+        }
+
+        RectF childRect;
+        if (!CalculateRect(*it, childRect)) {
+            continue;
+        }
+
+        OffsetF vec = childRect.Center() - rect.Center();
+        double val = (vec.GetX() * vec.GetX()) + (vec.GetY() * vec.GetY());
+        if (minVal > val) {
+            minVal = val;
+            itNewFocusNode = it;
+            offset = childRect.GetOffset();
+        }
+    }
+
+    if (itNewFocusNode != focusNodes_.end() && (*itNewFocusNode)->AcceptFocusByRectOfLastFocus(rect - offset)) {
+        itLastFocusNode_ = itNewFocusNode;
+        lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*itLastFocusNode_));
+        return true;
+    }
     return false;
 }
 
@@ -769,11 +841,36 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
 
 bool FocusHub::IsFocusableByTab()
 {
+    if (focusType_ == FocusType::NODE) {
+        return IsFocusableNodeByTab();
+    }
+    if (focusType_ == FocusType::SCOPE) {
+        return IsFocusableScopeByTab();
+    }
+    LOGE("Current node focus type: %{public}d is invalid.", focusType_);
+    return false;
+}
+
+bool FocusHub::IsFocusableNodeByTab()
+{
     auto parent = GetParentFocusHub();
     if (parent) {
         return (GetTabIndex() == 0) && (parent->GetTabIndex() == 0);
     }
     return GetTabIndex() == 0;
+}
+
+bool FocusHub::IsFocusableScopeByTab()
+{
+    FlushChildrenFocusHub();
+    if (!IsFocusableNodeByTab()) {
+        return false;
+    }
+    if (focusNodes_.empty()) {
+        return true;
+    }
+    return std::any_of(focusNodes_.begin(), focusNodes_.end(),
+        [](const RefPtr<FocusHub>& focusNode) { return focusNode->IsFocusableByTab(); });
 }
 
 bool FocusHub::IsFocusableWholePath()

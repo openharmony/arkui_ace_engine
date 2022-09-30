@@ -26,6 +26,7 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/geometry_property.h"
@@ -108,11 +109,6 @@ public:
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
         return measureType_.value_or(defaultType);
-    }
-
-    virtual bool IsDirectionVertical()
-    {
-        return true;
     }
 
     void UpdatePadding(const PaddingProperty& value)

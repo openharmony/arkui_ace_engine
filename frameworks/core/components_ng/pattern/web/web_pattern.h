@@ -136,13 +136,9 @@ public:
         return GetEventHub<WebEventHub>();
     }
 
-    FocusType GetFocusType() override
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::NODE;
-    }
-    bool GetFocusable() override
-    {
-        return true;
+        return { FocusType::NODE, true };
     }
 
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);

@@ -75,12 +75,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMaxLength, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
-
-    bool IsDirectionVertical() override
-    {
-        // Need update
-        return GetListDirection().value_or(Axis::VERTICAL) != Axis::HORIZONTAL;
-    }
 };
 } // namespace OHOS::Ace::NG
 

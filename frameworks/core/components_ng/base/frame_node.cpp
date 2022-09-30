@@ -127,12 +127,10 @@ void FrameNode::InitializePatternAndContext()
     });
     renderContext_->SetHostNode(WeakClaim(this));
     // Initialize FocusHub
-    if (pattern_->GetFocusType() != FocusType::DISABLE) {
+    if (pattern_->GetFocusPattern().focusType != FocusType::DISABLE) {
         auto focusHub = GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
-        if (layoutProperty_) {
-            focusHub->SetScopeVertical(layoutProperty_->IsDirectionVertical());
-        }
+        focusHub->SetScopeFocusAlgorithm(pattern_->GetScopeFocusAlgorithm());
     }
 }
 
@@ -820,6 +818,6 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
     if (!pattern_) {
         return eventHub_->GetOrCreateFocusHub();
     }
-    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusType(), pattern_->GetFocusable());
+    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().focusType, pattern_->GetFocusPattern().focusable);
 }
 } // namespace OHOS::Ace::NG

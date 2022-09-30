@@ -45,13 +45,18 @@ public:
         return MakeRefPtr<LinearLayoutAlgorithm>();
     }
 
-    FocusType GetFocusType() override
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::SCOPE;
+        return { FocusType::SCOPE, true };
     }
-    bool GetFocusable() override
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
     {
-        return true;
+        auto property = GetLayoutProperty<LinearLayoutProperty>();
+        if (!property) {
+            return ScopeFocusAlgorithm();
+        }
+        return ScopeFocusAlgorithm(isVertical_, true, ScopeType::FLEX);
     }
 
 private:

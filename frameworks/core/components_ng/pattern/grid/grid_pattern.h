@@ -61,14 +61,19 @@ public:
     {
         return supportAnimation_;
     }
- 
-    FocusType GetFocusType() override
+
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::SCOPE;
+        return { FocusType::SCOPE, true };
     }
-    bool GetFocusable() override
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
     {
-        return true;
+        auto property = GetLayoutProperty<GridLayoutProperty>();
+        if (!property) {
+            return ScopeFocusAlgorithm();
+        }
+        return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS);
     }
 
 private:
