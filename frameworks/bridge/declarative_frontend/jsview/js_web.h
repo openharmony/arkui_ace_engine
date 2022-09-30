@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components/web/web_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
@@ -25,6 +27,14 @@ class JSWeb : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void CreateInNewPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
+        std::optional<std::string> dstSrc);
+    static void CreateInOldPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
+        std::optional<std::string> dstSrc);
+    static void CreateWithWebController(JSRef<JSObject> controller,
+        RefPtr<WebComponent>& webComponent);
+    static void CreateWithWebviewController(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
+        RefPtr<WebComponent>& webComponent);
     static void OnAlert(const JSCallbackInfo& args);
     static void OnBeforeUnload(const JSCallbackInfo& args);
     static void OnConfirm(const JSCallbackInfo& args);

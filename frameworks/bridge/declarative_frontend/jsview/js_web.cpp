@@ -20,11 +20,9 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_view.h"
 #include "core/pipeline/pipeline_base.h"
@@ -1434,51 +1432,83 @@ void JSWeb::Create(const JSCallbackInfo& info)
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-
     JSRef<JSVal> srcValue = paramObject->GetProperty("src");
     std::string webSrc;
     std::optional<std::string> dstSrc;
-    RefPtr<WebComponent> webComponent;
     if (srcValue->IsString()) {
         dstSrc = srcValue->ToString();
     } else if (ParseJsMedia(srcValue, webSrc)) {
         int np = static_cast<int>(webSrc.find_first_of("/"));
-        if (np < 0) {
-            dstSrc = webSrc;
-        } else {
-            dstSrc = webSrc.erase(np, 1);
-        }
+        dstSrc = np < 0 ? webSrc : webSrc.erase(np, 1);
     }
-
     if (!dstSrc) {
         LOGE("Web component failed to parse src");
         return;
     }
-
     LOGI("JSWeb::Create src:%{public}s", dstSrc->c_str());
+    
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {
-        LOGI("web create error, controllerObj is invalid");
+        LOGE("web create error, controllerObj is invalid");
         return;
     }
-    auto* controller = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSWebController>();
-    if (!controller) {
-        LOGI("web create error, controller is invalid");
-        return;
-    }
+    auto controller = JSRef<JSObject>::Cast(controllerObj);
+    auto setWebIdFunction = controller->GetProperty("setWebId");
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::WebView::Create(dstSrc.value(), controller->GetController());
+        CreateInNewPipeline(controller, setWebIdFunction, dstSrc);
         return;
     }
+    CreateInOldPipeline(controller, setWebIdFunction, dstSrc);
+}
 
+void JSWeb::CreateInNewPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
+    std::optional<std::string> dstSrc)
+{
+    if (setWebIdFunction->IsFunction()) {
+        auto setIdCallback = [webviewController = controller,
+            func = JSRef<JSFunc>::Cast(setWebIdFunction)](int32_t webId) {
+            JSRef<JSVal> argv[] = {JSRef<JSVal>::Make(ToJSValue(webId))};
+            func->Call(webviewController, 1, argv);
+        };
+        NG::WebView::Create(dstSrc.value(), std::move(setIdCallback));
+        return;
+    }
+    auto* jsWebController = controller->Unwrap<JSWebController>();
+    NG::WebView::Create(dstSrc.value(), jsWebController->GetController());
+}
+
+void JSWeb::CreateInOldPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
+    std::optional<std::string> dstSrc)
+{
+    RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(dstSrc.value());
     webComponent->SetSrc(dstSrc.value());
-    webComponent->SetWebController(controller->GetController());
-
+    if (setWebIdFunction->IsFunction()) {
+        CreateWithWebviewController(controller, setWebIdFunction, webComponent);
+    } else {
+        CreateWithWebController(controller, webComponent);
+    }
     ViewStackProcessor::GetInstance()->Push(webComponent);
     JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
+}
+
+void JSWeb::CreateWithWebviewController(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
+    RefPtr<WebComponent>& webComponent)
+{
+    auto setIdCallback = [webviewController = controller,
+        func = JSRef<JSFunc>::Cast(setWebIdFunction)](int32_t webId) {
+        JSRef<JSVal> argv[] = {JSRef<JSVal>::Make(ToJSValue(webId))};
+        func->Call(webviewController, 1, argv);
+    };
+    webComponent->SetSetWebIdCallback(std::move(setIdCallback));
+}
+
+void JSWeb::CreateWithWebController(JSRef<JSObject> controller, RefPtr<WebComponent>& webComponent)
+{
+    auto* jsWebController = controller->Unwrap<JSWebController>();
+    webComponent->SetWebController(jsWebController->GetController());
 }
 
 void JSWeb::OnAlert(const JSCallbackInfo& args)
