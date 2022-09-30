@@ -500,10 +500,12 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto paddingRight = padding.right.value_or(0.0f);
     auto paddingTop = padding.top.value_or(0.0f);
     auto paddingBottom = padding.bottom.value_or(0.0f);
+    auto horizontalPadding = paddingLeft + paddingRight;
+    auto verticalPadding = paddingTop + paddingBottom;
     if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
-        mainAxisSize_ -= paddingLeft + paddingRight;
+        mainAxisSize_ -= horizontalPadding;
     } else {
-        mainAxisSize_ -= paddingTop + paddingBottom;
+        mainAxisSize_ -= verticalPadding;
     }
     if (NearEqual(mainAxisSize_, Infinity<float>())) {
         LOGW("The main axis size does not support infinite");
@@ -524,7 +526,9 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         crossAxisSize_ += paddingLeft + paddingRight;
     }
-    realSize.UpdateIllegalSizeWithCheck(GetCalcSizeHelper(mainAxisSize_, crossAxisSize_, direction_).ConvertToSizeT());
+    realSize.UpdateIllegalSizeWithCheck(
+        GetCalcSizeHelper(mainAxisSize_ + horizontalPadding, crossAxisSize_ + verticalPadding, direction_)
+            .ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
 }
 
