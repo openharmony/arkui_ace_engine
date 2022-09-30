@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/sk_painter.h"
 
 namespace OHOS::Ace::NG {
 void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& pathPaintProperty)
@@ -25,6 +26,6 @@ void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& pathPaintP
     if (!pathPaintProperty.HasCommands()) {
         return;
     }
-   // SkPainter::DrawPath(canvas, pathPaintProperty.GetCommandsValue(), pathPaintProperty);
+    SkPainter::DrawPath(canvas, pathPaintProperty.GetCommandsValue(), pathPaintProperty);
 }
 } // namespace OHOS::Ace::NG

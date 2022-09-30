@@ -45,7 +45,9 @@ public:
         }
         float height = paintWrapper->GetContentSize().Height();
         float width = paintWrapper->GetContentSize().Width();
-        RectF rect(0, 0, width, height);
+        float dx = paintWrapper->GetContentOffset().GetX();
+        float dy = paintWrapper->GetContentOffset().GetY();
+        RectF rect(dx, dy, width, height);
         return [rect, shapePaintProperty](
                    RSCanvas& canvas) { EllipsePainter::DrawEllipse(canvas, rect, *shapePaintProperty); };
     }
