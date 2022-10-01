@@ -35,6 +35,7 @@ public:
         auto value = MakeRefPtr<FlexLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propFlexLayoutAttribute_ = CloneFlexLayoutAttribute();
+        value->propWrapLayoutAttribute_ = CloneWrapLayoutAttribute();
         return value;
     }
 
@@ -42,6 +43,7 @@ public:
     {
         LayoutProperty::Reset();
         ResetFlexLayoutAttribute();
+        ResetWrapLayoutAttribute();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FlexLayoutAttribute, FlexLayoutAttribute);
@@ -49,12 +51,21 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, FlexDirection, FlexDirection, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, MainAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_GROUP(WrapLayoutAttribute, WrapLayoutAttribute);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(WrapLayoutAttribute, WrapDirection, WrapDirection, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(WrapLayoutAttribute, Alignment, WrapAlignment, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(WrapLayoutAttribute, MainAlignment, WrapAlignment, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(WrapLayoutAttribute, CrossAlignment, WrapAlignment, PROPERTY_UPDATE_MEASURE);
 
     bool IsDirectionVertical() override
     {
         if (GetFlexDirection().has_value()) {
             return GetFlexDirection().value() == FlexDirection::COLUMN ||
                    GetFlexDirection().value() == FlexDirection::COLUMN_REVERSE;
+        }
+        if (GetWrapDirection().has_value()) {
+            return GetWrapDirection().value() == WrapDirection::VERTICAL ||
+                   GetWrapDirection().value() == WrapDirection::HORIZONTAL_REVERSE;
         }
         return true;
     }

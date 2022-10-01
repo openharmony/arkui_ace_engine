@@ -16,8 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_PATTERN_H
 
+#include <string>
+
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -26,6 +30,7 @@ class FlexLayoutPattern : public Pattern {
 
 public:
     FlexLayoutPattern() = default;
+    explicit FlexLayoutPattern(bool wrap) : isWrap_(wrap) {};
     ~FlexLayoutPattern() override = default;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -35,6 +40,9 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        if (isWrap_) {
+            return MakeRefPtr<WrapLayoutAlgorithm>(isDialogStretch_);
+        }
         return MakeRefPtr<FlexLayoutAlgorithm>();
     }
 
@@ -52,7 +60,20 @@ public:
         return true;
     }
 
+    void SetDialogStretch(bool stretch)
+    {
+        isDialogStretch_ = stretch;
+    }
+
+    void DumpInfo() override
+    {
+        DumpLog::GetInstance().AddDesc(std::string("Type: ").append(isWrap_ ? "Wrap" : "NoWrap"));
+    }
+
 private:
+    bool isWrap_ = false;
+    bool isDialogStretch_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutPattern);
 };
 } // namespace OHOS::Ace::NG
