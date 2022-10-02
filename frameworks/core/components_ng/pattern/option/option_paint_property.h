@@ -28,11 +28,6 @@ struct OptionPaintBackground {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Hover, bool);
 };
 
-struct OptionPaintDivider {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerOffset, OffsetF);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerLength, float);
-};
-
 // PaintProperty are used to set paint properties.
 class ACE_EXPORT OptionPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(OptionPaintProperty, PaintProperty)
@@ -45,7 +40,7 @@ public:
     {
         auto paintProperty = MakeRefPtr<OptionPaintProperty>();
         paintProperty->propPaintBackground_ = ClonePaintBackground();
-        paintProperty->propPaintDivider_ = ClonePaintDivider();
+        paintProperty->propNeedDivider_ = CloneNeedDivider();
 
         return paintProperty;
     }
@@ -54,17 +49,15 @@ public:
     {
         PaintProperty::Reset();
         ResetPaintBackground();
-        ResetPaintDivider();
+        ResetNeedDivider();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(PaintBackground, OptionPaintBackground);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(PaintBackground, BackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(PaintBackground, SelectedBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(PaintBackground, Hover, bool, PROPERTY_UPDATE_RENDER);
-
-    ACE_DEFINE_PROPERTY_GROUP(PaintDivider, OptionPaintDivider);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(PaintDivider, DividerOffset, OffsetF, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(PaintDivider, DividerLength, float, PROPERTY_UPDATE_RENDER);
+    
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedDivider, bool, PROPERTY_UPDATE_RENDER);
 
 };
 

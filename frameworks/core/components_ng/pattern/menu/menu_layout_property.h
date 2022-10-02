@@ -13,37 +13,42 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_LAYOUT_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_LAYOUT_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_LAYOUT_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_LAYOUT_PROPERTY_H
 
-#include "base/geometry/axis.h"
-#include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT OptionLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(OptionLayoutProperty, LayoutProperty);
+class ACE_EXPORT MenuLayoutProperty : public LayoutProperty {
+    DECLARE_ACE_TYPE(MenuLayoutProperty, LayoutProperty);
 
 public:
-    OptionLayoutProperty() = default;
-    ~OptionLayoutProperty() override = default;
+    MenuLayoutProperty() = default;
+
+    ~MenuLayoutProperty() override = default;
 
     RefPtr<LayoutProperty> Clone() const override
     {
-        auto value = MakeRefPtr<OptionLayoutProperty>();
+        auto value = MakeRefPtr<MenuLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propTargetId_ = CloneTargetId();
+        value->propTargetTag_ = CloneTargetTag();
+
         return value;
     }
 
     void Reset() override
     {
         LayoutProperty::Reset();
+        ResetTargetId();
+        ResetTargetTag();
     }
 
+    // target frameNode that this menu belongs to
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetId, int32_t, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetTag, std::string, PROPERTY_UPDATE_LAYOUT);
 };
-
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_LAYOUT_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_LAYOUT_PROPERTY_H

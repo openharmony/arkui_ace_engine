@@ -12,29 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_LAYOUT_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/layout/box_layout_algorithm.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_WRAPPER_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_WRAPPER_LAYOUT_ALGORITHM_H
+
+#include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT OptionLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(OptionLayoutAlgorithm, BoxLayoutAlgorithm);
-
+class MenuWrapperLayoutAlgorithm : public LayoutAlgorithm {
+    DECLARE_ACE_TYPE(MenuWrapperLayoutAlgorithm, LayoutAlgorithm)
 public:
-    OptionLayoutAlgorithm() = default;
-    ~OptionLayoutAlgorithm() override = default;
+    MenuWrapperLayoutAlgorithm() = default;
+    ~MenuWrapperLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
-
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    float horInterval_;
-    float verInterval_;
-
-    ACE_DISALLOW_COPY_AND_MOVE(OptionLayoutAlgorithm);
+    ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_LAYOUT_ALGORITHM_H
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_WRAPPER_LAYOUT_ALGORITHM_H

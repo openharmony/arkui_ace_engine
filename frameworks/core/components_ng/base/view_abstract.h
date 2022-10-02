@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <stdint.h>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -32,12 +33,16 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/clip_path.h"
 
 namespace OHOS::Ace::NG {
+
+using optionParam = std::pair<std::string, std::function<void()>>;
+
 class ACE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength& width);
@@ -135,6 +140,8 @@ public:
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam>& param);
+    static void BindMenu(const std::vector<optionParam>& params, const RefPtr<FrameNode>& targetNode);
+    static void ShowMenu(int32_t targetId);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
     // transition

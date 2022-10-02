@@ -16,30 +16,29 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OPTION_OPTION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OPTION_OPTION_PATTERN_H
 
-#include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
+#include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_paint_method.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 class OptionPattern : public Pattern {
     DECLARE_ACE_TYPE(OptionPattern, Pattern);
 
 public:
-    OptionPattern() = default;
+    explicit OptionPattern(int index) : index_(index) {}
     ~OptionPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        LOGI("create optionPaintMethod");
         return MakeRefPtr<OptionPaintMethod>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        LOGI("create optionPaintProperty");
         return MakeRefPtr<OptionPaintProperty>();
     }
 
@@ -59,7 +58,18 @@ public:
     }
 
     void OnModifyDone() override;
+
 private:
+    // this option node's index in the menu
+    int index_;
+
+    void UpdateNextNodeDivider(bool needDivider);
+
+    // register option's JS callback
+    void RegisterOnClick(const RefPtr<GestureEventHub>& hub, const std::function<void()>& action);
+    // change option background color
+    void RegisterOnHover(const RefPtr<GestureEventHub>& hub);
+
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
 };
 } // namespace OHOS::Ace::NG

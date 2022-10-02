@@ -19,20 +19,17 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-namespace {
-constexpr uint32_t DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;
-constexpr uint32_t DEFAULT_HOVER_BACKGROUND_COLOR = 0x0C000000;
-}
-
-RefPtr<FrameNode> OptionView::Create(const std::string& value, const std::function<void()>& onClickFunc)
+RefPtr<FrameNode> OptionView::Create(const std::string& value, const std::function<void()>& onClickFunc, int index)
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>());
+    auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(index));
+
     auto eventHub = node->GetEventHub<OptionEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     eventHub->SetOnClick(onClickFunc);
@@ -48,6 +45,8 @@ RefPtr<FrameNode> OptionView::Create(const std::string& value, const std::functi
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     textProperty->UpdateContent(value);
     textNode->MountToParent(node);
+    textNode->MarkModifyDone();
+
     return node;
 }
 

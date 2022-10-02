@@ -103,6 +103,8 @@ build_component_ng("pattern_ng") {
     "menu/menu_layout_algorithm.cpp",
     "menu/menu_paint_method.cpp",
     "menu/menu_pattern.cpp",
+    "menu/wrapper/menu_wrapper_pattern.cpp",
+    "menu/wrapper/menu_wrapper_layout_algorithm.cpp",
     "menu/menu_view.cpp",
     "navigation/bar_item_layout_algorithm.cpp",
     "navigation/bar_item_node.cpp",

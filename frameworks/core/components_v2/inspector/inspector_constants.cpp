@@ -340,6 +340,7 @@ ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[] = "MenuComponent";
 ACE_EXPORT extern const char MENU_TAG[] = "menu";
 ACE_EXPORT extern const char MENU_ETS_TAG[] = "Menu";
+ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";

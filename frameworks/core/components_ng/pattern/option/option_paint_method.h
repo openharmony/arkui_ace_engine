@@ -41,6 +41,8 @@ private:
     void PaintBackground(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper);
 
+    bool hover_;
+
     ACE_DISALLOW_COPY_AND_MOVE(OptionPaintMethod);
 };
 } // namespace OHOS::Ace::NG

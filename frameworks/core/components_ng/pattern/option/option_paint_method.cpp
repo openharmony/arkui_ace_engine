@@ -18,26 +18,20 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
+#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-
-const Dimension ROUND_RADIUS_PHONE = 12.0_vp;
-constexpr double DEFAULT_STROKE_WIDTH = 1.0f;
-constexpr uint32_t DIVIDER_COLOR = 0x0C0DDDDD;
-
-} // namespace
 
 CanvasDrawFunction OptionPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
 {
     return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto option = weak.Upgrade();
         if (option) {
-            LOGI("start painting");
             option->PaintBackground(canvas, paintWrapper);
+            // don't paint divider when hovered
             option->PaintDivider(canvas, paintWrapper);
         }
     };
@@ -51,8 +45,8 @@ void OptionPaintMethod::PaintBackground(RSCanvas& canvas, PaintWrapper* paintWra
 
     // get background color
     Color bgColor;
-    bool hover = props->GetHover().value_or(false);
-    if (hover) {
+    hover_ = props->GetHover().value_or(false);
+    if (hover_) {
         bgColor = props->GetSelectedBackgroundColor().value_or(Color::WHITE);
     } else {
         bgColor = props->GetBackgroundColor().value_or(Color::WHITE);
@@ -64,9 +58,10 @@ void OptionPaintMethod::PaintBackground(RSCanvas& canvas, PaintWrapper* paintWra
     // initialize rRect radius
     float radius = ROUND_RADIUS_PHONE.ConvertToPx();
 
+    // offset should be (0, 0)
     auto size = paintWrapper->GetGeometryNode()->GetFrameSize();
     auto offset = paintWrapper->GetContentOffset();
-    LOGI("paintWrapper offset = %{public}f, %{public}f, size = %{public}f, %{public}f", offset.GetX(), offset.GetY(),
+    LOGD("paintWrapper offset = %{public}f, %{public}f, size = %{public}f, %{public}f", offset.GetX(), offset.GetY(),
         size.Width(), size.Height());
     // draw background rRect
     RSRoundRect rSRoundRect(
@@ -83,13 +78,23 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     auto props = DynamicCast<OptionPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(props);
 
-    OffsetF dividerOffset = props->GetDividerOffset().value_or(OffsetF());
-    float dividerLength = props->GetDividerLength().value_or(0);
+    bool needDivider = props->GetNeedDivider().value_or(true);
+    if (!needDivider || hover_) {
+        return;
+    }
 
-    // use DividerPainter
-    LOGI("DRAWING OptionDivider offset: X=%{public}f, Y=%{public}f, length: %{public}f", dividerOffset.GetX(),
-        dividerOffset.GetY(), dividerLength);
-    DividerPainter dividerPainter(DEFAULT_STROKE_WIDTH, dividerLength, false, Color(DIVIDER_COLOR), LineCap::SQUARE);
-    dividerPainter.DrawLine(canvas, dividerOffset);
+    auto optionSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    auto horInterval = HORIZONTAL_INTERVAL_PHONE.ConvertToPx();
+
+    RSPath path;
+    // draw divider above content, length = content width
+    path.AddRect(horInterval, 0, optionSize.Width() - horInterval, DEFAULT_STROKE_WIDTH);
+    LOGD("drawing option divider with length %{public}f", optionSize.Width() - 2 * horInterval);
+
+    RSBrush brush;
+    brush.SetColor(DIVIDER_COLOR);
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+    canvas.DrawPath(path);
 }
 } // namespace OHOS::Ace::NG

@@ -2217,10 +2217,72 @@ void JSViewAbstract::ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<Menu
     LOGI("Context menu is added.");
 }
 
+// menuItem <value, action>
+using optionParam = std::pair<std::string, std::function<void()>>;
+void JsBindMenuNG(const JSCallbackInfo& info)
+{
+    // onClick event to open Menu
+    GestureEventFunc event;
+    // Array<MenuItem>
+    if (info[0]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        std::vector<optionParam> params(paramArray->Length());
+        // parse paramArray
+        LOGD("parsing paramArray size = %{public}d", paramArray->Length());
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+            JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].first);
+            LOGD("option #%{public}d is %{public}s", i, params[i].first.c_str());
+            auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(indexObject->GetProperty("action")));
+            // set onClick function
+            params[i].second = [action, context = info.GetExecutionContext()]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
+                ACE_SCORING_EVENT("menu.action");
+                if (action) {
+                    LOGI("action detail : %{public}p", AceType::RawPtr(action));
+                    // CAUSING CRASH: action->Execute();
+                }
+            };
+        }
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(targetNode);
+        event = [params, targetNode](GestureEvent&  /*info*/) mutable {
+            // menu already created
+            if (params.empty()) {
+                NG::ViewAbstract::ShowMenu(targetNode->GetId());
+                return;
+            }
+            NG::ViewAbstract::BindMenu(params, targetNode);
+            // clear paramArray after creation
+            params.clear();
+        };
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        auto builder = obj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            LOGE("builder function is null.");
+            return;
+        }
+        event = [builderFunc](const GestureEvent& info) {
+
+        };
+    } else {
+        LOGE("bindMenu info is invalid");
+        return;
+    }
+    NG::ViewAbstract::SetOnClick(std::move(event));
+}
+
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     // NG
     if (Container::IsCurrentUseNewPipeline()) {
+        JsBindMenuNG(info);
         return;
     }
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
