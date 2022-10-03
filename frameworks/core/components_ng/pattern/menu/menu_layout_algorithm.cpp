@@ -70,23 +70,23 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childConstraint = props->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding);
 
-    // measure options
+    // measure children (options/customNode)
     SizeF menuSize;
-    for (const auto& option : layoutWrapper->GetAllChildrenWithBuild()) {
-        option->Measure(childConstraint);
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(childConstraint);
 
-        auto optionSize = option->GetGeometryNode()->GetFrameSize();
+        auto childSize = child->GetGeometryNode()->GetFrameSize();
         // set minimum size
-        if (optionSize.Width() < OPTION_MIN_WIDTH) {
-            optionSize.SetWidth(OPTION_MIN_WIDTH);
-            option->GetGeometryNode()->SetFrameSize(optionSize);
+        if (childSize.Width() < OPTION_MIN_WIDTH) {
+            childSize.SetWidth(OPTION_MIN_WIDTH);
+            child->GetGeometryNode()->SetFrameSize(childSize);
         }
 
         // calculate menuSize from optionSize
-        if (optionSize.Width() > menuSize.Width()) {
-            menuSize.SetWidth(optionSize.Width());
+        if (childSize.Width() > menuSize.Width()) {
+            menuSize.SetWidth(childSize.Width());
         }
-        menuSize.AddHeight(optionSize.Height());
+        menuSize.AddHeight(childSize.Height());
     }
     // set menu size
     menuSize.AddHeight(2.0 * outPadding);

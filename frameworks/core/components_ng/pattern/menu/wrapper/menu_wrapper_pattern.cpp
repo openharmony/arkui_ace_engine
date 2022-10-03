@@ -28,7 +28,13 @@ void MenuWrapperPattern::OnModifyDone()
     auto gestureHub = host->GetOrCreateGestureEventHub();
 
     // close menu when clicked outside the menu region
-    auto clickCallback = [menuId = Id_, host](const GestureEvent& info) {
+    auto callback = [targetId = targetId_, host](const TouchEventInfo& info) {
+        auto touch = info.GetTouches().front();
+        // only hide menu when touch DOWN occurs
+        if (touch.GetTouchType() != TouchType::DOWN) {
+            return;
+        }
+
         // get menuNode's touch region
         auto menuNode = host->GetChildAtIndex(0);
         CHECK_NULL_VOID(menuNode);
@@ -37,20 +43,20 @@ void MenuWrapperPattern::OnModifyDone()
         }
         auto menuZone = DynamicCast<FrameNode>(menuNode)->GetGeometryNode()->GetFrameRect();
 
-        auto position = info.GetGlobalPoint();
-        // if clicked outside the menu region, then hide menu
+        auto position = touch.GetGlobalLocation();
+        // if DOWN-touched outside the menu region, then hide menu
         if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
             auto pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
 
-            overlayManager->HideMenuNode(menuId);
+            overlayManager->HideMenu(targetId);
             LOGD("touch is outside the menu region (%{public}f, %{public}f), menu %{public}d removed", position.GetX(),
-                position.GetY(), menuId);
+                position.GetY(), targetId);
         }
     };
-    auto clickEvent = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gestureHub->AddClickEvent(clickEvent);
+    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(callback));
+    gestureHub->AddTouchEvent(touchEvent);
 }
 
 } // namespace OHOS::Ace::NG

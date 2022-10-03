@@ -39,11 +39,17 @@ void OptionPattern::OnModifyDone()
 
 void OptionPattern::RegisterOnClick(const RefPtr<GestureEventHub>& hub, const std::function<void()>& action)
 {
-    auto event = [action](GestureEvent& /*info*/) {
+    auto host = GetHost();
+    auto event = [host, action, targetId = targetId_](GestureEvent& /*info*/) {
         if (action) {
             LOGI("Option's JS callback executing");
             action();
         }
+        // hide menu when option is clicked
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->HideMenu(targetId);
     };
     auto clickEvent = MakeRefPtr<ClickEvent>(std::move(event));
     hub->AddClickEvent(clickEvent);

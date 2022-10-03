@@ -25,9 +25,8 @@
 
 namespace OHOS::Ace::NG {
 
-// create menu with menuItems
-RefPtr<FrameNode> MenuView::Create(
-    const std::vector<optionParam>& params, const std::string& targetTag, int32_t targetId)
+// create menuWrapper and menu node, update menu props
+std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& targetTag, int32_t targetId)
 {
     auto wrapperId = ElementRegister::GetInstance()->MakeUniqueId();
     // use wrapper to detect click events outside menu
@@ -42,15 +41,20 @@ RefPtr<FrameNode> MenuView::Create(
     layoutProps->UpdateTargetId(targetId);
     layoutProps->UpdateTargetTag(targetTag);
 
-    auto paintProps = menuNode->GetPaintProperty<PaintProperty>();
-    paintProps->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
-
     menuNode->MountToParent(wrapperNode);
     menuNode->MarkModifyDone();
 
+    return { wrapperNode, menuNode };
+}
+
+// create menu with menuItems
+RefPtr<FrameNode> MenuView::Create(
+    const std::vector<optionParam>& params, const std::string& targetTag, int32_t targetId)
+{
+    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::Create(params[i].first, params[i].second, i);
+        auto optionNode = OptionView::Create(params[i].first, params[i].second, targetId, i);
         // first node never paints divider
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
@@ -59,6 +63,14 @@ RefPtr<FrameNode> MenuView::Create(
         optionNode->MountToParent(menuNode);
         optionNode->MarkModifyDone();
     }
+    return wrapperNode;
+}
+
+// create menu with custom node from a builder
+RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, const std::string& targetTag, int32_t targetId)
+{
+    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
+    customNode->MountToParent(menuNode);
 
     return wrapperNode;
 }

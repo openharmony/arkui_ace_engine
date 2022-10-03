@@ -127,7 +127,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popup)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::ShowMenuNode(int32_t targetId, RefPtr<FrameNode> menu)
+void OverlayManager::ShowMenu(int32_t targetId, RefPtr<FrameNode> menu)
 {
     if (!menu) {
         // get existing menuNode
@@ -157,7 +157,7 @@ void OverlayManager::ShowMenuNode(int32_t targetId, RefPtr<FrameNode> menu)
     }
 }
 
-void OverlayManager::HideMenuNode(int32_t targetId)
+void OverlayManager::HideMenu(int32_t targetId)
 {
     LOGI("OverlayManager::HideMenuNode");
     auto rootNode = rootNodeWeak_.Upgrade();

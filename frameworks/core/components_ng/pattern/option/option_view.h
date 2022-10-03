@@ -26,7 +26,8 @@ namespace OHOS::Ace::NG {
 // menu option
 class ACE_EXPORT OptionView {
 public:
-    static RefPtr<FrameNode> Create(const std::string& value, const std::function<void()>& onClickFunc, int index);
+    static RefPtr<FrameNode> Create(
+        const std::string& value, const std::function<void()>& onClickFunc, int32_t targetId, int index);
 };
 
 } // namespace OHOS::Ace::NG

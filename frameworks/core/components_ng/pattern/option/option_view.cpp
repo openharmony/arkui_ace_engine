@@ -25,10 +25,11 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FrameNode> OptionView::Create(const std::string& value, const std::function<void()>& onClickFunc, int index)
+RefPtr<FrameNode> OptionView::Create(
+    const std::string& value, const std::function<void()>& onClickFunc, int32_t targetId, int index)
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(index));
+    auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(targetId, index));
 
     auto eventHub = node->GetEventHub<OptionEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);

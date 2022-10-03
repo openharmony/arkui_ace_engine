@@ -2221,8 +2221,12 @@ void JSViewAbstract::ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<Menu
 using optionParam = std::pair<std::string, std::function<void()>>;
 void JsBindMenuNG(const JSCallbackInfo& info)
 {
+    // this FrameNode
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
     // onClick event to open Menu
     GestureEventFunc event;
+
     // Array<MenuItem>
     if (info[0]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
@@ -2244,15 +2248,13 @@ void JsBindMenuNG(const JSCallbackInfo& info)
                 }
             };
         }
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(targetNode);
-        event = [params, targetNode](GestureEvent&  /*info*/) mutable {
+        event = [params, targetNode](GestureEvent& /*info*/) mutable {
             // menu already created
             if (params.empty()) {
                 NG::ViewAbstract::ShowMenu(targetNode->GetId());
                 return;
             }
-            NG::ViewAbstract::BindMenu(params, targetNode);
+            NG::ViewAbstract::BindMenuWithItems(params, targetNode);
             // clear paramArray after creation
             params.clear();
         };
@@ -2268,8 +2270,16 @@ void JsBindMenuNG(const JSCallbackInfo& info)
             LOGE("builder function is null.");
             return;
         }
-        event = [builderFunc](const GestureEvent& info) {
-
+        event = [builderFunc, targetNode](const GestureEvent& /*info*/) {
+            // builderFunc already executed, just show menu
+            if (!builderFunc) {
+                NG::ViewAbstract::ShowMenu(targetNode->GetId());
+            }
+            RefPtr<NG::UINode> customNode;
+            builderFunc->Execute();
+            customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+            builderFunc->DecRefCount();
+            LOGI("check if builderFunc is deleted successfully %{public}p", AceType::RawPtr(builderFunc));
         };
     } else {
         LOGE("bindMenu info is invalid");

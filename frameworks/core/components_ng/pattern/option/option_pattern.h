@@ -29,7 +29,7 @@ class OptionPattern : public Pattern {
     DECLARE_ACE_TYPE(OptionPattern, Pattern);
 
 public:
-    explicit OptionPattern(int index) : index_(index) {}
+    explicit OptionPattern(int32_t targetId, int index) : targetId_(targetId), index_(index) {}
     ~OptionPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -60,6 +60,8 @@ public:
     void OnModifyDone() override;
 
 private:
+    // to hide menu through OverlayManager when option is clicked
+    int32_t targetId_;
     // this option node's index in the menu
     int index_;
 

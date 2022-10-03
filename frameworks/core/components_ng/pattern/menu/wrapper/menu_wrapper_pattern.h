@@ -34,7 +34,7 @@ class MenuWrapperPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
 
 public:
-    explicit MenuWrapperPattern(int32_t Id) : Id_(Id) {}
+    explicit MenuWrapperPattern(int32_t Id) : targetId_(Id) {}
     ~MenuWrapperPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -51,7 +51,7 @@ private:
     void OnModifyDone() override;
 
     // menuId in OverlayManager's map
-    int32_t Id_;
+    int32_t targetId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
