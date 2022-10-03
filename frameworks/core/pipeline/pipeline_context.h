@@ -108,9 +108,7 @@ public:
     using TimeProvider = std::function<int64_t(void)>;
     using SurfaceChangedCallbackMap =
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
-    using SurfacePositionChangedCallbackMap =
-        std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
-    using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
+    using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
 
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -857,20 +855,6 @@ public:
         windowStartMoveCallback_ = std::move(callback);
     }
 
-    void SetGetWindowRectImpl(std::function<Rect()>&& callback)
-    {
-        windowRectImpl_ = std::move(callback);
-    }
-
-    Rect GetCurrentWindowRect() const
-    {
-        Rect rect;
-        if (windowRectImpl_) {
-            rect = windowRectImpl_();
-        }
-        return rect;
-    }
-
     bool FireWindowMinimizeCallBack() const
     {
         if (windowMinimizeCallback_) {
@@ -994,18 +978,6 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
-    void SetPostRTTaskCallBack(PostRTTaskCallback&& callback)
-    {
-        postRTTaskCallback_ = std::move(callback);
-    }
-
-    void PostTaskToRT(std::function<void()>&& task)
-    {
-        if (postRTTaskCallback_) {
-            postRTTaskCallback_(std::move(task));
-        }
-    }
-
     void AddVisibleAreaChangeNode(const ComposeId& nodeId, double ratio, const VisibleRatioCallback& callback);
 
     bool GetOnShow() const
@@ -1020,7 +992,7 @@ public:
 
     void SetForegroundCalled(bool isForegroundCalled)
     {
-        this->isForegroundCalled_ = isForegroundCalled;
+        isForegroundCalled_ = isForegroundCalled;
     }
 
     void AddRectCallback(OutOfRectGetRectCallback& getRectCallback, OutOfRectTouchCallback& touchCallback,
@@ -1246,7 +1218,6 @@ private:
     std::function<bool(void)> windowSplitCallback_ = nullptr;
     std::function<void(void)> windowStartMoveCallback_ = nullptr;
     std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
-    std::function<Rect()> windowRectImpl_ = nullptr;
 
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
@@ -1267,7 +1238,6 @@ private:
     bool isSubPipeline_ = false;
     bool isForegroundCalled_ = false;
 
-    PostRTTaskCallback postRTTaskCallback_;
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     std::vector<RectCallback> rectCallbackList_;

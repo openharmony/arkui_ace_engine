@@ -530,6 +530,23 @@ public:
         }
     }
 
+    using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
+    void SetPostRTTaskCallBack(PostRTTaskCallback&& callback)
+    {
+        postRTTaskCallback_ = std::move(callback);
+    }
+
+    void PostTaskToRT(std::function<void()>&& task)
+    {
+        if (postRTTaskCallback_) {
+            postRTTaskCallback_(std::move(task));
+        }
+    }
+
+    void SetGetWindowRectImpl(std::function<Rect()>&& callback);
+
+    Rect GetCurrentWindowRect() const;
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -592,7 +609,9 @@ private:
     std::list<DestroyEventHandler> destroyEventHandler_;
     std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
     GetViewScaleCallback getViewScaleCallback_;
+    // OnRouterChangeCallback is function point, need to be initialized.
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
+    PostRTTaskCallback postRTTaskCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

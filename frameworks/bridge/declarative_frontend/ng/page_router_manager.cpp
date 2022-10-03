@@ -46,18 +46,41 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
     LOGD("router.Push pagePath = %{private}s", info.url.c_str());
+    RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info, params);
 }
 
 void PageRouterManager::Push(const RouterPageInfo& target, const std::string& params, RouterMode mode)
 {
     CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGI("in router opt, post push router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent([weak = WeakClaim(this), target, params, mode]() {
+            auto router = weak.Upgrade();
+            CHECK_NULL_VOID(router);
+            router->Push(target, params, mode);
+        });
+        return;
+    }
     StartPush(target, params, mode);
 }
 
 void PageRouterManager::Replace(const RouterPageInfo& target, const std::string& params, RouterMode mode)
 {
     CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGI("in router opt, post replace router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent([weak = WeakClaim(this), target, params, mode]() {
+            auto router = weak.Upgrade();
+            CHECK_NULL_VOID(router);
+            router->Replace(target, params, mode);
+        });
+        return;
+    }
     StartReplace(target, params, mode);
 }
 
@@ -65,12 +88,40 @@ void PageRouterManager::BackWithTarget(const RouterPageInfo& target, const std::
 {
     CHECK_RUN_ON(JS);
     LOGD("router.Back path = %{private}s", target.url.c_str());
+    if (inRouterOpt_) {
+        LOGI("in router opt, post back router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent([weak = WeakClaim(this), target, params]() {
+            auto router = weak.Upgrade();
+            CHECK_NULL_VOID(router);
+            router->BackWithTarget(target, params);
+        });
+        return;
+    }
     BackCheckAlert(target, params);
 }
 
 void PageRouterManager::Clear()
 {
     CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGI("in router opt, post clear router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent([weak = WeakClaim(this)]() {
+            auto router = weak.Upgrade();
+            CHECK_NULL_VOID(router);
+            router->Clear();
+        });
+        return;
+    }
+    StartClean();
+}
+
+void PageRouterManager::StartClean()
+{
+    RouterOptScope scope(this);
     if (pageRouterStack_.size() <= 1) {
         LOGW("current page stack can not clean, %{public}d", static_cast<int32_t>(pageRouterStack_.size()));
         return;
@@ -87,6 +138,17 @@ void PageRouterManager::Clear()
 bool PageRouterManager::Pop()
 {
     CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGE("in router opt, post Pop router task failed");
+        return false;
+    }
+    return StartPop();
+}
+
+bool PageRouterManager::StartPop()
+{
+    CHECK_RUN_ON(JS);
+    RouterOptScope scope(this);
     if (pageRouterStack_.size() <= 1) {
         // the last page.
         return false;
@@ -213,6 +275,7 @@ std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const s
 void PageRouterManager::StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode)
 {
     CHECK_RUN_ON(JS);
+    RouterOptScope scope(this);
     if (target.url.empty()) {
         LOGE("router.Push uri is empty");
         return;
@@ -246,6 +309,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
 void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode)
 {
     CHECK_RUN_ON(JS);
+    RouterOptScope scope(this);
     if (target.url.empty()) {
         LOGE("router.Push uri is empty");
         return;
@@ -314,6 +378,7 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
 
 void PageRouterManager::BackCheckAlert(const RouterPageInfo& target, const std::string& params)
 {
+    RouterOptScope scope(this);
     if (pageRouterStack_.empty()) {
         LOGI("page route stack is empty");
         return;
@@ -401,8 +466,12 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
 void PageRouterManager::PopPage(const std::string& params, bool needShowNext)
 {
     CHECK_RUN_ON(JS);
-    if (pageRouterStack_.size() <= 1) {
+    if (pageRouterStack_.empty()) {
         LOGE("page router stack size is illegal");
+        return;
+    }
+    if (needShowNext && (pageRouterStack_.size() == 1)) {
+        LOGE("page router stack size is only one, can not show next");
         return;
     }
     auto topNode = pageRouterStack_.back();

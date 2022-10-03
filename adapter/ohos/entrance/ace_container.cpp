@@ -302,10 +302,7 @@ void AceContainer::OnShow(int32_t instanceId)
         front->OnShow();
     }
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("taskExecutor is null, OnShow failed.");
-        return;
-    }
+    CHECK_NULL_VOID(taskExecutor);
 
     taskExecutor->PostTask(
         [container]() {
@@ -314,7 +311,7 @@ void AceContainer::OnShow(int32_t instanceId)
             pipelineBase->OnShow();
             auto pipelineContext = DynamicCast<PipelineContext>(pipelineBase);
             if (!pipelineContext) {
-                LOGE("pipeline context is null, SetForegroundCalled failed.");
+                LOGI("old pipeline context is null, SetForegroundCalled failed.");
                 return;
             }
             pipelineContext->SetForegroundCalled(true);
@@ -1183,9 +1180,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     pipelineContext_->SetDataProviderManager(dataProviderManager);
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
-    auto context = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(context);
-    context->SetPostRTTaskCallBack([](std::function<void()>&& task) {
+    pipelineContext_->SetPostRTTaskCallBack([](std::function<void()>&& task) {
         auto syncTask = std::make_shared<AceRosenSyncTask>(std::move(task));
         Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
     });

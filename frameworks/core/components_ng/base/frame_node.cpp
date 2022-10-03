@@ -820,4 +820,15 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
     }
     return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().focusType, pattern_->GetFocusPattern().focusable);
 }
+
+void FrameNode::OnWindowShow()
+{
+    pattern_->OnWindowShow();
+}
+
+void FrameNode::OnWindowHide()
+{
+    pattern_->OnWindowHide();
+}
+
 } // namespace OHOS::Ace::NG

@@ -499,4 +499,19 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea)
     OnVirtualKeyboardHeightChange(keyboardHeight);
 }
 
+void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
+{
+    if (window_) {
+        window_->SetGetWindowRectImpl(std::move(callback));
+    }
+}
+
+Rect PipelineBase::GetCurrentWindowRect() const
+{
+    if (window_) {
+        return window_->GetCurrentWindowRect();
+    }
+    return {};
+}
+
 } // namespace OHOS::Ace

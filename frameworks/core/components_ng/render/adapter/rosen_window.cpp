@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
+#include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
@@ -101,6 +102,19 @@ void RosenWindow::RequestFrame()
             },
             TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND);
     }
+}
+
+void RosenWindow::OnShow()
+{
+    Window::OnShow();
+    rsUIDirector_->GoForeground();
+}
+
+void RosenWindow::OnHide()
+{
+    Window::OnHide();
+    rsUIDirector_->GoBackground();
+    rsUIDirector_->SendMessages();
 }
 
 void RosenWindow::Destroy()

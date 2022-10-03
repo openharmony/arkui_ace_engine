@@ -139,7 +139,7 @@ void CheckBoxPattern::UpdateState()
                 checkbox->CheckBoxGroupIsTrue();
             }
         };
-        PipelineContext::GetCurrentContext()->AddCallBack(callback);
+        PipelineContext::GetCurrentContext()->AddBuildFinishCallBack(callback);
         pattern->SetPreGroup(group);
         return;
     }
