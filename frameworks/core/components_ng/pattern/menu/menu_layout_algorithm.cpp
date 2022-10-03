@@ -76,6 +76,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(childConstraint);
 
         auto childSize = child->GetGeometryNode()->GetFrameSize();
+        LOGD("menu childSize = %{public}f, %{public}f", childSize.Width(), childSize.Height());
         // set minimum size
         if (childSize.Width() < OPTION_MIN_WIDTH) {
             childSize.SetWidth(OPTION_MIN_WIDTH);
@@ -106,7 +107,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     // set content offset, frame offset remains (0,0)
     OffsetF parentOffset(x, y);
-    layoutWrapper->GetGeometryNode()->SetFrameOffset(parentOffset);
+    layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(parentOffset);
     LOGD("Menu Layout: global offset = %{public}f, %{public}f", x, y);
 
     // translate each option by the height of previous options
@@ -114,8 +115,8 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     OffsetF translate(outPadding, outPadding);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         LOGD("layout child at offset: %{public}f, %{public}f", translate.GetX(), translate.GetY());
-        child->GetGeometryNode()->SetFrameOffset(translate);
-        child->Layout(parentOffset);
+        child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
     }
 }

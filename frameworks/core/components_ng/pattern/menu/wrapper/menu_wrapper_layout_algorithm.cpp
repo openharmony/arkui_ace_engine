@@ -40,7 +40,7 @@ void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void MenuWrapperLayoutAlgorithm::Layout(LayoutWrapper *layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
-    menu->Layout(OffsetF());
+    menu->Layout();
 }
 
 } // namespace OHOS::Ace::NG

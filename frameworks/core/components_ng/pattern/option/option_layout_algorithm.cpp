@@ -53,10 +53,8 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
-    auto parentGlobalOffset = layoutWrapper->GetGeometryNode()->GetParentGlobalOffset();
-    LOGD("option parentGlobalOffset = %{public}f, %{public}f", parentGlobalOffset.GetX(), parentGlobalOffset.GetY());
-    text->Layout(parentGlobalOffset);
-    text->GetGeometryNode()->SetFrameOffset(OffsetF(horInterval_, verInterval_));
+    text->GetGeometryNode()->SetMarginFrameOffset(OffsetF(horInterval_, verInterval_));
+    text->Layout();
 }
 
 } // namespace OHOS::Ace::NG

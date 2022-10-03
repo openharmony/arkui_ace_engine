@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/long_press_event.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -1091,8 +1092,8 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
     }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetTransformMatrix(
-            Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13],
-                matrix[2], matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]));
+            Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13], matrix[2],
+                matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]));
         return;
     }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
@@ -2218,47 +2219,67 @@ void JSViewAbstract::ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<Menu
 }
 
 // menuItem <value, action>
-using optionParam = std::pair<std::string, std::function<void()>>;
+GestureEventFunc JsBindOptionMenuNG(const JSCallbackInfo& info, const RefPtr<NG::FrameNode>& targetNode)
+{
+    auto paramArray = JSRef<JSArray>::Cast(info[0]);
+    std::vector<NG::optionParam> params(paramArray->Length());
+    // parse paramArray
+    LOGD("parsing paramArray size = %{public}d", static_cast<int>(paramArray->Length()));
+    for (size_t i = 0; i < paramArray->Length(); ++i) {
+        auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+        JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].first);
+        LOGD("option #%{public}d is %{public}s", static_cast<int>(i), params[i].first.c_str());
+        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(indexObject->GetProperty("action")));
+        // set onClick function
+        params[i].second = [func = std::move(action), context = info.GetExecutionContext()]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
+            ACE_SCORING_EVENT("menu.action");
+            if (func) {
+                LOGI("action detail : %{public}p", AceType::RawPtr(func));
+                // CAUSING CRASH: func->Execute();
+            }
+        };
+    }
+    GestureEventFunc event = [params, targetNode](GestureEvent& /*info*/) mutable {
+        // menu already created
+        if (params.empty()) {
+            NG::ViewAbstract::ShowMenu(targetNode->GetId());
+            return;
+        }
+        NG::ViewAbstract::BindMenuWithItems(params, targetNode);
+        // clear paramArray after creation
+        params.clear();
+    };
+    return event;
+}
+
+void CreateCustomMenu(RefPtr<JsFunction>& builder, const RefPtr<NG::FrameNode>& targetNode)
+{
+    // builder already executed, just show menu
+    if (!builder) {
+        NG::ViewAbstract::ShowMenu(targetNode->GetId());
+        return;
+    }
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    builder->Execute();
+    auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode);
+    // nullify builder
+    builder.Reset();
+}
+
 void JsBindMenuNG(const JSCallbackInfo& info)
 {
     // this FrameNode
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
-    // onClick event to open Menu
     GestureEventFunc event;
-
     // Array<MenuItem>
     if (info[0]->IsArray()) {
-        auto paramArray = JSRef<JSArray>::Cast(info[0]);
-        std::vector<optionParam> params(paramArray->Length());
-        // parse paramArray
-        LOGD("parsing paramArray size = %{public}d", paramArray->Length());
-        for (size_t i = 0; i < paramArray->Length(); ++i) {
-            auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
-            JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].first);
-            LOGD("option #%{public}d is %{public}s", i, params[i].first.c_str());
-            auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(indexObject->GetProperty("action")));
-            // set onClick function
-            params[i].second = [action, context = info.GetExecutionContext()]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
-                ACE_SCORING_EVENT("menu.action");
-                if (action) {
-                    LOGI("action detail : %{public}p", AceType::RawPtr(action));
-                    // CAUSING CRASH: action->Execute();
-                }
-            };
-        }
-        event = [params, targetNode](GestureEvent& /*info*/) mutable {
-            // menu already created
-            if (params.empty()) {
-                NG::ViewAbstract::ShowMenu(targetNode->GetId());
-                return;
-            }
-            NG::ViewAbstract::BindMenuWithItems(params, targetNode);
-            // clear paramArray after creation
-            params.clear();
-        };
+        event = JsBindOptionMenuNG(info, targetNode);
+
     } else if (info[0]->IsObject()) {
+        // CustomBuilder
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         auto builder = obj->GetProperty("builder");
         if (!builder->IsFunction()) {
@@ -2266,19 +2287,9 @@ void JsBindMenuNG(const JSCallbackInfo& info)
             return;
         }
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        if (!builderFunc) {
-            LOGE("builder function is null.");
-            return;
-        }
-        event = [builderFunc, targetNode](const GestureEvent& /*info*/) {
-            // builderFunc already executed, just show menu
-            if (!builderFunc) {
-                NG::ViewAbstract::ShowMenu(targetNode->GetId());
-            }
-            RefPtr<NG::UINode> customNode;
-            builderFunc->Execute();
-            customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-            builderFunc->DecRefCount();
+        CHECK_NULL_VOID(builderFunc);
+        event = [builderFunc, targetNode](const GestureEvent& /*info*/) mutable {
+            CreateCustomMenu(builderFunc, targetNode);
             LOGI("check if builderFunc is deleted successfully %{public}p", AceType::RawPtr(builderFunc));
         };
     } else {
@@ -4521,16 +4532,14 @@ void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient
             newGradient.GetSweepGradient()->centerX = Dimension(value);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
-                newGradient.GetSweepGradient()->centerX =
-                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+                newGradient.GetSweepGradient()->centerX = Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
             }
         }
         if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
             newGradient.GetSweepGradient()->centerY = Dimension(value);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
-                newGradient.GetSweepGradient()->centerY =
-                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+                newGradient.GetSweepGradient()->centerY = Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
             }
         }
     }
@@ -5133,17 +5142,37 @@ void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
     inspector->SetAccessibilityImportance(importance);
 }
 
-void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
+void JsBindContextMenuNG(RefPtr<JsFunction>& builder, int32_t responseType)
 {
-    ViewStackProcessor::GetInstance()->GetCoverageComponent();
-    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
-    if (!menuComponent) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto hub = targetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+
+    if (responseType == static_cast<int32_t>(ResponseType::RIGHT_CLICK)) {
+        OnMouseEventFunc event = [builder, targetNode](MouseInfo& info) mutable {
+            if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                CreateCustomMenu(builder, targetNode);
+            }
+        };
+        NG::ViewAbstract::SetOnMouse(std::move(event));
+    } else if (responseType == static_cast<int32_t>(ResponseType::LONGPRESS)) {
+        // create or show menu on long press
+        auto event = [builder, targetNode](const GestureEvent& /*info*/) mutable {
+            CreateCustomMenu(builder, targetNode);
+            LOGI("check builder is nullptr %{public}p", AceType::RawPtr(builder));
+        };
+        auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
+
+        hub->AddLongPressEvent(longPress);
+    } else {
+        LOGE("The arg responseType is invalid.");
         return;
     }
-#if defined(MULTIPLE_WINDOW_SUPPORTED)
-    menuComponent->SetIsContextMenu(true);
-#endif
+}
 
+void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
+{
     // Check the parameters
     if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("Builder param is invalid, not an object.");
@@ -5156,16 +5185,27 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         return;
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    if (!builderFunc) {
-        LOGE("builder function is null.");
-        return;
-    }
+    CHECK_NULL_VOID(builderFunc);
 
     int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
     if (info.Length() == 2 && info[1]->IsNumber()) {
         responseType = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %d.", responseType);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JsBindContextMenuNG(builderFunc, responseType);
+        return;
+    }
+
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
+    if (!menuComponent) {
+        return;
+    }
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+    menuComponent->SetIsContextMenu(true);
+#endif
 
     auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
     if (responseType == static_cast<int32_t>(ResponseType::RIGHT_CLICK)) {
@@ -5388,7 +5428,7 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
         NG::ViewAbstract::SetAlignRules(alignRules);
         return;
     }
-    
+
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     flexItem->SetAlignRules(alignRules);
 }
