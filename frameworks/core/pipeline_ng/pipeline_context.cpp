@@ -29,6 +29,7 @@
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -285,6 +286,8 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         return;
     }
     LOGI("SetRootRect %{public}f %{public}f", width, height);
+    GridSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
+    GridSystemManager::GetInstance().OnSurfaceChanged(width);
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
     if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF) {
         CalcSize idealSize { CalcLength(width), CalcLength(height) };

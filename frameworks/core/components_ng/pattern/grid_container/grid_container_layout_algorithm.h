@@ -19,6 +19,7 @@
 
 #include "grid_container_layout_property.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -34,13 +35,17 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override
     {
         const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        const auto& gridContainerLayoutProperty = DynamicCast<GridContainerLayoutProperty>(layoutProperty);
+        CHECK_NULL_VOID(gridContainerLayoutProperty);
+        gridContainerLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         float width = CreateIdealSize(
             layoutProperty->GetLayoutConstraint().value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true)
                           .Width();
-        const auto& gridContainerLayoutProperty = DynamicCast<GridContainerLayoutProperty>(layoutProperty);
         gridContainerLayoutProperty->BuildWidth(width);
 
         auto curLayoutProp = layoutWrapper->GetHostNode()->GetLayoutProperty<GridContainerLayoutProperty>();
+        curLayoutProp->UpdateMeasureType(MeasureType::MATCH_PARENT);
         curLayoutProp->BuildWidth(width);
 
         LinearLayoutAlgorithm::Measure(layoutWrapper);
