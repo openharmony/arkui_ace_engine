@@ -631,7 +631,7 @@ void UIContentImpl::Foreground()
     }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
-        LOGE("get pipeline context failed");
+        LOGI("get old pipeline context failed");
         return;
     }
     pipelineContext->SetForegroundCalled(true);

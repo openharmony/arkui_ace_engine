@@ -49,6 +49,7 @@ public:
 
     static void SetAspectRatio(float ratio);
     static void SetLayoutWeight(int32_t value);
+    static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color& color);
     static void SetBackgroundImage(const std::string& src);

@@ -25,7 +25,6 @@
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
 
-
 namespace OHOS::Ace::NG {
 
 enum class DetectState { READY, DETECTING, DETECTED };

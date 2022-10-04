@@ -29,17 +29,15 @@ class SwipeRecognizer : public MultiFingersRecognizer {
 
 public:
     SwipeRecognizer(int32_t fingers, const SwipeDirection& direction, double speed)
-        : direction_(direction), speed_(speed)
+        : direction_(direction), speed_(speed), newFingers_(fingers_), newSpeed_(speed_), newDirection_(direction_)
     {
         fingers_ = fingers;
-        newSpeed_ = speed_;
-        newFingers_ = fingers_;
-        newDirection_ = direction_;
     }
+
+    ~SwipeRecognizer() override = default;
 
     void OnAccepted() override;
     void OnRejected() override;
-    ~SwipeRecognizer() override {}
 
 private:
     enum class GestureAcceptResult {

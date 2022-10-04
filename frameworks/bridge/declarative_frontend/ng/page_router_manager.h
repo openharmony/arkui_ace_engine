@@ -106,6 +106,21 @@ public:
     RefPtr<Framework::RevSourceMap> GetCurrentPageSourceMap(const RefPtr<AssetManager>& assetManager);
 
 private:
+    class RouterOptScope {
+    public:
+        explicit RouterOptScope(PageRouterManager* manager) : manager_(manager)
+        {
+            manager_->inRouterOpt_ = true;
+        }
+        ~RouterOptScope()
+        {
+            manager_->inRouterOpt_ = false;
+        }
+
+    private:
+        PageRouterManager* manager_ = nullptr;
+    };
+
     // page id manage
     int32_t GenerateNextPageId();
 
@@ -113,8 +128,10 @@ private:
 
     void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     void StartBack(const RouterPageInfo& target, const std::string& params);
+    bool StartPop();
     void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     void BackCheckAlert(const RouterPageInfo& target, const std::string& params);
+    void StartClean();
 
     // page operations
     void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false,
@@ -129,6 +146,7 @@ private:
     static bool OnPopPageToIndex(int32_t index, bool needShowNext);
     static bool OnCleanPageStack();
 
+    bool inRouterOpt_ = false;
     RefPtr<Framework::ManifestParser> manifestParser_;
     LoadPageCallback loadJs_;
     int32_t pageId_ = 0;

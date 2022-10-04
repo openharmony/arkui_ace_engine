@@ -50,6 +50,7 @@ struct LayoutConstraintT {
         maxSize.MinusPadding(left, right, top, bottom);
         parentIdealSize.MinusPadding(left, right, top, bottom);
         selfIdealSize.MinusPadding(left, right, top, bottom);
+        percentReference.MinusPadding(left, right, top, bottom);
     }
 
     bool operator==(const LayoutConstraintT& layoutConstraint) const

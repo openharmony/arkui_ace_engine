@@ -633,6 +633,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
 void JSLazyForEach::Pop()
 {
     if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
         return;
     }
     ViewStackProcessor::GetInstance()->PopContainer();

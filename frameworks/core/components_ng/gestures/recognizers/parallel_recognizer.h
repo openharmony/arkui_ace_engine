@@ -18,6 +18,7 @@
 
 #include <functional>
 
+#include "base/memory/referenced.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
@@ -39,9 +40,9 @@ public:
 
     explicit ParallelRecognizer(std::list<RefPtr<GestureRecognizer>>&& recognizers)
     {
-        recognizers_ = std::move(recognizers);
-        for (const auto& recognizer : recognizers_) {
+        for (const auto& recognizer : recognizers) {
             recognizer->SetGestureGroup(AceType::WeakClaim(this));
+            recognizers_.emplace_back(recognizer);
         }
     }
 
@@ -52,6 +53,15 @@ public:
     bool HandleEvent(const TouchEvent& point) override;
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
+    void ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers)
+    {
+        // TODO: add state adjustment.
+        recognizers_.clear();
+        std::swap(recognizers_, recognizers);
+        for (auto& recognizer : recognizers_) {
+            recognizer->SetGestureGroup(AceType::WeakClaim(this));
+        }
+    }
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};

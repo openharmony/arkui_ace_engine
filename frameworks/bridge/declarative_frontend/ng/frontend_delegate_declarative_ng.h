@@ -180,6 +180,10 @@ public:
 
     bool OnPageBackPress();
 
+    void OnPageShow();
+
+    void OnPageHide();
+
 private:
     PipelineContextHolder pipelineContextHolder_;
     RefPtr<TaskExecutor> taskExecutor_;

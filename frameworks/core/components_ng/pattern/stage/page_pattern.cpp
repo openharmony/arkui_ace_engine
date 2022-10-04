@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,6 +37,32 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type) const
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     return renderContext->TriggerPageTransition(type);
+}
+
+void PagePattern::OnShow()
+{
+    if (isOnShow_) {
+        return;
+    }
+    isOnShow_ = true;
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (onPageShow_) {
+        context->PostAsyncEvent([onPageShow = onPageShow_]() { onPageShow(); });
+    }
+}
+
+void PagePattern::OnHide()
+{
+    if (!isOnShow_) {
+        return;
+    }
+    isOnShow_ = false;
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (onPageHide_) {
+        context->PostAsyncEvent([onPageHide = onPageHide_]() { onPageHide(); });
+    }
 }
 
 } // namespace OHOS::Ace::NG

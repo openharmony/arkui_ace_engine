@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <set>
+#include <type_traits>
 
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
@@ -31,7 +32,7 @@ class ACE_EXPORT ExclusiveRecognizer : public MultiFingersRecognizer {
 public:
     explicit ExclusiveRecognizer(const std::vector<RefPtr<GestureRecognizer>>& recognizers)
     {
-        for (auto& recognizer : recognizers) {
+        for (const auto& recognizer : recognizers) {
             recognizer->SetGestureGroup(AceType::WeakClaim(this));
             recognizers_.emplace_back(recognizer);
         }
@@ -52,6 +53,15 @@ public:
     bool HandleEvent(const TouchEvent& point) override;
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
+    void ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers)
+    {
+        // TODO: add state adjustment.
+        recognizers_.clear();
+        std::swap(recognizers_, recognizers);
+        for (auto& recognizer : recognizers_) {
+            recognizer->SetGestureGroup(AceType::WeakClaim(this));
+        }
+    }
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};

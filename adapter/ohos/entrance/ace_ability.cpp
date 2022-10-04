@@ -76,8 +76,7 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePath, const s
     if (!srcPath.empty()) {
         manifest = "assets/js/" + srcPath + "/manifest.json";
     }
-    std::string jsonStr = isHap ? GetStringFromHap(packagePath, manifest) :
-        GetStringFromFile(packagePath, manifest);
+    std::string jsonStr = isHap ? GetStringFromHap(packagePath, manifest) : GetStringFromFile(packagePath, manifest);
     if (jsonStr.empty()) {
         LOGE("return default frontend: JS frontend.");
         return FrontendType::JS;
@@ -441,13 +440,9 @@ void AceAbility::OnStart(const Want& want)
 
     // set window id & action event handler
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
-    if (context != nullptr) {
+    if (context) {
         context->SetActionEventHandler(actionEventHandler);
-    }
-
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
-    if (pipelineContext) {
-        pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
+        context->SetGetWindowRectImpl([window]() -> Rect {
             Rect rect;
             if (!window) {
                 return rect;

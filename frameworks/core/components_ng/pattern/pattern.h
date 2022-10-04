@@ -213,9 +213,6 @@ public:
         return DynamicCast<T>(host->GetEventHub<T>());
     }
 
-    virtual void OnInActive() {}
-    virtual void OnActive() {}
-
     // Called after frameNode RebuildRenderContextTree.
     virtual void OnRebuildFrame() {}
     // Called before frameNode CreateLayoutWrapper.
@@ -232,6 +229,14 @@ public:
     {
         return ScopeFocusAlgorithm();
     }
+
+    // out of viewport or visible is none or gone.
+    virtual void OnInActive() {}
+    virtual void OnActive() {}
+
+    // called by window life cycle.
+    virtual void OnWindowShow() {}
+    virtual void OnWindowHide() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

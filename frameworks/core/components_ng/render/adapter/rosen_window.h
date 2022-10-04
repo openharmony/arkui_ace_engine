@@ -50,6 +50,9 @@ public:
         return rsUIDirector_->RunningCustomAnimation(timeStamp);
     }
 
+    void OnShow() override;
+    void OnHide() override;
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

@@ -36,7 +36,7 @@ public:
     {}
     ~ListPaintMethod() override = default;
 
-    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
     V2::ItemDivider divider_;

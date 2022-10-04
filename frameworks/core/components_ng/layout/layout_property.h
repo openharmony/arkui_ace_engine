@@ -106,6 +106,11 @@ public:
         return gridProperty_;
     }
 
+    TextDirection GetLayoutDirection() const
+    {
+        return layoutDirection_.value_or(TextDirection::AUTO);
+    }
+
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
         return measureType_.value_or(defaultType);
@@ -159,6 +164,15 @@ public:
         if (magicItemProperty_->UpdateLayoutWeight(value)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
+    }
+
+    void UpdateLayoutDirection(TextDirection value)
+    {
+        if (layoutDirection_ == value) {
+            return;
+        }
+        layoutDirection_ = value;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 
     void UpdateAspectRatio(float ratio)
@@ -264,7 +278,7 @@ public:
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
-    
+
     void UpdateDisplayIndex(int32_t displayIndex)
     {
         if (!flexItemProperty_) {
@@ -336,6 +350,7 @@ private:
     std::unique_ptr<FlexItemProperty> flexItemProperty_;
     std::unique_ptr<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
+    std::optional<TextDirection> layoutDirection_;
 
     WeakPtr<FrameNode> host_;
 
