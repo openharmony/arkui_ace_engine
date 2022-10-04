@@ -70,18 +70,18 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   /**
    * Create a View
-   * 
+   *
    * 1. option: top level View, specify
    *    - compilerAssignedUniqueChildId must specify
    *    - parent=undefined
    *    - localStorage  must provide if @LocalSTorageLink/Prop variables are used
    *      in this View or descendant Views.
-   * 
+   *
    * 2. option: not a top level View
    *    - compilerAssignedUniqueChildId must specify
    *    - parent must specify
    *    - localStorage do not specify, will inherit from parent View.
-   * 
+   *
   */
   constructor(parent: ViewPU, localStorage?: LocalStorage) {
     super();
@@ -113,7 +113,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // are about to be deleted
   abstract aboutToBeDeleted(): void;
 
-  // super class will call this function from 
+  // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
     this.updateFuncByElmtId.clear();
@@ -273,7 +273,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}.purgeDeletedElmtIds -  start.`);
 
-    // rmElmtIds is the array of ElemntIds that 
+    // rmElmtIds is the array of ElemntIds that
     let removedElmtIds: number[] = [];
     rmElmtIds.forEach((elmtId: number) => {
       // remove entry from Map elmtId -> update function
@@ -316,103 +316,54 @@ abstract class ViewPU extends NativeViewPartialUpdate
     branchfunc();
   }
 
-  /*
-    partual updates for ForEach
-    The processing steps in re-render case are
-    1. create ForEachComponent,
-    2. get the previousIdArray from the ForEachElement. This array of
-       trings stores the result of the id generation function for all
-       array items at previous render,
-    3. compute newIdArray in the same way, using the current array. By comparing
-       the two array it gets clear what array items a- still exist but may have
-       moved position, b- which ones are new, and c- which ones no longer exist.
-    4. the ForEachComponent to sync the new idArray to the ForEachElement when it updates.
-    5. create ForEach children for new item array (case 2 above).
-
-    In the initial render case oldIdArray is empty. Therefore a new child will be
-    created for each item in the array (see step 3).
+ /*
+    Partial updates for ForEach
+    1. Generate IDs for new array.
+    2. Set new IDs and get diff to old one stored in C++.
+    3. Create new elements.
   */
-  forEachUpdateFunction(elmtId: number,
-    _arr: Array<any>,
-    itemGenFunc: (item: any) => void,
-    idGenFunc?: (item: any) => string) {
-    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction elmtId ${elmtId} - start`);
+forEachUpdateFunction(elmtId, _arr, itemGenFunc, idGenFunc) {
 
-    if (idGenFunc === undefined) {
-      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction: forEach does not specify id generation function. This will degrade performance`);
+  stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction ... `);
+
+  if (idGenFunc === undefined) {
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
       idGenFunc = function makeIdGenFunction() {
-        let index = 0;
-        // developers should always add an id gen function, because framework can not invent a good one
-        // for most cases:
-        // generate id that consist of the running index and the strinified item
-        return (item) => `${index++}_${JSON.stringify(item)}`;
+          let index = 0;
+          // Developer should give ID gen function. If not use this default.
+          return (item) => `${index++}_${JSON.stringify(item)}`;
       }();
-    }
-    const arr = _arr;  // just to trigger a 'get' onto the array
-
-    // id array of previous render or empty
-    const prevIdArray: string[] = [];
-    const success: boolean = ForEach.getIdArray(elmtId, prevIdArray) || false;  // step 2
-
-    stateMgmtConsole.debug(`${JSON.stringify(prevIdArray)}`);
-
-    // create array of new ids
-    let newIdArray: string[] = [];
-    arr.forEach((item) => {
-      let value = idGenFunc(item);
-      stateMgmtConsole.debug(`ID generator for ${item} returned: ${value}`)
-      newIdArray.push(value);
-    });
-
-    // step 3
-    // replace the idArray
-    // ForEachComponent needs to sync this back to the ForEachElement
-    ForEach.setIdArray(elmtId, newIdArray);
-
-    // step 4
-    // now, we compare the old and the new array
-    // for each entry three cases
-    // 1. id is in newIdArray, but missing from oldIdArray -> new entry, execute itemGenFunction
-    // 2. id is not in newIdArray, but in oldIdArray -> do nothing,
-    //       ForEachComponent to ForEachElement update will take care of deletion
-    // 3. id is in newdIdEntry and in oldIdEntry -> do nothing
-    //         ForEachComponent to ForEachElement update will change the slot
-    //         based on info found in the new idArray
-    newIdArray.forEach((id, newIndex) => {     // step 5
-      stateMgmtConsole.debug(`Handle item with item-id ${id}:`);
-      if (prevIdArray.indexOf(id) < 0) {
-        // id not in oldIdArray: create new child
-
-        stateMgmtConsole.debug(`   ... render children for item with item-id ${id} - start !`);
-        // on native side:
-        //  viewStack->PushKey(id);
-        //  viewStack->Push(AceType::MakeRefPtr<MultiComposedComponent>(viewStack->GetKey(), "ForEachItem"));
-        ForEach.createNewChildStart(id, /* View/JSView */ this);
-
-        itemGenFunc(arr[newIndex]);
-
-        // on native side:
-        //   viewStack->PopContainer();  FIXME: put to the right position in children_
-        //   viewStack->PopKey();
-        //   sync Component to Element
-        ForEach.createNewChildFinish(id, /* View/JSView */ this);
-
-        stateMgmtConsole.debug(`   ... render children for item with item-id ${id} - done!`);
-      } else {
-        stateMgmtConsole.debug(`   ... item-id ${id} is no new item, will not render child - done!`);
-      }
-    }); // newIdArray.forEach
-
-    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction elmtId ${elmtId} - done.`);
   }
 
+  let diffIndexArray = []; // New indexes compared to old one.
+  let newIdArray = [];
+  const arr = _arr; // just to trigger a 'get' onto the array
 
+  // Create array of new ids.
+  arr.forEach((item) => {
+      newIdArray.push(idGenFunc(item));
+  });
+
+  // set new array on C++ side
+  // C++ returns array of indexes of newly added array items
+  // these are indexes in new child list.
+  ForEach.setIdArray(elmtId, newIdArray,diffIndexArray);
+
+  stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
+
+  // Create new elements if any.
+  diffIndexArray.forEach((indx) => {
+      ForEach.createNewChildStart(newIdArray[indx], this);
+      itemGenFunc(arr[indx]);
+      ForEach.createNewChildFinish(newIdArray[indx], this);
+  });
+}
 
   /**
      * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
-     * @LocalStotrageLink in full update and partial update solution respectively. 
+     * @LocalStotrageLink in full update and partial update solution respectively.
      * These are not part of the public AppStorage API , apps should not use.
-     * @param storagePropName - key in LocalStorage 
+     * @param storagePropName - key in LocalStorage
      * @param defaultValue - value to use when creating a new prop in the LocalStotage
      * @param owningView - the View/ViewPU owning the @StorageLink/@LocalStorageLink variable
      * @param viewVariableName -  @StorageLink/@LocalStorageLink variable name

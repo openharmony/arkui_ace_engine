@@ -2938,7 +2938,7 @@ class ViewPU extends NativeViewPartialUpdate {
     id__() {
         return this.id_;
     }
-    // super class will call this function from 
+    // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
         this.updateFuncByElmtId.clear();
@@ -3074,7 +3074,7 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         
-        // rmElmtIds is the array of ElemntIds that 
+        // rmElmtIds is the array of ElemntIds that
         let removedElmtIds = [];
         rmElmtIds.forEach((elmtId) => {
             // remove entry from Map elmtId -> update function
@@ -3109,80 +3109,39 @@ class ViewPU extends NativeViewPartialUpdate {
         branchfunc();
     }
     /*
-      partual updates for ForEach
-      The processing steps in re-render case are
-      1. create ForEachComponent,
-      2. get the previousIdArray from the ForEachElement. This array of
-         trings stores the result of the id generation function for all
-         array items at previous render,
-      3. compute newIdArray in the same way, using the current array. By comparing
-         the two array it gets clear what array items a- still exist but may have
-         moved position, b- which ones are new, and c- which ones no longer exist.
-      4. the ForEachComponent to sync the new idArray to the ForEachElement when it updates.
-      5. create ForEach children for new item array (case 2 above).
-  
-      In the initial render case oldIdArray is empty. Therefore a new child will be
-      created for each item in the array (see step 3).
-    */
+       Partial updates for ForEach
+       1. Generate IDs for new array.
+       2. Set new IDs and get diff to old one stored in C++.
+       3. Create new elements.
+     */
     forEachUpdateFunction(elmtId, _arr, itemGenFunc, idGenFunc) {
         
         if (idGenFunc === undefined) {
             
             idGenFunc = function makeIdGenFunction() {
                 let index = 0;
-                // developers should always add an id gen function, because framework can not invent a good one
-                // for most cases:
-                // generate id that consist of the running index and the strinified item
+                // Developer should give ID gen function. If not use this default.
                 return (item) => `${index++}_${JSON.stringify(item)}`;
             }();
         }
-        const arr = _arr; // just to trigger a 'get' onto the array
-        // id array of previous render or empty
-        const prevIdArray = [];
-        const success = ForEach.getIdArray(elmtId, prevIdArray) || false; // step 2
-        
-        // create array of new ids
+        let diffIndexArray = []; // New indexes compared to old one.
         let newIdArray = [];
+        const arr = _arr; // just to trigger a 'get' onto the array
+        // Create array of new ids.
         arr.forEach((item) => {
-            let value = idGenFunc(item);
-            
-            newIdArray.push(value);
+            newIdArray.push(idGenFunc(item));
         });
-        // step 3
-        // replace the idArray
-        // ForEachComponent needs to sync this back to the ForEachElement
-        ForEach.setIdArray(elmtId, newIdArray);
-        // step 4
-        // now, we compare the old and the new array
-        // for each entry three cases
-        // 1. id is in newIdArray, but missing from oldIdArray -> new entry, execute itemGenFunction
-        // 2. id is not in newIdArray, but in oldIdArray -> do nothing,
-        //       ForEachComponent to ForEachElement update will take care of deletion
-        // 3. id is in newdIdEntry and in oldIdEntry -> do nothing
-        //         ForEachComponent to ForEachElement update will change the slot
-        //         based on info found in the new idArray
-        newIdArray.forEach((id, newIndex) => {
-            
-            if (prevIdArray.indexOf(id) < 0) {
-                // id not in oldIdArray: create new child
-                
-                // on native side:
-                //  viewStack->PushKey(id);
-                //  viewStack->Push(AceType::MakeRefPtr<MultiComposedComponent>(viewStack->GetKey(), "ForEachItem"));
-                ForEach.createNewChildStart(id, /* View/JSView */ this);
-                itemGenFunc(arr[newIndex]);
-                // on native side:
-                //   viewStack->PopContainer();  FIXME: put to the right position in children_
-                //   viewStack->PopKey();
-                //   sync Component to Element
-                ForEach.createNewChildFinish(id, /* View/JSView */ this);
-                
-            }
-            else {
-                
-            }
-        }); // newIdArray.forEach
+        // set new array on C++ side
+        // C++ returns array of indexes of newly added array items
+        // these are indexes in new child list.
+        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
         
+        // Create new elements if any.
+        diffIndexArray.forEach((indx) => {
+            ForEach.createNewChildStart(newIdArray[indx], this);
+            itemGenFunc(arr[indx]);
+            ForEach.createNewChildFinish(newIdArray[indx], this);
+        });
     }
     /**
        * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
@@ -3233,7 +3192,7 @@ class ViewPU extends NativeViewPartialUpdate {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-stateMgmtConsole.error("ACE State Management component is initiaizing ...");
+
 PersistentStorage.ConfigureBackend(new Storage());
 Environment.ConfigureBackend(new EnvironmentSetting());
 
