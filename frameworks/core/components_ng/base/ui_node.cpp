@@ -41,7 +41,7 @@ UINode::~UINode()
     onMainTree_ = false;
 }
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
 {
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
@@ -57,7 +57,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
 
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
-    if (onMainTree_) {
+    if (!silently && onMainTree_) {
         child->AttachToMainTree();
     }
     MarkNeedSyncRenderTree();
@@ -137,10 +137,10 @@ void UINode::Clean()
     MarkNeedSyncRenderTree();
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
 {
     CHECK_NULL_VOID(parent);
-    parent->AddChild(AceType::Claim(this), slot);
+    parent->AddChild(AceType::Claim(this), slot, silently);
     if (parent->GetPageId() != 0) {
         SetHostPageId(parent->GetPageId());
     }

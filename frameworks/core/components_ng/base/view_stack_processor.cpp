@@ -104,9 +104,9 @@ void ViewStackProcessor::Pop()
         groupNode->AddChildToGroup(currentNode);
         return;
     }
-    currentNode->MountToParent(parent);
+    currentNode->MountToParent(parent, DEFAULT_NODE_SLOT, AceType::InstanceOf<ForEachNode>(parent));
     auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
-    if (currentFrameNode) {
+    if (currentFrameNode  && !AceType::InstanceOf<ForEachNode>(parent)) {
         currentFrameNode->OnMountToParentDone();
     }
     LOGD("ViewStackProcessor Pop size %{public}d", static_cast<int32_t>(elementsStack_.size()));
