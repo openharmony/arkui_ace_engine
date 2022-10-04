@@ -72,6 +72,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         LOGE("child is not exist.");
         return children_.end();
     }
+    (*iter)->DetachFromMainTree();
     (*iter)->OnRemoveFromParent();
     auto result = children_.erase(iter);
     MarkNeedSyncRenderTree();
@@ -91,6 +92,7 @@ void UINode::RemoveChildAtIndex(int32_t index)
     }
     auto iter = children_.begin();
     std::advance(iter, index);
+    (*iter)->DetachFromMainTree();
     (*iter)->OnRemoveFromParent();
     children_.erase(iter);
     MarkNeedSyncRenderTree();
@@ -130,6 +132,10 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 
 void UINode::Clean()
 {
+    // detach to-be-removed children from the main tree.
+    for (const auto& toBeRemovedChild : children_) {
+        toBeRemovedChild->DetachFromMainTree();
+    }
     for (const auto& child : children_) {
         child->OnRemoveFromParent();
     }
