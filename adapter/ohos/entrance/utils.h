@@ -19,13 +19,16 @@
 #include <string>
 
 #include "base/log/log.h"
-#include "runtime_extractor.h"
+#include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
 
 std::string GetStringFromFile(const std::string& packagePathStr, const std::string& fileName);
 std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName);
 bool GetIsArkFromConfig(const std::string& packagePathStr, bool isHap);
+
+RefPtr<FlutterAssetProvider> CreateAssetProvider(const std::string& packagePath,
+    const std::vector<std::string>& assetBasePaths);
 
 inline const std::string GenerateFullPath(const std::string& prePath, const std::string& postPath)
 {

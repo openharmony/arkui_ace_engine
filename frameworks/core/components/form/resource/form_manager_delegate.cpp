@@ -416,7 +416,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
             return;
         }
         hasCreated_ = true;
-        onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath + "/", formJsInfo.formName,
+        onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath, formJsInfo.formName,
             formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo);
     } else {
         if (formJsInfo.formData.empty()) {

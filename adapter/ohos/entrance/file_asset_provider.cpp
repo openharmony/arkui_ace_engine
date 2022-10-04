@@ -34,8 +34,13 @@ bool FileAssetProvider::Initialize(const std::string& packagePath, const std::ve
         return false;
     }
 
+    if (packagePath.back() != '/') {
+        packagePath_ = packagePath + "/";
+    } else {
+        packagePath_ = packagePath;
+    }
+
     assetBasePaths_ = assetBasePaths;
-    packagePath_ = packagePath;
     return true;
 }
 
