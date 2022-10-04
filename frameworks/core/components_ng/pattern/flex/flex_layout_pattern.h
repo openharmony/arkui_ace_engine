@@ -52,14 +52,14 @@ public:
     {
         auto property = GetLayoutProperty<FlexLayoutProperty>();
         if (!property) {
-            return ScopeFocusAlgorithm();
+            return {};
         }
         bool isVertical = true;
         if (property->GetFlexDirection().has_value()) {
             isVertical = property->GetFlexDirection().value() == FlexDirection::COLUMN ||
                          property->GetFlexDirection().value() == FlexDirection::COLUMN_REVERSE;
         }
-        return ScopeFocusAlgorithm(isVertical, true, ScopeType::FLEX);
+        return { isVertical, true, ScopeType::FLEX };
     }
 
 private:

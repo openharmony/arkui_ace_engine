@@ -18,9 +18,9 @@
 
 #include <map>
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -29,7 +29,7 @@ struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignSelf, FlexAlign);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, CalcLength);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DisplayIndex, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRules, AlignRulesType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignLeft, float);

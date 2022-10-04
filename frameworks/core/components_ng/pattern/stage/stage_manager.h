@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
@@ -36,15 +37,15 @@ public:
     explicit StageManager(const RefPtr<FrameNode>& stage);
     ~StageManager() override = default;
 
-    bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true);
-    bool PopPage(bool needShowNext = true);
-    bool PopPageToIndex(int32_t index, bool needShowNext = true);
+    bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    bool PopPage(bool needShowNext = true, bool needTransition = true);
+    bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
     bool CleanPageStack();
 
-    bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true);
+    bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
 
-    static void FirePageHide(const RefPtr<UINode>& node);
-    static void FirePageShow(const RefPtr<UINode>& node);
+    static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
+    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
 
     RefPtr<FrameNode> GetLastPage();
 

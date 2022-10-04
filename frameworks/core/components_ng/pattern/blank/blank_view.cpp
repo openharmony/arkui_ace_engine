@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/blank/blank_layout_property.h"
@@ -35,6 +36,7 @@ void BlankView::Create()
     stack->Push(blankNode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, 1.0f);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, 0.0f);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, FlexAlign::STRETCH);
 }
 
 void BlankView::SetBlankMin(const Dimension& blankMin)

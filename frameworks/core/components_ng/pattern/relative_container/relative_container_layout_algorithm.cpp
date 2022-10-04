@@ -55,7 +55,7 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CollectNodesById(layoutWrapper);
     GetDependencyRelationship();
     if (!PreTopologicalLoopDetection()) {
-        auto childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
+        const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
         auto constraint = relativeContainerlayoutProperty->CreateChildConstraint();
         for (const auto& childrenWrapper : childrenWrappers) {
             constraint.maxSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -80,8 +80,8 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerlayoutProperty);
-    auto childrenWrapper = layoutWrapper->GetAllChildrenWithBuild();
-    for (auto& childWrapper : childrenWrapper) {
+    const auto& childrenWrapper = layoutWrapper->GetAllChildrenWithBuild();
+    for (const auto& childWrapper : childrenWrapper) {
         auto curOffset = recordOffsetMap_[childWrapper->GetHostNode()->GetInspectorIdValue()];
         childWrapper->GetGeometryNode()->SetMarginFrameOffset(curOffset);
         childWrapper->Layout();
@@ -93,7 +93,7 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
     idNodeMap_.clear();
     auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
     auto constraint = relativeContainerlayoutProperty->GetLayoutConstraint();
-    auto childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& childWrapper : childrenWrappers) {
         auto childLayoutProperty = childWrapper->GetLayoutProperty();
         auto childHostNode = childWrapper->GetHostNode();

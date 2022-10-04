@@ -17,16 +17,21 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_styles.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT LinearLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(LinearLayoutProperty, LayoutProperty);
+class ACE_EXPORT LinearLayoutProperty : public FlexLayoutProperty {
+    DECLARE_ACE_TYPE(LinearLayoutProperty, FlexLayoutProperty);
 
 public:
-    explicit LinearLayoutProperty(bool isVertical) : isVertical_(isVertical) {}
+    explicit LinearLayoutProperty(bool isVertical) : isVertical_(isVertical)
+    {
+        UpdateFlexDirection(isVertical_ ? FlexDirection::COLUMN : FlexDirection::ROW);
+    }
 
     ~LinearLayoutProperty() override = default;
 
@@ -39,18 +44,9 @@ public:
 
     void Reset() override
     {
-        LayoutProperty::Reset();
+        FlexLayoutProperty::Reset();
         isVertical_ = false;
-        ResetLinearLayoutAttribute();
     }
-
-    ACE_DEFINE_PROPERTY_GROUP(LinearLayoutAttribute, LinearLayoutAttribute)
-
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_LAYOUT);
-
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, MainAxisAlign, FlexAlign, PROPERTY_UPDATE_LAYOUT);
-
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, Space, Dimension, PROPERTY_UPDATE_MEASURE);
 
     bool IsVertical() const
     {
@@ -61,8 +57,7 @@ protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
         auto value = DynamicCast<LinearLayoutProperty>(property);
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propLinearLayoutAttribute_ = CloneLinearLayoutAttribute();
+        FlexLayoutProperty::Clone(value);
         value->isVertical_ = isVertical_;
     }
 

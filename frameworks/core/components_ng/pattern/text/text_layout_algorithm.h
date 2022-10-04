@@ -58,7 +58,7 @@ private:
         const RefPtr<PipelineContext>& pipeline);
     bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
     static TextDirection GetTextDirection(const std::string& content);
-    double GetTextWidth() const;
+    float GetTextWidth() const;
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::shared_ptr<RSParagraph> paragraph_;
