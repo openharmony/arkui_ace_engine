@@ -19,7 +19,7 @@
 
 #include "ashmem.h"
 
-#include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/utils.h"
 #include "base/utils/utils.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
@@ -161,21 +161,22 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
         frontend_->SetAssetManager(flutterAssetManager);
         assetManager_ = flutterAssetManager;
 
-        auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-        std::string temp1 = "assets/js/" + module + "/";
-        std::string temp2 = "assets/js/share/";
-        std::string temp3 = formSrc;
         std::vector<std::string> basePaths;
-        basePaths.push_back(temp1);
-        basePaths.push_back(temp2);
-        basePaths.push_back("./");
-        basePaths.push_back("./js/");
-        if (assetProvider->Initialize(path, basePaths)) {
+        basePaths.push_back("assets/js/" + module + "/");
+        basePaths.emplace_back("assets/js/share/");
+        basePaths.emplace_back("");
+        basePaths.emplace_back("js/");
+        auto assetProvider = CreateAssetProvider(path, basePaths);
+        if (assetProvider) {
             LOGI("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }
-    frontend_->SetFormSrc(formSrc);
+    if (formSrc.compare(0, 2, "./") == 0) { // 2:length of "./"
+        frontend_->SetFormSrc(formSrc.substr(2)); // 2:length of "./"
+    } else {
+        frontend_->SetFormSrc(formSrc);
+    }
     frontend_->SetCardWindowConfig(GetWindowConfig());
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
 

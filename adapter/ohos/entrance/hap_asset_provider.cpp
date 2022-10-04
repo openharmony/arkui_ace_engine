@@ -99,7 +99,7 @@ std::string HapAssetProvider::GetAssetPath(const std::string& assetName)
         if (!hasFile) {
             continue;
         }
-        return hapPath_ + "/" + fileName;
+        return hapPath_ + "/" + basePath;
     }
     LOGE("Cannot find base path of %{public}s", assetName.c_str());
     return "";
