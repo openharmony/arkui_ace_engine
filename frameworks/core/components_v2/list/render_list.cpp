@@ -294,6 +294,7 @@ void RenderList::InitScrollBar()
 {
     if (scrollBar_) {
         scrollBar_->Reset();
+        scrollBar_->SetDisplayMode(component_->GetScrollBar());
         return;
     }
     if (!component_) {
