@@ -102,6 +102,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
+#if defined(MODEL_COMPONENT_SUPPORTED)
+#include "frameworks/bridge/declarative_frontend/jsview/js_sceneview.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
@@ -463,6 +466,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
+#endif
+#if defined(MODEL_COMPONENT_SUPPORTED)
+    { "Model", JSSceneView::JSBind},
 #endif
 };
 

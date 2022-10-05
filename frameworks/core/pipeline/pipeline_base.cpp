@@ -495,6 +495,11 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     if (onVsyncProfiler_) {
         AceTracker::Start();
     }
+
+    if (gsVsyncCallback_) {
+        gsVsyncCallback_();
+    }
+
     FlushVsync(nanoTimestamp, frameCount);
     if (onVsyncProfiler_) {
         onVsyncProfiler_(AceTracker::Stop());
