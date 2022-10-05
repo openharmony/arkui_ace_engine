@@ -207,6 +207,19 @@ build_component_ng("pattern_ng") {
     "xcomponent/xcomponent_pattern.cpp",
     "xcomponent/xcomponent_view.cpp",
   ]
+
+  # custom_paint should not deps on skia interfaces
+  if (enable_ng_build) {
+    sources -= [
+      "custom_paint/canvas_paint_method.cpp",
+      "custom_paint/custom_paint_layout_algorithm.cpp",
+      "custom_paint/custom_paint_paint_method.cpp",
+      "custom_paint/custom_paint_pattern.cpp",
+      "custom_paint/custom_paint_view.cpp",
+      "custom_paint/offscreen_canvas_paint_method.cpp",
+      "custom_paint/offscreen_canvas_pattern.cpp",
+    ]
+  }
 }
 
 build_component_ng("pattern_ability_component_ng") {

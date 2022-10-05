@@ -27,7 +27,6 @@
 #include "core/common/container.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"

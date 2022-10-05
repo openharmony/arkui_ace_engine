@@ -16,7 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 
+#ifdef NG_BUILD
+#include "include/core/SkColor.h"
+#include "modules/svg/include/SkSVGDOM.h"
+#else
 #include "experimental/svg/model/SkSVGDOM.h"
+#endif
 #include "include/core/SkStream.h"
 
 #include "core/components/common/properties/color.h"
@@ -48,7 +53,12 @@ public:
             skColor.color = svgFillColor.value().GetValue();
             skColor.valid = 1;
         }
+#ifdef NG_BUILD
+        // NG not support svg yet
+        sk_sp<SkSVGDOM> skiaDom = nullptr;
+#else
         auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, skColor.value);
+#endif
         return AceType::MakeRefPtr<SkiaSvgDom>(skiaDom);
     }
 
@@ -59,17 +69,25 @@ public:
 
     void Render(SkCanvas* skCanvas)
     {
+#ifndef NG_BUILD
         skiaDom_->render(skCanvas);
+#endif
     }
 
     SizeF GetContainerSize() const override
     {
+#ifdef NG_BUILD
+        return {};
+#else
         return SizeF(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+#endif
     }
 
     void SetContainerSize(const SizeF& containerSize) override
     {
+#ifndef NG_BUILD
         skiaDom_->setContainerSize({containerSize.Width(), containerSize.Height()});
+#endif
     }
 private:
     sk_sp<SkSVGDOM> skiaDom_;

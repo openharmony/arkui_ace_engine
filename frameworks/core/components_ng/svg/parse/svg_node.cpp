@@ -241,7 +241,8 @@ const Rect& SvgNode::GetRootViewBox() const
     auto svgContext = svgContext_.Upgrade();
     if (!svgContext) {
         LOGE("Gradient failed, svgContext is null");
-        return Rect();
+        static Rect empty;
+        return empty;
     }
     return svgContext->GetRootViewBox();
 }
