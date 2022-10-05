@@ -81,39 +81,48 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto textContent = textFieldLayoutProperty->GetValueValue(textFieldLayoutProperty->GetPlaceholderValue(""));
     CreateParagraph(textStyle, textContent);
 
+    float imageSize = 0.0f;
+    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(false);
+    imageSize = showPasswordIcon ? GetTextFieldDefaultImageHeight() : 0.0f;
+    if (contentConstraint.selfIdealSize.Height()) {
+        imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
+    }
+
     if (textStyle.GetMaxLines() == 1) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(Infinity<float>());
     } else {
-        paragraph_->Layout(contentConstraint.maxSize.Width());
+        paragraph_->Layout(contentConstraint.maxSize.Width() - imageSize);
     }
-    if (pattern->GetTextModifiedByInputMethod()) {
-        UpdateCaretPositionByTextEdit(layoutWrapper);
-    } else {
-        UpdateCaretPositionByTouchOffset(layoutWrapper);
+
+    auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
+    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+        paragraph_->Layout(std::ceil(paragraphNewWidth));
+    }
+
+    switch (pattern->GetTextModified()) {
+        // TODO: need to move these function out of measure process.
+        case TextModifiedType::INPUT_METHOD:
+            UpdateCaretPositionByTextEdit(layoutWrapper);
+            break;
+        case TextModifiedType::TOUCH_OR_KEY:
+            UpdateCaretPositionByTouchOffset(layoutWrapper);
+            break;
+        default:
+            break;
     }
     auto height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
     // check password image size.
-    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(false);
     if (!showPasswordIcon) {
         textRect_.SetSize(SizeF(contentConstraint.maxSize.Width(), height));
         imageRect_.SetSize(SizeF());
         return SizeF(contentConstraint.maxSize.Width(), height);
     }
 
-    float imageHeight = 0.0f;
-    imageHeight = GetTextFieldDefaultImageHeight();
-    if (contentConstraint.selfIdealSize.Height()) {
-        imageHeight = std::min(imageHeight, contentConstraint.selfIdealSize.Height().value());
-    }
-    if (textStyle.GetMaxLines() > 1) {
-        // for textArea, need to delete imageWidth and remeasure.
-        paragraph_->Layout(contentConstraint.maxSize.Width() - imageHeight);
-    }
     height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
-    textRect_.SetSize(SizeF(contentConstraint.maxSize.Width() - imageHeight, static_cast<float>(height)));
-    imageRect_.SetSize(SizeF(imageHeight, imageHeight));
-    return SizeF(contentConstraint.maxSize.Width(), imageHeight);
+    textRect_.SetSize(SizeF(contentConstraint.maxSize.Width() - imageSize, static_cast<float>(height)));
+    imageRect_.SetSize(SizeF(imageSize, imageSize));
+    return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, height));
 }
 
 void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

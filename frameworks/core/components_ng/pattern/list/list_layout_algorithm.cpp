@@ -75,63 +75,72 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingBeforeContent_ = axis == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
+    auto childSize = layoutWrapper->GetTotalChildCount();
     if (!GetMainAxisSize(contentIdealSize, axis)) {
-        // use parent max size first.
-        auto parentMaxSize = contentConstraint.maxSize;
-        contentMainSize_ = GetMainAxisSize(parentMaxSize, axis) - paddingBeforeContent_ - paddingAfterContent_;
-        mainSizeIsDefined_ = false;
+        if (childSize == 0) {
+            contentMainSize_ = 0.0f;
+        } else {
+            // use parent max size first.
+            auto parentMaxSize = contentConstraint.maxSize;
+            contentMainSize_ = GetMainAxisSize(parentMaxSize, axis) - paddingBeforeContent_ - paddingAfterContent_;
+            mainSizeIsDefined_ = false;
+        }
     } else {
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis);
         mainSizeIsDefined_ = true;
     }
 
-    startMainPos_ = currentOffset_;
-    endMainPos_ = currentOffset_ + contentMainSize_;
-    LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f, startMainPos: %{public}f, "
-         "endMainPos: %{public}f",
-        preStartIndex_, preEndIndex_, currentOffset_, startMainPos_, endMainPos_);
+    if (childSize > 0) {
+        startMainPos_ = currentOffset_;
+        endMainPos_ = currentOffset_ + contentMainSize_;
+        LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f, startMainPos: %{public}f, "
+             "endMainPos: %{public}f",
+            preStartIndex_, preEndIndex_, currentOffset_, startMainPos_, endMainPos_);
 
-    auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
-    auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
-    spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
-    if (listLayoutProperty->GetDivider().has_value()) {
-        auto divider = listLayoutProperty->GetDivider().value();
-        std::optional<float> dividerSpace =
-            ConvertToPx(divider.strokeWidth, layoutConstraint.scaleProperty, mainPercentRefer);
-        if (dividerSpace.has_value()) {
-            spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
+        auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
+        auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
+        spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
+        if (listLayoutProperty->GetDivider().has_value()) {
+            auto divider = listLayoutProperty->GetDivider().value();
+            std::optional<float> dividerSpace =
+                ConvertToPx(divider.strokeWidth, layoutConstraint.scaleProperty, mainPercentRefer);
+            if (dividerSpace.has_value()) {
+                spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
+            }
         }
-    }
 
-    // calculate child layout constraint.
-    auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();
-    UpdateListItemConstraint(axis, contentIdealSize, childLayoutConstraint);
+        // calculate child layout constraint.
+        auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();
+        UpdateListItemConstraint(axis, contentIdealSize, childLayoutConstraint);
 
-    itemPosition_.clear();
+        itemPosition_.clear();
 
-    lanes_ = listLayoutProperty->GetLanes();
-    if (listLayoutProperty->GetLaneMinLength().has_value()) {
-        minLaneLength_ = ConvertToPx(
-            listLayoutProperty->GetLaneMinLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
-    }
-    if (listLayoutProperty->GetLaneMaxLength().has_value()) {
-        maxLaneLength_ = ConvertToPx(
-            listLayoutProperty->GetLaneMaxLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
-    }
-    listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
-    CalculateLanes(layoutConstraint, axis);
-
-    cachedCount_ = listLayoutProperty->GetCachedCount().value_or(0);
-    if (lanes_.has_value() && lanes_.value() > 1) {
-        if (cachedCount_ % lanes_.value() != 0) {
-            cachedCount_ = (cachedCount_ / lanes_.value() + 1) * lanes_.value();
+        lanes_ = listLayoutProperty->GetLanes();
+        if (listLayoutProperty->GetLaneMinLength().has_value()) {
+            minLaneLength_ = ConvertToPx(
+                listLayoutProperty->GetLaneMinLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
         }
-    }
+        if (listLayoutProperty->GetLaneMaxLength().has_value()) {
+            maxLaneLength_ = ConvertToPx(
+                listLayoutProperty->GetLaneMaxLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
+        }
+        listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
+        CalculateLanes(layoutConstraint, axis);
 
-    if (jumpIndex_) {
-        LayoutListInIndexMode(layoutWrapper, childLayoutConstraint, axis);
+        cachedCount_ = listLayoutProperty->GetCachedCount().value_or(0);
+        if (lanes_.has_value() && lanes_.value() > 1) {
+            if (cachedCount_ % lanes_.value() != 0) {
+                cachedCount_ = (cachedCount_ / lanes_.value() + 1) * lanes_.value();
+            }
+        }
+
+        if (jumpIndex_) {
+            LayoutListInIndexMode(layoutWrapper, childLayoutConstraint, axis);
+        } else {
+            LayoutListInOffsetMode(layoutWrapper, childLayoutConstraint, axis);
+        }
     } else {
-        LayoutListInOffsetMode(layoutWrapper, childLayoutConstraint, axis);
+        LOGI("child size is empty");
     }
 
     if (axis == Axis::HORIZONTAL) {
@@ -150,6 +159,10 @@ void ListLayoutAlgorithm::LayoutListInIndexMode(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
     auto totalCount = layoutWrapper->GetTotalChildCount();
+    if (totalCount == 0) {
+        LOGI("child size is empty");
+        return;
+    }
     if (jumpIndex_.value() < 0 || jumpIndex_.value() >= totalCount) {
         LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalCount);
         jumpIndex_ = std::clamp(jumpIndex_.value(), 0, totalCount - 1);

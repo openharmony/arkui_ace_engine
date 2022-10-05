@@ -96,9 +96,6 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::strin
             rsNode_ = Rosen::RSCanvasNode::Create();
         }
     }
-    rsNode_->SetBounds(0, 0, 0, 0);
-    rsNode_->SetFrame(0, 0, 0, 0);
-    rsNode_->SetPivot(0.5F, 0.5F); // default pivot is center
 }
 
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
@@ -117,6 +114,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    rsNode_->SetPivot(0.5f, 0.5f); // default pivot is center
 
     if (propTransform_ && propTransform_->HasTransformCenter()) {
         auto vec = propTransform_->GetTransformCenterValue();
@@ -142,6 +140,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         PaintClip(frameSize);
     }
 }
+
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     if (!rsNode_) {
@@ -307,8 +306,7 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
     DecomposedTransform transform;
     if (!TransformUtil::DecomposeTransform(transform, matrix)) {
         // fallback to basic matrix decompose
-        Rosen::Vector2f xyTranslateValue { static_cast<float>(matrix.Get(0, 3)),
-            static_cast<float>(matrix.Get(1, 3)) };
+        Rosen::Vector2f xyTranslateValue { static_cast<float>(matrix.Get(0, 3)), static_cast<float>(matrix.Get(1, 3)) };
         float zTranslateValue = static_cast<float>(matrix.Get(2, 3));
         Rosen::Vector2f scaleValue { 0.0f, 0.0f };
         AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
@@ -321,8 +319,7 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         Rosen::Vector2f xyTranslateValue { transform.translate[0], transform.translate[1] };
         float zTranslateValue = transform.translate[2];
         Rosen::Quaternion quaternion { static_cast<float>(transform.quaternion.GetX()),
-            static_cast<float>(transform.quaternion.GetY()),
-            static_cast<float>(transform.quaternion.GetZ()),
+            static_cast<float>(transform.quaternion.GetY()), static_cast<float>(transform.quaternion.GetZ()),
             static_cast<float>(transform.quaternion.GetW()) };
         Rosen::Vector2f scaleValue { transform.scale[0], transform.scale[1] };
         AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
@@ -1035,28 +1032,27 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type) const
     bool transitionIn = true;
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
-            effect->Translate({width, 0, 0});
+            effect->Translate({ width, 0, 0 });
             transitionIn = true;
             break;
         case PageTransitionType::ENTER_POP:
-            effect->Translate({-width, 0, 0});
+            effect->Translate({ -width, 0, 0 });
             transitionIn = true;
             break;
         case PageTransitionType::EXIT_PUSH:
-            effect->Translate({-width, 0, 0});
+            effect->Translate({ -width, 0, 0 });
             transitionIn = false;
             break;
         case PageTransitionType::EXIT_POP:
-            effect->Translate({width, 0, 0});
+            effect->Translate({ width, 0, 0 });
             transitionIn = false;
             break;
         default:
             LOGI("unexpected transition type");
             return false;
     }
-    AnimationUtils::Animate(option, [rsNode = rsNode_, effect, transitionIn]() {
-        rsNode->NotifyTransition(effect, transitionIn);
-    });
+    AnimationUtils::Animate(
+        option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); });
     return true;
 }
 

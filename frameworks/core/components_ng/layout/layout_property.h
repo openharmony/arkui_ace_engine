@@ -339,6 +339,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Visibility, VisibleType, PROPERTY_UPDATE_MEASURE);
     void OnVisibilityUpdate(VisibleType visible) const;
 
+    void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
+    {
+        layoutConstraint_ = layoutProperty->layoutConstraint_;
+        contentConstraint_ = layoutProperty->contentConstraint_;
+    }
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -350,6 +356,7 @@ private:
 
     void CheckAspectRatio();
 
+    // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;
 
