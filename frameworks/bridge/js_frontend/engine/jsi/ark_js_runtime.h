@@ -82,6 +82,7 @@ public:
     shared_ptr<JsValue> NewArray() override;
     shared_ptr<JsValue> NewFunction(RegisterFunctionType func) override;
     shared_ptr<JsValue> NewNativePointer(void* ptr) override;
+    void ThrowError(const std::string& msg, int32_t code) override;
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
     void HandleUncaughtException() override;
     bool HasPendingException() override;

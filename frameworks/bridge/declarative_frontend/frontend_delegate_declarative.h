@@ -49,6 +49,7 @@ struct RouterTask {
     RouterAction action = RouterAction::PUSH;
     PageTarget target = PageTarget("");
     std::string params;
+    std::function<void(const std::string&, int32_t)> errorCallback;
 };
 
 class FrontendDelegateDeclarative : public FrontendDelegate {
@@ -137,14 +138,24 @@ public:
     void FireExternalEvent(const std::string& eventId, const std::string& componentId, uint32_t nodeId, bool isDestroy);
 
     // FrontendDelegate overrides.
-    void Push(const PageTarget& target, const std::string& params);
-    void Replace(const PageTarget& target, const std::string& params);
+    void Push(const PageTarget& target, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
+    void Replace(const PageTarget& target, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
     void BackWithTarget(const PageTarget& target, const std::string& params);
 
     void Push(const std::string& uri, const std::string& params) override;
     void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
+    void PushWithCallback(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback) override;
+    void PushWithModeAndCallback(const std::string& uri, const std::string& params, uint32_t routerMode,
+        const std::function<void(const std::string&, int32_t)>& errorCallback) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
+    void ReplaceWithCallback(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback) override;
+    void ReplaceWithModeAndCallback(const std::string& uri, const std::string& params, uint32_t routerMode,
+        const std::function<void(const std::string&, int32_t)>& errorCallback) override;
     void Back(const std::string& uri, const std::string& params) override;
     void Clear() override;
     int32_t GetStackSize() const override;
@@ -327,8 +338,10 @@ private:
     void ResetStagingPage();
     void FlushAnimationTasks();
 
-    void StartPush(const PageTarget& target, const std::string& params);
-    void StartReplace(const PageTarget& target, const std::string& params);
+    void StartPush(const PageTarget& target, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback);
+    void StartReplace(const PageTarget& target, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback);
     void StartBack(const PageTarget& target, const std::string& params);
     void BackCheckAlert(const PageTarget& target, const std::string& params);
     void ProcessRouterTask();

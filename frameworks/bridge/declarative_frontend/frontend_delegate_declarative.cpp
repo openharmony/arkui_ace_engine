@@ -806,6 +806,18 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
     Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params);
 }
 
+void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    Push(PageTarget(uri), params, errorCallback);
+}
+
+void FrontendDelegateDeclarative::PushWithModeAndCallback(const std::string& uri, const std::string& params,
+    uint32_t routerMode, const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
+}
+
 void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::string& params)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -825,6 +837,18 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params);
+}
+
+void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    Replace(PageTarget(uri), params, errorCallback);
+}
+
+void FrontendDelegateDeclarative::ReplaceWithModeAndCallback(const std::string& uri, const std::string& params,
+    uint32_t routerMode, const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
 }
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)
@@ -937,10 +961,10 @@ void FrontendDelegateDeclarative::ProcessRouterTask()
             }
             switch (currentTask.action) {
                 case RouterAction::PUSH:
-                    delegate->StartPush(currentTask.target, currentTask.params);
+                    delegate->StartPush(currentTask.target, currentTask.params, currentTask.errorCallback);
                     break;
                 case RouterAction::REPLACE:
-                    delegate->StartReplace(currentTask.target, currentTask.params);
+                    delegate->StartReplace(currentTask.target, currentTask.params, currentTask.errorCallback);
                     break;
                 case RouterAction::BACK:
                     delegate->BackCheckAlert(currentTask.target, currentTask.params);
@@ -960,24 +984,26 @@ bool FrontendDelegateDeclarative::IsNavigationStage(const PageTarget& target)
     return target.container.Upgrade();
 }
 
-void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::string& params)
+void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     if (IsNavigationStage(target)) {
-        StartPush(target, params);
+        StartPush(target, params, errorCallback);
         return;
     }
     {
         std::lock_guard<std::mutex> lock(routerQueueMutex_);
         if (!routerQueue_.empty()) {
-            AddRouterTask(RouterTask { RouterAction::PUSH, target, params });
+            AddRouterTask(RouterTask { RouterAction::PUSH, target, params, errorCallback });
             return;
         }
-        AddRouterTask(RouterTask { RouterAction::PUSH, target, params });
+        AddRouterTask(RouterTask { RouterAction::PUSH, target, params, errorCallback });
     }
-    StartPush(target, params);
+    StartPush(target, params, errorCallback);
 }
 
-void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std::string& params)
+void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     if (target.url.empty()) {
         LOGE("router.Push uri is empty");
@@ -987,6 +1013,9 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
     if (isRouteStackFull_) {
         LOGE("the router stack has reached its max size, you can't push any more pages.");
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, target.url);
+        if (errorCallback != nullptr) {
+            errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+        }
         ProcessRouterTask();
         return;
     }
@@ -997,28 +1026,33 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
         LoadPage(GenerateNextPageId(), PageTarget(target, pagePath), false, params);
     } else {
         LOGW("[Engine Log] this uri not support in route push.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+        }
         ProcessRouterTask();
     }
 }
 
-void FrontendDelegateDeclarative::Replace(const PageTarget& target, const std::string& params)
+void FrontendDelegateDeclarative::Replace(const PageTarget& target, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     if (IsNavigationStage(target)) {
-        StartReplace(target, params);
+        StartReplace(target, params, errorCallback);
         return;
     }
     {
         std::lock_guard<std::mutex> lock(routerQueueMutex_);
         if (!routerQueue_.empty()) {
-            AddRouterTask(RouterTask { RouterAction::REPLACE, target, params });
+            AddRouterTask(RouterTask { RouterAction::REPLACE, target, params, errorCallback });
             return;
         }
-        AddRouterTask(RouterTask { RouterAction::REPLACE, target, params });
+        AddRouterTask(RouterTask { RouterAction::REPLACE, target, params, errorCallback });
     }
-    StartReplace(target, params);
+    StartReplace(target, params, errorCallback);
 }
 
-void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const std::string& params)
+void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     if (target.url.empty()) {
         LOGE("router.Replace uri is empty");
@@ -1032,6 +1066,9 @@ void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const s
         LoadReplacePage(GenerateNextPageId(), PageTarget(target, pagePath), params);
     } else {
         LOGW("[Engine Log] this uri not support in route replace.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR_LITE);
+        }
         ProcessRouterTask();
     }
 }

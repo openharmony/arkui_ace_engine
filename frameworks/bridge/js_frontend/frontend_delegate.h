@@ -56,9 +56,17 @@ public:
     // Jump to the specified page.
     virtual void Push(const std::string& uri, const std::string& params) = 0;
     virtual void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) {}
+    virtual void PushWithCallback(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback) {}
+    virtual void PushWithModeAndCallback(const std::string& uri, const std::string& params, uint32_t routerMode,
+        const std::function<void(const std::string&, int32_t)>& errorCallback) {}
     // Jump to the specified page, but current page will be removed from the stack.
     virtual void Replace(const std::string& uri, const std::string& params) = 0;
     virtual void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) {}
+    virtual void ReplaceWithCallback(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback) {}
+    virtual void ReplaceWithModeAndCallback(const std::string& uri, const std::string& params, uint32_t routerMode,
+        const std::function<void(const std::string&, int32_t)>& errorCallback) {}
     // Back to specified page or the previous page if url not set.
     virtual void Back(const std::string& uri, const std::string& params = "") = 0;
     // Postpone page transition after Begin called, usually to wait some async operation

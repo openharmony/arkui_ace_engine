@@ -68,6 +68,7 @@ public:
     virtual shared_ptr<JsValue> NewArray() = 0;
     virtual shared_ptr<JsValue> NewFunction(RegisterFunctionType func) = 0;
     virtual shared_ptr<JsValue> NewNativePointer(void *ptr) = 0;
+    virtual void ThrowError(const std::string& msg, int32_t code) = 0;
     virtual void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) = 0;
     virtual void HandleUncaughtException() = 0;
     virtual bool HasPendingException() = 0;
