@@ -3832,6 +3832,33 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
     }
 
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                                 const RefPtr<OHOS::Ace::DragEvent>& info,
+                                 const std::string& extraParams) -> NG::DragDropInfo {
+            NG::DragDropInfo dragDropInfo;
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, dragDropInfo);
+
+            auto ret = func->Execute(info, extraParams);
+            if (!ret->IsObject()) {
+                LOGE("NG: builder param is not an object.");
+                return dragDropInfo;
+            }
+
+            auto builderObj = JSRef<JSObject>::Cast(ret);
+#if !defined(PREVIEW)
+            auto pixmap = builderObj->GetProperty("pixelMap");
+            dragDropInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+            auto extraInfo = builderObj->GetProperty("extraInfo");
+            ParseJsString(extraInfo, dragDropInfo.extraInfo);
+            return dragDropInfo;
+        };
+        NG::ViewAbstract::SetOnDragStart(std::move(onDragStartId));
+        return;
+    }
+
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
         DragItemInfo itemInfo;
@@ -3913,6 +3940,19 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                                 const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onDragEnter");
+            func->Execute(info, extraParams);
+        };
+
+        NG::ViewAbstract::SetOnDragEnter(std::move(onDragEnterId));
+        return;
+    }
+
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -3930,6 +3970,19 @@ void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                                const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onDragMove");
+            func->Execute(info, extraParams);
+        };
+
+        NG::ViewAbstract::SetOnDragMove(std::move(onDragMoveId));
+        return;
+    }
+
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -3947,6 +4000,19 @@ void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                                 const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onDragLeave");
+            func->Execute(info, extraParams);
+        };
+
+        NG::ViewAbstract::SetOnDragLeave(std::move(onDragLeaveId));
+        return;
+    }
+
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -3964,6 +4030,19 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                            const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onDrop");
+            func->Execute(info, extraParams);
+        };
+
+        NG::ViewAbstract::SetOnDrop(std::move(onDropId));
+        return;
+    }
+
     auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

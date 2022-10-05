@@ -831,4 +831,13 @@ void FrameNode::OnWindowHide()
     pattern_->OnWindowHide();
 }
 
+OffsetF FrameNode::GetGlobalOffset() const
+{
+    auto parent = GetAncestorNodeOfFrame();
+    if (!parent) {
+        return geometryNode_->GetFrameOffset();
+    }
+    return parent->geometryNode_->GetFrameOffset() + geometryNode_->GetFrameOffset();
+}
+
 } // namespace OHOS::Ace::NG

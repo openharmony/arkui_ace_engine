@@ -29,6 +29,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
 namespace OHOS::Ace::NG {
 
@@ -65,6 +66,11 @@ enum class HitTestResult {
     STOP_BUBBLING,
     // node process events and bubble;
     BUBBLING,
+};
+
+struct DragDropInfo {
+    RefPtr<PixelMap> pixelMap;
+    std::string extraInfo;
 };
 
 class EventHub;
@@ -268,6 +274,12 @@ public:
         touchable_ = touchable;
     }
 
+    void InitDragDropEvent();
+    void HandleOnDragStart(const GestureEvent& info);
+    void HandleOnDragUpdate(const GestureEvent& info);
+    void HandleOnDragEnd(const GestureEvent& info);
+    void HandleOnDragCancel();
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult);
@@ -285,6 +297,7 @@ private:
     RefPtr<ExclusiveRecognizer> externalExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> nodeExclusiveRecognizer_;
     RefPtr<ParallelRecognizer> externalParallelRecognizer_;
+    RefPtr<DragDropProxy> dragDropProxy_;
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
