@@ -62,6 +62,20 @@ std::string IntTimeToText(uint32_t time)
     bool needShowHour = time > SECONDS_PER_HOUR;
     return Localization::GetInstance()->FormatDuration(time, needShowHour);
 }
+float CalControlBarHeight()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, 0.0f);
+    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    CHECK_NULL_RETURN(videoTheme, 0.0f);
+    auto controlsHeight =
+        pipelineContext->NormalizeToPx(Dimension(videoTheme->GetBtnSize().Height(), DimensionUnit::VP));
+    controlsHeight += pipelineContext->NormalizeToPx(videoTheme->GetBtnEdge().Top());
+    controlsHeight += pipelineContext->NormalizeToPx(videoTheme->GetBtnEdge().Bottom());
+    return static_cast<float>(controlsHeight);
+}
 } // namespace
 
 VideoPattern::VideoPattern(const RefPtr<VideoControllerV2>& videoController) : videoControllerV2_(videoController) {}
@@ -309,6 +323,18 @@ void VideoPattern::OnCompletion()
     auto param = json->ToString();
     auto eventHub = GetEventHub<VideoEventHub>();
     eventHub->FireFinishEvent(param);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetTag() == V2::ROW_ETS_TAG) {
+            auto playBtn = DynamicCast<FrameNode>(child->GetChildAtIndex(0));
+            ChangePlayButtonTag(false, playBtn);
+            break;
+        }
+    }
 }
 
 void VideoPattern::UpdateLooping()
@@ -460,7 +486,17 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto size = geometryNode->GetContentSize();
-    renderContextForMediaPlayer_->SetBounds(0, 0, size.Width(), size.Height());
+    auto offset = geometryNode->GetContentOffset();
+    auto controlBarHeight = 0.0f;
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (layoutProperty->GetControlsValue(false)) {
+        controlBarHeight = CalControlBarHeight();
+    }
+    size.MinusHeight(controlBarHeight);
+    renderContextForMediaPlayer_->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    host->MarkNeedSyncRenderTree();
     return false;
 }
 
@@ -475,14 +511,11 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
     auto controlBar = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(controlBar, nullptr);
 
-    auto startClickCallback = [weak = WeakClaim(this)](GestureEvent& /*info*/) {
-        auto videoPattern = weak.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        videoPattern->Start();
-    };
-    auto startButton = CreateButton("S", startClickCallback);
-    CHECK_NULL_RETURN(startButton, nullptr);
-    controlBar->AddChild(startButton);
+    auto playButton = CreateButton();
+    CHECK_NULL_RETURN(playButton, nullptr);
+    bool playing = mediaPlayer_->IsMediaPlayerValid() ? mediaPlayer_->IsPlaying() : false;
+    ChangePlayButtonTag(playing, playButton);
+    controlBar->AddChild(playButton);
 
     auto currentPosText = CreateText(currentPos_);
     CHECK_NULL_RETURN(currentPosText, nullptr);
@@ -496,14 +529,9 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
     CHECK_NULL_RETURN(durationText, nullptr);
     controlBar->AddChild(durationText);
 
-    auto fullScreenClickCallback = [weak = WeakClaim(this)](GestureEvent& /*info*/) {
-        auto videoPattern = weak.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        videoPattern->FullScreen();
-    };
-
-    auto fullScreenButton = CreateButton("X", fullScreenClickCallback);
+    auto fullScreenButton = CreateButton();
     CHECK_NULL_RETURN(fullScreenButton, nullptr);
+    ChangeFullScreenButtonTag(false, fullScreenButton);
     controlBar->AddChild(fullScreenButton);
 
     auto renderContext = controlBar->GetRenderContext();
@@ -545,6 +573,11 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     };
     auto sliderEventHub = sliderNode->GetEventHub<SliderEventHub>();
     sliderEventHub->SetOnChange(std::move(sliderOnChangeEvent));
+    if (duration_ > 0) {
+        auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+        CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
+        sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
+    }
     return sliderNode;
 }
 
@@ -576,7 +609,7 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
     return textNode;
 }
 
-RefPtr<FrameNode> VideoPattern::CreateButton(const std::string& label, GestureEventFunc clickCallback)
+RefPtr<FrameNode> VideoPattern::CreateButton()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
@@ -587,14 +620,8 @@ RefPtr<FrameNode> VideoPattern::CreateButton(const std::string& label, GestureEv
 
     auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto btnEventHub = buttonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(btnEventHub, nullptr);
-    btnEventHub->SetClickEvent(std::move(clickCallback));
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(label);
     buttonNode->AddChild(textNode);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
 
