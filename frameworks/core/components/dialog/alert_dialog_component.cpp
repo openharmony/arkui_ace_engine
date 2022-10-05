@@ -39,6 +39,7 @@ void AlertDialogComponent::BuildChild(const RefPtr<ThemeManager>& themeManager)
         deviceType_ = SystemProperties::GetDeviceType();
     }
     auto box = AceType::MakeRefPtr<BoxComponent>();
+    box->NeedMaterial(true);
     auto backDecoration = AceType::MakeRefPtr<Decoration>();
     backDecoration->SetBackgroundColor(dialogTheme_->GetBackgroundColor());
     Border border;

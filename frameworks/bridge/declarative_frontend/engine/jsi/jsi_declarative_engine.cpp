@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
+#include <optional>
 #include <unistd.h>
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
@@ -31,6 +32,7 @@
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -51,7 +53,6 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
@@ -942,29 +943,21 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
-    std::string basePath = delegate->GetAssetPath(fileName);
-    if (!basePath.empty()) {
-        std::string abcPath = basePath.append(fileName);
-        LOGD("abcPath is: %{private}s", abcPath.c_str());
-        if (!runtime->ExecuteJsBin(abcPath)) {
-            LOGE("ExecuteJsBin %{private}s failed.", fileName.c_str());
-            return false;
-        }
-    }
-    return true;
-#else
     std::vector<uint8_t> content;
     if (!delegate->GetAssetContent(fileName, content)) {
         LOGD("GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
     }
-    if (!runtime->EvaluateJsCode(content.data(), content.size(), fileName)) {
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
+    const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
+#else
+    const std::string& abcPath = fileName;
+#endif
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
         LOGE("EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;
     }
     return true;
-#endif
 }
 
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
@@ -1041,7 +1034,7 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 bool JsiDeclarativeEngine::LoadJsWithModule(const std::string& urlName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
-    auto vm = const_cast<EcmaVM *>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
+    auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
     if (!JSNApi::IsBundle(vm)) {
         if (!runtime->ExecuteJsBin(urlName)) {
             LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
@@ -1063,9 +1056,9 @@ bool JsiDeclarativeEngine::LoadFaAppSource()
     }
     if (!ExecuteAbc("app.abc")) {
         LOGW("ExecuteJsBin \"app.js\" failed.");
-    } else {
-        CallAppFunc("onCreate");
+        return false;
     }
+    CallAppFunc("onCreate");
     return true;
 }
 
@@ -1075,24 +1068,22 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
     LOGI("JsiDeclarativeEngine LoadJs %{private}s page", url.c_str());
     ACE_DCHECK(engineInstance_);
-
-    auto runtime = engineInstance_->GetJsRuntime();
-    auto delegate = engineInstance_->GetDelegate();
-    if (LoadJsWithModule(url)) {
+    // get js bundle content
+    const char jsExt[] = ".js";
+    const char binExt[] = ".abc";
+    std::optional<std::string> urlName;
+    auto pos = url.rfind(jsExt);
+    if (pos != std::string::npos && pos == url.length() - (sizeof(jsExt) - 1)) {
+        urlName = url.substr(0, pos) + binExt;
+    }
+    if (!urlName.has_value()) {
+        LOGE("fail to find abc file");
+        return false;
+    }
+    if (LoadJsWithModule(urlName.value())) {
         return true;
     }
-    // get js bundle content
-    shared_ptr<JsValue> jsCode = runtime->NewUndefined();
-    shared_ptr<JsValue> jsAppCode = runtime->NewUndefined();
-    const char js_ext[] = ".js";
-    const char bin_ext[] = ".abc";
-    auto pos = url.rfind(js_ext);
-    if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
-        std::string urlName = url.substr(0, pos) + bin_ext;
-        return ExecuteAbc(urlName);
-    }
-    LOGE("fail to find page file");
-    return false;
+    return ExecuteAbc(urlName.value());
 }
 
 #if defined(PREVIEW)

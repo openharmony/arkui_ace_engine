@@ -18,7 +18,7 @@
 
 #include "base/geometry/ng/radius.h"
 #include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/pattern/shape/line_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {

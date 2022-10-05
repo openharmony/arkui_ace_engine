@@ -117,7 +117,7 @@ void ViewStackProcessor::PopContainer()
 {
     auto top = GetMainElementNode();
     // for container node.
-    if (!top->IsAtomicNode()) {
+    if (top && !top->IsAtomicNode()) {
         Pop();
         return;
     }

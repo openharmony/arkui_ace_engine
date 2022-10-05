@@ -152,10 +152,7 @@ public:
         return eventHub_->GetOrCreateInputEventHub();
     }
 
-    RefPtr<FocusHub> GetOrCreateFocusHub() const
-    {
-        return eventHub_->GetOrCreateFocusHub();
-    }
+    RefPtr<FocusHub> GetOrCreateFocusHub() const;
 
     RefPtr<FocusHub> GetFocusHub() const
     {
@@ -238,6 +235,10 @@ public:
     }
     bool IsResponseRegion() const;
     void MarkResponseRegion(bool isResponseRegion);
+
+    void OnWindowShow() override;
+
+    void OnWindowHide() override;
 
 private:
     void UpdateLayoutPropertyFlag() override;

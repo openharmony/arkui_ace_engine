@@ -61,6 +61,11 @@ public:
     {
         isTouch_ = isTouch;
     }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
     
 private:
     void OnModifyDone() override;

@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components/data_panel/data_panel_component.h"
+#include "bridge/declarative_frontend/jsview/js_data_panel.h"
 
 #include <vector>
 
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/data_panel/data_panel_component.h"
 #include "core/components/theme/theme_manager.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components_ng/pattern/data_panel/data_panel_view.h"
+#include "core/components_ng/pattern/data_panel/data_panel_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -48,7 +48,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("toggle create error, info is non-valid");
         return;
-    }  
+    }
     auto param = JsonUtil::ParseJsonString(info[0]->ToString());
     if (!param || param->IsNull()) {
         LOGE("JSDataPanel::Create param is null");
@@ -63,7 +63,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         return;
     }
     auto type = param->GetValue("type");
-    size_t length = static_cast<size_t>(values->GetArraySize());   
+    size_t length = static_cast<size_t>(values->GetArraySize());
     std::vector<double> dateValues;
     double dataSum = 0.0;
     for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
@@ -101,7 +101,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         return;
     }
     RefPtr<PercentageDataPanelComponent> component =
-        AceType::MakeRefPtr<PercentageDataPanelComponent>(ChartType::RAINBOW);    
+        AceType::MakeRefPtr<PercentageDataPanelComponent>(ChartType::RAINBOW);
     double valueSum = 0.0;
     for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
         auto item = values->GetArrayItem(i);
@@ -160,8 +160,7 @@ void JSDataPanel::CloseEffect(const JSCallbackInfo& info)
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
-    auto component =
-        AceType::DynamicCast<PercentageDataPanelComponent>(stack->GetMainComponent());
+    auto component = AceType::DynamicCast<PercentageDataPanelComponent>(stack->GetMainComponent());
     component->SetEffects(!isCloseEffect);
 }
 

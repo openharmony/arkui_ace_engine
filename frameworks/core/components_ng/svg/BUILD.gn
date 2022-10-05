@@ -16,6 +16,15 @@ import(
 
 build_component_ng("svg_ng") {
   sources = [
+    "parse/svg_circle.cpp",
+    "parse/svg_clip_path.cpp",
+    "parse/svg_ellipse.cpp",
+    "parse/svg_fe.cpp",
+    "parse/svg_fe_color_matrix.cpp",
+    "parse/svg_fe_composite.cpp",
+    "parse/svg_fe_gaussian_blur.cpp",
+    "parse/svg_fe_offset.cpp",
+    "parse/svg_filter.cpp",
     "parse/svg_g.cpp",
     "parse/svg_gradient.cpp",
     "parse/svg_graphic.cpp",
@@ -23,9 +32,13 @@ build_component_ng("svg_ng") {
     "parse/svg_mask.cpp",
     "parse/svg_node.cpp",
     "parse/svg_path.cpp",
+    "parse/svg_pattern.cpp",
+    "parse/svg_polygon.cpp",
+    "parse/svg_rect.cpp",
     "parse/svg_stop.cpp",
     "parse/svg_style.cpp",
     "parse/svg_svg.cpp",
+    "parse/svg_use.cpp",
     "svg_dom.cpp",
   ]
 }

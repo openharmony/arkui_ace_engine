@@ -38,8 +38,8 @@ public:
     static void SetToolBarItems(std::list<BarItem>&& customToolBarItems);
     static void SetCustomToolBar(const RefPtr<UINode>& customToolBar);
     // menu
-    static void SetCustomMenu(const RefPtr<UINode>& menu);
-    static void SetMenuItems(std::list<BarItem>&& customMenuItems);
+    static void SetCustomMenu(const RefPtr<UINode>& customMenu);
+    static void SetMenuItems(std::list<BarItem>&& menuItems);
     // title mode change
     static void SetOnTitleModeChange(std::function<void(NavigationTitleMode)>&& onTitleModeChange);
 };

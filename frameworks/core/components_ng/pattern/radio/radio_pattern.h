@@ -87,6 +87,11 @@ public:
 
     void UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode);
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

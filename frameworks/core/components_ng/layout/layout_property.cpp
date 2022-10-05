@@ -24,9 +24,11 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
 void LayoutProperty::Reset()
 {
     layoutConstraint_.reset();
@@ -37,6 +39,7 @@ void LayoutProperty::Reset()
     magicItemProperty_.reset();
     positionProperty_.reset();
     measureType_.reset();
+    layoutDirection_.reset();
     CleanDirty();
 }
 
@@ -63,6 +66,9 @@ void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 {
     layoutConstraint_ = layoutProperty->layoutConstraint_;
+    if (layoutProperty->gridProperty_) {
+        gridProperty_ = std::make_unique<GridProperty>(*layoutProperty->gridProperty_);
+    }
     if (layoutProperty->calcLayoutConstraint_) {
         calcLayoutConstraint_ = std::make_unique<MeasureProperty>(*layoutProperty->calcLayoutConstraint_);
     }
@@ -85,6 +91,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
         flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
     }
     measureType_ = layoutProperty->measureType_;
+    layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
 }
 
@@ -177,6 +184,27 @@ void LayoutProperty::CheckAspectRatio()
         layoutConstraint_->selfIdealSize.SetWidth(selfWidth);
     }
     // TODO: after measure done, need to check AspectRatio again.
+}
+
+void LayoutProperty::UpdateGridConstraint(const RefPtr<FrameNode>& host)
+{
+    const auto& gridProperty = GetGridProperty();
+    if (!gridProperty) {
+        return;
+    }
+    bool gridflag = false;
+    auto parent = host->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
+            auto containerLayout = AceType::DynamicCast<FrameNode>(parent)->GetLayoutProperty();
+            gridflag = gridProperty->UpdateContainer(containerLayout, host);
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    if (gridflag) {
+        UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty->GetWidth()), std::nullopt));
+    }
 }
 
 void LayoutProperty::CheckSelfIdealSize()

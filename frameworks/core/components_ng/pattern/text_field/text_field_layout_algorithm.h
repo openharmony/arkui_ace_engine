@@ -63,6 +63,16 @@ public:
         return imageRect_;
     }
 
+    float GetCaretOffsetX() const
+    {
+        return caretOffsetX_;
+    }
+
+    void SetCaretOffset(float offsetX)
+    {
+        caretOffsetX_ = offsetX;
+    }
+
 private:
     void UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle);
@@ -77,13 +87,21 @@ private:
     static TextDirection GetTextDirection(const std::string& content);
 
     float GetTextFieldDefaultHeight();
-
     float GetTextFieldDefaultImageHeight();
 
-    std::shared_ptr<RSParagraph> paragraph_;
+    void UpdateCaretPositionByTextEdit(LayoutWrapper* layoutWrapper);
+    void UpdateCaretPositionByTouchOffset(LayoutWrapper* layoutWrapper);
+    void CalcCaretByPosition(const RefPtr<Pattern>& pattern, int32_t position);
+    bool ComputeOffsetForCaretDownstream(
+        const TextEditingValue& textEditingValue, int32_t extent, CaretMetrics& result) const;
+    void UpdatePositionOfTextEditingValue(int32_t position, LayoutWrapper* layoutWrapper);
+    int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
 
+    std::shared_ptr<RSParagraph> paragraph_;
     RectF textRect_;
     RectF imageRect_;
+
+    float caretOffsetX_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };

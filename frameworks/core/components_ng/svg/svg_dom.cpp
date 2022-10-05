@@ -15,11 +15,26 @@
 
 #include "frameworks/core/components_ng/svg/svg_dom.h"
 
+#include "frameworks/core/components_ng/svg/parse/svg_circle.h"
+#include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"
 #include "frameworks/core/components_ng/svg/parse/svg_defs.h"
+#include "frameworks/core/components_ng/svg/parse/svg_ellipse.h"
+#include "frameworks/core/components_ng/svg/parse/svg_fe_color_matrix.h"
+#include "frameworks/core/components_ng/svg/parse/svg_fe_composite.h"
+#include "frameworks/core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
+#include "frameworks/core/components_ng/svg/parse/svg_fe_offset.h"
+#include "frameworks/core/components_ng/svg/parse/svg_filter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_g.h"
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
+#include "frameworks/core/components_ng/svg/parse/svg_line.h"
+#include "frameworks/core/components_ng/svg/parse/svg_mask.h"
 #include "frameworks/core/components_ng/svg/parse/svg_path.h"
+#include "frameworks/core/components_ng/svg/parse/svg_pattern.h"
+#include "frameworks/core/components_ng/svg/parse/svg_polygon.h"
+#include "frameworks/core/components_ng/svg/parse/svg_rect.h"
+#include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
+#include "frameworks/core/components_ng/svg/parse/svg_use.h"
 
 #include "include/core/SkClipOp.h"
 
@@ -32,10 +47,29 @@ const char DOM_SVG_CLASS[] = "class";
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
+    { "circle", []() -> RefPtr<SvgNode> { return SvgCircle::Create(); } },
+    { "clipPath", []() -> RefPtr<SvgNode> { return SvgClipPath::Create(); } },
     { "defs", []() -> RefPtr<SvgNode> { return SvgDefs::Create(); } },
+    { "ellipse", []() -> RefPtr<SvgNode> { return SvgEllipse::Create(); } },
+    { "feColorMatrix", []() -> RefPtr<SvgNode> { return SvgFeColorMatrix::Create(); } },
+    { "feComposite", []() -> RefPtr<SvgNode> { return SvgFeComposite::Create(); } },
+    { "feGaussianBlur", []() -> RefPtr<SvgNode> { return SvgFeGaussianBlur::Create(); } },
+    { "feOffset", []() -> RefPtr<SvgNode> { return SvgFeOffset::Create(); } },
+    { "filter", []() -> RefPtr<SvgNode> { return SvgFilter::Create(); } },
     { "g", []() -> RefPtr<SvgNode> { return SvgG::Create(); } },
+    { "line", []() -> RefPtr<SvgNode> { return SvgLine::Create(); } },
+    { "linearGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateLinearGradient(); } },
+    { "mask", []() -> RefPtr<SvgNode> { return SvgMask::Create(); } },
     { "path", []() -> RefPtr<SvgNode> { return SvgPath::Create(); } },
+    { "pattern", []() -> RefPtr<SvgNode> { return SvgPattern::Create(); } },
+    { "polygon", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolygon(); } },
+    { "polyline", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolyline(); } },
+    { "radialGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateRadialGradient(); } },
+    { "rect", []() -> RefPtr<SvgNode> { return SvgRect::Create(); } },
+    { "stop", []() -> RefPtr<SvgNode> { return SvgStop::Create(); } },
+    { "style", []() -> RefPtr<SvgNode> { return SvgStyle::Create(); } },
     { "svg", []() -> RefPtr<SvgNode> { return SvgSvg::Create(); } },
+    { "use", []() -> RefPtr<SvgNode> { return SvgUse::Create(); } },
 };
 
 SvgDom::SvgDom()

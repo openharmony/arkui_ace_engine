@@ -69,6 +69,11 @@ public:
         spanItemChildren_.emplace_back(child->GetSpanItem());
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, false };
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;

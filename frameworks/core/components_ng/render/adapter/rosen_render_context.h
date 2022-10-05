@@ -26,10 +26,12 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/rosen_modifier_property.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +44,8 @@ public:
     void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
+
+    void SyncGeometryProperties(const RectF& rectF) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
@@ -56,6 +60,10 @@ public:
     void ResetBlendBgColor() override;
 
     void BlendBgColor(const Color& color) override;
+
+    void ResetBlendBorderColor() override;
+
+    void BlendBorderColor(const Color& color) override;
 
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
@@ -104,8 +112,8 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateBackShadow(const Shadow& shadow) override;
-    void UpdateLinearGradient(const NG::Gradient& gradient) override;
 
+    void OnTransformMatrixUpdate(const Matrix4& matrix) override;
     void UpdateTransition(const TransitionOptions& options) override;
     bool HasAppearingTransition() const
     {
@@ -115,6 +123,7 @@ public:
     {
         return transitionDisappearingEffect_ != nullptr;
     }
+    void ClipWithRect(const RectF& rectF) override;
 
     bool TriggerPageTransition(PageTransitionType type) const override;
 
@@ -124,6 +133,10 @@ public:
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(const TransitionOptions& options);
 
     void FlushModifier(const RefPtr<Modifier>& modifier) override;
+
+    void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
+    void SetBounds(float positionX, float positionY, float width, float height) override;
+    void OnTransformTranslateUpdate(const Vector3F& value) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -141,7 +154,6 @@ private:
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
-    void OnTransformTranslateUpdate(const Vector3F& value) override;
     void OnTransformRotateUpdate(const Vector4F& value) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
@@ -151,6 +163,10 @@ private:
 
     void OnClipShapeUpdate(const ClipPathNG& clipPath) override;
     void OnClipEdgeUpdate(bool isClip) override;
+
+    void OnLinearGradientUpdate(const NG::Gradient& value) override;
+    void OnSweepGradientUpdate(const NG::Gradient& value) override;
+    void OnRadialGradientUpdate(const NG::Gradient& value) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
     bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
@@ -162,8 +178,8 @@ private:
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
     void PaintBackground();
-    void PaintDecoration(const SizeF& size);
     void PaintClip(const SizeF& size);
+    void PaintGradient(const SizeF& frameSize);
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
@@ -177,6 +193,8 @@ private:
     Color hoveredColor_ = Color::TRANSPARENT;
     std::shared_ptr<Rosen::RSTransitionEffect> transitionAppearingEffect_ = nullptr;
     std::shared_ptr<Rosen::RSTransitionEffect> transitionDisappearingEffect_ = nullptr;
+
+    std::optional<TransformMatrixModifier> transformMatrixModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

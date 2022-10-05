@@ -32,6 +32,10 @@ WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webContr
     : webSrc_(std::move(webSrc)), webController_(webController)
 {}
 
+WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback)
+    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback)
+{}
+
 void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();

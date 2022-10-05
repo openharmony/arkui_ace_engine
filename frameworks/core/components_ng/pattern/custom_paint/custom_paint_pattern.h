@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
 class OffscreenCanvasPattern;
+// CustomPaintPattern is the base class for custom paint render node to perform paint canvas.
 class ACE_EXPORT CustomPaintPattern : public Pattern {
     DECLARE_ACE_TYPE(CustomPaintPattern, Pattern);
 
@@ -50,18 +51,89 @@ public:
         return false;
     }
 
+    void SetCanvasSize(std::optional<SizeF> canvasSize)
+    {
+        canvasSize_ = canvasSize;
+    }
+
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
+    void ClearRect(const Rect& rect);
+    void Fill();
+    void Fill(const RefPtr<CanvasPath2D>& path);
+    void Stroke();
+    void Stroke(const RefPtr<CanvasPath2D>& path);
+    void BeginPath();
+    void ClosePath();
+    void MoveTo(double x, double y);
+    void LineTo(double x, double y);
+    void Arc(const ArcParam& param);
+    void ArcTo(const ArcToParam& param);
+    void AddRect(const Rect& rect);
+    void Ellipse(const EllipseParam& param);
+    void BezierCurveTo(const BezierCurveParam& param);
+    void QuadraticCurveTo(const QuadraticCurveParam& param);
+
+    void FillText(const std::string& text, double x, double y);
+    void StrokeText(const std::string& text, double x, double y);
+    double MeasureText(const std::string& text, const PaintState& state);
+    double MeasureTextHeight(const std::string& text, const PaintState& state);
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
+
+    void DrawImage(const Ace::CanvasImage& image, double width, double height);
+    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
+    void PutImageData(const Ace::ImageData& imageData);
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern);
 
     void UpdateFillColor(const Color& color);
+    void UpdateFillRuleForPath(const CanvasFillRule rule);
+    void UpdateFillRuleForPath2D(const CanvasFillRule rule);
+    double GetWidth();
+    double GetHeight();
 
+    const LineDashParam& GetLineDash() const;
+    void UpdateLineDash(const std::vector<double>& segments);
+
+    void Save();
+    void Restore();
+    void Scale(double x, double y);
+    void Rotate(double angle);
+    void SetTransform(const TransformParam& param);
+    void Transform(const TransformParam& param);
+    void Translate(double x, double y);
+    std::string ToDataURL(const std::string& args);
+
+    void UpdateGlobalAlpha(double alpha);
+    void UpdateCompositeOperation(CompositeOperation type);
+    void UpdateSmoothingEnabled(bool enabled);
+    void UpdateLineCap(LineCapStyle cap);
+    void UpdateLineDashOffset(double dash);
+    void UpdateLineWidth(double width);
+    void UpdateMiterLimit(double limit);
+    void UpdateShadowBlur(double blur);
+    void UpdateShadowOffsetX(double offsetX);
+    void UpdateShadowOffsetY(double offsetY);
+    void UpdateTextAlign(TextAlign align);
+    void UpdateTextBaseline(TextBaseline baseline);
+    void UpdateStrokePattern(const Ace::Pattern& pattern);
+    void UpdateStrokeColor(const Color& color);
+    void UpdateFontWeight(FontWeight weight);
+    void UpdateFontStyle(FontStyle style);
+    void UpdateFontFamilies(const std::vector<std::string>& families);
+    void UpdateFontSize(const Dimension& size);
+    void UpdateLineJoin(LineJoinStyle join);
+    void UpdateFillGradient(const Ace::Gradient& gradient);
+    void UpdateFillPattern(const Ace::Pattern& pattern);
+    void UpdateShadowColor(const Color& color);
+    void UpdateStrokeGradient(const Ace::Gradient& grad);
+    
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     RefPtr<CanvasPaintMethod> paintMethod_;
+    std::optional<SizeF> canvasSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CustomPaintPattern);
 };

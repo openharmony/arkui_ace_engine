@@ -95,6 +95,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
     const RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(component);
     if (box) {
         boxComponent_ = box;
+        needMaterial_ = box->GetNeedMaterial();
         inspectorDirection_ = box->GetInspectorDirection();
         RenderBoxBase::Update(component);
         UpdateBackDecoration(box->GetBackDecoration());

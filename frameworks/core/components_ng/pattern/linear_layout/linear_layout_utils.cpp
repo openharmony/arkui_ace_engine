@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -190,6 +191,15 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     layoutWrapper->GetGeometryNode()->SetFrameSize((linearMeasureProperty.realSize.ConvertToSizeT()));
 }
 
+OffsetF LinearLayoutUtils::AdjustChildOnDirection(
+    const RefPtr<LayoutWrapper>& child, const OffsetF& offset, TextDirection direction, float parentWidth)
+{
+    auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
+    float yOffset = offset.GetY();
+    float xOffset = (direction == TextDirection::RTL) ? parentWidth - frameSize.Width() - offset.GetX() : offset.GetX();
+    return { xOffset, yOffset };
+}
+
 void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign crossAlign, FlexAlign mainAlign)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
@@ -203,13 +213,20 @@ void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, Fl
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto dir = linearLayoutProperty->GetLayoutDirection();
+    if (dir == TextDirection::AUTO) {
+        dir = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
+    auto width = size.Width();
     if (isVertical) {
         float yPos = 0.0f;
         if (mainAlign == FlexAlign::FLEX_START) {
-            for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            for (const auto& child : children) {
                 auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
                 float xOffset = CalculateCrossOffset(size.Width(), frameSize.Width(), crossAlign);
-                child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + OffsetF(xOffset, yPos));
+                auto offset = AdjustChildOnDirection(child, OffsetF(xOffset, yPos), dir, width);
+                child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
                 LOGD("Set %{public}s Child Position: %{public}s", child->GetHostTag().c_str(),
                     child->GetGeometryNode()->GetMarginFrameOffset().ToString().c_str());
                 yPos += frameSize.Height();
@@ -219,15 +236,16 @@ void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, Fl
         }
         LayoutConditions layoutConditions { layoutWrapper, isVertical, crossAlign, mainAlign, size, paddingOffset,
             space };
-        LinearLayoutUtils::LayoutCondition(layoutConditions);
+        LinearLayoutUtils::LayoutCondition(children, dir, layoutConditions);
         return;
     }
     float xPos = 0.0f;
     if (mainAlign == FlexAlign::FLEX_START) {
-        for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        for (const auto& child : children) {
             auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
             float yOffset = CalculateCrossOffset(size.Height(), frameSize.Height(), crossAlign);
-            child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + OffsetF(xPos, yOffset));
+            auto offset = AdjustChildOnDirection(child, OffsetF(xPos, yOffset), dir, width);
+            child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
             LOGD("Set %{public}s Child Position: %{public}s", child->GetHostTag().c_str(),
                 child->GetGeometryNode()->GetMarginFrameOffset().ToString().c_str());
             xPos += frameSize.Width();
@@ -236,17 +254,18 @@ void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, Fl
         return;
     }
     LayoutConditions layoutConditions { layoutWrapper, isVertical, crossAlign, mainAlign, size, paddingOffset, space };
-    LinearLayoutUtils::LayoutCondition(layoutConditions);
+    LinearLayoutUtils::LayoutCondition(children, dir, layoutConditions);
 }
 
-void LinearLayoutUtils::LayoutCondition(LayoutConditions& layoutConditions)
+void LinearLayoutUtils::LayoutCondition(
+    const std::list<RefPtr<LayoutWrapper>>& children, TextDirection direction, LayoutConditions& layoutConditions)
 {
     if (layoutConditions.isVertical) {
         float yPos = 0.0f;
         float frameHeightSum = 0.0f;
         float childNum = 0.0f;
         float blankSpace = 0.0f;
-        for (const auto& child : layoutConditions.layoutWrapper->GetAllChildrenWithBuild()) {
+        for (const auto& child : children) {
             auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
             frameHeightSum += frameSize.Height();
             childNum++;
@@ -275,11 +294,13 @@ void LinearLayoutUtils::LayoutCondition(LayoutConditions& layoutConditions)
             default:
                 break;
         }
-        for (const auto& child : layoutConditions.layoutWrapper->GetAllChildrenWithBuild()) {
+        for (const auto& child : children) {
             auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
             float xOffset =
                 CalculateCrossOffset(layoutConditions.size.Width(), frameSize.Width(), layoutConditions.crossAlign);
-            child->GetGeometryNode()->SetMarginFrameOffset(layoutConditions.paddingOffset + OffsetF(xOffset, yPos));
+            auto offset =
+                AdjustChildOnDirection(child, OffsetF(xOffset, yPos), direction, layoutConditions.size.Width());
+            child->GetGeometryNode()->SetMarginFrameOffset(layoutConditions.paddingOffset + offset);
             LOGD("Set %{public}s Child Position: %{public}s", child->GetHostTag().c_str(),
                 child->GetGeometryNode()->GetMarginFrameOffset().ToString().c_str());
             yPos += frameSize.Height();
@@ -296,7 +317,7 @@ void LinearLayoutUtils::LayoutCondition(LayoutConditions& layoutConditions)
     float frameWidthSum = 0.0f;
     float childNum = 0.0f;
     float blankSpace = 0.0f;
-    for (const auto& child : layoutConditions.layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : children) {
         auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
         frameWidthSum += frameSize.Width();
         childNum++;
@@ -324,11 +345,12 @@ void LinearLayoutUtils::LayoutCondition(LayoutConditions& layoutConditions)
         default:
             break;
     }
-    for (const auto& child : layoutConditions.layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : children) {
         auto frameSize = child->GetGeometryNode()->GetMarginFrameSize();
         float yOffset =
             CalculateCrossOffset(layoutConditions.size.Height(), frameSize.Height(), layoutConditions.crossAlign);
-        child->GetGeometryNode()->SetMarginFrameOffset(layoutConditions.paddingOffset + OffsetF(xPos, yOffset));
+        auto offset = AdjustChildOnDirection(child, OffsetF(xPos, yOffset), direction, layoutConditions.size.Width());
+        child->GetGeometryNode()->SetMarginFrameOffset(layoutConditions.paddingOffset + offset);
         LOGD("Set %{public}s Child Position: %{public}s", child->GetHostTag().c_str(),
             child->GetGeometryNode()->GetMarginFrameOffset().ToString().c_str());
         xPos += frameSize.Width();

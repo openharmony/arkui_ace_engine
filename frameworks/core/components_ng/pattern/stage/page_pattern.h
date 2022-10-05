@@ -48,19 +48,9 @@ public:
         return pageInfo_;
     }
 
-    void OnShow()
-    {
-        if (onPageShow_) {
-            onPageShow_();
-        }
-    }
+    void OnShow();
 
-    void OnHide()
-    {
-        if (onPageHide_) {
-            onPageHide_();
-        }
-    }
+    void OnHide();
 
     bool OnBackPressed() const
     {
@@ -92,6 +82,11 @@ public:
 
     bool TriggerPageTransition(PageTransitionType type) const;
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     void OnAttachToFrameNode() override;
 
@@ -100,6 +95,8 @@ private:
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> OnBackPressed_;
+
+    bool isOnShow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

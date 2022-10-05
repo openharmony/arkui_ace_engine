@@ -143,6 +143,7 @@ RefPtr<BoxComponent> DialogComponent::BuildBox(bool& isLimit)
         return box;
     }
 
+    box->NeedMaterial(true);
     auto backDecoration = AceType::MakeRefPtr<Decoration>();
     backDecoration->SetBackgroundColor(backgroundColor_);
     Border border;

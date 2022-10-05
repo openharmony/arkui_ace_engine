@@ -70,49 +70,18 @@ FrontendType GetFrontendType(const std::string& frontendType)
     }
 }
 
-FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr, const std::string& srcPath)
+FrontendType GetFrontendTypeFromManifest(const std::string& packagePath, const std::string& srcPath, bool isHap)
 {
     std::string manifest = std::string("assets/js/default/manifest.json");
     if (!srcPath.empty()) {
         manifest = "assets/js/" + srcPath + "/manifest.json";
     }
-    auto manifestPath = packagePathStr + manifest;
-    char realPath[PATH_MAX] = { 0x00 };
-    if (realpath(manifestPath.c_str(), realPath) == nullptr) {
-        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", manifestPath.c_str(), strerror(errno));
+    std::string jsonStr = isHap ? GetStringFromHap(packagePath, manifest) : GetStringFromFile(packagePath, manifest);
+    if (jsonStr.empty()) {
         LOGE("return default frontend: JS frontend.");
         return FrontendType::JS;
     }
-    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-    if (!file) {
-        LOGE("open file failed, filePath: %{private}s, fail reason: %{public}s", manifestPath.c_str(), strerror(errno));
-        LOGE("return default frontend: JS frontend.");
-        return FrontendType::JS;
-    }
-    if (std::fseek(file.get(), 0, SEEK_END) != 0) {
-        LOGE("seek file tail error, return default frontend: JS frontend.");
-        return FrontendType::JS;
-    }
-
-    int64_t size = std::ftell(file.get());
-    if (size == -1L) {
-        return FrontendType::JS;
-    }
-    char* fileData = new (std::nothrow) char[size];
-    if (fileData == nullptr) {
-        LOGE("new json buff failed, return default frontend: JS frontend.");
-        return FrontendType::JS;
-    }
-    rewind(file.get());
-    std::unique_ptr<char[]> jsonStream(fileData);
-    size_t result = std::fread(jsonStream.get(), 1, size, file.get());
-    if (result != (size_t)size) {
-        LOGE("read file failed, return default frontend: JS frontend.");
-        return FrontendType::JS;
-    }
-
-    std::string jsonString(jsonStream.get(), jsonStream.get() + size);
-    auto rootJson = JsonUtil::ParseJsonString(jsonString);
+    auto rootJson = JsonUtil::ParseJsonString(jsonStr);
     auto mode = rootJson->GetObject("mode");
     if (mode != nullptr) {
         if (mode->GetString("syntax") == "ets" || mode->GetString("type") == "pageAbility") {
@@ -252,9 +221,11 @@ void AceAbility::OnStart(const Want& want)
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-        rsUiDirector->SetCacheDir(abilityContext->GetCacheDir());
-        rsUiDirector->Init();
+        if (rsUiDirector) {
+            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+            rsUiDirector->SetCacheDir(abilityContext->GetCacheDir());
+            rsUiDirector->Init();
+        }
     }
 
     std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
@@ -328,8 +299,10 @@ void AceAbility::OnStart(const Want& want)
         AceApplicationInfo::GetInstance().SetPackageName(info->bundleName);
     }
 
-    FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr, srcPath);
-    bool isArkApp = GetIsArkFromConfig(packagePathStr);
+    bool isHap = !moduleInfo->hapPath.empty();
+    std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
+    FrontendType frontendType = GetFrontendTypeFromManifest(packagePath, srcPath, isHap);
+    bool isArkApp = GetIsArkFromConfig(packagePath, isHap);
 
     AceApplicationInfo::GetInstance().SetAbilityName(info ? info->name : "");
     std::string moduleName = info ? info->moduleName : "";
@@ -338,7 +311,7 @@ void AceAbility::OnStart(const Want& want)
 
     std::string resPath;
     for (const auto& module : moduleList) {
-        if (module.moduleName == moduleName) {
+        if (module.moduleName == moduleName && info != nullptr) {
             std::regex pattern(ABS_BUNDLE_CODE_PATH + info->bundleName + FILE_SEPARATOR);
             auto moduleSourceDir = std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
             resPath = moduleSourceDir + "/assets/" + module.moduleName + FILE_SEPARATOR;
@@ -389,10 +362,10 @@ void AceAbility::OnStart(const Want& want)
 
     if (srcPath.empty()) {
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
         auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/") };
-        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
 
     /* Note: DO NOT modify the sequence of adding libPath  */
@@ -467,13 +440,9 @@ void AceAbility::OnStart(const Want& want)
 
     // set window id & action event handler
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
-    if (context != nullptr) {
+    if (context) {
         context->SetActionEventHandler(actionEventHandler);
-    }
-
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
-    if (pipelineContext) {
-        pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
+        context->SetGetWindowRectImpl([window]() -> Rect {
             Rect rect;
             if (!window) {
                 return rect;
@@ -760,8 +729,8 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
         ContainerScope scope(abilityId_);
         taskExecutor->PostTask(
             [container, keyboardRect] {
-                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-                if (context != nullptr) {
+                auto context = container->GetPipelineContext();
+                if (context) {
                     context->OnVirtualKeyboardAreaChange(keyboardRect);
                 }
             },

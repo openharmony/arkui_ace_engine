@@ -107,6 +107,7 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
@@ -945,17 +946,9 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     }
     std::string inspectorKey = firstArg->ToString(vm)->ToString();
 
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return panda::JSValueRef::Undefined(vm);
-    }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (pipelineContext == nullptr) {
-        LOGE("pipelineContext==nullptr");
-        return panda::JSValueRef::Undefined(vm);
-    }
     bool result = false;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, panda::BooleanRef::New(vm, result));
     if (!pipelineContext->GetTaskExecutor()) {
         LOGE("pipelineContext's task excutor is null");
         return panda::BooleanRef::New(vm, result);
@@ -977,6 +970,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Span", JSSpan::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
+    { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },

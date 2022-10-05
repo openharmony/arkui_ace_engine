@@ -59,7 +59,6 @@ struct DecorationProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurStyle, BlurStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradient, NG::Gradient);
 };
 
 struct RenderPositionProperty {
@@ -72,6 +71,13 @@ struct ClipProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipShape, ClipPathNG);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipEdge, bool);
 };
+
+struct GradientProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SweepGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(RadialGradient, NG::Gradient);
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H

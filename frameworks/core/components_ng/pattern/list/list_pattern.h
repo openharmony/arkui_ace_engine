@@ -117,6 +117,24 @@ public:
 
     Axis GetDirection() const;
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
+    {
+        auto property = GetLayoutProperty<ListLayoutProperty>();
+        if (!property) {
+            return ScopeFocusAlgorithm();
+        }
+        auto isVertical = false;
+        if (property->GetListDirection() == Axis::VERTICAL) {
+            isVertical = true;
+        }
+        return ScopeFocusAlgorithm(isVertical, true, ScopeType::OTHERS);
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

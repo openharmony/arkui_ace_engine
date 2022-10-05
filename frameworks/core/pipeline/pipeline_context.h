@@ -108,9 +108,7 @@ public:
     using TimeProvider = std::function<int64_t(void)>;
     using SurfaceChangedCallbackMap =
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
-    using SurfacePositionChangedCallbackMap =
-        std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
-    using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
+    using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
 
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -229,7 +227,7 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void OnVirtualKeyboardAreaChange(Rect keyboardArea);
+    void OnVirtualKeyboardHeightChange(double keyboardHeight) override;
 
     // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
@@ -295,13 +293,6 @@ public:
         webPaintCallback_.push_back(std::move(listener));
     }
     void NotifyWebPaint() const;
-
-    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
-    void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
-    {
-        virtualKeyBoardCallback_.push_back(std::move(listener));
-    }
-    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const;
 
     float GetViewScale() const
     {
@@ -392,7 +383,7 @@ public:
 
     BaseId::IdType AddPageTransitionListener(const PageTransitionListenable::CallbackFuncType& funcObject);
 
-    const RefPtr<OverlayElement> GetOverlayElement() const;
+    const RefPtr<OverlayElement>& GetOverlayElement() const;
 
     void RemovePageTransitionListener(typename BaseId::IdType id);
 
@@ -864,20 +855,6 @@ public:
         windowStartMoveCallback_ = std::move(callback);
     }
 
-    void SetGetWindowRectImpl(std::function<Rect()>&& callback)
-    {
-        windowRectImpl_ = std::move(callback);
-    }
-
-    Rect GetCurrentWindowRect() const
-    {
-        Rect rect;
-        if (windowRectImpl_) {
-            rect = windowRectImpl_();
-        }
-        return rect;
-    }
-
     bool FireWindowMinimizeCallBack() const
     {
         if (windowMinimizeCallback_) {
@@ -1001,18 +978,6 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
-    void SetPostRTTaskCallBack(PostRTTaskCallback&& callback)
-    {
-        postRTTaskCallback_ = std::move(callback);
-    }
-
-    void PostTaskToRT(std::function<void()>&& task)
-    {
-        if (postRTTaskCallback_) {
-            postRTTaskCallback_(std::move(task));
-        }
-    }
-
     void AddVisibleAreaChangeNode(const ComposeId& nodeId, double ratio, const VisibleRatioCallback& callback);
 
     bool GetOnShow() const
@@ -1027,7 +992,7 @@ public:
 
     void SetForegroundCalled(bool isForegroundCalled)
     {
-        this->isForegroundCalled_ = isForegroundCalled;
+        isForegroundCalled_ = isForegroundCalled;
     }
 
     void AddRectCallback(OutOfRectGetRectCallback& getRectCallback, OutOfRectTouchCallback& touchCallback,
@@ -1166,7 +1131,7 @@ private:
     EventTrigger eventTrigger_;
 
     std::list<WebPaintCallback> webPaintCallback_;
-    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
+
     WeakPtr<RenderNode> requestedRenderNode_;
     // Make page update tasks pending here to avoid block receiving vsync.
     std::queue<std::function<void()>> pageUpdateTasks_;
@@ -1253,7 +1218,6 @@ private:
     std::function<bool(void)> windowSplitCallback_ = nullptr;
     std::function<void(void)> windowStartMoveCallback_ = nullptr;
     std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
-    std::function<Rect()> windowRectImpl_ = nullptr;
 
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
@@ -1274,7 +1238,6 @@ private:
     bool isSubPipeline_ = false;
     bool isForegroundCalled_ = false;
 
-    PostRTTaskCallback postRTTaskCallback_;
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     std::vector<RectCallback> rectCallbackList_;

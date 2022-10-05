@@ -57,10 +57,18 @@ private:
     float FillNewLineBackward(float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
         LayoutWrapper* layoutWrapper);
 
-    int32_t MeasureChild(float mainSize, float crossSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
-        const RefPtr<LayoutWrapper>& childLayoutWrapper);
+    // Measure grid item which not exist in grid matrix already, need to place it and save to grid matrix.
+    int32_t MeasureChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, bool reverse);
+    // Measure grid item which exist in grid matrix already, needn't to place it again.
+    int32_t MeasureChildPlaced(const SizeF& frameSize, int32_t itemIndex, int32_t crossStart,
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper);
+
+    // Compote position of grid item in cross axis.
     float ComputeItemCrossPosition(LayoutWrapper* layoutWrapper, int32_t crossStart) const;
-    void GetNextGrid(int32_t& curMain, int32_t& curCross) const;
+    // Find next valid cell when current is not valid.
+    void GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
+    // Find a valid cell to place grid item and save to grid matrix.
     bool CheckGridPlaced(int32_t index, int32_t main, int32_t cross, int32_t& mainSpan, int32_t& crossSpan);
     LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const;

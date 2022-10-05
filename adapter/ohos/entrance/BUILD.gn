@@ -35,9 +35,11 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
       "$ace_root/adapter/ohos/entrance/flutter_ace_view.cpp",
+      "$ace_root/adapter/ohos/entrance/hap_asset_provider.cpp",
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
+      "$ace_root/adapter/ohos/entrance/utils.cpp",
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
@@ -73,6 +75,7 @@ template("ace_ohos_standard_source_set") {
     deps = [
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "$ability_runtime_path/frameworks/native/ability/native:data_ability_helper",
+      "$ability_runtime_path/frameworks/native/runtime:runtime_extractor",
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",

@@ -58,6 +58,10 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
 FrameNode::~FrameNode()
 {
     pattern_->DetachFromFrameNode(this);
+    auto focusHub = GetFocusHub();
+    if (focusHub) {
+        focusHub->RemoveSelf();
+    }
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -122,6 +126,12 @@ void FrameNode::InitializePatternAndContext()
         frameNode->hasPendingRequest_ = true;
     });
     renderContext_->SetHostNode(WeakClaim(this));
+    // Initialize FocusHub
+    if (pattern_->GetFocusPattern().focusType != FocusType::DISABLE) {
+        auto focusHub = GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetScopeFocusAlgorithm(pattern_->GetScopeFocusAlgorithm());
+    }
 }
 
 void FrameNode::DumpInfo()
@@ -213,7 +223,11 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     SetGeometryNode(dirty->GetGeometryNode());
     if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
-        renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
+        if (pattern_->NeedOverridePaintRect()) {
+            renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
+        } else {
+            renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
+        }
     }
 
     // clean layout flag.
@@ -444,6 +458,7 @@ void FrameNode::RebuildRenderContextTree()
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthVisibleFrame(children);
     renderContext_->RebuildFrame(this, children);
+    pattern_->OnRebuildFrame();
     needSyncRenderTree_ = false;
 }
 
@@ -590,6 +605,10 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    if (!isActive_) {
+        LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
+        return HitTestResult::OUT_OF_REGION;
+    }
     auto responseRegionList = GetResponseRegionList();
     if (SystemProperties::GetDebugEnabled()) {
         LOGD("TouchTest: point is %{public}s in %{public}s", parentLocalPoint.ToString().c_str(), GetTag().c_str());
@@ -793,4 +812,23 @@ HitTestResult FrameNode::AxisTest(
     }
     return HitTestResult::BUBBLING;
 }
+
+RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
+{
+    if (!pattern_) {
+        return eventHub_->GetOrCreateFocusHub();
+    }
+    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().focusType, pattern_->GetFocusPattern().focusable);
+}
+
+void FrameNode::OnWindowShow()
+{
+    pattern_->OnWindowShow();
+}
+
+void FrameNode::OnWindowHide()
+{
+    pattern_->OnWindowHide();
+}
+
 } // namespace OHOS::Ace::NG

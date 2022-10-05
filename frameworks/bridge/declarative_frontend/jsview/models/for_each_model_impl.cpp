@@ -68,7 +68,7 @@ void ForEachModelImpl::Pop()
 const std::list<std::string>& ForEachModelImpl::GetCurrentIdList(int32_t nodeId)
 {
     LOGE("GetCurrentIdList unsupported by ForEachModelImpl");
-    return std::list<std::string>();
+    return {};
 }
 
 void ForEachModelImpl::SetNewIds(std::list<std::string>&& newIds)

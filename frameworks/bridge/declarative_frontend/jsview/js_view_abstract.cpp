@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/json/json_util.h"
@@ -199,7 +200,9 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy
     double dxVal = 0.0;
     double dyVal = 0.0;
     double dzVal = 0.0;
-    GetDefaultRotateVector(dxVal, dyVal, dzVal);
+    if (!argsPtrItem->Contains("x") && !argsPtrItem->Contains("y") && !argsPtrItem->Contains("z")) {
+        GetDefaultRotateVector(dxVal, dyVal, dzVal);
+    }
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), dxVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), dyVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), dzVal);
@@ -1086,6 +1089,12 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
         ParseJsonDouble(array->GetArrayItem(i), value);
         matrix[i] = static_cast<float>(value);
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetTransformMatrix(
+            Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13], matrix[2],
+                matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]));
+        return;
+    }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     transform->Matrix3d(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6], matrix[7],
@@ -1593,6 +1602,12 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
     }
 
     bool enabled = info[0]->ToBoolean();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetEnabled(enabled);
+        return;
+    }
+
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     if (mainComponent) {
         mainComponent->SetDisabledStatus(!enabled);
@@ -3676,9 +3691,14 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsGridSpan", info, checkList)) {
         return;
     }
+    auto span = info[0]->ToNumber<uint32_t>();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetGrid(span, std::nullopt);
+        return;
+    }
     auto gridContainerInfo = JSGridContainer::GetContainer();
     if (gridContainerInfo != nullptr) {
-        auto span = info[0]->ToNumber<uint32_t>();
         auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
         builder->SetParent(gridContainerInfo);
         builder->SetColumns(span);
@@ -3687,16 +3707,20 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
+    if (!CheckJSCallbackInfo("JsGridOffset", info, checkList)) {
+        return;
+    }
+    auto offset = info[0]->ToNumber<int32_t>();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetGrid(std::nullopt, offset);
         return;
     }
 
     auto gridContainerInfo = JSGridContainer::GetContainer();
-    if (info[0]->IsNumber() && gridContainerInfo != nullptr) {
+    if (gridContainerInfo != nullptr) {
         auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
         builder->SetParent(gridContainerInfo);
-        int32_t offset = info[0]->ToNumber<int32_t>();
         builder->SetOffset(offset);
     }
 }
@@ -3727,6 +3751,25 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsUseSizeType", info, checkList)) {
         return;
     }
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    // keys order must be strictly refer to GridSizeType
+    const char* keys[] = { "", "xs", "sm", "md", "lg" };
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
+            JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
+            if (val->IsNull() || val->IsEmpty()) {
+                continue;
+            }
+            uint32_t span = 0;
+            int32_t offset = 0;
+            if (ParseSpanAndOffset(val, span, offset)) {
+                NG::ViewAbstract::SetGrid(span, offset, static_cast<GridSizeType>(i));
+            }
+        }
+        return;
+    }
+
     auto gridContainerInfo = JSGridContainer::GetContainer();
     if (gridContainerInfo == nullptr) {
         LOGE("No valid grid container.");
@@ -3734,10 +3777,6 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
     }
     auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
     builder->SetParent(gridContainerInfo);
-
-    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    // keys order must be strictly refer to GridSizeType
-    const char* keys[] = { "", "xs", "sm", "md", "lg" };
     for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
         JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
         if (val->IsNull() || val->IsEmpty()) {
@@ -4053,17 +4092,17 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         LOGE("arg is not a object.");
         return;
     }
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        info.ReturnSelf();
+        return;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         // new pipeline
         NG::Gradient newGradient;
         NewJsLinearGradient(info, newGradient);
         NG::ViewAbstract::SetLinearGradient(newGradient);
-        return;
-    }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.ReturnSelf();
         return;
     }
     Gradient lineGradient;
@@ -4143,11 +4182,6 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.ReturnSelf();
-        return;
-    }
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
     std::optional<float> degree;
@@ -4212,7 +4246,12 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::Gradient newGradient;
+        NewJsRadialGradient(info, newGradient);
+        NG::ViewAbstract::SetRadialGradient(newGradient);
+        return;
+    }
     Gradient radialGradient;
     radialGradient.SetType(GradientType::RADIAL);
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
@@ -4270,6 +4309,44 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
+{
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    // center
+    auto center = argsPtrItem->GetValue("center");
+    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
+        Dimension value;
+        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
+            newGradient.GetRadialGradient()->radialCenterX = Dimension(value);
+            if (value.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                newGradient.GetRadialGradient()->radialCenterX =
+                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        }
+        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
+            newGradient.GetRadialGradient()->radialCenterY = Dimension(value);
+            if (value.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                newGradient.GetRadialGradient()->radialCenterY =
+                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        }
+    }
+    // radius
+    Dimension radius;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius)) {
+        newGradient.GetRadialGradient()->radialVerticalSize = Dimension(radius);
+        newGradient.GetRadialGradient()->radialHorizontalSize = Dimension(radius);
+    }
+    // repeating
+    auto repeating = argsPtrItem->GetBool("repeating", false);
+    newGradient.SetRepeat(repeating);
+    // color stops
+    NewGetGradientColorStops(newGradient, argsPtrItem->GetValue("colors"));
+}
+
 void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -4283,7 +4360,13 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::Gradient newGradient;
+        NewJsSweepGradient(info, newGradient);
+        NG::ViewAbstract::SetSweepGradient(newGradient);
+        return;
+    }
     Gradient sweepGradient;
     sweepGradient.SetType(GradientType::SWEEP);
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
@@ -4352,6 +4435,55 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
                 BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
         }
     }
+}
+
+void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
+{
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    newGradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    // center
+    auto center = argsPtrItem->GetValue("center");
+    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
+        Dimension value;
+        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
+            newGradient.GetSweepGradient()->centerX = Dimension(value);
+            if (value.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                newGradient.GetSweepGradient()->centerX = Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        }
+        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
+            newGradient.GetSweepGradient()->centerY = Dimension(value);
+            if (value.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                newGradient.GetSweepGradient()->centerY = Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        }
+    }
+    std::optional<float> degree;
+    // start
+    GetAngle("start", argsPtrItem, degree);
+    if (degree) {
+        newGradient.GetSweepGradient()->startAngle = Dimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // end
+    GetAngle("end", argsPtrItem, degree);
+    if (degree) {
+        newGradient.GetSweepGradient()->endAngle = Dimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // rotation
+    GetAngle("rotation", argsPtrItem, degree);
+    if (degree) {
+        newGradient.GetSweepGradient()->rotation = Dimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // repeating
+    auto repeating = argsPtrItem->GetBool("repeating", false);
+    newGradient.SetRepeat(repeating);
+    // color stops
+    NewGetGradientColorStops(newGradient, argsPtrItem->GetValue("colors"));
 }
 
 void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
@@ -4614,6 +4746,11 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetFocusable(info[0]->ToBoolean());
+        return;
+    }
+
     auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
     if (!focusComponent) {
         LOGE("The focusComponent is null");
@@ -4724,6 +4861,10 @@ void JSViewAbstract::JsTabIndex(const JSCallbackInfo& info)
         LOGE("Param is wrong, it is supposed to be a number");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetTabIndex(info[0]->ToNumber<int32_t>());
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
     if (focusableComponent) {
         focusableComponent->SetFocusable(true);
@@ -4737,12 +4878,16 @@ void JSViewAbstract::JsFocusOnTouch(const JSCallbackInfo& info)
         LOGE("Param is wrong, it is supposed to be a boolean");
         return;
     }
+    auto isFocusOnTouch = info[0]->ToBoolean();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetFocusOnTouch(isFocusOnTouch);
+        return;
+    }
     auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
     if (!touchComponent) {
         LOGE("Touch listener component get failed!");
         return;
     }
-    auto isFocusOnTouch = info[0]->ToBoolean();
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
     if (!focusableComponent) {
         LOGE("focusable component get failed!");
@@ -4764,6 +4909,10 @@ void JSViewAbstract::JsDefaultFocus(const JSCallbackInfo& info)
         return;
     }
     auto isDefaultFocus = info[0]->ToBoolean();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetDefaultFocus(isDefaultFocus);
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
     if (!focusableComponent) {
         LOGE("focusable component get failed!");
@@ -4779,6 +4928,10 @@ void JSViewAbstract::JsGroupDefaultFocus(const JSCallbackInfo& info)
         return;
     }
     auto isGroupDefaultFocus = info[0]->ToBoolean();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetGroupDefaultFocus(isGroupDefaultFocus);
+        return;
+    }
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
     if (!focusableComponent) {
         LOGE("focusable component get failed!");
@@ -5161,7 +5314,7 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
         NG::ViewAbstract::SetAlignRules(alignRules);
         return;
     }
-    
+
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     flexItem->SetAlignRules(alignRules);
 }
@@ -5588,28 +5741,32 @@ void JSViewAbstract::NewGetGradientColorStops(NG::Gradient& gradient, const std:
 
 void JSViewAbstract::SetDirection(const std::string& dir)
 {
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!box) {
+    TextDirection direction = TextDirection::AUTO;
+    if (dir == "Ltr") {
+        direction = TextDirection::LTR;
+    } else if (dir == "Rtl") {
+        direction = TextDirection::RTL;
+    } else if (dir == "Auto") {
+        direction = TextDirection::AUTO;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetLayoutDirection(direction);
         return;
     }
-
-    if (dir == "Ltr") {
-        box->SetTextDirection(TextDirection::LTR);
-        box->SetInspectorDirection(TextDirection::LTR);
-    } else if (dir == "Rtl") {
-        box->SetTextDirection(TextDirection::RTL);
-        box->SetInspectorDirection(TextDirection::RTL);
-    } else if (dir == "Auto") {
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    CHECK_NULL_VOID(box);
+    box->SetTextDirection(direction);
+    box->SetInspectorDirection(direction);
+    if (direction == TextDirection::AUTO) {
         box->SetTextDirection(
             AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
-        box->SetInspectorDirection(TextDirection::AUTO);
     }
 }
 
 RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& jsObj)
 {
-    std::string bundleName = "";
-    std::string moduleName = "";
+    std::string bundleName;
+    std::string moduleName;
     if (!jsObj->IsUndefined()) {
         JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
         JSRef<JSVal> module = jsObj->GetProperty("moduleName");

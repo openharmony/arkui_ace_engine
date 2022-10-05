@@ -494,10 +494,18 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
 {
     auto container = Container::Current();
     auto isStageModel = container ? container->IsUseStageModel() : false;
-    if (!isStageModel && Container::IsCurrentUseNewPipeline() && !pageProfile_.empty()) {
+    if (!isStageModel && Container::IsCurrentUseNewPipeline()) {
         // In NG structure and fa mode, first load app.js
-        CHECK_NULL_VOID(jsEngine_);
-        jsEngine_->LoadFaAppSource();
+        auto taskExecutor = container ? container->GetTaskExecutor() : nullptr;
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak = AceType::WeakClaim(this)]() {
+                auto frontend = weak.Upgrade();
+                CHECK_NULL_VOID(frontend);
+                CHECK_NULL_VOID(frontend->jsEngine_);
+                frontend->jsEngine_->LoadFaAppSource();
+            },
+            TaskExecutor::TaskType::JS);
     }
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
     if (delegate_) {

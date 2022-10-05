@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/matrix4.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -74,6 +76,8 @@ public:
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
 
+    virtual void SyncGeometryProperties(const RectF& rectF) {}
+
     virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) {}
@@ -86,6 +90,10 @@ public:
     virtual void ResetBlendBgColor() {}
 
     virtual void BlendBgColor(const Color& color) {}
+
+    virtual void ResetBlendBorderColor() {}
+
+    virtual void BlendBorderColor(const Color& color) {}
 
     virtual void UpdateBorderWidth(const BorderWidthPropertyF& value) {}
 
@@ -103,18 +111,26 @@ public:
         return false;
     }
 
+    virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
+    virtual void SetBounds(float positionX, float positionY, float width, float height) {}
+
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}
-    virtual void UpdateLinearGradient(const NG::Gradient& gradient) {}
+    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+    virtual void ClipWithRect(const RectF& rectF) {}
 
-    // Add Transform in group
+    // transform matrix
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
+
+    // Transform
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, Vector3F);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
 
+    // Background
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImage, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
@@ -125,6 +141,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
 
+    // Decoration
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
     ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
@@ -133,6 +150,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
+
     // Transition Options
     ACE_DEFINE_PROPERTY_GROUP(TransitionAppearing, TransitionOptions);
     ACE_DEFINE_PROPERTY_GROUP(TransitionDisappearing, TransitionOptions);
@@ -151,6 +169,12 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, ClipPathNG);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipEdge, bool);
 
+    // Gradient
+    ACE_DEFINE_PROPERTY_GROUP(Gradient, GradientProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LinearGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, SweepGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, RadialGradient, NG::Gradient);
+
 protected:
     RenderContext() = default;
 
@@ -168,8 +192,9 @@ protected:
 
     virtual void OnTransformScaleUpdate(const VectorF& value) {}
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
-    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
+
+    virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
@@ -179,6 +204,10 @@ protected:
     virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
     
+    virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;

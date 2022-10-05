@@ -347,7 +347,7 @@ const std::vector<double>& CanvasTaskPool::GetLineDash() const
 {
     auto paint = renderNode_.Upgrade();
     if (!paint) {
-        return std::vector<double>();
+        return {};
     }
 
     return paint->GetLineDash();

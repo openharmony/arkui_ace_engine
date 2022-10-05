@@ -1,20 +1,21 @@
 /*
-* Copyright (c) 2021-2022 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 
+#include <iterator>
 #include <vector>
 
 #include "base/thread/task_executor.h"
@@ -34,11 +35,13 @@ void SequencedRecognizer::OnAccepted()
         return;
     }
 
+    auto iter = recognizers_.begin();
+    std::advance(iter, activeIndex);
     for (size_t touchId : refereePointers_) {
-        recognizers_[activeIndex]->SetCoordinateOffset(coordinateOffset_);
-        recognizers_[activeIndex]->OnAccepted(touchId);
+        (*iter)->SetCoordinateOffset(coordinateOffset_);
+        (*iter)->OnAccepted(touchId);
     }
-    recognizers_[activeIndex]->SetRefereeState(RefereeState::SUCCEED);
+    (*iter)->SetRefereeState(RefereeState::SUCCEED);
 }
 
 void SequencedRecognizer::OnRejected()
@@ -48,14 +51,16 @@ void SequencedRecognizer::OnRejected()
         return;
     }
 
+    auto iter = recognizers_.begin();
+    std::advance(iter, activeIndex);
     for (size_t touchId : refereePointers_) {
-        auto recognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizers_[activeIndex]);
+        auto recognizer = AceType::DynamicCast<MultiFingersRecognizer>(*iter);
         if (recognizer && recognizer->GetRefereeState() == RefereeState::SUCCEED) {
             recognizer->SetRefereePointer(touchId);
         }
-        recognizers_[activeIndex]->OnRejected(touchId);
+        (*iter)->OnRejected(touchId);
     }
-    recognizers_[activeIndex]->SetRefereeState(RefereeState::FAIL);
+    (*iter)->SetRefereeState(RefereeState::FAIL);
 
     if (activeIndex != 0) {
         SendCancelMsg();
@@ -70,17 +75,21 @@ void SequencedRecognizer::OnPending(size_t touchId)
     if (activeIndex >= recognizers_.size()) {
         return;
     }
-    if (recognizers_[activeIndex]->GetDetectState() == DetectState::DETECTED) {
-        recognizers_[activeIndex]->OnAccepted(touchId);
-        recognizers_[activeIndex]->SetRefereeState(RefereeState::SUCCEED);
+    auto iter = recognizers_.begin();
+    std::advance(iter, activeIndex);
+    if ((*iter)->GetDetectState() == DetectState::DETECTED) {
+        (*iter)->OnAccepted(touchId);
+        (*iter)->SetRefereeState(RefereeState::SUCCEED);
     } else {
-        recognizers_[activeIndex]->OnPending(touchId);
+        (*iter)->OnPending(touchId);
     }
 }
 
 bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
-    RefPtr<GestureRecognizer> curRecognizer = recognizers_[activeIndex];
+    auto iter = recognizers_.begin();
+    std::advance(iter, activeIndex);
+    RefPtr<GestureRecognizer> curRecognizer = *iter;
     LOGD("dispatch to the %{public}zu gesture recognizer, event type is %{public}zu", activeIndex, point.type);
     switch (point.type) {
         case TouchType::MOVE:
@@ -121,10 +130,12 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
         if (curPoints_.empty()) {
             DeadlineTimer();
         } else {
+            auto recognizerIter = recognizers_.begin();
+            std::advance(recognizerIter, activeIndex);
             auto iter = curPoints_.begin();
             while (iter != curPoints_.end()) {
                 iter->second.type = TouchType::DOWN;
-                recognizers_[activeIndex]->HandleEvent(iter->second);
+                (*recognizerIter)->HandleEvent(iter->second);
                 iter++;
             }
         }
@@ -223,11 +234,15 @@ bool SequencedRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recogni
         return false;
     }
 
+    auto newRecognizer = recognizers_.begin();
+    auto curRecognizer = curr->recognizers_.begin();
     for (size_t i = 0; i < recognizers_.size(); i++) {
-        if (!recognizers_[i]->ReconcileFrom(curr->recognizers_[i])) {
+        if (!(*newRecognizer)->ReconcileFrom(*curRecognizer)) {
             Reset();
             return false;
         }
+        ++newRecognizer;
+        ++curRecognizer;
     }
 
     onActionCancel_ = std::move(curr->onActionCancel_);

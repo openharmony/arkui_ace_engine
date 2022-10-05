@@ -27,9 +27,8 @@ const T& GetValue(const T& current, const T& system, const T& defaultValue)
 {
     if (current == defaultValue) {
         return system;
-    } else {
-        return current;
     }
+    return current;
 }
 
 void GridContainerInfo::BuildColumnWidth()
@@ -66,10 +65,11 @@ void GridContainerInfo::BuildColumnWidth(double width)
     double gutterWidth = GetValue(gutterWidth_, systemGridInfo.gutter, UNDEFINED_DIMENSION).ConvertToPx(dipScale);
     double marginLeft = GetValue(marginLeft_, systemGridInfo.margin, UNDEFINED_DIMENSION).ConvertToPx(dipScale);
     double marginRight = GetValue(marginRight_, systemGridInfo.margin, UNDEFINED_DIMENSION).ConvertToPx(dipScale);
-    double padding = paddingLeft_.ConvertToPx(dipScale) + paddingRight_.ConvertToPx(dipScale);
+    double padding = GetValue(paddingLeft_, Dimension(), UNDEFINED_DIMENSION).ConvertToPx(dipScale) +
+                     GetValue(paddingRight_, Dimension(), UNDEFINED_DIMENSION).ConvertToPx(dipScale);
 
     columnWidth_ = (width - marginLeft - marginRight - padding - (columns - 1) * gutterWidth) / columns;
-    LOGD("width = %{public}f, columns: %{public}d columnWidth: %{public}f gutterWidth: %{public}f marginLeft: "
+    LOGI("width = %{public}f, columns: %{public}d columnWidth: %{public}f gutterWidth: %{public}f marginLeft: "
          "%{public}f marginRight: %{public}f padding: %{public}f",
         width, columns, columnWidth_, gutterWidth, marginLeft, marginRight, padding);
 }

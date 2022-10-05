@@ -61,6 +61,11 @@ public:
     // Called on main thread to check if need rerender of the content.
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, false };
+    }
+
 private:
     void OnModifyDone() override;
     void OnActive() override

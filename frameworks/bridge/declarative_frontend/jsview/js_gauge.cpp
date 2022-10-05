@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
+#include "bridge/declarative_frontend/jsview/js_gauge.h"
 
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/chart/chart_component.h"
 #include "core/components/progress/progress_component.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "core/components_ng/pattern/gauge/gauge_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -59,6 +60,9 @@ void JSGauge::Create(const JSCallbackInfo& info)
     double gaugeMin = min->IsNumber() ? min->ToNumber<double>() : 0;
     double gaugeMax = max->IsNumber() ? max->ToNumber<double>() : 100;
     double gaugeValue = value->IsNumber() ? value->ToNumber<double>() : 0;
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GaugeView::Create(gaugeValue, gaugeMin, gaugeMax);
+    }
     auto progressChild =
         AceType::MakeRefPtr<ProgressComponent>(gaugeMin, gaugeValue, gaugeMin, gaugeMax, ProgressType::GAUGE);
     progressChild->SetIndicatorFlag(true);
@@ -75,6 +79,9 @@ void JSGauge::SetValue(const JSCallbackInfo& info)
         LOGE("JSGauge::SetValue::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GaugeView::SetValue(info[0]->ToNumber<float>());
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
     if (!gaugeComponent) {
@@ -89,6 +96,9 @@ void JSGauge::SetStartAngle(const JSCallbackInfo& info)
         LOGE("JSGauge::SetStartAngle::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GaugeView::SetStartAngle(info[0]->ToNumber<float>());
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
     if (!gaugeComponent) {
@@ -102,6 +112,9 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
     if (info.Length() < 1 && !info[0]->IsNumber()) {
         LOGE("JSGauge::SetEndAngle::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GaugeView::SetEndAngle(info[0]->ToNumber<float>());
     }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
@@ -119,16 +132,26 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
     }
     std::vector<Color> colors;
     std::vector<double> values;
+    std::vector<float> weights;
     auto jsColor = JSRef<JSArray>::Cast(info[0]);
     for (size_t i = 0; i < jsColor->Length(); ++i) {
         JSRef<JSArray> tempColors = jsColor->GetValueAt(i);
         double value = tempColors->GetValueAt(1)->ToNumber<double>();
+        float weight = tempColors->GetValueAt(1)->ToNumber<float>();
         Color selectedColor;
         if (!ParseJsColor(tempColors->GetValueAt(0), selectedColor)) {
             return;
         }
         colors.push_back(selectedColor);
         values.push_back(value);
+        if (weight > 0) {
+            weights.push_back(weight);
+        } else {
+            weights.push_back(0.0f);
+        }
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GaugeView::SetColors(colors, weights);
     }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
@@ -147,6 +170,9 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
     Dimension strokeWidth;
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
         return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GaugeView::SetStrokeWidth(strokeWidth);
     }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);

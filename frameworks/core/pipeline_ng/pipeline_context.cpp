@@ -29,6 +29,7 @@
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -184,7 +186,7 @@ void PipelineContext::FlushFocus()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     auto focusNode = dirtyFocusNode_.Upgrade();
-    if (!focusNode || focusNode->GetFocusType() == FocusType::DISABLE) {
+    if (!focusNode || focusNode->GetFocusType() != FocusType::NODE) {
         dirtyFocusNode_.Reset();
     } else {
         auto focusNodeHub = focusNode->GetFocusHub();
@@ -196,7 +198,7 @@ void PipelineContext::FlushFocus()
         return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
-    if (!focusScope || focusNode->GetFocusType() == FocusType::DISABLE) {
+    if (!focusScope || focusScope->GetFocusType() != FocusType::SCOPE) {
         dirtyFocusScope_.Reset();
     } else {
         auto focusScopeHub = focusScope->GetFocusHub();
@@ -207,8 +209,10 @@ void PipelineContext::FlushFocus()
         dirtyFocusScope_.Reset();
         return;
     }
-    if (rootNode_ && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
-        rootNode_->GetFocusHub()->RequestFocusImmediately();
+    if (!RequestDefaultFocus()) {
+        if (rootNode_ && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
+            rootNode_->GetFocusHub()->RequestFocusImmediately();
+        }
     }
 }
 
@@ -283,6 +287,8 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         return;
     }
     LOGI("SetRootRect %{public}f %{public}f", width, height);
+    GridSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
+    GridSystemManager::GetInstance().OnSurfaceChanged(width);
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
     if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF) {
         CalcSize idealSize { CalcLength(width), CalcLength(height) };
@@ -292,6 +298,11 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootNode_->UpdateLayoutConstraint(layoutConstraint);
         rootNode_->MarkDirtyNode();
     }
+}
+
+void PipelineContext::OnVirtualKeyboardHeightChange(double keyboardHeight)
+{
+    // TODO: add textfield opeartion.
 }
 
 bool PipelineContext::OnBackPressed()
@@ -407,7 +418,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-multimodal") {
 #endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
-        rootNode_->DumpTree(0);
+        auto pageNode = stageManager_->GetLastPage();
+        pageNode->DumpTree(pageNode->GetDepth());
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {
@@ -478,7 +490,54 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
-    return eventManager_->DispatchKeyEventNG(event, rootNode_);
+    // Need update while key tab pressed
+    auto lastPage = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, false);
+    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, lastPage)) {
+        return eventManager_->DispatchKeyEventNG(event, rootNode_);
+    }
+    return true;
+}
+
+bool PipelineContext::RequestDefaultFocus()
+{
+    auto lastPage = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, false);
+    auto lastPageFocusHub = lastPage->GetFocusHub();
+    CHECK_NULL_RETURN(lastPageFocusHub, false);
+    if (lastPageFocusHub->IsDefaultHasFocused()) {
+        return false;
+    }
+    auto defaultFocusNode = lastPageFocusHub->GetChildFocusNodeByType();
+    if (!defaultFocusNode) {
+        return false;
+    }
+    if (!defaultFocusNode->IsFocusableWholePath()) {
+        return false;
+    }
+    lastPageFocusHub->SetIsDefaultHasFocused(true);
+    LOGD("Focus: request default focus node %{public}s", defaultFocusNode->GetFrameName().c_str());
+    return defaultFocusNode->RequestFocusImmediately();
+}
+
+bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto focusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->RequestFocusImmediatelyById(targetNodeId);
+}
+
+void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(node);
+    if (node->GetFocusType() == FocusType::NODE) {
+        dirtyFocusNode_ = WeakClaim(RawPtr(node));
+    } else {
+        dirtyFocusScope_ = WeakClaim(RawPtr(node));
+    }
+    window_->RequestFrame();
 }
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
@@ -496,6 +555,23 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
     eventManager_->DispatchAxisEventNG(scaleEvent);
 }
 
+void PipelineContext::OnShow()
+{
+    CHECK_RUN_ON(UI);
+    window_->OnShow();
+    window_->RequestFrame();
+    FlushWindowStateChangedCallback(true);
+}
+
+void PipelineContext::OnHide()
+{
+    CHECK_RUN_ON(UI);
+    window_->RequestFrame();
+    window_->OnHide();
+    OnVirtualKeyboardAreaChange(Rect());
+    FlushWindowStateChangedCallback(false);
+}
+
 void PipelineContext::Destroy()
 {
     taskScheduler_.CleanUp();
@@ -506,9 +582,37 @@ void PipelineContext::Destroy()
     overlayManager_.Reset();
 }
 
-void PipelineContext::AddCallBack(std::function<void()>&& callback)
+void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
 {
     buildFinishCallbacks_.emplace_back(std::move(callback));
+}
+
+void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId)
+{
+    onWindowStateChangedCallbacks_.emplace_back(nodeId);
+}
+
+void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId)
+{
+    onWindowStateChangedCallbacks_.remove(nodeId);
+}
+
+void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
+{
+    auto iter = onWindowStateChangedCallbacks_.begin();
+    while (iter != onWindowStateChangedCallbacks_.end()) {
+        auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
+        if (!node) {
+            iter = onWindowStateChangedCallbacks_.erase(iter);
+        } else {
+            if (isShow) {
+                node->OnWindowShow();
+            } else {
+                node->OnWindowHide();
+            }
+            ++iter;
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -335,6 +335,23 @@ if (is_standard_system) {
     }
   }
 
+  if (use_mac || use_mingw_win) {
+    ohos_copy("copy_communication_library") {
+      #http
+      out_path = get_label_info(
+              "//foundation/communication/netstack/frameworks/js/napi/http:http",
+              "root_out_dir")
+      deps =
+          [ "//foundation/communication/netstack/frameworks/js/napi/http:http" ]
+      sources = [ "${out_path}/communication/netstack/libhttp${dylib_suffix}" ]
+
+      outputs = [ target_out_dir +
+                  "/previewer/common/bin/module/net/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/previewer/common/bin/module/net/"
+      module_install_name = ""
+    }
+  }
+
   if (use_mingw_win) {
     ohos_copy("copy_preview_curl_cacert") {
       sources = [ "//third_party/curl/cacert.pem" ]

@@ -18,7 +18,9 @@ build_component_ng("property_ng") {
   sources = [
     "calc_length.cpp",
     "gradient_property.cpp",
+    "grid_property.cpp",
     "measure_utils.cpp",
     "property.cpp",
   ]
+  rosen_sources = [ "rosen_modifier_property.cpp" ]
 }

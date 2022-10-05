@@ -147,6 +147,7 @@ void SwiperPattern::FireChangeEvent() const
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireChangeEvent(currentIndex_);
+    swiperEventHub->FireChangeDoneEvent(moveDirection_);
 }
 
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
@@ -190,13 +191,16 @@ void SwiperPattern::ShowNext()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
+
     if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
         LOGW("already last one, can't show next");
         return;
     }
     StopAutoPlay();
     StopTranslateAnimation();
-    PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize, true);
+    if (childrenSize > 0 && GetDisplayCount() != 0) {
+        PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize, true);
+    }
 }
 
 void SwiperPattern::ShowPrevious()
@@ -210,7 +214,9 @@ void SwiperPattern::ShowPrevious()
     }
     StopAutoPlay();
     StopTranslateAnimation();
-    PlayTranslateAnimation(0, MainSize() / GetDisplayCount(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
+    if (childrenSize > 0 && GetDisplayCount() != 0) {
+        PlayTranslateAnimation(0, MainSize() / GetDisplayCount(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
+    }
 }
 
 void SwiperPattern::FinishAnimation()
@@ -542,6 +548,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
 
     PlayTranslateAnimation(start, end, nextIndex);
+    moveDirection_ = dragVelocity <= 0;
 }
 
 void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay)

@@ -490,4 +490,28 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
     }
 }
 
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea)
+{
+    double keyboardHeight = keyboardArea.Height();
+    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
+        return;
+    }
+    OnVirtualKeyboardHeightChange(keyboardHeight);
+}
+
+void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
+{
+    if (window_) {
+        window_->SetGetWindowRectImpl(std::move(callback));
+    }
+}
+
+Rect PipelineBase::GetCurrentWindowRect() const
+{
+    if (window_) {
+        return window_->GetCurrentWindowRect();
+    }
+    return {};
+}
+
 } // namespace OHOS::Ace

@@ -38,10 +38,11 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    auto clickRecognizer = MakeRefPtr<ClickRecognizer>();
+    if (!clickRecognizer_) {
+        clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+    }
     auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
         for (const auto& callback : actuator->clickEvents_) {
             if (callback) {
                 (*callback)(info);
@@ -51,10 +52,10 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
             (*actuator->userCallback_)(info);
         }
     };
-    clickRecognizer->SetOnAction(callback);
-    clickRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-    clickRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
-    result.emplace_back(clickRecognizer);
+    clickRecognizer_->SetOnAction(callback);
+    clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(clickRecognizer_);
 }
 
 } // namespace OHOS::Ace::NG

@@ -498,6 +498,55 @@ public:
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
+    void OnVirtualKeyboardAreaChange(Rect keyboardArea);
+
+    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
+    void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
+    {
+        virtualKeyBoardCallback_.push_back(std::move(listener));
+    }
+    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
+    {
+        for (const auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
+            if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    using configChangedCallback = std::function<void()>;
+    void SetConfigChangedCallback(configChangedCallback&& listener)
+    {
+        configChangedCallback_.push_back(std::move(listener));
+    }
+
+    void NotifyConfigurationChange()
+    {
+        for (const auto& callback : configChangedCallback_) {
+            if (callback) {
+                callback();
+            }
+        }
+    }
+
+    using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
+    void SetPostRTTaskCallBack(PostRTTaskCallback&& callback)
+    {
+        postRTTaskCallback_ = std::move(callback);
+    }
+
+    void PostTaskToRT(std::function<void()>&& task)
+    {
+        if (postRTTaskCallback_) {
+            postRTTaskCallback_(std::move(task));
+        }
+    }
+
+    void SetGetWindowRectImpl(std::function<Rect()>&& callback);
+
+    Rect GetCurrentWindowRect() const;
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -508,7 +557,12 @@ protected:
     virtual void FlushPipelineWithoutAnimation() = 0;
     virtual void FlushMessages() = 0;
     virtual void FlushUITasks() = 0;
+    virtual void OnVirtualKeyboardHeightChange(double keyboardHeight) {}
+
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
+
+    std::list<configChangedCallback> configChangedCallback_;
+    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
@@ -555,7 +609,9 @@ private:
     std::list<DestroyEventHandler> destroyEventHandler_;
     std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
     GetViewScaleCallback getViewScaleCallback_;
+    // OnRouterChangeCallback is function point, need to be initialized.
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
+    PostRTTaskCallback postRTTaskCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

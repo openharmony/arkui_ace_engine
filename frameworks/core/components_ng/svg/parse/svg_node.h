@@ -102,10 +102,10 @@ protected:
     virtual void OnAppendChild(const RefPtr<SvgNode>& child) {}
     // called by function InitStyle
     virtual void OnInitStyle() {}
-
     // function override by graphic tag
     virtual void OnDraw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) {}
-    void OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
+
+    virtual void OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
     bool OnCanvas(RSCanvas& canvas);
     void OnClipPath(RSCanvas& canvas, const Size& viewPort);
     void OnFilter(RSCanvas& canvas, const Size& viewPort);

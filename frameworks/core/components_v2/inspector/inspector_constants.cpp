@@ -102,6 +102,12 @@ const char TAB_BAR_ETS_TAG[] = "TabBar";
 // navigation view
 const char NAVIGATION_VIEW_COMPONENT_TAG[] = "NavigationContainerComponent";
 const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
+const char BAR_ITEM_ETS_TAG[] = "BarItem";
+const char TITLE_BAR_ETS_TAG[] = "TitleBar";
+const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
+const char TOOL_BAR_ETS_TAG[] = "ToolBar";
+const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
+const char BACK_BUTTON_ETS_TAG[] = "BackButton";
 
 // row split
 const char ROW_SPLIT_COMPONENT_TAG[] = "RowSplitComponent";
@@ -157,14 +163,26 @@ const char PATTERN_LOCK_ETS_TAG[] = "PatternLock";
 const char ROW_COMPONENT_TAG[] = "RowComponent";
 const char ROW_ETS_TAG[] = "Row";
 
-//rect
+// rect
 const char RECT_ETS_TAG[] = "Rect";
 
-//line
+// line
 const char LINE_ETS_TAG[] = "Line";
 
-//circle
+// circle
 const char CIRCLE_ETS_TAG[] = "Circle";
+
+// ellipse
+const char ELLIPSE_ETS_TAG[] = "Ellipse";
+
+// path
+const char PATH_ETS_TAG[] = "Path";
+
+// polygon
+const char POLYGON_ETS_TAG[] = "Polygon";
+
+// polyline
+const char POLYLINE_ETS_TAG[] = "Polyline";
 
 // shape
 const char SHAPE_COMPONENT_TAG[] = "ShapeComponent";
@@ -407,9 +425,4 @@ ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
 // Popup
 ACE_EXPORT extern const char POPUP_ETS_TAG[] = "Popup";
 
-// bar item
-ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[] = "BarItem";
-
-// title bar
-ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[] = "TitleBar";
 } // namespace OHOS::Ace::V2

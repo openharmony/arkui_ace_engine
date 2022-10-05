@@ -45,6 +45,20 @@ public:
         return MakeRefPtr<LinearLayoutAlgorithm>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
+    {
+        auto property = GetLayoutProperty<LinearLayoutProperty>();
+        if (!property) {
+            return ScopeFocusAlgorithm();
+        }
+        return ScopeFocusAlgorithm(isVertical_, true, ScopeType::FLEX);
+    }
+
 private:
     bool isVertical_ = false;
 };

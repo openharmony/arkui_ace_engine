@@ -29,7 +29,6 @@ namespace OHOS::Ace {
 
 namespace {
 
-constexpr double DEFAULT_SPLIT_RESPOND_WIDTH = 25.0;
 constexpr int32_t DISABLE_HIDE = -1;
 
 } // namespace
@@ -218,9 +217,7 @@ void RenderSplitContainer::LayoutChildren()
         if (dragSplitOffset_[index] > 0.0) {
             childOffsetMain += dragSplitOffset_[index];
         }
-        double posMain =
-            childOffsetMain > DEFAULT_SPLIT_RESPOND_WIDTH ? (childOffsetMain - DEFAULT_SPLIT_RESPOND_WIDTH) : 0.0;
-        posMain = childOffsetMain;
+        double posMain = childOffsetMain;
         if (splitType_ == SplitType::ROW_SPLIT) {
             splitRects_.push_back(Rect(posMain, 0, DEFAULT_SPLIT_HEIGHT, maxSize.Height()));
         } else {

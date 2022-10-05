@@ -577,11 +577,15 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     auto pos = url.rfind(js_ext);
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
-        std::string assetBasePath = delegate->GetAssetPath(urlName);
-        std::string assetPath = assetBasePath.append(urlName);
-        LOGD("assetPath is: %{private}s", assetPath.c_str());
-        if (!runtime->ExecuteJsBin(assetPath)) {
-            LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+        LOGI("GetAssetContent: %{public}s", urlName.c_str());
+        std::vector<uint8_t> content;
+        if (!delegate->GetAssetContent(urlName, content)) {
+            LOGE("GetAssetContent \"%{public}s\" failed.", urlName.c_str());
+            return;
+        }
+        std::string abcPath = delegate->GetAssetPath(urlName).append(urlName);
+        if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
+            LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.c_str());
             return;
         }
 

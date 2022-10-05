@@ -25,20 +25,62 @@ class ACE_EXPORT TitleBarNode : public FrameNode {
     DECLARE_ACE_TYPE(TitleBarNode, FrameNode)
 public:
     TitleBarNode(const std::string& tag, int32_t nodeId);
+    TitleBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern) {}
     ~TitleBarNode() = default;
+    static RefPtr<TitleBarNode> GetOrCreateTitleBarNode(
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
     bool IsAtomicNode() const override
     {
         return false;
     }
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackButtonIndex, int32_t);
-    void OnBackButtonIndexUpdate(int32_t value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TitleIndex, int32_t);
-    void OnTitleIndexUpdate(int32_t value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SubtitleIndex, int32_t);
-    void OnSubtitleIndexUpdate(int32_t value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MenuIndex, int32_t);
-    void OnMenuIndexUpdate(int32_t value) {}
+
+    void SetBackButton(const RefPtr<UINode>& button)
+    {
+        backButton_ = button;
+    }
+
+    const RefPtr<UINode>& GetBackButton() const
+    {
+        return backButton_;
+    }
+
+    void SetTitle(const RefPtr<UINode>& title)
+    {
+        title_ = title;
+    }
+
+    const RefPtr<UINode>& GetTitle() const
+    {
+        return title_;
+    }
+
+    void SetSubtitle(const RefPtr<UINode>& subtitle)
+    {
+        subtitle_ = subtitle;
+    }
+
+    const RefPtr<UINode>& GetSubtitle() const
+    {
+        return subtitle_;
+    }
+
+    void SetMenu(const RefPtr<UINode>& menu)
+    {
+        menu_ = menu;
+    }
+
+    const RefPtr<UINode>& GetMenu() const
+    {
+        return menu_;
+    }
+
+private:
+    RefPtr<UINode> backButton_;
+    RefPtr<UINode> title_;
+    RefPtr<UINode> subtitle_;
+    RefPtr<UINode> menu_;
 };
 
 } // namespace OHOS::Ace::NG

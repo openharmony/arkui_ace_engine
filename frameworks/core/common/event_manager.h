@@ -84,7 +84,7 @@ public:
     // platform will handle it.
     bool DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode);
     bool DispatchTabIndexEventNG(
-        const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<FocusGroup>& curPage);
+        const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& curPage);
 
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.

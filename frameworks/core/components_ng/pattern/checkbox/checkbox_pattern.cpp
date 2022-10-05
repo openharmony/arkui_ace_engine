@@ -139,7 +139,7 @@ void CheckBoxPattern::UpdateState()
                 checkbox->CheckBoxGroupIsTrue();
             }
         };
-        PipelineContext::GetCurrentContext()->AddCallBack(callback);
+        PipelineContext::GetCurrentContext()->AddBuildFinishCallBack(callback);
         pattern->SetPreGroup(group);
         return;
     }
@@ -175,15 +175,15 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
 
     for (auto&& item : list) {
         auto node = item.Upgrade();
+        if (!node) {
+            continue;
+        }
         if (node == checkBoxFrameNode) {
             if (select) {
                 auto eventHub = node->GetEventHub<CheckBoxEventHub>();
                 CHECK_NULL_VOID(eventHub);
                 vec.push_back(eventHub->GetName());
             }
-            continue;
-        }
-        if (!node) {
             continue;
         }
         if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {

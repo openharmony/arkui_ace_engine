@@ -233,4 +233,24 @@ bool FrontendDelegateDeclarativeNG::OnPageBackPress()
     return pageRouterManager_->Pop();
 }
 
+void FrontendDelegateDeclarativeNG::OnPageShow()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnShow();
+}
+
+void FrontendDelegateDeclarativeNG::OnPageHide()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnHide();
+}
+
 } // namespace OHOS::Ace::Framework

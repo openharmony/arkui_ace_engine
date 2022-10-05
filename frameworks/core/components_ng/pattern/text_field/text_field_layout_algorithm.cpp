@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/text/text_theme.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
@@ -69,6 +71,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(themeManager, std::nullopt);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
     TextStyle textStyle;
     if (textFieldLayoutProperty->HasValue()) {
         UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
@@ -83,6 +86,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         paragraph_->Layout(Infinity<float>());
     } else {
         paragraph_->Layout(contentConstraint.maxSize.Width());
+    }
+    if (pattern->GetTextModifiedByInputMethod()) {
+        UpdateCaretPositionByTextEdit(layoutWrapper);
+    } else {
+        UpdateCaretPositionByTouchOffset(layoutWrapper);
     }
     auto height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
     // check password image size.
@@ -246,6 +254,109 @@ float TextFieldLayoutAlgorithm::GetTextFieldDefaultImageHeight()
     CHECK_NULL_RETURN(textFieldTheme, defaultHeight.ConvertToPx());
     auto height = textFieldTheme->GetIconHotZoneSize();
     return static_cast<float>(height.ConvertToPx());
+}
+
+void TextFieldLayoutAlgorithm::UpdateCaretPositionByTextEdit(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto value = pattern->GetEditingValue();
+    auto selection = value.selection;
+    // scene of inserting text to tail
+    if (selection.IsValid() && (selection.GetStart() == selection.GetEnd() &&
+                                   selection.GetEnd() == static_cast<int32_t>(value.GetWideText().length()))) {
+        pattern->SetCaretOffsetX(static_cast<float>(paragraph_->GetLongestLine()));
+        return;
+    }
+    // scene of insert in the middle
+    // after text insert, selection will update both base and extend offset to the same value
+    CalcCaretByPosition(pattern, selection.baseOffset);
+}
+
+void TextFieldLayoutAlgorithm::UpdateCaretPositionByTouchOffset(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto offset = pattern->GetLastTouchOffset() - Offset(pattern->GetBasicPadding(), 0.0f);
+    auto value = pattern->GetEditingValue();
+    // update text editing value for touch out of boundary edge case
+    if (pattern->GetTextDirection() == TextDirection::LTR &&
+        GreatOrEqual(offset.GetX(), paragraph_->GetLongestLine())) {
+        value.MoveToPosition(static_cast<int32_t>(value.GetWideText().length()));
+        pattern->SetCaretOffsetX(static_cast<float>(paragraph_->GetLongestLine()));
+        pattern->SetEditingValue(value);
+        return;
+    }
+    auto position = ConvertTouchOffsetToCaretPosition(offset);
+    UpdatePositionOfTextEditingValue(position, layoutWrapper);
+
+    CalcCaretByPosition(pattern, position);
+}
+
+void TextFieldLayoutAlgorithm::CalcCaretByPosition(const RefPtr<Pattern>& pattern, int32_t position)
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFieldPattern);
+    CaretMetrics downStreamMetrics;
+    if (!ComputeOffsetForCaretDownstream(textFieldPattern->GetEditingValue(), position, downStreamMetrics)) {
+        textFieldPattern->SetCaretOffsetX(static_cast<float>(paragraph_->GetLongestLine()));
+        LOGW("Get caret offset failed, set it to text tail");
+        return;
+    }
+    textFieldPattern->SetCaretOffsetX(static_cast<float>(downStreamMetrics.offset.GetX()));
+}
+
+void TextFieldLayoutAlgorithm::UpdatePositionOfTextEditingValue(int32_t position, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto value = pattern->GetEditingValue();
+    // TextEditingValue::MoveToPosition will handle edge values itself
+    value.MoveToPosition(position);
+    pattern->SetEditingValue(value);
+}
+
+bool TextFieldLayoutAlgorithm::ComputeOffsetForCaretDownstream(
+    const TextEditingValue& textEditingValue, int32_t extent, CaretMetrics& result) const
+{
+    if (!paragraph_ || static_cast<size_t>(extent) >= textEditingValue.GetWideText().length()) {
+        return false;
+    }
+
+    result.Reset();
+    const int32_t graphemeClusterLength = 1;
+    const int32_t next = extent + graphemeClusterLength;
+    auto boxes = paragraph_->GetRectsForRange(
+        extent, next, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
+    if (boxes.empty()) {
+        LOGW("Box empty");
+        return false;
+    }
+
+    const auto& textBox = *boxes.begin();
+    // Caret is within width of the downstream glyphs.
+    float caretStart = textBox.rect_.GetLeft();
+    float offsetX = std::min(caretStart, static_cast<float>(paragraph_->GetLongestLine()));
+    result.offset.SetX(offsetX);
+    result.offset.SetY(textBox.rect_.GetTop());
+    result.height = textBox.rect_.GetHeight();
+    return true;
+}
+
+int32_t TextFieldLayoutAlgorithm::ConvertTouchOffsetToCaretPosition(const Offset& localOffset)
+{
+    if (!paragraph_) {
+        LOGW("Paragraph is empty");
+        return 0;
+    }
+    return static_cast<int32_t>(
+        paragraph_->GetGlyphPositionAtCoordinateWithCluster(localOffset.GetX(), localOffset.GetY()).pos_);
 }
 
 } // namespace OHOS::Ace::NG

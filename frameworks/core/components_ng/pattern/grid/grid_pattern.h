@@ -62,6 +62,20 @@ public:
         return supportAnimation_;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
+    {
+        auto property = GetLayoutProperty<GridLayoutProperty>();
+        if (!property) {
+            return ScopeFocusAlgorithm();
+        }
+        return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS);
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

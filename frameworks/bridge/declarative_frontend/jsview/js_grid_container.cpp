@@ -18,6 +18,7 @@
 #include "base/log/ace_trace.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/components/common/layout/grid_system_manager.h"
+#include "frameworks/core/components_ng/pattern/grid_container/grid_container_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -25,11 +26,7 @@ thread_local std::vector<RefPtr<GridContainerInfo>> JSGridContainer::gridContain
 
 void JSGridContainer::Create(const JSCallbackInfo& info)
 {
-    JSColumn::SetInspectorTag("GridContainer");
-    JSColumn::Create(info);
-    JSColumn::ClearInspectorTag();
     GridContainerInfo::Builder gridContainerInfoBuilder;
-
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
 
@@ -58,8 +55,17 @@ void JSGridContainer::Create(const JSCallbackInfo& info)
             gridContainerInfoBuilder.SetMarginRight(dim);
         }
     }
-
     auto gridContainerInfo = gridContainerInfoBuilder.Build();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GridContainerView::Create(gridContainerInfo);
+        return;
+    }
+
+    JSColumn::SetInspectorTag("GridContainer");
+    JSColumn::Create(info);
+    JSColumn::ClearInspectorTag();
+
     gridContainerStack_.emplace_back(gridContainerInfo);
     ViewStackProcessor::GetInstance()->GetBoxComponent()->SetGridLayoutInfo(gridContainerInfo);
 
@@ -72,7 +78,9 @@ void JSGridContainer::Create(const JSCallbackInfo& info)
 
 void JSGridContainer::Pop()
 {
-    gridContainerStack_.pop_back();
+    if (!Container::IsCurrentUseNewPipeline()) {
+        gridContainerStack_.pop_back();
+    }
     JSColumn::Pop();
 }
 

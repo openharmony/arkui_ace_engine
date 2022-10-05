@@ -60,7 +60,10 @@ class WebPattern : public Pattern {
     DECLARE_ACE_TYPE(WebPattern, Pattern);
 
 public:
+    using SetWebIdCallback = std::function<void(int32_t)>;
+
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
+    WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
 
     ~WebPattern() override = default;
 
@@ -118,9 +121,24 @@ public:
         return webController_;
     }
 
+    void SetSetWebIdCallback(SetWebIdCallback&& SetIdCallback)
+    {
+        setWebIdCallback_ = std::move(SetIdCallback);
+    }
+
+    SetWebIdCallback GetSetWebIdCallback() const
+    {
+        return setWebIdCallback_;
+    }
+
     RefPtr<WebEventHub> GetWebEventHub()
     {
         return GetEventHub<WebEventHub>();
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
     }
 
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
@@ -207,6 +225,7 @@ private:
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
     RefPtr<WebController> webController_;
+    SetWebIdCallback setWebIdCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;

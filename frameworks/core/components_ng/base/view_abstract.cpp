@@ -125,6 +125,11 @@ void ViewAbstract::SetLayoutWeight(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
+void ViewAbstract::SetLayoutDirection(TextDirection value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutDirection, value);
+}
+
 void ViewAbstract::SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules);
@@ -224,9 +229,16 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
+    auto gestureEvent = clickEventFunc;
+    auto focusEvent = clickEventFunc;
+
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetClickEvent(std::move(clickEventFunc));
+    gestureHub->SetClickEvent(std::move(gestureEvent));
+
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnClickCallback(std::move(focusEvent));
 }
 
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
@@ -257,11 +269,11 @@ void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
     eventHub->SetHoverAnimation(hoverEffect);
 }
 
-void ViewAbstract::SetFocusType(FocusType type)
+void ViewAbstract::SetEnabled(bool enabled)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusType(type);
+    focusHub->SetEnabled(enabled);
 }
 
 void ViewAbstract::SetFocusable(bool focusable)
@@ -290,6 +302,34 @@ void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnKeyCallback(std::move(onKeyCallback));
+}
+
+void ViewAbstract::SetTabIndex(int32_t index)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetTabIndex(index);
+}
+
+void ViewAbstract::SetFocusOnTouch(bool isSet)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsFocusOnTouch(isSet);
+}
+
+void ViewAbstract::SetDefaultFocus(bool isSet)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsDefaultFocus(isSet);
+}
+
+void ViewAbstract::SetGroupDefaultFocus(bool isSet)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsDefaultGroupFocus(isSet);
 }
 
 void ViewAbstract::SetOnAppear(std::function<void()>&& onAppear)
@@ -392,6 +432,11 @@ void ViewAbstract::SetRotate(const NG::Vector4F& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
 }
 
+void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
+{
+    ACE_UPDATE_RENDER_CONTEXT(TransformMatrix, matrix);
+}
+
 void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
 {
     auto msg = param->GetMessage();
@@ -454,11 +499,31 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
+void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
+{
+    ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
+}
+
+void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
+{
+    ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
+}
+
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->UpdateInspectorId(inspectorId);
+}
+
+void ViewAbstract::SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    // frame node is mounted to parent when pop from stack later, no grid-container is added here
+    layoutProperty->UpdateGridProperty(span, offset, type);
 }
 
 void ViewAbstract::Pop()

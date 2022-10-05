@@ -232,15 +232,15 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
     if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
         // PanRecognizer Direction: Vertical
-        delta_ = Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE,
-            -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+        delta_ =
+            Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
     } else if ((direction_.type & PanDirection::VERTICAL) == 0) {
         // PanRecognizer Direction: Horizontal
         if (NearZero(event.horizontalAxis)) {
             delta_ = Offset(-event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE, 0);
         } else {
-            delta_ = Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE,
-                -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+            delta_ = Offset(
+                -event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
         }
     }
 

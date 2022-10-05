@@ -28,6 +28,66 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void MeasureIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    const RefPtr<LayoutProperty>& barItemLayoutProperty)
+{
+    auto iconNode = hostNode->GetIconNode();
+    CHECK_NULL_VOID(iconNode);
+    auto index = hostNode->GetChildIndexById(iconNode->GetId());
+    auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
+    CHECK_NULL_VOID(iconWrapper);
+    auto constraint = barItemLayoutProperty->CreateChildConstraint();
+    constraint.selfIdealSize = OptionalSizeF(
+        static_cast<float>(ICON_SIZE.ConvertToPx()), static_cast<float>(ICON_SIZE.ConvertToPx()));
+    iconWrapper->Measure(constraint);
+}
+
+void MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    const RefPtr<LayoutProperty>& barItemLayoutProperty)
+{
+    auto textNode = hostNode->GetTextNode();
+    CHECK_NULL_VOID(textNode);
+    auto index = hostNode->GetChildIndexById(textNode->GetId());
+    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
+    CHECK_NULL_VOID(textWrapper);
+    auto constraint = barItemLayoutProperty->CreateChildConstraint();
+    auto textHeight = TOOLBAR_HEIGHT - ICON_SIZE - TEXT_TOP_PADDING;
+    constraint.selfIdealSize = OptionalSizeF(
+        static_cast<float>(ICON_SIZE.ConvertToPx()), static_cast<float>(textHeight.ConvertToPx()));
+    textWrapper->Measure(constraint);
+}
+
+void LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    const RefPtr<LayoutProperty>& barItemLayoutProperty, float barItemHeight)
+{
+    auto iconNode = hostNode->GetIconNode();
+    CHECK_NULL_VOID(iconNode);
+    auto index = hostNode->GetChildIndexById(iconNode->GetId());
+    auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(iconWrapper);
+    auto geometryNode = iconWrapper->GetGeometryNode();
+    auto offset = OffsetF(static_cast<float>(ICON_PADDING.ConvertToPx()), barItemHeight);
+    geometryNode->SetMarginFrameOffset(offset);
+    iconWrapper->Layout();
+}
+
+void LayoutText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    const RefPtr<LayoutProperty>& barItemLayoutProperty)
+{
+    auto textNode = hostNode->GetTextNode();
+    CHECK_NULL_VOID(textNode);
+    auto index = hostNode->GetChildIndexById(textNode->GetId());
+    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(textWrapper);
+    auto geometryNode = textWrapper->GetGeometryNode();
+    auto textOffsetY = ICON_SIZE + TEXT_TOP_PADDING;
+    auto offset = OffsetF(static_cast<float>(ICON_PADDING.ConvertToPx()), static_cast<float>(textOffsetY.ConvertToPx()));
+    geometryNode->SetMarginFrameOffset(offset);
+    textWrapper->Layout();
+}
+
+} // namespace
 
 void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -37,25 +97,11 @@ void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(barItemLayoutProperty);
     const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    CHECK_NULL_VOID(barItemLayoutProperty);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    geometryNode->SetFrameSize(SizeF(ICON_SIZE + ICON_PADDING * 2, BAR_ITEM_HEIGHT));
-    auto childConstraint = barItemLayoutProperty->CreateChildConstraint();
-    if (hostNode->HasIconIndex()) {
-        auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetIconIndexValue());
-        auto iconSize = SizeF(ICON_SIZE, ICON_SIZE);
-        auto imageLayoutProperty = iconWrapper->GetLayoutProperty();
-        childConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(ICON_SIZE, ICON_SIZE));
-        iconWrapper->Measure(childConstraint);
-    }
-    if (hostNode->HasTextIndex()) {
-        auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetTextIndexValue());
-        auto textGeometryNode = textWrapper->GetGeometryNode();
-        auto textSize = SizeF(ICON_SIZE, BAR_ITEM_HEIGHT - ICON_SIZE - TEXT_TOP_PADDING);
-        textGeometryNode->SetFrameSize(textSize);
-        childConstraint.maxSize.SetSizeT(textSize);
-        textWrapper->Measure(childConstraint);
-    }
+    auto width = ICON_SIZE + ICON_PADDING * 2;
+    auto size = SizeF(static_cast<float>(width.ConvertToPx()), static_cast<float>(TOOLBAR_HEIGHT.ConvertToPx()));
+    MeasureIcon(layoutWrapper, hostNode, barItemLayoutProperty);
+    MeasureText(layoutWrapper, hostNode, barItemLayoutProperty);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
 void BarItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -64,19 +110,9 @@ void BarItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(barItemLayoutProperty);
-    if (hostNode->HasIconIndex()) {
-        auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetIconIndexValue());
-        auto iconGeometryNode = iconWrapper->GetGeometryNode();
-        iconGeometryNode->SetMarginFrameOffset(OffsetF(ICON_PADDING, 0.0f));
-        iconWrapper->Layout();
-    }
-    if (hostNode->HasTextIndex()) {
-        auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(hostNode->GetTextIndexValue());
-        auto textGeometryNode = textWrapper->GetGeometryNode();
-        auto textOffsetX = ICON_SIZE + ICON_PADDING * 2 - textGeometryNode->GetContentSize().Width();
-        textGeometryNode->SetMarginFrameOffset(OffsetF(textOffsetX / 2.0f, ICON_SIZE + TEXT_TOP_PADDING));
-        textWrapper->Layout();
-    }
+    float barItemHeight = layoutWrapper->GetGeometryNode()->GetFrameOffset().GetY();
+    LayoutIcon(layoutWrapper, hostNode, barItemLayoutProperty, barItemHeight);
+    LayoutText(layoutWrapper, hostNode, barItemLayoutProperty);
 }
 
 } // namespace OHOS::Ace::NG

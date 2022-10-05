@@ -412,7 +412,10 @@ bool FindInputFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityN
 void FindText(
     const RefPtr<AccessibilityNode>& node, const std::string& text, std::list<RefPtr<AccessibilityNode>>& nodeList)
 {
-    if ((node != nullptr) && (node->GetText().find(text) != std::string::npos)) {
+    if (node == nullptr) {
+        return;
+    }
+    if (node->GetText().find(text) != std::string::npos) {
         LOGI("FindText find nodeId(%{public}d)", node->GetNodeId());
         nodeList.push_back(node);
     }

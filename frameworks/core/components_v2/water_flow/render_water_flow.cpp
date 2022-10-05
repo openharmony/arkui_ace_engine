@@ -957,7 +957,6 @@ bool RenderWaterFlow::Rank(int32_t mainIndex, int32_t itemIndex)
     bool isFilled = false;
     int32_t index = mainIndex;
     int32_t crossIndex = 0;
-    bool placed = false;
     while (!isFilled) {
         int32_t itemMainSpan = -1;
         int32_t itemCrossSpan = -1;
@@ -975,9 +974,6 @@ bool RenderWaterFlow::Rank(int32_t mainIndex, int32_t itemIndex)
                 isFilled = true;
                 break;
             }
-        }
-        if (!isFilled) {
-            placed = true;
         }
         itemIndex++;
     }

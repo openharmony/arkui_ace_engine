@@ -43,6 +43,25 @@ public:
         return false;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
+    {
+        auto property = GetLayoutProperty<FlexLayoutProperty>();
+        if (!property) {
+            return ScopeFocusAlgorithm();
+        }
+        bool isVertical = true;
+        if (property->GetFlexDirection().has_value()) {
+            isVertical = property->GetFlexDirection().value() == FlexDirection::COLUMN ||
+                         property->GetFlexDirection().value() == FlexDirection::COLUMN_REVERSE;
+        }
+        return ScopeFocusAlgorithm(isVertical, true, ScopeType::FLEX);
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutPattern);
 };

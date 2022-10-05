@@ -14,9 +14,11 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_view.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -25,16 +27,22 @@ void XComponentView::Create(const std::string& id, const std::string& type, cons
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    auto xcomponentType = type == "component" ? XComponentType::COMPONENT : XComponentType::SURFACE;
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController]() {
-            return AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, xcomponentController);
+        V2::XCOMPONENT_ETS_TAG, nodeId, [id, xcomponentType, libraryname, xcomponentController]() {
+            return AceType::MakeRefPtr<XComponentPattern>(id, xcomponentType, libraryname, xcomponentController);
         });
     stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, xcomponentType);
 }
 void XComponentView::SetOnLoad(LoadEvent&& onLoad)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+        return;
+    }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
@@ -43,6 +51,10 @@ void XComponentView::SetOnDestroy(DestroyEvent&& onDestroy)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+        return;
+    }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestroy(std::move(onDestroy));
@@ -51,6 +63,10 @@ void XComponentView::SetOnSurfaceDestroyEvent(DestroyEvent&& onSurfaceDestroyEve
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+        return;
+    }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSurfaceDestroyEvent(std::move(onSurfaceDestroyEvent));

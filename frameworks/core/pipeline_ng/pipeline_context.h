@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H
 
+#include <cstdint>
 #include <functional>
 #include <list>
 #include <utility>
@@ -112,9 +113,9 @@ public:
 
     void Destroy() override;
 
-    void OnShow() override {}
+    void OnShow() override;
 
-    void OnHide() override {}
+    void OnHide() override;
 
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
@@ -162,7 +163,25 @@ public:
 
     void FlushBuild() override;
 
-    void AddCallBack(std::function<void()>&& callback);
+    void AddBuildFinishCallBack(std::function<void()>&& callback);
+
+    void AddWindowStateChangedCallback(int32_t nodeId);
+
+    void RemoveWindowStateChangedCallback(int32_t nodeId);
+
+    bool GetIsFocusingByTab() const
+    {
+        return isFocusingByTab_;
+    }
+
+    void SetIsFocusingByTab(bool isFocusingByTab)
+    {
+        isFocusingByTab_ = isFocusingByTab;
+    }
+
+    bool RequestDefaultFocus();
+    bool RequestFocus(const std::string& targetNodeId) override;
+    void AddDirtyFocus(const RefPtr<FrameNode>& node);
 
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -172,12 +191,16 @@ protected:
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
+    void OnVirtualKeyboardHeightChange(double keyboardHeight) override;
+
     void FlushUITasks() override
     {
         taskScheduler_.FlushTask();
     }
 
 private:
+    void FlushWindowStateChangedCallback(bool isShow);
+
     void FlushTouchEvents();
 
     void FlushBuildFinishCallbacks();
@@ -215,6 +238,8 @@ private:
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
+    // window on show or on hide.
+    std::list<int32_t> onWindowStateChangedCallbacks_;
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
@@ -226,6 +251,7 @@ private:
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
+    bool isFocusingByTab_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

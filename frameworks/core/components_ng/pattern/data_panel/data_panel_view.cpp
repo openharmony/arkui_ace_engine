@@ -36,7 +36,7 @@ void DataPanelView::Create(const std::vector<double>& values, double max, int32_
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, dataPanelType);
 }
 
-void DataPanelView::SetEffect(const bool& isCloseEffect)
+void DataPanelView::SetEffect(bool isCloseEffect)
 {
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Effect, isCloseEffect);
 }

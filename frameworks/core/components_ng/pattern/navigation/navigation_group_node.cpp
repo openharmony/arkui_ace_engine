@@ -51,7 +51,6 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
         SetContentNode(contentNode);
         auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        UpdateContentIndex(static_cast<int32_t>(GetChildren().size()));
         AddChild(contentNode);
     }
     contentNode->AddChild(child);

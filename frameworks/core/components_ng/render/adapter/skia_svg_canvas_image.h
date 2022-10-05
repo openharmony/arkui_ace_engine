@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 
 class SkiaSvgCanvasImage : public CanvasImage {
-    DECLARE_ACE_TYPE(SvgSkiaCanvasImage, CanvasImage)
+    DECLARE_ACE_TYPE(SkiaSvgCanvasImage, CanvasImage)
 public:
     SkiaSvgCanvasImage() = default;
     explicit SkiaSvgCanvasImage(const RefPtr<SvgDom>& svgDom) : svgDom_(svgDom) {}

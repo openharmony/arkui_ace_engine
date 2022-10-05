@@ -16,11 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATTERN_H
 
+#include <cstddef>
+#include <optional>
+
+#include "base/geometry/ng/rect_t.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_view_box.h"
 
 namespace OHOS::Ace::NG {
 class ShapePattern : public Pattern {
@@ -40,13 +46,29 @@ public:
         return MakeRefPtr<ShapePaintProperty>();
     }
 
-    bool IsAtomicNode() const override
+protected:
+    RefPtr<ShapePaintProperty> GetAncestorPaintProperty()
     {
-        return false;
+        auto curFrameNode = GetHost();
+        CHECK_NULL_RETURN(curFrameNode, nullptr);
+        ShapePaintProperty propertiesFromAncestor;
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
+        while (parentFrameNode) {
+            auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
+            if (parentPaintProperty) {
+                propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
+            }
+            curFrameNode = parentFrameNode;
+            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
+        }
+        return DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone());
     }
 
 private:
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override
+    {
+        return !(skipMeasure || dirty->SkipMeasureContent());
+    }
     ACE_DISALLOW_COPY_AND_MOVE(ShapePattern);
 };
 } // namespace OHOS::Ace::NG

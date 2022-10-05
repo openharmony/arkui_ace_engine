@@ -28,12 +28,16 @@ class ACE_EXPORT XComponentLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(XComponentLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    XComponentLayoutAlgorithm();
+    XComponentLayoutAlgorithm() = default;
 
     ~XComponentLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(XComponentLayoutAlgorithm);

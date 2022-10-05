@@ -20,6 +20,7 @@
 #include <functional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
@@ -48,6 +49,7 @@ public:
 
     static void SetAspectRatio(float ratio);
     static void SetLayoutWeight(int32_t value);
+    static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color& color);
     static void SetBackgroundImage(const std::string& src);
@@ -73,12 +75,18 @@ public:
     static void SetBackdropBlur(const Dimension& radius);
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
+
+    // gradient
     static void SetLinearGradient(const NG::Gradient& gradient);
+    static void SetSweepGradient(const NG::Gradient& gradient);
+    static void SetRadialGradient(const NG::Gradient& gradient);
 
     // layout
     static void SetAlign(Alignment alignment);
     static void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules);
     static void SetVisibility(VisibleType visible);
+    static void SetGrid(
+        std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
 
     // position
     static void SetPosition(const OffsetT<Dimension>& value);
@@ -94,17 +102,23 @@ public:
     static void SetTranslate(const NG::Vector3F& value);
     static void SetRotate(const NG::Vector4F& value);
 
+    static void SetTransformMatrix(const Matrix4& matrix);
+
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
-    static void SetFocusType(FocusType type);
+    static void SetEnabled(bool enabled);
     static void SetFocusable(bool focusable);
     static void SetOnFocus(OnFocusFunc&& onFocusCallback);
     static void SetOnBlur(OnBlurFunc&& onBlurCallback);
     static void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback);
+    static void SetTabIndex(int32_t index);
+    static void SetFocusOnTouch(bool isSet);
+    static void SetDefaultFocus(bool isSet);
+    static void SetGroupDefaultFocus(bool isSet);
     static void SetOnAppear(std::function<void()>&& onAppear);
     static void SetOnDisappear(std::function<void()>&& onDisappear);
     static void SetOnAreaChanged(

@@ -52,9 +52,6 @@ bool HoursWestIsValid(int32_t hoursWest)
     if (hoursWest < HOURS_WEST_LOWER_LIMIT || hoursWest > HOURS_WEST_UPPER_LIMIT) {
         return false;
     }
-    if (hoursWest < HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT) {
-        hoursWest += TWENTY_FOUR_HOUR_BASE;
-    }
     return true;
 }
 

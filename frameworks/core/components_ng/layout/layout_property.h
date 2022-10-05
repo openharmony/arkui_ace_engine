@@ -26,9 +26,11 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/geometry_property.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -98,6 +100,17 @@ public:
     {
         return flexItemProperty_;
     }
+
+    const std::unique_ptr<GridProperty>& GetGridProperty() const
+    {
+        return gridProperty_;
+    }
+
+    TextDirection GetLayoutDirection() const
+    {
+        return layoutDirection_.value_or(TextDirection::AUTO);
+    }
+
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
         return measureType_.value_or(defaultType);
@@ -151,6 +164,15 @@ public:
         if (magicItemProperty_->UpdateLayoutWeight(value)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
+    }
+
+    void UpdateLayoutDirection(TextDirection value)
+    {
+        if (layoutDirection_ == value) {
+            return;
+        }
+        layoutDirection_ = value;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 
     void UpdateAspectRatio(float ratio)
@@ -256,7 +278,7 @@ public:
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
-    
+
     void UpdateDisplayIndex(int32_t displayIndex)
     {
         if (!flexItemProperty_) {
@@ -266,6 +288,22 @@ public:
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
+
+    void UpdateGridProperty(
+        std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED)
+    {
+        if (!gridProperty_) {
+            gridProperty_ = std::make_unique<GridProperty>();
+        }
+
+        bool isSpanUpdated = (span.has_value() && gridProperty_->UpdateSpan(span.value(), type));
+        bool isOffsetUpdated = (offset.has_value() && gridProperty_->UpdateOffset(offset.value(), type));
+        if (isSpanUpdated || isOffsetUpdated) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateGridConstraint(const RefPtr<FrameNode>& host);
 
     void UpdateContentConstraint();
 
@@ -310,7 +348,9 @@ private:
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
     std::unique_ptr<FlexItemProperty> flexItemProperty_;
+    std::unique_ptr<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
+    std::optional<TextDirection> layoutDirection_;
 
     WeakPtr<FrameNode> host_;
 

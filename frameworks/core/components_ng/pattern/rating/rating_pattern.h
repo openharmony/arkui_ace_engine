@@ -79,6 +79,11 @@ public:
     ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(StepSize, double);
     ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(StarNum, int32_t);
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
 private:
     void OnModifyDone() override;
 
