@@ -13,22 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_VIEW_H
-
-#include <vector>
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_GAUGE_VIEW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_GAUGE_VIEW_H
 
 #include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT DataPanelView {
+class ACE_EXPORT GaugeView {
 public:
-    static void Create(const std::vector<double>& values, double max, int32_t dataPanelType);
-    static void SetEffect(bool Effect);
+    static void Create(float value, float min, float max);
+    static void SetValue(float value);
+    static void SetStartAngle(float startAngle);
+    static void SetEndAngle(float endAngle);
+    static void SetColors(const std::vector<Color>& colors, const std::vector<float>& values);
+    static void SetStrokeWidth(const Dimension& strokeWidth);
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_GAUGE_VIEW_H

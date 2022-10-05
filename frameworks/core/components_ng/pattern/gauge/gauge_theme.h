@@ -13,22 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GAUGE_GAUGE_THEME_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GAUGE_GAUGE_THEME_H
 
-#include <vector>
-
-#include "base/json/json_util.h"
-#include "core/components/common/layout/constants.h"
+#include "base/i18n/localization.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT DataPanelView {
-public:
-    static void Create(const std::vector<double>& values, double max, int32_t dataPanelType);
-    static void SetEffect(bool Effect);
-};
+inline constexpr float DEFAULT_START_DEGREE = -150.0f;
+inline constexpr float DEFAULT_END_DEGREE = 150.0f;
+inline constexpr float EDGE = 15.0f;
+inline constexpr float HEIGHT_OFFSET = 5.0f;
+inline constexpr float INDICATOR_STROKE_WIDTH = 5.0f;
+inline constexpr int8_t UNSELECT_ALPHA = 125;
 
 } // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GAUGE_GAUGE_THEME_H
