@@ -30,36 +30,17 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextFieldPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextFieldPaintMethod, NodePaintMethod)
 public:
-    TextFieldPaintMethod(std::shared_ptr<RSParagraph> paragraph, float baselineOffset)
-        : paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset)
-    {}
+    TextFieldPaintMethod(const WeakPtr<Pattern>& pattern) : pattern_(pattern) {}
     ~TextFieldPaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paragraph_, nullptr);
-        auto offset = paintWrapper->GetContentOffset();
-        auto paintOffset = offset - OffsetF(0.0, baselineOffset_);
-        return [paragraph = paragraph_, paintOffset](
-                   RSCanvas& canvas) { paragraph->Paint(&canvas, paintOffset.GetX(), paintOffset.GetY()); };
-    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
-    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-            auto textField = weak.Upgrade();
-            if (textField) {
-                textField->PaintMask(canvas, paintWrapper);
-            }
-        };
-    }
+    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
-    void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
+    void PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrapper);
 
 private:
-    std::shared_ptr<RSParagraph> paragraph_;
-    float baselineOffset_;
-
+    WeakPtr<Pattern> pattern_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPaintMethod);
 };
 

@@ -29,8 +29,10 @@
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -39,11 +41,18 @@
 #endif
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
+} // namespace
 
-TextFieldPattern::TextFieldPattern() = default;
+TextFieldPattern::TextFieldPattern()
+{
+    twinklingInterval_ = TWINKLING_INTERVAL_MS;
+}
+
 TextFieldPattern::~TextFieldPattern()
 {
-    LOGI("Destruction text field.");
+    LOGI("Destruction of text field.");
     if (textEditingController_) {
         textEditingController_->Clear();
         textEditingController_->RemoveObserver(WeakClaim(this));
@@ -51,8 +60,8 @@ TextFieldPattern::~TextFieldPattern()
 
     // If soft keyboard is still exist, close it.
 #if defined(ENABLE_STANDARD_INPUT)
-        LOGI("Destruction text field, close input method.");
-        MiscServices::InputMethodController::GetInstance()->Close();
+    LOGI("Destruction text field, close input method.");
+    MiscServices::InputMethodController::GetInstance()->Close();
 #endif
 }
 
@@ -60,7 +69,9 @@ TextFieldPattern::~TextFieldPattern()
 void TextFieldPattern::UpdateConfiguration()
 {
     MiscServices::Configuration configuration;
-    configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>((int32_t)action_));
+    LOGI("Enter key type %{public}d", (int32_t)GetTextInputActionValue(TextInputAction::DONE));
+    configuration.SetEnterKeyType(
+        static_cast<MiscServices::EnterKeyType>((int32_t)GetTextInputActionValue(TextInputAction::DONE)));
     configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
     MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
 }
@@ -86,58 +97,195 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     return true;
 }
 
+bool TextFieldPattern::DisplayPlaceHolder()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto value = layoutProperty->GetValueValue("");
+    return value.empty();
+}
+
 const TextEditingValue& TextFieldPattern::GetEditingValue() const
 {
     return textEditingController_->GetValue();
+}
+
+void TextFieldPattern::InitFocusEvent()
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleBlurEvent();
+        }
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+
+    auto keyTask = [weak = WeakClaim(this)](const KeyEvent& keyEvent) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->HandleKeyEvent(keyEvent);
+    };
+    focusHub->SetOnKeyEventInternal(keyTask);
+    focusEventInitialized_ = true;
+}
+
+void TextFieldPattern::HandleBlurEvent()
+{
+    CloseKeyboard(true);
+    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+    eventHub->FireOnEditChanged(false);
+}
+
+bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
+{
+    return false;
+}
+
+void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        HandleTouchDown(info.GetTouches().front().GetLocalLocation());
+    } else if (touchType == TouchType::UP) {
+        HandleTouchUp();
+    }
+}
+
+void TextFieldPattern::HandleTouchDown(const Offset& offset)
+{
+    StartTwinkling();
+    UpdateTextFieldManager(offset);
+    lastTouchOffset_ = offset;
+    textModifiedByInputMethod_ = false;
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::HandleTouchUp()
+{
+    if (RequestKeyboard(false, true, true)) {
+        auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnEditChanged(true);
+    }
+}
+
+void TextFieldPattern::InitTouchEvent()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleTouchEvent(info);
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void TextFieldPattern::ScheduleCursorTwinkling()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+
+    if (!context->GetTaskExecutor()) {
+        LOGW("context has no task executor.");
+        return;
+    }
+
+    auto weak = WeakClaim(this);
+    cursorTwinklingTask_.Reset([weak] {
+        auto client = weak.Upgrade();
+        if (client) {
+            client->OnCursorTwinkling();
+        }
+    });
+    auto taskExecutor = context->GetTaskExecutor();
+    if (taskExecutor) {
+        taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_);
+    } else {
+        LOGE("the task executor is nullptr");
+    }
+}
+
+void TextFieldPattern::StartTwinkling()
+{
+    // Ignore the result because all ops are called on this same thread (ACE UI).
+    // The only reason failed is that the task has finished.
+    cursorTwinklingTask_.Cancel();
+
+    // Show cursor right now.
+    cursorVisible_ = true;
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ScheduleCursorTwinkling();
+}
+
+void TextFieldPattern::OnCursorTwinkling()
+{
+    cursorTwinklingTask_.Cancel();
+    cursorVisible_ = !cursorVisible_;
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ScheduleCursorTwinkling();
+}
+
+void TextFieldPattern::StopTwinkling()
+{
+    cursorTwinklingTask_.Cancel();
+
+    // Repaint only if cursor is visible for now.
+    if (cursorVisible_) {
+        cursorVisible_ = false;
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TextFieldPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (clickListener_) {
-        return;
-    }
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     instanceId_ = context->GetInstanceId();
 #if defined(ENABLE_STANDARD_INPUT)
     UpdateConfiguration();
 #endif
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto textFieldPattern = weak.Upgrade();
-        CHECK_NULL_VOID(textFieldPattern);
-        auto context = textFieldPattern->GetHost()->GetContext();
-        CHECK_NULL_VOID(context);
-        auto textFieldManager = context->GetTextFieldManager();
-        CHECK_NULL_VOID(textFieldManager);
-        textFieldManager->SetClickPosition(info.GetGlobalLocation());
-        textFieldPattern->OnClick();
-    };
+    InitTouchEvent();
+    InitFocusEvent();
+}
 
-    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickEvent(clickListener_);
+void TextFieldPattern::UpdatePositionOfParagraph(int32_t position)
+{
+    auto value = GetEditingValue();
+    value.MoveToPosition(position);
+    SetEditingValue(value);
 
-    if (textFieldController_) {
-        textFieldController_->SetCaretPosition([weak = WeakClaim(this)](int32_t caretPosition) {
-            auto textFieldPattern = weak.Upgrade();
-            CHECK_NULL_VOID(textFieldPattern);
-            auto host = textFieldPattern->GetHost();
-            CHECK_NULL_VOID(host);
-            textFieldPattern->UpdateCaretPosition(caretPosition);
-            textFieldPattern->cursorPositionType_ = CursorPositionType::NORMAL;
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        });
+    if (!GetEditingValue().text.empty() && position == GetEditingValue().selection.GetEnd()) {
+        OnValueChanged(true, false);
     }
 }
 
-void TextFieldPattern::UpdateCaretPosition(int32_t caretPosition) {}
-
-void TextFieldPattern::OnClick()
+void TextFieldPattern::UpdateTextFieldManager(const Offset& offset)
 {
-    RequestKeyboard(false, true, true);
+    auto context = GetHost()->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = DynamicCast<TextFieldManager>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->SetClickPosition(offset);
+    textFieldManager->SetOnFocusTextField(WeakClaim(this));
 }
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
@@ -163,20 +311,13 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard);
 #endif
     }
-    auto manager = context->GetTextFieldManager();
-    if (manager && AceType::InstanceOf<TextFieldManager>(manager)) {
-        auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
-        textFieldManager->SetOnFocusTextField(WeakClaim(this));
-    }
-    auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
-    // TODO: start twinkling
     return true;
 }
 
 bool TextFieldPattern::CloseKeyboard(bool forceClose)
 {
     if (forceClose) {
+        StopTwinkling();
         LOGI("Request close soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
@@ -198,6 +339,7 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     CHECK_NULL_VOID(value);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto context = host->GetContext();
@@ -208,15 +350,13 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     // TODO: change counter style
     // TODO: filter values
     // TODO: update obscure pending for password input
-
-    SetEditingValue(std::move(valueNeedToUpdate), needFireChangeEvent);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    // TODO: fire events in event hub if value changed
+    auto* rawValuePtr = value.get();
+    SetEditingValue(*rawValuePtr, needFireChangeEvent);
+    textModifiedByInputMethod_ = true;
 }
 
-void TextFieldPattern::SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent)
+void TextFieldPattern::SetEditingValue(const TextEditingValue& newValue, bool needFireChangeEvent)
 {
-    // set value to layout property
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -228,7 +368,7 @@ void TextFieldPattern::SetEditingValue(TextEditingValue&& newValue, bool needFir
 void TextFieldPattern::ClearEditingValue()
 {
     TextEditingValue emptyValue;
-    SetEditingValue(std::move(emptyValue));
+    SetEditingValue(emptyValue);
 }
 
 void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard) {}

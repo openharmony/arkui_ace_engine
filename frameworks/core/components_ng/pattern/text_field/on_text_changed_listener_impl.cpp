@@ -102,11 +102,38 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status) {}
 
 void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) {}
 
-void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInfo& info) {}
+void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInfo& info)
+{
+    HandleFunctionKey(info.GetFunctionKey());
+}
 
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status) {}
 
-void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey) {}
+void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey)
+{
+    auto task = [textField = pattern_, functionKey] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->GetInstanceId());
+        TextInputAction action_ = static_cast<TextInputAction>(functionKey);
+        switch (action_) {
+            case TextInputAction::DONE:
+            case TextInputAction::NEXT:
+            case TextInputAction::SEARCH:
+            case TextInputAction::SEND:
+            case TextInputAction::GO:
+                client->PerformAction(action_);
+                break;
+            default:
+                LOGE("TextInputAction  is not support: %{public}d", action_);
+                break;
+        }
+    };
+    PostTaskToUI(task);
+}
 
 void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction) {}
 
