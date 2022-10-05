@@ -28,6 +28,19 @@ public:
     {
         ViewStackProcessor::GetInstance()->PopContainer();
     }
+
+    void NewScope() override
+    {
+        scopeStack_ = std::make_unique<ScopedViewStackProcessor>();
+    }
+
+    RefPtr<Component> FinishComponent() override
+    {
+        scopeStack_.reset();
+        return ViewStackProcessor::GetInstance()->Finish();
+    }
+private:
+    std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };
 
 } // namespace OHOS::Ace::Framework

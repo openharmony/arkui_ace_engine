@@ -21,21 +21,10 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_v2/common/common_def.h"
+#include "core/components_v2/list/list_properties.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace::V2 {
-
-struct ItemDivider final {
-    Dimension strokeWidth = 0.0_vp;
-    Dimension startMargin = 0.0_vp;
-    Dimension endMargin = 0.0_vp;
-    Color color = Color::TRANSPARENT;
-    bool operator==(const ItemDivider& itemDivider) const
-    {
-        return (strokeWidth == itemDivider.strokeWidth) && (startMargin == itemDivider.startMargin)
-            && (endMargin == itemDivider.endMargin) && (color == itemDivider.color);
-    }
-};
 
 class ACE_EXPORT ListItemGroupComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(V2::ListItemGroupComponent, ComponentGroup);

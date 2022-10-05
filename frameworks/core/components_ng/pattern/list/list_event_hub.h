@@ -22,13 +22,6 @@
 #include "core/components_v2/list/list_component.h"
 
 namespace OHOS::Ace::NG {
-
-using OnScrollEvent = std::function<void(Dimension, V2::ScrollState)>;
-using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
-using OnScrollStopEvent = std::function<void()>;
-using OnScrollIndexEvent = std::function<void(int32_t, int32_t)>;
-using OnReachEvent = std::function<void()>;
-
 class ListEventHub : public EventHub {
     DECLARE_ACE_TYPE(ListEventHub, EventHub)
 

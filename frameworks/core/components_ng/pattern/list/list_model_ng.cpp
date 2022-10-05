@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/list/list_view.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void ListView::Create()
+void ListModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -31,65 +31,67 @@ void ListView::Create()
     stack->Push(frameNode);
 }
 
-void ListView::SetSpace(const Dimension& space)
+void ListModelNG::SetSpace(const Dimension& space)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
 }
 
-void ListView::SetInitialIndex(const int32_t& initialIndex)
+void ListModelNG::SetInitialIndex(const int32_t& initialIndex)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex);
 }
 
-void ListView::SetListDirection(Axis axis)
+void ListModelNG::SetListDirection(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, axis);
 }
 
-void ListView::SetEdgeEffect(EdgeEffect edgeEffect)
+void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, EdgeEffect, edgeEffect);
 }
 
-void ListView::SetDivider(const V2::ItemDivider& divider)
+void ListModelNG::SetDivider(const V2::ItemDivider& divider)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);
 }
 
-void ListView::SetChainAnimation(bool enableChainAnimation)
-{
-}
+void ListModelNG::SetChainAnimation(bool enableChainAnimation) {}
 
-void ListView::SetLanes(int32_t lanes)
+void ListModelNG::SetLanes(int32_t lanes)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes);
 }
 
-void ListView::SetLaneMinLength(const Dimension& laneMinLength)
+void ListModelNG::SetLaneConstrain(const Dimension& laneMinLength, const Dimension& laneMaxLength)
+{
+    SetLaneMinLength(laneMinLength);
+    SetLaneMaxLength(laneMaxLength);
+}
+
+void ListModelNG::SetLaneMinLength(const Dimension& laneMinLength)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength);
 }
 
-void ListView::SetLaneMaxLength(const Dimension& laneMaxLength)
+void ListModelNG::SetLaneMaxLength(const Dimension& laneMaxLength)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength);
 }
 
-void ListView::SetListItemAlign(V2::ListItemAlign listItemAlign)
+void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign);
 }
 
-void ListView::SetCachedCount(const int32_t& cachedCount)
+void ListModelNG::SetCachedCount(int32_t cachedCount)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
 }
 
-void ListView::SetSticky(V2::StickyStyle stickyStyle)
-{
-}
+void ListModelNG::SetSticky(V2::StickyStyle stickyStyle) {}
 
-void ListView::SetOnScroll(OnScrollEvent&& onScroll)
+void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -98,7 +100,7 @@ void ListView::SetOnScroll(OnScrollEvent&& onScroll)
     eventHub->SetOnScroll(std::move(onScroll));
 }
 
-void ListView::SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin)
+void ListModelNG::SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -107,7 +109,7 @@ void ListView::SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin)
     eventHub->SetOnScrollBegin(std::move(onScrollBegin));
 }
 
-void ListView::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
+void ListModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -116,7 +118,7 @@ void ListView::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
-void ListView::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
+void ListModelNG::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -125,7 +127,7 @@ void ListView::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
-void ListView::SetOnReachStart(OnReachEvent&& onReachStart)
+void ListModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -134,7 +136,7 @@ void ListView::SetOnReachStart(OnReachEvent&& onReachStart)
     eventHub->SetOnReachStart(std::move(onReachStart));
 }
 
-void ListView::SetOnReachEnd(OnReachEvent&& onReachEnd)
+void ListModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
