@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include <list>
+#include <type_traits>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -465,8 +466,10 @@ void FrameNode::RebuildRenderContextTree()
     if (!needSyncRenderTree_) {
         return;
     }
+    frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthVisibleFrame(children);
+    frameChildren_ = { children.begin(), children.end() };
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
     needSyncRenderTree_ = false;
@@ -639,9 +642,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // group.
     TouchTestResult newComingTargets;
     const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
-    const auto& children = GetChildren();
     bool consumed = false;
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
             break;
         }
