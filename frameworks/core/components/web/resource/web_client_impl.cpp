@@ -156,6 +156,7 @@ void WebClientImpl::OnFocus()
         return;
     }
     delegate->OnRequestFocus();
+    delegate->RequestFocus();
 }
 
 bool WebClientImpl::OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message)
