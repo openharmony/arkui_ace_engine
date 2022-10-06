@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT DataPanelView {
 public:
     static void Create(const std::vector<double>& values, double max, int32_t dataPanelType);
-    static void SetEffect(const bool& Effect);
+    static void SetEffect(bool Effect);
 };
 
 } // namespace OHOS::Ace::NG

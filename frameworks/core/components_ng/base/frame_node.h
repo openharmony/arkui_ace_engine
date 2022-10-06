@@ -236,6 +236,10 @@ public:
     bool IsResponseRegion() const;
     void MarkResponseRegion(bool isResponseRegion);
 
+    void OnWindowShow() override;
+
+    void OnWindowHide() override;
+
 private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;

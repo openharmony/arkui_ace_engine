@@ -69,7 +69,7 @@ void FlutterRenderContext::InitContext(bool isRoot, const std::optional<std::str
 
 void FlutterRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
 {
-    const auto& frameRect = geometryNode->GetFrame().GetRect();
+    const auto& frameRect = geometryNode->GetFrameRect();
     LOGD("SyncGeometryProperties frameRect:%s", frameRect.ToString().c_str());
     if (!flutterNode_) {
         return;

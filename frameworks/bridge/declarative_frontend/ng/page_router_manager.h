@@ -106,6 +106,21 @@ public:
     RefPtr<Framework::RevSourceMap> GetCurrentPageSourceMap(const RefPtr<AssetManager>& assetManager);
 
 private:
+    class RouterOptScope {
+    public:
+        explicit RouterOptScope(PageRouterManager* manager) : manager_(manager)
+        {
+            manager_->inRouterOpt_ = true;
+        }
+        ~RouterOptScope()
+        {
+            manager_->inRouterOpt_ = false;
+        }
+
+    private:
+        PageRouterManager* manager_ = nullptr;
+    };
+
     // page id manage
     int32_t GenerateNextPageId();
 
@@ -113,22 +128,25 @@ private:
 
     void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     void StartBack(const RouterPageInfo& target, const std::string& params);
+    bool StartPop();
     void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     void BackCheckAlert(const RouterPageInfo& target, const std::string& params);
+    void StartClean();
 
     // page operations
     void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false,
-        bool needHideLast = true);
+        bool needHideLast = true, bool needTransition = true);
     void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params, bool needHideLast,
-        bool forceShowCurrent = false);
-    void PopPage(const std::string& params, bool needShowNext);
-    void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext);
+        bool forceShowCurrent = false, bool needTransition = true);
+    void PopPage(const std::string& params, bool needShowNext, bool needTransition);
+    void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition);
 
-    static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast);
-    static bool OnPopPage(bool needShowNext);
-    static bool OnPopPageToIndex(int32_t index, bool needShowNext);
+    static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition);
+    static bool OnPopPage(bool needShowNext, bool needTransition);
+    static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
+    bool inRouterOpt_ = false;
     RefPtr<Framework::ManifestParser> manifestParser_;
     LoadPageCallback loadJs_;
     int32_t pageId_ = 0;

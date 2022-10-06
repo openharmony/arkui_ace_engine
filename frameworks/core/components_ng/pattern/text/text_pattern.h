@@ -69,13 +69,9 @@ public:
         spanItemChildren_.emplace_back(child->GetSpanItem());
     }
 
-    FocusType GetFocusType() override
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::SCOPE;
-    }
-    bool GetFocusable() override
-    {
-        return true;
+        return { FocusType::NODE, false };
     }
 
 private:

@@ -19,6 +19,7 @@
 #include <memory>
 #include <optional>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -26,7 +27,9 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/grid_property.h"
@@ -105,14 +108,14 @@ public:
         return gridProperty_;
     }
 
+    TextDirection GetLayoutDirection() const
+    {
+        return layoutDirection_.value_or(TextDirection::AUTO);
+    }
+
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
         return measureType_.value_or(defaultType);
-    }
-
-    virtual bool IsDirectionVertical()
-    {
-        return true;
     }
 
     void UpdatePadding(const PaddingProperty& value)
@@ -163,6 +166,15 @@ public:
         if (magicItemProperty_->UpdateLayoutWeight(value)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
+    }
+
+    void UpdateLayoutDirection(TextDirection value)
+    {
+        if (layoutDirection_ == value) {
+            return;
+        }
+        layoutDirection_ = value;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 
     void UpdateAspectRatio(float ratio)
@@ -229,7 +241,7 @@ public:
         }
     }
 
-    void UpdateFlexGrow(const float flexGrow)
+    void UpdateFlexGrow(float flexGrow)
     {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
@@ -239,12 +251,22 @@ public:
         }
     }
 
-    void UpdateFlexShrink(const float flexShrink)
+    void UpdateFlexShrink(float flexShrink)
     {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
         }
         if (flexItemProperty_->UpdateFlexShrink(flexShrink)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateFlexBasis(const Dimension& flexBasis)
+    {
+        if (!flexItemProperty_) {
+            flexItemProperty_ = std::make_unique<FlexItemProperty>();
+        }
+        if (flexItemProperty_->UpdateFlexBasis(flexBasis)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
@@ -268,7 +290,7 @@ public:
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
-    
+
     void UpdateDisplayIndex(int32_t displayIndex)
     {
         if (!flexItemProperty_) {
@@ -340,6 +362,7 @@ private:
     std::unique_ptr<FlexItemProperty> flexItemProperty_;
     std::unique_ptr<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
+    std::optional<TextDirection> layoutDirection_;
 
     WeakPtr<FrameNode> host_;
 

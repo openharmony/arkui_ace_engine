@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -26,17 +27,15 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         ACE_SCOPED_TRACE("CustomNode:BuildItem");
         // first create child node and wrapper.
         auto child = renderFunction_();
-        if (!child) {
-            LOGE("fail to build child");
-            return;
-        }
+        renderFunction_ = nullptr;
+        CHECK_NULL_VOID(child);
         buildItem_ = child;
         child->AdjustLayoutWrapperTree(Claim(layoutWrapper), true, true);
     }
     // then use normal measure step.
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
 
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     for (auto&& child : children) {
         child->Measure(layoutConstraint);
     }

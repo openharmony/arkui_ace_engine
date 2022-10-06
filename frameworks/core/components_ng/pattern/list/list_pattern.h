@@ -117,13 +117,22 @@ public:
 
     Axis GetDirection() const;
 
-    FocusType GetFocusType() override
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::SCOPE;
+        return { FocusType::SCOPE, true };
     }
-    bool GetFocusable() override
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
     {
-        return true;
+        auto property = GetLayoutProperty<ListLayoutProperty>();
+        if (!property) {
+            return ScopeFocusAlgorithm();
+        }
+        auto isVertical = false;
+        if (property->GetListDirection() == Axis::VERTICAL) {
+            isVertical = true;
+        }
+        return ScopeFocusAlgorithm(isVertical, true, ScopeType::OTHERS);
     }
 
 private:

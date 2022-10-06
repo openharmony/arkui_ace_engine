@@ -91,6 +91,10 @@ public:
 
     virtual void BlendBgColor(const Color& color) {}
 
+    virtual void ResetBlendBorderColor() {}
+
+    virtual void BlendBorderColor(const Color& color) {}
+
     virtual void UpdateBorderWidth(const BorderWidthPropertyF& value) {}
 
     virtual void SetClipToFrame(bool useClip) {}

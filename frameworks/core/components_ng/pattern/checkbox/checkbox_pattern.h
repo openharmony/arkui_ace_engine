@@ -81,13 +81,9 @@ public:
         preGroup_ = group;
     }
 
-    FocusType GetFocusType() override
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::NODE;
-    }
-    bool GetFocusable() override
-    {
-        return true;
+        return { FocusType::NODE, true };
     }
 
 private:

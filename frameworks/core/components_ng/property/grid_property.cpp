@@ -31,7 +31,8 @@ Dimension GridProperty::GetWidth()
 Dimension GridProperty::GetOffset()
 {
     // gridInfo_ must exist, because layout algorithm invoke UpdateContainer() first
-    return gridInfo_->GetOffset();
+    auto marginOffset = Dimension(gridInfo_->GetParent()->GetMarginLeft().ConvertToPx());
+    return gridInfo_->GetOffset() + marginOffset;
 }
 
 bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefPtr<AceType>& host)

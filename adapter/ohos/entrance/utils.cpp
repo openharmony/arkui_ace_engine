@@ -14,9 +14,16 @@
  */
 
 #include "adapter/ohos/entrance/utils.h"
+
 #include <cstdio>
+#include <regex>
 #include <sstream>
 #include <string>
+
+#include "runtime_extractor.h"
+
+#include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/hap_asset_provider.h"
 
 namespace OHOS::Ace {
 
@@ -88,5 +95,22 @@ std::string GetStringFromHap(const std::string& hapPath, const std::string& file
     }
 
     return osstream.str();
+}
+
+RefPtr<FlutterAssetProvider> CreateAssetProvider(const std::string& packagePath,
+    const std::vector<std::string>& assetBasePaths)
+{
+    if (std::regex_match(packagePath, std::regex(".*\\.hap"))) {
+        auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+        if (assetProvider->Initialize(packagePath, assetBasePaths)) {
+            return assetProvider;
+        }
+    } else {
+        auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+        if (assetProvider->Initialize(packagePath, assetBasePaths)) {
+            return assetProvider;
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace

@@ -51,13 +51,23 @@ public:
         return false;
     }
 
-    FocusType GetFocusType() override
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::SCOPE;
+        return { FocusType::SCOPE, true };
     }
-    bool GetFocusable() override
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
     {
-        return true;
+        auto property = GetLayoutProperty<FlexLayoutProperty>();
+        if (!property) {
+            return {};
+        }
+        bool isVertical = true;
+        if (property->GetFlexDirection().has_value()) {
+            isVertical = property->GetFlexDirection().value() == FlexDirection::COLUMN ||
+                         property->GetFlexDirection().value() == FlexDirection::COLUMN_REVERSE;
+        }
+        return { isVertical, true, ScopeType::FLEX };
     }
 
     void SetDialogStretch(bool stretch)

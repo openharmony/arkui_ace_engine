@@ -68,7 +68,6 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float baselineDistance = 0.0f;
     std::list<RefPtr<LayoutWrapper>> itemsList;
     for (auto& item : children) {
-        LOGE("item layout isze %{public}s", item->GetGeometryNode()->GetFrameSize().ToString().c_str());
         item->Measure(childLayoutConstraint);
         if (mainLengthLimit_ >= currentMainLength + GetMainItemLength(item->GetGeometryNode())) {
             currentMainLength += GetMainItemLength(item->GetGeometryNode());

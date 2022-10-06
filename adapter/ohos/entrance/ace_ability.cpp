@@ -76,8 +76,7 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePath, const s
     if (!srcPath.empty()) {
         manifest = "assets/js/" + srcPath + "/manifest.json";
     }
-    std::string jsonStr = isHap ? GetStringFromHap(packagePath, manifest) :
-        GetStringFromFile(packagePath, manifest);
+    std::string jsonStr = isHap ? GetStringFromHap(packagePath, manifest) : GetStringFromFile(packagePath, manifest);
     if (jsonStr.empty()) {
         LOGE("return default frontend: JS frontend.");
         return FrontendType::JS;
@@ -222,9 +221,11 @@ void AceAbility::OnStart(const Want& want)
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-        rsUiDirector->SetCacheDir(abilityContext->GetCacheDir());
-        rsUiDirector->Init();
+        if (rsUiDirector) {
+            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+            rsUiDirector->SetCacheDir(abilityContext->GetCacheDir());
+            rsUiDirector->Init();
+        }
     }
 
     std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
@@ -310,7 +311,7 @@ void AceAbility::OnStart(const Want& want)
 
     std::string resPath;
     for (const auto& module : moduleList) {
-        if (module.moduleName == moduleName) {
+        if (module.moduleName == moduleName && info != nullptr) {
             std::regex pattern(ABS_BUNDLE_CODE_PATH + info->bundleName + FILE_SEPARATOR);
             auto moduleSourceDir = std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
             resPath = moduleSourceDir + "/assets/" + module.moduleName + FILE_SEPARATOR;
@@ -439,13 +440,9 @@ void AceAbility::OnStart(const Want& want)
 
     // set window id & action event handler
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
-    if (context != nullptr) {
+    if (context) {
         context->SetActionEventHandler(actionEventHandler);
-    }
-
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
-    if (pipelineContext) {
-        pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
+        context->SetGetWindowRectImpl([window]() -> Rect {
             Rect rect;
             if (!window) {
                 return rect;

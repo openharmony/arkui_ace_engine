@@ -61,6 +61,7 @@ using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
 using RSPathDashStyle = rosen::PathDashStyle;
 using RSParagraph = rosen::Typography;
+using RSTypographyProperties = rosen::TypographyProperties;
 using RSParagraphBuilder = rosen::TypographyCreate;
 using RSFontCollection = rosen::FontCollection;
 using RSParagraphStyle = rosen::TypographyStyle;

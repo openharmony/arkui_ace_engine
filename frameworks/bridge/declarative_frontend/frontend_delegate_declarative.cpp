@@ -2253,6 +2253,16 @@ void FrontendDelegateDeclarative::RebuildAllPages()
 
 void FrontendDelegateDeclarative::OnPageShow()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto pageNode = pageRouterManager_->GetCurrentPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->OnShow();
+        return;
+    }
+
     auto pageId = GetRunningPageId();
     auto page = GetPage(pageId);
     if (page) {
@@ -2263,6 +2273,15 @@ void FrontendDelegateDeclarative::OnPageShow()
 
 void FrontendDelegateDeclarative::OnPageHide()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto pageNode = pageRouterManager_->GetCurrentPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->OnHide();
+        return;
+    }
     auto pageId = GetRunningPageId();
     auto page = GetPage(pageId);
     if (page) {

@@ -37,6 +37,19 @@ void WebView::Create(const std::string& src, const RefPtr<WebController>& webCon
     webPattern->SetWebController(webController);
 }
 
+void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
+        [src, setWebIdCallback]() { return AceType::MakeRefPtr<WebPattern>(src, std::move(setWebIdCallback)); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetWebSrc(src);
+    webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
+}
+
 void WebView::SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType)
 {
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();

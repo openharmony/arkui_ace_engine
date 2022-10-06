@@ -15,6 +15,8 @@
 
 #include "core/components/dialog/dialog_element.h"
 
+#include "core/components/box/box_element.h"
+#include "core/components/box/render_box.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/dialog/render_dialog.h"
 #include "core/components/transition/transition_element.h"
@@ -30,7 +32,22 @@ void DialogElement::PerformBuild()
     dialogId_ = dialog->GetDialogId();
     dialog->BuildChild(GetThemeManager());
     const auto& child = children_.empty() ? nullptr : children_.front();
-    UpdateChild(child, dialog->GetChild());
+    RefPtr<Element> dialogEle = UpdateChild(child, dialog->GetChild());
+    auto dialogEleBrothers = dialogEle->GetChildren();
+    int boxEleNum = 0;
+    const int customStyleLayer = 3;
+    while (dialogEleBrothers.front()) {
+        if (AceType::DynamicCast<BoxElement>(dialogEleBrothers.front())) {
+            boxEleNum += 1;
+            auto renderNode = AceType::DynamicCast<BoxElement>(dialogEleBrothers.front())->GetRenderNode();
+            auto renderBox = AceType::DynamicCast<RenderBox>(renderNode);
+            if (renderBox && renderBox->GetColor() != Color::TRANSPARENT && boxEleNum >= customStyleLayer) {
+                renderBox->NeedMaterial(true);
+                break;
+            }
+        }
+        dialogEleBrothers = dialogEleBrothers.front()->GetChildren();
+    }
     const auto& animator = dialog->GetAnimator();
     if (!animator) {
         return;

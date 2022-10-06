@@ -125,6 +125,11 @@ void ViewAbstract::SetLayoutWeight(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
+void ViewAbstract::SetLayoutDirection(TextDirection value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutDirection, value);
+}
+
 void ViewAbstract::SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules);
@@ -143,6 +148,11 @@ void ViewAbstract::SetFlexShrink(float value)
 void ViewAbstract::SetFlexGrow(float value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value);
+}
+
+void ViewAbstract::SetFlexBasis(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value);
 }
 
 void ViewAbstract::SetDisplayIndex(int32_t value)

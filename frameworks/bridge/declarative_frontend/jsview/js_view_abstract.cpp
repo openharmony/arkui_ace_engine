@@ -1091,8 +1091,8 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
     }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetTransformMatrix(
-            Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13],
-                matrix[2], matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]));
+            Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13], matrix[2],
+                matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]));
         return;
     }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
@@ -1763,6 +1763,10 @@ void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
     }
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetFlexBasis(value);
         return;
     }
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -4449,16 +4453,14 @@ void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient
             newGradient.GetSweepGradient()->centerX = Dimension(value);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
-                newGradient.GetSweepGradient()->centerX =
-                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+                newGradient.GetSweepGradient()->centerX = Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
             }
         }
         if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
             newGradient.GetSweepGradient()->centerY = Dimension(value);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
-                newGradient.GetSweepGradient()->centerY =
-                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+                newGradient.GetSweepGradient()->centerY = Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
             }
         }
     }
@@ -5316,7 +5318,7 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
         NG::ViewAbstract::SetAlignRules(alignRules);
         return;
     }
-    
+
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     flexItem->SetAlignRules(alignRules);
 }
@@ -5743,28 +5745,32 @@ void JSViewAbstract::NewGetGradientColorStops(NG::Gradient& gradient, const std:
 
 void JSViewAbstract::SetDirection(const std::string& dir)
 {
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!box) {
+    TextDirection direction = TextDirection::AUTO;
+    if (dir == "Ltr") {
+        direction = TextDirection::LTR;
+    } else if (dir == "Rtl") {
+        direction = TextDirection::RTL;
+    } else if (dir == "Auto") {
+        direction = TextDirection::AUTO;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetLayoutDirection(direction);
         return;
     }
-
-    if (dir == "Ltr") {
-        box->SetTextDirection(TextDirection::LTR);
-        box->SetInspectorDirection(TextDirection::LTR);
-    } else if (dir == "Rtl") {
-        box->SetTextDirection(TextDirection::RTL);
-        box->SetInspectorDirection(TextDirection::RTL);
-    } else if (dir == "Auto") {
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    CHECK_NULL_VOID(box);
+    box->SetTextDirection(direction);
+    box->SetInspectorDirection(direction);
+    if (direction == TextDirection::AUTO) {
         box->SetTextDirection(
             AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
-        box->SetInspectorDirection(TextDirection::AUTO);
     }
 }
 
 RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& jsObj)
 {
-    std::string bundleName = "";
-    std::string moduleName = "";
+    std::string bundleName;
+    std::string moduleName;
     if (!jsObj->IsUndefined()) {
         JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
         JSRef<JSVal> module = jsObj->GetProperty("moduleName");

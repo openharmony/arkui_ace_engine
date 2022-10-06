@@ -34,7 +34,7 @@ RefPtr<GestureReferee> GetCurrentGestureReferee()
     return eventManager->GetGestureRefereeNG();
 }
 
-}
+} // namespace
 
 bool GestureRecognizer::HandleEvent(const TouchEvent& point)
 {

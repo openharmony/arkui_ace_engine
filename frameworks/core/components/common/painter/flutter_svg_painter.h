@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_FLUTTER_SVG_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_FLUTTER_SVG_PAINTER_H
 
-#include "flutter/lib/ui/painting/canvas.h"
-#include "flutter/lib/ui/painting/paint.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPoint.h"
 #include "include/core/SkTypeface.h"

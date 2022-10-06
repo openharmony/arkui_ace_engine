@@ -191,13 +191,16 @@ void SwiperPattern::ShowNext()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
+
     if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
         LOGW("already last one, can't show next");
         return;
     }
     StopAutoPlay();
     StopTranslateAnimation();
-    PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize, true);
+    if (childrenSize > 0 && GetDisplayCount() != 0) {
+        PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize, true);
+    }
 }
 
 void SwiperPattern::ShowPrevious()
@@ -211,7 +214,9 @@ void SwiperPattern::ShowPrevious()
     }
     StopAutoPlay();
     StopTranslateAnimation();
-    PlayTranslateAnimation(0, MainSize() / GetDisplayCount(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
+    if (childrenSize > 0 && GetDisplayCount() != 0) {
+        PlayTranslateAnimation(0, MainSize() / GetDisplayCount(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
+    }
 }
 
 void SwiperPattern::FinishAnimation()

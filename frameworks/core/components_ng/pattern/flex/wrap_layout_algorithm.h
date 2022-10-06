@@ -26,15 +26,15 @@
 namespace OHOS::Ace::NG {
 
 struct ContentInfo {
-    ContentInfo(double main, double cross, int32_t total, const std::list<RefPtr<LayoutWrapper>>& nodeList)
+    ContentInfo(float main, float cross, int32_t total, const std::list<RefPtr<LayoutWrapper>>& nodeList)
         : mainLength(main), crossLength(cross), count(total), itemList(nodeList)
     {}
 
-    float mainLength = 0.0;
-    float crossLength = 0.0;
+    float mainLength = 0.0f;
+    float crossLength = 0.0f;
     int32_t count = 0;
     std::list<RefPtr<LayoutWrapper>> itemList;
-    float maxBaselineDistance = 0.0;
+    float maxBaselineDistance = 0.0f;
 };
 
 class ACE_EXPORT WrapLayoutAlgorithm : public LayoutAlgorithm {
@@ -86,8 +86,8 @@ private:
     // Should be clear after Layout.
     std::list<ContentInfo> contentList_;
 
-    float mainLengthLimit_ = 0.0;
-    float crossLengthLimit_ = 0.0;
+    float mainLengthLimit_ = 0.0f;
+    float crossLengthLimit_ = 0.0f;
     bool isLeftToRight_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(WrapLayoutAlgorithm);

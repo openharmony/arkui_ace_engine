@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/gesture_info.h"
+#include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,10 +31,11 @@ class LongPressRecognizer;
 
 class DragEvent : public Referenced {
 public:
-    DragEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate,
-        GestureEventFunc&& actionEnd, GestureEventNoParameter&& actionCancel) : actionStart_(std::move(actionStart)),
-        actionUpdate_(std::move(actionUpdate)), actionEnd_(std::move(actionEnd)),
-        actionCancel_(std::move(actionCancel)) {}
+    DragEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd,
+        GestureEventNoParameter&& actionCancel)
+        : actionStart_(std::move(actionStart)), actionUpdate_(std::move(actionUpdate)),
+          actionEnd_(std::move(actionEnd)), actionCancel_(std::move(actionCancel))
+    {}
     ~DragEvent() override = default;
 
     const GestureEventFunc& GetActionStartEventFunc() const
@@ -66,8 +68,8 @@ private:
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(DragEventActuator, GestureEventActuator)
 public:
-    DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub,
-    PanDirection direction, int32_t fingers, float distance);
+    DragEventActuator(
+        const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance);
     ~DragEventActuator() override = default;
 
     void ReplaceDragEvent(const RefPtr<DragEvent>& dragEvent)
@@ -108,6 +110,7 @@ private:
     RefPtr<DragEvent> userCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<SequencedRecognizer> SequencedRecognizer_;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

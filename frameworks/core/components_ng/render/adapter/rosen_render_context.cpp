@@ -487,6 +487,40 @@ void RosenRenderContext::BlendBgColor(const Color& color)
     RequestNextFrame();
 }
 
+void RosenRenderContext::ResetBlendBorderColor()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto leftColor = (Color::TRANSPARENT).GetValue();
+    auto topColor = (Color::TRANSPARENT).GetValue();
+    auto rightColor = (Color::TRANSPARENT).GetValue();
+    auto bottomColor = (Color::TRANSPARENT).GetValue();
+    if (GetBorderColor().has_value()) {
+        leftColor = GetBorderColor()->leftColor.value_or(Color::TRANSPARENT).GetValue();
+        topColor = GetBorderColor()->topColor.value_or(Color::TRANSPARENT).GetValue();
+        rightColor = GetBorderColor()->rightColor.value_or(Color::TRANSPARENT).GetValue();
+        bottomColor = GetBorderColor()->bottomColor.value_or(Color::TRANSPARENT).GetValue();
+    }
+    rsNode_->SetBorderColor(leftColor, topColor, rightColor, bottomColor);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::BlendBorderColor(const Color& color)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto leftColor = color.GetValue();
+    auto topColor = color.GetValue();
+    auto rightColor = color.GetValue();
+    auto bottomColor = color.GetValue();
+    if (GetBorderColor().has_value()) {
+        leftColor = (GetBorderColor()->leftColor.value_or(Color::TRANSPARENT).BlendColor(color)).GetValue();
+        topColor = (GetBorderColor()->topColor.value_or(Color::TRANSPARENT).BlendColor(color)).GetValue();
+        rightColor = (GetBorderColor()->rightColor.value_or(Color::TRANSPARENT).BlendColor(color)).GetValue();
+        bottomColor = (GetBorderColor()->bottomColor.value_or(Color::TRANSPARENT).BlendColor(color)).GetValue();
+    }
+    rsNode_->SetBorderColor(leftColor, topColor, rightColor, bottomColor);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDraw)
 {
     CHECK_NULL_VOID(rsNode_);

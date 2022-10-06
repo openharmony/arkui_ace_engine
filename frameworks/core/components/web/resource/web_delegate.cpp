@@ -1460,6 +1460,26 @@ void WebDelegate::RegisterOHOSWebEventAndMethord()
     }
 }
 
+void WebDelegate::RunSetWebIdCallback()
+{
+    CHECK_NULL_VOID(nweb_);
+    auto webId = nweb_->GetWebId();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto setWebIdCallback = pattern->GetSetWebIdCallback();
+        CHECK_NULL_VOID(setWebIdCallback);
+        setWebIdCallback(webId);
+        return;
+    }
+    auto webCom = webComponent_.Upgrade();
+    CHECK_NULL_VOID(webCom);
+    auto setWebIdCallback = webCom->GetSetWebIdCallback();
+    CHECK_NULL_VOID(setWebIdCallback);
+    setWebIdCallback(webId);
+}
+
 void WebDelegate::SetWebCallBack()
 {
     RefPtr<WebController> webController;
@@ -1946,6 +1966,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
             delegate->UpdateSettting(Container::IsCurrentUseNewPipeline());
+            delegate->RunSetWebIdCallback();
         },
         TaskExecutor::TaskType::PLATFORM);
 }

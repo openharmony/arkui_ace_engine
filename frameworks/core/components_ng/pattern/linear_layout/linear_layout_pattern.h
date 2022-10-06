@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_PATTERN_H
 
+#include "base/utils/noncopyable.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_styles.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -45,17 +46,20 @@ public:
         return MakeRefPtr<LinearLayoutAlgorithm>();
     }
 
-    FocusType GetFocusType() override
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::SCOPE;
+        return { FocusType::SCOPE, true };
     }
-    bool GetFocusable() override
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
     {
-        return true;
+        return { isVertical_, true, ScopeType::FLEX };
     }
 
 private:
     bool isVertical_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LinearLayoutPattern);
 };
 } // namespace OHOS::Ace::NG
 

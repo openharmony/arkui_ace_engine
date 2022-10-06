@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/list/list_paint_method.h"
 
 namespace OHOS::Ace::NG {
-CanvasDrawFunction ListPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
+CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
     double constrainStrokeWidth = divider_.strokeWidth.ConvertToPx();
     const auto& geometryNode = paintWrapper->GetGeometryNode();

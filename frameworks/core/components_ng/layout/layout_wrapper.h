@@ -97,7 +97,7 @@ public:
     // render area, and nodes in the render area will be mounted on the render tree after the layout is complete. You
     // can call the RemoveChildInRenderTree method to explicitly remove the node from the area to be rendered.
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(int32_t index, bool addToRenderTree = true);
-    std::list<RefPtr<LayoutWrapper>> GetAllChildrenWithBuild(bool addToRenderTree = true);
+    const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true);
 
     int32_t GetTotalChildCount() const
     {
@@ -193,6 +193,9 @@ private:
     std::list<RefPtr<LayoutWrapper>> children_;
     // Speed up the speed of getting child by index.
     std::unordered_map<int32_t, RefPtr<LayoutWrapper>> childrenMap_;
+    // cached for GetAllChildrenWithBuild function.
+    std::list<RefPtr<LayoutWrapper>> cachedList_;
+
     // The Wrapper Created by LazyForEach stores in the LayoutWrapperBuilder object.
     RefPtr<LayoutWrapperBuilder> layoutWrapperBuilder_;
 
@@ -206,6 +209,7 @@ private:
     bool isActive_ = false;
     bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;
+    bool measureContent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

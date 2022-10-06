@@ -49,6 +49,7 @@ public:
 
     static void SetAspectRatio(float ratio);
     static void SetLayoutWeight(int32_t value);
+    static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color& color);
     static void SetBackgroundImage(const std::string& src);
@@ -131,6 +132,7 @@ public:
     static void SetAlignSelf(int32_t value);
     static void SetFlexShrink(float value);
     static void SetFlexGrow(float value);
+    static void SetFlexBasis(const Dimension& value);
     static void SetDisplayIndex(int32_t value);
 
     // Bind properties

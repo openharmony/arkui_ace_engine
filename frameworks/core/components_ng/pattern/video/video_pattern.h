@@ -75,13 +75,9 @@ public:
         progressRate_ = progressRate;
     }
 
-    FocusType GetFocusType() override
+    FocusPattern GetFocusPattern() const override
     {
-        return FocusType::NODE;
-    }
-    bool GetFocusable() override
-    {
-        return true;
+        return { FocusType::NODE, true };
     }
 
 private:
@@ -118,7 +114,7 @@ private:
     void OnUpdateTime(uint32_t time, int pos) const;
 
     RefPtr<FrameNode> CreateControlBar();
-    static RefPtr<FrameNode> CreateButton(const std::string& label, GestureEventFunc clickCallback);
+    static RefPtr<FrameNode> CreateButton();
     static RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn);

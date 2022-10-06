@@ -48,24 +48,27 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
     return wrapper;
 }
 
-std::list<RefPtr<LayoutWrapper>> LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
+const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
 {
-    std::list<RefPtr<LayoutWrapper>> childLayoutWrappers = children_;
+    if (!cachedList_.empty()) {
+        return cachedList_;
+    }
+    cachedList_ = children_;
     if (layoutWrapperBuilder_) {
         auto buildItems = layoutWrapperBuilder_->ExpandAllChildWrappers();
         auto index = layoutWrapperBuilder_->GetStartIndex();
-        auto insertIter = childLayoutWrappers.begin();
+        auto insertIter = cachedList_.begin();
         std::advance(insertIter, index);
-        childLayoutWrappers.splice(insertIter, buildItems);
+        cachedList_.splice(insertIter, buildItems);
     }
     if (addToRenderTree) {
-        for (const auto& child : childLayoutWrappers) {
+        for (const auto& child : cachedList_) {
             if (!child->isActive_) {
                 child->isActive_ = true;
             }
         }
     }
-    return childLayoutWrappers;
+    return cachedList_;
 }
 
 void LayoutWrapper::RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper)
@@ -139,6 +142,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
             host->GetTag().c_str(), isContraintNoChanged_, layoutProperty_->GetPropertyChangeFlag());
     } else {
         auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
+        measureContent_ = true;
         if (size.has_value()) {
             geometryNode_->SetContentSize(size.value());
         }
@@ -192,16 +196,8 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
 
-    // TODO: delete following to use constraint offset
-    {
-        const auto& gridProp = layoutProperty_->GetGridProperty();
-        if (gridProp) {
-            OffsetF gridOffset = geometryNode_->GetFrameOffset();
-            gridOffset.SetX(gridProp->GetOffset().Value());
-            LOGD("On grid layout Done: %{public}s, Offset: %{public}f", GetHostTag().c_str(), gridOffset.GetX());
-            geometryNode_->SetMarginFrameOffset(gridOffset);
-        }
-    }
+    // TODO: add grid container offset prop.
+
     layoutAlgorithm_->Layout(this);
     LOGD("On Layout Done: %{public}s, Offset: %{public}s", GetHostTag().c_str(),
         geometryNode_->GetFrameOffset().ToString().c_str());
@@ -209,10 +205,7 @@ void LayoutWrapper::Layout()
 
 bool LayoutWrapper::SkipMeasureContent() const
 {
-    if (layoutProperty_) {
-        return isContraintNoChanged_ && !CheckMeasureFlag(layoutProperty_->GetPropertyChangeFlag());
-    }
-    return isContraintNoChanged_;
+    return !measureContent_;
 }
 
 void LayoutWrapper::MountToHostOnMainThread()

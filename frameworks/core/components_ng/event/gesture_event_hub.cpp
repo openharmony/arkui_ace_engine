@@ -65,7 +65,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
     }
     if (dragEventActuator_) {
-        dragEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+        dragEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
     }
 
     return false;
@@ -92,8 +92,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     } else if (innerRecognizers.size() > 1) {
         if (!innerExclusiveRecognizer_) {
             innerExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(innerRecognizers));
-            innerExclusiveRecognizer_->SetCoordinateOffset(offset);
+        } else {
+            innerExclusiveRecognizer_->ReplaceChildren(innerRecognizers);
         }
+        innerExclusiveRecognizer_->SetCoordinateOffset(offset);
         current = innerExclusiveRecognizer_;
     }
 
@@ -124,8 +126,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             if (recognizers.size() > 1) {
                 if (!externalParallelRecognizer_ || recreateGesture_) {
                     externalParallelRecognizer_ = AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers));
-                    externalParallelRecognizer_->SetCoordinateOffset(offset);
+                } else {
+                    externalParallelRecognizer_->ReplaceChildren(recognizers);
                 }
+                externalParallelRecognizer_->SetCoordinateOffset(offset);
                 current = externalParallelRecognizer_;
             } else if (recognizers.size() == 1) {
                 current = *recognizers.begin();
@@ -142,8 +146,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             if (recognizers.size() > 1) {
                 if (!externalExclusiveRecognizer_ || recreateGesture_) {
                     externalExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers));
-                    externalExclusiveRecognizer_->SetCoordinateOffset(offset);
+                } else {
+                    externalExclusiveRecognizer_->ReplaceChildren(recognizers);
                 }
+                externalExclusiveRecognizer_->SetCoordinateOffset(offset);
                 current = externalExclusiveRecognizer_;
             } else if (recognizers.size() == 1) {
                 current = *recognizers.begin();
@@ -217,8 +223,10 @@ void GestureEventHub::CombineIntoExclusiveRecognizer(
     } else if (recognizers.size() > 1) {
         if (!nodeExclusiveRecognizer_) {
             nodeExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers));
-            nodeExclusiveRecognizer_->SetCoordinateOffset(offset);
+        } else {
+            nodeExclusiveRecognizer_->ReplaceChildren(recognizers);
         }
+        nodeExclusiveRecognizer_->SetCoordinateOffset(offset);
         current = nodeExclusiveRecognizer_;
     }
 

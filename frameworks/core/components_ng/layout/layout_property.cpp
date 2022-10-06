@@ -39,6 +39,7 @@ void LayoutProperty::Reset()
     magicItemProperty_.reset();
     positionProperty_.reset();
     measureType_.reset();
+    layoutDirection_.reset();
     CleanDirty();
 }
 
@@ -90,6 +91,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
         flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
     }
     measureType_ = layoutProperty->measureType_;
+    layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
 }
 

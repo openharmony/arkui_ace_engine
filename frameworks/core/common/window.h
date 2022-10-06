@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 
 namespace NG {
 class FrameNode;
-}
+} // namespace NG
 class ACE_EXPORT Window {
 public:
     Window() = default;
@@ -62,12 +62,12 @@ public:
         callbacks_.push_back(std::move(callback));
     }
 
-    void OnShow()
+    virtual void OnShow()
     {
         onShow_ = true;
     }
 
-    void OnHide()
+    virtual void OnHide()
     {
         onShow_ = false;
     }
@@ -81,7 +81,21 @@ public:
     {
         density_ = density;
     }
-    
+
+    void SetGetWindowRectImpl(std::function<Rect()>&& callback)
+    {
+        windowRectImpl_ = std::move(callback);
+    }
+
+    Rect GetCurrentWindowRect() const
+    {
+        Rect rect;
+        if (windowRectImpl_) {
+            rect = windowRectImpl_();
+        }
+        return rect;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
@@ -89,6 +103,7 @@ protected:
     std::list<AceVsyncCallback> callbacks_;
 
 private:
+    std::function<Rect()> windowRectImpl_;
     std::unique_ptr<PlatformWindow> platformWindow_;
 
     ACE_DISALLOW_COPY_AND_MOVE(Window);

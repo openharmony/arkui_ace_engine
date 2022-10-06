@@ -177,6 +177,10 @@ public:
 
     virtual void RebuildRenderContextTree();
 
+    virtual void OnWindowShow() {}
+
+    virtual void OnWindowHide() {}
+
 protected:
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {

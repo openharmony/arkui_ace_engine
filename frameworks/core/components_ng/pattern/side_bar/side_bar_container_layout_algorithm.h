@@ -65,12 +65,12 @@ public:
     }
 
 private:
-    void MeasureControlButton(
-        const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& buttonLayoutWrapper);
+    void MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
+        const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth);
     void MeasureSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& sideBarLayoutWrapper);
     void MeasureSideBarContent(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
-        const RefPtr<LayoutWrapper>& contentLayoutWrapper);
+        const RefPtr<LayoutWrapper>& contentLayoutWrapper, float parentWidth);
     void LayoutControlButton(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& buttonLayoutWrapper);
     void LayoutSideBar(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper);
     void LayoutSideBarContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& contentLayoutWrapper);

@@ -422,6 +422,7 @@ private:
     void DeleteEntirelyCookie();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
+    void RunSetWebIdCallback();
 
     // Backward and forward
     void Backward();

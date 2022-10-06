@@ -107,6 +107,7 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
@@ -969,6 +970,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Span", JSSpan::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
+    { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },

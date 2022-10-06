@@ -127,12 +127,10 @@ void FrameNode::InitializePatternAndContext()
     });
     renderContext_->SetHostNode(WeakClaim(this));
     // Initialize FocusHub
-    if (pattern_->GetFocusType() != FocusType::DISABLE) {
+    if (pattern_->GetFocusPattern().focusType != FocusType::DISABLE) {
         auto focusHub = GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
-        if (layoutProperty_) {
-            focusHub->SetScopeVertical(layoutProperty_->IsDirectionVertical());
-        }
+        focusHub->SetScopeFocusAlgorithm(pattern_->GetScopeFocusAlgorithm());
     }
 }
 
@@ -401,9 +399,9 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
         forceLayout);
     do {
-        if (CheckNeedMeasure(flag) || forceMeasure) {
+        if (CheckNeedMeasure(flag) || forceMeasure || !isActive_) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
-            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure;
+            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure || !isActive_;
             UpdateChildrenLayoutWrapper(layoutWrapper, forceChildMeasure, false);
             break;
         }
@@ -822,6 +820,17 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
     if (!pattern_) {
         return eventHub_->GetOrCreateFocusHub();
     }
-    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusType(), pattern_->GetFocusable());
+    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().focusType, pattern_->GetFocusPattern().focusable);
 }
+
+void FrameNode::OnWindowShow()
+{
+    pattern_->OnWindowShow();
+}
+
+void FrameNode::OnWindowHide()
+{
+    pattern_->OnWindowHide();
+}
+
 } // namespace OHOS::Ace::NG

@@ -61,6 +61,10 @@ public:
 
     void BlendBgColor(const Color& color) override;
 
+    void ResetBlendBorderColor() override;
+
+    void BlendBorderColor(const Color& color) override;
+
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
 

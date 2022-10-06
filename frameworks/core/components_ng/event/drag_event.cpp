@@ -129,10 +129,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     panRecognizer_->SetOnActionCancel(actionCancel);
     
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
-    auto dragRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
-    dragRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-    dragRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
-    result.emplace_back(dragRecognizer);
+    if (!SequencedRecognizer_) {
+        SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    }
+    SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(SequencedRecognizer_);
 }
 
 } // namespace OHOS::Ace::NG

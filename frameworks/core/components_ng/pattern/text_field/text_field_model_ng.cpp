@@ -58,6 +58,7 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
+    pattern->SetBasicPadding(static_cast<float>(radius.GetX().ConvertToPx()));
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     return pattern->GetTextFieldController();
