@@ -18,16 +18,20 @@
 
 #include <memory>
 
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 
+// TODO: change name later
 class ACE_EXPORT ContainerModel {
 public:
     static ContainerModel* GetInstance();
     virtual ~ContainerModel() = default;
 
     virtual void Pop() = 0;
+    virtual void NewScope() = 0;
+    virtual RefPtr<AceType> Finish() = 0;
 
 private:
     static std::unique_ptr<ContainerModel> instance_;

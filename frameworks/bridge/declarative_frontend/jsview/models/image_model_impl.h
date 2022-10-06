@@ -21,9 +21,6 @@
 
 namespace OHOS::Ace::Framework {
 
-// ImageModel is essentially the same class as ImageView
-// there should be only one left in the final implementation
-
 class ImageModelImpl : public OHOS::Ace::ImageModel {
 public:
     void SetAlt(const std::string& src) override;

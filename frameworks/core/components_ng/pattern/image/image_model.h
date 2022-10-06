@@ -27,8 +27,6 @@
 
 namespace OHOS::Ace {
 
-// ImageModel is essentially the same class as ImageView
-// there should be only one left in the final implementation
 class ImageModel {
 public:
     static ImageModel* GetInstance();

@@ -25,46 +25,12 @@
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/components_v2/common/common_def.h"
-#include "core/components_v2/list/list_position_controller.h"
 #include "core/components_v2/list/list_item_group_component.h"
+#include "core/components_v2/list/list_position_controller.h"
+#include "core/components_v2/list/list_properties.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace::V2 {
-
-enum class ScrollState {
-    IDLE = 0,
-    SCROLL,
-    FLING,
-};
-
-enum class ListItemAlign {
-    /*
-     * display list item at start of cross axis.
-     */
-    START = 0,
-
-    /*
-     * display list item at center of cross axis.
-     */
-    CENTER,
-
-    /*
-     * display list item at center of cross axis.
-     */
-    END,
-};
-
-enum StickyStyle : uint32_t {
-    NONE = 0,
-    HEADER = 1,
-    FOOTER = 2,
-};
-
-using OnItemDragStartFunc = std::function<RefPtr<Component>(const ItemDragInfo&, int32_t)>;
-using OnItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
-using OnItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
-using OnItemDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
-using OnItemDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
 
 class ACE_EXPORT ListComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(V2::ListComponent, ComponentGroup)

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_MODEL_NG_H
 
+#include <memory>
+
 #include "base/utils/macros.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_model.h"
@@ -28,6 +30,21 @@ public:
     {
         ViewStackProcessor::GetInstance()->PopContainer();
     }
+
+    void NewScope() override
+    {
+        scopeStack_ = std::make_unique<ScopedViewStackProcessor>();
+    }
+
+    RefPtr<AceType> Finish() override
+    {
+        auto node = ViewStackProcessor::GetInstance()->Finish();
+        scopeStack_.reset();
+        return node;
+    }
+
+private:
+    std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };
 
 } // namespace OHOS::Ace::NG

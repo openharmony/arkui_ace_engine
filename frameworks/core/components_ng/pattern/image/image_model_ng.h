@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 
 class  ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
+    void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) override;
     void SetAlt(const std::string& src) override;
     void SetBorder(const Border& border) override;
     void SetBlur(double blur) override;
@@ -34,7 +35,6 @@ public:
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;
     void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override;
     void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;
-    void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
     void SetImageFill(const Color& color) override;
     void SetImageInterpolation(ImageInterpolation iterpolation) override;

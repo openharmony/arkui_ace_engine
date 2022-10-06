@@ -20,154 +20,103 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_ng/pattern/list/list_view.h"
-#include "core/components_v2/list/list_component.h"
-#include "core/components_v2/list/list_position_controller.h"
+#include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
+#include "core/components_ng/pattern/container_model.h"
+#include "core/components_ng/pattern/list/list_model.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ListModel> ListModel::instance_ = nullptr;
+
+ListModel* ListModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ListModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ListModelNG());
+        } else {
+            instance_.reset(new Framework::ListModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-
-using ThisComponent = V2::ListComponent;
-
-constexpr DisplayMode DISPLAY_MODE_TABLE[] = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
-constexpr EdgeEffect EDGE_EFFECT_TABLE[] = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
-constexpr Axis DIRECTION_TABLE[] = { Axis::VERTICAL, Axis::HORIZONTAL };
-constexpr V2::ListItemAlign LIST_ITEM_ALIGN_TABLE[] = { V2::ListItemAlign::START, V2::ListItemAlign::CENTER,
-    V2::ListItemAlign::END };
-
-} // namespace
 
 void JSList::SetDirection(int32_t direction)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ListView::SetListDirection(static_cast<Axis>(direction));
-        return;
-    }
-    JSViewSetProperty(&V2::ListComponent::SetDirection, direction, DIRECTION_TABLE, Axis::VERTICAL);
+    ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
 }
 
 void JSList::SetScrollBar(int32_t scrollBar)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("ScrollBar is not supported");
-        return;
-    }
-    JSViewSetProperty(&V2::ListComponent::SetScrollBar, scrollBar, DISPLAY_MODE_TABLE, DisplayMode::OFF);
+    ListModel::GetInstance()->SetScrollBar(static_cast<DisplayMode>(scrollBar));
 }
 
 void JSList::SetEdgeEffect(int32_t edgeEffect)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ListView::SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
-        return;
-    }
-    JSViewSetProperty(&V2::ListComponent::SetEdgeEffect, edgeEffect, EDGE_EFFECT_TABLE, EdgeEffect::SPRING);
+    ListModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
 }
 
 void JSList::SetEditMode(bool editMode)
 {
-    JSViewSetProperty(&V2::ListComponent::SetEditMode, editMode);
+    ListModel::GetInstance()->SetEditMode(editMode);
 }
 
 void JSList::SetCachedCount(int32_t cachedCount)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ListView::SetCachedCount(cachedCount);
-        return;
-    }
-    JSViewSetProperty(&V2::ListComponent::SetCachedCount, cachedCount);
+    ListModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
 void JSList::Create(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ListView::Create();
-        if (args.Length() >= 1 && args[0]->IsObject()) {
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-            Dimension space;
-            if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
-                NG::ListView::SetSpace(space);
-            }
-            int32_t initialIndex = 0;
-            if (ConvertFromJSValue(obj->GetProperty("initialIndex"), initialIndex) && initialIndex >= 0) {
-                NG::ListView::SetInitialIndex(initialIndex);
-            }
-        }
-        return;
-    }
-
-    auto listComponent = AceType::MakeRefPtr<V2::ListComponent>();
-    ViewStackProcessor::GetInstance()->ClaimElementId(listComponent);
-
+    ListModel::GetInstance()->Create();
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-
         Dimension space;
         if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
-            listComponent->SetSpace(space);
+            ListModel::GetInstance()->SetSpace(space);
         }
-
         int32_t initialIndex = 0;
         if (ConvertFromJSValue(obj->GetProperty("initialIndex"), initialIndex) && initialIndex >= 0) {
-            listComponent->SetInitialIndex(initialIndex);
+            ListModel::GetInstance()->SetInitialIndex(initialIndex);
         }
-
         JSRef<JSVal> scrollerValue = obj->GetProperty("scroller");
         if (scrollerValue->IsObject()) {
-            auto scroller = Referenced::Claim(JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>());
-            if (scroller) {
-                auto listController = AceType::MakeRefPtr<V2::ListPositionController>();
-                scroller->SetController(listController);
-                listComponent->SetScrollController(listController);
-
-                // Init scroll bar proxy.
-                auto proxy = scroller->GetScrollBarProxy();
-                if (!proxy) {
-                    proxy = AceType::MakeRefPtr<ScrollBarProxy>();
-                    scroller->SetScrollBarProxy(proxy);
-                }
-                listComponent->SetScrollBarProxy(proxy);
-            }
+            void* scroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
+            ListModel::GetInstance()->SetScroller(scroller);
         }
     }
 
-    ViewStackProcessor::GetInstance()->Push(listComponent);
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
     args.ReturnSelf();
 }
 
 void JSList::SetChainAnimation(bool enableChainAnimation)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ListView::SetChainAnimation(enableChainAnimation);
-    }
-    JSViewSetProperty(&V2::ListComponent::SetChainAnimation, enableChainAnimation);
+    ListModel::GetInstance()->SetChainAnimation(enableChainAnimation);
 }
 
 void JSList::JsWidth(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-    JSViewSetProperty(&V2::ListComponent::SetHasWidth, true);
+    ListModel::GetInstance()->SetHasWidth(true);
 }
 
 void JSList::JsHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-    JSViewSetProperty(&V2::ListComponent::SetHasHeight, true);
+    ListModel::GetInstance()->SetHasHeight(true);
 }
 
 void JSList::SetListItemAlign(int32_t itemAlignment)
 {
-    JSViewSetProperty(
-        &V2::ListComponent::SetListItemAlign, itemAlignment, LIST_ITEM_ALIGN_TABLE, V2::ListItemAlign::START);
+    ListModel::GetInstance()->SetListItemAlign(static_cast<V2::ListItemAlign>(itemAlignment));
 }
 
 void JSList::SetLanes(const JSCallbackInfo& info)
@@ -177,45 +126,12 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        int32_t laneNum = 1;
-        if (ParseJsInteger<int32_t>(info[0], laneNum)) {
-            // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
-            NG::ListView::SetLanes(laneNum);
-            return;
-        }
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-        auto minLengthParam = jsObj->GetProperty("minLength");
-        auto maxLengthParam = jsObj->GetProperty("maxLength");
-        if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
-            LOGW("minLength and maxLength are not both set");
-            return;
-        }
-        Dimension minLengthValue;
-        Dimension maxLengthValue;
-        if (!ParseJsDimensionVp(minLengthParam, minLengthValue) ||
-            !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
-            LOGW("minLength param or maxLength param is invalid");
-            return;
-        }
-        NG::ListView::SetLaneMinLength(minLengthValue);
-        NG::ListView::SetLaneMaxLength(maxLengthValue);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto listComponent = AceType::DynamicCast<V2::ListComponent>(component);
-    if (!listComponent) {
-        LOGE("list component is null while trying set lanes");
-        return;
-    }
     int32_t laneNum = 1;
     if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
-        listComponent->SetLanes(laneNum);
+        ListModel::GetInstance()->SetLanes(laneNum);
         return;
     }
-    LOGI("lanes is not number, parse lane length contraint.");
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     auto minLengthParam = jsObj->GetProperty("minLength");
     auto maxLengthParam = jsObj->GetProperty("maxLength");
@@ -229,186 +145,132 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         LOGW("minLength param or maxLength param is invalid");
         return;
     }
-    listComponent->SetLaneConstrain(minLengthValue, maxLengthValue);
+    ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
 }
 
 void JSList::SetSticky(int32_t sticky)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ListView::SetSticky(static_cast<V2::StickyStyle>(sticky));
-    }
-    JSViewSetProperty(&V2::ListComponent::SetSticky, static_cast<V2::StickyStyle>(sticky));
+    ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
 }
 
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        do {
-            if (args.Length() < 1 || !args[0]->IsObject()) {
-                LOGW("Invalid params");
-                break;
-            }
-
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-            Dimension strokeWidth;
-            if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
-                LOGW("Invalid strokeWidth of divider");
-                break;
-            }
-
-            V2::ItemDivider divider;
-            divider.strokeWidth = strokeWidth;
-            if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-                // Failed to get color from param, using default color defined in theme
-                RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
-                if (listTheme) {
-                    divider.color = listTheme->GetDividerColor();
-                }
-            }
-            ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
-            ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
-
-            NG::ListView::SetDivider(divider);
-        } while (0);
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("Invalid params");
         return;
     }
-    do {
-        if (args.Length() < 1 || !args[0]->IsObject()) {
-            LOGW("Invalid params");
-            break;
-        }
 
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        Dimension strokeWidth;
-        if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
-            LOGW("Invalid strokeWidth of divider");
-            break;
-        }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    Dimension strokeWidth;
+    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
+        LOGW("Invalid strokeWidth of divider");
+        return;
+    }
 
-        auto divider = std::make_unique<V2::ItemDivider>();
-        divider->strokeWidth = strokeWidth;
-        if (!ConvertFromJSValue(obj->GetProperty("color"), divider->color)) {
-            // Failed to get color from param, using default color defined in theme
-            RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
-            if (listTheme) {
-                divider->color = listTheme->GetDividerColor();
-            }
+    V2::ItemDivider divider;
+    divider.strokeWidth = strokeWidth;
+    if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+        // Failed to get color from param, using default color defined in theme
+        RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
+        if (listTheme) {
+            divider.color = listTheme->GetDividerColor();
         }
-        ConvertFromJSValue(obj->GetProperty("startMargin"), divider->startMargin);
-        ConvertFromJSValue(obj->GetProperty("endMargin"), divider->endMargin);
-
-        JSViewSetProperty(&V2::ListComponent::SetItemDivider, std::move(divider));
-    } while (0);
+    }
+    ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
+    ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
+    ListModel::GetInstance()->SetDivider(divider);
 
     args.ReturnSelf();
 }
 
 void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (args[0]->IsFunction()) {
-            auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                const Dimension& scrollOffset, const V2::ScrollState& scrollState) {
-                auto params = ConvertToJSValues(scrollOffset, scrollState);
-                func->Call(JSRef<JSObject>(), params.size(), params.data());
-                return;
-            };
-            NG::ListView::SetOnScroll(onScroll);
-        }
-        return;
-    }
-    if (!JSViewBindEvent(&V2::ListComponent::SetOnScroll, args)) {
-        LOGW("Failed to bind event");
+    if (args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const Dimension& scrollOffset, const V2::ScrollState& scrollState) {
+            auto params = ConvertToJSValues(scrollOffset, scrollState);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+        ListModel::GetInstance()->SetOnScroll(std::move(onScroll));
     }
     args.ReturnSelf();
 }
 
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (args[0]->IsFunction()) {
-            auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-                func->Call(JSRef<JSObject>());
-                return;
-            };
-            NG::ListView::SetOnReachStart(onReachStart);
-        }
-        return;
-    }
-    if (!JSViewBindEvent(&V2::ListComponent::SetOnReachStart, args)) {
-        LOGW("Failed to bind event");
+    if (args[0]->IsFunction()) {
+        auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        ListModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
     }
     args.ReturnSelf();
 }
 
 void JSList::ReachEndCallback(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (args[0]->IsFunction()) {
-            auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-                func->Call(JSRef<JSObject>());
-                return;
-            };
-            NG::ListView::SetOnReachEnd(onReachEnd);
-        }
-        return;
-    }
-    if (!JSViewBindEvent(&V2::ListComponent::SetOnReachEnd, args)) {
-        LOGW("Failed to bind event");
+    if (args[0]->IsFunction()) {
+        auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        ListModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
     }
     args.ReturnSelf();
 }
 
 void JSList::ScrollStopCallback(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (args[0]->IsFunction()) {
-            auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-                func->Call(JSRef<JSObject>());
-                return;
-            };
-            NG::ListView::SetOnScrollStop(onScrollStop);
-        }
-        return;
-    }
-    if (!JSViewBindEvent(&V2::ListComponent::SetOnScrollStop, args)) {
-        LOGW("Failed to bind event");
+    if (args[0]->IsFunction()) {
+        auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        ListModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
     }
     args.ReturnSelf();
 }
 
 void JSList::ItemDeleteCallback(const JSCallbackInfo& args)
 {
-    if (!JSViewBindEvent(&V2::ListComponent::SetOnItemDelete, args)) {
-        LOGW("Failed to bind event");
+    if (args[0]->IsFunction()) {
+        auto onItemDelete = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                int32_t index) -> bool {
+            auto params = ConvertToJSValues(index);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return true;
+        };
+        ListModel::GetInstance()->SetOnItemDelete(std::move(onItemDelete));
     }
     args.ReturnSelf();
 }
 
 void JSList::ItemMoveCallback(const JSCallbackInfo& args)
 {
-    if (!JSViewBindEvent(&V2::ListComponent::SetOnItemMove, args)) {
-        LOGW("Failed to bind event");
+    if (args[0]->IsFunction()) {
+        auto onItemMove = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                              int32_t start, int32_t end) -> bool {
+            auto params = ConvertToJSValues(start, end);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return true;
+        };
+        ListModel::GetInstance()->SetOnItemMove(std::move(onItemMove));
     }
     args.ReturnSelf();
 }
 
 void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (args[0]->IsFunction()) {
-            auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                     const int32_t start, const int32_t end) {
-                auto params = ConvertToJSValues(start, end);
-                func->Call(JSRef<JSObject>(), params.size(), params.data());
-                return;
-            };
-            NG::ListView::SetOnScrollIndex(onScrollIndex);
-        }
-        return;
-    }
-    if (!JSViewBindEvent(&V2::ListComponent::SetOnScrollIndex, args)) {
-        LOGW("Failed to bind event");
+    if (args[0]->IsFunction()) {
+        auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const int32_t start, const int32_t end) {
+            auto params = ConvertToJSValues(start, end);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+        ListModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
     }
     args.ReturnSelf();
 }
@@ -421,8 +283,8 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
     }
 
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onItemDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
-                                 const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<Component> {
+    auto onItemDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
+                               const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<AceType> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
         if (!ret->IsObject()) {
@@ -442,24 +304,14 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
             return nullptr;
         }
         // use another VSP instance while executing the builder function
-        ScopedViewStackProcessor builderViewStackProcessor;
+        ContainerModel::GetInstance()->NewScope();
         {
             ACE_SCORING_EVENT("List.onItemDragStart.builder");
             builderFunc->Execute();
         }
-        RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
-        if (!customComponent) {
-            LOGE("Custom component is null.");
-            return nullptr;
-        }
-        return customComponent;
+        return ContainerModel::GetInstance()->Finish();
     };
-    auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListComponent>());
-        return;
-    }
-    component->SetOnItemDragStartId(onItemDragStartId);
+    ListModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
 }
 
 void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
@@ -470,18 +322,13 @@ void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
     }
 
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onItemDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                                 const ItemDragInfo& dragInfo) {
+    auto onItemDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                               const ItemDragInfo& dragInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragEnter");
         func->ItemDragEnterExecute(dragInfo);
     };
-    auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListComponent>());
-        return;
-    }
-    component->SetOnItemDragEnterId(onItemDragEnterId);
+    ListModel::GetInstance()->SetOnItemDragEnter(std::move(onItemDragEnter));
 }
 
 void JSList::ItemDragMoveCallback(const JSCallbackInfo& info)
@@ -492,18 +339,13 @@ void JSList::ItemDragMoveCallback(const JSCallbackInfo& info)
     }
 
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onItemDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                                const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
+    auto onItemDragMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                              const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragMove");
         func->ItemDragMoveExecute(dragInfo, itemIndex, insertIndex);
     };
-    auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListComponent>());
-        return;
-    }
-    component->SetOnItemDragMoveId(onItemDragMoveId);
+    ListModel::GetInstance()->SetOnItemDragMove(std::move(onItemDragMove));
 }
 
 void JSList::ItemDragLeaveCallback(const JSCallbackInfo& info)
@@ -514,18 +356,13 @@ void JSList::ItemDragLeaveCallback(const JSCallbackInfo& info)
     }
 
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onItemDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                                 const ItemDragInfo& dragInfo, int32_t itemIndex) {
+    auto onItemDragLeave = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                               const ItemDragInfo& dragInfo, int32_t itemIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragLeave");
         func->ItemDragLeaveExecute(dragInfo, itemIndex);
     };
-    auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListComponent>());
-        return;
-    }
-    component->SetOnItemDragLeaveId(onItemDragLeaveId);
+    ListModel::GetInstance()->SetOnItemDragLeave(std::move(onItemDragLeave));
 }
 
 void JSList::ItemDropCallback(const JSCallbackInfo& info)
@@ -536,23 +373,18 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
     }
 
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onItemDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                            const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+    auto onItemDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                          const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
     };
-    auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListComponent>());
-        return;
-    }
-    component->SetOnItemDropId(onItemDropId);
+    ListModel::GetInstance()->SetOnItemDrop(onItemDrop);
 }
 
 void JSList::SetMultiSelectable(bool multiSelectable)
 {
-    JSViewSetProperty(&V2::ListComponent::SetMultiSelectable, multiSelectable);
+    ListModel::GetInstance()->SetMultiSelectable(multiSelectable);
 }
 
 void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
@@ -585,17 +417,56 @@ void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
             }
             return scrollInfo;
         };
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ListView::SetOnScrollBegin(onScrollBegin);
-            return;
-        }
-        auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (!component) {
-            LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListComponent>());
-            return;
-        }
-        component->SetOnScrollBegin(onScrollBegin);
+        ListModel::GetInstance()->SetOnScrollBegin(std::move(onScrollBegin));
     }
+}
+
+void JSList::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSList>::Declare("List");
+    JSClass<JSList>::StaticMethod("create", &JSList::Create);
+
+    JSClass<JSList>::StaticMethod("width", &JSList::JsWidth);
+    JSClass<JSList>::StaticMethod("height", &JSList::JsHeight);
+    JSClass<JSList>::StaticMethod("listDirection", &JSList::SetDirection);
+    JSClass<JSList>::StaticMethod("scrollBar", &JSList::SetScrollBar);
+    JSClass<JSList>::StaticMethod("edgeEffect", &JSList::SetEdgeEffect);
+    JSClass<JSList>::StaticMethod("divider", &JSList::SetDivider);
+    JSClass<JSList>::StaticMethod("editMode", &JSList::SetEditMode);
+    JSClass<JSList>::StaticMethod("cachedCount", &JSList::SetCachedCount);
+    JSClass<JSList>::StaticMethod("chainAnimation", &JSList::SetChainAnimation);
+    JSClass<JSList>::StaticMethod("multiSelectable", &JSList::SetMultiSelectable);
+    JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
+    JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
+    JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
+
+    JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
+    JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
+    JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);
+    JSClass<JSList>::StaticMethod("onScrollStop", &JSList::ScrollStopCallback);
+    JSClass<JSList>::StaticMethod("onItemDelete", &JSList::ItemDeleteCallback);
+    JSClass<JSList>::StaticMethod("onItemMove", &JSList::ItemMoveCallback);
+    JSClass<JSList>::StaticMethod("onScrollIndex", &JSList::ScrollIndexCallback);
+    JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
+
+    JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSList>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSList>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSList>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSList>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+
+    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
+    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
+    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
+    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
+    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
+    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+
+    JSClass<JSList>::Inherit<JSContainerBase>();
+    JSClass<JSList>::Inherit<JSViewAbstract>();
+    JSClass<JSList>::Bind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework
