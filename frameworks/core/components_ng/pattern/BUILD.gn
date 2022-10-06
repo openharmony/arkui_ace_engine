@@ -30,6 +30,7 @@ build_component_ng("pattern_ng") {
     "button/button_view.cpp",
     "button/toggle_button_pattern.cpp",
     "button/toggle_button_view.cpp",
+    "calendar/calendar_controller_ng.cpp",
     "calendar/calendar_layout_algorithm.cpp",
     "calendar/calendar_month_pattern.cpp",
     "calendar/calendar_month_view.cpp",

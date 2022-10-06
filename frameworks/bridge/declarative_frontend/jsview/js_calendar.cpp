@@ -19,9 +19,11 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
@@ -29,7 +31,6 @@
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -93,9 +94,9 @@ void JSCalendar::Create(const JSCallbackInfo& info)
         calendarData.preData = preMonthData;
         calendarData.nextData = nextMonthData;
         if (controllerObj->IsObject()) {
-            auto jsCalendarController = JSRef<JSObject>::Cast(controllerObj).Unwrap<JSCalendarControllerNg>();
+            auto jsCalendarController = JSRef<JSObject>::Cast(controllerObj).Unwrap<JSCalendarController>();
             if (jsCalendarController) {
-                auto controller = jsCalendarController->GetController();
+                auto controller = jsCalendarController->GetControllerNg();
                 calendarData.controller = controller;
             }
         }

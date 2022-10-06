@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_CALENDAR_CONTROLLER_NG_H
 
 #include "base/memory/ace_type.h"
-#include "core/components/swiper/swiper_controller.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,13 +28,16 @@ public:
     CalendarControllerNg() = default;
     ~CalendarControllerNg() override = default;
 
-    void SetSwiperController(const RefPtr<SwiperController>& swiperController)
+    void SetCalendarPattern(const WeakPtr<Pattern>& pattern)
     {
-        swiperController_ = swiperController;
+        pattern_ = pattern;
     }
 
+    void BackToToday();
+    void GoTo(int32_t year, int32_t month, int32_t day);
+
 private:
-    RefPtr<SwiperController> swiperController_;
+    WeakPtr<Pattern> pattern_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CalendarControllerNg);
 };
