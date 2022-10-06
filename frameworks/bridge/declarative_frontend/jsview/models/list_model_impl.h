@@ -27,7 +27,7 @@ public:
 
     void Create() override;
     void SetSpace(const Dimension& space) override;
-    void SetInitialIndex(const int32_t& initialIndex) override;
+    void SetInitialIndex(int32_t initialIndex) override;
     void SetScroller(void* scroller) override;
     void SetListDirection(Axis axis) override;
     void SetScrollBar(DisplayMode scrollBar) override;

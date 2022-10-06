@@ -50,7 +50,7 @@ enum class ListItemAlign {
     END,
 };
 
-enum StickyStyle : uint32_t {
+enum class StickyStyle : uint32_t {
     NONE = 0,
     HEADER = 1,
     FOOTER = 2,
@@ -76,7 +76,7 @@ using OnScrollIndexEvent = std::function<void(int32_t, int32_t)>;
 using OnReachEvent = std::function<void()>;
 using OnItemDeleteEvent = std::function<bool(int32_t)>;
 using OnItemMoveEvent = std::function<bool(int32_t, int32_t)>;
-using OnItemDragStartFunc = std::function<RefPtr<Component>(const ItemDragInfo&, int32_t)>;
+using OnItemDragStartFunc = std::function<RefPtr<AceType>(const ItemDragInfo&, int32_t)>;
 using OnItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
 using OnItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
 using OnItemDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;

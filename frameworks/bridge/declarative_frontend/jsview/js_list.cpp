@@ -192,7 +192,7 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
         };
-        ListModel::GetInstance()->SetOnScroll(onScroll);
+        ListModel::GetInstance()->SetOnScroll(std::move(onScroll));
     }
     args.ReturnSelf();
 }
@@ -204,7 +204,7 @@ void JSList::ReachStartCallback(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>());
             return;
         };
-        ListModel::GetInstance()->SetOnReachStart(onReachStart);
+        ListModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
     }
     args.ReturnSelf();
 }
@@ -216,7 +216,7 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>());
             return;
         };
-        ListModel::GetInstance()->SetOnReachEnd(onReachEnd);
+        ListModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
     }
     args.ReturnSelf();
 }
@@ -228,7 +228,7 @@ void JSList::ScrollStopCallback(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>());
             return;
         };
-        ListModel::GetInstance()->SetOnScrollStop(onScrollStop);
+        ListModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
     }
     args.ReturnSelf();
 }
@@ -242,7 +242,7 @@ void JSList::ItemDeleteCallback(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return true;
         };
-        ListModel::GetInstance()->SetOnItemDelete(onItemDelete);
+        ListModel::GetInstance()->SetOnItemDelete(std::move(onItemDelete));
     }
     args.ReturnSelf();
 }
@@ -256,7 +256,7 @@ void JSList::ItemMoveCallback(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return true;
         };
-        ListModel::GetInstance()->SetOnItemMove(onItemMove);
+        ListModel::GetInstance()->SetOnItemMove(std::move(onItemMove));
     }
     args.ReturnSelf();
 }
@@ -270,7 +270,7 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
         };
-        ListModel::GetInstance()->SetOnScrollIndex(onScrollIndex);
+        ListModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
     }
     args.ReturnSelf();
 }
@@ -284,7 +284,7 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
-                                 const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<Component> {
+                               const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<AceType> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
         if (!ret->IsObject()) {
@@ -309,9 +309,9 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("List.onItemDragStart.builder");
             builderFunc->Execute();
         }
-        return ContainerModel::GetInstance()->FinishComponent();
+        return ContainerModel::GetInstance()->Finish();
     };
-    ListModel::GetInstance()->SetOnItemDragStart(onItemDragStart);
+    ListModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
 }
 
 void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
@@ -323,12 +323,12 @@ void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                                 const ItemDragInfo& dragInfo) {
+                               const ItemDragInfo& dragInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragEnter");
         func->ItemDragEnterExecute(dragInfo);
     };
-    ListModel::GetInstance()->SetOnItemDragEnter(onItemDragEnter);
+    ListModel::GetInstance()->SetOnItemDragEnter(std::move(onItemDragEnter));
 }
 
 void JSList::ItemDragMoveCallback(const JSCallbackInfo& info)
@@ -340,12 +340,12 @@ void JSList::ItemDragMoveCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                                const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
+                              const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragMove");
         func->ItemDragMoveExecute(dragInfo, itemIndex, insertIndex);
     };
-    ListModel::GetInstance()->SetOnItemDragMove(onItemDragMove);
+    ListModel::GetInstance()->SetOnItemDragMove(std::move(onItemDragMove));
 }
 
 void JSList::ItemDragLeaveCallback(const JSCallbackInfo& info)
@@ -357,12 +357,12 @@ void JSList::ItemDragLeaveCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragLeave = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                                 const ItemDragInfo& dragInfo, int32_t itemIndex) {
+                               const ItemDragInfo& dragInfo, int32_t itemIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragLeave");
         func->ItemDragLeaveExecute(dragInfo, itemIndex);
     };
-    ListModel::GetInstance()->SetOnItemDragLeave(onItemDragLeave);
+    ListModel::GetInstance()->SetOnItemDragLeave(std::move(onItemDragLeave));
 }
 
 void JSList::ItemDropCallback(const JSCallbackInfo& info)
@@ -374,7 +374,7 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                            const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+                          const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
@@ -417,7 +417,7 @@ void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
             }
             return scrollInfo;
         };
-        ListModel::GetInstance()->SetOnScrollBegin(onScrollBegin);
+        ListModel::GetInstance()->SetOnScrollBegin(std::move(onScrollBegin));
     }
 }
 

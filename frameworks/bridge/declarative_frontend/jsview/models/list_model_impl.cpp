@@ -39,7 +39,7 @@ void ListModelImpl::SetSpace(const Dimension& space)
     JSViewSetProperty(&V2::ListComponent::SetSpace, space);
 }
 
-void ListModelImpl::SetInitialIndex(const int32_t& initialIndex)
+void ListModelImpl::SetInitialIndex(int32_t initialIndex)
 {
     JSViewSetProperty(&V2::ListComponent::SetInitialIndex, initialIndex);
 }

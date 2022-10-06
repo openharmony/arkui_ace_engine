@@ -33,7 +33,7 @@ public:
 
     virtual void Create() = 0;
     virtual void SetSpace(const Dimension& space) = 0;
-    virtual void SetInitialIndex(const int32_t& initialIndex) = 0;
+    virtual void SetInitialIndex(int32_t initialIndex) = 0;
     virtual void SetScroller(void* scroller) = 0;
     virtual void SetListDirection(Axis axis) = 0;
     virtual void SetScrollBar(DisplayMode scrollBar) = 0;

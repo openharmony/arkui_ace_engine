@@ -36,7 +36,7 @@ void ListModelNG::SetSpace(const Dimension& space)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
 }
 
-void ListModelNG::SetInitialIndex(const int32_t& initialIndex)
+void ListModelNG::SetInitialIndex(int32_t initialIndex)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex);
 }

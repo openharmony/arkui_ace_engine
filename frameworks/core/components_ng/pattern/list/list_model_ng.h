@@ -16,9 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
 
-
 #include "core/components_ng/pattern/list/list_model.h"
-
 
 namespace OHOS::Ace::NG {
 
@@ -26,7 +24,7 @@ class ACE_EXPORT ListModelNG : public ListModel {
 public:
     void Create() override;
     void SetSpace(const Dimension& space) override;
-    void SetInitialIndex(const int32_t& initialIndex) override;
+    void SetInitialIndex(int32_t initialIndex) override;
     void SetScroller(void* scroller) override {}
     void SetListDirection(Axis axis) override;
     void SetScrollBar(DisplayMode scrollBar) override {}
