@@ -343,6 +343,11 @@ void JSViewAbstract::Pop()
     NG::ViewStackProcessor::GetInstance()->Pop();
 }
 
+RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& info)
+{
+    return nullptr;
+}
+
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info) {}
 
 void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info) {}

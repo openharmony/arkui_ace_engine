@@ -970,13 +970,14 @@ private:
     float newScale_ = 0.0f;
 };
 
-class ACE_EXPORT OnScrollEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(OnScrollEvent, BaseEventInfo);
+class ACE_EXPORT WebOnScrollEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebOnScrollEvent, BaseEventInfo);
 
 public:
-    OnScrollEvent(double xOffset, double yOffset) : BaseEventInfo("OnScrollEvent"), xOffset_(xOffset), yOffset_(yOffset)
+    WebOnScrollEvent(double xOffset, double yOffset)
+        : BaseEventInfo("OnScrollEvent"), xOffset_(xOffset), yOffset_(yOffset)
     {}
-    ~OnScrollEvent() = default;
+    ~WebOnScrollEvent() = default;
 
     float GetX() const
     {

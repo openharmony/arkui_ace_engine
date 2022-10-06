@@ -18,7 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_ng/pattern/list/list_item_view.h"
+// #include "core/components_ng/pattern/list/list_item_view.h"
 #include "core/components_v2/list/list_item_group_component.h"
 
 namespace OHOS::Ace::Framework {
