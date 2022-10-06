@@ -112,6 +112,11 @@ public:
         playEdgeEffectAnimation_ = playEdgeEffectAnimation;
     }
 
+    bool Scrollable() const
+    {
+        return scrollable_;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -139,6 +144,8 @@ private:
     void CalculateLanes(const LayoutConstraintF& layoutConstraint, Axis axis);
     void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+
+    void ResetScrollable();
 
     std::optional<int32_t> jumpIndex_;
     bool jumpIndexOutOfRange_ = false;
@@ -170,6 +177,9 @@ private:
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
     float edgeEffectOffset_ = 0.0f;
+
+    // List is scrollable when content size is greater than list size in main axis.
+    bool scrollable_ = true;
 };
 } // namespace OHOS::Ace::NG
 
