@@ -66,6 +66,50 @@ rosen::TextAlign ToRSTextAlign(const TextAlign& align)
     return static_cast<rosen::TextAlign>(align);
 }
 
+rosen::FontWeight ToRSFontWeight(FontWeight fontWeight)
+{
+    rosen::FontWeight rsFontWeight = rosen::FontWeight::W400;
+    switch (fontWeight) {
+        case FontWeight::W100:
+        case FontWeight::LIGHTER:
+            rsFontWeight = rosen::FontWeight::W100;
+            break;
+        case FontWeight::W200:
+            rsFontWeight = rosen::FontWeight::W200;
+            break;
+        case FontWeight::W300:
+            rsFontWeight = rosen::FontWeight::W300;
+            break;
+        case FontWeight::W400:
+        case FontWeight::NORMAL:
+        case FontWeight::REGULAR:
+            rsFontWeight = rosen::FontWeight::W400;
+            break;
+        case FontWeight::W500:
+        case FontWeight::MEDIUM:
+            rsFontWeight = rosen::FontWeight::W500;
+            break;
+        case FontWeight::W600:
+            rsFontWeight = rosen::FontWeight::W600;
+            break;
+        case FontWeight::W700:
+        case FontWeight::BOLD:
+            rsFontWeight = rosen::FontWeight::W700;
+            break;
+        case FontWeight::W800:
+            rsFontWeight = rosen::FontWeight::W800;
+            break;
+        case FontWeight::W900:
+        case FontWeight::BOLDER:
+            rsFontWeight = rosen::FontWeight::W900;
+            break;
+        default:
+            rsFontWeight = rosen::FontWeight::W400;
+            break;
+    }
+    return rsFontWeight;
+}
+
 rosen::WordBreakType ToRSWordBreakType(const WordBreak& wordBreak)
 {
     // should keep enum same with rosen.
@@ -78,8 +122,8 @@ rosen::TextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextSt
     rsTextStyle.color_ = ToRSColor(textStyle.GetTextColor());
     // TODO: convert decoration,fontFamily and other styles.
 
-    // TODO: convert missing fontWeight and textBaseline
-    rsTextStyle.fontWeight_ = static_cast<rosen::FontWeight>(textStyle.GetFontWeight());
+    // TODO: convert missing textBaseline
+    rsTextStyle.fontWeight_ = ToRSFontWeight(textStyle.GetFontWeight());
     rsTextStyle.fontStyle_ = static_cast<rosen::FontStyle>(textStyle.GetFontStyle());
     rsTextStyle.textBaseline_ = static_cast<rosen::TextBaseline>(textStyle.GetTextBaseline());
     if (context) {
