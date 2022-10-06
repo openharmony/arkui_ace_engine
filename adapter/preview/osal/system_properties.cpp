@@ -189,4 +189,10 @@ std::string SystemProperties::GetNewPipePkg()
     return "";
 }
 
+int32_t SystemProperties::GetSvgMode()
+{
+    // TODO: add support for pc preview.
+    return 0;
+}
+
 } // namespace OHOS::Ace

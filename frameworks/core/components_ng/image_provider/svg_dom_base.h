@@ -13,22 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_SVG_DOM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_SVG_DOM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_SVG_DOM_BASE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_SVG_DOM_BASE_H
+
+#include <optional>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 
-class SvgDom : public AceType {
-    DECLARE_ACE_TYPE(SvgDom, AceType);
+class SvgDomBase : public AceType {
+    DECLARE_ACE_TYPE(SvgDomBase, AceType);
 
 public:
     virtual SizeF GetContainerSize() const = 0;
     virtual void SetContainerSize(const SizeF& containerSize) = 0;
+    virtual void SetSvgFillColor(const std::optional<Color>& color) = 0;
+    virtual void DrawImage(
+        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) = 0;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_SVG_DOM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_SVG_DOM_BASE_H
