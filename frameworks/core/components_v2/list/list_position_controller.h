@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_LIST_POSITION_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_LIST_POSITION_CONTROLLER_H
 
-#include "core/components/scroll/scroll_controller_interface.h"
+#include "core/components/scroll/scroll_controller.h"
 
 namespace OHOS::Ace::V2 {
 

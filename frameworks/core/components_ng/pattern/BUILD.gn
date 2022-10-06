@@ -145,6 +145,8 @@ build_component_ng("pattern_ng") {
     "relative_container/relative_container_view.cpp",
     "scroll/scroll_layout_algorithm.cpp",
     "scroll/scroll_pattern.cpp",
+    "scroll/scroll_position_controller.cpp",
+    "scroll/scroll_spring_effect.cpp",
     "scroll/scroll_view.cpp",
     "select_overlay/select_overlay_layout_algorithm.cpp",
     "select_overlay/select_overlay_node.cpp",

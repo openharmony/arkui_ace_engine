@@ -100,6 +100,22 @@ public:
         scrollableActuator_->RemoveScrollableEvent(scrollableEvent);
     }
 
+    void AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& scrollEffect)
+    {
+        if (!scrollableActuator_) {
+            scrollableActuator_ = MakeRefPtr<ScrollableActuator>(WeakClaim(this));
+        }
+        scrollableActuator_->AddScrollEdgeEffect(axis, scrollEffect);
+    }
+
+    void RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
+    {
+        if (!scrollableActuator_) {
+            return;
+        }
+        scrollableActuator_->RemoveScrollEdgeEffect(scrollEffect);
+    }
+
     // Set by user define, which will replace old one.
     void SetTouchEvent(TouchEventFunc&& touchEventFunc)
     {

@@ -15,21 +15,26 @@
 
 #include "core/components_ng/pattern/scroll/scroll_view.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 
 namespace OHOS::Ace::NG {
 
-void ScrollView::Create()
+RefPtr<FrameNode> ScrollView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     stack->Push(frameNode);
+    auto springEdgeEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
+    SetScrollEdgeEffect(springEdgeEffect);
+    return frameNode;
 }
 
 void ScrollView::SetAxis(Axis axis)
@@ -81,5 +86,17 @@ void ScrollView::SetOnScrollBegin(ScrollBeginEvent&& event)
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollBegin(std::move(event));
+}
+
+void ScrollView::SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetScrollEdgeEffect(scrollEffect);
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetScrollEdgeEffect(scrollEffect);
 }
 } // namespace OHOS::Ace::NG

@@ -123,7 +123,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
     auto direction = controller_->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
-    controller_->AnimateTo(position, duration, curve);
+    controller_->AnimateTo(position, static_cast<float>(duration), curve);
 }
 
 void JSScroller::ScrollEdge(const JSCallbackInfo& args)
@@ -219,7 +219,6 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
             deltaY = context->NormalizeToPx(yOffset);
         }
     }
-
     controller_->ScrollBy(deltaX, deltaY, false);
 }
 

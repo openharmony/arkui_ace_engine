@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLL_EDGE_EFFECT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLL_EDGE_EFFECT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_EDGE_EFFECT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_EDGE_EFFECT_H
 
 #include "core/components/scroll/scroll_edge_effect_base.h"
+#include "core/components_ng/render/render_context.h"
 
-namespace OHOS::Ace {
+namespace OHOS::Ace::NG {
 
 class ScrollEdgeEffect : public ScrollEdgeEffectBase {
     DECLARE_ACE_TYPE(ScrollEdgeEffect, ScrollEdgeEffectBase);
@@ -30,19 +31,11 @@ public:
 
     ~ScrollEdgeEffect() override = default;
 
-    void SetScrollNode(const WeakPtr<RenderNode>& scroll)
-    {
-        scroll_ = scroll;
-    }
-
-    virtual void HandleOverScroll(Axis axis, double overScroll, const Size& viewPort) {}
+    virtual void HandleOverScroll(Axis axis, float overScroll, float viewPortLength) {}
 
     virtual void Paint(RenderContext& context, const Size& viewPort, const Offset& offset) {}
-
-protected:
-    WeakPtr<RenderNode> scroll_;
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLL_EDGE_EFFECT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_EDGE_EFFECT_H

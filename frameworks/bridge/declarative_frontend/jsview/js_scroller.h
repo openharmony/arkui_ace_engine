@@ -18,7 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
-#include "core/components/scroll/scroll_controller_interface.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
 
 namespace OHOS::Ace::Framework {
@@ -39,12 +39,12 @@ public:
     void ScrollToIndex(const JSCallbackInfo& args);
     void ScrollBy(const JSCallbackInfo& args);
 
-    const RefPtr<ScrollController>& GetController() const
+    const RefPtr<ScrollControllerBase>& GetController() const
     {
         return controller_;
     }
 
-    void SetController(const RefPtr<ScrollController>& controller)
+    void SetController(const RefPtr<ScrollControllerBase>& controller)
     {
         controller_ = controller;
     }
@@ -60,7 +60,7 @@ public:
     }
 
 private:
-    RefPtr<ScrollController> controller_;
+    RefPtr<ScrollControllerBase> controller_;
     RefPtr<ScrollBarProxy> scrollBarProxy_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JSScroller);
