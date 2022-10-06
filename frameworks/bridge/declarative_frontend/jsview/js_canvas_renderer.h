@@ -77,7 +77,9 @@ public:
     void JsSave(const JSCallbackInfo& info);
     void JsRotate(const JSCallbackInfo& info);
     void JsScale(const JSCallbackInfo& info);
+    void JsGetTransform(const JSCallbackInfo& info);
     void JsSetTransform(const JSCallbackInfo& info);
+    void JsResetTransform(const JSCallbackInfo& info);
     void JsTransform(const JSCallbackInfo& info);
     void JsTranslate(const JSCallbackInfo& info);
     void JsSetLineDash(const JSCallbackInfo& info);
@@ -129,7 +131,10 @@ public:
     void JsSetTextBaseline(const JSCallbackInfo& info);
     void JsSetImageSmoothingQuality(const JSCallbackInfo& info);
     void JsGetPixelMap(const JSCallbackInfo& info);
+    void JsSetPixelMap(const JSCallbackInfo& info);
     void JsDrawBitmapMesh(const JSCallbackInfo& info);
+    void JsFilter(const JSCallbackInfo& info);
+    void JsDirection(const JSCallbackInfo& info);
 
     void SetComponent(const RefPtr<CanvasTaskPool>& controller)
     {

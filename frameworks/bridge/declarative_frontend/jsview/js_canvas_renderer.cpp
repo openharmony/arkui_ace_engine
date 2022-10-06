@@ -1058,6 +1058,11 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 #endif
 }
 
+void JSCanvasRenderer::JsSetPixelMap(const JSCallbackInfo& info)
+{
+    return;
+}
+
 void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
 {
     RefPtr<OffscreenCanvas> offscreenCanvas;
@@ -1095,6 +1100,17 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
     }
 
     pool_->DrawBitmapMesh(offscreenCanvas, mesh, column, row);
+}
+
+void JSCanvasRenderer::JsFilter(const JSCallbackInfo& info)
+{
+
+    return;
+}
+
+void JSCanvasRenderer::JsDirection(const JSCallbackInfo& info)
+{
+    return;
 }
 
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)
@@ -1950,6 +1966,11 @@ void JSCanvasRenderer::JsScale(const JSCallbackInfo& info)
     }
 }
 
+void JSCanvasRenderer::JsGetTransform(const JSCallbackInfo& info)
+{
+    return;
+}
+
 void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
 {
     if (info.Length() == 6) {
@@ -2009,6 +2030,11 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
+}
+
+void JSCanvasRenderer::JsResetTransform(const JSCallbackInfo& info)
+{
+    return;
 }
 
 void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
