@@ -135,15 +135,15 @@ private:
 
     // page operations
     void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false,
-        bool needHideLast = true);
+        bool needHideLast = true, bool needTransition = true);
     void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params, bool needHideLast,
-        bool forceShowCurrent = false);
-    void PopPage(const std::string& params, bool needShowNext);
-    void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext);
+        bool forceShowCurrent = false, bool needTransition = true);
+    void PopPage(const std::string& params, bool needShowNext, bool needTransition);
+    void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition);
 
-    static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast);
-    static bool OnPopPage(bool needShowNext);
-    static bool OnPopPageToIndex(int32_t index, bool needShowNext);
+    static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition);
+    static bool OnPopPage(bool needShowNext, bool needTransition);
+    static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
     bool inRouterOpt_ = false;

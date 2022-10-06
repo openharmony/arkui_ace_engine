@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPaintMethod, NodePaintMethod)
 public:
-    TextPaintMethod(std::shared_ptr<RSParagraph>  paragraph, float baselineOffset)
+    TextPaintMethod(std::shared_ptr<RSParagraph> paragraph, float baselineOffset)
         : paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset)
     {}
     ~TextPaintMethod() override = default;

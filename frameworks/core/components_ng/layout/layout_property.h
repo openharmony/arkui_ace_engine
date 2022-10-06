@@ -19,6 +19,7 @@
 #include <memory>
 #include <optional>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -28,6 +29,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/grid_property.h"
@@ -239,7 +241,7 @@ public:
         }
     }
 
-    void UpdateFlexGrow(const float flexGrow)
+    void UpdateFlexGrow(float flexGrow)
     {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
@@ -249,12 +251,22 @@ public:
         }
     }
 
-    void UpdateFlexShrink(const float flexShrink)
+    void UpdateFlexShrink(float flexShrink)
     {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
         }
         if (flexItemProperty_->UpdateFlexShrink(flexShrink)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateFlexBasis(const Dimension& flexBasis)
+    {
+        if (!flexItemProperty_) {
+            flexItemProperty_ = std::make_unique<FlexItemProperty>();
+        }
+        if (flexItemProperty_->UpdateFlexBasis(flexBasis)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }

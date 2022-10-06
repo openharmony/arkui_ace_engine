@@ -35,7 +35,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // then use normal measure step.
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
 
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     for (auto&& child : children) {
         child->Measure(layoutConstraint);
     }

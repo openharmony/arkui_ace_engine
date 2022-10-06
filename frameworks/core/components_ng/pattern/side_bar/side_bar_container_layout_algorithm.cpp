@@ -37,7 +37,7 @@ constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty() || children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         LOGE("SideBarContainerLayoutAlgorithm::Measure, children is empty or less than 3.");
         return;
@@ -149,7 +149,7 @@ void SideBarContainerLayoutAlgorithm::MeasureControlButton(const RefPtr<SideBarC
 
 void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty() || children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         LOGE("SideBarContainerLayoutAlgorithm::Measure, children is empty or less than 3.");
         return;

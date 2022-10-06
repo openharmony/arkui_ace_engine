@@ -58,7 +58,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     LayoutConstraintF childLayoutConstraint;
     childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
     ComputeInnerLayoutParam(childLayoutConstraint);
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
     }
@@ -168,7 +168,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     auto selfSize = frameNode->GetGeometryNode()->GetFrameSize();
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
     }

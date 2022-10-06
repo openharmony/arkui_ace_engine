@@ -33,8 +33,7 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<FlexLayoutProperty>();
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propFlexLayoutAttribute_ = CloneFlexLayoutAttribute();
+        Clone(value);
         return value;
     }
 
@@ -49,6 +48,15 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, FlexDirection, FlexDirection, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, MainAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, Space, Dimension, PROPERTY_UPDATE_MEASURE);
+
+protected:
+    void Clone(RefPtr<LayoutProperty> property) const override
+    {
+        auto value = DynamicCast<FlexLayoutProperty>(property);
+        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propFlexLayoutAttribute_ = CloneFlexLayoutAttribute();
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutProperty);
