@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/dialog/dialog_render_property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

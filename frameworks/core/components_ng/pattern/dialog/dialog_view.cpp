@@ -39,7 +39,8 @@ const char SEPARATE[] = " ";
 
 } // namespace
 
-RefPtr<FrameNode> DialogView::CreateDialogNode(const DialogProperties& param)
+RefPtr<FrameNode> DialogView::CreateDialogNode(
+    const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
     auto dialogNode = DialogView::CreateDialogWithType(param.type);
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
@@ -62,7 +63,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(const DialogProperties& param)
     dialogContext->UpdateBackgroundColor(dialogTheme->GetMaskColorEnd());
     // data used for inspector
     std::string data;
-    BuildChild(dialogNode, param, data, dialogTheme, themeManager);
+    BuildChild(dialogNode, param, data, dialogTheme, customNode);
     BuildButtons(themeManager, dialogNode, param.buttons, dialogTheme, data);
     dialogNode->MarkModifyDone();
     // TODO: build animation.
@@ -92,11 +93,19 @@ RefPtr<FrameNode> DialogView::CreateDialogWithType(DialogType type)
 }
 
 void DialogView::BuildChild(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProperties,
-    std::string& data, const RefPtr<DialogTheme>& dialogTheme, const RefPtr<ThemeManager>& themeManager)
+    std::string& data, const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode = nullptr)
 {
-    bool isCustom = dialogProperties.customStyle;
-    if (isCustom) {
-        // TODO: custom dialog not completed
+    LOGD("build child");
+    // append customNode
+    if (customNode) {
+        if (!AceType::InstanceOf<CustomNode>(customNode)) {
+            LOGE("dialogNode's child isn't FrameNode");
+        }
+        auto contentRenderContext = AceType::DynamicCast<CustomNode>(customNode)->GetRenderContext();
+        CHECK_NULL_VOID(contentRenderContext);
+        contentRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+        customNode->MountToParent(dialog);
+        LOGD("customNode tag = %s mounted to dialog", customNode->GetTag().c_str());
         return;
     }
     auto deviceType = SystemProperties::GetDeviceType();

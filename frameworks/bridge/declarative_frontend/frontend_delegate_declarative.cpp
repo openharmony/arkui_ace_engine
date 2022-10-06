@@ -1335,7 +1335,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
             [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
-                overlayManager->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
+                overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
             },
             TaskExecutor::TaskType::UI);
         return;
