@@ -142,6 +142,7 @@ private:
 
     float MainSize() const;
     void PlaySpringAnimation(double dragVelocity);
+    void ResetScrollableEvent(bool scrollable);
 
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<Animator> springController_;
@@ -161,6 +162,7 @@ private:
     bool isScroll_ = false;
     bool scrollStop_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
+    bool initScrollable_ = false;
 };
 } // namespace OHOS::Ace::NG
 

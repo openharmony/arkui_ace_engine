@@ -142,6 +142,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AddPaddingToSize(padding, contentIdealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
 
+    ResetScrollable();
+
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f, mainSize is %{public}f",
         startIndex_.value(), endIndex_.value(), currentOffset_, contentMainSize_);
 }
@@ -790,4 +792,18 @@ void ListLayoutAlgorithm::LayoutBackwardForLaneList(
         layoutWrapper->RemoveChildInRenderTree(index);
     }
 }
+
+void ListLayoutAlgorithm::ResetScrollable()
+{
+    if (itemPosition_.empty()) {
+        LOGE("There is no item in list.");
+        return;
+    }
+
+    auto firstItem = itemPosition_.begin();
+    auto lastItem = itemPosition_.rbegin();
+    auto totalSize = lastItem->second.second - firstItem->second.first;
+    scrollable_ = GreatNotEqual(totalSize, contentMainSize_);
+}
+
 } // namespace OHOS::Ace::NG

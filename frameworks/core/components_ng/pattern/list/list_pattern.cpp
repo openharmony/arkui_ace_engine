@@ -117,6 +117,7 @@ void ListPattern::OnModifyDone()
         scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginTask));
     }
     gestureHub->AddScrollableEvent(scrollableEvent_);
+    initScrollable_ = true;
 }
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -189,7 +190,29 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     jumpIndex_.reset();
     currentDelta_ = 0.0f;
+    ResetScrollableEvent(listLayoutAlgorithm->Scrollable());
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
+}
+
+void ListPattern::ResetScrollableEvent(bool scrollable)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    if (scrollable && !initScrollable_) {
+        gestureHub->AddScrollableEvent(scrollableEvent_);
+        initScrollable_ = true;
+        return;
+    }
+
+    if (initScrollable_) {
+        gestureHub->RemoveScrollableEvent(scrollableEvent_);
+        initScrollable_ = false;
+    }
 }
 
 void ListPattern::UpdateCurrentOffset(float offset)
