@@ -125,8 +125,8 @@ void RenderSlidingPanel::Update(const RefPtr<Component>& component)
     miniHeight_ = slidingPanel->GetMiniHeight();
     panelId_ = slidingPanel->GetPanelId();
     visible = slidingPanel->Visible();
-    onSizeChange_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        slidingPanel->GetOnSizeChanged(), context_);
+    onSizeChange_ =
+        AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(slidingPanel->GetOnSizeChanged(), context_);
     onHeightChange_ = slidingPanel->GetOnHeightChanged();
     MarkNeedLayout();
 }
@@ -213,11 +213,11 @@ bool RenderSlidingPanel::InitializeLayoutProps()
         CheckHeightValidity();
         isFirstLayout_ = true;
         fullHalfBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
-            (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
+                            (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
         halfMiniBoundary_ = defaultBlankHeights_[PanelMode::HALF] +
-            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::HALF]) / 2.0;
+                            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::HALF]) / 2.0;
         fullMiniBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
-            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
+                            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
     }
     minBlankHeight_ = NormalizeToPx(BLANK_MIN_HEIGHT);
     if (dragBar_ && !(dragBar_->HasClickArrowCallback())) {
@@ -544,20 +544,20 @@ void RenderSlidingPanel::AppendBlankHeightAnimation(double blankHeight, PanelMod
     // Mass: 1.0, stiffness: 100.0f, damping: 20.0f. For Critical Damped.
     auto springProperty = AceType::MakeRefPtr<SpringProperty>(1.0f, 100.0f, 20.0f);
     auto heightAnimation = AceType::MakeRefPtr<SpringAnimation>(springProperty);
-    heightAnimation->AddListener([weak = AceType::WeakClaim(this),
-        start = blankHeight_, end = blankHeight, mode](const double& value) {
-        auto panel = weak.Upgrade();
-        if (!panel) {
-            LOGE("Panel is null.");
-            return;
-        }
-        if (value > 1.0) {
-            panel->dragBar_->ShowInPanelMode(mode);
-        }
-        panel->blankHeight_ = start + (end - start) * value;
-        panel->FireHeightChangeEvent();
-        panel->MarkNeedLayout();
-    });
+    heightAnimation->AddListener(
+        [weak = AceType::WeakClaim(this), start = blankHeight_, end = blankHeight, mode](const double& value) {
+            auto panel = weak.Upgrade();
+            if (!panel) {
+                LOGE("Panel is null.");
+                return;
+            }
+            if (value > 1.0) {
+                panel->dragBar_->ShowInPanelMode(mode);
+            }
+            panel->blankHeight_ = start + (end - start) * value;
+            panel->FireHeightChangeEvent();
+            panel->MarkNeedLayout();
+        });
     animator_->AddInterpolator(heightAnimation);
 }
 
