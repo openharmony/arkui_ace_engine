@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/calendar/calendar_view.h"
 
-#include <cstddef>
 #include <string>
 
 #include "base/memory/referenced.h"
@@ -23,6 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_month_view.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
@@ -78,10 +78,7 @@ void CalendarView::Create(const CalendarData& calendarData)
     auto nextPattern = nextMonthFrameNode->GetPattern<CalendarMonthPattern>();
     CHECK_NULL_VOID(nextPattern);
     if (calendarData.controller) {
-        calendarData.controller->SetSwiperController(swiperController);
-        currentPattern->SetCalendarController(calendarData.controller);
-        prePattern->SetCalendarController(calendarData.controller);
-        nextPattern->SetCalendarController(calendarData.controller);
+        calendarPattern->SetCalendarControllerNg(calendarData.controller);
     }
     preMonthFrameNode->MountToParent(swiperNode);
     preMonthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

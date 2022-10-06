@@ -30,6 +30,15 @@ void JSCalendarController::JSBind(BindingTarget globalObj)
 void JSCalendarController::Constructor(const JSCallbackInfo& args)
 {
     auto jsCalendarController = Referenced::MakeRefPtr<JSCalendarController>();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto controllerNg = Referenced::MakeRefPtr<NG::CalendarControllerNg>();
+        jsCalendarController->SetControllerNg(controllerNg);
+        jsCalendarController->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsCalendarController));
+        return;
+    }
+    auto controllerV2 = Referenced::MakeRefPtr<CalendarControllerV2>();
+    jsCalendarController->SetController(controllerV2);
     jsCalendarController->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsCalendarController));
 }
@@ -43,6 +52,12 @@ void JSCalendarController::Destructor(JSCalendarController* controller)
 
 void JSCalendarController::BackToToday(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (controllerNg_ != nullptr) {
+            controllerNg_->BackToToday();
+        }
+        return;
+    }
     if (controller_ != nullptr) {
         controller_->BackToToday();
     }
@@ -50,10 +65,9 @@ void JSCalendarController::BackToToday(const JSCallbackInfo& args)
 
 void JSCalendarController::GoTo(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsObject() || !controller_) {
+    if (info.Length() != 1 || !info[0]->IsObject()) {
         return;
     }
-
     auto obj = JSRef<JSObject>::Cast(info[0]);
     int32_t year = 0;
     int32_t month = 0;
@@ -61,7 +75,15 @@ void JSCalendarController::GoTo(const JSCallbackInfo& info)
     ConvertFromJSValue(obj->GetProperty("year"), year);
     ConvertFromJSValue(obj->GetProperty("month"), month);
     ConvertFromJSValue(obj->GetProperty("day"), day);
-    controller_->GoTo(year, month, day);
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (controllerNg_ != nullptr) {
+            controllerNg_->GoTo(year, month, day);
+        }
+        return;
+    }
+    if (controller_ != nullptr) {
+        controller_->GoTo(year, month, day);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

@@ -18,8 +18,10 @@
 #include <optional>
 
 #include "base/geometry/offset.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
@@ -36,6 +38,14 @@ void CalendarPattern::OnAttachToFrameNode()
 bool CalendarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
     return false;
+}
+
+void CalendarPattern::SetCalendarControllerNg(const RefPtr<CalendarControllerNg>& calendarController)
+{
+    calendarControllerNg_ = calendarController;
+    if (calendarControllerNg_) {
+        calendarControllerNg_->SetCalendarPattern(AceType::WeakClaim(this));
+    }
 }
 
 void CalendarPattern::OnModifyDone()
@@ -66,7 +76,7 @@ void CalendarPattern::OnModifyDone()
     CHECK_NULL_VOID(nextFrameNode);
     auto nextPattern = nextFrameNode->GetPattern<CalendarMonthPattern>();
     CHECK_NULL_VOID(nextPattern);
-    if (initialize) {
+    if (initialize_) {
         prePattern->SetMonthData(preMonth_, MonthState::PRE_MONTH);
         prePattern->SetCalendarDay(calendarDay_);
         currentPattern->SetMonthData(currentMonth_, MonthState::CUR_MONTH);
@@ -76,7 +86,7 @@ void CalendarPattern::OnModifyDone()
         if (currentMonth_.days.empty() && calendarEventHub->GetOnRequestDataEvent()) {
             FireFirstRequestData();
         } else {
-            initialize = false;
+            initialize_ = false;
         }
         auto requestDataCallBack = [weak = WeakClaim(this), swiperEventHub = swiperEventHub]() {
             auto pattern = weak.Upgrade();
@@ -98,6 +108,9 @@ void CalendarPattern::OnModifyDone()
             calenderMonthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
         return;
+    }
+    if (backToToday_ || goTo_) {
+        JumpTo(preFrameNode, currentFrameNode, nextFrameNode, swiperFrameNode);
     }
     auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
@@ -205,6 +218,97 @@ void CalendarPattern::FireRequestData(MonthState monthState)
     json->Put("year", currentMonth_.year);
     json->Put("month", currentMonth_.month);
     onRequest(json->ToString());
+}
+
+void CalendarPattern::FireGoToRequestData(int32_t year, int32_t month, int32_t day)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = GetEventHub<CalendarEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto json = JsonUtil::Create(true);
+    auto currentMonth = calendarDay_.month;
+    json->Put("currentYear", currentMonth.year);
+    json->Put("currentMonth", currentMonth.month);
+    json->Put("year", year);
+    json->Put("month", month);
+    json->Put("MonthState", 0);
+    goToCalendarDay_ = day;
+    eventHub->UpdateRequestDataEvent(json->ToString());
+}
+
+void CalendarPattern::JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr<FrameNode>& curFrameNode,
+    const RefPtr<FrameNode>& nextFrameNode, const RefPtr<FrameNode>& swiperFrameNode)
+{
+    auto prePattern = preFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(prePattern);
+    auto currentPattern = curFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(currentPattern);
+    auto nextPattern = nextFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(nextPattern);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto currentIndex = swiperPattern->GetCurrentIndex();
+    switch (currentIndex) {
+        case 0: {
+            if (goTo_) {
+                currentMonth_.days[--goToCalendarDay_].focused = true;
+            }
+            prePattern->SetMonthData(currentMonth_, MonthState::CUR_MONTH);
+            if (backToToday_) {
+                prePattern->SetCalendarDay(calendarDay_);
+            }
+            currentPattern->SetMonthData(nextMonth_, MonthState::NEXT_MONTH);
+            nextPattern->SetMonthData(preMonth_, MonthState::PRE_MONTH);
+            curFrameNode->MarkModifyDone();
+            curFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            preFrameNode->MarkModifyDone();
+            preFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            nextFrameNode->MarkModifyDone();
+            nextFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            break;
+        }
+        case 1: {
+            prePattern->SetMonthData(preMonth_, MonthState::PRE_MONTH);
+            if (goTo_) {
+                currentMonth_.days[--goToCalendarDay_].focused = true;
+            }
+            currentPattern->SetMonthData(currentMonth_, MonthState::CUR_MONTH);
+            if (backToToday_) {
+                currentPattern->SetCalendarDay(calendarDay_);
+            }
+            nextPattern->SetMonthData(nextMonth_, MonthState::NEXT_MONTH);
+            curFrameNode->MarkModifyDone();
+            curFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            preFrameNode->MarkModifyDone();
+            preFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            nextFrameNode->MarkModifyDone();
+            nextFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            break;
+        }
+        case 2: {
+            prePattern->SetMonthData(nextMonth_, MonthState::NEXT_MONTH);
+            currentPattern->SetMonthData(preMonth_, MonthState::PRE_MONTH);
+            if (goTo_) {
+                currentMonth_.days[--goToCalendarDay_].focused = true;
+            }
+            nextPattern->SetMonthData(currentMonth_, MonthState::CUR_MONTH);
+            if (backToToday_) {
+                nextPattern->SetCalendarDay(calendarDay_);
+            }
+            curFrameNode->MarkModifyDone();
+            curFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            preFrameNode->MarkModifyDone();
+            preFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            nextFrameNode->MarkModifyDone();
+            nextFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            break;
+        }
+        default:
+            break;
+    }
+    backToToday_ = false;
+    goTo_ = false;
 }
 
 } // namespace OHOS::Ace::NG

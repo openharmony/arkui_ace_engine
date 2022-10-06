@@ -16,16 +16,16 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CALENDAR_CONTROLLER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CALENDAR_CONTROLLER_H
 
-#include "bridge/declarative_frontend/engine/bindings.h"
-
 #include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/engine/bindings.h"
 #include "core/components/calendar/calendar_controller_v2.h"
+#include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
 
 namespace OHOS::Ace::Framework {
 
 class JSCalendarController : public Referenced {
 public:
-    JSCalendarController() : controller_(AceType::MakeRefPtr<CalendarControllerV2>()) {}
+    JSCalendarController() = default;
     ~JSCalendarController() override = default;
 
     static void JSBind(BindingTarget globalObj);
@@ -40,12 +40,28 @@ public:
         return controller_;
     }
 
+    void SetController(const RefPtr<CalendarControllerV2>& controllerV2)
+    {
+        controller_ = controllerV2;
+    }
+
+    const RefPtr<NG::CalendarControllerNg>& GetControllerNg() const
+    {
+        return controllerNg_;
+    }
+
+    void SetControllerNg(const RefPtr<NG::CalendarControllerNg>& controllerNg)
+    {
+        controllerNg_ = controllerNg;
+    }
+
 private:
     RefPtr<CalendarControllerV2> controller_;
+    RefPtr<NG::CalendarControllerNg> controllerNg_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JSCalendarController);
 };
 
-} // OHOS::Ace::Framework
+} // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CALENDAR_CONTROLLER_H
