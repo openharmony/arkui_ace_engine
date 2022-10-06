@@ -42,7 +42,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->shapeMode_ = ShapeMode(themeConstants->GetInt(THEME_SCROLL_BAR_SHAPE_MODE));
+            theme->shapeMode_ = static_cast<ShapeMode>(themeConstants->GetInt(THEME_SCROLL_BAR_SHAPE_MODE));
             theme->normalWidth_ = themeConstants->GetDimension(THEME_SCROLL_BAR_NORMAL_WIDTH);
             theme->activeWidth_ = themeConstants->GetDimension(THEME_SCROLL_BAR_ACTIVE_WIDTH);
             theme->minHeight_ = themeConstants->GetDimension(THEME_SCROLL_BAR_MIN_HEIGHT);

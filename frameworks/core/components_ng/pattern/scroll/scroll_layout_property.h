@@ -20,6 +20,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -28,13 +29,18 @@ class ACE_EXPORT ScrollLayoutProperty : public LayoutProperty {
 
 public:
     ScrollLayoutProperty() = default;
-    ~ScrollLayoutProperty() override = default;
+    ~ScrollLayoutProperty() override
+    {
+        scrollEffect_ = nullptr;
+    }
 
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<ScrollLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propAxis_ = CloneAxis();
+        value->propBarWidth_ = CloneBarWidth();
+        value->scrollEffect_ = scrollEffect_;
         return value;
     }
 
@@ -44,9 +50,21 @@ public:
         ResetAxis();
     }
 
+    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
+    {
+        scrollEffect_ = scrollEffect;
+    }
+
+    const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
+    {
+        return scrollEffect_;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
+private:
+    RefPtr<ScrollEdgeEffect> scrollEffect_;
 };
 
 } // namespace OHOS::Ace::NG

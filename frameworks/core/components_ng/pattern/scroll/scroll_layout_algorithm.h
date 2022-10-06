@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components/scroll/scroll_component.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,12 +44,24 @@ public:
         return currentOffset_;
     }
 
+    float GetScrollableDistance() const
+    {
+        return scrollableDistance_;
+    }
+
+    float GetViewPort() const
+    {
+        return viewPortLength_;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
     float currentOffset_ = 0.0f;
+    float scrollableDistance_ = 0.0f;
+    float viewPortLength_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG
