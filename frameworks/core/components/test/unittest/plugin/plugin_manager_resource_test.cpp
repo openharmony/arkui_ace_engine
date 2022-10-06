@@ -114,7 +114,7 @@ HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetIntParam001, TestSiz
      */
 
     int32_t result = pluginManagerResource.GetIntParam("paramname", "p");
-    GTEST_LOG_(INFO) << "PluginManagerResourceGetIntParam001 is begin2:"<<result;
+    GTEST_LOG_(INFO) << "PluginManagerResourceGetIntParam001 is begin2:" << result;
     EXPECT_EQ(result, 0);
 }
 
@@ -207,7 +207,7 @@ HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetStringParam001, Test
      */
 
     std::string result = pluginManagerResource.GetStringParam("paramname", "p");
-    GTEST_LOG_(INFO) << "PluginManagerResourceGetStringParam001 is begin2:"<<result;
+    GTEST_LOG_(INFO) << "PluginManagerResourceGetStringParam001 is begin2:" << result;
     EXPECT_EQ(result, "ramname");
 }
 

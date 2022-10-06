@@ -262,6 +262,10 @@ const char SEARCH_ETS_TAG[] = "Search";
 const char FORM_COMPONENT_TAG[] = "FormComponent";
 const char FORM_ETS_TAG[] = "FormComponent";
 
+// PluginComponent
+const char PLUGIN_COMPONENT_TAG[] = "PluginComponent";
+const char PLUGIN_ETS_TAG[] = "PluginComponent";
+
 // video
 const char VIDEO_COMPONENT_TAG[] = "VideoComponentV2";
 const char VIDEO_ETS_TAG[] = "Video";

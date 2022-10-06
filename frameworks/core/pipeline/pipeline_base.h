@@ -33,6 +33,7 @@
 #include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
+#include "core/common/platform_res_register.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
@@ -60,6 +61,8 @@ public:
     PipelineBase() = default;
     PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
+    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+        const RefPtr<Frontend>& frontend, int32_t instanceId, RefPtr<PlatformResRegister> platformResRegister);
     ~PipelineBase() override;
 
     static RefPtr<PipelineBase> GetCurrentContext();
@@ -406,6 +409,16 @@ public:
         isJsCard_ = isJsCard;
     }
 
+    void SetIsJsPlugin(bool isJsPlugin)
+    {
+        isJsPlugin_ = isJsPlugin;
+    }
+
+    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
+    {
+        drawDelegate_ = std::move(delegate);
+    }
+
     bool IsJsCard() const
     {
         return isJsCard_;
@@ -645,6 +658,11 @@ public:
         return density_;
     }
 
+    RefPtr<PlatformResRegister> GetPlatformResRegister() const
+    {
+        return platformResRegister_;
+    }
+
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
@@ -739,6 +757,8 @@ protected:
     bool isEtsCard_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
+
+    bool isJsPlugin_ = false;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
     float fontScale_ = 1.0f;
@@ -755,6 +775,7 @@ protected:
     Offset pluginEventOffset_ { 0, 0 };
     Color appBgColor_ = Color::WHITE;
 
+    std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
     std::unique_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -774,6 +795,7 @@ protected:
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
+    RefPtr<PlatformResRegister> platformResRegister_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
 

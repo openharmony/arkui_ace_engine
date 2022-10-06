@@ -270,6 +270,10 @@ ACE_EXPORT extern const char SEARCH_ETS_TAG[];
 ACE_EXPORT extern const char FORM_COMPONENT_TAG[];
 ACE_EXPORT extern const char FORM_ETS_TAG[];
 
+// PluginComponent
+ACE_EXPORT extern const char PLUGIN_COMPONENT_TAG[];
+ACE_EXPORT extern const char PLUGIN_ETS_TAG[];
+
 // video
 ACE_EXPORT extern const char VIDEO_COMPONENT_TAG[];
 ACE_EXPORT extern const char VIDEO_ETS_TAG[];

@@ -106,6 +106,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/common/plugin_manager.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
@@ -156,10 +157,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
+
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
+
 #include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
@@ -183,13 +186,24 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
+        RefPtr<NG::FrameNode> pageNode;
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+        if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
+            auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());
+            CHECK_NULL_VOID(pluginContainer);
+            pageNode = pluginContainer->GetPluginNode().Upgrade();
+            CHECK_NULL_VOID(pageNode);
+        } else
+#endif
+        {
+            auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
+            CHECK_NULL_VOID(frontEnd);
+            auto pageRouterManager = frontEnd->GetPageRouterManager();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageNode = pageRouterManager->GetCurrentPageNode();
+            CHECK_NULL_VOID(pageNode);
+        }
         Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
-        auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
-        CHECK_NULL_VOID(frontEnd);
-        auto pageRouterManager = frontEnd->GetPageRouterManager();
-        CHECK_NULL_VOID(pageRouterManager);
-        auto pageNode = pageRouterManager->GetCurrentPageNode();
-        CHECK_NULL_VOID(pageNode);
         if (!pageNode->GetChildren().empty()) {
             LOGW("the page has already add node, clean");
             auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());

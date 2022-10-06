@@ -84,7 +84,7 @@ void PluginManagerDelegate::RegisterEvent()
 }
 
 void PluginManagerDelegate::CreatePlatformResource(
-    const WeakPtr<PipelineContext>& context, const RequestPluginInfo& info)
+    const WeakPtr<PipelineBase>& context, const RequestPluginInfo& info)
 {
     context_ = context;
     state_ = State::CREATING;
@@ -134,7 +134,7 @@ void PluginManagerDelegate::CreatePlatformResource(
     OnPluginComplete("Complete");
 }
 
-void PluginManagerDelegate::AddPlugin(const WeakPtr<PipelineContext>& context, const RequestPluginInfo& info)
+void PluginManagerDelegate::AddPlugin(const WeakPtr<PipelineBase>& context, const RequestPluginInfo& info)
 {
     LOGI("PluginManagerDelegate::AddPlugin");
     CreatePlatformResource(context, info);
@@ -142,7 +142,6 @@ void PluginManagerDelegate::AddPlugin(const WeakPtr<PipelineContext>& context, c
 
 void PluginManagerDelegate::AddPluginCompleteCallback(const OnPluginCompleteCallback& callback)
 {
-    LOGI("PluginManagerDelegate::AddPluginCompleteCallback");
     if (!callback || state_ == State::RELEASED) {
         LOGE("callback is null or has released");
         return;
