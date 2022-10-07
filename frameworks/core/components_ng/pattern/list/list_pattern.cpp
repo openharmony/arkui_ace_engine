@@ -209,7 +209,7 @@ void ListPattern::ResetScrollableEvent(bool scrollable)
         return;
     }
 
-    if (initScrollable_) {
+    if (!scrollable && initScrollable_) {
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
         initScrollable_ = false;
     }
