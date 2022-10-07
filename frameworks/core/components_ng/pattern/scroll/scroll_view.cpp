@@ -32,8 +32,8 @@ RefPtr<FrameNode> ScrollView::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     stack->Push(frameNode);
-    auto springEdgeEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
-    SetScrollEdgeEffect(springEdgeEffect);
+    auto defaultEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
+    SetScrollEdgeEffect(defaultEdgeEffect);
     return frameNode;
 }
 
