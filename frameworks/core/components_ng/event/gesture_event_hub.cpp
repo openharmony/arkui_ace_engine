@@ -236,4 +236,104 @@ void GestureEventHub::CombineIntoExclusiveRecognizer(
     result.swap(finalResult);
 }
 
+void GestureEventHub::InitDragDropEvent()
+{
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto gestureEventHub = weak.Upgrade();
+        if (gestureEventHub) {
+            gestureEventHub->HandleOnDragStart(info);
+        }
+    };
+
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto gestureEventHub = weak.Upgrade();
+        if (gestureEventHub) {
+            gestureEventHub->HandleOnDragUpdate(info);
+        }
+    };
+
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto gestureEventHub = weak.Upgrade();
+        if (gestureEventHub) {
+            gestureEventHub->HandleOnDragEnd(info);
+        }
+    };
+
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto gestureEventHub = weak.Upgrade();
+        if (gestureEventHub) {
+            gestureEventHub->HandleOnDragCancel();
+        }
+    };
+
+    auto dragEvent = MakeRefPtr<DragEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    AddDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_VOID(eventHub);
+    
+    if (!eventHub->HasOnDragStart()) {
+        LOGE("HandleOnDragStart: there is no onDragStart function.");
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+    auto extraParams = JsonUtil::Create(true);
+    auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams->ToString());
+
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    if (dragDropProxy_) {
+        dragDropProxy_ = nullptr;
+    }
+
+    dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
+    CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo);
+}
+
+void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
+{
+    CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->OnDragMove(info);
+}
+
+void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_VOID(eventHub);
+
+    CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->OnDragEnd(info);
+
+    if (eventHub->HasOnDrop()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+
+        RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+        event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+        event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+        eventHub->FireOnDrop(event, "");
+    }
+
+    dragDropProxy_ = nullptr;
+}
+
+void GestureEventHub::HandleOnDragCancel()
+{
+    CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->onDragCancel();
+    dragDropProxy_ = nullptr;
+}
+
 } // namespace OHOS::Ace::NG

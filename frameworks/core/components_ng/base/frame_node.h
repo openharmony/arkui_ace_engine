@@ -240,6 +240,8 @@ public:
 
     void OnWindowHide() override;
 
+    OffsetF GetGlobalOffset() const;
+
 private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;

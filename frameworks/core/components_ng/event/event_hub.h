@@ -130,6 +130,76 @@ public:
         return static_cast<bool>(onAreaChanged_);
     }
 
+    using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+    using OnDragStartFunc = std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+    void SetOnDragStart(OnDragStartFunc&& onDragStart)
+    {
+        onDragStart_ = std::move(onDragStart);
+    }
+
+    const OnDragStartFunc& GetOnDragStart() const
+    {
+        return onDragStart_;
+    }
+
+    bool HasOnDragStart() const
+    {
+        return static_cast<bool>(onDragStart_);
+    }
+
+    void SetOnDragEnter(OnDragFunc&& onDragEnter)
+    {
+        onDragEnter_ = std::move(onDragEnter);
+    }
+
+    void FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+    {
+        if (onDragEnter_) {
+            onDragEnter_(info, extraParams);
+        }
+    }
+
+    void SetOnDragLeave(OnDragFunc&& onDragLeave)
+    {
+        onDragLeave_ = std::move(onDragLeave);
+    }
+
+    void FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+    {
+        if (onDragLeave_) {
+            onDragLeave_(info, extraParams);
+        }
+    }
+
+    void SetOnDragMove(OnDragFunc&& onDragMove)
+    {
+        onDragMove_ = std::move(onDragMove);
+    }
+
+    void FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+    {
+        if (onDragMove_) {
+            onDragMove_(info, extraParams);
+        }
+    }
+
+    void SetOnDrop(OnDragFunc&& onDrop)
+    {
+        onDrop_ = std::move(onDrop);
+    }
+
+    void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+    {
+        if (onDrop_) {
+            onDrop_(info, extraParams);
+        }
+    }
+
+    bool HasOnDrop() const
+    {
+        return static_cast<bool>(onDrop_);
+    }
+
 private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
@@ -139,6 +209,12 @@ private:
     std::function<void()> onAppear_;
     std::function<void()> onDisappear_;
     OnAreaChangedFunc onAreaChanged_;
+
+    OnDragStartFunc onDragStart_;
+    OnDragFunc onDragEnter_;
+    OnDragFunc onDragLeave_;
+    OnDragFunc onDragMove_;
+    OnDragFunc onDrop_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

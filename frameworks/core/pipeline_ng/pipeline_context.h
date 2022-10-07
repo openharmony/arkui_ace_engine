@@ -23,6 +23,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -89,7 +90,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override {}
+    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override {}
@@ -161,6 +162,11 @@ public:
         return selectOverlayManager_;
     }
 
+    const RefPtr<DragDropManager>& GetDragDropManager()
+    {
+        return dragDropManager_;
+    }
+
     void FlushBuild() override;
 
     void AddBuildFinishCallBack(std::function<void()>&& callback);
@@ -177,6 +183,11 @@ public:
     void SetIsFocusingByTab(bool isFocusingByTab)
     {
         isFocusingByTab_ = isFocusingByTab;
+    }
+
+    void SetIsDragged(bool isDragged)
+    {
+        isDragged_ = isDragged;
     }
 
     bool RequestDefaultFocus();
@@ -247,11 +258,13 @@ private:
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
     RefPtr<SelectOverlayManager> selectOverlayManager_;
+    RefPtr<DragDropManager> dragDropManager_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
+    bool isDragged_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

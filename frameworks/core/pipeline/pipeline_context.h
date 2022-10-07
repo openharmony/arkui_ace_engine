@@ -1219,12 +1219,10 @@ private:
     std::function<void(void)> windowStartMoveCallback_ = nullptr;
     std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
 
-    std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     Size selectedItemSize_ { 0.0, 0.0 };
     size_t selectedIndex_ = -1;
     size_t insertIndex_ = -1;
-    RefPtr<Clipboard> clipboard_;
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
     std::string selectedText_;

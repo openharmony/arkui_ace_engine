@@ -780,9 +780,13 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
         case OHOS::Rosen::DragEvent::DRAG_EVENT_END:
             action = DragEventAction::DRAG_EVENT_END;
             break;
-        case OHOS::Rosen::DragEvent::DRAG_EVENT_IN:
         case OHOS::Rosen::DragEvent::DRAG_EVENT_OUT:
+            action = DragEventAction::DRAG_EVENT_OUT;
+            break;
         case OHOS::Rosen::DragEvent::DRAG_EVENT_MOVE:
+            action = DragEventAction::DRAG_EVENT_MOVE;
+            break;
+        case OHOS::Rosen::DragEvent::DRAG_EVENT_IN:
         default:
             action = DragEventAction::DRAG_EVENT_START;
             break;

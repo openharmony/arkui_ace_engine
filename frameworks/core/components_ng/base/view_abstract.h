@@ -127,6 +127,15 @@ public:
     static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
+    static void SetOnDragStart(
+        std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
+    static void SetOnDragEnter(
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragEnter);
+    static void SetOnDragLeave(
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave);
+    static void SetOnDragMove(
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove);
+    static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
 
     // flex properties
     static void SetAlignSelf(int32_t value);
@@ -146,6 +155,9 @@ public:
     static void SetEdgeClip(bool isClip);
 
     static void Pop();
+
+private:
+    static void AddDragFrameNodeToManager();
 };
 } // namespace OHOS::Ace::NG
 
