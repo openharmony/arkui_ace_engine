@@ -25,8 +25,8 @@
 
 namespace OHOS::Ace::NG {
 // CustomNode is the frame node of @Component struct.
-class ACE_EXPORT CustomNode : public FrameNode {
-    DECLARE_ACE_TYPE(CustomNode, FrameNode);
+class ACE_EXPORT CustomNode : public UINode {
+    DECLARE_ACE_TYPE(CustomNode, UINode);
 
 public:
     static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
@@ -34,12 +34,16 @@ public:
     CustomNode(int32_t nodeId, const std::string& viewKey);
     ~CustomNode() override;
 
+    void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
     void SetRenderFunction(const RenderFunction& renderFunction)
     {
-        auto pattern = DynamicCast<CustomNodePattern>(GetPattern());
-        if (pattern) {
-            pattern->SetRenderFunction(renderFunction);
-        }
+        renderFunction_ = renderFunction;
     }
 
     void FireOnAppear() const
@@ -76,6 +80,7 @@ private:
     std::function<void()> destroyFunc_;
     std::string viewKey_;
     bool needRebuild_ = false;
+    RenderFunction renderFunction_;
 };
 } // namespace OHOS::Ace::NG
 
