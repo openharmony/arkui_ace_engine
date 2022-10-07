@@ -47,9 +47,11 @@ void JSRenderImage::Destructor(JSRenderImage* controller)
 void JSRenderImage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRenderImage>::Declare("ImageBitmap");
-    JSClass<JSRenderImage>::CustomMethod("width", &JSRenderImage::JsWidth);
-    JSClass<JSRenderImage>::CustomMethod("height", &JSRenderImage::JsHeight);
-
+    JSClass<JSRenderImage>::CustomProperty("width", &JSRenderImage::JsGetWidth,
+                                    &JSRenderImage::JsSetWidth);
+    JSClass<JSRenderImage>::CustomProperty("height", &JSRenderImage::JsGetHeight,
+                                    &JSRenderImage::JsSetHeight);
+    JSClass<JSRenderImage>::CustomMethod("close", &JSRenderImage::JsClose);
     JSClass<JSRenderImage>::Bind(globalObj, JSRenderImage::Constructor, JSRenderImage::Destructor);
 }
 
@@ -58,22 +60,40 @@ std::string JSRenderImage::GetSrc()
     return src_;
 }
 
-void JSRenderImage::JsWidth(const JSCallbackInfo& info)
+void JSRenderImage::JsSetWidth(const JSCallbackInfo& info)
 {
-    double width = 0;
-    if (info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], width);
-        width_ = width;
-    }
+    return;
 }
 
-void JSRenderImage::JsHeight(const JSCallbackInfo& info)
+void JSRenderImage::JsSetHeight(const JSCallbackInfo& info)
 {
-    double height = 0;
-    if (info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], height);
-        height_ = height;
-    }
+    return;
+}
+
+void JSRenderImage::JsGetWidth(const JSCallbackInfo& info)
+{
+    double width = 0.0;
+    width = width_;
+    width = SystemProperties::Px2Vp(width);
+    auto returnValue = JSVal(ToJSValue(width));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
+}
+
+void JSRenderImage::JsGetHeight(const JSCallbackInfo& info)
+{
+    double height = 0.0;
+    height = height_;
+
+    height = SystemProperties::Px2Vp(height);
+    auto returnValue = JSVal(ToJSValue(height));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
+}
+
+void JSRenderImage::JsClose(const JSCallbackInfo& info)
+{
+    return;
 }
 
 double JSRenderImage::GetWidth()
