@@ -766,15 +766,17 @@ bool WebDelegate::LoadDataWithRichText()
             return false;
         }
 
-        context->PostAsyncEvent([weak = WeakClaim(this), data]() {
-            auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
-            if (delegate->nweb_) {
-                delegate->nweb_->LoadWithDataAndBaseUrl("", data, "", "", "");
-            }
-        });
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this), data]() {
+                auto delegate = weak.Upgrade();
+                if (!delegate) {
+                    return;
+                }
+                if (delegate->nweb_) {
+                    delegate->nweb_->LoadWithDataAndBaseUrl("", data, "", "", "");
+                }
+            },
+            TaskExecutor::TaskType::PLATFORM);
         return true;
     }
 
@@ -1382,7 +1384,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
 
     onPageFinishedV2_ = useNewPipe ? eventHub->GetOnPageFinishedEvent()
                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                       webCom->GetPageFinishedEventId(), oldContext);
+                                         webCom->GetPageFinishedEventId(), oldContext);
     onPageStartedV2_ = useNewPipe ? eventHub->GetOnPageStartedEvent()
                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                         webCom->GetPageStartedEventId(), oldContext);
@@ -2735,8 +2737,8 @@ bool WebDelegate::OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, Dia
 
 void WebDelegate::OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler)
 {
-    auto param = std::make_shared<FullScreenEnterEvent>(AceType::MakeRefPtr<FullScreenExitHandlerOhos>(
-        handler, WeakClaim(this)));
+    auto param = std::make_shared<FullScreenEnterEvent>(
+        AceType::MakeRefPtr<FullScreenExitHandlerOhos>(handler, WeakClaim(this)));
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
