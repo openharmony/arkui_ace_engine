@@ -26,11 +26,12 @@
 namespace OHOS::Ace::NG {
 
 struct SelectHandleInfo {
+    bool isShow = true;
     RectF paintRect;
 
     bool operator==(const SelectHandleInfo& info) const
     {
-        return paintRect == info.paintRect;
+        return (isShow == info.isShow) && (paintRect == info.paintRect);
     }
 
     bool operator!=(const SelectHandleInfo& info) const
