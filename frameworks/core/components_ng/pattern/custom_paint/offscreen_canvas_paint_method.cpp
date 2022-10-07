@@ -361,6 +361,23 @@ void OffscreenCanvasPaintMethod::SetColorFilter(float matrix[20])
 #endif
 }
 
+bool OffscreenCanvasPaintMethod::GetFilterType(std::string& filterType, std::string& filterParam)
+{
+    std::string paramData = filterParam_;
+    size_t index = paramData.find("(");
+    if (index == std::string::npos) {
+        return false;
+    }
+    filterType = paramData.substr(0, index);
+    filterParam = paramData.substr(index + 1);
+    size_t endeIndex = filterParam.find(")");
+    if (endeIndex  == std::string::npos) {
+        return false;
+    }
+    filterParam.erase(endeIndex, 1);
+    return true;
+}
+
 bool OffscreenCanvasPaintMethod::IsPercentStr(std::string& percent)
 {
     if (percent.find("%") != std::string::npos) {
@@ -421,6 +438,140 @@ void OffscreenCanvasPaintMethod::ImageObjFailed()
     loadingSource_.SetSrc("");
     currentSource_.SetSrc("");
     skiaDom_ = nullptr;
+}
+
+void OffscreenCanvasPaintMethod::DrawImage(
+    PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
+{
+    if (!flutter::UIDartState::Current()) {
+        return;
+    }
+
+    std::string::size_type tmp = canvasImage.src.find(".svg");
+    if (tmp != std::string::npos) {
+        DrawSvgImage(paintWrapper, canvasImage);
+        return;
+    }
+
+    auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
+                        ? ImageProvider::GetSkImage(canvasImage.src, context_, Size(width, height))
+                        : ImageProvider::GetSkImage(canvasImage.src, context_);
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    InitPaintBlend(cachePaint_);
+    const auto skCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    InitImagePaint();
+    if (HasImageShadow()) {
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        SkPath path;
+        path.addRect(skRect);
+        FlutterDecorationPainter::PaintShadow(path, imageShadow_, skCanvas);
+    }
+    switch (canvasImage.flag) {
+        case 0:
+            skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
+            break;
+        case 1: {
+            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            skCanvas->drawImageRect(image, rect, &imagePaint_);
+            break;
+        }
+        case 2: {
+            SkRect dstRect =
+                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect =
+                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+            break;
+        }
+        default:
+            break;
+    }
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
+}
+
+void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
+{
+    if (!flutter::UIDartState::Current()) {
+        return;
+    }
+
+    // get skImage form pixelMap
+    auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
+
+    // Step2: Create SkImage and draw it, using gpu or cpu
+    sk_sp<SkImage> image;
+
+    image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+
+    InitPaintBlend(cachePaint_);
+    const auto skCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    InitImagePaint();
+    switch (canvasImage.flag) {
+        case 0:
+            skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
+            break;
+        case 1: {
+            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            skCanvas->drawImageRect(image, rect, &imagePaint_);
+            break;
+        }
+        case 2: {
+            SkRect dstRect =
+                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect =
+                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+            break;
+        }
+        default:
+            break;
+    }
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
+}
+
+bool OffscreenCanvasPaintMethod::HasImageShadow() const
+{
+    return !(NearZero(imageShadow_.GetOffset().GetX()) && NearZero(imageShadow_.GetOffset().GetY()) &&
+         NearZero(imageShadow_.GetBlurRadius()));
+}
+
+void OffscreenCanvasPaintMethod::SetPaintImage()
+{
+    float matrix[20] = {0};
+    matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
+#ifdef USE_SYSTEM_SKIA
+    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
+#else
+    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
+#endif
+
+    imagePaint_.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
+    imagePaint_.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
+
+    SetDropShadowFilter("0px 0px 0px black");
+    std::string filterType, filterParam;
+    if (!GetFilterType(filterType, filterParam)) {
+        return;
+    }
+    if (filterFunc_.find(filterType) != filterFunc_.end()) {
+        filterFunc_[filterType](filterParam);
+    }
 }
 
 std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(

@@ -56,8 +56,6 @@ public:
     void Ellipse(PaintWrapper* paintWrapper, const EllipseParam& param);
     void BezierCurveTo(PaintWrapper* paintWrapper, const BezierCurveParam& param);
     void QuadraticCurveTo(PaintWrapper* paintWrapper, const QuadraticCurveParam& param);
-    void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
-    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     void PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData);
 
     void Save();
@@ -253,6 +251,7 @@ protected:
 
     void InitImagePaint();
     void InitImageCallbacks();
+    virtual void SetPaintImage() = 0;
     virtual void ImageObjReady(const RefPtr<ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
     virtual sk_sp<SkImage> GetImage(const std::string& src) = 0;

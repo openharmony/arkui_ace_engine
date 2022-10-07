@@ -113,7 +113,6 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
 
     skCanvas->save();
     skCanvas->scale(1.0 / viewScale, 1.0 / viewScale);
-
     skCanvas->drawBitmap(canvasCache_, 0.0f, 0.0f);
 
     skCanvas->restore();
@@ -154,6 +153,96 @@ void CanvasPaintMethod::ImageObjFailed()
 {
     imageObj_ = nullptr;
     skiaDom_ = nullptr;
+}
+
+void CanvasPaintMethod::DrawImage(
+    PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
+{
+    if (!flutter::UIDartState::Current()) {
+        return;
+    }
+
+    std::string::size_type tmp = canvasImage.src.find(".svg");
+    if (tmp != std::string::npos) {
+        DrawSvgImage(paintWrapper, canvasImage);
+        return;
+    }
+
+    auto image = GetImage(canvasImage.src);
+
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    InitImagePaint();
+    InitPaintBlend(imagePaint_);
+
+    switch (canvasImage.flag) {
+        case 0:
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
+            break;
+        case 1: {
+            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            skCanvas_->drawImageRect(image, rect, &imagePaint_);
+            break;
+        }
+        case 2: {
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
+{
+    if (!flutter::UIDartState::Current()) {
+        return;
+    }
+
+    // get skImage form pixelMap
+    auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
+
+    // Step2: Create SkImage and draw it, using gpu or cpu
+    sk_sp<SkImage> image;
+    if (!renderTaskHolder_->ioManager) {
+        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    } else {
+#ifndef GPU_DISABLED
+        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
+            imagePixmap, true, imagePixmap.colorSpace(), true);
+#else
+        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+#endif
+    }
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    InitImagePaint();
+    InitPaintBlend(imagePaint_);
+    switch (canvasImage.flag) {
+        case 0:
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
+            break;
+        case 1: {
+            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            skCanvas_->drawImageRect(image, rect, &imagePaint_);
+            break;
+        }
+        case 2: {
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
