@@ -64,6 +64,13 @@ public:
         destroyFunc_ = std::move(destroyFunc);
     }
 
+    void Reset()
+    {
+        updateFunc_ = nullptr;
+        appearFunc_ = nullptr;
+        destroyFunc_ = nullptr;
+    }
+
     // called by view in js thread
     void MarkNeedUpdate();
 
