@@ -28,6 +28,8 @@ constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
 
+WebPattern::WebPattern() = default;
+
 WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webController)
     : webSrc_(std::move(webSrc)), webController_(webController)
 {}

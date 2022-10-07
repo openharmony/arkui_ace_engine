@@ -62,6 +62,7 @@ class WebPattern : public Pattern {
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
 
+    WebPattern();
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
     WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
 
