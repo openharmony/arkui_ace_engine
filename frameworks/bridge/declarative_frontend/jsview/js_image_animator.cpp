@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/image_animator/image_animator_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -24,6 +25,10 @@ constexpr uint32_t DEFAULT_ITERATIONS = 1;
 
 void JSImageAnimator::Create()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::Create();
+        return;
+    }
     RefPtr<ImageAnimatorComponent> imageAnimator = AceType::MakeRefPtr<ImageAnimatorComponent>("ImageAnimator");
     imageAnimator->SetIteration(DEFAULT_ITERATIONS);
     imageAnimator->SetDuration(DEFAULT_DURATION);
@@ -79,6 +84,11 @@ void JSImageAnimator::SetImages(const JSCallbackInfo& info)
         images.push_back(imageProperties);
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetImages(images);
+        return;
+    }
+
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (imageAnimator) {
@@ -88,6 +98,10 @@ void JSImageAnimator::SetImages(const JSCallbackInfo& info)
 
 void JSImageAnimator::SetState(int32_t state)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetStatus(static_cast<Animator::Status>(state));
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (imageAnimator) {
@@ -97,6 +111,10 @@ void JSImageAnimator::SetState(int32_t state)
 
 void JSImageAnimator::SetDuration(int32_t duration)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetDuration(duration);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (imageAnimator) {
@@ -106,6 +124,10 @@ void JSImageAnimator::SetDuration(int32_t duration)
 
 void JSImageAnimator::SetIteration(int32_t iteration)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetIteration(iteration);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (imageAnimator) {
@@ -115,6 +137,10 @@ void JSImageAnimator::SetIteration(int32_t iteration)
 
 void JSImageAnimator::SetFillMode(int32_t fillMode)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetFillMode(static_cast<FillMode>(fillMode));
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (imageAnimator) {
@@ -124,6 +150,10 @@ void JSImageAnimator::SetFillMode(int32_t fillMode)
 
 void JSImageAnimator::SetPreDecode(int32_t preDecode)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetPreDecode(preDecode);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (imageAnimator) {
@@ -133,6 +163,10 @@ void JSImageAnimator::SetPreDecode(int32_t preDecode)
 
 void JSImageAnimator::SetIsReverse(bool isReverse)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetIsReverse(isReverse);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (imageAnimator) {
@@ -142,6 +176,10 @@ void JSImageAnimator::SetIsReverse(bool isReverse)
 
 void JSImageAnimator::SetFixedSize(bool fixedSize)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetFixedSize(fixedSize);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (imageAnimator) {
@@ -151,6 +189,10 @@ void JSImageAnimator::SetFixedSize(bool fixedSize)
 
 void JSImageAnimator::OnStart(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_START);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!imageAnimator) {
@@ -165,6 +207,10 @@ void JSImageAnimator::OnStart(const JSCallbackInfo& info)
 
 void JSImageAnimator::OnPause(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_PAUSE);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!imageAnimator) {
@@ -179,6 +225,10 @@ void JSImageAnimator::OnPause(const JSCallbackInfo& info)
 
 void JSImageAnimator::OnRepeat(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_REPEAT);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!imageAnimator) {
@@ -193,6 +243,10 @@ void JSImageAnimator::OnRepeat(const JSCallbackInfo& info)
 
 void JSImageAnimator::OnCancel(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_CANCEL);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!imageAnimator) {
@@ -207,6 +261,10 @@ void JSImageAnimator::OnCancel(const JSCallbackInfo& info)
 
 void JSImageAnimator::OnFinish(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_FINISH);
+        return;
+    }
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!imageAnimator) {
@@ -223,7 +281,7 @@ EventMarker JSImageAnimator::GetEventMarker(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
         LOGE("info[0] is not a function.");
-        return EventMarker();
+        return {};
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
@@ -232,6 +290,17 @@ EventMarker JSImageAnimator::GetEventMarker(const JSCallbackInfo& info)
         func->Execute();
     });
     return eventMarker;
+}
+
+AnimatorEvent JSImageAnimator::GetAnimatorEvent(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        LOGE("info[0] is not a function.");
+        return {};
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto animatorEvent = [func = std::move(jsFunc)]() { func->Execute(); };
+    return animatorEvent;
 }
 
 void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& imageProperties)
