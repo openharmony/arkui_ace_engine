@@ -24,7 +24,7 @@ namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 
-}
+} // namespace
 
 ImageAnimatorPattern::ImageAnimatorPattern()
 {
@@ -39,16 +39,16 @@ RefPtr<PictureAnimation<int32_t>> ImageAnimatorPattern::CreatePictureAnimation(i
 
     if (durationTotal_ > 0) {
         for (int32_t index = 0; index < size; ++index) {
-            pictureAnimation->AddPicture(images_[index].duration / (float)durationTotal_, index);
+            pictureAnimation->AddPicture(images_[index].duration / static_cast<float>(durationTotal_), index);
         }
         animator_->SetDuration(durationTotal_);
     } else {
         for (int32_t index = 0; index < size; ++index) {
-            pictureAnimation->AddPicture(NORMALIZED_DURATION_MAX / (float)size, index);
+            pictureAnimation->AddPicture(NORMALIZED_DURATION_MAX / static_cast<float>(size), index);
         }
     }
 
-    pictureAnimation->AddListener([weak = WeakClaim(this)](const int32_t index) {
+    pictureAnimation->AddListener([weak = WeakClaim(this)](int32_t index) {
         auto imageAnimator = weak.Upgrade();
         CHECK_NULL_VOID(imageAnimator);
         auto frameNode = imageAnimator->GetHost();

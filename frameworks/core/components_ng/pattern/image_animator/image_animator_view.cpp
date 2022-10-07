@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 
 void ImageAnimatorView::Create()
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ANIMATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImageAnimatorPattern>(); });
@@ -42,7 +42,7 @@ void ImageAnimatorView::Create()
     stack->Push(frameNode);
 }
 
-void ImageAnimatorView::SetImages(std::vector<ImageProperties> images)
+void ImageAnimatorView::SetImages(std::vector<ImageProperties>&& images)
 {
     GetImageAnimatorPattern()->SetImages(std::move(images));
 }

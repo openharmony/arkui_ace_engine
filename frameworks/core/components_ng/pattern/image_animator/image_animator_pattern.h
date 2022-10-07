@@ -48,7 +48,7 @@ public:
         return MakeRefPtr<ImageAnimatorEventHub>();
     }
 
-    void SetImages(std::vector<ImageProperties> images)
+    void SetImages(std::vector<ImageProperties>&& images)
     {
         if (images_.size() == images.size()) {
             return;

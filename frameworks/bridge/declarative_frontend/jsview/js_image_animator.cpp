@@ -85,7 +85,7 @@ void JSImageAnimator::SetImages(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetImages(images);
+        NG::ImageAnimatorView::SetImages(std::move(images));
         return;
     }
 

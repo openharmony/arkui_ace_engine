@@ -40,7 +40,7 @@ class ACE_EXPORT ImageAnimatorView {
 public:
     static void Create();
 
-    static void SetImages(std::vector<ImageProperties> images);
+    static void SetImages(std::vector<ImageProperties>&& images);
     static void SetStatus(Animator::Status status);
     static void SetDuration(int32_t duration);
     static void SetIteration(int32_t iteration);
