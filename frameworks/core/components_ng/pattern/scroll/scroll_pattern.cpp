@@ -189,7 +189,26 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     delta = direction * CalculateOffsetByFriction(overscrollPast, std::abs(delta), friction);
 }
 
-void ScrollPattern::ValidateOffset(int32_t source) {}
+void ScrollPattern::ValidateOffset(int32_t source)
+{
+    if (scrollableDistance_ <= 0.0f) {
+        return;
+    }
+
+    // restrict position between top and bottom
+    if (!scrollEffect_ || scrollEffect_->IsRestrictBoundary() || source == SCROLL_FROM_JUMP ||
+        source == SCROLL_FROM_BAR || source == SCROLL_FROM_ROTATE) {
+        if (axis_ == Axis::HORIZONTAL) {
+            if (IsRowReverse()) {
+                currentOffset_ = std::clamp(currentOffset_, 0.0f, scrollableDistance_);
+            } else {
+                currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+            }
+        } else {
+            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+        }
+    }
+}
 
 void ScrollPattern::HandleScrollPosition(float scroll, int32_t scrollState)
 {
@@ -271,7 +290,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     // TODO: ignore handle refresh
     if ((IsAtBottom() && delta < 0.0f) || (IsAtTop() && delta > 0.0f)) {
-        if (scrollEffect_->IsNoneEffect()) {
+        if (!scrollEffect_ || scrollEffect_->IsNoneEffect()) {
             return false;
         }
     }
@@ -344,6 +363,9 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
 
 void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
+    if (scrollEdgeType == ScrollEdgeType::SCROLL_NONE) {
+        return;
+    }
     float distance = scrollEdgeType == ScrollEdgeType::SCROLL_TOP ? -currentOffset_ :
         (-scrollableDistance_ - currentOffset_);
     ScrollBy(distance, distance, smooth);
