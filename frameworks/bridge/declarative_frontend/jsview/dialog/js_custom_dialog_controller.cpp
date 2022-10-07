@@ -126,7 +126,7 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
 
 void JSCustomDialogController::NotifyDialogOperation(DialogOperation operation)
 {
-    LOGD("JSCustomDialogController(NotifyDialogOperation) operation: %{public}d", operation);
+    LOGI("JSCustomDialogController(NotifyDialogOperation) operation: %{public}d", operation);
     if (operation == DialogOperation::DIALOG_OPEN) {
         isShown_ = true;
         pending_ = false;
@@ -162,7 +162,7 @@ void JSCustomDialogController::NotifyDialogOperation(DialogOperation operation)
 
 void JSCustomDialogController::ShowDialog()
 {
-    LOGD("JSCustomDialogController(ShowDialog)");
+    LOGI("JSCustomDialogController(ShowDialog)");
     RefPtr<Container> container;
     auto current = Container::Current();
     if (!current) {
@@ -240,7 +240,7 @@ void JSCustomDialogController::ShowDialog()
 
 void JSCustomDialogController::CloseDialog()
 {
-    LOGD("JSCustomDialogController(CloseDialog)");
+    LOGI("JSCustomDialogController(CloseDialog)");
     RefPtr<Container> container;
     auto current = Container::Current();
     if (!current) {
@@ -314,8 +314,11 @@ void JSCustomDialogController::CloseDialog()
 
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
-    LOGD("JSCustomDialogController(JsOpenDialog)");
-
+    LOGI("JSCustomDialogController(JsOpenDialog)");
+    if (!jsBuilderFunction_) {
+        LOGE("Builder of CustomDialog is null.");
+        return;
+    }
     // NG
     if (Container::IsCurrentUseNewPipeline()) {
         auto container = Container::Current();
@@ -333,14 +336,6 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_VOID(customNode);
 
-        // store some properties
-        EventMarker cancelMarker([cancelCallback = jsCancelFunction_]() {
-            if (cancelCallback) {
-                ACE_SCORING_EVENT("CustomDialog.cancel");
-                cancelCallback->Execute();
-            }
-        });
-        dialogProperties_.callbacks.try_emplace("cancel", cancelMarker);
         dialogProperties_.onStatusChanged = [this](bool isShown) {
             if (!isShown) {
                 this->isShown_ = isShown;
@@ -379,7 +374,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
-    LOGD("JSCustomDialogController(JsCloseDialog)");
+    LOGI("JSCustomDialogController(JsCloseDialog)");
 
     if (Container::IsCurrentUseNewPipeline()) {
         auto container = Container::Current();

@@ -69,7 +69,8 @@ public:
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
     void PopToast(int32_t toastId);
 
-    RefPtr<FrameNode> ShowDialog(const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
+    RefPtr<FrameNode> ShowDialog(
+        const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
     void CloseDialog(RefPtr<FrameNode> dialogNode);
 
 private:

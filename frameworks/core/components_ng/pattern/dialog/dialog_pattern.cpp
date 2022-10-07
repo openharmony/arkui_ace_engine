@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -66,7 +67,12 @@ void DialogPattern::HandleTouchUp(const Offset& clickPosition)
     CHECK_NULL_VOID(dialogRenderProp);
     auto autoCancel = dialogRenderProp->GetAutoCancel().value_or(true);
     if (autoCancel) {
-        PopDialog();
+        auto content = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        auto contentRect = content->GetGeometryNode()->GetFrameRect();
+        // close dialog if clicked outside content rect
+        if (!contentRect.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {
+            PopDialog();
+        }
     }
 }
 
@@ -79,6 +85,11 @@ void DialogPattern::PopDialog()
     CHECK_NULL_VOID(overlayManager);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    // trigger onCancel callback
+    auto hub = host->GetEventHub<DialogEventHub>();
+    hub->FireChangeEvent();
+
     overlayManager->CloseDialog(host);
 }
 
