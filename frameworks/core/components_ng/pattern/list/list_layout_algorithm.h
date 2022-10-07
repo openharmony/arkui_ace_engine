@@ -124,10 +124,9 @@ public:
     void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
-    void LayoutForwardForLaneList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-    void LayoutBackwardForLaneList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-
 private:
+    void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
+
     void LayoutListInIndexMode(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
     void LayoutListInOffsetMode(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
@@ -144,6 +143,10 @@ private:
     void CalculateLanes(const LayoutConstraintF& layoutConstraint, Axis axis);
     void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+    int LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int& currentIndex, float& mainLen);
+    int LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int& currentIndex, float& mainLen);
 
     void ResetScrollable();
 
