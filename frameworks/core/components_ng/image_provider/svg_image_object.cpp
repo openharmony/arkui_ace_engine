@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG {
 
-const RefPtr<SvgDom>& SvgImageObject::GetSVGDom() const
+const RefPtr<SvgDomBase>& SvgImageObject::GetSVGDom() const
 {
-    return svgDom_;
+    return svgDomBase_;
 }
 
 void SvgImageObject::MakeCanvasImage(
@@ -35,10 +35,10 @@ bool SvgImageObject::MakeSvgDom(const std::optional<Color>& svgFillColor)
     auto skiaImageData = DynamicCast<SkiaImageData>(data_);
     CHECK_NULL_RETURN(skiaImageData, false);
     // update SVGSkiaDom
-    svgDom_ = skiaImageData->MakeSvgDom(svgFillColor);
-    CHECK_NULL_RETURN(svgDom_, false);
+    svgDomBase_ = skiaImageData->MakeSvgDom(svgFillColor);
+    CHECK_NULL_RETURN(svgDomBase_, false);
     // get ImageSize
-    SetImageSize(svgDom_->GetContainerSize());
+    SetImageSize(svgDomBase_->GetContainerSize());
     return true;
 }
 

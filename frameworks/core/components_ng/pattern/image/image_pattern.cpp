@@ -126,7 +126,6 @@ void ImagePattern::OnImageDataReady()
         loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
         geometryNode->GetFrameSize().Height(), 0);
     imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
-
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -151,7 +150,10 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(imageRenderProperty, nullptr);
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     ImagePaintConfig imagePaintConfig(lastSrcRect_, lastDstRect_);
+    imagePaintConfig.imageFit_ = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
     imagePaintConfig.renderMode_ = imageRenderProperty->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
     imagePaintConfig.imageInterpolation_ =
         imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
@@ -198,7 +200,8 @@ void ImagePattern::OnModifyDone()
                                                                  : currentSourceInfo.GetFillColor();
     }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
-        (currentSourceInfo.IsSvg() && svgFillColorOpt.has_value() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
+        (currentSourceInfo.IsSvg() && svgFillColorOpt.has_value() &&
+            loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
         loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier));
         loadingCtx_->SetSvgFillColor(svgFillColorOpt);

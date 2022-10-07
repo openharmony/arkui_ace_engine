@@ -15,7 +15,9 @@
 
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components_ng/image_provider/adapter/skia_svg_dom.h"
+#include "core/components_ng/svg/svg_dom.h"
 
 namespace OHOS::Ace::NG {
 
@@ -57,9 +59,22 @@ sk_sp<SkData> SkiaImageData::GetSkData() const
     return skData_;
 }
 
-RefPtr<SvgDom> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
+RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
 {
-    return SkiaSvgDom::CreateSkiaSvgDom(skData_, svgFillColor);
+    const auto svgStream = std::make_unique<SkMemoryStream>(skData_);
+    CHECK_NULL_RETURN(svgStream, nullptr);
+    if (SystemProperties::GetSvgMode() <= 0) {
+        return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, svgFillColor);
+    }
+    auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, svgFillColor);
+    svgDom_->SetFunction(
+        [pipeline = WeakClaim(RawPtr(PipelineContext::GetCurrentContext()))](const Dimension& value) -> double {
+            auto context = pipeline.Upgrade();
+            CHECK_NULL_RETURN(context, 0.0);
+            return context->NormalizeToPx(value);
+        },
+        nullptr);
+    return svgDom_;
 }
 
 } // namespace OHOS::Ace::NG

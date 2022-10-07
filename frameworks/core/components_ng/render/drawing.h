@@ -16,21 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 
-#include "utils/camera3d.h"
 #include "draw/canvas.h"
-#include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
-#include "drawing/engine_adapter/impl_interface/bitmap_impl.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "image/image.h"
 #include "rosen_text/ui/font_collection.h"
 #include "rosen_text/ui/typography.h"
 #include "rosen_text/ui/typography_create.h"
+#include "utils/camera3d.h"
 #include "utils/scalar.h"
 
 namespace OHOS::Ace {
 
 using RSCanvas = Rosen::Drawing::Canvas;
-using RSSkCanvas = Rosen::Drawing::SkiaCanvas;
 using RSImage = Rosen::Drawing::Image;
 using RSBrush = Rosen::Drawing::Brush;
 using RSFilter = Rosen::Drawing::Filter;

@@ -32,7 +32,6 @@
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
-#include "core/components_ng/render/adapter/skia_svg_canvas_image.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -160,27 +159,6 @@ RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateSvgEncodedInfo(const RefPtr<NG:
     // TODO: Encode svg
     int32_t totalFrames = 1;
     return MakeRefPtr<ImageEncodedInfo>(SizeF(), totalFrames);
-}
-
-void ImageProvider::MakeCanvasImageForSVG(
-    const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks)
-{
-    auto canvasImageMakingTask = [objWp = imageObjWp, loadCallbacks] {
-        auto obj = objWp.Upgrade();
-        CHECK_NULL_VOID(obj);
-        CHECK_NULL_VOID(obj->GetSVGDom());
-        // update SVGSkiaDom to ImageObject and trigger loadSuccessCallback_
-        auto notifyLoadSuccessTask = [objWp, loadCallbacks] {
-            auto obj = objWp.Upgrade();
-            CHECK_NULL_VOID(obj);
-            // upload canvasImage, in order to set svgDom
-            obj->SetCanvasImage(MakeRefPtr<NG::SkiaSvgCanvasImage>(obj->GetSVGDom()));
-            loadCallbacks.loadSuccessCallback_(obj->GetSourceInfo());
-        };
-        ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadSuccessTask));
-    };
-    // TODO: add sync load
-    ImageProvider::WrapTaskAndPostToBackground(std::move(canvasImageMakingTask));
 }
 
 void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,

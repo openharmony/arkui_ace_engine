@@ -30,12 +30,12 @@ public:
     {}
     ~SvgImageObject() override = default;
 
-    const RefPtr<SvgDom>& GetSVGDom() const;
+    const RefPtr<SvgDomBase>& GetSVGDom() const;
 
     void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) override;
     bool MakeSvgDom(const std::optional<Color>& svgFillColor);
 private:
-    RefPtr<SvgDom> svgDom_;
+    RefPtr<SvgDomBase> svgDomBase_;
 };
 
 } // namespace OHOS::Ace::NG
