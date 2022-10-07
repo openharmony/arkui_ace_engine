@@ -13,18 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_FOR_EACH_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_FOR_EACH_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_FOR_EACH_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_FOR_EACH_MODEL_NG_H
 
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT LazyForEach {
+class ACE_EXPORT LazyForEachModelNG : public LazyForEachModel {
 public:
-    static void Create(const RefPtr<LazyForEachBuilder>& forEachBuilder)
+    void Create(const RefPtr<LazyForEachActuator>& actuator) override
+    {
+        auto builder = AceType::DynamicCast<LazyForEachBuilder>(actuator);
+        Create(builder);
+    }
+
+private:
+    void Create(const RefPtr<LazyForEachBuilder>& forEachBuilder)
     {
         auto* stack = ViewStackProcessor::GetInstance();
         auto nodeId = stack->ClaimNodeId();
@@ -40,4 +49,4 @@ public:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_FOR_EACH_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_FOR_EACH_MODEL_NG_H

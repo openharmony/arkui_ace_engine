@@ -3019,7 +3019,7 @@ void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
 void WebDelegate::OnScroll(double xOffset, double yOffset)
 {
     if (onScrollV2_) {
-        onScrollV2_(std::make_shared<OnScrollEvent>(xOffset, yOffset));
+        onScrollV2_(std::make_shared<WebOnScrollEvent>(xOffset, yOffset));
     }
 }
 

@@ -43,6 +43,11 @@ public:
         return node;
     }
 
+    std::string ProcessViewId(const std::string& viewId) override
+    {
+        return ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    }
+
 private:
     std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };

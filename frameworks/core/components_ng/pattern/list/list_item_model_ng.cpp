@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/list/list_item_view.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
-void ListItemView::Create(std::function<void(int32_t)>&& deepRenderFunc)
+void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -41,7 +41,7 @@ void ListItemView::Create(std::function<void(int32_t)>&& deepRenderFunc)
     stack->Push(frameNode);
 }
 
-void ListItemView::Create()
+void ListItemModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
