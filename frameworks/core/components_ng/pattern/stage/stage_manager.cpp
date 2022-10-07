@@ -47,6 +47,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     rect.SetOffset({});
     node->GetRenderContext()->SyncGeometryProperties(rect);
     node->MountToParent(stageNode_);
+    stageNode_->RebuildRenderContextTree();
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     auto pagePattern = node->GetPattern<PagePattern>();

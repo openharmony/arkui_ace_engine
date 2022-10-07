@@ -37,7 +37,13 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     if (textFieldLayoutProperty) {
         if (value) {
-            textFieldLayoutProperty->UpdateValue(value.value());
+            if (value->empty()) {
+                if (textFieldLayoutProperty->HasValue()) {
+                    textFieldLayoutProperty->UpdateValue(value.value());
+                }
+            } else {
+                textFieldLayoutProperty->UpdateValue(value.value());
+            }
         }
         if (placeholder) {
             textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());

@@ -45,10 +45,7 @@ namespace {
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 } // namespace
 
-TextFieldPattern::TextFieldPattern()
-{
-    twinklingInterval_ = TWINKLING_INTERVAL_MS;
-}
+TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS) {}
 
 TextFieldPattern::~TextFieldPattern()
 {
@@ -71,8 +68,8 @@ void TextFieldPattern::UpdateConfiguration()
     MiscServices::Configuration configuration;
     LOGI("Enter key type %{public}d", (int32_t)GetTextInputActionValue(TextInputAction::DONE));
     configuration.SetEnterKeyType(
-        static_cast<MiscServices::EnterKeyType>((int32_t)GetTextInputActionValue(TextInputAction::DONE)));
-    configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
+        static_cast<MiscServices::EnterKeyType>(static_cast<int32_t>(GetTextInputActionValue(TextInputAction::DONE))));
+    configuration.SetTextInputType(static_cast<MiscServices::TextInputType>(static_cast<int32_t>(keyboard_)));
     MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
 }
 #endif
@@ -91,9 +88,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         LOGD("on layout process, just return");
         return false;
     }
-    paragraph_ = textFieldLayoutAlgorithm->GetParagraph();
+    paragraph_ = paragraph;
     textRect_ = textFieldLayoutAlgorithm->GetTextRect();
     imageRect_ = textFieldLayoutAlgorithm->GetTextRect();
+    textModified_ = TextModifiedType::NONE;
     return true;
 }
 
@@ -162,7 +160,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
     StartTwinkling();
     UpdateTextFieldManager(offset);
     lastTouchOffset_ = offset;
-    textModifiedByInputMethod_ = false;
+    textModified_ = TextModifiedType::TOUCH_OR_KEY;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -352,7 +350,7 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     // TODO: update obscure pending for password input
     auto* rawValuePtr = value.get();
     SetEditingValue(*rawValuePtr, needFireChangeEvent);
-    textModifiedByInputMethod_ = true;
+    textModified_ = TextModifiedType::INPUT_METHOD;
 }
 
 void TextFieldPattern::SetEditingValue(const TextEditingValue& newValue, bool needFireChangeEvent)

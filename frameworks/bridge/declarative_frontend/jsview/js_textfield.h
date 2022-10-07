@@ -28,6 +28,7 @@ namespace OHOS::Ace::Framework {
 class JSTextField : public JSViewAbstract {
 public:
     static void CreateTextInput(const JSCallbackInfo& info);
+    static void CreateTextArea(const JSCallbackInfo& info);
     static void SetType(const JSCallbackInfo& info);
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);

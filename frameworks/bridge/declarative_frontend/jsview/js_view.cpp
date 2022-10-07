@@ -605,12 +605,16 @@ RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode()
     LOGD("Creating CustomNode with claimed elmtId %{public}d.", viewId);
     auto customNode = NG::CustomNode::CreateCustomNode(viewId, key);
     node_ = customNode;
-    {
-        ACE_SCORING_EVENT("Component[" + viewId_ + "].Appear");
-        if (jsViewFunction_) {
-            jsViewFunction_->ExecuteAppear();
+
+    auto appearFunction = [weak = AceType::WeakClaim(this)]() {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
+        if (jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteAppear();
         }
-    }
+    };
+    customNode->SetAppearFunction(std::move(appearFunction));
 
     auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::UINode> {
         auto jsView = weak.Upgrade();

@@ -138,9 +138,17 @@ void FrameNode::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
+                                       .append(geometryNode_->GetParentLayoutConstraint().has_value()
+                                                   ? geometryNode_->GetParentLayoutConstraint().value().ToString()
+                                                   : "NA"));
     DumpLog::GetInstance().AddDesc(std::string("LayoutConstraint: ")
                                        .append(layoutProperty_->GetLayoutConstraint().has_value()
                                                    ? layoutProperty_->GetLayoutConstraint().value().ToString()
+                                                   : "NA"));
+    DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
+                                       .append(layoutProperty_->GetContentLayoutConstraint().has_value()
+                                                   ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
                                                    : "NA"));
 }
 
@@ -184,6 +192,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     ACE_FUNCTION_TRACE();
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
+    // update new layoutConstrain.
+    layoutProperty_->UpdateLayoutConstraint(dirty->GetLayoutProperty());
 
     // active change flag judge.
     bool activeChanged = false;
