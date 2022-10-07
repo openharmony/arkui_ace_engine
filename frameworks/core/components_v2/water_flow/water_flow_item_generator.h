@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_v2/water_flow/water_flow_item_component.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_ITEM_GENERATOR_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_ITEM_GENERATOR_ELEMENT_H
 
 #include "core/components_v2/water_flow/render_water_flow_item.h"
-#include "core/components_v2/water_flow/water_flow_item_element.h"
 
 namespace OHOS::Ace::V2 {
-RefPtr<Element> WaterFlowItemComponent::CreateElement()
-{
-    return AceType::MakeRefPtr<WaterFlowItemElement>();
-}
 
-RefPtr<RenderNode> WaterFlowItemComponent::CreateRenderNode()
-{
-    return RenderWaterFlowItem::Create();
-}
+class WaterFlowItemGenerator : virtual public Referenced {
+public:
+    virtual RefPtr<RenderNode> RequestWaterFlowFooter()
+    {
+        return nullptr;
+    }
+};
+
 } // namespace OHOS::Ace::V2
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_ITEM_GENERATOR_ELEMENT_H

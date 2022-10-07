@@ -16,14 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_RENDER_WATER_FLOW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_RENDER_WATER_FLOW_H
 
-#include <atomic>
-#include <functional>
-#include <list>
 #include <map>
-#include <mutex>
 #include <set>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include "core/components/common/layout/constants.h"
@@ -31,43 +26,45 @@
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
-#include "core/components/stack/stack_element.h"
 #include "core/components_v2/water_flow/render_water_flow_item.h"
 #include "core/components_v2/water_flow/water_flow_component.h"
+#include "core/components_v2/water_flow/water_flow_item_generator.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
-class WaterFlowEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(WaterFlowEventInfo, BaseEventInfo, EventToJSONStringAdapter);
+enum class SCROLLABLE : uint32_t {
+    NO_SCROLL = 0,
+    VERTICAL,
+    HORIZONTAL,
+};
 
-public:
-    explicit WaterFlowEventInfo(int32_t scrollIndex) : BaseEventInfo("waterflow"), scrollIndex_(scrollIndex) {}
-
-    ~WaterFlowEventInfo() = default;
-
-    std::string ToJSONString() const override;
-
-    int32_t GetScrollIndex() const
-    {
-        return scrollIndex_;
-    }
-
-private:
-    int32_t scrollIndex_ = 0;
+enum class WaterFlowEvents : uint32_t {
+    NONE = 0,
+    REACH_START,
+    REACH_END,
 };
 
 typedef struct {
-    int32_t rowSpan = 0;
-    int32_t colSpan = 0;
-} Span;
+    double mainPos = 0.0;   // position of main side
+    double crossPos = 0.0;  // position of cross side
+    double mainSize = 0.0;  // size of main side
+    double crossSize = 0.0; // size of corss side
+} FlowStyle;
+
+typedef struct {
+    double minCrossSize = 0.0; // min cross Size
+    double maxCrossSize = 0.0; // max cross Size
+    double minMainSize = 0.0;  // min main Size
+    double maxMainSize = 0.0;  // max cross Size
+} ItemConstraintSize;
 
 class RenderWaterFlow : public RenderNode {
     DECLARE_ACE_TYPE(RenderWaterFlow, RenderNode);
 
 public:
-    using BuildChildByIndex = std::function<bool(int32_t)>;
-    using GetChildSpanByIndex = std::function<bool(int32_t, bool, int32_t&, int32_t&)>;
-    using DeleteChildByIndex = std::function<void(int32_t)>;
+    using BuildChildByIndex = std::function<bool(size_t)>;
+    using DeleteChildByIndex = std::function<void(size_t)>;
+    using UpdateTotalCount = std::function<size_t()>;
 
     RenderWaterFlow() = default;
     ~RenderWaterFlow() override;
@@ -75,32 +72,26 @@ public:
     static RefPtr<RenderNode> Create();
 
     void Update(const RefPtr<Component>& component) override;
-    void CalAndPosItems(double& drawLength, int32_t& main);
     void PerformLayout() override;
     void OnPredictLayout(int64_t deadline) override;
 
-    const std::list<RefPtr<RenderNode>>& GetChildren() const override
-    {
-        return childrenInRect_;
-    }
-
-    void SetBuildChildByIndex(BuildChildByIndex func)
+    inline void SetBuildChildByIndex(BuildChildByIndex func)
     {
         buildChildByIndex_ = std::move(func);
     }
 
-    void SetDeleteChildByIndex(DeleteChildByIndex func)
+    inline void SetDeleteChildByIndex(DeleteChildByIndex func)
     {
         deleteChildByIndex_ = std::move(func);
     }
 
-    void SetGetChildSpanByIndex(GetChildSpanByIndex func)
+    inline void SetGetTotalCount(UpdateTotalCount func)
     {
-        getChildSpanByIndex_ = std::move(func);
+        getTotalCount_ = std::move(func);
     }
 
     void AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode);
-    void RemoveChildByIndex(int32_t index)
+    inline void RemoveChildByIndex(int32_t index)
     {
         auto item = items_.find(index);
         if (item != items_.end()) {
@@ -111,217 +102,154 @@ public:
     void ClearLayout(int32_t index = -1);
     void ClearItems(int32_t index = 0);
     void OnDataSourceUpdated(int32_t index);
-    bool CheckEndShowItemPlace(int32_t index);
 
-    void SetTotalCount(int32_t totalCount)
+    inline void SetTotalCount(size_t totalCount)
     {
-        if (totalCount_ == totalCount) {
-            return;
+        if (totalCount_ != totalCount) {
+            totalCount_ = totalCount;
         }
-        totalCount_ = totalCount;
-        totalCountFlag_ = true;
     }
 
     double GetEstimatedHeight();
-    // Used in WaterFlowPositionController
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
-    Offset CurrentOffset();
-    void ScrollToEdge(ScrollEdgeType edgeType, bool smooth);
+    void ScrollToIndex(int32_t index, int32_t source);
 
-    Axis GetAxis() const
+    inline Axis GetAxis() const
     {
         return useScrollable_ == SCROLLABLE::VERTICAL ? Axis::VERTICAL : Axis::HORIZONTAL;
     }
 
-    void OnPaintFinish() override;
-
     bool IsChildrenTouchEnable() override;
-
-    size_t GetCachedSize() const
+    inline Offset GetLastOffset() const
     {
-        return endShowItemIndex_ - startShowItemIndex_;
-    }
-
-    Offset GetLastOffset() const
-    {
-        return useScrollable_ == SCROLLABLE::VERTICAL ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
+        return useScrollable_ == SCROLLABLE::VERTICAL ? Offset(0.0, lastOffset_) : Offset(lastOffset_, 0.0);
     }
 
     void HandleAxisEvent(const AxisEvent& event) override;
-
     bool IsAxisScrollable(AxisDirection direction) override;
-
     WeakPtr<RenderNode> CheckAxisNode() override;
-
     void OnChildAdded(const RefPtr<RenderNode>& renderNode) override;
     bool IsUseOnly() override;
-    int32_t RequestNextFocus(bool vertical, bool reverse);
-    void UpdateFocusInfo(int32_t focusIndex);
+    RefPtr<RenderNode> RequestWaterFlowFooter();
+    inline void RegisterItemGenerator(WeakPtr<WaterFlowItemGenerator>&& waterFlowItemGenerator)
+    {
+        itemGenerator_ = std::move(waterFlowItemGenerator);
+    }
 
 protected:
-    int32_t GetItemSpan(const RefPtr<RenderNode>& child, bool isRow) const;
-    bool GetItemSpanFromCache(int32_t index, int32_t& rowSpan, int32_t& colSpan);
-    int32_t GetIndexByFlow(int32_t row, int32_t column) const;
-    int32_t GetIndexByNode(const RefPtr<RenderNode>& child) const;
-    // Handle direction key move
-    int32_t focusMove(KeyDirection direction);
-    void UpdateAccessibilityAttr();
-
-    std::vector<double> ParseCrossLength(double size, double gap);
-    int32_t GetItemMainIndex(int32_t index) const;
-    void SetMainSize(Size& dst, const Size& src);
-    double GetSize(const Size& src, bool isMain = true) const;
-    void GetNextFlow(int32_t& curMain, int32_t& curCross) const;
-    void GetPreviousFlow(int32_t& curMain, int32_t& curCross);
-    LayoutParam MakeInnerLayoutParam(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan) const;
-    void CalculateCrossSpan(int32_t mainIndex, int32_t cross, int32_t crossSpan, int32_t& calculateCrossSpan);
-    bool CheckFlowPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan);
+    void HandleScrollEvent();
+    LayoutParam MakeInnerLayoutParam(size_t itemIndex) const;
 
     // Sets child position, the mainAxis does not contain the offset.
-    void SetChildPosition(const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
-
+    void SetChildPosition(const RefPtr<RenderNode>& child, size_t itemIndex);
     void CreateScrollable();
-    void LayoutChild(const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan,
-        bool needPosition = true);
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     bool UpdateScrollPosition(double offset, int32_t source);
-    void RecordLocation();
-
     void CallGap();
+    void CallItemConstraintSize();
     void InitialFlowProp();
-    void CalculateViewPortSceneOne();
-    bool CalculateViewPortSceneTwo(bool& NeedContinue);
-    void CalculateViewPort();
-    double BuildLazyFlowLayout(int32_t index, double sizeNeed);
-    bool GetFlowSize();
-    void BuildFlow(std::vector<double>& cols);
-    double CalculateBlankOfEnd();
-    double SupplyItems(bool& vailSupplyItem, int32_t mainIndex, int32_t itemIndex = -1, bool needPosition = true,
-        bool needRank = true);
-    bool CheckMainFull(int32_t mainIndex);
-    int32_t CalItemIndexInRank(int32_t mainIndex);
-    bool Rank(int32_t mainIndex, int32_t itemIndex = -1);
-    void DealCache(int32_t start, int32_t end);
-    void DeleteItems(int32_t index, bool isTail);
-
-    void GetMinAndMaxIndex(int32_t& min, int32_t& max);
+    void GetFlowSize();
+    void SupplyItems(size_t startIndex, double targetPos);
+    void LayoutItems(std::set<size_t>& items);
+    void GetFooterSize(double mainSize, double crossSize);
+    void LayoutFooter();
+    void SetFooterPosition();
+    void UpdateCacheItems();
+    std::set<size_t> GetShowItems();
+    size_t GetLastSupplyedIndex();
+    size_t GetNextSupplyedIndex();
+    double GetLastSupplyedMainSize();
+    Offset GetLastMainBlankPos();
+    size_t GetLastMainBlankCross();
+    Offset GetLastMainPos();
+    void ClearFlowMatrix(int32_t index = -1);
+    void ClearItemsByCrossIndex(int32_t index = -1);
+    void InitMainSideEndPos();
+    void UpdateMainSideEndPos();
+    double GetCrossEndPos(size_t crossIndex);
+    FlowStyle ConstraintItemSize(FlowStyle item, size_t crossIndex);
+    RefPtr<RenderWaterFlowItem> GetFlowItemByChild(const RefPtr<RenderNode>& child) const;
+    double GetMainSize(const RefPtr<RenderNode>& item) const;
+    double GetCrossSize(const RefPtr<RenderNode>& item) const;
+    bool CheckReachHead();
+    bool CheckReachTail();
+    void AdjustViewPort();
+    double GetTailPos();
+    double GetTargetPos();
+    double GetCacheTargetPos();
+    void SetTargetPos(double targetPos);
+    void DealCache();
+    void DeleteItems(size_t index);
     bool GetItemMainCrossIndex(int32_t index, int32_t& mainIndex, int32_t& crossIndex);
-
-    bool NeedUpdate(const RefPtr<Component>& component);
-
-    void CalculateWholeSize(double drawLength);
-
-    void InitScrollBar(const RefPtr<Component>& component);
+    void InitScrollBar();
     void InitScrollBarProxy();
-
     void DoJump(double position, int32_t source);
-    void LoadForward();
-
-    double GetCurrentOffset() const
-    {
-        return startMainPos_ + currentOffset_ - firstItemOffset_;
-    }
-
     void SetScrollBarCallback();
-
-    void SetItemCalSizeNeeded(const RefPtr<RenderNode>& child, bool need);
-
-    bool GetItemCalSizeNeeded(const RefPtr<RenderNode>& child) const;
-
-    void CheckAndInsertItems(int32_t mainIndex, int32_t itemIndex);
-
-    void OutputMatrix(int32_t rows, bool before);
-
-    bool DeleteItemsInMatrix(size_t rows, int32_t itemIndex);
-
-    enum class SCROLLABLE : uint32_t {
-        NO_SCROLL = 0,
-        VERTICAL,
-        HORIZONTAL,
-    };
+    void AnimateToPos(const double& position, int32_t duration, const RefPtr<Curve>& curve);
+    void OutputMatrix();
+    void RemoveAllChild();
+    bool NeedPredictLayout();
 
     SCROLLABLE useScrollable_ = SCROLLABLE::NO_SCROLL;
-
-    std::unordered_map<int32_t, RefPtr<RenderNode>> items_;
-    std::set<int32_t> showItem_;
-    std::set<int32_t> inCache_;
-    std::list<RefPtr<RenderNode>> childrenInRect_;
-    // Map structure: [Index - (rowSpan, columnSpan)]
-    std::map<int32_t, Span> itemSpanCache_;
+    std::unordered_map<size_t, RefPtr<RenderNode>> items_;
+    std::set<size_t> cacheItems_;
 
     RefPtr<Scrollable> scrollable_;
     bool reachHead_ = false;
     bool reachTail_ = false;
-    std::optional<bool> firstLineToBottom_;
-    bool needCalculateViewPort_ = false;
-    double startMainPos_ = 0.0;
-    double endMainPos_ = 0.0;
-    double currentOffset_ = 0.0;
-    double animateDelta_ = 0.0;
+    int32_t targetIndex_ = -1; // target item index of supply items (for scrollToIndex)
+    double viewportStartPos_ = 0.0;
     double lastOffset_ = 0.0;
-    double firstItemOffset_ = 0.0;
-    int32_t startIndex_ = 0;
-    int32_t endIndex_ = -1;
-
-    int32_t startShowItemIndex_ = 0;
-    int32_t endShowItemIndex_ = -1;
-
-    int32_t startRankItemIndex_ = 0;
-    int32_t currentItemIndex_ = 0;
-
-    double mainSize_ = 0.0;
-    double crossSize_ = 0.0;
-    int32_t mainCount_ = 0;
-    int32_t crossCount_ = 0;
-    double crossGap_ = 0.0;
-    double mainGap_ = 0.0;
-    int32_t totalCount_ = 0;
+    bool lastReachHead_ = false;
+    bool lastReachTail_ = false;
+    double mainSize_ = 0.0;  // size ot main side
+    double crossSize_ = 0.0; // size of cross side
+    double crossGap_ = 0.0;  // gap of cross side
+    double mainGap_ = 0.0;   // gap of main side
+    size_t crossCount_ = 0;  // splits count of cross side
+    size_t totalCount_ = 0;  // ElementProxyHost::TotalCount()
+    size_t totalCountBack_ = 0;
 
     // used for scrollbar
     double scrollBarExtent_ = 0.0;
     double mainScrollExtent_ = 0.0;
     int32_t scrollBarOpacity_ = 0;
     double estimateHeight_ = 0.0;
-    bool totalCountFlag_ = false;
-    Color scrollBarColor_;
 
     RefPtr<ScrollBarProxy> scrollBarProxy_;
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<Animator> animator_;
     RefPtr<V2::WaterFlowComponent> component_;
+    WeakPtr<WaterFlowItemGenerator> itemGenerator_;
     BuildChildByIndex buildChildByIndex_;
     DeleteChildByIndex deleteChildByIndex_;
-    GetChildSpanByIndex getChildSpanByIndex_;
+    UpdateTotalCount getTotalCount_;
 
-    int32_t loadingIndex_ = -1;
-
-    int32_t cacheCount_ = 10;
-
-    // add from RenderWaterFlowBase
-    bool isVertical_ = false;
+    double cacheSize_ = 0.0;
     bool updateFlag_ = false;
-    FlexDirection direction_ = FlexDirection::ROW;
-    FlexAlign crossAxisAlign_ = FlexAlign::CENTER;
+    FlexDirection direction_ = FlexDirection::COLUMN;
+    ItemConstraintSize itemConstraintSize_ = { 0.0, 0.0, 0.0, 0.0 };
+    double mainMaxConstraintSize_ = 0.0;
+    double dVPStartPosBackup_ = -1;
+    std::string colsArgs_;
+    std::string rowsArgs_;
 
-    int32_t focusRow_ = -1;
-    int32_t focusCol_ = -1;
-    int32_t focusIndex_ = 0;
-
-    double flowWidth_ = -1.0;
-    double flowHeight_ = -1.0;
-    double mainLength_ = 0.0;
     Dimension userColGap_ = 0.0_px;
     Dimension userRowGap_ = 0.0_px;
-    Dimension userMainLength_ = 0.0_px;
     DisplayMode displayMode_ = DisplayMode::OFF;
-    bool rightToLeft_ = false;
-    // Map structure: [rowIndex - (columnIndex, index)]
-    std::map<int32_t, std::map<int32_t, int32_t>> flowMatrix_;
-    // Map structure: [Index - (rowIndex, columnIndex)]
-    std::map<int32_t, std::map<int32_t, int32_t>> flowMatrixByIndex_;
-    // Map structure: [rowIndex - columnIndex - (width, height)]
-    Size flowCells_;
+    // Map structure: [Index - FlowStyle]
+    std::map<size_t, FlowStyle> flowMatrix_;
+    // Map structure: [crossIndex,  main side endPos of per splits]
+    std::vector<double> mainSideEndPos_;
+    // Map structure: [crossIndex, cross side size of per splits]
+    std::vector<double> crossSideSize_;
+    // Map structure: [crossIndex, item index]
+    std::vector<std::vector<size_t>> itemsByCrossIndex_;
+
+    std::map<WaterFlowEvents, bool> waterflowEventFlags_;
+    RefPtr<RenderNode> footer_;
+    Size footerMaxSize_;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_RENDER_WATER_FLOW_H

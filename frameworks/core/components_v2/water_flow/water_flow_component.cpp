@@ -17,7 +17,6 @@
 
 #include "core/components_v2/water_flow/render_water_flow.h"
 #include "core/components_v2/water_flow/water_flow_element.h"
-#include "core/pipeline/base/multi_composed_component.h"
 
 namespace OHOS::Ace::V2 {
 RefPtr<Element> WaterFlowComponent::CreateElement()
@@ -30,19 +29,10 @@ RefPtr<RenderNode> WaterFlowComponent::CreateRenderNode()
     return RenderWaterFlow::Create();
 }
 
-void WaterFlowComponent::SetMainLength(const Dimension& mainLength)
-{
-    if (mainLength.Value() < 0.0) {
-        LOGW("Invalid MainLength use 0px");
-        return;
-    }
-    mainLength_ = mainLength;
-}
-
 void WaterFlowComponent::SetColumnsGap(const Dimension& columnsGap)
 {
-    if (columnsGap.Value() < 0.0) {
-        LOGW("Invalid RowGap, use 0px");
+    if (LessNotEqual(columnsGap.Value(), 0.0)) {
+        LOGW("Invalid RowGap, use 0.0px");
         columnsGap_ = 0.0_px;
         return;
     }
@@ -51,8 +41,8 @@ void WaterFlowComponent::SetColumnsGap(const Dimension& columnsGap)
 
 void WaterFlowComponent::SetRowsGap(const Dimension& rowsGap)
 {
-    if (rowsGap.Value() < 0.0) {
-        LOGW("Invalid RowGap, use 0px");
+    if (LessNotEqual(rowsGap.Value(), 0.0)) {
+        LOGW("Invalid RowGap, use 0.0px");
         rowsGap_ = 0.0_px;
         return;
     }
@@ -68,15 +58,6 @@ void WaterFlowComponent::SetLayoutDirection(FlexDirection direction)
     direction_ = direction;
 }
 
-void WaterFlowComponent::SetFlexAlign(FlexAlign flexAlign)
-{
-    if (flexAlign < FlexAlign::FLEX_START || flexAlign > FlexAlign::STRETCH) {
-        LOGW("Invalid flexAlign %{public}d", flexAlign);
-        return;
-    }
-    flexAlign_ = flexAlign;
-}
-
 void WaterFlowComponent::SetController(const RefPtr<V2::WaterFlowPositionController>& controller)
 {
     controller_ = controller;
@@ -85,11 +66,6 @@ void WaterFlowComponent::SetController(const RefPtr<V2::WaterFlowPositionControl
 void WaterFlowComponent::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
 {
     scrollBarProxy_ = scrollBarProxy;
-}
-
-void WaterFlowComponent::SetRightToLeft(bool rightToLeft)
-{
-    rightToLeft_ = rightToLeft;
 }
 
 void WaterFlowComponent::SetScrolledEvent(const EventMarker& event)
@@ -102,13 +78,58 @@ void WaterFlowComponent::SetScrollBarDisplayMode(DisplayMode displayMode)
     displayMode_ = displayMode;
 }
 
-void WaterFlowComponent::SetScrollBarColor(const std::string& color)
+void WaterFlowComponent::SetColumnsArgs(const std::string& columnsArgs)
 {
-    scrollBarColor_ = color;
+    columnsArgs_ = columnsArgs;
 }
 
-void WaterFlowComponent::SetScrollBarWidth(const std::string& width)
+void WaterFlowComponent::SetRowsArgs(const std::string& rowsArgs)
 {
-    scrollBarWidth_ = width;
+    rowsArgs_ = rowsArgs;
+}
+
+void WaterFlowComponent::SetMinWidth(const Dimension& minWidth)
+{
+    if (LessNotEqual(minWidth.Value(), 0.0)) {
+        LOGW("Invalid minWidth, use 0.0px");
+        minWidth_ = 0.0_px;
+        return;
+    }
+    minWidth_ = minWidth;
+}
+
+void WaterFlowComponent::SetMinHeight(const Dimension& minHeight)
+{
+    if (LessNotEqual(minHeight.Value(), 0.0)) {
+        LOGW("Invalid minHeight, use 0.0px");
+        minHeight_ = 0.0_px;
+        return;
+    }
+    minHeight_ = minHeight;
+}
+
+void WaterFlowComponent::SetMaxWidth(const Dimension& maxWidth)
+{
+    if (LessNotEqual(maxWidth.Value(), 0.0)) {
+        LOGW("Invalid maxWidth, use 0.0px");
+        maxWidth_ = 0.0_px;
+        return;
+    }
+    maxWidth_ = maxWidth;
+}
+
+void WaterFlowComponent::SetMaxHeight(const Dimension& maxHeight)
+{
+    if (LessNotEqual(maxHeight.Value(), 0.0)) {
+        LOGW("Invalid maxHeight, use 0.0px");
+        maxHeight_ = 0.0_px;
+        return;
+    }
+    maxHeight_ = maxHeight;
+}
+
+void WaterFlowComponent::SetFooterComponent(RefPtr<Component> component)
+{
+    footerComponent_ = component;
 }
 } // namespace OHOS::Ace::V2

@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_ITEM_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_ITEM_COMPONENT_H
 
-#include "base/utils/macros.h"
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -31,70 +30,7 @@ public:
     ~WaterFlowItemComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
-
     RefPtr<Element> CreateElement() override;
-
-    void SetColumnIndex(int32_t columnIndex);
-    void SetRowIndex(int32_t rowIndex);
-    void SetColumnSpan(int32_t columnSpan);
-    void SetRowSpan(int32_t rowSpan);
-    void SetForceRebuild(bool forceRebuild)
-    {
-        forceRebuild_ = forceRebuild;
-    }
-
-    void SetClickedEventId(const EventMarker& eventId)
-    {
-        clickEventId_ = eventId;
-    }
-
-    const EventMarker& GetClickedEventId() const
-    {
-        return clickEventId_;
-    }
-
-    int32_t GetColumnSpan() const
-    {
-        return columnSpan_;
-    }
-
-    int32_t GetRowSpan() const
-    {
-        return rowSpan_;
-    }
-
-    bool ForceRebuild() const
-    {
-        return forceRebuild_;
-    }
-
-    bool GetSelectable() const
-    {
-        return selectable_;
-    }
-
-    void SetSelectable(bool selectable)
-    {
-        selectable_ = selectable;
-    }
-
-    OnSelectFunc GetOnSelectId() const
-    {
-        return onSelectId_;
-    }
-
-    void SetOnSelectId(const OnSelectFunc& onSelectId)
-    {
-        onSelectId_ = onSelectId;
-    }
-
-private:
-    EventMarker clickEventId_;
-    int32_t columnSpan_ = 1;
-    int32_t rowSpan_ = 1;
-    bool forceRebuild_ = false;
-    OnSelectFunc onSelectId_;
-    bool selectable_ = false;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_ITEM_COMPONENT_H

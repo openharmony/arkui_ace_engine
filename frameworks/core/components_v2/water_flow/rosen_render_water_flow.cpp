@@ -65,7 +65,7 @@ void RosenRenderWaterFlow::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     rsNode->SetPaintOrder(true);
-    Offset lastOffset = isVertical_ ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
+    Offset lastOffset = (useScrollable_ == SCROLLABLE::VERTICAL) ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
     scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), lastOffset, GetEstimatedHeight());
     RefPtr<RosenScrollBarPainter> scrollPainter = AceType::MakeRefPtr<RosenScrollBarPainter>();
     scrollPainter->PaintBar(canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);

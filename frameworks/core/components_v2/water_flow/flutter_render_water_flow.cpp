@@ -59,7 +59,7 @@ void FlutterRenderWaterFlow::Paint(RenderContext& context, const Offset& offset)
     }
     const auto renderContext = static_cast<FlutterRenderContext*>(&context);
     flutter::Canvas* canvas = renderContext->GetCanvas();
-    Offset lastOffset = isVertical_ ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
+    Offset lastOffset = (useScrollable_ == SCROLLABLE::VERTICAL) ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
     scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), lastOffset, GetEstimatedHeight());
     RefPtr<FlutterScrollBarPainter> scrollPainter = AceType::MakeRefPtr<FlutterScrollBarPainter>();
     scrollPainter->PaintBar(canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);

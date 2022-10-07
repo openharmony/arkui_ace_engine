@@ -24,9 +24,6 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create();
 
-protected:
-    static void SetRowSpan(int32_t rowSpan);
-    static void SetColumnSpan(int32_t columnSpan);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WATER_FLOW_ITEM_H

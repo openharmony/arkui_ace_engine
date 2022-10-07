@@ -30,9 +30,6 @@ public:
 
     void JumpTo(int32_t index, int32_t source = SCROLL_FROM_JUMP) override;
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
-
-    Offset GetCurrentOffset() const override;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_POSITION_CONTROLLER_H

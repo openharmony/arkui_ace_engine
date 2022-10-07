@@ -15,7 +15,6 @@
 
 #include "core/components_v2/water_flow/water_flow_element.h"
 
-#include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/proxy/render_item_proxy.h"
 #include "core/components_v2/water_flow/render_water_flow.h"
@@ -30,7 +29,6 @@ void WaterFlowElement::Update()
     if (!render) {
         return;
     }
-    render->OnDataSourceUpdated(0);
 }
 
 RefPtr<RenderNode> WaterFlowElement::CreateRenderNode()
@@ -38,7 +36,7 @@ RefPtr<RenderNode> WaterFlowElement::CreateRenderNode()
     auto render = RenderElement::CreateRenderNode();
     RefPtr<RenderWaterFlow> renderWaterFlow = AceType::DynamicCast<RenderWaterFlow>(render);
     if (renderWaterFlow) {
-        renderWaterFlow->SetBuildChildByIndex([weak = WeakClaim(this)](int32_t index) {
+        renderWaterFlow->SetBuildChildByIndex([weak = WeakClaim(this)](size_t index) {
             auto element = weak.Upgrade();
             if (!element) {
                 return false;
@@ -46,7 +44,7 @@ RefPtr<RenderNode> WaterFlowElement::CreateRenderNode()
             return element->BuildChildByIndex(index);
         });
 
-        renderWaterFlow->SetDeleteChildByIndex([weak = WeakClaim(this)](int32_t index) {
+        renderWaterFlow->SetDeleteChildByIndex([weak = WeakClaim(this)](size_t index) {
             auto element = weak.Upgrade();
             if (!element) {
                 return;
@@ -54,16 +52,15 @@ RefPtr<RenderNode> WaterFlowElement::CreateRenderNode()
             element->DeleteChildByIndex(index);
         });
 
-        renderWaterFlow->SetGetChildSpanByIndex(
-            [weak = WeakClaim(this)](int32_t index, bool isHorizontal, int32_t& itemMainSpan, int32_t& itemCrossSpan) {
-                auto element = weak.Upgrade();
-                if (!element) {
-                    return false;
-                }
-                return element->GetItemSpanByIndex(index, isHorizontal, itemMainSpan, itemCrossSpan);
-            });
+        renderWaterFlow->SetGetTotalCount([weak = WeakClaim(this)]() {
+            auto element = weak.Upgrade();
+            if (!element) {
+                return (size_t)(0);
+            }
+            return element->TotalCount();
+        });
+        renderWaterFlow->RegisterItemGenerator(AceType::WeakClaim(static_cast<WaterFlowItemGenerator*>(this)));
     }
-
     return render;
 }
 
@@ -72,16 +69,22 @@ void WaterFlowElement::PerformBuild()
     auto component = AceType::DynamicCast<V2::WaterFlowComponent>(component_);
     ACE_DCHECK(component); // MUST be WaterFlowComponent
     V2::ElementProxyHost::UpdateChildren(component->GetChildren());
+    footerElement_ = UpdateChild(footerElement_, component->GetFooterComponent());
 }
 
-bool WaterFlowElement::BuildChildByIndex(int32_t index)
+RefPtr<RenderNode> WaterFlowElement::RequestWaterFlowFooter(void)
+{
+    return footerElement_ ? AceType::DynamicCast<RenderNode>(footerElement_->GetRenderNode()) : nullptr;
+}
+
+bool WaterFlowElement::BuildChildByIndex(size_t index)
 {
     if (index < 0) {
         return false;
     }
     auto element = GetElementByIndex(index);
     if (!element) {
-        LOGE("GetElementByIndex failed index=[%d]", index);
+        LOGE("GetElementByIndex failed index=[%{public}zu]", index);
         return false;
     }
     auto renderNode = element->GetRenderNode();
@@ -97,59 +100,9 @@ bool WaterFlowElement::BuildChildByIndex(int32_t index)
     return true;
 }
 
-bool WaterFlowElement::GetItemSpanByIndex(
-    int32_t index, bool isHorizontal, int32_t& itemMainSpan, int32_t& itemCrossSpan)
-{
-    if (index < 0) {
-        return false;
-    }
-    auto component = GetComponentByIndex(index);
-    auto flowItem = AceType::DynamicCast<WaterFlowItemComponent>(component);
-
-    if (!flowItem) {
-        return false;
-    }
-    if (isHorizontal) {
-        itemMainSpan = flowItem->GetColumnSpan();
-        itemCrossSpan = flowItem->GetRowSpan();
-    } else {
-        itemMainSpan = flowItem->GetRowSpan();
-        itemCrossSpan = flowItem->GetColumnSpan();
-    }
-    return true;
-}
-
-void WaterFlowElement::DeleteChildByIndex(int32_t index)
+void WaterFlowElement::DeleteChildByIndex(size_t index)
 {
     ReleaseElementByIndex(index);
-}
-
-bool WaterFlowElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
-{
-    RefPtr<RenderWaterFlow> waterFlow = AceType::DynamicCast<RenderWaterFlow>(renderNode_);
-    if (!waterFlow) {
-        LOGE("Render waterFlow is null.");
-        return false;
-    }
-    LOGI("RequestNextFocus vertical:%{public}d reverse:%{public}d.", vertical, reverse);
-    bool ret = false;
-    while (!ret) {
-        int32_t focusIndex = waterFlow->RequestNextFocus(vertical, reverse);
-        size_t size = GetChildrenList().size();
-        if (focusIndex < 0 || static_cast<size_t>(focusIndex) >= size) {
-            return false;
-        }
-        auto iter = GetChildrenList().begin();
-        std::advance(iter, focusIndex);
-        auto focusNode = *iter;
-        if (!focusNode) {
-            LOGE("Target focus node is null.");
-            return false;
-        }
-        // If current Node can not obtain focus, move to next.
-        ret = focusNode->RequestFocusImmediately();
-    }
-    return ret;
 }
 
 void WaterFlowElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChild)
@@ -182,29 +135,22 @@ void WaterFlowElement::OnDataSourceUpdated(size_t startIndex)
     if (context) {
         context->AddPostFlushListener(AceType::Claim(this));
     }
+
     RefPtr<RenderWaterFlow> render = AceType::DynamicCast<RenderWaterFlow>(renderNode_);
-    if (!render) {
-        return;
+    if (render) {
+        render->OnDataSourceUpdated(static_cast<int32_t>(startIndex));
+        render->SetTotalCount(ElementProxyHost::TotalCount());
     }
-    render->OnDataSourceUpdated(static_cast<int32_t>(startIndex));
-    render->SetTotalCount(ElementProxyHost::TotalCount());
+}
+
+size_t WaterFlowElement::TotalCount()
+{
+    return ElementProxyHost::TotalCount();
 }
 
 void WaterFlowElement::OnPostFlush()
 {
     ReleaseRedundantComposeIds();
-}
-
-size_t WaterFlowElement::GetReloadedCheckNum()
-{
-    RefPtr<RenderWaterFlow> render = AceType::DynamicCast<RenderWaterFlow>(renderNode_);
-    if (render) {
-        size_t cachedNum = render->GetCachedSize();
-        if (cachedNum > 0) {
-            return cachedNum;
-        }
-    }
-    return ElementProxyHost::GetReloadedCheckNum();
 }
 
 void WaterFlowElement::Dump()
