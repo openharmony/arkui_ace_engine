@@ -36,7 +36,7 @@ public:
     void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         TabBarBuilderFunc&& builder, bool useContentOnly) override;
     static void SetTabBar(const std::string& text, const std::string& icon, TabBarBuilderFunc&& builder);
-    static void AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position);
+    static void AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position = DEFAULT_NODE_SLOT, bool update = false);
     static void RemoveTabBarItem(const RefPtr<TabsNode>& tabs, int32_t id);
     static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
 };

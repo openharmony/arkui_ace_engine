@@ -77,6 +77,7 @@ void TabContentModelNG::Create()
 void TabContentModelNG::Pop()
 {
     auto tabContent = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    AddTabBarItem(tabContent, DEFAULT_NODE_SLOT, true);
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 
 }
@@ -95,7 +96,7 @@ RefPtr<TabsNode> TabContentView::FindTabsNode(const RefPtr<UINode>& tabContent)
     return nullptr;
 }
 
-void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position)
+void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position, bool update )
 {
     LOGD("position %{public}d", position);
     CHECK_NULL_VOID(tabContent);
@@ -106,12 +107,18 @@ void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t pos
 
     auto tabsNode = FindTabsNode(tabContent);
     CHECK_NULL_VOID(tabsNode);
+
+    if (update && !tabsNode->HasTabBarItemByContentId(tabContentId)) {
+        LOGD("Update only, do nothing");
+        return;
+    }
+
     auto tabBarNode = tabsNode->GetTabBar();
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarParam = tabContentFrameNode->GetPattern<TabContentPattern>()->GetTabBarParam();
 
     // Create column node to contain image and text or builder.
-    auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetTabBarByContentId(tabContentId),
+    auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetTabBarItemByContentId(tabContentId),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     auto linearLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(linearLayoutProperty);
@@ -191,7 +198,7 @@ void TabContentView::RemoveTabBarItem(const RefPtr<TabsNode>& tabsNode, int32_t 
     auto tabBarNode = tabsNode->GetTabBar();
     CHECK_NULL_VOID(tabBarNode);
 
-    auto tabBarItemId = tabsNode->GetTabBarByContentId(tabContentId);
+    auto tabBarItemId = tabsNode->GetTabBarItemByContentId(tabContentId);
     LOGD("Tab ID: %{public}d, Bar item ID: %{public}d", tabContentId, tabBarItemId);
 
     auto tabBarItemNode = ElementRegister::GetInstance()->GetUINodeById(tabBarItemId);

@@ -60,7 +60,7 @@ public:
         return tabBarId_.value();
     }
 
-    int32_t GetTabBarByContentId(int32_t tabContentId)
+    int32_t GetTabBarItemByContentId(int32_t tabContentId)
     {
         auto iter = tabBarItemIds_.find(tabContentId);
         if (iter == tabBarItemIds_.end()) {
@@ -69,6 +69,11 @@ public:
             return tabBarId;
         }
         return iter->second;
+    }
+
+    bool HasTabBarItemByContentId(int32_t tabContentId)
+    {
+        return tabBarItemIds_.find(tabContentId) != tabBarItemIds_.end();
     }
 
     RefPtr<UINode> GetBuilderByContentId(int32_t tabContentId, const RefPtr<UINode>& builderNode)
