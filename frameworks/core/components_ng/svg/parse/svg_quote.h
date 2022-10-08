@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 
 class SvgQuote : public SvgNode {
-    DECLARE_ACE_TYPE(SvgGroup, SvgNode);
+    DECLARE_ACE_TYPE(SvgQuote, SvgNode);
 
 public:
     SvgQuote() : SvgNode()

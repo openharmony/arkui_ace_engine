@@ -16,16 +16,33 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Rosen::Drawing {
 class Canvas;
 class RectF;
-}
+} // namespace OHOS::Rosen::Drawing
 namespace OHOS::Ace::NG {
 
 using RSCanvas = Rosen::Drawing::Canvas;
 using RSRect = Rosen::Drawing::RectF;
+
+struct ImagePaintConfig {
+    ImagePaintConfig(const RectF& srcRect, const RectF& dstRect) : srcRect_(srcRect), dstRect_(dstRect) {}
+    ~ImagePaintConfig() = default;
+
+    RectF srcRect_;
+    RectF dstRect_;
+    ImageRenderMode renderMode_ = ImageRenderMode::ORIGINAL;
+    ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
+    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+    ImageFit imageFit_ = ImageFit::COVER;
+    std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
+    bool needFlipCanvasHorizontally_ = false;
+    bool isSvg = false;
+};
 
 // CanvasImage is interface for drawing image.
 class CanvasImage : public virtual AceType {
@@ -38,6 +55,11 @@ public:
     static RefPtr<CanvasImage> Create();
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
+    void SetImagePaintConfig(const ImagePaintConfig& imagePaintConfig)
+    {
+        imagePaintConfig_ = std::make_unique<ImagePaintConfig>(imagePaintConfig);
+    }
+    std::unique_ptr<ImagePaintConfig> imagePaintConfig_;
 };
 } // namespace OHOS::Ace::NG
 
