@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,29 +34,18 @@ void OverlayManager::ShowToast(
     CHECK_NULL_VOID(context);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
-    LOGI("begin to show toast, toast id is %{public}d, message is %{public}s", toastId, message.c_str());
-    // make toast node
-    auto toastNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, MakeRefPtr<TextPattern>());
-    auto layoutProperty = toastNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    // update toast props
-    layoutProperty->UpdateContent(message);
-    auto target = toastNode->GetRenderContext();
-    auto themeManager = context->GetThemeManager();
-    Color toastColor = Color::BLUE;
-    if (themeManager) {
-        auto toastTheme = themeManager->GetTheme<ToastTheme>();
-        if (toastTheme) {
-            toastColor = toastTheme->GetBackgroundColor();
-        }
+
+    // only one toast
+    if (toastInfo_.toastNode) {
+        rootNode->RemoveChild(toastInfo_.toastNode);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (target) {
-        target->UpdateBackgroundColor(toastColor);
-    }
-    // save toast node in overlay manager
+
+    auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
+    auto toastId = toastNode->GetId();
     ToastInfo info = { toastId, toastNode };
-    toastStack_.emplace_back(info);
+    toastInfo_ = info;
+
     // mount to parent
     toastNode->MountToParent(rootNode);
     toastNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -74,13 +63,10 @@ void OverlayManager::ShowToast(
 void OverlayManager::PopToast(int32_t toastId)
 {
     RefPtr<UINode> toastUnderPop;
-    auto toastIter = toastStack_.rbegin();
-    for (; toastIter != toastStack_.rend(); ++toastIter) {
-        if (toastIter->toastId == toastId) {
-            toastUnderPop = toastIter->toastNode;
-            break;
-        }
+    if (toastId != toastInfo_.toastId) {
+        return;
     }
+    toastUnderPop = toastInfo_.toastNode;
     if (!toastUnderPop) {
         LOGE("No toast under pop");
         return;
@@ -91,7 +77,6 @@ void OverlayManager::PopToast(int32_t toastId)
         return;
     }
     LOGI("begin to pop toast, id is %{public}d", toastId);
-    toastStack_.remove(*toastIter);
     rootNode->RemoveChild(toastUnderPop);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }

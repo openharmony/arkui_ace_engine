@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
-#include <list>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
@@ -56,7 +55,6 @@ public:
     {
         LOGI("OverlayManager Destructor.");
         popupMap_.clear();
-        toastStack_.clear();
     }
 
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popup);
@@ -73,7 +71,7 @@ public:
     void CloseDialog(RefPtr<FrameNode> dialogNode);
 
 private:
-    std::list<NG::ToastInfo> toastStack_;
+    NG::ToastInfo toastInfo_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     WeakPtr<UINode> rootNodeWeak_;
