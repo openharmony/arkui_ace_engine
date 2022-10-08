@@ -73,6 +73,10 @@ const char COLUMN_COMPONENT_TAG[] = "ColumnComponent";
 const char COLUMN_ETS_TAG[] = "Column";
 const char COLUMN_ATTRS_ALIGN_ITEMS[] = "alignItems";
 
+// panel bar
+const char DRAG_BAR_COMPONENT_TAG[] = "DragBarComponent";
+const char DRAG_BAR_ETS_TAG[] = "DragBar";
+
 // text
 const char TEXT_COMPONENT_TAG[] = "TextComponentV2";
 const char TEXT_ETS_TAG[] = "Text";

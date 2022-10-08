@@ -260,6 +260,7 @@ void PipelineContext::SetupRootElement()
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    dragDropManager_ = MakeRefPtr<DragDropManager>();
     LOGI("SetupRootElement success!");
 }
 
@@ -613,6 +614,27 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
             ++iter;
         }
     }
+}
+
+void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
+{
+    if (isDragged_) {
+        return;
+    }
+
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+
+    std::string extraInfo;
+    manager->GetExtraInfoFromClipboard(extraInfo);
+
+    if (action == DragEventAction::DRAG_EVENT_END) {
+        manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
+        manager->RestoreClipboardData();
+        return;
+    }
+
+    manager->OnDragMove(static_cast<float>(x), static_cast<float>(y), extraInfo);
 }
 
 } // namespace OHOS::Ace::NG

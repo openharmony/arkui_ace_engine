@@ -24,71 +24,30 @@
 #endif
 #include "include/core/SkStream.h"
 
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/image_provider/svg_dom.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 
 namespace OHOS::Ace::NG {
 
-union SkColorEx {
-    struct {
-        SkColor color : 32;
-        bool valid : 1;
-        uint32_t reserved : 31; // reserved
-    };
-    uint64_t value = 0;
-};
-
-class SkiaSvgDom : public SvgDom {
-    DECLARE_ACE_TYPE(SkiaSvgDom, SvgDom);
+class SkiaSvgDom : public SvgDomBase {
+    DECLARE_ACE_TYPE(SkiaSvgDom, SvgDomBase);
 
 public:
     SkiaSvgDom() = default;
     explicit SkiaSvgDom(const sk_sp<SkSVGDOM>& skiaDom) : skiaDom_(skiaDom) {}
 
-    static RefPtr<SkiaSvgDom> CreateSkiaSvgDom(const sk_sp<SkData>& skData, const std::optional<Color>& svgFillColor)
-    {
-        const auto svgStream = std::make_unique<SkMemoryStream>(skData);
-        SkColorEx skColor;
-        if (svgFillColor.has_value()) {
-            skColor.color = svgFillColor.value().GetValue();
-            skColor.valid = 1;
-        }
-#ifdef NG_BUILD
-        // NG not support svg yet
-        sk_sp<SkSVGDOM> skiaDom = nullptr;
-#else
-        auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, skColor.value);
-#endif
-        return AceType::MakeRefPtr<SkiaSvgDom>(skiaDom);
-    }
+    static RefPtr<SkiaSvgDom> CreateSkiaSvgDom(SkStream& svgStream, const std::optional<Color>& svgFillColor);
 
-    const sk_sp<SkSVGDOM>& GetSkiaSvgDom() const
-    {
-        return skiaDom_;
-    }
+    void DrawImage(
+        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) override;
 
-    void Render(SkCanvas* skCanvas)
-    {
-#ifndef NG_BUILD
-        skiaDom_->render(skCanvas);
-#endif
-    }
+    const sk_sp<SkSVGDOM>& GetSkiaSvgDom() const;
 
-    SizeF GetContainerSize() const override
-    {
-#ifdef NG_BUILD
-        return {};
-#else
-        return SizeF(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-#endif
-    }
+    void Render(SkCanvas* skCanvas);
 
-    void SetContainerSize(const SizeF& containerSize) override
-    {
-#ifndef NG_BUILD
-        skiaDom_->setContainerSize({containerSize.Width(), containerSize.Height()});
-#endif
-    }
+    SizeF GetContainerSize() const override;
+    void SetContainerSize(const SizeF& containerSize) override;
+    void SetSvgFillColor(const std::optional<Color>& color) override {}
+
 private:
     sk_sp<SkSVGDOM> skiaDom_;
 };

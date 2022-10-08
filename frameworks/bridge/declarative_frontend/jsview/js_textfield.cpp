@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -66,6 +68,69 @@ namespace {
 
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
+constexpr uint32_t TEXTAREA_MAXLENGTH_VALUE_DEFAULT = std::numeric_limits<uint32_t>::max();
+
+void InitTextAreaDefaultStyle()
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    if (!boxComponent || !textAreaComponent || !theme) {
+        LOGE("boxComponent or textAreaComponent or theme is null");
+        return;
+    }
+
+    textAreaComponent->SetTextMaxLines(TEXTAREA_MAXLENGTH_VALUE_DEFAULT);
+    textAreaComponent->SetCursorColor(theme->GetCursorColor());
+    textAreaComponent->SetPlaceholderColor(theme->GetPlaceholderColor());
+    textAreaComponent->SetFocusBgColor(theme->GetFocusBgColor());
+    textAreaComponent->SetFocusPlaceholderColor(theme->GetFocusPlaceholderColor());
+    textAreaComponent->SetFocusTextColor(theme->GetFocusTextColor());
+    textAreaComponent->SetBgColor(theme->GetBgColor());
+    textAreaComponent->SetTextColor(theme->GetTextColor());
+    textAreaComponent->SetSelectedColor(theme->GetSelectedColor());
+    textAreaComponent->SetHoverColor(theme->GetHoverColor());
+    textAreaComponent->SetPressColor(theme->GetPressColor());
+
+    TextStyle textStyle = textAreaComponent->GetTextStyle();
+    textStyle.SetTextColor(theme->GetTextColor());
+    textStyle.SetFontSize(theme->GetFontSize());
+    textStyle.SetFontWeight(theme->GetFontWeight());
+    textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
+    textAreaComponent->SetTextStyle(textStyle);
+    textAreaComponent->SetEditingStyle(textStyle);
+    textAreaComponent->SetPlaceHoldStyle(textStyle);
+
+    textAreaComponent->SetCountTextStyle(theme->GetCountTextStyle());
+    textAreaComponent->SetOverCountStyle(theme->GetOverCountStyle());
+    textAreaComponent->SetCountTextStyleOuter(theme->GetCountTextStyleOuter());
+    textAreaComponent->SetOverCountStyleOuter(theme->GetOverCountStyleOuter());
+    textAreaComponent->SetErrorBorderWidth(theme->GetErrorBorderWidth());
+    textAreaComponent->SetErrorBorderColor(theme->GetErrorBorderColor());
+
+    RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
+    backDecoration->SetPadding(theme->GetPadding());
+    backDecoration->SetBackgroundColor(theme->GetBgColor());
+    backDecoration->SetBorderRadius(theme->GetBorderRadius());
+    const auto& boxDecoration = boxComponent->GetBackDecoration();
+    if (boxDecoration) {
+        backDecoration->SetImage(boxDecoration->GetImage());
+        backDecoration->SetGradient(boxDecoration->GetGradient());
+    }
+    textAreaComponent->SetOriginBorder(backDecoration->GetBorder());
+    textAreaComponent->SetDecoration(backDecoration);
+    textAreaComponent->SetIconSize(theme->GetIconSize());
+    textAreaComponent->SetIconHotZoneSize(theme->GetIconHotZoneSize());
+    textAreaComponent->SetHeight(theme->GetHeight());
+
+    // text area need to extend height.
+    textAreaComponent->SetExtend(true);
+    boxComponent->SetHeight(-1.0, DimensionUnit::VP);
+}
 
 } // namespace
 
@@ -99,6 +164,63 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
         JSInteractableView::SetFocusable(true);
         JSInteractableView::SetFocusNode(true);
     }
+}
+
+void JSTextField::CreateTextArea(const JSCallbackInfo& info)
+{
+    std::optional<std::string> placeholderSrc;
+    std::optional<std::string> value;
+    JSTextAreaController* jsController = nullptr;
+    if (info[0]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        std::string placeholder;
+        if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
+            placeholderSrc = placeholder;
+        }
+        std::string text;
+        if (ParseJsString(paramObject->GetProperty("text"), text)) {
+            value = text;
+        }
+        auto controllerObj = paramObject->GetProperty("controller");
+        if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextAreaController>();
+        }
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        // TODO: add textfield impl.
+        TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
+        return;
+    }
+
+    RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
+    textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
+    textAreaComponent->SetHoverAnimationType(HoverAnimationType::BOARD);
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+
+    ViewStackProcessor::GetInstance()->ClaimElementId(textAreaComponent);
+    ViewStackProcessor::GetInstance()->Push(textAreaComponent);
+    InitTextAreaDefaultStyle();
+    Border boxBorder;
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto theme = GetTheme<TextFieldTheme>();
+    if (boxComponent->GetBackDecoration()) {
+        boxBorder = boxComponent->GetBackDecoration()->GetBorder();
+    }
+    if (value) {
+        textAreaComponent->SetValue(value.value());
+    }
+    if (placeholderSrc) {
+        textAreaComponent->SetPlaceholder(placeholderSrc.value());
+    }
+    JSTextField::UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
+    if (jsController) {
+        jsController->SetController(textAreaComponent->GetTextFieldController());
+    }
+
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(true);
 }
 
 void JSTextField::SetType(const JSCallbackInfo& info)

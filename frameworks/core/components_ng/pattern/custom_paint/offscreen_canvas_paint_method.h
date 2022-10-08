@@ -28,6 +28,8 @@ public:
     OffscreenCanvasPaintMethod(const RefPtr<PipelineContext> context, int32_t width, int32_t height);
     ~OffscreenCanvasPaintMethod() override = default;
 
+    void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
+    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     std::string ToDataURL(const std::string& type, const double quality);
 
@@ -59,6 +61,7 @@ private:
     void SetHueRotateFilter(const std::string& percent);
     void SetColorFilter(float matrix[20]);
 
+    bool GetFilterType(std::string& filterType, std::string& filterParam);
     bool IsPercentStr(std::string& percentStr);
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
@@ -67,6 +70,8 @@ private:
     void ImageObjFailed() override;
 
     sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }
+    bool HasImageShadow() const;
+    void SetPaintImage() override;
 
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
     double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
@@ -79,6 +84,7 @@ private:
     int32_t height_;
     std::map<std::string, setColorFunc> filterFunc_;
     Shadow imageShadow_;
+    std::string filterParam_ = "";
 };
 } // namespace OHOS::Ace::NG
 

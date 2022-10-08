@@ -42,6 +42,18 @@ public:
         }
     }
 
+    void FireOnAppear() const
+    {
+        if (appearFunc_) {
+            appearFunc_();
+        }
+    }
+
+    void SetAppearFunction(std::function<void()>&& appearFunc)
+    {
+        appearFunc_ = std::move(appearFunc);
+    }
+
     void SetUpdateFunction(std::function<void()>&& updateFunc)
     {
         updateFunc_ = std::move(updateFunc);
@@ -52,6 +64,13 @@ public:
         destroyFunc_ = std::move(destroyFunc);
     }
 
+    void Reset()
+    {
+        updateFunc_ = nullptr;
+        appearFunc_ = nullptr;
+        destroyFunc_ = nullptr;
+    }
+
     // called by view in js thread
     void MarkNeedUpdate();
 
@@ -59,9 +78,8 @@ public:
     void Update();
 
 private:
-    void BuildChildren(const RefPtr<FrameNode>& child);
-
     std::function<void()> updateFunc_;
+    std::function<void()> appearFunc_;
     std::function<void()> destroyFunc_;
     std::string viewKey_;
     bool needRebuild_ = false;

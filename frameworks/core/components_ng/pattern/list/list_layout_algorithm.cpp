@@ -35,26 +35,54 @@ namespace {
 
 constexpr float CACHE_SIZE_RADIO = 0.1;
 
-void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
+} // namespace
+
+void ListLayoutAlgorithm::UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
+    LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;
     if (axis == Axis::VERTICAL) {
         contentConstraint.maxSize.SetHeight(Infinity<float>());
         auto width = selfIdealSize.Width();
         if (width.has_value()) {
-            contentConstraint.maxSize.SetWidth(width.value());
-            contentConstraint.minSize.SetWidth(width.value());
+            float crossSize = width.value();
+            if (lanes_.has_value() && lanes_.value() > 1) {
+                crossSize /= lanes_.value();
+            }
+            if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
+                crossSize = maxLaneLength_.value();
+            }
+            contentConstraint.percentReference.SetWidth(crossSize);
+            contentConstraint.parentIdealSize.SetWidth(crossSize);
+            contentConstraint.maxSize.SetWidth(crossSize);
+            if (minLaneLength_.has_value()) {
+                contentConstraint.minSize.SetWidth(minLaneLength_.value());
+            } else {
+                contentConstraint.minSize.SetWidth(crossSize);
+            }
         }
         return;
     }
     contentConstraint.maxSize.SetWidth(Infinity<float>());
     auto height = selfIdealSize.Height();
     if (height.has_value()) {
-        contentConstraint.maxSize.SetHeight(height.value());
-        contentConstraint.minSize.SetHeight(height.value());
+        float crossSize = height.value();
+        if (lanes_.has_value() && lanes_.value() > 1) {
+            crossSize /= lanes_.value();
+        }
+        if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
+            crossSize = maxLaneLength_.value();
+        }
+        contentConstraint.percentReference.SetHeight(crossSize);
+        contentConstraint.parentIdealSize.SetHeight(crossSize);
+        contentConstraint.maxSize.SetHeight(crossSize);
+        if (minLaneLength_.has_value()) {
+            contentConstraint.minSize.SetHeight(minLaneLength_.value());
+        } else {
+            contentConstraint.minSize.SetHeight(crossSize);
+        }
     }
 }
-} // namespace
 
 void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -75,63 +103,71 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingBeforeContent_ = axis == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
+    auto childSize = layoutWrapper->GetTotalChildCount();
     if (!GetMainAxisSize(contentIdealSize, axis)) {
-        // use parent max size first.
-        auto parentMaxSize = contentConstraint.maxSize;
-        contentMainSize_ = GetMainAxisSize(parentMaxSize, axis) - paddingBeforeContent_ - paddingAfterContent_;
-        mainSizeIsDefined_ = false;
+        if (childSize == 0) {
+            contentMainSize_ = 0.0f;
+        } else {
+            // use parent max size first.
+            auto parentMaxSize = contentConstraint.maxSize;
+            contentMainSize_ = GetMainAxisSize(parentMaxSize, axis) - paddingBeforeContent_ - paddingAfterContent_;
+            mainSizeIsDefined_ = false;
+        }
     } else {
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis);
         mainSizeIsDefined_ = true;
     }
 
-    startMainPos_ = currentOffset_;
-    endMainPos_ = currentOffset_ + contentMainSize_;
-    LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f, startMainPos: %{public}f, "
-         "endMainPos: %{public}f",
-        preStartIndex_, preEndIndex_, currentOffset_, startMainPos_, endMainPos_);
+    if (childSize > 0) {
+        startMainPos_ = currentOffset_;
+        endMainPos_ = currentOffset_ + contentMainSize_;
+        LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f, startMainPos: %{public}f, "
+             "endMainPos: %{public}f",
+            preStartIndex_, preEndIndex_, currentOffset_, startMainPos_, endMainPos_);
 
-    auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
-    auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
-    spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
-    if (listLayoutProperty->GetDivider().has_value()) {
-        auto divider = listLayoutProperty->GetDivider().value();
-        std::optional<float> dividerSpace =
-            ConvertToPx(divider.strokeWidth, layoutConstraint.scaleProperty, mainPercentRefer);
-        if (dividerSpace.has_value()) {
-            spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
+        auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
+        auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
+        spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
+        if (listLayoutProperty->GetDivider().has_value()) {
+            auto divider = listLayoutProperty->GetDivider().value();
+            std::optional<float> dividerSpace =
+                ConvertToPx(divider.strokeWidth, layoutConstraint.scaleProperty, mainPercentRefer);
+            if (dividerSpace.has_value()) {
+                spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
+            }
         }
-    }
 
-    // calculate child layout constraint.
-    auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();
-    UpdateListItemConstraint(axis, contentIdealSize, childLayoutConstraint);
+        itemPosition_.clear();
 
-    itemPosition_.clear();
-
-    lanes_ = listLayoutProperty->GetLanes();
-    if (listLayoutProperty->GetLaneMinLength().has_value()) {
-        minLaneLength_ = ConvertToPx(
-            listLayoutProperty->GetLaneMinLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
-    }
-    if (listLayoutProperty->GetLaneMaxLength().has_value()) {
-        maxLaneLength_ = ConvertToPx(
-            listLayoutProperty->GetLaneMaxLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
-    }
-    listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
-    CalculateLanes(layoutConstraint, axis);
-
-    cachedCount_ = listLayoutProperty->GetCachedCount().value_or(0);
-    if (lanes_.has_value() && lanes_.value() > 1) {
-        if (cachedCount_ % lanes_.value() != 0) {
-            cachedCount_ = (cachedCount_ / lanes_.value() + 1) * lanes_.value();
+        lanes_ = listLayoutProperty->GetLanes();
+        if (listLayoutProperty->GetLaneMinLength().has_value()) {
+            minLaneLength_ = ConvertToPx(
+                listLayoutProperty->GetLaneMinLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
         }
-    }
+        if (listLayoutProperty->GetLaneMaxLength().has_value()) {
+            maxLaneLength_ = ConvertToPx(
+                listLayoutProperty->GetLaneMaxLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
+        }
+        listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
+        CalculateLanes(layoutConstraint, axis);
+        // calculate child layout constraint.
+        auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();
+        UpdateListItemConstraint(axis, contentIdealSize, childLayoutConstraint);
 
-    if (jumpIndex_) {
-        LayoutListInIndexMode(layoutWrapper, childLayoutConstraint, axis);
+        cachedCount_ = listLayoutProperty->GetCachedCount().value_or(0);
+        if (lanes_.has_value() && lanes_.value() > 1) {
+            if (cachedCount_ % lanes_.value() != 0) {
+                cachedCount_ = (cachedCount_ / lanes_.value() + 1) * lanes_.value();
+            }
+        }
+
+        if (jumpIndex_) {
+            LayoutListInIndexMode(layoutWrapper, childLayoutConstraint, axis);
+        } else {
+            LayoutListInOffsetMode(layoutWrapper, childLayoutConstraint, axis);
+        }
     } else {
-        LayoutListInOffsetMode(layoutWrapper, childLayoutConstraint, axis);
+        LOGI("child size is empty");
     }
 
     if (axis == Axis::HORIZONTAL) {
@@ -142,6 +178,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AddPaddingToSize(padding, contentIdealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
 
+    ResetScrollable();
+
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f, mainSize is %{public}f",
         startIndex_.value(), endIndex_.value(), currentOffset_, contentMainSize_);
 }
@@ -150,46 +188,16 @@ void ListLayoutAlgorithm::LayoutListInIndexMode(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
     auto totalCount = layoutWrapper->GetTotalChildCount();
+    if (totalCount == 0) {
+        LOGI("child size is empty");
+        return;
+    }
     if (jumpIndex_.value() < 0 || jumpIndex_.value() >= totalCount) {
         LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalCount);
         jumpIndex_ = std::clamp(jumpIndex_.value(), 0, totalCount - 1);
     }
     jumpIndexOutOfRange_ = !((jumpIndex_.value() >= preStartIndex_) && (jumpIndex_.value() <= preEndIndex_));
     preStartIndex_ = jumpIndex_.value();
-    if (lanes_.has_value() && lanes_.value() > 1) {
-        // first layout Forward.
-        LayoutForwardForLaneList(layoutWrapper, layoutConstraint, axis);
-        if (itemPosition_[endIndex_.value_or(0)].second < contentMainSize_) {
-            auto movePosition = contentMainSize_ - itemPosition_[endIndex_.value_or(0)].second;
-            for (auto index = startIndex_.value_or(0); index <= endIndex_.value_or(0); index++) {
-                itemPosition_[index].first = itemPosition_[index].first + movePosition;
-                itemPosition_[index].second = itemPosition_[index].second + movePosition;
-            }
-            currentOffset_ = currentOffset_ + movePosition;
-
-            preEndIndex_ = startIndex_.value_or(0);
-            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(preEndIndex_);
-            CHECK_NULL_VOID(childWrapper);
-            if (axis == Axis::VERTICAL) {
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, itemPosition_[preEndIndex_].first));
-            } else {
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(itemPosition_[preEndIndex_].first, 0));
-            }
-            auto saveEndIndex = endIndex_.value_or(0);
-            LayoutBackwardForLaneList(layoutWrapper, layoutConstraint, axis);
-            endIndex_ = saveEndIndex;
-
-            if (startIndex_.value_or(0) == 0 && itemPosition_[0].first > 0) {
-                movePosition = itemPosition_[0].first;
-                for (auto index = startIndex_.value_or(0); index <= endIndex_.value_or(0); index++) {
-                    itemPosition_[index].first = itemPosition_[index].first - movePosition;
-                    itemPosition_[index].second = itemPosition_[index].second - movePosition;
-                }
-                currentOffset_ = currentOffset_ - movePosition;
-            }
-        }
-        return;
-    }
     LayoutForward(layoutWrapper, layoutConstraint, axis);
     if (itemPosition_[endIndex_.value_or(0)].second < contentMainSize_) {
         auto movePosition = contentMainSize_ - itemPosition_[endIndex_.value_or(0)].second;
@@ -225,14 +233,6 @@ void ListLayoutAlgorithm::LayoutListInIndexMode(
 void ListLayoutAlgorithm::LayoutListInOffsetMode(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
-    if (lanes_.has_value() && lanes_.value() > 1) {
-        if (NonNegative(currentOffset_)) {
-            LayoutForwardForLaneList(layoutWrapper, layoutConstraint, axis);
-        } else {
-            LayoutBackwardForLaneList(layoutWrapper, layoutConstraint, axis);
-        }
-        return;
-    }
     if (NonNegative(currentOffset_)) {
         LayoutForward(layoutWrapper, layoutConstraint, axis);
     } else {
@@ -240,11 +240,57 @@ void ListLayoutAlgorithm::LayoutListInOffsetMode(
     }
 }
 
+int ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    Axis axis, int& currentIndex, float& mainLen)
+{
+    int cnt = 0;
+    int lanes = lanes_.has_value() && lanes_.value() > 1 ? lanes_.value() : 1;
+    for (int i = 0; i < lanes; i++) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
+        if (!wrapper) {
+            maxListItemIndex_ = currentIndex;
+            LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
+            return cnt;
+        }
+        cnt++;
+        ++currentIndex;
+        {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
+            wrapper->Measure(layoutConstraint);
+        }
+        mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+    }
+    return cnt;
+}
+
+int ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    Axis axis, int& currentIndex, float& mainLen)
+{
+    int cnt = 0;
+    int lanes = lanes_.has_value() && lanes_.value() > 1 ? lanes_.value() : 1;
+    for (int i = 0; i < lanes; i++) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
+        if (!wrapper) {
+            LOGI("the %{public}d wrapper is null", currentIndex - 1);
+            break;
+        }
+        --currentIndex;
+        cnt++;
+        {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
+            wrapper->Measure(layoutConstraint);
+        }
+        mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+        if (currentIndex % lanes == 0) {
+            break;
+        }
+    }
+    return cnt;
+}
+
 void ListLayoutAlgorithm::LayoutForward(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
-    std::unordered_set<int32_t> inActiveItems;
-    std::optional<int32_t> newStartIndex;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(preStartIndex_);
     if (!wrapper) {
         LOGI("the %{public}d wrapper is null in LayoutForward", preStartIndex_);
@@ -262,55 +308,37 @@ void ListLayoutAlgorithm::LayoutForward(
     }
     float currentStartPos;
     auto currentIndex = preStartIndex_ - 1;
-    float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
-    if (cachedCount_ > 0) {
-        cacheSize = 0.0f;
-    }
+    float cacheSize = (cachedCount_ > 0) ? 0.0f : contentMainSize_ * CACHE_SIZE_RADIO;
     do {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
-        if (!wrapper) {
-            maxListItemIndex_ = currentIndex;
-            LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
+        currentStartPos = currentEndPos;
+        float mainLength = 0;
+        int count = LayoutALineForward(layoutWrapper, layoutConstraint, axis, currentIndex, mainLength);
+        if (count == 0) {
             break;
         }
-        ++currentIndex;
-        currentStartPos = currentEndPos;
-        {
-            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
-            wrapper->Measure(layoutConstraint);
-        }
-        auto mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
         currentEndPos = currentStartPos + mainLength;
-        // out of display area, mark inactive.
-        if (LessNotEqual(currentEndPos, startMainPos_ - cacheSize)) {
-            inActiveItems.emplace(currentIndex);
-        } else {
-            // mark new start index.
-            if (!newStartIndex) {
-                newStartIndex = currentIndex;
-            }
+        for (int i = 0; i < count; i++) {
+            itemPosition_[currentIndex - i] = { currentStartPos, currentEndPos };
         }
-        itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
         if (currentIndex >= 0) {
             currentEndPos = currentEndPos + spaceWidth_;
         }
         if (GreatOrEqual(currentStartPos, endMainPos_ + cacheSize)) {
-            endCachedCount_++;
+            endCachedCount_ += count;
         }
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
     } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize) || (endCachedCount_ < cachedCount_));
     currentEndPos = currentEndPos - spaceWidth_;
 
-    startIndex_ = newStartIndex.value_or(preStartIndex_);
     endIndex_ = currentIndex - endCachedCount_;
 
     if (playEdgeEffectAnimation_) {
         edgeEffectOffset_ = currentOffset_;
     }
     // adjust offset.
-    if (LessNotEqual(currentEndPos, endMainPos_)) {
-        auto firstItemTop = itemPosition_[startIndex_.value()].first;
+    if (LessNotEqual(currentEndPos, endMainPos_) && !itemPosition_.empty()) {
+        auto firstItemTop = itemPosition_.begin()->second.first;
         auto itemTotalSize = currentEndPos - firstItemTop;
         if (LessOrEqual(itemTotalSize, contentMainSize_) && (startIndex_ == 0)) {
             // all items size is less than list.
@@ -324,33 +352,24 @@ void ListLayoutAlgorithm::LayoutForward(
             currentOffset_ = currentEndPos - contentMainSize_;
             LOGD("LayoutForward: adjust offset to %{public}f", currentOffset_);
             startMainPos_ = currentOffset_;
-            auto startIndex = startIndex_.value();
-            auto currentStartPos = itemPosition_[startIndex].first;
-            // After shrinking the offset, needs to find the deleted node and add it back again.
-            while (GreatOrEqual(currentStartPos, startMainPos_ - cacheSize)) {
-                auto item = itemPosition_.find(startIndex - 1);
-                if (item == itemPosition_.end()) {
-                    break;
-                }
-                --startIndex;
-                LOGD("LayoutForward: get %{public}d item back", startIndex);
-                currentStartPos = item->second.first;
-                inActiveItems.erase(startIndex);
-            }
-            startIndex_ = startIndex;
         }
     }
+    
     // Mark inactive in wrapper.
-    for (const auto& index : inActiveItems) {
-        layoutWrapper->RemoveChildInRenderTree(index);
+    for (auto pos : itemPosition_) {
+        auto currentPos = pos.second.second;
+        if (GreatOrEqual(currentPos, startMainPos_ - cacheSize)) {
+            startIndex_ = pos.first;
+            break;
+        }
+        LOGI("recycle item:%{public}d", pos.first);
+        layoutWrapper->RemoveChildInRenderTree(pos.first);
     }
 }
 
 void ListLayoutAlgorithm::LayoutBackward(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
-    std::unordered_set<int32_t> inActiveItems;
-    std::optional<int32_t> newEndIndex;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(preEndIndex_);
     if (!wrapper) {
         LOGI("the %{public}d wrapper is null in LayoutBackward", preEndIndex_);
@@ -363,47 +382,30 @@ void ListLayoutAlgorithm::LayoutBackward(
                             paddingBeforeContent_;
     float currentEndPos;
     auto currentIndex = preEndIndex_ + 1;
-    float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
-    if (cachedCount_ > 0) {
-        cacheSize = 0.0f;
-    }
+    float cacheSize = (cachedCount_ > 0) ? 0.0f : contentMainSize_ * CACHE_SIZE_RADIO;
     do {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
-        if (!wrapper) {
-            LOGI("the %{public}d wrapper is null", currentIndex - 1);
+        currentEndPos = currentStartPos;
+        float mainLength = 0;
+        int count = LayoutALineBackward(layoutWrapper, layoutConstraint, axis, currentIndex, mainLength);
+        if (count == 0) {
             break;
         }
-        --currentIndex;
-        // the current item end pos is the prev item start pos in backward.
-        currentEndPos = currentStartPos;
-        {
-            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
-            wrapper->Measure(layoutConstraint);
-        }
-        auto mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
         currentStartPos = currentEndPos - mainLength;
 
-        // out of display area, mark inactive.
-        if (GreatNotEqual(currentStartPos, endMainPos_ + cacheSize)) {
-            inActiveItems.emplace(currentIndex);
-        } else {
-            // mark new end index.
-            if (!newEndIndex) {
-                newEndIndex = currentIndex;
-            }
+        for (int i = 0; i < count; i++) {
+            itemPosition_[currentIndex + i] = { currentStartPos, currentEndPos };
         }
-        itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
         if (currentIndex > 0) {
             currentStartPos = currentStartPos - spaceWidth_;
         }
         if (LessOrEqual(currentEndPos, startMainPos_ - cacheSize)) {
-            startCachedCount_++;
+            startCachedCount_ += count;
         }
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
     } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize) || (startCachedCount_ < cachedCount_));
 
-    endIndex_ = newEndIndex.value_or(preEndIndex_);
+    // endIndex_ = newEndIndex.value_or(preEndIndex_);
     startIndex_ = currentIndex + startCachedCount_;
 
     if (playEdgeEffectAnimation_) {
@@ -413,25 +415,16 @@ void ListLayoutAlgorithm::LayoutBackward(
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
         currentOffset_ = currentStartPos;
         endMainPos_ = currentOffset_ + contentMainSize_;
-        currentOffset_ = currentStartPos;
-        auto endIndex = endIndex_.value();
-        auto currentEndPos = itemPosition_[endIndex].second;
-        // After shrinking the offset, needs to find the deleted node and add it back again.
-        while (LessOrEqual(currentEndPos, endMainPos_ + cacheSize)) {
-            auto item = itemPosition_.find(endIndex + 1);
-            if (item == itemPosition_.end()) {
-                break;
-            }
-            ++endIndex;
-            LOGD("LayoutBackward: get %{public}d item back", endIndex);
-            currentEndPos = item->second.second;
-            inActiveItems.erase(endIndex);
-        }
-        endIndex_ = endIndex;
     }
     // Mark inactive in wrapper.
-    for (const auto& index : inActiveItems) {
-        layoutWrapper->RemoveChildInRenderTree(index);
+    for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); pos++) {
+        auto currentEndPos = pos->second.first;
+        if (LessOrEqual(currentEndPos, endMainPos_ + cacheSize)) {
+            endIndex_ = pos->first;
+            break;
+        }
+        LOGI("recycle item:%{public}d", pos->first);
+        layoutWrapper->RemoveChildInRenderTree(pos->first);
     }
 }
 
@@ -591,203 +584,17 @@ void ListLayoutAlgorithm::ModifyLaneLength(const LayoutConstraintF& layoutConstr
     }
 }
 
-void ListLayoutAlgorithm::LayoutForwardForLaneList(
-    LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
+void ListLayoutAlgorithm::ResetScrollable()
 {
-    std::unordered_set<int32_t> inActiveItems;
-    std::optional<int32_t> newStartIndex;
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(preStartIndex_);
-    if (!wrapper) {
-        LOGW("the %{public}d wrapper is null in LayoutForward", preStartIndex_);
+    if (itemPosition_.empty()) {
+        LOGE("There is no item in list.");
         return;
     }
-    float currentEndPos = 0.0f;
-    if (jumpIndexOutOfRange_) {
-        // index is out of range, need to place this jumpIndex at begin.
-        currentEndPos = 0.0f;
-    } else {
-        // Calculate the end pos of the priv item ahead of the StartIndex.
-        // the child frame offset is include list padding and border, need to delete it first to match content origin.
-        currentEndPos =
-            GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) - paddingBeforeContent_;
-    }
-    float currentStartPos;
-    auto currentIndex = preStartIndex_ - 1;
-    float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
-    if (cachedCount_ > 0) {
-        cacheSize = 0.0f;
-    }
-    float mainLength = 0.0f;
-    bool outOfListSize = false;
-    do {
-        currentStartPos = currentEndPos;
-        for (int32_t i = 0; i < lanes_.value(); i++) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
-            if (!wrapper) {
-                maxListItemIndex_ = currentIndex;
-                LOGE("the start %{public}d index wrapper is null", currentIndex + 1);
-                outOfListSize = true;
-                break;
-            }
-            ++currentIndex;
-            {
-                ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
-                wrapper->Measure(layoutConstraint);
-            }
-            mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
-            // out of display area, mark inactive.
-            if (LessNotEqual(currentStartPos + mainLength, startMainPos_ - cacheSize)) {
-                inActiveItems.emplace(currentIndex);
-            } else {
-                // mark new start index.
-                if (!newStartIndex) {
-                    newStartIndex = currentIndex;
-                }
-            }
-            itemPosition_[currentIndex] = { currentStartPos, currentStartPos + mainLength };
-        }
-        currentEndPos = currentStartPos + mainLength;
-        if (GreatOrEqual(currentStartPos, endMainPos_ + cacheSize)) {
-            endCachedCount_ = endCachedCount_ + lanes_.value();
-        }
-        LOGD("LayoutForwardForLaneList: %{public}d current start pos: %{public}f, current end pos: %{public}f",
-            currentIndex, currentStartPos, currentEndPos);
-        if (outOfListSize) {
-            break;
-        }
-    } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize) || (endCachedCount_ < cachedCount_));
 
-    startIndex_ = newStartIndex.value_or(preStartIndex_);
-    endIndex_ = currentIndex - endCachedCount_;
-
-    if (playEdgeEffectAnimation_) {
-        edgeEffectOffset_ = currentOffset_;
-    }
-    // adjust offset.
-    if (LessNotEqual(currentEndPos, endMainPos_)) {
-        auto firstItemTop = itemPosition_[startIndex_.value()].first;
-        auto itemTotalSize = currentEndPos - firstItemTop;
-        if (LessOrEqual(itemTotalSize, contentMainSize_) && (startIndex_ == 0)) {
-            // all items size is less than list.
-            currentOffset_ = firstItemTop;
-            if (!mainSizeIsDefined_) {
-                // adapt child size.
-                LOGD("LayoutForwardForLaneList: adapt child total size");
-                contentMainSize_ = itemTotalSize;
-            }
-        } else {
-            currentOffset_ = currentEndPos - contentMainSize_;
-            LOGD("LayoutForwardForLaneList: adjust offset to %{public}f", currentOffset_);
-            startMainPos_ = currentOffset_;
-            auto startIndex = startIndex_.value();
-            auto currentStartPos = itemPosition_[startIndex].first;
-            // After shrinking the offset, needs to find the deleted node and add it back again.
-            while (GreatOrEqual(currentStartPos, startMainPos_ - cacheSize)) {
-                auto item = itemPosition_.find(startIndex - 1);
-                if (item == itemPosition_.end()) {
-                    break;
-                }
-                --startIndex;
-                LOGD("LayoutForwardForLaneList: get %{public}d item back", startIndex);
-                currentStartPos = item->second.first;
-                inActiveItems.erase(startIndex);
-            }
-            startIndex_ = startIndex;
-        }
-    }
-    // Mark inactive in wrapper.
-    for (const auto& index : inActiveItems) {
-        layoutWrapper->RemoveChildInRenderTree(index);
-    }
+    auto firstItem = itemPosition_.begin();
+    auto lastItem = itemPosition_.rbegin();
+    auto totalSize = lastItem->second.second - firstItem->second.first;
+    scrollable_ = GreatNotEqual(totalSize, contentMainSize_);
 }
 
-void ListLayoutAlgorithm::LayoutBackwardForLaneList(
-    LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
-{
-    std::unordered_set<int32_t> inActiveItems;
-    std::optional<int32_t> newEndIndex;
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(preEndIndex_);
-    if (!wrapper) {
-        LOGW("the %{public}d wrapper is null in LayoutBackward", preEndIndex_);
-        return;
-    }
-    // Calculate the start pos of the next item behind the EndIndex.
-    // the child frame offset is include list padding and border, need to delete it first to match content origin.
-    float currentStartPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) +
-                            GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis) -
-                            paddingBeforeContent_;
-    float currentEndPos;
-    auto currentIndex = preEndIndex_ + 1;
-    float cacheSize = contentMainSize_ * CACHE_SIZE_RADIO;
-    if (cachedCount_ > 0) {
-        cacheSize = 0.0f;
-    }
-    do {
-        currentEndPos = currentStartPos;
-        float mainLength = 0.0f;
-        for (int32_t i = 0; i < lanes_.value(); i++) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
-            if (!wrapper) {
-                LOGE("the start %{public}d index wrapper is null", currentIndex - 1);
-                break;
-            }
-            --currentIndex;
-            {
-                ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
-                wrapper->Measure(layoutConstraint);
-            }
-            mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
-            // out of display area, mark inactive.
-            if (GreatNotEqual(currentEndPos - mainLength, endMainPos_ + cacheSize)) {
-                inActiveItems.emplace(currentIndex);
-            } else {
-                // mark new start index.
-                if (!newEndIndex) {
-                    newEndIndex = currentIndex;
-                }
-            }
-            itemPosition_[currentIndex] = { currentEndPos - mainLength, currentEndPos };
-        }
-        currentStartPos = currentEndPos - mainLength;
-        LOGD("LayoutBackwardForLaneList: %{public}d current start pos: %{public}f, current end pos: %{public}f",
-            currentIndex, currentStartPos, currentEndPos);
-        if (LessOrEqual(currentEndPos, startMainPos_ - cacheSize)) {
-            startCachedCount_ = startCachedCount_ + lanes_.value();
-        }
-        if (currentIndex <= 0) {
-            break;
-        }
-    } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize) || (startCachedCount_ < cachedCount_));
-
-    endIndex_ = newEndIndex.value_or(preEndIndex_);
-    startIndex_ = currentIndex + startCachedCount_;
-
-    if (playEdgeEffectAnimation_) {
-        edgeEffectOffset_ = currentOffset_;
-    }
-    // adjust offset.
-    if (GreatNotEqual(currentStartPos, startMainPos_)) {
-        currentOffset_ = currentStartPos;
-        endMainPos_ = currentOffset_ + contentMainSize_;
-        currentOffset_ = currentStartPos;
-        auto endIndex = endIndex_.value();
-        auto currentEndPos = itemPosition_[endIndex].second;
-        // After shrinking the offset, needs to find the deleted node and add it back again.
-        while (LessOrEqual(currentEndPos, endMainPos_ + cacheSize)) {
-            auto item = itemPosition_.find(endIndex + 1);
-            if (item == itemPosition_.end()) {
-                break;
-            }
-            ++endIndex;
-            LOGD("LayoutBackwardForLaneList: get %{public}d item back", endIndex);
-            currentEndPos = item->second.second;
-            inActiveItems.erase(endIndex);
-        }
-        endIndex_ = endIndex;
-    }
-    // Mark inactive in wrapper.
-    for (const auto& index : inActiveItems) {
-        layoutWrapper->RemoveChildInRenderTree(index);
-    }
-}
 } // namespace OHOS::Ace::NG

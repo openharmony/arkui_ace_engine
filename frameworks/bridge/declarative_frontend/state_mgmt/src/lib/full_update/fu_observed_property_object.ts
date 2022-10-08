@@ -43,7 +43,7 @@ class ObservedPropertyObject<T extends Object> extends ObservedPropertyObjectAbs
   // It is NOT called when
   //    thisProp.aObsObj = new ClassA
   hasChanged(newValue: T): void {
-    console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
+    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
     this.notifyHasChanged(this.wrappedValue_);
   }
 
@@ -63,39 +63,39 @@ class ObservedPropertyObject<T extends Object> extends ObservedPropertyObjectAbs
   */
   private setValueInternal(newValue: T): boolean {
     if (typeof newValue !== 'object') {
-      console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
+      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
       return false;
     }
 
     this.unsubscribeFromOwningProperty();
 
     if (ObservedObject.IsObservedObject(newValue)) {
-      console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
+      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
       ObservedObject.addOwningProperty(newValue, this);
       this.wrappedValue_ = newValue;
     } else if (newValue instanceof SubscribaleAbstract) {
-      console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
+      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
       this.wrappedValue_ = newValue;
       (this.wrappedValue_ as unknown as SubscribaleAbstract).addOwningProperty(this);
     } else {
-      console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
+      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
       this.wrappedValue_ = ObservedObject.createNew(newValue, this);
     }
     return true;
   }
 
   public get(): T {
-    console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: get`);
+    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: get`);
     this.notifyPropertyRead();
     return this.wrappedValue_;
   }
 
   public set(newValue: T): void {
     if (this.wrappedValue_ == newValue) {
-      console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
       return;
     }
-    console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set, changed`);
+    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set, changed`);
     this.setValueInternal(newValue);
     this.notifyHasChanged(newValue);
   }

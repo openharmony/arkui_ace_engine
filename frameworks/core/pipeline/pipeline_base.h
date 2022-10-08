@@ -29,6 +29,7 @@
 #include "base/thread/task_executor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
@@ -599,6 +600,9 @@ protected:
     ActionEventHandler actionEventHandler_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
+
+    RefPtr<Clipboard> clipboard_;
+    std::function<void(const std::string&)> clipboardCallback_ = nullptr;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

@@ -54,8 +54,8 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     totalMainLength_ = 0.0f;
     totalCrossLength_ = 0.0f;
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.UpdateMaxSizeWithCheck(GetLeftSize(0.0, mainLengthLimit_, crossLengthLimit_));
-    childLayoutConstraint.UpdateMinSizeWithCheck(SizeF(0.0, 0.0));
+    childLayoutConstraint.UpdateMaxSizeWithCheck(GetLeftSize(0.0f, mainLengthLimit_, crossLengthLimit_));
+    childLayoutConstraint.UpdateMinSizeWithCheck(SizeF(0.0f, 0.0f));
     if (isDialogStretch_) {
         HandleDialogStretch();
         return;
@@ -196,29 +196,29 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(LayoutWrapper* layoutWrapper)
         }
         case WrapAlignment::CENTER: {
             // divided the space by two
-            startPosition = GetContentOffset(totalCrossLength_) / 2;
+            startPosition = GetContentOffset(totalCrossLength_) / 2.0;
             betweenPosition = OffsetF();
             break;
         }
         case WrapAlignment::SPACE_BETWEEN: {
             startPosition = OffsetF(0.0, 0.0);
-            double crossSpace =
+            float crossSpace =
                 contentNum > 1 ? (crossLengthLimit_ - totalCrossLength_) / static_cast<double>(contentNum - 1) : 0.0;
-            betweenPosition = isHorizontal ? OffsetF(0.0, crossSpace) : OffsetF(crossSpace, 0.0);
+            betweenPosition = isHorizontal ? OffsetF(0.0f, crossSpace) : OffsetF(crossSpace, 0.0f);
             break;
         }
         case WrapAlignment::SPACE_EVENLY: {
-            double leftSpace = crossLengthLimit_ - totalCrossLength_;
-            double crossSpace = leftSpace / static_cast<double>(contentNum + 1);
-            startPosition = isHorizontal ? OffsetF(0.0, crossSpace) : OffsetF(crossSpace, 0.0);
-            betweenPosition = isHorizontal ? OffsetF(0.0, crossSpace) : OffsetF(crossSpace, 0.0);
+            float leftSpace = crossLengthLimit_ - totalCrossLength_;
+            float crossSpace = leftSpace / static_cast<float>(contentNum + 1);
+            startPosition = isHorizontal ? OffsetF(0.0f, crossSpace) : OffsetF(crossSpace, 0.0f);
+            betweenPosition = isHorizontal ? OffsetF(0.0f, crossSpace) : OffsetF(crossSpace, 0.0f);
             break;
         }
         case WrapAlignment::SPACE_AROUND: {
-            double leftSpace = crossLengthLimit_ - totalCrossLength_;
-            double crossSpace = leftSpace / static_cast<double>(contentNum);
-            startPosition = isHorizontal ? OffsetF(0.0, crossSpace / 2) : OffsetF(crossSpace / 2, 0.0);
-            betweenPosition = isHorizontal ? OffsetF(0.0, crossSpace) : OffsetF(crossSpace, 0.0);
+            float leftSpace = crossLengthLimit_ - totalCrossLength_;
+            float crossSpace = leftSpace / static_cast<float>(contentNum);
+            startPosition = isHorizontal ? OffsetF(0.0f, crossSpace / 2.0) : OffsetF(crossSpace / 2, 0.0);
+            betweenPosition = isHorizontal ? OffsetF(0.0f, crossSpace) : OffsetF(crossSpace, 0.0);
             break;
         }
         default: {
@@ -242,9 +242,9 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(LayoutWrapper* layoutWrapper)
 OffsetF WrapLayoutAlgorithm::GetContentOffset(float totalCrossLength) const
 {
     if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
-        return OffsetF(0.0, crossLengthLimit_ - totalCrossLength);
+        return OffsetF(0.0f, crossLengthLimit_ - totalCrossLength);
     } else {
-        return OffsetF(crossLengthLimit_ - totalCrossLength, 0.0);
+        return OffsetF(crossLengthLimit_ - totalCrossLength, 0.0f);
     }
 }
 

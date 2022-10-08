@@ -44,7 +44,7 @@ void PageEventHub::UpdateRadioGroupValue(const std::string& group, int32_t radio
         if (item == radioId) {
             continue;
         }
-        auto node = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(radioId));
+        auto node = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(item));
         if (!node) {
             continue;
         }

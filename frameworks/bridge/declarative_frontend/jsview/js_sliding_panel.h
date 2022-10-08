@@ -28,6 +28,7 @@ class JSSlidingPanel : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void Pop();
     static void SetHasDragBar(bool hasDragBar);
     static void SetShow(bool isShow);
     static void SetPanelMode(int32_t mode);

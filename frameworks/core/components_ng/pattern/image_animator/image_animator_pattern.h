@@ -1,0 +1,129 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_ANIMATOR_IMAGE_ANIMATOR_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_ANIMATOR_IMAGE_ANIMATOR_PATTERN_H
+
+#include "core/animation/animator.h"
+#include "core/animation/picture_animation.h"
+#include "core/components/declaration/image/image_animator_declaration.h"
+#include "core/components_ng/pattern/image_animator/image_animator_event_hub.h"
+#include "core/components_ng/pattern/pattern.h"
+
+namespace OHOS::Ace::NG {
+
+class ACE_EXPORT ImageAnimatorPattern : public Pattern {
+    DECLARE_ACE_TYPE(ImageAnimatorPattern, Pattern);
+
+public:
+    ImageAnimatorPattern();
+    ~ImageAnimatorPattern() override
+    {
+        animator_ = nullptr;
+    }
+
+    void OnModifyDone() override;
+
+    void OnAttachToFrameNode() override;
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ImageAnimatorEventHub>();
+    }
+
+    void SetImages(std::vector<ImageProperties>&& images)
+    {
+        if (images_.size() == images.size()) {
+            return;
+        }
+        images_ = std::move(images);
+        durationTotal_ = 0;
+        for (const auto& childImage : images_) {
+            if (!childImage.src.empty() && childImage.duration > 0) {
+                durationTotal_ += childImage.duration;
+            }
+        }
+        imagesChangedFlag_ = true;
+    }
+
+    void SetStatus(Animator::Status status)
+    {
+        status_ = status;
+    }
+
+    void SetDuration(int32_t duration)
+    {
+        animator_->SetDuration(durationTotal_ > 0 ? durationTotal_ : duration);
+    }
+
+    void SetIteration(int32_t iteration)
+    {
+        animator_->SetIteration(iteration);
+    }
+
+    void SetFillMode(FillMode fillMode)
+    {
+        animator_->SetFillMode(fillMode);
+    }
+
+    void SetPreDecode(int32_t preDecode) {}
+
+    void SetIsReverse(bool isReverse)
+    {
+        isReverse_ = isReverse;
+    }
+
+    void SetFixedSize(bool fixedSize)
+    {
+        fixedSize_ = fixedSize;
+    }
+
+    void OnInActive() override
+    {
+        if (status_ == Animator::Status::RUNNING) {
+            animator_->Pause();
+        }
+    }
+
+    void OnActive() override
+    {
+        if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+            isReverse_ ? animator_->Backward() : animator_->Forward();
+        }
+    }
+
+private:
+    RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
+    void UpdateEventCallback();
+
+    RefPtr<Animator> animator_;
+    std::vector<ImageProperties> images_;
+    Animator::Status status_ = Animator::Status::IDLE;
+    int32_t durationTotal_ = 0;
+    bool isReverse_ = false;
+    bool fixedSize_ = true;
+
+    bool imagesChangedFlag_ = false;
+    bool firstUpdateEvent_ = true;
+};
+
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_ANIMATOR_IMAGE_ANIMATOR_PATTERN_H

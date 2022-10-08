@@ -403,8 +403,8 @@ void RenderListItemGroup::SetItemGroupLayoutParam(const ListItemLayoutParam &par
     listMainSize_ = param.listMainSize;
     vertical_ = param.isVertical;
     align_ = param.align;
-    stickyHeader_ = static_cast<bool>(param.sticky & StickyStyle::HEADER);
-    stickyFooter_ = static_cast<bool>(param.sticky & StickyStyle::FOOTER);
+    stickyHeader_ = (param.sticky == StickyStyle::HEADER);
+    stickyFooter_ = (param.sticky == StickyStyle::FOOTER);
     lanes_ = static_cast<size_t>(param.lanes);
     if (!isInitialized_) {
         isInitialized_ = true;

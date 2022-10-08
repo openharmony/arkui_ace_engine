@@ -18,25 +18,29 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
 
 class JSCanvasImageData : public Referenced {
 public:
-    JSCanvasImageData();
+    JSCanvasImageData() = default;
     ~JSCanvasImageData() override = default;
 
     static void JSBind(BindingTarget globalObj);
     static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSCanvasImageData* scroller);
+    static void Destructor(JSCanvasImageData* controller);
 
-    void getData(const JSCallbackInfo& args);
+    void JsGetWidth(const JSCallbackInfo& info);
+    void JsGetHeight(const JSCallbackInfo& info);
+    void JsGetData(const JSCallbackInfo& info);
+    void JsSetWidth(const JSCallbackInfo& info);
+    void JsSetHeight(const JSCallbackInfo& info);
+    void JsSetData(const JSCallbackInfo& info);
 
-    double width_ = 0;
-    double height_ = 0;
-
-    double GetWidth() const;
-    double GetHeight() const;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
+    JSRef<JSArray> colorArray_;
 
     void setX(int32_t x)
     {

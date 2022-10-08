@@ -21,31 +21,12 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_v2/common/common_def.h"
+#include "core/components_v2/list/list_properties.h"
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace::V2 {
 
-enum class StickyMode {
-    NONE = 0,
-    NORMAL,
-    OPACITY,
-};
 
-enum class SwipeEdgeEffect {
-    Spring = 0,
-    None,
-};
-
-struct EditMode {
-    enum : uint32_t {
-        NONE = 0,
-        DELETABLE = (1 << 0),
-        MOVABLE = (1 << 1),
-        SHAM = (1 << 2), // this enum value [SHAM] is added for inspector use, it works as [NONE]
-    };
-};
-
-using OnSelectFunc = std::function<void(bool)>;
 using DeepRenderFunc = std::function<RefPtr<Component>()>;
 
 class ACE_EXPORT ListItemComponent : public SoleChildComponent {

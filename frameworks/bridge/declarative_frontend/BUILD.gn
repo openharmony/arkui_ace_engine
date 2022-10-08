@@ -247,15 +247,15 @@ template("declarative_js_engine") {
       "sharedata/js_share_data.cpp",
       "view_stack_processor.cpp",
 
-      # jsview bindings
-      "jsview/bindings/js_list_binding.cpp",
-
       # Models implemenations for classic fw
       "jsview/models/column_model_impl.cpp",
       "jsview/models/flex_model_impl.cpp",
       "jsview/models/for_each_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
+      "jsview/models/lazy_for_each_model_impl.cpp",
+      "jsview/models/list_item_model_impl.cpp",
+      "jsview/models/list_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
       "jsview/models/text_field_model_impl.cpp",
@@ -409,22 +409,19 @@ template("declarative_js_engine_ng") {
       "jsview/js_container_base.cpp",
       "jsview/js_flex.cpp",
       "jsview/js_image.cpp",
+      "jsview/js_lazy_foreach.cpp",
+      "jsview/js_list.cpp",
+      "jsview/js_list_item.cpp",
       "jsview/js_row.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_text.cpp",
 
       # jsview bindings
-      "jsview/bindings/js_lazy_foreach_binding.cpp",
-      "jsview/bindings/js_list_binding.cpp",
-      "jsview/bindings/js_list_item_binding.cpp",
       "jsview/bindings/js_view_abstract_binding.cpp",
       "jsview/bindings/js_view_binding.cpp",
 
       # ng jsviews
       "ng/jsview/js_interactable_view.cpp",
-      "ng/jsview/js_lazy_foreach.cpp",
-      "ng/jsview/js_list.cpp",
-      "ng/jsview/js_list_item.cpp",
       "ng/jsview/js_view.cpp",
       "ng/jsview/js_view_abstract.cpp",
     ]

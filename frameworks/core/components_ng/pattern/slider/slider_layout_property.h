@@ -32,6 +32,7 @@ public:
         auto value = MakeRefPtr<SliderLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propSliderLayoutStyle_ = CloneSliderLayoutStyle();
+        value->propSliderLayoutThemeStyle_ = CloneSliderLayoutThemeStyle();
         return value;
     }
 
@@ -39,6 +40,7 @@ public:
     {
         LayoutProperty::Reset();
         ResetSliderLayoutStyle();
+        ResetSliderLayoutThemeStyle();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderLayoutStyle, SliderLayoutStyle)

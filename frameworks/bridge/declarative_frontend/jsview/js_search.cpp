@@ -15,9 +15,11 @@
 
 #include "bridge/declarative_frontend/jsview/js_search.h"
 
+#include "core/common/container.h"
 #include "core/components/search/search_component.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/text_field_component.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -249,6 +251,12 @@ void JSSearch::JSBind(BindingTarget globalObj)
 
 void JSSearch::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        // TODO: add search component impl.
+        NG::TextFieldModelNG textFieldModel;
+        textFieldModel.CreateTextInput(std::nullopt, std::nullopt);
+        return;
+    }
     auto searchComponent = AceType::MakeRefPtr<OHOS::Ace::SearchComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(searchComponent);
     ViewStackProcessor::GetInstance()->Push(searchComponent);

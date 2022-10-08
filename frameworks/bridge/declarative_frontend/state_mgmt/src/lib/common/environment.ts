@@ -66,7 +66,7 @@ class Environment {
   private envProp<S>(key: string, value: S): boolean {
     let prop = AppStorage.Prop(key);
     if (prop) {
-      console.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
+      stateMgmtConsole.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
       return false;
     }
     let tmp;
@@ -94,7 +94,7 @@ class Environment {
     }
     prop = AppStorage.SetAndProp(key, tmp);
     this.props_.set(key, prop);
-    console.debug(`Environment: envProp for '${key}' done.`);
+    stateMgmtConsole.debug(`Environment: envProp for '${key}' done.`);
   }
 
   private envProps(properties: {
@@ -103,7 +103,7 @@ class Environment {
   }[]): void {
     properties.forEach(property => {
       this.envProp(property.key, property.defaultValue);
-      console.debug(`Environment: envProps for '${property.key}' done.`);
+      stateMgmtConsole.debug(`Environment: envProps for '${property.key}' done.`);
     });
   }
 
@@ -123,9 +123,9 @@ class Environment {
   onValueChanged(key: string, value: any): void {
     let ok = AppStorage.Set(key, value);
     if (ok) {
-      console.debug(`Environment: onValueChanged: ${key} changed to ${value}`);
+      stateMgmtConsole.debug(`Environment: onValueChanged: ${key} changed to ${value}`);
     } else {
-      console.warn(`Environment: onValueChanged: error changing ${key}! See results above.`);
+      stateMgmtConsole.warn(`Environment: onValueChanged: error changing ${key}! See results above.`);
     }
   }
 

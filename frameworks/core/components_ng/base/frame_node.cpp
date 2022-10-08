@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include <list>
+#include <type_traits>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -137,9 +138,13 @@ void FrameNode::InitializePatternAndContext()
 void FrameNode::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("LayoutConstraint: ")
+    DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
+                                                   : "NA"));
+    DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
+                                       .append(layoutProperty_->GetContentLayoutConstraint().has_value()
+                                                   ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
                                                    : "NA"));
     if (pattern_) {
         pattern_->DumpInfo();
@@ -186,6 +191,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     ACE_FUNCTION_TRACE();
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
+    // update new layoutConstrain.
+    layoutProperty_->UpdateLayoutConstraint(dirty->GetLayoutProperty());
 
     // active change flag judge.
     bool activeChanged = false;
@@ -457,8 +464,10 @@ void FrameNode::RebuildRenderContextTree()
     if (!needSyncRenderTree_) {
         return;
     }
+    frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthVisibleFrame(children);
+    frameChildren_ = { children.begin(), children.end() };
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
     needSyncRenderTree_ = false;
@@ -631,9 +640,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // group.
     TouchTestResult newComingTargets;
     const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
-    const auto& children = GetChildren();
     bool consumed = false;
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
             break;
         }
@@ -831,6 +839,15 @@ void FrameNode::OnWindowShow()
 void FrameNode::OnWindowHide()
 {
     pattern_->OnWindowHide();
+}
+
+OffsetF FrameNode::GetGlobalOffset() const
+{
+    auto parent = GetAncestorNodeOfFrame();
+    if (!parent) {
+        return geometryNode_->GetFrameOffset();
+    }
+    return parent->geometryNode_->GetFrameOffset() + geometryNode_->GetFrameOffset();
 }
 
 } // namespace OHOS::Ace::NG

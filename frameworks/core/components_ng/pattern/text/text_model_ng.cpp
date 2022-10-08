@@ -24,6 +24,35 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+FontWeight ConvertFontWeight(FontWeight fontWeight)
+{
+    FontWeight convertValue = fontWeight;
+    switch (fontWeight) {
+        case FontWeight::LIGHTER:
+            convertValue = FontWeight::W100;
+            break;
+        case FontWeight::NORMAL:
+        case FontWeight::REGULAR:
+            convertValue = FontWeight::W400;
+            break;
+        case FontWeight::MEDIUM:
+            convertValue = FontWeight::W500;
+            break;
+        case FontWeight::BOLD:
+            convertValue = FontWeight::W700;
+            break;
+        case FontWeight::BOLDER:
+            convertValue = FontWeight::W900;
+            break;
+        default:
+            convertValue = fontWeight;
+            break;
+    }
+    return convertValue;
+}
+} // namespace
+
 void TextModelNG::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -33,6 +62,8 @@ void TextModelNG::Create(const std::string& content)
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_LEFT);
 }
 
 void TextModelNG::SetFontSize(const Dimension& value)
@@ -52,7 +83,7 @@ void TextModelNG::SetItalicFontStyle(Ace::FontStyle value)
 
 void TextModelNG::SetFontWeight(Ace::FontWeight value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, ConvertFontWeight(value));
 }
 
 void TextModelNG::SetFontFamily(const std::vector<std::string>& value)

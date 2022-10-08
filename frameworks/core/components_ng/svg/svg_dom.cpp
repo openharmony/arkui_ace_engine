@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components_ng/svg/svg_dom.h"
 
+#include "include/core/SkClipOp.h"
+
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 #include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"
 #include "frameworks/core/components_ng/svg/parse/svg_defs.h"
@@ -35,8 +37,6 @@
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 #include "frameworks/core/components_ng/svg/parse/svg_use.h"
-
-#include "include/core/SkClipOp.h"
 
 namespace OHOS::Ace::NG {
 namespace {

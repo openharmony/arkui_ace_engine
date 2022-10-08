@@ -15,22 +15,30 @@
 
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 
+#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 
 namespace OHOS::Ace::NG {
 
 void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto host = layoutWrapper->GetHostNode();
+    auto host = DynamicCast<CustomNode>(layoutWrapper->GetHostNode());
     if (renderFunction_ && host) {
-        ACE_SCOPED_TRACE("CustomNode:BuildItem");
-        // first create child node and wrapper.
-        auto child = renderFunction_();
-        renderFunction_ = nullptr;
-        CHECK_NULL_VOID(child);
-        buildItem_ = child;
-        child->AdjustLayoutWrapperTree(Claim(layoutWrapper), true, true);
+        {
+            ACE_SCOPED_TRACE("CustomNode:OnAppear");
+            host->FireOnAppear();
+        }
+        {
+            ACE_SCOPED_TRACE("CustomNode:BuildItem");
+            // first create child node and wrapper.
+            auto child = renderFunction_();
+            renderFunction_ = nullptr;
+            CHECK_NULL_VOID(child);
+            buildItem_ = child;
+            child->AdjustLayoutWrapperTree(Claim(layoutWrapper), true, true);
+        }
     }
     // then use normal measure step.
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();

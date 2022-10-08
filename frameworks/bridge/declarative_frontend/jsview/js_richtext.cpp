@@ -15,12 +15,18 @@
 
 #include "bridge/declarative_frontend/jsview/js_richtext.h"
 
+#include <string>
+
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
 #include "core/components/web/web_component.h"
+#include "core/components/web/web_property.h"
+#include "core/components_ng/pattern/web/web_view.h"
 
 namespace OHOS::Ace::Framework {
+
 void JSRichText::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -28,7 +34,16 @@ void JSRichText::Create(const JSCallbackInfo& info)
         return;
     }
 
-    std::string data = "";
+    std::string data;
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (ParseJsString(info[0], data)) {
+            RefPtr<WebController> webController;
+            NG::WebView::Create(data);
+        }
+        return;
+    }
+
     RefPtr<WebComponent> webComponent;
     if (ParseJsString(info[0], data)) {
         webComponent = AceType::MakeRefPtr<OHOS::Ace::WebComponent>("");
@@ -53,12 +68,23 @@ void JSRichText::JSBind(BindingTarget globalObj)
 void JSRichText::OnStart(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && info[0]->IsFunction()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            RefPtr<JsFunction> jsFunc =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+            auto onStart = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                               const std::shared_ptr<BaseEventInfo>& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute();
+            };
+            NG::WebView::SetOnPageStart(onStart);
+            return;
+        }
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(),
-            func = std::move(jsFunc)](const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute();
-        });
+        auto eventMarker =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute();
+            });
         auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         webComponent->SetPageStartedEventId(eventMarker);
     }
@@ -67,12 +93,23 @@ void JSRichText::OnStart(const JSCallbackInfo& info)
 void JSRichText::OnComplete(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && info[0]->IsFunction()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            RefPtr<JsFunction> jsFunc =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+            auto onComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                  const std::shared_ptr<BaseEventInfo>& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute();
+            };
+            NG::WebView::SetOnPageFinish(onComplete);
+            return;
+        }
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(),
-            func = std::move(jsFunc)](const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute();
-        });
+        auto eventMarker =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute();
+            });
         auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         webComponent->SetPageFinishedEventId(eventMarker);
     }

@@ -170,8 +170,10 @@ public:
             case OHOS::Rosen::DragEvent::DRAG_EVENT_END:
                 action = DragEventAction::DRAG_EVENT_END;
                 break;
-            case OHOS::Rosen::DragEvent::DRAG_EVENT_MOVE:
             case OHOS::Rosen::DragEvent::DRAG_EVENT_OUT:
+                action = DragEventAction::DRAG_EVENT_OUT;
+                break;
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_MOVE:
                 action = DragEventAction::DRAG_EVENT_MOVE;
                 break;
             case OHOS::Rosen::DragEvent::DRAG_EVENT_IN:

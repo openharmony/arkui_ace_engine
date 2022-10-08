@@ -34,6 +34,7 @@ struct ImagePaintConfig {
     ImageRenderMode renderMode_ = ImageRenderMode::ORIGINAL;
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+    ImageFit imageFit_ = ImageFit::COVER;
     std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
     bool needFlipCanvasHorizontally_ = false;
     bool isSvg = false;

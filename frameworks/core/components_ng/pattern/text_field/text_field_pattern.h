@@ -43,10 +43,17 @@
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
-}
+} // namespace OHOS::MiscServices
 #endif
 
 namespace OHOS::Ace::NG {
+
+enum class TextModifiedType {
+    INPUT_METHOD,
+    TOUCH_OR_KEY,
+    NONE,
+};
+
 class TextFieldPattern : public Pattern, public TextInputClient, public ValueChangeObserver {
     DECLARE_ACE_TYPE(TextFieldPattern, Pattern, TextInputClient, ValueChangeObserver);
 
@@ -157,9 +164,9 @@ public:
         caretOffsetX_ = offsetX;
     }
 
-    bool GetTextModifiedByInputMethod() const
+    TextModifiedType GetTextModified() const
     {
-        return textModifiedByInputMethod_;
+        return textModified_;
     }
 
     void SetBasicPadding(float padding)
@@ -219,7 +226,7 @@ private:
     float baselineOffset_ = 0.0f;
     float caretOffsetX_ = 0.0f;
     bool cursorVisible_ = false;
-    bool textModifiedByInputMethod_ = false;
+    TextModifiedType textModified_ = TextModifiedType::NONE;
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
 
@@ -234,7 +241,7 @@ private:
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
 #endif
-    int32_t instanceId_;
+    int32_t instanceId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

@@ -182,6 +182,8 @@ public:
 
     static std::string GetPartialUpdatePkg();
 
+    static int32_t GetSvgMode();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;

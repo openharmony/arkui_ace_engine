@@ -188,6 +188,14 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         CHECK_NULL_VOID(pageRouterManager);
         auto pageNode = pageRouterManager->GetCurrentPageNode();
         CHECK_NULL_VOID(pageNode);
+        if (!pageNode->GetChildren().empty()) {
+            LOGW("the page has already add node, clean");
+            auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());
+            if (oldChild) {
+                oldChild->Reset();
+            }
+            pageNode->Clean();
+        }
         auto pageRootNode = view->CreateUINode();
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);

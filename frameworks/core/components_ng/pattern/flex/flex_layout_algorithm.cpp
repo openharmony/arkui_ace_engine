@@ -18,6 +18,7 @@
 #include <iterator>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
@@ -100,6 +101,9 @@ void UpdateChildLayoutConstrainByFlexBasis(
     }
     const auto& flexBasis = flexItemProperty->GetFlexBasis();
     if (!flexBasis) {
+        return;
+    }
+    if (flexBasis->Unit() == DimensionUnit::AUTO) {
         return;
     }
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
