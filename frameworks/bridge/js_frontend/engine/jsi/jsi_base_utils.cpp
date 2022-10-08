@@ -93,7 +93,7 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
     }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    std::string summaryBodyInsertedWithTagStr = "[Engine Log]";
+    std::string summaryBodyInsertedWithTagStr = "";
     size_t lastPosOfNextLine = -1;
     size_t currPosOfNextLine = 0;
     while (true) {
@@ -103,13 +103,10 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
             break;
         }
         summaryBodyInsertedWithTagStr
-            .append(summaryBody.substr(lastPosOfNextLine, (currPosOfNextLine - lastPosOfNextLine) + 1))
-            .append("[Engine Log]");
+            .append("[Engine Log]")
+            .append(summaryBody.substr(lastPosOfNextLine, (currPosOfNextLine - lastPosOfNextLine) + 1));
         lastPosOfNextLine = currPosOfNextLine;
     }
-    summaryBodyInsertedWithTagStr
-        .append(summaryBody.substr(lastPosOfNextLine, summaryBody.length() - lastPosOfNextLine))
-        .append("\n");
     return summaryBodyInsertedWithTagStr;
 #else
     return summaryBody;
