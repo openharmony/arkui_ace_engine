@@ -65,4 +65,14 @@ void DragDropProxy::onDragCancel()
     manager->onDragCancel();
 }
 
+void DragDropProxy::DestroyDragWindow()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+
+    manager->DestroyDragWindow();
+}
+
 } // namespace OHOS::Ace::NG
