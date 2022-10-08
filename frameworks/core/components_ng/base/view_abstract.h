@@ -18,7 +18,7 @@
 
 #include <cstdint>
 #include <functional>
-#include <stdint.h>
+#include <cstdint>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -41,7 +41,7 @@
 
 namespace OHOS::Ace::NG {
 
-using optionParam = std::pair<std::string, std::function<void()>>;
+using OptionParam = std::pair<std::string, std::function<void()>>;
 
 class ACE_EXPORT ViewAbstract {
 public:
@@ -140,7 +140,7 @@ public:
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam>& param);
-    static void BindMenuWithItems(const std::vector<optionParam>& params, const RefPtr<FrameNode>& targetNode);
+    static void BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode);
     static void ShowMenu(int32_t targetId);
     // inspector

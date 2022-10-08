@@ -51,7 +51,7 @@ private:
     void OnModifyDone() override;
 
     // menuId in OverlayManager's map
-    int32_t targetId_;
+    int32_t targetId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };

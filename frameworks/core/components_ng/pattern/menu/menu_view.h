@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuView {
 public:
     static RefPtr<FrameNode> Create(
-        const std::vector<optionParam>& params, const std::string& targetTag, int32_t targetId);
+        const std::vector<OptionParam>& params, const std::string& targetTag, int32_t targetId);
 
     static RefPtr<FrameNode> Create(const RefPtr<UINode>& customNode, const std::string& targetTag, int32_t targetId);
 

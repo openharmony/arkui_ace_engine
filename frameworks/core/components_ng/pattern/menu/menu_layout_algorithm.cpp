@@ -39,7 +39,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     auto targetNode = FrameNode::GetFrameNode(tag, Id);
     if (!targetNode) {
         // targetId = -1, set position to center top of the screen
-        position_ = OffsetF(screenSize_.Width() / 2, 0);
+        position_ = OffsetF(screenSize_.Width() / 2.0, 0);
         return;
     }
 
@@ -47,7 +47,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     OffsetF offset = targetNode->GetGeometryNode()->GetFrameOffset();
     LOGD("offset = %{public}f, %{public}f", offset.GetX(), offset.GetY());
     // set position to bottom center point of targetNode
-    position_ = offset + OffsetF(size.Width() / 2, size.Height());
+    position_ = offset + OffsetF(size.Width() / 2.0, size.Height());
     LOGD("menu position set to %{public}f, %{public}f", position_.GetX(), position_.GetY());
 }
 

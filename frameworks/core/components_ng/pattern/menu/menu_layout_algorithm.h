@@ -40,8 +40,6 @@ private:
     SizeF screenSize_;
     OffsetF position_;
 
-    // bool isContextMenu_ = false;
-
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

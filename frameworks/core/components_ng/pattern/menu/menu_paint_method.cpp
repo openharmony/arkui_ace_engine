@@ -50,10 +50,10 @@ void MenuPaintMethod::PaintGradient(RSCanvas& canvas, PaintWrapper* paintWrapper
     // create gradientRect
     const double outPadding = OUT_PADDING.ConvertToPx();
     const double gradientHeight = GRADIENT_HEIGHT.ConvertToPx();
-    LOGI("GRADIENT_HEIGHT = %{public}f px", gradientHeight);
+    LOGD("GRADIENT_HEIGHT = %{public}f px", gradientHeight);
     auto yPos = isTop ? outPadding : menuSize.Height() - gradientHeight;
     RSRect gradientRect(outPadding, yPos, menuSize.Width() - outPadding, gradientHeight);
-    LOGI("gradientRect = (%{public}f, %{public}f) - (%{public}f, %{public}f)", gradientRect.GetLeft(),
+    LOGD("gradientRect = (%{public}f, %{public}f) - (%{public}f, %{public}f)", gradientRect.GetLeft(),
         gradientRect.GetTop(), gradientRect.GetRight(), gradientRect.GetBottom());
 
     RSBrush brush;

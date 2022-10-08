@@ -49,7 +49,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& ta
 
 // create menu with menuItems
 RefPtr<FrameNode> MenuView::Create(
-    const std::vector<optionParam>& params, const std::string& targetTag, int32_t targetId)
+    const std::vector<OptionParam>& params, const std::string& targetTag, int32_t targetId)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
     // append options to menu

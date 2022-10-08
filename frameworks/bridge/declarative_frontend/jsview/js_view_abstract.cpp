@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/long_press_event.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -2222,7 +2223,7 @@ void JSViewAbstract::ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<Menu
 GestureEventFunc JsBindOptionMenuNG(const JSCallbackInfo& info, const RefPtr<NG::FrameNode>& targetNode)
 {
     auto paramArray = JSRef<JSArray>::Cast(info[0]);
-    std::vector<NG::optionParam> params(paramArray->Length());
+    std::vector<NG::OptionParam> params(paramArray->Length());
     // parse paramArray
     LOGD("parsing paramArray size = %{public}d", static_cast<int>(paramArray->Length()));
     for (size_t i = 0; i < paramArray->Length(); ++i) {
@@ -2235,8 +2236,7 @@ GestureEventFunc JsBindOptionMenuNG(const JSCallbackInfo& info, const RefPtr<NG:
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
             ACE_SCORING_EVENT("menu.action");
             if (func) {
-                LOGI("action detail : %{public}p", AceType::RawPtr(func));
-                // CAUSING CRASH: func->Execute();
+                func->ExecuteJS();
             }
         };
     }
@@ -2266,6 +2266,7 @@ void CreateCustomMenu(RefPtr<JsFunction>& builder, const RefPtr<NG::FrameNode>& 
     NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode);
     // nullify builder
     builder.Reset();
+    LOGD("check if builderFunc is deleted successfully %{public}p", AceType::RawPtr(builder));
 }
 
 void JsBindMenuNG(const JSCallbackInfo& info)
@@ -2277,7 +2278,6 @@ void JsBindMenuNG(const JSCallbackInfo& info)
     // Array<MenuItem>
     if (info[0]->IsArray()) {
         event = JsBindOptionMenuNG(info, targetNode);
-
     } else if (info[0]->IsObject()) {
         // CustomBuilder
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -2290,13 +2290,14 @@ void JsBindMenuNG(const JSCallbackInfo& info)
         CHECK_NULL_VOID(builderFunc);
         event = [builderFunc, targetNode](const GestureEvent& /*info*/) mutable {
             CreateCustomMenu(builderFunc, targetNode);
-            LOGI("check if builderFunc is deleted successfully %{public}p", AceType::RawPtr(builderFunc));
         };
     } else {
         LOGE("bindMenu info is invalid");
         return;
     }
-    NG::ViewAbstract::SetOnClick(std::move(event));
+    auto hub = targetNode->GetOrCreateGestureEventHub();
+    auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(event));
+    hub->AddClickEvent(onClick);
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
@@ -5159,12 +5160,13 @@ void JsBindContextMenuNG(RefPtr<JsFunction>& builder, int32_t responseType)
     } else if (responseType == static_cast<int32_t>(ResponseType::LONGPRESS)) {
         // create or show menu on long press
         auto event = [builder, targetNode](const GestureEvent& /*info*/) mutable {
+            LOGD("long press event triggered");
             CreateCustomMenu(builder, targetNode);
-            LOGI("check builder is nullptr %{public}p", AceType::RawPtr(builder));
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
         hub->AddLongPressEvent(longPress);
+        LOGD("add longPress successful");
     } else {
         LOGE("The arg responseType is invalid.");
         return;

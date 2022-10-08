@@ -17,7 +17,7 @@
 
 #include <cstdint>
 #include <optional>
-#include <stdint.h>
+#include <cstdint>
 #include <utility>
 
 #include "base/geometry/ng/offset_t.h"
@@ -497,7 +497,7 @@ void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId)
     LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
 }
 
-void ViewAbstract::BindMenuWithItems(const std::vector<optionParam>& params, const RefPtr<FrameNode>& targetNode)
+void ViewAbstract::BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode)
 {
     CHECK_NULL_VOID(targetNode);
 
