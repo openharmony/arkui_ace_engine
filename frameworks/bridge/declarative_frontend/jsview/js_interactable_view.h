@@ -25,6 +25,8 @@
 
 namespace OHOS::Ace::Framework {
 
+using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
+
 class JSInteractableView {
 public:
     static void JsOnTouch(const JSCallbackInfo& args);
@@ -32,7 +34,6 @@ public:
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsTouchable(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
-    static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
     static void JsOnKey(const JSCallbackInfo& args);
     static void SetFocusable(bool focusable);
     static void SetFocusNode(bool isFocusNode);
@@ -48,13 +49,9 @@ public:
     static std::function<void()> GetRemoteMessageEventCallback(const JSCallbackInfo& info);
 
 protected:
-    static void JsRemoteMessage(const JSCallbackInfo& info, EventMarker& eventMarker);
+    static void JsRemoteMessage(const JSCallbackInfo& info, RemoteCallback& remoteCallback);
 
 private:
-    static RefPtr<Gesture> GetTapGesture(
-        const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
-    static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
-    static RefPtr<Gesture> GetRemoteMessageTapGesture(const JSCallbackInfo& info);
     static void SplitString(const std::string& str, char tag, std::vector<std::string>& strList);
 }; // class JSInteractableView
 

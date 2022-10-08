@@ -19,6 +19,7 @@
 #include <iterator>
 
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
@@ -73,8 +74,9 @@ void JSSwiper::Create(const JSCallbackInfo& info)
 
 void JSSwiper::JsRemoteMessage(const JSCallbackInfo& info)
 {
-    EventMarker remoteMessageEventId;
-    JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
+    RemoteCallback remoteCallback;
+    JSInteractableView::JsRemoteMessage(info, remoteCallback);
+    EventMarker remoteMessageEventId(std::move(remoteCallback));
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperComponent = AceType::DynamicCast<SwiperComponent>(stack->GetMainComponent());
     if (!swiperComponent) {
@@ -535,13 +537,36 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& info)
     }
 }
 
+EventMarker GetClickEventMarker(const JSCallbackInfo& info)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("fail to get inspector for on get click event marker");
+        return EventMarker();
+    }
+    auto impl = inspector->GetInspectorFunctionImpl();
+    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onClickId = EventMarker(
+        [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            auto newInfo = *clickInfo;
+            if (impl) {
+                impl->UpdateEventInfo(newInfo);
+            }
+            ACE_SCORING_EVENT("onClick");
+            func->Execute(newInfo);
+        });
+    return onClickId;
+}
+
 void JSSwiper::SetOnClick(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
         if (swiper) {
-            swiper->SetClickEventId(JSInteractableView::GetClickEventMarker(info));
+            swiper->SetClickEventId(GetClickEventMarker(info));
         }
     }
     info.SetReturnValue(info.This());

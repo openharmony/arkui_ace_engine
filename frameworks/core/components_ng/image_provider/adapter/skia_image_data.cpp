@@ -61,6 +61,10 @@ sk_sp<SkData> SkiaImageData::GetSkData() const
 
 RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
 {
+    // TODO: svg support in ng build
+#ifdef NG_BUILD
+    return nullptr;
+#else
     const auto svgStream = std::make_unique<SkMemoryStream>(skData_);
     CHECK_NULL_RETURN(svgStream, nullptr);
     if (SystemProperties::GetSvgMode() <= 0) {
@@ -75,6 +79,7 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
         },
         nullptr);
     return svgDom_;
+#endif
 }
 
 } // namespace OHOS::Ace::NG
