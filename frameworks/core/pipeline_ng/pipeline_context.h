@@ -185,6 +185,16 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
+    bool GetIsNeedShowFocus() const
+    {
+        return isNeedShowFocus_;
+    }
+
+    void SetIsNeedShowFocus(bool isNeedShowFocus)
+    {
+        isNeedShowFocus_ = isNeedShowFocus;
+    }
+
     void SetIsDragged(bool isDragged)
     {
         isDragged_ = isDragged;
@@ -264,6 +274,7 @@ private:
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
+    bool isNeedShowFocus_ = false;
     bool isDragged_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

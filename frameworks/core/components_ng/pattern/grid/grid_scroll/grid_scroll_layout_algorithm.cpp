@@ -23,7 +23,10 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -99,6 +102,12 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::CENTER);
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
             wrapper->Layout();
+            auto layoutProperty = wrapper->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+            CHECK_NULL_VOID(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateMainIndex(line.first);
+            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
         }
         prevLineHeight +=
             gridLayoutInfo_.lineHeightMap_[line.first] + GridUtils::GetMainGap(gridLayoutProperty, size, axis_);
@@ -540,6 +549,7 @@ bool GridScrollLayoutAlgorithm::CheckGridPlaced(
         }
         gridLayoutInfo_.gridMatrix_[i] = mainMap;
     }
+
     return true;
 }
 

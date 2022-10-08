@@ -51,7 +51,7 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         return { isVertical_, true, ScopeType::FLEX };
     }

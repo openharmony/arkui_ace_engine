@@ -203,7 +203,7 @@ protected:
 
     virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
-    
+
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
     virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}

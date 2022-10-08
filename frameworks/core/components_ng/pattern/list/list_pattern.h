@@ -122,16 +122,13 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         auto property = GetLayoutProperty<ListLayoutProperty>();
         if (!property) {
             return ScopeFocusAlgorithm();
         }
-        auto isVertical = false;
-        if (property->GetListDirection() == Axis::VERTICAL) {
-            isVertical = true;
-        }
+        auto isVertical = property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
         return ScopeFocusAlgorithm(isVertical, true, ScopeType::OTHERS);
     }
 
