@@ -45,7 +45,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
 
   public distributeProp<T>(propName: string, defaultValue: T): void {
     if (this.link(propName, defaultValue)) {
-      console.debug(`DistributedStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
+      stateMgmtConsole.debug(`DistributedStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
     }
   }
 
@@ -58,16 +58,16 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
 
   public link<T>(propName: string, defaultValue: T): boolean {
     if (defaultValue == null || defaultValue == undefined) {
-      console.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
+      stateMgmtConsole.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
       return false;
     }
     if (this.links_.get(propName)) {
-      console.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
+      stateMgmtConsole.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
         return false;
     }
     let link = AppStorage.Link(propName, this);
     if (link) {
-      console.debug(`DistributedStorage: linkProp ${propName} in AppStorage, using that`);
+      stateMgmtConsole.debug(`DistributedStorage: linkProp ${propName} in AppStorage, using that`);
         this.links_.set(propName, link);
         this.setDistributedProp(propName, defaultValue);
     }
@@ -76,7 +76,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
         if (this.aviliable_) {
             let newValue = this.getDistributedProp(propName);
             if (newValue == null) {
-              console.debug(`DistributedStorage: no entry for ${propName}, will initialize with default value`);
+              stateMgmtConsole.debug(`DistributedStorage: no entry for ${propName}, will initialize with default value`);
                 this.setDistributedProp(propName, defaultValue);
             }
             else {
@@ -85,7 +85,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
         }
         link = AppStorage.SetAndLink(propName, returnValue, this);
         this.links_.set(propName, link);
-        console.debug(`DistributedStorage: created new linkProp prop for ${propName}`);
+        stateMgmtConsole.debug(`DistributedStorage: created new linkProp prop for ${propName}`);
     }
     return true;
   }
@@ -99,7 +99,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
         this.storage_.delete(propName);
       }
     } else {
-      console.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
+      stateMgmtConsole.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
     }
   }
 
@@ -113,9 +113,9 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
 
   // public required by the interface, use the static method instead!
   public aboutToBeDeleted(): void {
-    console.debug("DistributedStorage: about to be deleted");
+    stateMgmtConsole.debug("DistributedStorage: about to be deleted");
     this.links_.forEach((val, key, map) => {
-      console.debug(`DistributedStorage: removing ${key}`);
+      stateMgmtConsole.debug(`DistributedStorage: removing ${key}`);
       val.aboutToBeDeleted();
     });
 
@@ -128,7 +128,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
   }
 
   public propertyHasChanged(info?: PropertyInfo): void {
-    console.debug("DistributedStorage: property changed");
+    stateMgmtConsole.debug("DistributedStorage: property changed");
     this.write(info);
   }
 
@@ -136,13 +136,13 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
     let link = this.links_.get(propName);
     let newValue = this.getDistributedProp(propName);
     if (link && newValue != null) {
-        console.info(`DistributedStorage: dataOnChange[${propName}-${newValue}]`);
+        stateMgmtConsole.info(`DistributedStorage: dataOnChange[${propName}-${newValue}]`);
         link.set(newValue)
     }
   }
 
   public onConnected(status): void {
-    console.info(`DistributedStorage onConnected: status = ${status}`);
+    stateMgmtConsole.info(`DistributedStorage onConnected: status = ${status}`);
     if (!this.aviliable_) {
         this.syncProp();
         this.aviliable_ = true;
@@ -165,10 +165,10 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
 
   private setDistributedProp(key, value): void {
     if (!this.aviliable_) {
-      console.warn(`DistributedStorage is not aviliable`);
+      stateMgmtConsole.warn(`DistributedStorage is not aviliable`);
         return;
     }
-    console.error(`DistributedStorage value is object ${key}-${JSON.stringify(value)}`);
+    stateMgmtConsole.error(`DistributedStorage value is object ${key}-${JSON.stringify(value)}`);
     if (typeof value == 'object') {
         this.storage_.set(key, JSON.stringify(value));
         return;

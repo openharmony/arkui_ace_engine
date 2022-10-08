@@ -22,7 +22,7 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
   }
 
   protected notifyHasChanged(newValue: T) {
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
     var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = registry!.get(subscribedId)
@@ -36,7 +36,7 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
           (subscriber as IMultiPropertiesChangeSubscriber).propertyHasChanged(this.info_);
         }
       } else {
-        console.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+        stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
       }
     });
   }
@@ -49,7 +49,7 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
   public markDependentElementsDirty(view: ViewPU) {
     // TODO ace-ets2bundle, framework, compilated apps need to update together
     // this function will be removed after a short transiition periode
-    console.warn(`markDependentElementsDirty no longer supported. App will work ok, but
+    stateMgmtConsole.warn(`markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
   }
 
@@ -80,13 +80,13 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
       // not access recording 
       return;
     }
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: recordDependentUpdate on elmtId ${elmtId}.`)
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: recordDependentUpdate on elmtId ${elmtId}.`)
     this.dependentElementIds_.add(elmtId);
   }
 
   
   public purgeDependencyOnElmtId(rmElmtId: number): void {
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']:purgeDependencyOnElmtId ${rmElmtId}`);
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']:purgeDependencyOnElmtId ${rmElmtId}`);
     this.dependentElementIds_.delete(rmElmtId);
   }
 

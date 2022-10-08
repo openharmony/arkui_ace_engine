@@ -62,7 +62,7 @@ abstract class SubscribaleAbstract {
    */
   constructor() {
     this.owningProperties_ = new Set<number>();
-    console.debug(`SubscribaleAbstract: construcstor done`);
+    stateMgmtConsole.debug(`SubscribaleAbstract: construcstor done`);
   }
 
   /**
@@ -72,7 +72,7 @@ abstract class SubscribaleAbstract {
    * @param newValue the property value after the change
    */
   protected notifyPropertyHasChanged(propName: string, newValue: any) {
-    console.debug(`SubscribaleAbstract: notifyPropertyHasChanged '${propName}'.`)
+    stateMgmtConsole.debug(`SubscribaleAbstract: notifyPropertyHasChanged '${propName}'.`)
     var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = registry!.get(subscribedId)
@@ -84,7 +84,7 @@ abstract class SubscribaleAbstract {
           (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
         }
       } else {
-        console.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+        stateMgmtConsole.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
       }
     });
   }
@@ -98,7 +98,7 @@ abstract class SubscribaleAbstract {
    */
 
   public addOwningProperty(subscriber: IPropertySubscriber): void {
-    console.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`)
+    stateMgmtConsole.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`)
     this.owningProperties_.add(subscriber.id__());
   }
 
@@ -114,7 +114,7 @@ abstract class SubscribaleAbstract {
   }
 
   public removeOwningPropertyById(subscriberId: number): void {
-    console.debug(`SubscribaleAbstract: removeOwningProperty '${subscriberId}'.`)
+    stateMgmtConsole.debug(`SubscribaleAbstract: removeOwningProperty '${subscriberId}'.`)
     this.owningProperties_.delete(subscriberId);
   }
 }

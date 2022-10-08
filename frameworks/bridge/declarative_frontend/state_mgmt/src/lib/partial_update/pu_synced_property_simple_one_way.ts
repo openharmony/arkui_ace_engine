@@ -44,31 +44,31 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   // this object is subscriber to  source
   // when source notifies a change, copy its value to local backing store
   hasChanged(newValue: T): void {
-    console.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
     this.wrappedValue_ = this.source_.getUnmonitored();
     this.notifyHasChanged(newValue);
   }
 
   public getUnmonitored(): T {
-    console.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
     // unmonitored get access , no call to otifyPropertyRead !
     return this.wrappedValue_;
   }
 
   // get 'read through` from the ObservedProperty
   public get(): T {
-    console.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
     this.notifyPropertyRead();
     return this.wrappedValue_;
   }
 
   public set(newValue: T): void {
     if (this.wrappedValue_ == newValue) {
-      console.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
     this.wrappedValue_ = newValue;
     this.notifyHasChanged(newValue);
   }

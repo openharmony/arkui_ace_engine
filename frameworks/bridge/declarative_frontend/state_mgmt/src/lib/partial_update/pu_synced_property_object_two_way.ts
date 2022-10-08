@@ -53,21 +53,21 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
   // will call this cb function when property has changed
   hasChanged(newValue: C): void {
     if (!this.changeNotificationIsOngoing_) {
-      console.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
       this.notifyHasChanged(this.linkedParentProperty_.getUnmonitored());
     }
   }
 
 
   public getUnmonitored(): C {
-    console.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.linkedParentProperty_.getUnmonitored())}' .`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.linkedParentProperty_.getUnmonitored())}' .`);
     // unmonitored get access , no call to otifyPropertyRead !
     return this.linkedParentProperty_.getUnmonitored();
   }
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    console.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
     this.notifyPropertyRead();
     return this.linkedParentProperty_.getUnmonitored();
   }
@@ -75,11 +75,11 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
     if (this.linkedParentProperty_.getUnmonitored() == newValue) {
-      console.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
 
     ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
     

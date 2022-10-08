@@ -40,19 +40,19 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
   // a set (newValue) is not done because get reads through for the source_
   hasChanged(newValue: T): void {
     if (!this.changeNotificationIsOngoing_) {
-      console.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
+      stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
       this.notifyHasChanged(newValue);
     }
   }
 
   public getUnmonitored(): T {
-    console.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored`);
     return this.source_.getUnmonitored();
   }
 
   // get 'read through` from the ObservedProperty
   public get(): T {
-    console.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`);
     this.notifyPropertyRead();
     return this.source_.getUnmonitored();
   }
@@ -60,11 +60,11 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
   // set 'writes through` to the ObservedProperty
   public set(newValue: T): void {
     if (this.source_.get() == newValue) {
-      console.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
 
     // avoid circular notifications @Link -> source @State -> other but also to same @Link
     this.changeNotificationIsOngoing_ = true;

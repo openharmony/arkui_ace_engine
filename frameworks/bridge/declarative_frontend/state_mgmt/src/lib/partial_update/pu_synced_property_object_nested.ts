@@ -51,20 +51,20 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   // this object is subscriber to ObservedObject
   // will call this cb function when property has changed
   hasChanged(newValue: C): void {
-    console.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
+    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
     this.notifyHasChanged(this.obsObject_);
   }
 
 
   public getUnmonitored(): C {
-    // console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
+    // stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
     // unmonitored get access , no call to otifyPropertyRead !
     return this.obsObject_;
   }
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    console.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
+    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
     this.notifyPropertyRead();
     return this.obsObject_;
   }
@@ -72,11 +72,11 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
     if (this.obsObject_ == newValue) {
-      console.debug(`SynchedPropertyNesedObjectPu[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertyNesedObjectPu[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
 
     // unsubscribe from the old value ObservedObject
     ObservedObject.removeOwningProperty(this.obsObject_, this);
