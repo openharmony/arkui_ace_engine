@@ -265,8 +265,7 @@ void CalendarPaintMethod::PaintDay(
 void CalendarPaintMethod::PaintLunarDay(
     RSCanvas& canvas, const Offset& offset, const CalendarDay& day, const rosen::TextStyle& textStyle) const
 {
-    Rect boxRect;
-    boxRect = { offset.GetX(), offset.GetY(), dayWidth_, lunarHeight_ };
+    Rect boxRect = { offset.GetX(), offset.GetY(), dayWidth_, lunarHeight_ };
     DrawCalendarText(&canvas, day.lunarDay, textStyle, boxRect);
 }
 
