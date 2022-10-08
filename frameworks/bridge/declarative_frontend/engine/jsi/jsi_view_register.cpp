@@ -23,7 +23,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "frameworks/bridge/card_frontend/card_frontend_delegate_declarative.h"
+#include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -269,15 +269,13 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
         auto cardId = CardScope::CurrentId();
-        auto weak = container->GetCardFrontendDelegate(cardId);
-        auto delegate = weak.Upgrade();
-        if (!delegate) {
-            LOGE("UpdateCardRootComponent failed, delegate is nullptr");
-        }
-        auto frontEndDelegate = AceType::DynamicCast<CardFrontendDelegateDeclarative>(delegate); // container->GetCardFrontend(cardId)
-        CHECK_NULL_VOID(frontEndDelegate);
+        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_VOID(frontEnd);
 
-        auto pageRouterManager = frontEndDelegate->GetPageRouterManager();
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_VOID(delegate);
+
+        auto pageRouterManager = delegate->GetPageRouterManager();
         CHECK_NULL_VOID(pageRouterManager);
 
         auto pageNode = pageRouterManager->GetCurrentPageNode();

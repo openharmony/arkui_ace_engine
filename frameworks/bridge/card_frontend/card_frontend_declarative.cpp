@@ -105,6 +105,13 @@ void CardFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, co
     }
 
     if (delegate_) {
+        auto container = Container::Current();
+        if (!container) {
+            LOGE("RunPage host container null");
+            EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
+            return;
+        }
+        container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
         delegate_->RunCard(urlPath, params, "", cardId_);
     }
 }

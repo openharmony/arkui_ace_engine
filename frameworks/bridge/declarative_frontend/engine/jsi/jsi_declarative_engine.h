@@ -63,7 +63,6 @@ public:
 
     static RefPtr<JsAcePage> GetRunningPage(int32_t instanceId);
     static RefPtr<JsAcePage> GetStagingPage(int32_t instanceId);
-    static RefPtr<JsAcePage> GetCardPage(int32_t instanceId, uint64_t cardId);
     static shared_ptr<JsRuntime> GetCurrentRuntime();
     static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
@@ -97,22 +96,6 @@ public:
     {
         std::lock_guard<std::mutex> lock(mutex_);
         return stagingPage_;
-    }
-
-    void SetCardPage(uint64_t cardId, const RefPtr<JsAcePage>& page)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        cardPageMap_.emplace(cardId, page);
-    }
-
-    RefPtr<JsAcePage> GetCardPage(uint64_t cardId) const
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        auto it = cardPageMap_.find(cardId);
-        if (it != cardPageMap_.end()) {
-            return it->second;
-        }
-        return nullptr;
     }
 
     void ResetStagingPage(const RefPtr<JsAcePage>& page)
@@ -206,7 +189,6 @@ private:
     //   such as removeElement, updateElementAttrs and updateElementStyles.
     RefPtr<JsAcePage> runningPage_;
     RefPtr<JsAcePage> stagingPage_;
-    std::unordered_map<uint64_t, RefPtr<JsAcePage>> cardPageMap_;
 
     shared_ptr<JsRuntime> runtime_;
     RefPtr<FrontendDelegate> frontendDelegate_;

@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-constexpr uint64_t INVALID_CARD_ID = -1;
+constexpr uint64_t INVALID_CARD_ID = 0;
 
 class ACE_EXPORT CardScope {
 public:
@@ -44,13 +44,9 @@ public:
 
     static void UpdateCurrent(uint64_t id);
 
-    static void SetScopeNotify(std::function<void(uint64_t)>&& notify);
-
 private:
     static thread_local uint64_t currentId_;
     uint64_t restoreId_ = INVALID_CARD_ID;
-    static std::function<void(uint64_t)> updateScopeNotify_;
-    static std::shared_mutex scopeLock_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CardScope);
 };

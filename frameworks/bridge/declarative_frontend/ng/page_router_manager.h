@@ -113,12 +113,6 @@ public:
     // Get the currently running JS page information in NG structure.
     RefPtr<Framework::RevSourceMap> GetCurrentPageSourceMap(const RefPtr<AssetManager>& assetManager);
 
-    void SetPipelineContext(WeakPtr<PipelineBase> context)
-    {
-        pipelineContext_ = context;
-        return;
-    }
-
     void SetIsCard()
     {
         isCardRouter = true;
@@ -171,7 +165,6 @@ private:
         bool isRestore = false, bool needHideLast = true);
         
     RefPtr<Framework::ManifestParser> manifestParser_;
-    WeakPtr<PipelineBase> pipelineContext_;
 
     bool inRouterOpt_ = false;
     LoadPageCallback loadJs_;

@@ -21,19 +21,16 @@
 #include "base/memory/ace_type.h"
 #include "core/common/ace_page.h"
 #include "core/common/frontend.h"
+#include "frameworks/bridge/card_frontend/card_frontend.h"
 #include "frameworks/bridge/card_frontend/card_frontend_delegate_declarative.h"
 #include "frameworks/bridge/card_frontend/js_card_parser.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/common/utils/page_id_pool.h"
-#include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
-
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
-
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
-
-#include "frameworks/bridge/card_frontend/card_frontend.h"
+#include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 
 namespace OHOS::Ace {
 
@@ -92,9 +89,14 @@ public:
         delegate_->SetLoadCardCallBack(loadCallback);
     }
 
+    RefPtr<Framework::CardFrontendDelegateDeclarative> GetDelegate()
+    {
+        return delegate_;
+    }
+
 private:
-    RefPtr<Framework::CardFrontendDelegateDeclarative> delegate_;
     void InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor);
+    RefPtr<Framework::CardFrontendDelegateDeclarative> delegate_;
 };
 
 class CardEventHandlerDeclarative : public AceEventHandler {

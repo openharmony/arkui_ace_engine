@@ -34,6 +34,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -614,21 +615,6 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
     return engineInstance->GetStagingPage();
 }
 
-RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetCardPage(int32_t instanceId, uint64_t cardId)
-{
-    auto engine = EngineHelper::GetEngine(instanceId);
-    auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
-    if (!jsiEngine) {
-        LOGE("jsiEngine is null");
-        return nullptr;
-    }
-    auto engineInstance = jsiEngine->GetEngineInstance();
-    if (engineInstance == nullptr) {
-        return nullptr;
-    }
-    return engineInstance->GetCardPage(cardId);
-}
-
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 {
     if (globalRuntime_) {
@@ -978,13 +964,28 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 
 bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string &fileName, uint64_t cardId)
 {
-    LOGI("ExecuteCardAbc fileName = %{public}s cardId = %{public}d", fileName.c_str(), (int)cardId);
     auto runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("ExecuteCardAbc failed, runtime is nullptr");
+        return false;
+    }
+
     auto container = Container::Current();
-    auto weak = container->GetCardFrontendDelegate(cardId);
-    auto delegate = weak.Upgrade();
+    if (!container) {
+        LOGE("ExecuteCardAbc failed, container is nullptr");
+        return false;
+    }
+
+    auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+    if (!frontEnd) {
+        LOGE("ExecuteCardAbc failed, frontEnd is nullptr");
+        return false;
+    }
+
+    auto delegate = frontEnd->GetDelegate();
     if (!delegate) {
         LOGE("ExecuteCardAbc failed, delegate is nullptr");
+        return false;
     }
 
     std::vector<uint8_t> content;

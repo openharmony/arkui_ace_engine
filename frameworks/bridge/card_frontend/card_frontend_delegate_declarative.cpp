@@ -36,12 +36,11 @@ void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
     CHECK_NULL_VOID(pageRouterManager);
     pageRouterManager->SetManifestParser(GetManifestParser());
     pageRouterManager->SetIsCard();
-    pageRouterManager->SetPipelineContext(AceType::WeakClaim(AceType::RawPtr(GetPipelineContext())));
+    auto cardPipeline = GetPipelineContext();
     auto taskExecutor = GetTaskExecutor();
-
     taskExecutor->PostTask(
         [weakPageRouterManager = WeakPtr<NG::PageRouterManager>(pageRouterManager), 
-         weakDelegate = AceType::WeakClaim(this), url, params, cardId]() {
+         weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline), url, params, cardId]() {
             auto pageRouterManager = weakPageRouterManager.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             auto container = Container::Current();
@@ -49,7 +48,7 @@ void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
                 LOGE("RunCard host container null");
                 return;
             }
-            container->SetCardFrontendDelegate(weakDelegate, cardId);
+            container->SetCardPipeline(weakCardPipeline, cardId);
             pageRouterManager->RunCard(url, params, cardId);
         },
         TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM

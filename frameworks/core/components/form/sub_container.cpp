@@ -282,6 +282,10 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = DynamicCast<NG::PipelineContext>(pipelineContext_);
+            if(!pipelineContext) {
+                LOGE("RunCard failed, pipeline context is nullptr");
+                return;
+            }
             pipelineContext->SetDrawDelegate(pattern->GetDrawDelegate());
             frontend_->RunPage(0, "", data);
             return;
@@ -294,6 +298,10 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = DynamicCast<PipelineContext>(pipelineContext_);
+            if(!pipelineContext) {
+                LOGE("RunCard failed, pipeline context is nullptr");
+                return;
+            }
             pipelineContext->SetDrawDelegate(pattern->GetDrawDelegate());
             frontend_->RunPage(0, "", data);
             return;

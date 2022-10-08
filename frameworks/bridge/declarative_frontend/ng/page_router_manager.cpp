@@ -584,9 +584,10 @@ bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool need
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    RefPtr<PipelineBase> pipeline = nullptr;
+    RefPtr<PipelineBase> pipeline;
     if (isCardRouter) {
-        pipeline = container->GetCardPipeline(cardId);
+        auto weak = container->GetCardPipeline(cardId);
+        pipeline = weak.Upgrade();
         CHECK_NULL_RETURN(pipeline, false);
     } else {
         pipeline = container->GetPipelineContext();

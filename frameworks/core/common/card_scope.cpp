@@ -17,14 +17,7 @@
 
 namespace OHOS::Ace {
 
-// preview not support multi-instance, always using default instance id 0.
-#if defined(PREVIEW)
 thread_local uint64_t CardScope::currentId_ = 0;
-#else
-thread_local uint64_t CardScope::currentId_ = -1;
-#endif
-std::function<void(uint64_t)> CardScope::updateScopeNotify_;
-std::shared_mutex CardScope::scopeLock_;
 
 uint64_t CardScope::CurrentId()
 {
@@ -34,16 +27,6 @@ uint64_t CardScope::CurrentId()
 void CardScope::UpdateCurrent(uint64_t id)
 {
     currentId_ = id;
-    std::shared_lock<std::shared_mutex> readLock(scopeLock_);
-    if (updateScopeNotify_) {
-        updateScopeNotify_(id);
-    }
-}
-
-void CardScope::SetScopeNotify(std::function<void(uint64_t)>&& notify)
-{
-    std::unique_lock<std::shared_mutex> writeLock(scopeLock_);
-    updateScopeNotify_ = std::move(notify);
 }
 
 } // namespace OHOS::Ace

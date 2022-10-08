@@ -32,8 +32,6 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 
-#include "frameworks/bridge/js_frontend/frontend_delegate.h"
-
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
@@ -100,14 +98,16 @@ public:
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
 
-    virtual void SetCardFrontendDelegate(WeakPtr<Framework::FrontendDelegate> delegate, uint64_t cardId) {}
+    virtual void SetCardFrontend(WeakPtr<Frontend> frontend, uint64_t cardId) {}
 
-    virtual WeakPtr<Framework::FrontendDelegate> GetCardFrontendDelegate(uint64_t cardId) const
+    virtual WeakPtr<Frontend> GetCardFrontend(uint64_t cardId) const
     {
         return nullptr;
     }
 
-    virtual RefPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const
+    virtual void SetCardPipeline(WeakPtr<PipelineBase>, uint64_t cardId) {}
+
+    virtual WeakPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const
     {
         return nullptr;
     }
@@ -207,26 +207,6 @@ public:
         return useNewPipeline_;
     }
 
-    void SetCardContext(bool isCardContext)
-    {
-        isCardContext_ = false;
-    }
-
-    void SetCardInfo(std::string& cardInfo)
-    {
-        cardInfo_ = cardInfo;
-    }
-
-    bool GetCardContext() const
-    {
-        return isCardContext_;
-    }
-
-    std::string GetCardInfo() const
-    {
-        return cardInfo_;
-    }
-
     static bool IsCurrentUseNewPipeline()
     {
         auto container = Current();
@@ -265,8 +245,6 @@ protected:
     bool firstUpdateData_ = true;
     std::string cardHapPath_;
     bool useNewPipeline_ = false;
-    bool isCardContext_ = false;
-    std::string cardInfo_;
 
 private:
     std::string moduleName_;

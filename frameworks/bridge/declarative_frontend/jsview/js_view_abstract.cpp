@@ -5859,10 +5859,12 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
             moduleName = module->ToString();
         }
     }
+
     auto cardId = CardScope::CurrentId();
     if (cardId != INVALID_CARD_ID) {
         auto container = Container::Current();
-        auto cardPipelineContext = container->GetCardPipeline(cardId);
+        auto weak = container->GetCardPipeline(cardId);
+        auto cardPipelineContext = weak.Upgrade();
         if (!cardPipelineContext) {
             LOGE("card pipelineContext is null!");
             return nullptr;
