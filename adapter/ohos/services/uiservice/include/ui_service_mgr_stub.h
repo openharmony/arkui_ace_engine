@@ -33,22 +33,17 @@ namespace Ace {
 class UIServiceMgrStub : public IRemoteStub<IUIServiceMgr> {
 public:
     UIServiceMgrStub();
-    virtual ~UIServiceMgrStub();
-    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    ~UIServiceMgrStub() override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
-    int RegisterCallBackInner(MessageParcel& data, MessageParcel& reply);
-    int UnregisterCallBackInner(MessageParcel& data, MessageParcel& reply);
-    int PushInner(MessageParcel& data, MessageParcel& reply);
-    int RequestInner(MessageParcel& data, MessageParcel& reply);
-    int ReturnRequestInner(MessageParcel& data, MessageParcel& reply);
-    int ShowDialogInner(MessageParcel& data, MessageParcel& reply);
-    int CancelDialogInner(MessageParcel& data, MessageParcel& reply);
-    int UpdateDialogInner(MessageParcel &data, MessageParcel &reply);
-    int32_t AttachToUiServiceInner(MessageParcel &data, MessageParcel &reply);
-    int32_t RemoteDialogCallbackInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegisterCallBackInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnregisterCallBackInner(MessageParcel& data, MessageParcel& reply);
+    int32_t PushInner(MessageParcel& data, MessageParcel& reply);
+    int32_t RequestInner(MessageParcel& data, MessageParcel& reply);
+    int32_t ReturnRequestInner(MessageParcel& data, MessageParcel& reply);
 
-    using RequestFuncType = int (UIServiceMgrStub ::*)(MessageParcel& data, MessageParcel& reply);
+    using RequestFuncType = int32_t (UIServiceMgrStub ::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, RequestFuncType> requestFuncMap_;
 };
 }  // namespace Ace

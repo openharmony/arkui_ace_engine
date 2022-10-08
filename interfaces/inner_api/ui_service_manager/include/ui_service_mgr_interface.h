@@ -21,54 +21,34 @@
 #include <ipc_types.h>
 #include <iremote_broker.h>
 
-#include "dialog_callback_interface.h"
 #include "ui_service_interface.h"
-#include "uri.h"
+
+#include "base/utils/macros.h"
 
 namespace OHOS {
 namespace Ace {
-using Uri = OHOS::Uri;
-const std::string UI_MANAGER_SERVICE_NAME = "UIMgrService";
 /**
  * @class IUIServiceMgr
  * IUIServiceMgr interface is used to access UIService manager services.
  */
-class IUIServiceMgr : public OHOS::IRemoteBroker {
+class ACE_FORCE_EXPORT IUIServiceMgr : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ace.UIServiceMgr")
 
     IUIServiceMgr() = default;
-    virtual ~IUIServiceMgr() = default;
+    ~IUIServiceMgr() override = default;
 
-    virtual int RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService) = 0;
+    virtual int32_t RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService) = 0;
 
-    virtual int UnregisterCallBack(const AAFwk::Want& want) = 0;
+    virtual int32_t UnregisterCallBack(const AAFwk::Want& want) = 0;
 
-    virtual int Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
+    virtual int32_t Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
         const std::string& data, const std::string& extraData) = 0;
 
-    virtual int Request(const AAFwk::Want& want, const std::string& name, const std::string& data) = 0;
+    virtual int32_t Request(const AAFwk::Want& want, const std::string& name, const std::string& data) = 0;
 
-    virtual int ReturnRequest(const AAFwk::Want& want, const std::string& source,  const std::string& data,
+    virtual int32_t ReturnRequest(const AAFwk::Want& want, const std::string& source,  const std::string& data,
         const std::string& extraData) = 0;
-
-    virtual int ShowDialog(const std::string& name,
-                           const std::string& params,
-                           uint32_t windowType,
-                           int x,
-                           int y,
-                           int width,
-                           int height,
-                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
-                           int* id = nullptr) = 0;
-
-    virtual int CancelDialog(int id) = 0;
-
-    virtual int UpdateDialog(int id, const std::string& data) = 0;
-
-    virtual int32_t AttachToUiService(const sptr<IRemoteObject>& dialog, int32_t pid) = 0;
-
-    virtual int32_t RemoteDialogCallback(int32_t id, const std::string& event, const std::string& params) = 0;
 
     enum {
         // ipc id 1-1000 for kit
@@ -79,11 +59,6 @@ public:
         PUSH,
         REQUEST,
         RETURN_REQUEST,
-        SHOW_DIALOG,
-        CANCEL_DIALOG,
-        UPDATE_DIALOG,
-        ATTACH_DIALOG,
-        REMOTE_DIALOG_CALLBACK,
     };
 };
 }  // namespace Ace

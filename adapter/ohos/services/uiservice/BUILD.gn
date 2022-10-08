@@ -38,14 +38,11 @@ config("uiservicems_config") {
     "include/",
     "$ability_runtime_inner_api_path/base/include",
     "$ability_runtime_services_path/common/include",
-    "$ace_root/adapter/ohos/services/uiservice",
-    "$ace_root/adapter/ohos/services/uiservice/uiservice_plugins",
     "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "//prebuilts/jdk/jdk8/linux-x86/include",
     "//prebuilts/jdk/jdk8/linux-x86/include/linux",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager/include",
-    "//foundation/windowmanager/interfaces/innerkits",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -69,27 +66,17 @@ template("uiservice_static") {
     ]
 
     deps = [
-      "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/uiservice_plugins/uiservice_dialog:uiservicedialog",
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
       "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     ]
 
-    deps += [ "$ace_root/adapter/ohos/services/uiservice/dialog_ui/dialog_picker/js:dialog_picker_js_files_etc" ]
-
     external_deps = [
       "ability_base:want",
-      "ability_base:zuri",
-      "ability_runtime:ability_manager",
-      "ability_runtime:runtime",
-      "appspawn:appspawn_socket_client",
-      "bundle_framework:appexecfwk_base",
-      "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "eventhandler:libeventhandler",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
-      "window_manager:libwm",
     ]
   }
 }
