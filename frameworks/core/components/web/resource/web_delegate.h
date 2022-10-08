@@ -376,6 +376,7 @@ public:
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
+    void RequestFocus();
 
 private:
     void InitWebEvent();
@@ -403,7 +404,6 @@ private:
     void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void SetWebViewJavaScriptResultCallBack(const WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl);
-    void RequestFocus();
     void OnInactive();
     void OnActive();
     void Zoom(float factor);
