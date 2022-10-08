@@ -620,7 +620,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
-    auto responseRegionList = GetResponseRegionList();
+    auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto responseRegionList = GetResponseRegionList(paintRect);
     if (SystemProperties::GetDebugEnabled()) {
         LOGD("TouchTest: point is %{public}s in %{public}s", parentLocalPoint.ToString().c_str(), GetTag().c_str());
         for (const auto& rect : responseRegionList) {
@@ -639,7 +640,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // newComingTargets is the template object to collect child nodes gesture and used by gestureHub to pack gesture
     // group.
     TouchTestResult newComingTargets;
-    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto localPoint = parentLocalPoint - paintRect.GetOffset();
     bool consumed = false;
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
@@ -677,7 +678,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     result.splice(result.end(), std::move(newComingTargets));
     auto gestureHub = eventHub_->GetGestureEventHub();
-    if (gestureHub) {
+    if (gestureHub && consumed) {
         gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result);
     }
 
@@ -687,9 +688,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return consumed ? HitTestResult::BUBBLING : HitTestResult::OUT_OF_REGION;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionList()
+std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect)
 {
-    const auto& rect = geometryNode_->GetFrameRect();
     std::vector<RectF> responseRegionList;
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (!gestureHub) {
@@ -728,7 +728,7 @@ bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::
 HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
 {
-    const auto& rect = geometryNode_->GetFrameRect();
+    const auto& rect = renderContext_->GetPaintRectWithTransform();
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
     // TODO: disableTouchEvent || disabled_ need handle
@@ -740,10 +740,10 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
 
     bool preventBubbling = false;
 
-    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto localPoint = parentLocalPoint - rect.GetOffset();
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        auto& child = *iter;
+        const auto& child = *iter;
         auto childHitResult = child->MouseTest(globalPoint, localPoint, onMouseResult, onHoverResult, hoverNode);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
@@ -778,7 +778,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
 HitTestResult FrameNode::AxisTest(
     const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
 {
-    const auto& rect = geometryNode_->GetFrameRect();
+    const auto& rect = renderContext_->GetPaintRectWithTransform();
     LOGD("AxisTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
     // TODO: disableTouchEvent || disabled_ need handle
@@ -790,7 +790,7 @@ HitTestResult FrameNode::AxisTest(
 
     bool preventBubbling = false;
 
-    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto localPoint = parentLocalPoint - rect.GetOffset();
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
