@@ -831,13 +831,16 @@ void FrameNode::OnWindowHide()
     pattern_->OnWindowHide();
 }
 
-OffsetF FrameNode::GetGlobalOffset() const
+OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
+    auto offset = geometryNode_->GetFrameOffset();
     auto parent = GetAncestorNodeOfFrame();
-    if (!parent) {
-        return geometryNode_->GetFrameOffset();
+    while (parent) {
+        offset += parent->geometryNode_->GetFrameOffset();
+        parent = parent->GetAncestorNodeOfFrame();
     }
-    return parent->geometryNode_->GetFrameOffset() + geometryNode_->GetFrameOffset();
+
+    return offset;
 }
 
 } // namespace OHOS::Ace::NG

@@ -72,7 +72,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
         }
 
         auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(frameNode->GetGlobalOffset());
+        globalFrameRect.SetOffset(frameNode->GetOffsetRelativeToWindow());
 
         if (globalFrameRect.IsInRegion(PointF(globalX, globalY))) {
             hitFrameNodes.insert(std::make_pair(frameNode->GetDepth(), frameNode));
