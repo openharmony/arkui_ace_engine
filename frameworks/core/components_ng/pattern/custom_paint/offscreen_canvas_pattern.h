@@ -97,6 +97,7 @@ public:
     void Scale(double x, double y);
     void Rotate(double angle);
     void SetTransform(const TransformParam& param);
+    void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
     std::string ToDataURL(const std::string& type, const double quality);

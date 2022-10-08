@@ -644,6 +644,16 @@ void CustomPaintPattern::SetTransform(const TransformParam& param)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::ResetTransform()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.ResetTransform();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::Transform(const TransformParam& param)
 {
     auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {

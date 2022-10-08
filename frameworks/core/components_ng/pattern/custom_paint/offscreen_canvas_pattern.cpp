@@ -218,6 +218,11 @@ void OffscreenCanvasPattern::SetTransform(const TransformParam& param)
     offscreenPaintMethod_->SetTransform(param);
 }
 
+void OffscreenCanvasPattern::ResetTransform()
+{
+    offscreenPaintMethod_->ResetTransform();
+}
+
 void OffscreenCanvasPattern::Transform(const TransformParam& param)
 {
     offscreenPaintMethod_->Transform(param);
