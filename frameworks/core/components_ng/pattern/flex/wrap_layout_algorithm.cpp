@@ -203,7 +203,7 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(LayoutWrapper* layoutWrapper)
         case WrapAlignment::SPACE_BETWEEN: {
             startPosition = OffsetF(0.0, 0.0);
             float crossSpace =
-                contentNum > 1 ? (crossLengthLimit_ - totalCrossLength_) / static_cast<double>(contentNum - 1) : 0.0;
+                contentNum > 1 ? (crossLengthLimit_ - totalCrossLength_) / static_cast<float>(contentNum - 1) : 0.0;
             betweenPosition = isHorizontal ? OffsetF(0.0f, crossSpace) : OffsetF(crossSpace, 0.0f);
             break;
         }
@@ -292,18 +292,18 @@ void WrapLayoutAlgorithm::TraverseContent(const OffsetF& startPosition, const Of
                 break;
             }
             case WrapAlignment::SPACE_BETWEEN: {
-                double betweenSpace = (itemNum - 1 == 0) ? 0.0 : currentMainSpaceLength / (itemNum - 1);
+                float betweenSpace = (itemNum - 1 == 0) ? 0.0 : currentMainSpaceLength / (itemNum - 1);
                 PositionedItem(betweenSpace, content, accumulateOffset, content.crossLength);
                 break;
             }
             case WrapAlignment::SPACE_AROUND: {
-                double itemMainSpace = currentMainSpaceLength / itemNum;
+                float itemMainSpace = currentMainSpaceLength / itemNum;
                 PositionedItem(itemMainSpace, content, accumulateOffset + GetItemMainOffset(itemMainSpace / 2),
                     content.crossLength);
                 break;
             }
             case WrapAlignment::SPACE_EVENLY: {
-                double itemMainSpace = currentMainSpaceLength / (itemNum + 1);
+                float itemMainSpace = currentMainSpaceLength / (itemNum + 1);
                 PositionedItem(
                     itemMainSpace, content, accumulateOffset + GetItemMainOffset(itemMainSpace), content.crossLength);
                 break;
