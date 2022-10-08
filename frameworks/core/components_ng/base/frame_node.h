@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -267,7 +268,7 @@ private:
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
-    std::vector<RectF> GetResponseRegionList();
+    std::vector<RectF> GetResponseRegionList(const RectF& rect);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     struct ZIndexComparator {

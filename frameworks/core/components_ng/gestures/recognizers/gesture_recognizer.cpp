@@ -16,6 +16,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/event/axis_event.h"
 

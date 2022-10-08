@@ -15,6 +15,8 @@
 
 #include "core/components_ng/event/gesture_event_hub.h"
 
+#include <cstdint>
+
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -105,6 +107,8 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     }
 
     auto context = host->GetContext();
+    int32_t parallelIndex = 0;
+    int32_t exclusiveIndex = 0;
     for (auto const& recognizer : gestureHierarchy_) {
         if (!recognizer) {
             continue;
@@ -124,13 +128,15 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             }
 
             if (recognizers.size() > 1) {
-                if (!externalParallelRecognizer_ || recreateGesture_) {
-                    externalParallelRecognizer_ = AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers));
+                if ((static_cast<int32_t>(externalParallelRecognizer_.size()) <= parallelIndex)) {
+                    externalParallelRecognizer_.emplace_back(
+                        AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
                 } else {
-                    externalParallelRecognizer_->ReplaceChildren(recognizers);
+                    externalParallelRecognizer_[parallelIndex]->ReplaceChildren(recognizers);
                 }
-                externalParallelRecognizer_->SetCoordinateOffset(offset);
-                current = externalParallelRecognizer_;
+                externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
+                current = externalParallelRecognizer_[parallelIndex];
+                parallelIndex++;
             } else if (recognizers.size() == 1) {
                 current = *recognizers.begin();
             }
@@ -144,18 +150,33 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             }
 
             if (recognizers.size() > 1) {
-                if (!externalExclusiveRecognizer_ || recreateGesture_) {
-                    externalExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers));
+                if ((static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= exclusiveIndex)) {
+                    externalExclusiveRecognizer_.emplace_back(
+                        AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
                 } else {
-                    externalExclusiveRecognizer_->ReplaceChildren(recognizers);
+                    externalExclusiveRecognizer_[exclusiveIndex]->ReplaceChildren(recognizers);
                 }
-                externalExclusiveRecognizer_->SetCoordinateOffset(offset);
-                current = externalExclusiveRecognizer_;
+                externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
+                current = externalExclusiveRecognizer_[exclusiveIndex];
+                exclusiveIndex++;
             } else if (recognizers.size() == 1) {
                 current = *recognizers.begin();
             }
         }
     }
+
+    if (exclusiveIndex != static_cast<int32_t>(externalExclusiveRecognizer_.size())) {
+        LOGI("externalExclusiveRecognizer size changed, %{public}d resize to %{public}d",
+            static_cast<int32_t>(externalExclusiveRecognizer_.size()), exclusiveIndex);
+        externalExclusiveRecognizer_.resize(exclusiveIndex);
+    }
+
+    if (parallelIndex != static_cast<int32_t>(externalParallelRecognizer_.size())) {
+        LOGI("externalParallelRecognizer size changed, %{public}d resize to %{public}d",
+            static_cast<int32_t>(externalParallelRecognizer_.size()), parallelIndex);
+        externalParallelRecognizer_.resize(parallelIndex);
+    }
+
     if (current) {
         finalResult.emplace_back(std::move(current));
     }
@@ -275,7 +296,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
-    
+
     if (!eventHub->HasOnDragStart()) {
         LOGE("HandleOnDragStart: there is no onDragStart function.");
         return;
