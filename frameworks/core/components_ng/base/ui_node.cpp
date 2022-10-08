@@ -383,4 +383,24 @@ int32_t UINode::GetChildIndexById(int32_t id)
     return -1;
 }
 
+RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout) const
+{
+    if (GetChildren().empty()) {
+        return nullptr;
+    }
+
+    auto child = GetChildren().front();
+    while (!InstanceOf<FrameNode>(child)) {
+        auto children = child->GetChildren();
+        if (children.empty()) {
+            return nullptr;
+        }
+
+        child = children.front();
+    }
+
+    auto frameChild = DynamicCast<FrameNode>(child);
+    return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
+}
+
 } // namespace OHOS::Ace::NG
