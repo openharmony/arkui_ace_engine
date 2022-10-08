@@ -42,6 +42,7 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     geometryNode->SetFrameSize(idealSize);
+    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
 
