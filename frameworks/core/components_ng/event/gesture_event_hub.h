@@ -57,7 +57,14 @@ enum class HitTestMode {
      * Self not respond to the hit test for touch events,
      * but children respond to the hit test for touch events.
      */
-    HTMNONE
+    HTMNONE,
+
+    /**
+     * Self and child respond to the hit test for touch events,
+     * when self consumed allow hit test of other nodes which is masked by this node,
+     * when child consumed block hit test of other nodes.
+     */
+    HTMTRANSPARENT_SELF,
 };
 
 enum class HitTestResult {
@@ -67,6 +74,8 @@ enum class HitTestResult {
     STOP_BUBBLING,
     // node process events and bubble;
     BUBBLING,
+    // node process events and bubble;
+    SELF_TRANSPARENT,
 };
 
 struct DragDropInfo {
