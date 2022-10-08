@@ -70,6 +70,8 @@ panda::Local<panda::JSValueRef> toJsiValueWithVM(const EcmaVM* vm, T val)
         return panda::BooleanRef::New(vm, val);
     } else if constexpr (std::is_integral<T>::value && std::is_signed<T>::value) {
         return panda::IntegerRef::New(vm, val);
+    } else if constexpr (std::is_same_v<T, uint64_t>) {
+    return panda::BigIntRef::New(vm, val);
     } else if constexpr (std::is_unsigned_v<T>) {
         return panda::IntegerRef::NewFromUnsigned(vm, val);
     } else if constexpr (std::is_floating_point_v<T>) {
