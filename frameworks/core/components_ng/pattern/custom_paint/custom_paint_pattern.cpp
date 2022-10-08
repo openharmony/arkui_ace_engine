@@ -281,6 +281,9 @@ std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, do
         data->dirtyHeight = height;
         return data;
     }
+    if (paintMethod_->HasTask()) {
+        paintMethod_->FlushPipelineImmediately();
+    }
     return paintMethod_->GetImageData(left, top, width, height);
 }
 
@@ -663,6 +666,9 @@ void CustomPaintPattern::Translate(double x, double y)
 
 std::string CustomPaintPattern::ToDataURL(const std::string& args)
 {
+    if (paintMethod_->HasTask()) {
+        paintMethod_->FlushPipelineImmediately();
+    }
     return paintMethod_->ToDataURL(args);
 }
 

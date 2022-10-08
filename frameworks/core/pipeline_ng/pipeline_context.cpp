@@ -216,7 +216,21 @@ void PipelineContext::FlushFocus()
     }
 }
 
-void PipelineContext::FlushPipelineWithoutAnimation() {}
+void PipelineContext::FlushPipelineImmediately()
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+    FlushPipelineWithoutAnimation();
+}
+
+void PipelineContext::FlushPipelineWithoutAnimation()
+{
+    FlushBuild();
+    FlushTouchEvents();
+    taskScheduler_.FlushTask();
+    FlushMessages();
+    FlushFocus();
+}
 
 void PipelineContext::FlushBuild()
 {

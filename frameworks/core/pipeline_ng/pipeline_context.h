@@ -169,6 +169,8 @@ public:
 
     void FlushBuild() override;
 
+    void FlushPipelineImmediately();
+
     void AddBuildFinishCallBack(std::function<void()>&& callback);
 
     void AddWindowStateChangedCallback(int32_t nodeId);

@@ -226,6 +226,11 @@ public:
         saveStates_.pop();
     }
 
+    void FlushPipelineImmediately()
+    {
+        context_->FlushPipelineImmediately();
+    }
+
 protected:
     bool HasShadow() const;
     void UpdateLineDash(SkPaint& paint);
