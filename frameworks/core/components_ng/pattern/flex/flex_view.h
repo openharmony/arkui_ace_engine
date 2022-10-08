@@ -23,9 +23,16 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT FlexView {
 public:
     static void Create(FlexDirection direction, FlexAlign mainAxisAlign, FlexAlign crossAxisAlign);
+    static void CreateWrap(WrapDirection direction, WrapAlignment mainAxisAlign, WrapAlignment crossAxisAlign,
+        WrapAlignment alignment);
     static void Direction(const FlexDirection& value);
     static void MainAxisAlign(const FlexAlign& value);
     static void CrossAxisAlign(const FlexAlign& value);
+
+    static void SetWrapDirection(WrapDirection value);
+    static void SetWrapAlignment(WrapAlignment value);
+    static void SetWrapMainAlignment(WrapAlignment value);
+    static void SetWrapCrossAlignment(WrapAlignment value);
 };
 } // namespace OHOS::Ace::NG
 

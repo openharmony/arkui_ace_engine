@@ -189,6 +189,8 @@ public:
         return frameNode_.Upgrade();
     }
 
+    virtual void DumpInfo() {}
+
     template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {

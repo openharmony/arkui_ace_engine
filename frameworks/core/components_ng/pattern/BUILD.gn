@@ -69,6 +69,7 @@ build_component_ng("pattern_ng") {
     "divider/divider_view.cpp",
     "flex/flex_layout_algorithm.cpp",
     "flex/flex_view.cpp",
+    "flex/wrap_layout_algorithm.cpp",
     "gauge/gauge_layout_algorithm.cpp",
     "gauge/gauge_paint_method.cpp",
     "gauge/gauge_pattern.cpp",
