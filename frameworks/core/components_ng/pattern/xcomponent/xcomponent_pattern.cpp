@@ -53,15 +53,33 @@ void XComponentPattern::OnAttachToFrameNode()
     auto host = GetHost();
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE) {
-        renderSurface_->SetRenderContext(host->GetRenderContext());
+        renderContextForSurface_ = RenderContext::Create();
+        renderContextForSurface_->InitContext(false, id_ + "Surface");
+        renderSurface_ = RenderSurface::Create();
+        renderSurface_->SetRenderContext(renderContextForSurface_);
         renderSurface_->InitSurface();
         renderSurface_->UpdateXComponentConfig();
+        renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
         InitEvent();
         SetMethodCall();
-        renderContext->UpdateBackgroundColor(Color::BLACK);
-    } else {
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     }
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+}
+
+void XComponentPattern::OnRebuildFrame()
+{
+    if (type_ == XComponentType::COMPONENT) {
+        return;
+    }
+    if (!renderSurface_->IsSurfaceValid()) {
+        LOGE("surface not valid");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->AddChild(renderContextForSurface_, 0);
 }
 
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -134,6 +152,13 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             XComponentSizeChange(drawSize.Width(), drawSize.Height());
         }
     }
+
+    auto size = geometryNode->GetContentSize();
+    auto offset = geometryNode->GetContentOffset();
+    renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    host->MarkNeedSyncRenderTree();
     return false;
 }
 
