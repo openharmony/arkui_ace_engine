@@ -144,6 +144,16 @@ public:
     {
         panda::JSNApi::SetBundle(vm_, isBundle);
     }
+
+    void AddRootView(const panda::Global<panda::ObjectRef> &RootView)
+    {
+        RootView_ = RootView;
+    }
+
+    panda::Global<panda::ObjectRef> GetRootView()
+    {
+        return RootView_;
+    }
 #endif
 
 private:
@@ -160,6 +170,7 @@ private:
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
     std::unordered_map<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
+    panda::Global<panda::ObjectRef> RootView_;
 #endif
 };
 

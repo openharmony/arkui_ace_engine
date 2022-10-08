@@ -45,6 +45,7 @@ const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_STYLES[] = "$styles";
 const char INSPECTOR_INNER_DEBUGLINE[] = "debugLine";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
+const char INSPECTOR_VIEW_ID[] = "$viewID";
 
 std::list<std::string> specialComponentNameV1 = { "dialog", "panel" };
 
@@ -211,10 +212,10 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
         rootElement->UpdateChildWithSlot(child, newComponent, -1, -1);
         return true;
     }
-    return OperateGrneralComponent(parentID, slot, operateType, newComponent);
+    return OperateGeneralComponent(parentID, slot, operateType, newComponent);
 }
 
-bool JsInspectorManager::OperateGrneralComponent(
+bool JsInspectorManager::OperateGeneralComponent(
     int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent)
 {
     auto parentElement = GetInspectorElementById(parentID);
@@ -336,10 +337,13 @@ void JsInspectorManager::GetAttrsAndStylesV2(
         return;
     }
     std::string debugLine = composedElement->GetDebugLine();
+    std::string viewId = composedElement->GetViewId();
     jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
+    jsonNode->Put(INSPECTOR_VIEW_ID, viewId.c_str());
     auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement);
     if (inspectorElement) {
         auto jsonObject = inspectorElement->ToJsonObject();
+        jsonObject->Put("viewId", viewId.c_str());
         jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     }
     auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(inspectorElement);
