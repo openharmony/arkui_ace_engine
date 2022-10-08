@@ -340,7 +340,7 @@ void ListLayoutAlgorithm::LayoutForward(
     if (LessNotEqual(currentEndPos, endMainPos_) && !itemPosition_.empty()) {
         auto firstItemTop = itemPosition_.begin()->second.first;
         auto itemTotalSize = currentEndPos - firstItemTop;
-        if (LessOrEqual(itemTotalSize, contentMainSize_) && (startIndex_ == 0)) {
+        if (LessOrEqual(itemTotalSize, contentMainSize_) && (itemPosition_.begin()->first == 0)) {
             // all items size is less than list.
             currentOffset_ = firstItemTop;
             if (!mainSizeIsDefined_) {
