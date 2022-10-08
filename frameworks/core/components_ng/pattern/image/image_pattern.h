@@ -84,8 +84,10 @@ private:
     void OnImageLoadFail();
     void OnImageLoadSuccess();
     void CacheImageObject();
+    void SetImagePaintConfig(
+        const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg);
 
-    DataReadyNotifyTask CreateDataReadyCallback();
+        DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     LoadFailNotifyTask CreateLoadFailCallback();
 

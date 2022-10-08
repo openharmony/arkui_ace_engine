@@ -17,7 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
-#include "core/components_ng/render/image_painter.h"
+
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -95,6 +95,8 @@ void ImagePattern::OnImageLoadSuccess()
     lastCanvasImage_ = loadingCtx_->GetCanvasImage();
     lastSrcRect_ = loadingCtx_->GetSrcRect();
     lastDstRect_ = loadingCtx_->GetDstRect();
+    SetImagePaintConfig(lastCanvasImage_, lastSrcRect_, lastDstRect_, loadingCtx_->GetSourceInfo().IsSvg());
+    CHECK_NULL_VOID(lastCanvasImage_->imagePaintConfig_);
     // clear alt data
     altLoadingCtx_ = nullptr;
     lastAltCanvasImage_ = nullptr;
@@ -146,12 +148,14 @@ void ImagePattern::OnImageLoadFail()
     imageEventHub->FireErrorEvent(std::move(loadImageFailEvent_));
 }
 
-RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
+void ImagePattern::SetImagePaintConfig(
+    const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg)
 {
     auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_RETURN(imageRenderProperty, nullptr);
+    CHECK_NULL_VOID(imageRenderProperty);
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+    CHECK_NULL_VOID(imageLayoutProperty);
+
     ImagePaintConfig imagePaintConfig(lastSrcRect_, lastDstRect_);
     imagePaintConfig.imageFit_ = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
     imagePaintConfig.renderMode_ = imageRenderProperty->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
@@ -166,15 +170,18 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     if (colorFilterMatrix.has_value()) {
         imagePaintConfig.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
     }
-    if (lastCanvasImage_) {
-        imagePaintConfig.isSvg = loadingCtx_->GetSourceInfo().IsSvg();
-        return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_, imagePaintConfig);
+    imagePaintConfig.isSvg = isSvg;
+
+    canvasImage->SetImagePaintConfig(imagePaintConfig);
+}
+
+RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
+{
+    if (lastCanvasImage_ && lastCanvasImage_->imagePaintConfig_) {
+        return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_);
     }
-    if (lastAltCanvasImage_ && lastAltDstRect_ && lastAltSrcRect_) {
-        imagePaintConfig.srcRect_ = *lastAltSrcRect_;
-        imagePaintConfig.dstRect_ = *lastAltDstRect_;
-        imagePaintConfig.isSvg = altLoadingCtx_->GetSourceInfo().IsSvg();
-        return MakeRefPtr<ImagePaintMethod>(lastAltCanvasImage_, imagePaintConfig);
+    if (lastAltCanvasImage_ && lastAltCanvasImage_->imagePaintConfig_ && lastAltDstRect_ && lastAltSrcRect_) {
+        return MakeRefPtr<ImagePaintMethod>(lastAltCanvasImage_);
     }
     return nullptr;
 }
@@ -274,6 +281,9 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->lastAltCanvasImage_ = pattern->altLoadingCtx_->GetCanvasImage();
         pattern->lastAltSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->lastAltDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
+        pattern->SetImagePaintConfig(pattern->lastAltCanvasImage_, *pattern->lastAltSrcRect_, *pattern->lastAltDstRect_,
+            pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
+        CHECK_NULL_VOID(pattern->lastAltCanvasImage_->imagePaintConfig_);
     };
     return task;
 }
