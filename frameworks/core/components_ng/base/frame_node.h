@@ -240,7 +240,7 @@ public:
 
     void OnWindowHide() override;
 
-    OffsetF GetGlobalOffset() const;
+    OffsetF GetOffsetRelativeToWindow() const;
 
 private:
     void UpdateLayoutPropertyFlag() override;
