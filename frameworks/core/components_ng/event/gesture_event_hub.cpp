@@ -313,26 +313,34 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
 
-    CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnDragEnd(info);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
 
+    // Only the onDrop callback of dragged frame node is triggered.
+    // The onDrop callback of target frame node is triggered in PipelineContext::OnDragEvent.
     if (eventHub->HasOnDrop()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-
         RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
         event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
         eventHub->FireOnDrop(event, "");
     }
 
+    pipeline->SetIsDragged(false);
+
+    CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
 }
 
 void GestureEventHub::HandleOnDragCancel()
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetIsDragged(false);
+
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->onDragCancel();
+    dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
 }
 
