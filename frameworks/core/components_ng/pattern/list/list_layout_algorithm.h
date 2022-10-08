@@ -64,12 +64,12 @@ public:
 
     int32_t GetStartIndex() const
     {
-        return startIndex_.value_or(0);
+        return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
     }
 
     int32_t GetEndIndex() const
     {
-        return endIndex_.value_or(0);
+        return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
     }
 
     std::optional<int32_t> GetMaxListItemIndex() const
@@ -121,15 +121,15 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int32_t startIndex, float startPos);
+    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int32_t endIndex, float endPos);
 
 private:
     void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
 
-    void LayoutListInIndexMode(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-
-    void LayoutListInOffsetMode(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void LayoutList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
@@ -151,7 +151,6 @@ private:
     void ResetScrollable();
 
     std::optional<int32_t> jumpIndex_;
-    bool jumpIndexOutOfRange_ = false;
 
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;
@@ -159,8 +158,6 @@ private:
     float endMainPos_ = 0.0f;
     int32_t preStartIndex_ = -1;
     int32_t preEndIndex_ = -1;
-    std::optional<int32_t> startIndex_;
-    std::optional<int32_t> endIndex_;
 
     std::optional<int32_t> maxListItemIndex_;
     float spaceWidth_ = 0.0f;
