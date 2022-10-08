@@ -196,8 +196,9 @@ void JSButton::SetStateEffect(bool stateEffect)
 
 void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
 {
-    EventMarker remoteMessageEventId;
-    JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
+    RemoteCallback remoteCallback;
+    JSInteractableView::JsRemoteMessage(info, remoteCallback);
+    EventMarker remoteMessageEventId(std::move(remoteCallback));
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     if (buttonComponent) {
