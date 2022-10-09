@@ -217,6 +217,7 @@ build_component_ng("pattern_ng") {
     "time_picker/timepicker_column_pattern.cpp",
     "time_picker/timepicker_row_pattern.cpp",
     "time_picker/timepicker_view.cpp",
+    "toast/toast_view.cpp",
     "toggle/switch_layout_algorithm.cpp",
     "toggle/switch_paint_method.cpp",
     "toggle/switch_pattern.cpp",
