@@ -62,6 +62,16 @@ void OffscreenCanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
     offscreenPaintMethod_->Stroke(nullptr, path);
 }
 
+void OffscreenCanvasPattern::Clip()
+{
+    offscreenPaintMethod_->Clip();
+}
+
+void OffscreenCanvasPattern::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    offscreenPaintMethod_->Clip(path);
+}
+
 void OffscreenCanvasPattern::BeginPath()
 {
     offscreenPaintMethod_->BeginPath();

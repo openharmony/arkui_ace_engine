@@ -46,6 +46,8 @@ public:
     void Fill(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
     void Stroke(PaintWrapper* paintWrapper);
     void Stroke(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
+    void Clip();
+    void Clip(const RefPtr<CanvasPath2D>& path);
     void BeginPath();
     void ClosePath();
     void MoveTo(PaintWrapper* paintWrapper, double x, double y);
@@ -242,6 +244,7 @@ protected:
 
     void Path2DFill(const OffsetF& offset);
     void Path2DStroke(const OffsetF& offset);
+    void Path2DClip();
     void ParsePath2D(const OffsetF& offset, const RefPtr<CanvasPath2D>& path);
     void Path2DAddPath(const OffsetF& offset, const PathArgs& args);
     void Path2DClosePath(const OffsetF& offset, const PathArgs& args);
