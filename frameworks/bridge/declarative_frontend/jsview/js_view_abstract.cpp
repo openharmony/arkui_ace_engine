@@ -4749,6 +4749,11 @@ void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
         value.SetValue(1.0);
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetGrayScale(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetGrayScale(value);
 }
@@ -4762,6 +4767,11 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
 
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBrightness(value);
         return;
     }
 
@@ -4784,6 +4794,12 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetContrast(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetContrast(value);
 }
@@ -4802,6 +4818,12 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetSaturate(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetSaturate(value);
 }
@@ -4821,6 +4843,12 @@ void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetSepia(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetSepia(value);
 }
@@ -4838,6 +4866,12 @@ void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetInvert(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetInvert(value);
 }
@@ -4864,6 +4898,10 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
     deg = std::fmod(deg, ROUND_UNIT);
     if (deg < 0.0f) {
         deg += ROUND_UNIT;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetHueRotate(deg);
+        return;
     }
     auto decoration = GetFrontDecoration();
     if (decoration) {
@@ -5732,6 +5770,10 @@ void JSViewAbstract::SetBlur(float radius)
 
 void JSViewAbstract::SetColorBlend(Color color)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetColorBlend(color);
+        return;
+    }
     auto decoration = GetFrontDecoration();
     if (decoration) {
         decoration->SetColorBlend(color);
