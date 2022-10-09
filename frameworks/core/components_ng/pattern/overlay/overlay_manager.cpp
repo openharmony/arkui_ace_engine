@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/property.h"
@@ -123,6 +124,48 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popup)
         popupMap_[targetId].popupNode->MountToParent(rootNode);
     }
     popupMap_[targetId].isCurrentOnShow = !popup.isCurrentOnShow;
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OverlayManager::ShowMenu(int32_t targetId, RefPtr<FrameNode> menu)
+{
+    if (!menu) {
+        // get existing menuNode
+        auto it = menuMap_.find(targetId);
+        if (it != menuMap_.end()) {
+            menu = it->second;
+        } else {
+            LOGW("menuNode doesn't exists %{public}d", targetId);
+        }
+    } else {
+        // creating new menu
+        menuMap_[targetId] = menu;
+        LOGI("menuNode %{public}d added to map", targetId);
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto rootChildren = rootNode->GetChildren();
+    auto iter = std::find(rootChildren.begin(), rootChildren.end(), menu);
+    // menuNode already showing
+    if (iter != rootChildren.end()) {
+        LOGW("menuNode already appended");
+    } else {
+        menu->MountToParent(rootNode);
+        menu->MarkModifyDone();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        LOGI("menuNode mounted");
+    }
+}
+
+void OverlayManager::HideMenu(int32_t targetId)
+{
+    LOGI("OverlayManager::HideMenuNode");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    if (menuMap_.find(targetId) == menuMap_.end()) {
+        LOGE("OverlayManager: menuNode %{public}d not found in map", targetId);
+    }
+    rootNode->RemoveChild(menuMap_[targetId]);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

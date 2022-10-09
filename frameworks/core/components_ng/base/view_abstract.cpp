@@ -17,14 +17,19 @@
 
 #include <cstdint>
 #include <optional>
+#include <cstdint>
 #include <utility>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/option/option_paint_property.h"
+#include "core/components_ng/pattern/option/option_view.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -547,6 +552,61 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
     popupNode->MarkModifyDone();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
     overlayManager->UpdatePopupNode(targetId, popupInfo);
+}
+
+// common function to bind menu
+void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId)
+{
+    LOGD("ViewAbstract::BindMenu");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    // pass in menuNode to register it in OverlayManager
+    overlayManager->ShowMenu(targetId, menuNode);
+    LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
+}
+
+void ViewAbstract::BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_VOID(targetNode);
+
+    if (params.empty()) {
+        LOGD("menu params is empty");
+        return;
+    }
+    auto menuNode = MenuView::Create(params, targetNode->GetTag(), targetNode->GetId());
+    BindMenu(menuNode, targetNode->GetId());
+}
+
+void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode)
+{
+    LOGD("ViewAbstract::BindMenuWithCustomNode");
+    CHECK_NULL_VOID(customNode);
+    CHECK_NULL_VOID(targetNode);
+
+    auto menuNode = MenuView::Create(customNode, targetNode->GetTag(), targetNode->GetId());
+    BindMenu(menuNode, targetNode->GetId());
+}
+
+void ViewAbstract::ShowMenu(int32_t targetId)
+{
+    LOGD("ViewAbstract::ShowMenu");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->ShowMenu(targetId);
 }
 
 void ViewAbstract::SetBackdropBlur(const Dimension& radius)

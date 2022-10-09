@@ -66,6 +66,9 @@ public:
         return popupMap_[targetId];
     }
 
+    void ShowMenu(int32_t targetId, RefPtr<FrameNode> menu = nullptr);
+    void HideMenu(int32_t targetId);
+
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
     void PopToast(int32_t toastId);
 
@@ -76,6 +79,8 @@ private:
     std::list<NG::ToastInfo> toastStack_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
+    // K: target frameNode ID, V: menuNode
+    std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     WeakPtr<UINode> rootNodeWeak_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);

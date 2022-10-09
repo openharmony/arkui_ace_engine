@@ -890,6 +890,7 @@ void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
+    rsNode_->SetShadowElevation(shadow.GetElevation());
     RequestNextFrame();
 }
 

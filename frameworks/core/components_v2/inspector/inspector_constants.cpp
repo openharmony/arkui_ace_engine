@@ -220,6 +220,10 @@ const char BLANK_ETS_TAG[] = "Blank";
 ACE_EXPORT extern const char BUTTON_COMPONENT_TAG[] = "ButtonComponent";
 ACE_EXPORT extern const char BUTTON_ETS_TAG[] = "Button";
 
+// option
+ACE_EXPORT extern const char OPTION_COMPONENT_TAG[] = "OptionComponent";
+ACE_EXPORT extern const char OPTION_ETS_TAG[] = "Option";
+
 // divider
 ACE_EXPORT extern const char DIVIDER_COMPONENT_TAG[] = "DividerComponent";
 ACE_EXPORT extern const char DIVIDER_ETS_TAG[] = "Divider";
@@ -340,6 +344,7 @@ ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[] = "MenuComponent";
 ACE_EXPORT extern const char MENU_TAG[] = "menu";
 ACE_EXPORT extern const char MENU_ETS_TAG[] = "Menu";
+ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
@@ -356,6 +361,10 @@ ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[] = "TextTimer";
 // select
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[] = "SelectComponent";
 ACE_EXPORT extern const char SELECT_ETS_TAG[] = "Select";
+
+// select_popup
+ACE_EXPORT extern const char SELECT_POPUP_COMPONENT_TAG[] = "SelectPopupComponent";
+ACE_EXPORT extern const char SELECT_POPUP_ETS_TAG[] = "SelectPopup";
 
 // marquee
 ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[] = "MarqueeComponent";
