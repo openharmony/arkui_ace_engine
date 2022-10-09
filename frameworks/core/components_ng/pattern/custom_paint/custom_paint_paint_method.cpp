@@ -1099,6 +1099,11 @@ void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
     skCanvas_->setMatrix(skMatrix);
 }
 
+void CustomPaintPaintMethod::ResetTransform()
+{
+    skCanvas_->resetMatrix();
+}
+
 void CustomPaintPaintMethod::Transform(const TransformParam& param)
 {
     SkMatrix skMatrix;

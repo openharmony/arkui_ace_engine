@@ -2034,7 +2034,13 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsResetTransform(const JSCallbackInfo& info)
 {
-    return;
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            offscreenCanvasPattern_->ResetTransform();
+        } else {
+            customPaintPattern_->ResetTransform();
+        }
+    }
 }
 
 void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
