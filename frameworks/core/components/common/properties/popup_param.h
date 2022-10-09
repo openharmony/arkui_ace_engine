@@ -302,7 +302,6 @@ private:
 
     // Used in NG mode
     StateChangeFunc onStateChange_;
-    SubInfoUpdateFunc subInfoUpdate_;
     ButtonProperties primaryButtonProperties_;   // first button.
     ButtonProperties secondaryButtonProperties_; // second button.
 };
