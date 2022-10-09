@@ -28,7 +28,6 @@ namespace OHOS::Ace::NG {
 void ExclusiveRecognizer::OnAccepted(size_t touchId)
 {
     LOGI("the exclusive gesture recognizer has been accepted, touch id %{public}zu", touchId);
-    pendingReset_ = true;
     if (refereePointers_.find(touchId) == refereePointers_.end()) {
         LOGE("the exclusive gesture refereePointers_ can not find current touch id");
         return;
@@ -52,6 +51,10 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
             recognizer->OnRejected(touchId);
             recognizer->SetRefereeState(RefereeState::FAIL);
         }
+    }
+
+    if (AceType::InstanceOf<ClickRecognizer>(activeRecognizer_)) {
+        pendingReset_ = true;
     }
 }
 
@@ -113,7 +116,7 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
             break;
     }
 
-    if (pendingReset_) {
+    if ((activeRecognizer_ && (activeRecognizer_->GetDetectState() != DetectState::DETECTED)) || pendingReset_) {
         LOGD("sub detected gesture has finished, change the exclusive recognizer to be ready");
         Reset();
         pendingReset_ = false;
