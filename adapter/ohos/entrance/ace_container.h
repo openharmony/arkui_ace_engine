@@ -107,6 +107,16 @@ public:
         return aceView_ ? aceView_->GetHeight() : 0;
     }
 
+    int32_t GetViewPosX() const override
+    {
+        return aceView_ ? aceView_->GetPosX() : 0;
+    }
+
+    int32_t GetViewPosY() const override
+    {
+        return aceView_ ? aceView_->GetPosY() : 0;
+    }
+
     AceView* GetAceView() const
     {
         return aceView_;
@@ -266,12 +276,12 @@ public:
         return windowName_;
     }
 
-    void SetWindowId(uint32_t windowId)
+    void SetWindowId(uint32_t windowId) override
     {
         windowId_ = windowId;
     }
 
-    uint32_t GetWindowId()
+    uint32_t GetWindowId() const override
     {
         return windowId_;
     }

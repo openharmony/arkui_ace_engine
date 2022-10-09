@@ -45,13 +45,25 @@ void OnMessage(const std::string& message)
     if (g_inspector != nullptr && g_inspector->connectServer_ != nullptr) {
         g_inspector->ideMsgQueue_.push(message);
         std::string checkMessage = "connected";
+        std::string requestMessage = "tree";
         if (message.find(checkMessage, 0) != std::string::npos) {
             g_inspector->waitingForDebugger_ = false;
-            for (auto &info : g_inspector->infoBuffer_) {
+            g_inspector->setConnectedStaus_(g_inspector->instanceId_);
+            for (auto& info : g_inspector->infoBuffer_) {
                 g_inspector->connectServer_->SendMessage(info.second);
             }
         }
+        if (message.find(requestMessage, 0) != std::string::npos) {
+            g_inspector->connectServer_->SendMessage(g_inspector->layoutInspectorInfo_.tree);
+            g_inspector->connectServer_->SendMessage(g_inspector->layoutInspectorInfo_.snapShot);
+        }
     }
+}
+
+void SetCreatTreeCallBack(const std::function<void(int32_t)>& setConnectedStaus, int32_t instanceId)
+{
+    g_inspector->instanceId_ = instanceId;
+    g_inspector->setConnectedStaus_ = setConnectedStaus;
 }
 
 void ResetService()
@@ -90,6 +102,13 @@ void StoreMessage(int32_t instanceId, const std::string& message)
         return;
     }
     g_inspector->infoBuffer_[instanceId] = message;
+}
+
+void StoreInspectorInfo(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr)
+{
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
+    g_inspector->layoutInspectorInfo_.tree = jsonTreeStr;
+    g_inspector->layoutInspectorInfo_.snapShot = jsonSnapshotStr;
 }
 
 void RemoveMessage(int32_t instanceId)
