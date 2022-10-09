@@ -3131,7 +3131,11 @@ void WebDelegate::OnBlur()
 bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
-    // TODO: add ng pattern.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        return webPattern->RunQuickMenu(params, callback);
+    }
     auto renderWeb = renderWeb_.Upgrade();
     if (!renderWeb || !params || !callback) {
         LOGE("renderWeb is nullptr");
@@ -3143,7 +3147,12 @@ bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> 
 
 void WebDelegate::OnQuickMenuDismissed()
 {
-    // TODO: add ng pattern.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnQuickMenuDismissed();
+        return;
+    }
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_VOID(renderWeb);
     renderWeb->OnQuickMenuDismissed();
@@ -3153,7 +3162,12 @@ void WebDelegate::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchH
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
 {
-    // TODO: add ng pattern.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
+        return;
+    }
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_VOID(renderWeb);
     renderWeb->OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);

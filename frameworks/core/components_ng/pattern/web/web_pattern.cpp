@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
@@ -255,6 +256,7 @@ void WebPattern::HandleBlurEvent()
         return;
     }
     delegate_->OnBlur();
+    OnQuickMenuDismissed();
 }
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
@@ -519,13 +521,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         LOGE("handle touch down error");
         return;
     }
-    auto offset = GetHostFrameGlobalOffset();
     for (auto& touchPoint : touchInfos) {
-        if (fromOverlay) {
-            touchPoint.x -= offset.value_or(OffsetF()).GetX();
-            touchPoint.y -= offset.value_or(OffsetF()).GetY();
-        }
-        touchOffset = Offset(touchPoint.x, touchPoint.y);
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
     }
 }
@@ -538,12 +534,7 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         LOGE("handle touch up error");
         return;
     }
-    auto offset = GetHostFrameGlobalOffset();
     for (auto& touchPoint : touchInfos) {
-        if (fromOverlay) {
-            touchPoint.x -= offset.value_or(OffsetF()).GetX();
-            touchPoint.y -= offset.value_or(OffsetF()).GetY();
-        }
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
     }
     if (!touchInfos.empty()) {
@@ -559,12 +550,7 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
         LOGE("handle touch move error");
         return;
     }
-    auto offset = GetHostFrameGlobalOffset();
     for (auto& touchPoint : touchInfos) {
-        if (fromOverlay) {
-            touchPoint.x -= offset.value_or(OffsetF()).GetX();
-            touchPoint.y -= offset.value_or(OffsetF()).GetY();
-        }
         delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y);
     }
 }
@@ -614,5 +600,257 @@ void WebPattern::ExitFullScreen()
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
     fullScreenManager->ExitFullScreen(host);
+}
+
+bool WebPattern::IsTouchHandleValid(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
+{
+    return (handle != nullptr) && (handle->IsEnable());
+}
+
+bool WebPattern::IsTouchHandleShow(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
+{
+    if (!handle) {
+        return false;
+    }
+    if (handle->GetAlpha() > 0 &&
+        GreatOrEqual(handle->GetY(), handle->GetEdgeHeight()) &&
+        GreatNotEqual(GetHostFrameSize().value_or(SizeF()).Height(), handle->GetY())) {
+        return true;
+    }
+    return false;
+}
+
+WebOverlayType WebPattern::GetTouchHandleOverlayType(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
+{
+    if (IsTouchHandleValid(insertHandle) &&
+        !IsTouchHandleValid(startSelectionHandle) &&
+        !IsTouchHandleValid(endSelectionHandle)) {
+        return INSERT_OVERLAY;
+    }
+
+    if (!IsTouchHandleValid(insertHandle) &&
+        IsTouchHandleValid(startSelectionHandle) &&
+        IsTouchHandleValid(endSelectionHandle)) {
+        return SELECTION_OVERLAY;
+    }
+
+    return INVALID_OVERLAY;
+}
+
+RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle)
+{
+    RectF paintRect;
+    auto offset = GetHostFrameGlobalOffset().value_or(OffsetF());
+    auto size = GetHostFrameSize().value_or(SizeF());
+    float edgeHeight = touchHandle->GetEdgeHeight();
+    float x = touchHandle->GetX();
+    float y = touchHandle->GetY();
+    if (x > size.Width()) {
+        x = offset.GetX() + size.Width();
+    } else {
+        x = x + offset.GetX();
+    }
+
+    if (y < 0) {
+        y = offset.GetY();
+    } else if (y > size.Height()) {
+        y = offset.GetY() + size.Height();
+    } else {
+        y = y + offset.GetY();
+        y = y - edgeHeight;
+    }
+
+    x = x - SelectHandleInfo::GetDefaultLineWidth().ConvertToPx() / 2;
+    paintRect.SetOffset({ x, y });
+    paintRect.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), edgeHeight });
+    return paintRect;
+}
+
+void WebPattern::CloseSelectOverlay()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (selectOverlayProxy_) {
+        selectOverlayProxy_->Close();
+        pipeline->GetSelectOverlayManager()->DestroySelectOverlay(selectOverlayProxy_);
+        selectOverlayProxy_ = nullptr;
+    }
+}
+
+void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
+{
+    int32_t flags = params->GetEditStateFlags();
+    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) {
+        selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
+            if (callback) {
+                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT,
+                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            }
+        };
+    } else {
+        selectInfo.menuInfo.showCut = false;
+    }
+    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY) {
+        selectInfo.menuCallback.onCopy = [weak = AceType::WeakClaim(this), callback]() {
+            if (callback) {
+                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY,
+                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            }
+        };
+    } else {
+        selectInfo.menuInfo.showCopy = false;
+    }
+    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE) {
+        selectInfo.menuCallback.onPaste = [weak = AceType::WeakClaim(this), callback]() {
+            if (callback) {
+                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE,
+                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            }
+        };
+    } else {
+        selectInfo.menuInfo.showPaste = false;
+    }
+    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL) {
+        selectInfo.menuCallback.onSelectAll = [weak = AceType::WeakClaim(this), callback]() {
+            if (callback) {
+                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
+                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            }
+        };
+    } else {
+        selectInfo.menuInfo.showCopyAll = false;
+    }
+    selectInfo.onHandleMoveDone = [weak = AceType::WeakClaim(this)](const RectF& rectF, bool isFirst) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->UpdateTouchHandleForOverlay();
+    };
+}
+
+bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
+{
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle =
+        params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::INSERT_HANDLE);
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle =
+        params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::SELECTION_BEGIN_HANDLE);
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle =
+        params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::SELECTION_END_HANDLE);
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle,
+                                                           beginTouchHandle,
+                                                           endTouchHandle);
+    if (overlayType == INVALID_OVERLAY) {
+        return false;
+    }
+    if (selectOverlayProxy_) {
+        CloseSelectOverlay();
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    selectHotZone_ = theme->GetHandleHotZoneRadius().ConvertToPx();
+    SelectOverlayInfo selectInfo;
+    selectInfo.isSingleHandle = (overlayType == INSERT_OVERLAY);
+    if (selectInfo.isSingleHandle) {
+        selectInfo.firstHandle.isShow = IsTouchHandleShow(insertTouchHandle);
+        selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertTouchHandle);
+    } else {
+        selectInfo.firstHandle.isShow = IsTouchHandleShow(beginTouchHandle);
+        selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(beginTouchHandle);
+        selectInfo.secondHandle.isShow = IsTouchHandleShow(endTouchHandle);
+        selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endTouchHandle);
+    }
+    selectInfo.menuInfo.menuIsShow = true;
+    RegisterSelectOverlayCallback(selectInfo, params, callback);
+    selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
+    insertHandle_ = insertTouchHandle;
+    startSelectionHandle_ = beginTouchHandle;
+    endSelectionHandle_ = endTouchHandle;
+    return selectOverlayProxy_ ? true : false;
+}
+
+void WebPattern::OnQuickMenuDismissed()
+{
+    CloseSelectOverlay();
+}
+
+void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
+{
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle,
+                                                           startSelectionHandle,
+                                                           endSelectionHandle);
+    if (overlayType == INVALID_OVERLAY) {
+        CloseSelectOverlay();
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    selectHotZone_ = theme->GetHandleHotZoneRadius().ConvertToPx();
+    insertHandle_ = insertHandle;
+    startSelectionHandle_ = startSelectionHandle;
+    endSelectionHandle_ = endSelectionHandle;
+    if (!selectOverlayProxy_) {
+        if (overlayType == INSERT_OVERLAY) {
+            SelectOverlayInfo selectInfo;
+            selectInfo.isSingleHandle = true;
+            selectInfo.firstHandle.isShow = IsTouchHandleShow(insertHandle_);
+            selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
+            selectInfo.menuInfo.menuDisable = false;
+            selectInfo.menuInfo.menuIsShow = false;
+            selectInfo.onHandleMoveDone = [weak = AceType::WeakClaim(this)](const RectF& rectF, bool isFirst) {
+                auto webPattern = weak.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                webPattern->UpdateTouchHandleForOverlay();
+            };
+            selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
+        }
+    } else {
+        if (overlayType == INSERT_OVERLAY) {
+            UpdateTouchHandleForOverlay();
+        }
+    }
+}
+
+void WebPattern::UpdateTouchHandleForOverlay()
+{
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_,
+                                                           startSelectionHandle_,
+                                                           endSelectionHandle_);
+    if (!selectOverlayProxy_) {
+        return;
+    }
+    if (overlayType == INVALID_OVERLAY) {
+        CloseSelectOverlay();
+        return;
+    }
+    SelectHandleInfo firstHandleInfo;
+    SelectHandleInfo secondHandleInfo;
+    SelectMenuInfo menuInfo;
+    if (overlayType == INSERT_OVERLAY) {
+        firstHandleInfo.isShow = IsTouchHandleShow(insertHandle_);
+        firstHandleInfo.paintRect = ComputeTouchHandleRect(insertHandle_);
+        menuInfo.menuIsShow = false;
+        selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
+        selectOverlayProxy_->UpdateSelectMenuInfo(menuInfo);
+    } else {
+        firstHandleInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
+        firstHandleInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
+        secondHandleInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
+        secondHandleInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+        selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
+        selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
+    }
 }
 } // namespace OHOS::Ace::NG
