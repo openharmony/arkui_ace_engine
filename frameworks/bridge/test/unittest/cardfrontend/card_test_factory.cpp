@@ -20,6 +20,7 @@
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_mock.h"
 
 #define private public
+#define protected public
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 
 namespace OHOS::Ace::Framework {

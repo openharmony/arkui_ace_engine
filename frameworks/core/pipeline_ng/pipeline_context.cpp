@@ -143,6 +143,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
     FlushBuild();
+    if (isEtsCard_ && drawDelegate_) {
+        auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
+        drawDelegate_->DrawRSFrame(renderContext);
+        drawDelegate_ = nullptr;
+    }
     FlushTouchEvents();
     taskScheduler_.FlushTask();
     auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);

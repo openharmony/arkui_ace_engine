@@ -206,6 +206,11 @@ public:
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
 
+    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
+    {
+        drawDelegate_ = std::move(delegate);
+    }
+
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -266,6 +271,8 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
+    std::unique_ptr<DrawDelegate> drawDelegate_;
+
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;

@@ -749,26 +749,6 @@ public:
         return isHoleValid_;
     }
 
-    void SetPluginOffset(const Offset& offset)
-    {
-        pluginOffset_ = offset;
-    }
-
-    Offset GetPluginOffset() const
-    {
-        return pluginOffset_;
-    }
-
-    void SetPluginEventOffset(const Offset& offset)
-    {
-        pluginEventOffset_ = offset;
-    }
-
-    Offset GetPluginEventOffset() const
-    {
-        return pluginEventOffset_;
-    }
-
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRSUIDirector();
@@ -1198,9 +1178,6 @@ private:
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
-
-    Offset pluginOffset_ { 0, 0 };
-    Offset pluginEventOffset_ { 0, 0 };
 
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
