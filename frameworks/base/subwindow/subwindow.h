@@ -49,7 +49,7 @@ public:
     }
 
 private:
-    int32_t subwindowId_;
+    int32_t subwindowId_ = 0;
 };
 
 } // namespace OHOS::Ace

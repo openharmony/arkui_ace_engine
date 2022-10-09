@@ -21,8 +21,8 @@
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/select_popup/select_popup_component.h"
-#include "core/components/tween/tween_component.h"
 #include "core/components/stack/stack_element.h"
+#include "core/components/tween/tween_component.h"
 
 namespace OHOS::Rosen {
 class Window;

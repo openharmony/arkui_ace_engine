@@ -26,8 +26,8 @@
 #include "base/utils/system_properties.h"
 #include "core/common/container_scope.h"
 #include "core/common/frontend.h"
-#include "core/components/popup/popup_component.h"
 #include "core/components/bubble/bubble_component.h"
+#include "core/components/popup/popup_component.h"
 
 namespace OHOS::Ace {
 
