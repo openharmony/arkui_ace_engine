@@ -41,6 +41,7 @@ public:
     void OnDragMove(const GestureEvent& info);
     void OnDragEnd(const GestureEvent& info);
     void onDragCancel();
+    void DestroyDragWindow();
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DragDropProxy);

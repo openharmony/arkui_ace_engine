@@ -24,6 +24,7 @@
 #include "render_service_client/core/ui/rs_surface_node.h"
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
@@ -332,6 +333,36 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
             rsNode_, transformMatrixModifier_->quaternion, transformMatrixModifier_->quaternionValue, quaternion);
     }
     RequestNextFrame();
+}
+
+RectF RosenRenderContext::GetPaintRectWithTransform()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(rsNode_, rect);
+    rect = GetPaintRectWithoutTransform();
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+    // calculate new pos.
+    auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
+    auto centerPos = rect.GetOffset() + centOffset;
+    auto newPos = centerPos - OffsetF(centOffset.GetX() * scale[0], centOffset.GetY() * scale[1]);
+    newPos = newPos + OffsetF(translate[0], translate[1]);
+    rect.SetOffset(newPos);
+    // calculate new size.
+    auto oldSize = rect.GetSize();
+    auto newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
+    rect.SetSize(newSize);
+    return rect;
+}
+
+RectF RosenRenderContext::GetPaintRectWithoutTransform()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(rsNode_, rect);
+    auto paintRectVector = rsNode_->GetStagingProperties().GetBounds();
+    rect.SetRect(paintRectVector[0], paintRectVector[1], paintRectVector[2], paintRectVector[3]);
+    return rect;
 }
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
@@ -859,6 +890,7 @@ void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
+    rsNode_->SetShadowElevation(shadow.GetElevation());
     RequestNextFrame();
 }
 

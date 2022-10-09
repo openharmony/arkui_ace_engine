@@ -18,11 +18,18 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/device_type.h"
+#include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -39,7 +46,8 @@ const char SEPARATE[] = " ";
 
 } // namespace
 
-RefPtr<FrameNode> DialogView::CreateDialogNode(const DialogProperties& param)
+RefPtr<FrameNode> DialogView::CreateDialogNode(
+    const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
     auto dialogNode = DialogView::CreateDialogWithType(param.type);
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
@@ -62,8 +70,9 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(const DialogProperties& param)
     dialogContext->UpdateBackgroundColor(dialogTheme->GetMaskColorEnd());
     // data used for inspector
     std::string data;
-    BuildChild(dialogNode, param, data, dialogTheme, themeManager);
-    BuildButtons(themeManager, dialogNode, param.buttons, dialogTheme, data);
+    BuildChild(dialogNode, param, data, dialogTheme, customNode);
+
+    BuildButtons(param.buttons, dialogTheme, dialogNode);
     dialogNode->MarkModifyDone();
     // TODO: build animation.
     // TODO: menu event not completed.
@@ -77,7 +86,8 @@ RefPtr<FrameNode> DialogView::CreateDialogWithType(DialogType type)
     auto dialogId = ElementRegister::GetInstance()->MakeUniqueId();
     switch (type) {
         case DialogType::ALERT_DIALOG: {
-            // Alert dialog need to be completed.
+            dialog =
+                FrameNode::CreateFrameNode(V2::ALERTDIALOG_ETS_TAG, dialogId, AceType::MakeRefPtr<DialogPattern>());
             break;
         }
         case DialogType::ACTION_SHEET: {
@@ -92,11 +102,20 @@ RefPtr<FrameNode> DialogView::CreateDialogWithType(DialogType type)
 }
 
 void DialogView::BuildChild(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProperties,
-    std::string& data, const RefPtr<DialogTheme>& dialogTheme, const RefPtr<ThemeManager>& themeManager)
+    std::string& data, const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode = nullptr)
 {
-    bool isCustom = dialogProperties.customStyle;
-    if (isCustom) {
-        // TODO: custom dialog not completed
+    LOGI("build dialog child");
+    // append customNode
+    if (customNode) {
+        if (!AceType::InstanceOf<CustomNode>(customNode)) {
+            LOGE("dialogNode's child isn't FrameNode");
+        }
+        auto contentNode = AceType::DynamicCast<FrameNode>(customNode->GetChildAtIndex(0));
+        auto contentRenderContext = contentNode->GetRenderContext();
+        CHECK_NULL_VOID(contentRenderContext);
+        contentRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+        customNode->MountToParent(dialog);
+        LOGD("customNode tag = %s mounted to dialog", customNode->GetTag().c_str());
         return;
     }
     auto deviceType = SystemProperties::GetDeviceType();
@@ -130,6 +149,7 @@ void DialogView::BuildChild(const RefPtr<FrameNode>& dialog, const DialogPropert
         contentProp->UpdateTextAlign(TextAlign::CENTER);
     }
     contentProp->UpdateContent(dialogProperties.content);
+    LOGD("content = %s", dialogProperties.content.c_str());
     data += dialogProperties.content + SEPARATE;
     Edge contentPaddingInTheme;
     if (!dialogProperties.title.empty()) {
@@ -155,14 +175,6 @@ void DialogView::BuildChild(const RefPtr<FrameNode>& dialog, const DialogPropert
         // TODO: shrink need to be completed
         scrollProp->UpdateFlexShrink(1.0);
     }
-    // Make Menu node if hasMenu
-    if (dialogProperties.isMenu) {
-        // TODO: make menu node
-        LOGD("Menu is not Completed");
-    } else {
-        // TODO: build button
-        LOGD("button is not completed.");
-    }
     // TODO: need to check if Focusable is need in DialogView
     // TODO: need to check if FocusCollaboration is need in DialogView
     // Make dialog Content Column
@@ -183,16 +195,86 @@ void DialogView::BuildChild(const RefPtr<FrameNode>& dialog, const DialogPropert
     // TODO: need to check TextDirection.
     // Begin to composite FrameNodes
     contentColumn->AddChild(title);
-    contentColumn->AddChild(contentScroll);
-    contentScroll->AddChild(contentNode);
+    // NOT SHOWing inside scroll, need to fix scroll
+    contentColumn->AddChild(contentNode);
+
+    // Make Menu node if hasMenu
+    if (dialogProperties.isMenu) {
+        // TODO: make menu node
+        LOGD("Menu is not Completed");
+    } else {
+        auto buttonContainer = BuildButtons(dialogProperties.buttons, dialogTheme, dialog);
+        CHECK_NULL_VOID(buttonContainer);
+        buttonContainer->MountToParent(contentColumn);
+    }
+
     dialog->AddChild(contentColumn);
 }
 
-void DialogView::BuildButtons(const RefPtr<ThemeManager>& themeManager, const RefPtr<FrameNode>& dialog,
-    const std::vector<ButtonInfo>& buttons, const RefPtr<DialogTheme>& dialogTheme, std::string& data)
+// alert dialog buttons
+RefPtr<FrameNode> DialogView::BuildButtons(
+    const std::vector<ButtonInfo>& buttons, const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dialog)
 {
-    // TODO: Frame Node Create logic may be moved to this function.
-    LOGI("build buttons");
+    auto Id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> container;
+    if (buttons.size() == 1) { // the button in dialog is one.
+        container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    } else if (buttons.size() == 2) { // the button in dialog is two.
+        container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
+        layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    } else { // the button in dialog is more than two.
+        // TODO: use wrap pattern
+    }
+    CHECK_NULL_RETURN(container, nullptr);
+    // set action's padding
+    PaddingProperty actionPadding;
+    auto padding = dialogTheme->GetActionsPadding();
+    actionPadding.left = CalcLength(padding.Left());
+    actionPadding.right = CalcLength(padding.Right());
+    actionPadding.top = CalcLength(padding.Top());
+    actionPadding.bottom = CalcLength(padding.Bottom());
+    container->GetLayoutProperty()->UpdatePadding(actionPadding);
+
+    for (auto&& params : buttons) {
+        ButtonView::CreateWithLabel(params.text);
+        if (!params.textColor.empty()) {
+            ButtonView::SetTextColor(Color::FromString(params.textColor));
+        }
+        auto buttonNode = ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_RETURN(buttonNode, nullptr);
+
+        // bind click event
+        auto buttonFrame = AceType::DynamicCast<FrameNode>(buttonNode);
+        auto hub = buttonFrame->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(hub, nullptr);
+        hub->AddClickEvent(params.action);
+
+        // to close dialog when clicked inside button rect
+        auto closeCallback = [dialog](GestureEvent& /*info*/) {
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(context);
+            auto overlayManager = context->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+
+            overlayManager->CloseDialog(dialog);
+        };
+        hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(closeCallback));
+
+        // update background color
+        if (params.isBgColorSetted) {
+            auto renderContext = buttonFrame->GetRenderContext();
+            renderContext->UpdateBackgroundColor(params.bgColor);
+        }
+
+        buttonNode->MountToParent(container);
+    }
+    return container;
 }
 
 } // namespace OHOS::Ace::NG

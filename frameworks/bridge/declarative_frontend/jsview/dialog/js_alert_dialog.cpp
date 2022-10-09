@@ -21,55 +21,65 @@
 
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_component.h"
+#include "core/components_ng/event/click_event.h"
+#include "core/components_ng/pattern/dialog/dialog_event_hub.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<DialogAlignment> DIALOG_ALIGNMENT = {
-    DialogAlignment::TOP, DialogAlignment::CENTER, DialogAlignment::BOTTOM, DialogAlignment::DEFAULT,
-    DialogAlignment::TOP_START, DialogAlignment::TOP_END, DialogAlignment::CENTER_START,
-    DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START, DialogAlignment::BOTTOM_END
-};
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
+    DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
+    DialogAlignment::BOTTOM_END };
 } // namespace
 
 void ParseButtonObj(
     const JSCallbackInfo& args, DialogProperties& properties, JSRef<JSObject> obj, const std::string& property)
 {
     auto jsVal = obj->GetProperty(property.c_str());
-    if (jsVal->IsObject()) {
-        auto objInner = JSRef<JSObject>::Cast(jsVal);
-        auto value = objInner->GetProperty("value");
-        std::string buttonValue;
-        ButtonInfo buttonInfo;
-        if (JSAlertDialog::ParseJsString(value, buttonValue)) {
-            buttonInfo.text = buttonValue;
-        }
+    if (!jsVal->IsObject()) {
+        return;
+    }
+    auto objInner = JSRef<JSObject>::Cast(jsVal);
+    auto value = objInner->GetProperty("value");
+    std::string buttonValue;
+    ButtonInfo buttonInfo;
+    if (JSAlertDialog::ParseJsString(value, buttonValue)) {
+        buttonInfo.text = buttonValue;
+    }
 
-        auto fontColorValue = objInner->GetProperty("fontColor");
-        Color textColor;
-        if (JSAlertDialog::ParseJsColor(fontColorValue, textColor)) {
-            buttonInfo.textColor = textColor.ColorToString();
-        }
+    auto fontColorValue = objInner->GetProperty("fontColor");
+    Color textColor;
+    if (JSAlertDialog::ParseJsColor(fontColorValue, textColor)) {
+        buttonInfo.textColor = textColor.ColorToString();
+    }
 
-        auto backgroundColorValue = objInner->GetProperty("backgroundColor");
-        Color backgroundColor;
-        if (JSAlertDialog::ParseJsColor(backgroundColorValue, backgroundColor)) {
-            buttonInfo.isBgColorSetted = true;
-            buttonInfo.bgColor = backgroundColor;
-        }
+    auto backgroundColorValue = objInner->GetProperty("backgroundColor");
+    Color backgroundColor;
+    if (JSAlertDialog::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        buttonInfo.isBgColorSetted = true;
+        buttonInfo.bgColor = backgroundColor;
+    }
 
-        if (buttonInfo.IsValid()) {
-            properties.buttons.emplace_back(buttonInfo);
-        }
-
-        auto actionValue = objInner->GetProperty("action");
-        if (actionValue->IsFunction()) {
-            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+    auto actionValue = objInner->GetProperty("action");
+    if (actionValue->IsFunction()) {
+        auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto callback = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property](
+                                GestureEvent& /*info*/) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("AlertDialog.[" + property + "].onAction");
+                func->ExecuteJS();
+            };
+            buttonInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(callback));
+        } else {
             EventMarker actionId([execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("AlertDialog.]" + property + "].onSction");
+                ACE_SCORING_EVENT("AlertDialog.[" + property + "].onAction");
                 func->Execute();
             });
 
@@ -79,6 +89,10 @@ void ParseButtonObj(
                 properties.secondaryId = actionId;
             }
         }
+    }
+
+    if (buttonInfo.IsValid()) {
+        properties.buttons.emplace_back(buttonInfo);
     }
 }
 
@@ -90,7 +104,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         LOGE("scopedDelegate is null, please check");
         return;
     }
-    
+
     DialogProperties properties { .type = DialogType::ALERT_DIALOG };
     if (args[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(args[0]);
@@ -125,12 +139,22 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         auto cancelValue = obj->GetProperty("cancel");
         if (cancelValue->IsFunction()) {
             auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
-            EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("AlertDialog.property.cancel");
-                func->Execute();
-            });
-            properties.callbacks.try_emplace("cancel", cancelId);
+            // NG set onCancel
+            if (Container::IsCurrentUseNewPipeline()) {
+                properties.onCancel = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)] {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("AlertDialog.property.cancel");
+                    LOGD("dialog onCancel triggered");
+                    func->ExecuteJS();
+                };
+            } else {
+                EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("AlertDialog.property.cancel");
+                    func->Execute();
+                });
+                properties.callbacks.try_emplace("cancel", cancelId);
+            }
         }
 
         if (obj->GetProperty("confirm")->IsObject()) {
@@ -162,6 +186,23 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             auto dyValue = offsetObj->GetProperty("dy");
             ParseJsDimensionVp(dyValue, dy);
             properties.offset = DimensionOffset(dx, dy);
+        }
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(context);
+            auto overlayManager = context->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+
+            auto dialog = overlayManager->ShowDialog(properties, nullptr, false);
+            CHECK_NULL_VOID(dialog);
+            auto hub = dialog->GetEventHub<NG::DialogEventHub>();
+            hub->SetOnCancel(std::move(properties.onCancel));
+            return;
         }
 
         // Show dialog.

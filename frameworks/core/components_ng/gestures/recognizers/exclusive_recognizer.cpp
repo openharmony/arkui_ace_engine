@@ -27,16 +27,16 @@ namespace OHOS::Ace::NG {
 
 void ExclusiveRecognizer::OnAccepted(size_t touchId)
 {
-    LOGD("the exclusive gesture recognizer has been accepted, touch id %{public}zu", touchId);
+    LOGI("the exclusive gesture recognizer has been accepted, touch id %{public}zu", touchId);
     if (refereePointers_.find(touchId) == refereePointers_.end()) {
-        LOGD("the exclusive gesture refereePointers_ can not find current touch id");
+        LOGE("the exclusive gesture refereePointers_ can not find current touch id");
         return;
     }
 
     refereePointers_.erase(touchId);
 
     if (!activeRecognizer_) {
-        LOGD("the activeRecognizer is nullptr");
+        LOGE("the activeRecognizer is nullptr");
         return;
     }
 
@@ -54,12 +54,13 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
     }
 
     if (AceType::InstanceOf<ClickRecognizer>(activeRecognizer_)) {
-        Reset();
+        pendingReset_ = true;
     }
 }
 
 void ExclusiveRecognizer::OnRejected(size_t touchId)
 {
+    pendingReset_ = true;
     if (refereePointers_.find(touchId) == refereePointers_.end()) {
         return;
     }
@@ -115,12 +116,31 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
             break;
     }
 
-    if (activeRecognizer_ && activeRecognizer_->GetDetectState() != DetectState::DETECTED) {
+    if ((activeRecognizer_ && (activeRecognizer_->GetDetectState() != DetectState::DETECTED)) || pendingReset_) {
         LOGD("sub detected gesture has finished, change the exclusive recognizer to be ready");
         Reset();
+        pendingReset_ = false;
     }
 
     return true;
+}
+
+void ExclusiveRecognizer::ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers)
+{
+    // TODO: add state adjustment.
+    bool needReset_ = true;
+    for (auto& recognizer : recognizers) {
+        if (activeRecognizer_ == recognizer) {
+            needReset_ = false;
+        }
+    }
+    if (needReset_) {
+        ResetStatus();
+    }
+    std::swap(recognizers_, recognizers);
+    for (auto& recognizer : recognizers_) {
+        recognizer->SetGestureGroup(AceType::WeakClaim(this));
+    }
 }
 
 void ExclusiveRecognizer::OnFlushTouchEventsBegin()
@@ -184,7 +204,6 @@ void ExclusiveRecognizer::BatchAdjudicate(
     if (CheckAllFailed()) {
         LOGD("all gesture recognizers are rejected, adjudicate reject");
         MultiFingersRecognizer::Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        Reset();
     }
 }
 
@@ -238,6 +257,12 @@ bool ExclusiveRecognizer::CheckAllFailed()
 
 void ExclusiveRecognizer::Reset()
 {
+    ResetStatus();
+    recognizers_.clear();
+}
+
+void ExclusiveRecognizer::ResetStatus()
+{
     state_ = DetectState::READY;
     activeRecognizer_ = nullptr;
     for (auto& recognizer : recognizers_) {
@@ -249,12 +274,12 @@ bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recogni
 {
     RefPtr<ExclusiveRecognizer> curr = AceType::DynamicCast<ExclusiveRecognizer>(recognizer);
     if (!curr) {
-        Reset();
+        ResetStatus();
         return false;
     }
 
     if (recognizers_.size() != curr->recognizers_.size() || curr->priorityMask_ != priorityMask_) {
-        Reset();
+        ResetStatus();
         return false;
     }
 
@@ -262,7 +287,7 @@ bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recogni
 
     for (auto iter = recognizers_.begin(); iter != recognizers_.end(); iter++, currIter++) {
         if (!(*iter)->ReconcileFrom(*currIter)) {
-            Reset();
+            ResetStatus();
             return false;
         }
     }

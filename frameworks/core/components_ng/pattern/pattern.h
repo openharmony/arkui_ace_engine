@@ -227,7 +227,7 @@ public:
         return { FocusType::DISABLE, false };
     }
 
-    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm() const
+    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
     {
         return ScopeFocusAlgorithm();
     }

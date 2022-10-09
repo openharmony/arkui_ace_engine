@@ -20,10 +20,12 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,29 +36,18 @@ void OverlayManager::ShowToast(
     CHECK_NULL_VOID(context);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
-    LOGI("begin to show toast, toast id is %{public}d, message is %{public}s", toastId, message.c_str());
-    // make toast node
-    auto toastNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, MakeRefPtr<TextPattern>());
-    auto layoutProperty = toastNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    // update toast props
-    layoutProperty->UpdateContent(message);
-    auto target = toastNode->GetRenderContext();
-    auto themeManager = context->GetThemeManager();
-    Color toastColor = Color::BLUE;
-    if (themeManager) {
-        auto toastTheme = themeManager->GetTheme<ToastTheme>();
-        if (toastTheme) {
-            toastColor = toastTheme->GetBackgroundColor();
-        }
+
+    // only one toast
+    if (toastInfo_.toastNode) {
+        rootNode->RemoveChild(toastInfo_.toastNode);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (target) {
-        target->UpdateBackgroundColor(toastColor);
-    }
-    // save toast node in overlay manager
+
+    auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
+    auto toastId = toastNode->GetId();
     ToastInfo info = { toastId, toastNode };
-    toastStack_.emplace_back(info);
+    toastInfo_ = info;
+
     // mount to parent
     toastNode->MountToParent(rootNode);
     toastNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -74,13 +65,10 @@ void OverlayManager::ShowToast(
 void OverlayManager::PopToast(int32_t toastId)
 {
     RefPtr<UINode> toastUnderPop;
-    auto toastIter = toastStack_.rbegin();
-    for (; toastIter != toastStack_.rend(); ++toastIter) {
-        if (toastIter->toastId == toastId) {
-            toastUnderPop = toastIter->toastNode;
-            break;
-        }
+    if (toastId != toastInfo_.toastId) {
+        return;
     }
+    toastUnderPop = toastInfo_.toastNode;
     if (!toastUnderPop) {
         LOGE("No toast under pop");
         return;
@@ -91,7 +79,6 @@ void OverlayManager::PopToast(int32_t toastId)
         return;
     }
     LOGI("begin to pop toast, id is %{public}d", toastId);
-    toastStack_.remove(*toastIter);
     rootNode->RemoveChild(toastUnderPop);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -108,7 +95,6 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popup)
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popup.popupNode);
     if (iter != rootChildren.end()) {
-        // Pop popup
         if (!popup.isCurrentOnShow) {
             return;
         }
@@ -126,15 +112,60 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popup)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::ShowDialog(const DialogProperties& dialogProps, bool isRightToLeft)
+void OverlayManager::ShowMenu(int32_t targetId, RefPtr<FrameNode> menu)
 {
-    LOGI("OverlayManager::ShowDialog");
-    auto dialogNode = DialogView::CreateDialogNode(dialogProps);
-    CHECK_NULL_VOID(dialogNode);
+    if (!menu) {
+        // get existing menuNode
+        auto it = menuMap_.find(targetId);
+        if (it != menuMap_.end()) {
+            menu = it->second;
+        } else {
+            LOGW("menuNode doesn't exists %{public}d", targetId);
+        }
+    } else {
+        // creating new menu
+        menuMap_[targetId] = menu;
+        LOGI("menuNode %{public}d added to map", targetId);
+    }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    dialogNode->MountToParent(rootNode);
+    auto rootChildren = rootNode->GetChildren();
+    auto iter = std::find(rootChildren.begin(), rootChildren.end(), menu);
+    // menuNode already showing
+    if (iter != rootChildren.end()) {
+        LOGW("menuNode already appended");
+    } else {
+        menu->MountToParent(rootNode);
+        menu->MarkModifyDone();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        LOGI("menuNode mounted");
+    }
+}
+
+void OverlayManager::HideMenu(int32_t targetId)
+{
+    LOGI("OverlayManager::HideMenuNode");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    if (menuMap_.find(targetId) == menuMap_.end()) {
+        LOGE("OverlayManager: menuNode %{public}d not found in map", targetId);
+        return;
+    }
+    rootNode->RemoveChild(menuMap_[targetId]);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+RefPtr<FrameNode> OverlayManager::ShowDialog(
+    const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
+{
+    LOGI("OverlayManager::ShowDialog");
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    dialog->MountToParent(rootNode);
+    LOGD("dialog mounted to root node");
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return dialog;
 }
 
 void OverlayManager::CloseDialog(RefPtr<FrameNode> dialogNode)

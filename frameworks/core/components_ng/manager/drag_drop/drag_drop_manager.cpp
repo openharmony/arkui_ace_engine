@@ -72,7 +72,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
         }
 
         auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(frameNode->GetGlobalOffset());
+        globalFrameRect.SetOffset(frameNode->GetOffsetRelativeToWindow());
 
         if (globalFrameRect.IsInRegion(PointF(globalX, globalY))) {
             hitFrameNodes.insert(std::make_pair(frameNode->GetDepth(), frameNode));
@@ -127,7 +127,6 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
 
 void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string& extraInfo)
 {
-    DestroyDragWindow();
     preTargetFrameNode_ = nullptr;
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY);
@@ -154,7 +153,6 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
 
 void DragDropManager::onDragCancel()
 {
-    DestroyDragWindow();
     preTargetFrameNode_ = nullptr;
 }
 
@@ -260,10 +258,6 @@ void DragDropManager::DestroyDragWindow()
     CHECK_NULL_VOID(dragWindow_);
     dragWindow_->Destroy();
     dragWindow_ = nullptr;
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetIsDragged(false);
 #endif
 }
 

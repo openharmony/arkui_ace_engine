@@ -42,7 +42,7 @@ private:
     void AssembleDefaultJSONTree(std::string& jsonStr);
 
     bool OperateComponent(const std::string& attrsJson);
-    bool OperateGrneralComponent(
+    bool OperateGeneralComponent(
         int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent);
     RefPtr<Component> GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root);
     RefPtr<V2::InspectorComposedElement> GetInspectorElementById(NodeId nodeId);

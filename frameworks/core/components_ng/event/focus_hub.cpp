@@ -74,7 +74,9 @@ void FocusHub::FlushChildrenFocusHub()
     }
     focusNodes_.clear();
     for (const auto& child : childrenNode) {
-        focusNodes_.emplace_back(child->GetFocusHub());
+        if (child->GetFocusHub()) {
+            focusNodes_.emplace_back(child->GetFocusHub());
+        }
     }
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (!lastFocusNode) {
@@ -498,7 +500,25 @@ bool FocusHub::RequestNextFocus(bool vertical, bool reverse, const RectF& rect)
         }
         return GoToNextFocusLinear(reverse, rect);
     }
-    return false;
+    FlushChildrenFocusHub();
+    FocusStep step = FocusStep::DOWN;
+    if (vertical && !reverse) {
+        step = FocusStep::DOWN;
+    } else if (vertical && reverse) {
+        step = FocusStep::UP;
+    } else if (!vertical && !reverse) {
+        step = FocusStep::RIGHT;
+    } else {
+        step = FocusStep::LEFT;
+    }
+    WeakPtr<FocusHub> nextFocusHubWeak;
+    focusAlgorithm_.getNextFocusNode(step, lastWeakFocusNode_, nextFocusHubWeak);
+    auto nextFocusHub = nextFocusHubWeak.Upgrade();
+    if (!nextFocusHub) {
+        LOGE("Can't find next focus hub with focus algorithm.");
+        return false;
+    }
+    return nextFocusHub->RequestFocusImmediately();
 }
 
 void FocusHub::RefreshParentFocusable(bool focusable)
@@ -671,7 +691,8 @@ void FocusHub::OnFocusNode()
     if (onFocusCallback) {
         onFocusCallback();
     }
-    if (focusType_ == FocusType::NODE) {
+    auto context = PipelineContext::GetCurrentContext();
+    if (context && context->GetIsNeedShowFocus() && focusType_ == FocusType::NODE) {
         auto frameNode = GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();

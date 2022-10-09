@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 
+#include <algorithm>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
@@ -221,13 +223,26 @@ void SelectOverlayPattern::HandlePanCancel()
 void SelectOverlayPattern::CheckHandleReverse()
 {
     bool handleReverseChanged = false;
-    if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
+    double epsilon = std::max(info_->firstHandle.paintRect.Height(), info_->secondHandle.paintRect.Height());
+    epsilon = std::max(static_cast<double>(info_->singleLineHeight), epsilon);
+    if (NearEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top(), epsilon)) {
+        if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
+            if (!info_->handleReverse) {
+                info_->handleReverse = true;
+                handleReverseChanged = true;
+            }
+        } else {
+            if (info_->handleReverse) {
+                info_->handleReverse = false;
+                handleReverseChanged = true;
+            }
+        }
+    } else if (GreatNotEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top())) {
         if (!info_->handleReverse) {
             info_->handleReverse = true;
             handleReverseChanged = true;
         }
-    }
-    if (info_->firstHandle.paintRect.Left() < info_->secondHandle.paintRect.Left()) {
+    } else {
         if (info_->handleReverse) {
             info_->handleReverse = false;
             handleReverseChanged = true;
@@ -246,8 +261,12 @@ void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& i
     info_->firstHandle = info;
     CheckHandleReverse();
     UpdateHandleHotZone();
-    auto host = GetHost();
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
+    if (!info_->menuInfo.menuIsShow) {
+        info_->menuInfo.menuIsShow = true;
+        host->UpdateToolBar(false);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -259,8 +278,12 @@ void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& 
     info_->secondHandle = info;
     CheckHandleReverse();
     UpdateHandleHotZone();
-    auto host = GetHost();
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
+    if (!info_->menuInfo.menuIsShow) {
+        info_->menuInfo.menuIsShow = true;
+        host->UpdateToolBar(false);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

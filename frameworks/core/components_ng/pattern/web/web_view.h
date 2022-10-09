@@ -88,6 +88,9 @@ public:
     static void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId);
     static void SetOnDropId(const OnDropFunc& onDropId);
     static void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
+    static void SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId);
+    static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
+    static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
 };
 } // namespace OHOS::Ace::NG
 

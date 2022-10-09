@@ -62,6 +62,16 @@ void OffscreenCanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
     offscreenPaintMethod_->Stroke(nullptr, path);
 }
 
+void OffscreenCanvasPattern::Clip()
+{
+    offscreenPaintMethod_->Clip();
+}
+
+void OffscreenCanvasPattern::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    offscreenPaintMethod_->Clip(path);
+}
+
 void OffscreenCanvasPattern::BeginPath()
 {
     offscreenPaintMethod_->BeginPath();
@@ -216,6 +226,11 @@ void OffscreenCanvasPattern::Rotate(double angle)
 void OffscreenCanvasPattern::SetTransform(const TransformParam& param)
 {
     offscreenPaintMethod_->SetTransform(param);
+}
+
+void OffscreenCanvasPattern::ResetTransform()
+{
+    offscreenPaintMethod_->ResetTransform();
 }
 
 void OffscreenCanvasPattern::Transform(const TransformParam& param)

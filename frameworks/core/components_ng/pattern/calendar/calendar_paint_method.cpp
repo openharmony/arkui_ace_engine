@@ -265,8 +265,7 @@ void CalendarPaintMethod::PaintDay(
 void CalendarPaintMethod::PaintLunarDay(
     RSCanvas& canvas, const Offset& offset, const CalendarDay& day, const rosen::TextStyle& textStyle) const
 {
-    Rect boxRect;
-    boxRect = { offset.GetX(), offset.GetY(), dayWidth_, lunarHeight_ };
+    Rect boxRect = { offset.GetX(), offset.GetY(), dayWidth_, lunarHeight_ };
     DrawCalendarText(&canvas, day.lunarDay, textStyle, boxRect);
 }
 
@@ -405,7 +404,7 @@ bool CalendarPaintMethod::IsOffDay(const CalendarDay& dayInfo) const
     StringUtils::StringSplitter(offDays_, ',', days);
     int daysOfWeek = 7;
     for (const auto& day : days) {
-        auto num = (StringUtils::StringToInt(day) + 1) % daysOfWeek;
+        auto num = (StringUtils::StringToInt(day) + (daysOfWeek - startOfWeek_)) % daysOfWeek;
         if ((dayInfo.index % daysOfWeek) == num) {
             return true;
         }

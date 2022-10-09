@@ -52,6 +52,7 @@ private:
     RefPtr<JsFunction> jsCancelFunction_;
     RefPtr<Component> customDialog_;
     RefPtr<DialogComponent> dialogComponent_;
+    RefPtr<NG::FrameNode> dialogNode_;
     std::list<DialogOperation> dialogOperation_;
 };
 

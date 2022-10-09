@@ -269,6 +269,32 @@ public:
         return declaration_->GetPermissionRequestEventId();
     }
 
+    using OnWindowNewImpl = std::function<void(const std::shared_ptr<BaseEventInfo>& info)>;
+    void SetWindowNewEvent(OnWindowNewImpl && onWindowNewImpl)
+    {
+        if (onWindowNewImpl == nullptr) {
+            return;
+        }
+        onWindowNewImpl_ = std::move(onWindowNewImpl);
+    }
+
+    void OnWindowNewEvent(const std::shared_ptr<BaseEventInfo>& info) const
+    {
+        if (onWindowNewImpl_) {
+            onWindowNewImpl_(info);
+        }
+    }
+
+    void SetWindowExitEventId(const EventMarker& windowExitEventId)
+    {
+        declaration_->SetWindowExitEventId(windowExitEventId);
+    }
+
+    const EventMarker& GetWindowExitEventId() const
+    {
+        return declaration_->GetWindowExitEventId();
+    }
+
     void SetDeclaration(const RefPtr<WebDeclaration>& declaration)
     {
         if (declaration) {
@@ -453,6 +479,16 @@ public:
     void SetPinchSmoothModeEnabled(bool isEnabled)
     {
         isPinchSmoothModeEnabled_ = isEnabled;
+    }
+
+    bool GetMultiWindowAccessEnabled() const
+    {
+        return isMultiWindowAccessEnabled_;
+    }
+
+    void SetMultiWindowAccessEnabled(bool isEnabled)
+    {
+        isMultiWindowAccessEnabled_ = isEnabled;
     }
 
     bool GetIsInitialScaleSet() const
@@ -803,6 +839,7 @@ private:
     OnContextMenuImpl onContextMenuImpl_;
     OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
     OnProgressChangeImpl onProgressChangeImpl_ = nullptr;
+    OnWindowNewImpl onWindowNewImpl_ = nullptr;
 
     std::string type_;
     bool isJsEnabled_ = true;
@@ -822,6 +859,7 @@ private:
     int32_t textZoomRatioNum_ = DEFAULT_TEXT_ZOOM_RATIO;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
+    bool isMultiWindowAccessEnabled_ = false;
     OnMouseCallback onMouseEvent_;
     OnKeyEventCallback onKeyEvent_;
     float initialScale_;

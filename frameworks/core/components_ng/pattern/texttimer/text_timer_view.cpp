@@ -22,7 +22,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -33,18 +32,6 @@ RefPtr<TextTimerController> TextTimerView::Create()
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTTIMER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
-    if (frameNode->GetChildren().empty()) {
-        auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateContent(std::string(""));
-        frameNode->AddChild(textNode);
-    } else {
-        auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        ACE_DCHECK(textChild);
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        ACE_DCHECK(textLayoutProperty);
-        textLayoutProperty->UpdateContent(std::string(""));
-    }
     stack->Push(frameNode);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     return pattern ? pattern->GetTextTimerController() : nullptr;
@@ -53,71 +40,6 @@ RefPtr<TextTimerController> TextTimerView::Create()
 void TextTimerView::SetFormat(const std::string& format)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, Format, format);
-}
-
-void TextTimerView::SetTextColor(const Color& textColor)
-{
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(textColor);
-}
-
-void TextTimerView::SetFontSize(const Dimension& fontSize)
-{
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
-    textLayoutProperty->UpdateFontSize(fontSize);
-}
-
-void TextTimerView::SetFontWeight(const FontWeight& fontWeight)
-{
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
-    textLayoutProperty->UpdateFontWeight(fontWeight);
-}
-
-void TextTimerView::SetFontFamily(const std::vector<std::string>& fontFamilies)
-{
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
-    textLayoutProperty->UpdateFontFamily(fontFamilies);
-}
-
-void TextTimerView::SetItalicFontStyle(const Ace::FontStyle& fontStyle)
-{
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
-    textLayoutProperty->UpdateItalicFontStyle(fontStyle);
 }
 
 void TextTimerView::SetIsCountDown(bool isCountDown)

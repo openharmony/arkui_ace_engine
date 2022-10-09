@@ -140,8 +140,12 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 RefPtr<FrameNode> UINode::GetFocusParent() const
 {
     auto parentUi = GetParent();
-    auto parentFrame = parentUi ? AceType::DynamicCast<FrameNode>(parentUi) : nullptr;
-    while (parentFrame) {
+    while (parentUi) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
+        if (!parentFrame) {
+            parentUi = parentUi->GetParent();
+            continue;
+        }
         auto type = parentFrame->GetFocusType();
         if (type == FocusType::SCOPE) {
             return parentFrame;
@@ -149,8 +153,7 @@ RefPtr<FrameNode> UINode::GetFocusParent() const
         if (type == FocusType::NODE) {
             return nullptr;
         }
-        parentUi = parentFrame->GetParent();
-        parentFrame = parentUi ? AceType::DynamicCast<FrameNode>(parentUi) : nullptr;
+        parentUi = parentUi->GetParent();
     }
     return nullptr;
 }
@@ -381,6 +384,26 @@ int32_t UINode::GetChildIndexById(int32_t id)
         iter++;
     }
     return -1;
+}
+
+RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout) const
+{
+    if (GetChildren().empty()) {
+        return nullptr;
+    }
+
+    auto child = GetChildren().front();
+    while (!InstanceOf<FrameNode>(child)) {
+        auto children = child->GetChildren();
+        if (children.empty()) {
+            return nullptr;
+        }
+
+        child = children.front();
+    }
+
+    auto frameChild = DynamicCast<FrameNode>(child);
+    return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
 }
 
 } // namespace OHOS::Ace::NG

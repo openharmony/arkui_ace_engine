@@ -133,6 +133,8 @@ protected:
 
     WeakPtr<ComposedElement> element_;
     WeakPtr<NG::CustomNode> node_;
+    // view id for custom view itself
+    std::string viewId_;
 
 private:
     int32_t instanceId_ = -1;
@@ -215,9 +217,6 @@ private:
      * its cleared after cleaning up the abandoned child.
      */
     void ChildAccessedById(const std::string& viewId);
-
-    // view id for custom view itself
-    std::string viewId_;
 
     bool isLazyForEachProcessed_ = false;
     std::string lazyItemGroupId_;
@@ -323,9 +322,6 @@ public:
 
 private:
     void MarkNeedUpdate() override;
-
-    // view id for custom view itself
-    std::string viewId_;
 
     // indicates if the JSView has ever completed initial render
     // used for code branching in lambda given to ComposedComponent

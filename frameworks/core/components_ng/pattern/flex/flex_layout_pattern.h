@@ -56,7 +56,7 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         auto property = GetLayoutProperty<FlexLayoutProperty>();
         if (!property) {

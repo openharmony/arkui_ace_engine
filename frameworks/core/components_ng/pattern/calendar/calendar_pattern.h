@@ -123,6 +123,7 @@ private:
     void FireRequestData(MonthState monthState);
     void JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr<FrameNode>& curFrameNode,
         const RefPtr<FrameNode>& nextFrameNode, const RefPtr<FrameNode>& swiperFrameNode);
+    static void FlushFocus(ObtainedMonth& obtainedMonth);
 
     RefPtr<CalendarControllerNg> calendarControllerNg_;
     CalendarDay calendarDay_;

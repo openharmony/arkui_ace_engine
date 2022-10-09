@@ -46,6 +46,7 @@ struct WebEvent : Event {
     EventMarker searchResultReceiveEventId;
     EventMarker scrollId;
     EventMarker fullScreenExitEventId;
+    EventMarker windowExitId;
 };
 
 struct WebMethod : Method {
@@ -301,6 +302,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.searchResultReceiveEventId;
+    }
+
+    void SetWindowExitEventId(const EventMarker& windowExitId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.windowExitId = windowExitId;
+    }
+
+    const EventMarker& GetWindowExitEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.windowExitId;
     }
 
 protected:

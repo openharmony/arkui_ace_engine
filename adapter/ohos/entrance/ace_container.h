@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_CPP_ACE_CONTAINER_H
 
 #include <memory>
+#include <mutex>
 
 #include "ability_context.h"
 #include "native_engine/native_reference.h"
@@ -67,6 +68,38 @@ public:
     RefPtr<Frontend> GetFrontend() const override
     {
         return frontend_;
+    }
+
+    void SetCardFrontend(WeakPtr<Frontend> frontend, uint64_t cardId) override
+    {
+        std::lock_guard<std::mutex> lock(cardFrontMutex_);
+        cardFrontendMap_.try_emplace(cardId, frontend);
+    }
+
+    WeakPtr<Frontend> GetCardFrontend(uint64_t cardId) const override
+    {
+        std::lock_guard<std::mutex> lock(cardFrontMutex_);
+        auto it = cardFrontendMap_.find(cardId);
+        if (it != cardFrontendMap_.end()) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    void SetCardPipeline(WeakPtr<PipelineBase> pipeline, uint64_t cardId) override
+    {
+        std::lock_guard<std::mutex> lock(cardPipelineMutex_);
+        cardPipelineMap_.try_emplace(cardId, pipeline);
+    }
+
+    WeakPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const override
+    {
+        std::lock_guard<std::mutex> lock(cardPipelineMutex_);
+        auto it = cardPipelineMap_.find(cardId);
+        if (it == cardPipelineMap_.end()) {
+            return nullptr;
+        }
+        return it->second;
     }
 
     RefPtr<TaskExecutor> GetTaskExecutor() const override
@@ -318,6 +351,9 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
+    std::unordered_map<uint64_t, WeakPtr<Frontend>> cardFrontendMap_;
+    std::unordered_map<uint64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
+
     FrontendType type_ = FrontendType::JS;
     bool isArkApp_ = false;
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
@@ -338,6 +374,9 @@ private:
     bool isSubContainer_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
+
+    mutable std::mutex cardFrontMutex_;
+    mutable std::mutex cardPipelineMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

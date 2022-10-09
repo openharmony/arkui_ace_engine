@@ -27,19 +27,39 @@ namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
 {
     auto node = MakeRefPtr<CustomNode>(nodeId, viewKey);
-    node->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
 }
 
 CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
-    : FrameNode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
+    : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
 CustomNode::~CustomNode()
 {
     if (destroyFunc_) {
         destroyFunc_();
+    }
+}
+
+void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
+{
+    if (renderFunction_) {
+        {
+            ACE_SCOPED_TRACE("CustomNode:OnAppear");
+            FireOnAppear();
+        }
+        {
+            ACE_SCOPED_TRACE("CustomNode:BuildItem");
+            // first create child node and wrapper.
+            auto child = renderFunction_();
+            CHECK_NULL_VOID(child);
+            child->MountToParent(Claim(this));
+            child->AdjustLayoutWrapperTree(parent, true, true);
+        }
+        renderFunction_ = nullptr;
+    } else {
+        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
     }
 }
 

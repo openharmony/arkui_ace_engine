@@ -138,6 +138,10 @@ public:
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const Vector3F& value) override;
 
+    RectF GetPaintRectWithTransform() override;
+
+    RectF GetPaintRectWithoutTransform() override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
