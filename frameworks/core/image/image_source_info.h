@@ -71,6 +71,7 @@ public:
     void SetSrc(const std::string& src, std::optional<Color> fillColor = std::nullopt)
     {
         src_ = src;
+        srcType_ = ResolveURIType(src_);
         resourceId_ = InternalResource::ResourceId::NO_ID;
         isSvg_ = IsSVGSource(src_, resourceId_);
         fillColor_ = fillColor;
@@ -85,6 +86,7 @@ public:
     void SetResourceId(InternalResource::ResourceId id, std::optional<Color> fillColor = std::nullopt)
     {
         resourceId_ = id;
+        srcType_ = SrcType::RESOURCE_ID;
         src_.clear();
         isSvg_ = IsSVGSource(src_, resourceId_);
         fillColor_ = fillColor;
@@ -171,11 +173,6 @@ public:
     }
 
     void SetFillColor(const Color& color);
-
-    void UpdateSrcType()
-    {
-        srcType_ = ResolveSrcType();
-    }
 
     std::optional<Color> GetFillColor() const
     {

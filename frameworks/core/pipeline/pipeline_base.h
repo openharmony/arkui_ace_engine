@@ -139,6 +139,8 @@ public:
 
     virtual void OnHide() = 0;
 
+    virtual void WindowFocus(bool isFocus) = 0;
+
     virtual void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
 
@@ -183,7 +185,16 @@ public:
         return true;
     }
 
-    virtual void SetAppBgColor(const Color& color) {}
+    virtual void SetAppBgColor(const Color& color)
+    {
+        appBgColor_ = color;
+    }
+
+    const Color& GetAppBgColor() const
+    {
+        return appBgColor_;
+    }
+
     virtual void RefreshRootBgColor() const {}
 
     virtual void PostponePageTransition() {}
@@ -453,6 +464,134 @@ public:
         return rootHeight_;
     }
 
+
+    // TODO:: Set up window manager class to manage window related operations
+    void SetWindowModal(WindowModal modal)
+    {
+        windowModal_ = modal;
+    }
+
+    WindowModal GetWindowModal() const
+    {
+        return windowModal_;
+    }
+
+    void SetAppIconId(int32_t id)
+    {
+        appIconId_ = id;
+    }
+
+    int32_t GetAppIconId() const
+    {
+        return appIconId_;
+    }
+
+    void SetAppLabelId(int32_t id)
+    {
+        appLabelId_ = id;
+    }
+
+    int32_t GetAppLabelId() const
+    {
+        return appLabelId_;
+    }
+
+    void SetWindowMinimizeCallBack(std::function<bool(void)>&& callback)
+    {
+        windowMinimizeCallback_ = std::move(callback);
+    }
+
+    void SetWindowMaximizeCallBack(std::function<bool(void)>&& callback)
+    {
+        windowMaximizeCallback_ = std::move(callback);
+    }
+
+    void SetWindowRecoverCallBack(std::function<bool(void)>&& callback)
+    {
+        windowRecoverCallback_ = std::move(callback);
+    }
+
+    void SetWindowCloseCallBack(std::function<bool(void)>&& callback)
+    {
+        windowCloseCallback_ = std::move(callback);
+    }
+
+    void SetWindowSplitCallBack(std::function<bool(void)>&& callback)
+    {
+        windowSplitCallback_ = std::move(callback);
+    }
+
+    void SetWindowGetModeCallBack(std::function<WindowMode(void)>&& callback)
+    {
+        windowGetModeCallback_ = std::move(callback);
+    }
+
+    void SetWindowStartMoveCallBack(std::function<void(void)>&& callback)
+    {
+        windowStartMoveCallback_ = std::move(callback);
+    }
+
+    bool FireWindowMinimizeCallBack() const
+    {
+        if (windowMinimizeCallback_) {
+            return windowMinimizeCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowMaximizeCallBack() const
+    {
+        if (windowMaximizeCallback_) {
+            return windowMaximizeCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowRecoverCallBack() const
+    {
+        if (windowRecoverCallback_) {
+            return windowRecoverCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowSplitCallBack() const
+    {
+        if (windowSplitCallback_) {
+            return windowSplitCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowCloseCallBack() const
+    {
+        if (windowCloseCallback_) {
+            return windowCloseCallback_();
+        }
+        return false;
+    }
+
+    void FireWindowStartMoveCallBack() const
+    {
+        if (windowStartMoveCallback_) {
+            windowStartMoveCallback_();
+        }
+    }
+
+    WindowMode FireWindowGetModeCallBack() const
+    {
+        if (windowGetModeCallback_) {
+            return windowGetModeCallback_();
+        }
+        return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+
+    bool IsFullScreenModal() const
+    {
+        return windowModal_ == WindowModal::NORMAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN ||
+               windowModal_ == WindowModal::CONTAINER_MODAL || isFullWindow_;
+    }
+
     void SetIsRightToLeft(bool isRightToLeft)
     {
         isRightToLeft_ = isRightToLeft;
@@ -599,6 +738,7 @@ protected:
     bool isJsCard_ = false;
     bool isEtsCard_ = false;
     bool isRightToLeft_ = false;
+    bool isFullWindow_ = false;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
     float fontScale_ = 1.0f;
@@ -609,9 +749,11 @@ protected:
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
     FrontendType frontendType_;
+    WindowModal windowModal_ = WindowModal::NORMAL;
 
     Offset pluginOffset_ { 0, 0 };
     Offset pluginEventOffset_ { 0, 0 };
+    Color appBgColor_ = Color::WHITE;
 
     std::stack<bool> pendingImplicitLayout_;
     std::unique_ptr<Window> window_;
@@ -650,6 +792,17 @@ private:
     // OnRouterChangeCallback is function point, need to be initialized.
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
+
+    // for container modal
+    int32_t appLabelId_ = 0;
+    int32_t appIconId_ = 0;
+    std::function<bool(void)> windowMinimizeCallback_ = nullptr;
+    std::function<bool(void)> windowMaximizeCallback_ = nullptr;
+    std::function<bool(void)> windowRecoverCallback_ = nullptr;
+    std::function<bool(void)> windowCloseCallback_ = nullptr;
+    std::function<bool(void)> windowSplitCallback_ = nullptr;
+    std::function<void(void)> windowStartMoveCallback_ = nullptr;
+    std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

@@ -241,6 +241,10 @@ public:
 
     void OnWindowHide() override;
 
+    void OnWindowFocused() override;
+
+    void OnWindowUnfocused() override;
+
     OffsetF GetOffsetRelativeToWindow() const;
 
 private:

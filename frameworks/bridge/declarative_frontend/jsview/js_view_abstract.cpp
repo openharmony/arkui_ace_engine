@@ -2960,7 +2960,6 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        Color borderColor;
         if (ParseJsColor(args, borderColor)) {
             NG::ViewAbstract::SetBorderColor(borderColor);
             return;

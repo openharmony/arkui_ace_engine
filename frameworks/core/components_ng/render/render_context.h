@@ -95,9 +95,13 @@ public:
 
     virtual void BlendBorderColor(const Color& color) {}
 
-    virtual void UpdateBorderWidth(const BorderWidthPropertyF& value) {}
+    virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
+    // clip node without padding
     virtual void SetClipToFrame(bool useClip) {}
+
+    // clip node with padding
+    virtual void SetClipToBounds(bool useClip) {}
 
     virtual RefPtr<Canvas> GetCanvas() = 0;
 
@@ -157,7 +161,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
     ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
-    // BorderRadius.
+    // Border
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
@@ -167,13 +171,13 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(TransitionAppearing, TransitionOptions);
     ACE_DEFINE_PROPERTY_GROUP(TransitionDisappearing, TransitionOptions);
 
-    // Position.
+    // Position
     ACE_DEFINE_PROPERTY_GROUP(PositionProperty, RenderPositionProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Position, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Offset, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Anchor, OffsetT<Dimension>);
 
-    // zIndex.
+    // zIndex
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ZIndex, int32_t);
 
     // Clip
