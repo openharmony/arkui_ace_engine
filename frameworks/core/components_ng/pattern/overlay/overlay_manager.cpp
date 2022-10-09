@@ -20,6 +20,7 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -154,15 +155,17 @@ void OverlayManager::HideMenu(int32_t targetId)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::ShowDialog(const DialogProperties& dialogProps, bool isRightToLeft)
+RefPtr<FrameNode> OverlayManager::ShowDialog(
+    const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
 {
     LOGI("OverlayManager::ShowDialog");
-    auto dialogNode = DialogView::CreateDialogNode(dialogProps);
-    CHECK_NULL_VOID(dialogNode);
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    dialogNode->MountToParent(rootNode);
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    dialog->MountToParent(rootNode);
+    LOGD("dialog mounted to root node");
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return dialog;
 }
 
 void OverlayManager::CloseDialog(RefPtr<FrameNode> dialogNode)
