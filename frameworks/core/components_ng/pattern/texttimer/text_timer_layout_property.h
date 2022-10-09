@@ -19,11 +19,12 @@
 #include <string>
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT TextTimerLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(TextTimerLayoutProperty, LayoutProperty);
+class ACE_EXPORT TextTimerLayoutProperty : public TextLayoutProperty {
+    DECLARE_ACE_TYPE(TextTimerLayoutProperty, TextLayoutProperty);
 
 public:
     TextTimerLayoutProperty() = default;
@@ -33,6 +34,7 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<TextTimerLayoutProperty>();
+        TextLayoutProperty::Clone(value);
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propFormat_ = CloneFormat();
         value->propIsCountDown_ = CloneIsCountDown();
@@ -42,7 +44,7 @@ public:
 
     void Reset() override
     {
-        LayoutProperty::Reset();
+        TextLayoutProperty::Reset();
         ResetFormat();
         ResetIsCountDown();
         ResetInputCount();

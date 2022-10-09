@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
 
+#include <regex>
 #include <string>
 #include <sys/time.h>
 
@@ -171,6 +172,12 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     }
     std::string value;
     if (!ParseJsString(info[0], value)) {
+        return;
+    }
+    std::regex pattern(
+        R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
+    if (!std::regex_match(value, pattern)) {
+        LOGE("The arg is wrong, because of format matching error.");
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {

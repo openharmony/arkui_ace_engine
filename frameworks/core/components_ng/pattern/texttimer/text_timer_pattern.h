@@ -24,14 +24,15 @@
 #include "core/components/texttimer/texttimer_controller.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
-class TextTimerPattern : public Pattern {
-    DECLARE_ACE_TYPE(TextTimerPattern, Pattern);
+class TextTimerPattern : public TextPattern {
+    DECLARE_ACE_TYPE(TextTimerPattern, TextPattern);
 
 public:
     TextTimerPattern();
@@ -70,7 +71,6 @@ private:
     double GetInputCount() const;
 
     RefPtr<TextTimerController> textTimerController_;
-    RefPtr<TextLayoutProperty> textLayoutProperty_;
     RefPtr<Scheduler> scheduler_;
     uint64_t elapsedTime_ = 0; // millisecond.
     bool isCountDown_ = false;
