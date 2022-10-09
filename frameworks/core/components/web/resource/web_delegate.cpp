@@ -407,6 +407,29 @@ void ContextMenuResultOhos::CopyImage() const
     }
 }
 
+void WebWindowNewHandlerOhos::SetWebController(int32_t id)
+{
+    if (handler_) {
+        handler_->SetNWebHandlerById(id);
+    }
+}
+
+bool WebWindowNewHandlerOhos::IsFrist() const
+{
+    if (handler_) {
+        return handler_->IsFrist();
+    }
+    return true;
+}
+
+int32_t WebWindowNewHandlerOhos::GetId() const
+{
+    if (handler_) {
+        return handler_->GetId();
+    }
+    return -1;
+}
+
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
@@ -1433,6 +1456,9 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
     onScrollV2_ = useNewPipe ? eventHub->GetOnScrollEvent()
                              : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                    webCom->GetScrollId(), oldContext);
+    onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetWindowExitEventId(), oldContext);
 }
 
 void WebDelegate::RegisterOHOSWebEventAndMethord()
@@ -2314,6 +2340,23 @@ void WebDelegate::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isMultiWindowAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                setting->PutMultiWindowAccess(isMultiWindowAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::LoadUrl()
 {
     auto context = context_.Upgrade();
@@ -3043,6 +3086,33 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
     }
     isRefreshPixelMap_ = true;
     return true;
+}
+
+void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
+    const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
+{
+    auto param = std::make_shared<WebWindowNewEvent>(targetUrl, isAlert, isUserTrigger,
+        AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnWindowNewEvent = webEventHub->GetOnWindowNewEvent();
+        CHECK_NULL_VOID(propOnWindowNewEvent);
+        propOnWindowNewEvent(param);
+        return;
+    }
+    auto webCom = webComponent_.Upgrade();
+    CHECK_NULL_VOID(webCom);
+    webCom->OnWindowNewEvent(param);
+}
+
+void WebDelegate::OnWindowExit()
+{
+    if (onWindowExitV2_) {
+        onWindowExitV2_(std::make_shared<WebWindowExitEvent>());
+    }
 }
 
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()

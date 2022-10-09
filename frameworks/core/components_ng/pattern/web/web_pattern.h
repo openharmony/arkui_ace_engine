@@ -165,6 +165,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, PinchSmoothModeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MultiWindowAccessEnabled, bool);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -202,6 +203,7 @@ private:
     void OnPinchSmoothModeEnabledUpdate(bool value);
     void OnBackgroundColorUpdate(int32_t value);
     void OnInitialScaleUpdate(float value);
+    void OnMultiWindowAccessEnabledUpdate(bool value);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

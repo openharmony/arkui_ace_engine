@@ -529,6 +529,70 @@ private:
     RefPtr<WebPermissionRequest> webPermissionRequest_;
 };
 
+class JSWebWindowNewHandler : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebWindowNewHandler>::Declare("WebWindowNewHandler");
+        JSClass<JSWebWindowNewHandler>::CustomMethod("setWebController", &JSWebWindowNewHandler::SetWebController);
+        JSClass<JSWebWindowNewHandler>::Bind(
+            globalObj, &JSWebWindowNewHandler::Constructor, &JSWebWindowNewHandler::Destructor);
+    }
+
+    void SetEvent(const WebWindowNewEvent& eventInfo)
+    {
+        handler_ = eventInfo.GetWebWindowNewHandler();
+    }
+
+    static RefPtr<WebController> PopController(int32_t id)
+    {
+        auto iter = controller_map_.find(id);
+        if (iter == controller_map_.end()) {
+            LOGI("JSWebWindowNewHandler not find web controller");
+            return nullptr;
+        }
+        auto controller = iter->second;
+        controller_map_.erase(iter);
+        return controller;
+    }
+
+    void SetWebController(const JSCallbackInfo& args)
+    {
+        LOGI("JSWebWindowNewHandler SetWebController");
+        if (args.Length() < 1 || !args[0]->IsObject()) {
+            LOGI("SetWebController param err");
+            return;
+        }
+        if (handler_) {
+            auto paramObject = JSRef<JSObject>::Cast(args[0]);
+            auto controller = paramObject->Unwrap<JSWebController>();
+            if (controller) {
+                controller_map_.insert(
+                    std::pair<int32_t, RefPtr<WebController>>(handler_->GetId(), controller->GetController()));
+            }
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebWindowNewHandler = Referenced::MakeRefPtr<JSWebWindowNewHandler>();
+        jsWebWindowNewHandler->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebWindowNewHandler));
+    }
+
+    static void Destructor(JSWebWindowNewHandler* jsWebWindowNewHandler)
+    {
+        if (jsWebWindowNewHandler != nullptr) {
+            jsWebWindowNewHandler->DecRefCount();
+        }
+    }
+
+    RefPtr<WebWindowNewHandler> handler_;
+    static std::unordered_map<int32_t, RefPtr<WebController>> controller_map_;
+};
+std::unordered_map<int32_t, RefPtr<WebController>> JSWebWindowNewHandler::controller_map_;
+
 class JSWebResourceError : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -1214,6 +1278,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
     JSClass<JSWeb>::StaticMethod("pinchSmoothMode", &JSWeb::PinchSmoothModeEnabled);
     JSClass<JSWeb>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
+    JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
+    JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1231,6 +1298,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebPermissionRequest::JSBind(globalObj);
     JSContextMenuParam::JSBind(globalObj);
     JSContextMenuResult::JSBind(globalObj);
+    JSWebWindowNewHandler::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -3421,5 +3489,138 @@ void JSWeb::PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
         return;
     }
     webComponent->SetPinchSmoothModeEnabled(isPinchSmoothModeEnabled);
+}
+
+JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("isAlert", eventInfo.IsAlert());
+    obj->SetProperty("isUserTrigger", eventInfo.IsUserTrigger());
+    obj->SetProperty("targetUrl", eventInfo.GetTargetUrl());
+    JSRef<JSObject> handlerObj = JSClass<JSWebWindowNewHandler>::NewInstance();
+    auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
+    handler->SetEvent(eventInfo);
+    obj->SetPropertyObject("handler", handlerObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
+{
+    if (eventInfo == nullptr) {
+        return false;
+    }
+    auto handler = eventInfo->GetWebWindowNewHandler();
+    if (handler && !handler->IsFrist()) {
+        auto controller = JSWebWindowNewHandler::PopController(handler->GetId());
+        if (controller) {
+            handler->SetWebController(controller->GetWebId());
+        }
+        return false;
+    }
+    return true;
+}
+
+void JSWeb::OnWindowNew(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebWindowNewEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), WindowNewEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
+            if (!func || !HandleWindowNewEvent(eventInfo)) {
+                return;
+            }
+            auto jsTask = SingleTaskExecutor::Make(Container::CurrentTaskExecutor(), TaskExecutor::TaskType::JS);
+            if (jsTask.IsRunOnCurrentThread()) {
+                func->Execute(*eventInfo);
+            } else {
+                jsTask.PostSyncTask([execCtx, func = func, eventInfo]() {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    func->Execute(*eventInfo);
+                });
+            }
+        };
+        NG::WebView::SetWindowNewEvent(std::move(uiCallback));
+        return;
+    }
+    auto eventMarker =
+        [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::shared_ptr<BaseEventInfo>& info) {
+            ACE_SCORING_EVENT("OnWindowNew CallBack");
+            auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
+            if (!func || !HandleWindowNewEvent(eventInfo)) {
+                return;
+            }
+            auto jsTask = SingleTaskExecutor::Make(Container::CurrentTaskExecutor(), TaskExecutor::TaskType::JS);
+            if (jsTask.IsRunOnCurrentThread()) {
+                func->Execute(*eventInfo);
+            } else {
+                jsTask.PostSyncTask([execCtx, func = func, eventInfo]() {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    func->Execute(*eventInfo);
+                });
+            }
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetWindowNewEvent(eventMarker);
+}
+
+JSRef<JSVal> WindowExitEventToJSValue(const WebWindowExitEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnWindowExit(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebWindowExitEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), WindowExitEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetWindowExitEventId(std::move(uiCallback));
+        return;
+    }
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetWindowExitEventId(eventMarker);
+}
+
+void JSWeb::MultiWindowAccessEnabled(bool isMultiWindowAccessEnable)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetMultiWindowAccessEnabled(isMultiWindowAccessEnable);
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetMultiWindowAccessEnabled(isMultiWindowAccessEnable);
 }
 } // namespace OHOS::Ace::Framework

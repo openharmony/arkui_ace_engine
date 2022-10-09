@@ -100,6 +100,9 @@ public:
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
     static void PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
+    static void OnWindowNew(const JSCallbackInfo& args);
+    static void OnWindowExit(const JSCallbackInfo& args);
+    static void MultiWindowAccessEnabled(bool isMultiWindowAccessEnable);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

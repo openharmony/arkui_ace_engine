@@ -134,6 +134,13 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle) override;
     bool OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt) override;
+    void OnWindowNewByJS(
+        const std::string& targetUrl,
+        bool isAlert,
+        bool isUserTrigger,
+        std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
+    void OnWindowExitByJS() override;
+
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;

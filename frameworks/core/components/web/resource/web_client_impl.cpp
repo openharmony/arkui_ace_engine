@@ -660,4 +660,26 @@ bool WebClientImpl::OnDragAndDropData(const void* data, size_t len, const NWeb::
     }
     return delegate->OnDragAndDropData(data, len, opt.width, opt.height);
 }
+
+void WebClientImpl::OnWindowNewByJS(
+    const std::string& targetUrl,
+    bool isAlert,
+    bool isUserTrigger,
+    std::shared_ptr<NWeb::NWebControllerHandler> handler)
+{
+    LOGI("OnWindowNewByJS");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnWindowNew(targetUrl, isAlert, isUserTrigger, handler);
+}
+
+void WebClientImpl::OnWindowExitByJS()
+{
+    LOGI("OnWindowExitByJS");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnWindowExit();
+}
 } // namespace OHOS::Ace
