@@ -49,7 +49,7 @@ public:
     ContentModifierAdapter() = default;
     ContentModifierAdapter(
         const RefPtr<ContentModifier<T>>& modifier, const std::shared_ptr<RSAnimatableProperty<T>>& property)
-        : Rosen::RSContentStyleModifier(property), modifier_(modifier), property_(property)
+        : Rosen::RSContentStyleModifier(), modifier_(modifier), property_(property)
     {
         if (modifier) {
             modifier->SetUpdateFunc(
