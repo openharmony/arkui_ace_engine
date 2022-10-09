@@ -383,7 +383,7 @@ public:
 
     BaseId::IdType AddPageTransitionListener(const PageTransitionListenable::CallbackFuncType& funcObject);
 
-    const RefPtr<OverlayElement>& GetOverlayElement() const;
+    const RefPtr<OverlayElement> GetOverlayElement() const;
 
     void RemovePageTransitionListener(typename BaseId::IdType id);
 

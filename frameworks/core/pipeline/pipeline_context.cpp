@@ -2832,7 +2832,7 @@ void PipelineContext::SetClickPosition(const Offset& position) const
     }
 }
 
-const RefPtr<OverlayElement>& PipelineContext::GetOverlayElement() const
+const RefPtr<OverlayElement> PipelineContext::GetOverlayElement() const
 {
     if (!rootElement_) {
         LOGE("Root element is null!");
