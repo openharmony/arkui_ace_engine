@@ -272,6 +272,12 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     }
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+#if defined(PREVIEW)
+    panda::Global<panda::ObjectRef> rootView(vm, obj->ToObject(vm));
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    arkRuntime->AddRootView(rootView);
+#endif
     UpdateRootComponent(obj);
 
     return panda::JSValueRef::Undefined(vm);
@@ -341,6 +347,14 @@ panda::Local<panda::JSValueRef> JsStorePreviewComponents(panda::JsiRuntimeCallIn
     }
 
     return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsGetRootView(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    LOGD("JsGetRootView");
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    return arkRuntime->GetRootView().ToLocal();
 }
 #endif
 
@@ -1232,6 +1246,8 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetPreviewComponentFlag));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "storePreviewComponents"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsStorePreviewComponents));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "GetRootView"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetRootView));
 #endif
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "dumpMemoryStats"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsDumpMemoryStats));

@@ -84,6 +84,16 @@ public:
     {
         return debugLine_;
     }
+
+    void SetViewId(const std::string& viewId)
+    {
+        viewId_ = viewId;
+    }
+
+    std::string GetViewId()
+    {
+        return viewId_;
+    }
 #endif
 
     // dimension settings
@@ -170,7 +180,7 @@ public:
     virtual double GetGrayScale() const = 0;
     virtual double GetHueRotate() const = 0;
     virtual std::string GetColorBlend() const = 0;
-    
+
     // shape clip
     virtual std::string GetClip() const = 0;
     virtual std::unique_ptr<JsonValue> GetMask() const = 0;
@@ -220,6 +230,7 @@ protected:
     std::string inspectorTag_;
 #if defined(PREVIEW)
     std::string debugLine_;
+    std::string viewId_;
 #endif
 };
 

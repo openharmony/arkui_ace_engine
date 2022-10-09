@@ -28,23 +28,24 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-const char INSPECTOR_CURRENT_VERSION[] = "1.0";
-const char INSPECTOR_DEVICE_TYPE[] = "deviceType";
-const char INSPECTOR_DEFAULT_VALUE[] = "defaultValue";
-const char INSPECTOR_TYPE[] = "$type";
-const char INSPECTOR_ROOT[] = "root";
-const char INSPECTOR_VERSION[] = "version";
-const char INSPECTOR_WIDTH[] = "width";
-const char INSPECTOR_HEIGHT[] = "height";
-const char INSPECTOR_RESOLUTION[] = "$resolution";
-const char INSPECTOR_CHILDREN[] = "$children";
-const char INSPECTOR_ID[] = "$ID";
-const char INSPECTOR_RECT[] = "$rect";
-const char INSPECTOR_Z_INDEX[] = "$z-index";
-const char INSPECTOR_ATTRS[] = "$attrs";
-const char INSPECTOR_STYLES[] = "$styles";
-const char INSPECTOR_INNER_DEBUGLINE[] = "debugLine";
-const char INSPECTOR_DEBUGLINE[] = "$debugLine";
+constexpr char INSPECTOR_CURRENT_VERSION[] = "1.0";
+constexpr char INSPECTOR_DEVICE_TYPE[] = "deviceType";
+constexpr char INSPECTOR_DEFAULT_VALUE[] = "defaultValue";
+constexpr char INSPECTOR_TYPE[] = "$type";
+constexpr char INSPECTOR_ROOT[] = "root";
+constexpr char INSPECTOR_VERSION[] = "version";
+constexpr char INSPECTOR_WIDTH[] = "width";
+constexpr char INSPECTOR_HEIGHT[] = "height";
+constexpr char INSPECTOR_RESOLUTION[] = "$resolution";
+constexpr char INSPECTOR_CHILDREN[] = "$children";
+constexpr char INSPECTOR_ID[] = "$ID";
+constexpr char INSPECTOR_RECT[] = "$rect";
+constexpr char INSPECTOR_Z_INDEX[] = "$z-index";
+constexpr char INSPECTOR_ATTRS[] = "$attrs";
+constexpr char INSPECTOR_STYLES[] = "$styles";
+constexpr char INSPECTOR_INNER_DEBUGLINE[] = "debugLine";
+constexpr char INSPECTOR_DEBUGLINE[] = "$debugLine";
+constexpr char INSPECTOR_VIEW_ID[] = "$viewID";
 
 std::list<std::string> specialComponentNameV1 = { "dialog", "panel" };
 
@@ -211,10 +212,10 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
         rootElement->UpdateChildWithSlot(child, newComponent, -1, -1);
         return true;
     }
-    return OperateGrneralComponent(parentID, slot, operateType, newComponent);
+    return OperateGeneralComponent(parentID, slot, operateType, newComponent);
 }
 
-bool JsInspectorManager::OperateGrneralComponent(
+bool JsInspectorManager::OperateGeneralComponent(
     int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent)
 {
     auto parentElement = GetInspectorElementById(parentID);
@@ -336,10 +337,13 @@ void JsInspectorManager::GetAttrsAndStylesV2(
         return;
     }
     std::string debugLine = composedElement->GetDebugLine();
+    std::string viewId = composedElement->GetViewId();
     jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
+    jsonNode->Put(INSPECTOR_VIEW_ID, viewId.c_str());
     auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement);
     if (inspectorElement) {
         auto jsonObject = inspectorElement->ToJsonObject();
+        jsonObject->Put("viewId", viewId.c_str());
         jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     }
     auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(inspectorElement);

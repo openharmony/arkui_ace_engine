@@ -127,6 +127,11 @@ public:
     {
         return debugLine_;
     }
+
+    void SetViewId(std::string viewId)
+    {
+        viewId_ = viewId;
+    }
 #endif
 
     static bool HasInspectorFinished(std::string tag);
@@ -147,6 +152,7 @@ private:
 
 #if defined(PREVIEW)
     std::string debugLine_;
+    std::string viewId_;
 #endif
 };
 
