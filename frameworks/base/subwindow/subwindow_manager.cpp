@@ -154,6 +154,28 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
     return currentSubwindow_;
 }
 
+void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        LOGI("Subwindow is null, add a new one.");
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    subwindow->ShowPopup(newComponent, disableTouchEvent);
+}
+
+bool SubwindowManager::CancelPopup(const std::string& id)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        return subwindow->CancelPopup(id);
+    }
+    return false;
+}
+
 void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
 {
     auto containerId = Container::CurrentId();

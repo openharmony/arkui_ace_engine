@@ -21,6 +21,7 @@
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/select_popup/select_popup_component.h"
+#include "core/components/tween/tween_component.h"
 #include "core/components/stack/stack_element.h"
 
 namespace OHOS::Rosen {
@@ -40,6 +41,8 @@ public:
 
     void InitContainer() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
+    void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
+    bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
 

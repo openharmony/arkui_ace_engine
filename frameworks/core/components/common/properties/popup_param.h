@@ -247,6 +247,36 @@ public:
         return secondaryButtonProperties_;
     }
 
+    void SetShowInSubWindow(bool isShowInSubWindow)
+    {
+        isShowInSubWindow_ = isShowInSubWindow;
+    }
+
+    bool IsShowInSubWindow() const
+    {
+        return isShowInSubWindow_;
+    }
+
+    void SetTargetSize(const Size& targetSize)
+    {
+        targetSize_ = targetSize;
+    }
+
+    const Size& GetTargetSize() const
+    {
+        return targetSize_;
+    }
+
+    void SetTargetOffset(const Offset& targetOffset)
+    {
+        targetOffset_ = targetOffset;
+    }
+
+    const Offset& GetTargetOffset() const
+    {
+        return targetOffset_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -254,6 +284,7 @@ private:
     bool isMaskColorSetted_ = false;
     bool isBackgroundColorSetted_ = false;
     bool useCustom_ = false;
+    bool isShowInSubWindow_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
@@ -266,9 +297,12 @@ private:
     ComposeId targetId_;
     Dimension targetSpace_;
     std::string message_;
+    Offset targetOffset_;
+    Size targetSize_;
 
     // Used in NG mode
     StateChangeFunc onStateChange_;
+    SubInfoUpdateFunc subInfoUpdate_;
     ButtonProperties primaryButtonProperties_;   // first button.
     ButtonProperties secondaryButtonProperties_; // second button.
 };
