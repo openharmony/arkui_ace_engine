@@ -19,10 +19,10 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components_ng/pattern/grid_row/grid_row_view.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 #include "core/components_v2/grid_layout/grid_row_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-
 namespace OHOS::Ace::Framework {
 namespace {
 
@@ -120,15 +120,15 @@ void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gut
     }
 }
 
-void ParserGutter(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>& gridRow)
+RefPtr<V2::Gutter> ParserGutter(const JSRef<JSVal>& jsValue)
 {
     Dimension result;
     if (JSContainerBase::ParseJsDimensionVp(jsValue, result)) {
         auto gutter = AceType::MakeRefPtr<V2::Gutter>(result);
-        gridRow->SetGutter(gutter);
+        return gutter;
     } else {
         if (!jsValue->IsObject()) {
-            return;
+            return AceType::MakeRefPtr<V2::Gutter>();
         }
         auto paramGutter = JSRef<JSObject>::Cast(jsValue);
         auto xObject = paramGutter->GetProperty("x");
@@ -136,17 +136,16 @@ void ParserGutter(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>& gri
         auto gutter = AceType::MakeRefPtr<V2::Gutter>();
         ParseGutterObject(xObject, gutter, true);
         ParseGutterObject(yObject, gutter, false);
-        gridRow->SetGutter(gutter);
+        return gutter;
     }
 }
 
-void ParserColumns(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent> gridRow)
+RefPtr<V2::GridContainerSize> ParserColumns(const JSRef<JSVal>& jsValue)
 {
     if (jsValue->IsNumber()) {
         double columnNumber = 0.0;
         JSViewAbstract::ParseJsDouble(jsValue, columnNumber);
-        auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber);
-        gridRow->SetTotalCol(gridContainerSize);
+        return AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber);
     } else if (jsValue->IsObject()) {
         auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(12);
         auto gridParam = JSRef<JSObject>::Cast(jsValue);
@@ -176,24 +175,22 @@ void ParserColumns(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent> gri
             containerSizeArray[5] = xxl->ToNumber<int32_t>();
         }
         InheritGridRowOption(gridContainerSize, containerSizeArray);
-        gridRow->SetTotalCol(gridContainerSize);
+        return gridContainerSize;
     } else {
         LOGI("parse column error");
+        return AceType::MakeRefPtr<V2::GridContainerSize>();
     }
 }
 
-void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent> gridRow)
+RefPtr<V2::BreakPoints> ParserBreakpoints(const JSRef<JSVal>& jsValue)
 {
     if (!jsValue->IsObject()) {
-        return;
+        return AceType::MakeRefPtr<V2::BreakPoints>();
     }
     auto breakpoints = JSRef<JSObject>::Cast(jsValue);
     auto value = breakpoints->GetProperty("value");
     auto reference = breakpoints->GetProperty("reference");
     auto breakpoint = AceType::MakeRefPtr<V2::BreakPoints>();
-    if (!gridRow) {
-        return;
-    }
     if (reference->IsNumber()) {
         breakpoint->reference = static_cast<V2::BreakPointsReference>(reference->ToNumber<int32_t>());
     }
@@ -202,8 +199,7 @@ void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>
         breakpoint->breakpoints.clear();
         if (array->Length() > MAX_NUMBER_BREAKPOINT - 1) {
             LOGI("The maximum number of breakpoints is %{public}zu", MAX_NUMBER_BREAKPOINT);
-            gridRow->SetBreakPoints(breakpoint);
-            return;
+            return breakpoint;
         }
         double width = -1.0;
         for (size_t i = 0; i < array->Length(); i++) {
@@ -213,22 +209,23 @@ void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>
                 JSContainerBase::ParseJsDimensionVp(threshold, valueDimension);
                 if (GreatNotEqual(width, valueDimension.Value())) {
                     LOGI("Array data must be sorted in ascending order");
-                    gridRow->SetBreakPoints(breakpoint);
-                    return;
+                    return breakpoint;
                 }
                 width = valueDimension.Value();
                 breakpoint->breakpoints.push_back(threshold->ToString());
             }
         }
     }
-    gridRow->SetBreakPoints(breakpoint);
+    return breakpoint;
 }
 
-void ParserDirection(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent> gridRow)
+V2::GridRowDirection ParserDirection(const JSRef<JSVal>& jsValue)
 {
-    if (gridRow && jsValue->IsNumber()) {
-        gridRow->SetDirection(static_cast<V2::GridRowDirection>(jsValue->ToNumber<int32_t>()));
+    V2::GridRowDirection direction(V2::GridRowDirection::Row);
+    if (jsValue->IsNumber()) {
+        direction = static_cast<V2::GridRowDirection>(jsValue->ToNumber<int32_t>());
     }
+    return direction;
 }
 
 } // namespace
@@ -261,20 +258,46 @@ void JSGridRow::Height(const JSCallbackInfo& info)
     }
 }
 
+inline void FillComponent(const RefPtr<V2::GridRowComponent>& component, const RefPtr<V2::GridContainerSize>& col,
+    const RefPtr<V2::Gutter>& gutter, const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction)
+{
+    component->SetTotalCol(col);
+    component->SetGutter(gutter);
+    component->SetBreakPoints(breakpoints);
+    component->SetDirection(direction);
+}
+
 void JSGridRow::Create(const JSCallbackInfo& info)
 {
-    auto component = AceType::MakeRefPtr<V2::GridRowComponent>();
-    ViewStackProcessor::GetInstance()->Push(component);
+    bool isNewPipeline = Container::IsCurrentUseNewPipeline();
+
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto gridRow = JSRef<JSObject>::Cast(info[0]);
         auto columns = gridRow->GetProperty("columns");
         auto gutter = gridRow->GetProperty("gutter");
         auto breakpoints = gridRow->GetProperty("breakpoints");
         auto direction = gridRow->GetProperty("direction");
-        ParserColumns(columns, component);
-        ParserGutter(gutter, component);
-        ParserBreakpoints(breakpoints, component);
-        ParserDirection(direction, component);
+
+        auto parsedColumns = ParserColumns(columns);
+        auto parsedGutter = ParserGutter(gutter);
+        auto parsedBreakpoints = ParserBreakpoints(breakpoints);
+        auto parsedDirection = ParserDirection(direction);
+
+        if (isNewPipeline) {
+            NG::GridRowView::Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
+        } else {
+            auto component = AceType::MakeRefPtr<V2::GridRowComponent>();
+            ViewStackProcessor::GetInstance()->Push(component);
+            FillComponent(component, parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
+        }
+        return;
+    }
+
+    if (isNewPipeline) {
+        NG::GridRowView::Create();
+    } else {
+        auto component = AceType::MakeRefPtr<V2::GridRowComponent>();
+        ViewStackProcessor::GetInstance()->Push(component);
     }
 }
 
@@ -287,7 +310,7 @@ void JSGridRow::Columns(const JSCallbackInfo& info)
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
     if (grid) {
-        ParserColumns(info[0], grid);
+        grid->SetTotalCol(ParserColumns(info[0]));
     }
 }
 void JSGridRow::Gutter(const JSCallbackInfo& info)
@@ -299,7 +322,7 @@ void JSGridRow::Gutter(const JSCallbackInfo& info)
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
     if (grid) {
-        ParserGutter(info[0], grid);
+        grid->SetGutter(ParserGutter(info[0]));
     }
 }
 
@@ -315,7 +338,7 @@ void JSGridRow::Breakpoints(const JSCallbackInfo& info)
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
     if (grid) {
-        ParserBreakpoints(info[0], grid);
+        grid->SetBreakPoints(ParserBreakpoints(info[0]));
     }
 }
 
@@ -324,7 +347,7 @@ void JSGridRow::Direction(const JSCallbackInfo& info)
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
     if (grid) {
-        ParserDirection(info[0], grid);
+        grid->SetDirection(ParserDirection(info[0]));
     }
 }
 
