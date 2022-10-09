@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG {
 // has full screen size
 // used for detecting clicks outside Menu area
 class MenuWrapperPattern : public Pattern {
-    DECLARE_ACE_TYPE(MenuPattern, Pattern);
+    DECLARE_ACE_TYPE(MenuWrapperPattern, Pattern);
 
 public:
     explicit MenuWrapperPattern(int32_t Id) : targetId_(Id) {}
