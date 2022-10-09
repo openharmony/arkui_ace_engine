@@ -94,7 +94,6 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popup)
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popup.popupNode);
     if (iter != rootChildren.end()) {
-        // Pop popup
         if (!popup.isCurrentOnShow) {
             return;
         }
@@ -149,6 +148,7 @@ void OverlayManager::HideMenu(int32_t targetId)
     CHECK_NULL_VOID(rootNode);
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGE("OverlayManager: menuNode %{public}d not found in map", targetId);
+        return;
     }
     rootNode->RemoveChild(menuMap_[targetId]);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

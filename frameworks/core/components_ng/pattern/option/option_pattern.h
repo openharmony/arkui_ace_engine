@@ -29,7 +29,7 @@ class OptionPattern : public Pattern {
     DECLARE_ACE_TYPE(OptionPattern, Pattern);
 
 public:
-    explicit OptionPattern(int32_t targetId, int index) : targetId_(targetId), index_(index) {}
+    OptionPattern(int32_t targetId, int index) : targetId_(targetId), index_(index) {}
     ~OptionPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -60,17 +60,17 @@ public:
     void OnModifyDone() override;
 
 private:
-    // to hide menu through OverlayManager when option is clicked
-    int32_t targetId_;
-    // this option node's index in the menu
-    int index_;
-
     void UpdateNextNodeDivider(bool needDivider);
 
     // register option's JS callback
     void RegisterOnClick(const RefPtr<GestureEventHub>& hub, const std::function<void()>& action);
     // change option background color
     void RegisterOnHover(const RefPtr<GestureEventHub>& hub);
+    
+    // to hide menu through OverlayManager when option is clicked
+    int32_t targetId_ = -1;
+    // this option node's index in the menu
+    int index_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
 };
