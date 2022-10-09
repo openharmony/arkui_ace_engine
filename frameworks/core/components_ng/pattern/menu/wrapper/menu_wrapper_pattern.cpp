@@ -40,6 +40,7 @@ void MenuWrapperPattern::OnModifyDone()
         CHECK_NULL_VOID(menuNode);
         if (!InstanceOf<FrameNode>(menuNode)) {
             LOGW("MenuWrapper's child is not a Menu! type = %{public}s", menuNode->GetTag().c_str());
+            return;
         }
         auto menuZone = DynamicCast<FrameNode>(menuNode)->GetGeometryNode()->GetFrameRect();
 

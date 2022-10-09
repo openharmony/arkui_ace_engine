@@ -94,6 +94,7 @@ void OptionPattern::UpdateNextNodeDivider(bool needDivider)
     if (nextNode) {
         if (!InstanceOf<FrameNode>(nextNode)) {
             LOGW("next optionNode is not a frameNode! type = %{public}s", nextNode->GetTag().c_str());
+            return;
         }
         auto props = DynamicCast<FrameNode>(nextNode)->GetPaintProperty<OptionPaintProperty>();
         CHECK_NULL_VOID(props);

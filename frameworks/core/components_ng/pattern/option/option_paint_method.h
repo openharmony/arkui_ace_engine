@@ -41,7 +41,7 @@ private:
     void PaintBackground(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper);
 
-    bool hover_;
+    bool hover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPaintMethod);
 };
