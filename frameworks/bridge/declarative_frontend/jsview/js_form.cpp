@@ -40,6 +40,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> module = obj->GetProperty("module");
     JSRef<JSVal> dimension = obj->GetProperty("dimension");
     JSRef<JSVal> temporary = obj->GetProperty("temporary");
+    JSRef<JSVal> wantValue = obj->GetProperty("want");
 
     LOGD("js form create id:%{public}d, name:%{public}s, bundle:%{public}s, ability:%{public}s, module:%{public}s, "
          "temporary:%{public}s",
@@ -56,6 +57,10 @@ void JSForm::Create(const JSCallbackInfo& info)
         fomInfo.dimension = dimension->ToNumber<int32_t>();
     }
     fomInfo.temporary = temporary->ToBoolean();
+
+    if (!wantValue->IsNull() && wantValue->IsObject()) {
+        fomInfo.want = wantValue->ToString();
+    }
 
     if (Container::IsCurrentUseNewPipeline()) {
         NG::FormView::Create(fomInfo);
