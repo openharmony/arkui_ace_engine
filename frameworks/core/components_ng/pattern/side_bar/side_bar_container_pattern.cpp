@@ -28,6 +28,9 @@ namespace {
 constexpr int32_t SLIDE_TRANSLATE_DURATION = 400;
 constexpr float RATIO_NEGATIVE = -1.0f;
 constexpr float RATIO_ZERO = 0.0f;
+constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
+constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -68,7 +71,7 @@ void SideBarContainerPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestu
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->HandleDragUpdate(info);
+            pattern->HandleDragUpdate(static_cast<float>(info.GetOffsetX()));
         }
     };
 
@@ -143,7 +146,7 @@ void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEv
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->ControlButtonOnClick();
+            pattern->DoSideBarAnimation();
         }
     };
 
@@ -154,12 +157,13 @@ void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEv
     gestureHub->AddClickEvent(controlButtonClickEvent_);
 }
 
-void SideBarContainerPattern::ControlButtonOnClick()
+void SideBarContainerPattern::DoSideBarAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
     if (!controller_ || !leftToRightAnimation_ || !rightToLeftAnimation_) {
+        LOGE("DoSideBarAnimation: Animator or animation is null.");
         return;
     }
 
@@ -175,10 +179,10 @@ void SideBarContainerPattern::ControlButtonOnClick()
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    bool isSideBarStart = sideBarPosition == SideBarPosition::START;
 
     if (sideBarStatus_ == SideBarStatus::HIDDEN) {
-        controller_->AddInterpolator(
-            (sideBarPosition == SideBarPosition::START) ? leftToRightAnimation_ : rightToLeftAnimation_);
+        controller_->AddInterpolator(isSideBarStart ? leftToRightAnimation_ : rightToLeftAnimation_);
         controller_->AddStopListener([weak]() {
             auto pattern = weak.Upgrade();
             if (pattern) {
@@ -188,8 +192,7 @@ void SideBarContainerPattern::ControlButtonOnClick()
             }
         });
     } else {
-        controller_->AddInterpolator(
-            (sideBarPosition == SideBarPosition::START) ? rightToLeftAnimation_ : leftToRightAnimation_);
+        controller_->AddInterpolator(isSideBarStart ? rightToLeftAnimation_ : leftToRightAnimation_);
         controller_->AddStopListener([weak]() {
             auto pattern = weak.Upgrade();
             if (pattern) {
@@ -286,37 +289,128 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
 bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!needInitRealSideBarWidth_) {
-        return false;
-    }
-
-    if (config.skipMeasure && config.skipLayout) {
-        return false;
-    }
-
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<SideBarContainerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
 
-    realSideBarWidth_ = layoutAlgorithm->GetRealSideBarWidth();
-    needInitRealSideBarWidth_ = false;
+    UpdateResponseRegion(layoutAlgorithm);
+
+    if (needInitRealSideBarWidth_) {
+        needInitRealSideBarWidth_ = false;
+    }
+
     return false;
+}
+
+void SideBarContainerPattern::UpdateResponseRegion(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm)
+{
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto scaleProperty = constraint->scaleProperty;
+    auto halfDragRegionWidth = ConvertToPx(DEFAULT_DRAG_REGION, scaleProperty).value_or(0);
+    auto dragRegionWidth = halfDragRegionWidth * 2;
+
+    realSideBarWidth_ = layoutAlgorithm->GetRealSideBarWidth();
+    auto dragRegionHeight = layoutAlgorithm->GetRealSideBarHeight();
+    auto dragRectOffset = layoutAlgorithm->GetSideBarOffset();
+
+    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    if (sideBarPosition == SideBarPosition::START) {
+        dragRectOffset.SetX(dragRectOffset.GetX() + realSideBarWidth_ - halfDragRegionWidth);
+    } else {
+        dragRectOffset.SetX(dragRectOffset.GetX() - halfDragRegionWidth);
+    }
+
+    dragRect_.SetOffset(dragRectOffset);
+    dragRect_.SetSize(SizeF(dragRegionWidth, dragRegionHeight));
+
+    auto eventHub = GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+
+    gestureEventHub->MarkResponseRegion(true);
+    std::vector<DimensionRect> responseRegion;
+    DimensionOffset responseOffset(dragRectOffset);
+    DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
+        Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
+    responseRegion.emplace_back(responseRect);
+    gestureEventHub->SetResponseRegion(responseRegion);
 }
 
 void SideBarContainerPattern::HandleDragStart()
 {
-    LOGI("SideBarContainerPattern::HandleDragStart");
+    if (sideBarStatus_ != SideBarStatus::SHOW) {
+        return;
+    }
+
+    preSidebarWidth_ = realSideBarWidth_;
 }
 
-void SideBarContainerPattern::HandleDragUpdate(const GestureEvent& info)
+void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 {
-    LOGI("SideBarContainerPattern::HandleDragUpdate");
+    if (sideBarStatus_ != SideBarStatus::SHOW) {
+        return;
+    }
+
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto minSideBarWidth = layoutProperty->GetMinSideBarWidth().value_or(DEFAULT_MIN_SIDE_BAR_WIDTH);
+    auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidth().value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto frameSize = geometryNode->GetFrameSize();
+    auto parentWidth = frameSize.Width();
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto scaleProperty = constraint->scaleProperty;
+    auto minSideBarWidthPx = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(0);
+    auto maxSideBarWidthPx = ConvertToPx(maxSideBarWidth, scaleProperty, parentWidth).value_or(0);
+
+    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    bool isSideBarStart = sideBarPosition == SideBarPosition::START;
+
+    auto sideBarLine = preSidebarWidth_ + (isSideBarStart ? xOffset : -xOffset);
+
+    if (sideBarLine > minSideBarWidthPx && sideBarLine < maxSideBarWidthPx) {
+        realSideBarWidth_ = sideBarLine;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+
+    if (sideBarLine > maxSideBarWidthPx) {
+        realSideBarWidth_ = maxSideBarWidthPx;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+
+    auto halfDragRegionWidth = dragRect_.Width() / 2;
+    if (sideBarLine > minSideBarWidthPx - halfDragRegionWidth) {
+        realSideBarWidth_ = minSideBarWidthPx;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    realSideBarWidth_ = minSideBarWidthPx;
+
+    auto autoHide_ = layoutProperty->GetAutoHide().value_or(true);
+    if (autoHide_) {
+        DoSideBarAnimation();
+    }
 }
 
 void SideBarContainerPattern::HandleDragEnd()
 {
-    LOGI("SideBarContainerPattern::HandleDragEnd");
+    if (sideBarStatus_ != SideBarStatus::SHOW) {
+        return;
+    }
+
+    preSidebarWidth_ = realSideBarWidth_;
 }
 
 } // namespace OHOS::Ace::NG
