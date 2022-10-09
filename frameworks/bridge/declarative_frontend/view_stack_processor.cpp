@@ -879,6 +879,9 @@ void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& ins
         auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(
             V2::InspectorComposedComponent::GenerateId(), inspectorTag);
         auto& wrappingComponentsMap = componentsStack_.top();
+#if defined(PREVIEW)
+        composedComponent->SetViewId(viewKey_);
+#endif
         wrappingComponentsMap.emplace("inspector", composedComponent);
     }
 }

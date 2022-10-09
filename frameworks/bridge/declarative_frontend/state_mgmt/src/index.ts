@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-console.debug("ACE State Mgmt init start ...")
+stateMgmtConsole.info("ACE State Management component is initiaizing ...")
 
 PersistentStorage.ConfigureBackend(new Storage());
 

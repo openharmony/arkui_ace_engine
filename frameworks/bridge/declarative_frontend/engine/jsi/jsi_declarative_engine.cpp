@@ -29,10 +29,12 @@
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
+#include "core/common/card_scope.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -960,6 +962,50 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
     return true;
 }
 
+bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string &fileName, uint64_t cardId)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("ExecuteCardAbc failed, runtime is nullptr");
+        return false;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("ExecuteCardAbc failed, container is nullptr");
+        return false;
+    }
+
+    auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+    if (!frontEnd) {
+        LOGE("ExecuteCardAbc failed, frontEnd is nullptr");
+        return false;
+    }
+
+    auto delegate = frontEnd->GetDelegate();
+    if (!delegate) {
+        LOGE("ExecuteCardAbc failed, delegate is nullptr");
+        return false;
+    }
+
+    std::vector<uint8_t> content;
+    if (!delegate->GetAssetContent(fileName, content)) {
+        LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+        return true;
+    }
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
+    const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
+#else
+    const std::string& abcPath = fileName;
+#endif
+    CardScope cardScope(cardId);
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
+        LOGE("ExecuteCardAbc EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
+        return false;
+    }
+    return true;
+}
+
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs");
@@ -1084,6 +1130,12 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
         return true;
     }
     return ExecuteAbc(urlName.value());
+}
+
+bool JsiDeclarativeEngine::LoadCard(const std::string& url, uint64_t cardId)
+{
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadCard");
+    return ExecuteCardAbc(url, cardId);
 }
 
 #if defined(PREVIEW)

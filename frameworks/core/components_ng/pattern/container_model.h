@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODEL_H
 
 #include <memory>
+#include <string>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
@@ -32,6 +33,7 @@ public:
     virtual void Pop() = 0;
     virtual void NewScope() = 0;
     virtual RefPtr<AceType> Finish() = 0;
+    virtual std::string ProcessViewId(const std::string& viewId) = 0;
 
 private:
     static std::unique_ptr<ContainerModel> instance_;

@@ -10,7 +10,7 @@ func
  = f:("log" / "info" / "debug" ) { return f; }
 
 console
- = head:"console" dot:(_ "." _) func:func _ { return head + '.' + func }
+ = head:"stateMgmtConsole" dot:(_ "." _) func:func _ { return head + '.' + func }
 
 skipConsole
  = console:console "(" c:(!")" c:logChar { return c; })* ")" ";"? { return ``}

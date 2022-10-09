@@ -189,6 +189,8 @@ public:
         return frameNode_.Upgrade();
     }
 
+    virtual void DumpInfo() {}
+
     template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
@@ -225,7 +227,7 @@ public:
         return { FocusType::DISABLE, false };
     }
 
-    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm() const
+    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
     {
         return ScopeFocusAlgorithm();
     }

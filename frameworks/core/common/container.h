@@ -98,6 +98,20 @@ public:
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
 
+    virtual void SetCardFrontend(WeakPtr<Frontend> frontend, uint64_t cardId) {}
+
+    virtual WeakPtr<Frontend> GetCardFrontend(uint64_t cardId) const
+    {
+        return nullptr;
+    }
+
+    virtual void SetCardPipeline(WeakPtr<PipelineBase>, uint64_t cardId) {}
+
+    virtual WeakPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const
+    {
+        return nullptr;
+    }
+
     // Get MutilModal ptr.
     virtual uintptr_t GetMutilModalPtr() const
     {

@@ -16,61 +16,64 @@
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 
 #include <cstdint>
+#include <functional>
 
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/list_item_model_impl.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/list/list_item_view.h"
-#include "core/components_ng/syntax/shallow_builder.h"
-#include "core/components_v2/common/element_proxy.h"
-#include "core/components_v2/list/list_item_component.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/components_ng/pattern/list/list_item_model.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ListItemModel> ListItemModel::instance_ = nullptr;
+
+ListItemModel* ListItemModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ListItemModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ListItemModelNG());
+        } else {
+            instance_.reset(new Framework::ListItemModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-
-const V2::StickyMode STICKY_MODE_TABLE[] = { V2::StickyMode::NONE, V2::StickyMode::NORMAL, V2::StickyMode::OPACITY };
-const V2::SwipeEdgeEffect SWIPE_EDGE_EFFECT_TABLE[] = { V2::SwipeEdgeEffect::Spring, V2::SwipeEdgeEffect::None };
-
-} // namespace
 
 void JSListItem::Create(const JSCallbackInfo& args)
 {
     if (Container::IsCurrentUsePartialUpdate()) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            CreateForNGPartialUpdate(args);
-        } else {
-            CreateForPartialUpdate(args);
-        }
+        CreateForPartialUpdate(args);
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ListItemView::Create();
-        return;
-    }
-
-    auto listItemComponent = AceType::MakeRefPtr<V2::ListItemComponent>();
+    std::string type;
     if (args.Length() >= 1 && args[0]->IsString()) {
-        listItemComponent->SetType(args[0]->ToString());
+        type = args[0]->ToString();
     }
-    ViewStackProcessor::GetInstance()->Push(listItemComponent);
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
+
+    ListItemModel::GetInstance()->Create();
+    if (!type.empty()) {
+        ListItemModel::GetInstance()->SetType(type);
+    }
     args.ReturnSelf();
 }
 
 void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 {
-    auto listItemComponent = AceType::MakeRefPtr<V2::ListItemComponent>();
-    ViewStackProcessor::GetInstance()->ClaimElementId(listItemComponent);
-
     if (args.Length() < 2 || !args[0]->IsFunction()) {
         LOGE("Expected deep render function parameter");
+        ListItemModel::GetInstance()->Create();
         return;
     }
     RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
@@ -80,48 +83,8 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
         return;
     }
     const bool isLazy = args[1]->ToBoolean();
-
-    V2::DeepRenderFunc listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
-                                                    jsDeepRenderFunc = std::move(jsDeepRender),
-                                                    elmtId = listItemComponent->GetElementId()]() -> RefPtr<Component> {
-        ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
-
-        LOGD("ListItem elmtId %{public}d DeepRender JS function execution start ....", elmtId);
-        ACE_DCHECK(componentsStack_.empty());
-
-        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-        JSRef<JSVal> jsParams[2];
-        jsParams[0] = JSRef<JSVal>::Make(ToJSValue(elmtId));
-        jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
-        jsDeepRenderFunc->ExecuteJS(2, jsParams);
-        RefPtr<Component> component = ViewStackProcessor::GetInstance()->Finish();
-        ACE_DCHECK(AceType::DynamicCast<V2::ListItemComponent>(component) != nullptr);
-        LOGD("ListItem elmtId %{public}d DeepRender JS function execution - done ", elmtId);
-        return component;
-    }; // listItemDeepRenderFunc lambda
-
-    listItemComponent->SetDeepRenderFunc(listItemDeepRenderFunc);
-    listItemComponent->SetIsLazyCreating(isLazy);
-    ViewStackProcessor::GetInstance()->Push(listItemComponent);
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
-    args.ReturnSelf();
-}
-
-void JSListItem::CreateForNGPartialUpdate(const JSCallbackInfo& args)
-{
-    if (args.Length() < 2 || !args[0]->IsFunction()) {
-        LOGW("Expected deep render function parameter");
-        NG::ListItemView::Create();
-        return;
-    }
-    if (!args[1]->IsBoolean()) {
-        LOGE("Expected isLazy parameter");
-        return;
-    }
-    const bool isLazy = args[1]->ToBoolean();
     if (!isLazy) {
-        NG::ListItemView::Create();
+        ListItemModel::GetInstance()->Create();
     } else {
         RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
         auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
@@ -134,54 +97,41 @@ void JSListItem::CreateForNGPartialUpdate(const JSCallbackInfo& args)
             jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
             jsDeepRenderFunc->ExecuteJS(2, jsParams);
         }; // listItemDeepRenderFunc lambda
-        NG::ListItemView::Create(std::move(listItemDeepRenderFunc));
+        ListItemModel::GetInstance()->Create(std::move(listItemDeepRenderFunc));
+        ListItemModel::GetInstance()->SetIsLazyCreating(isLazy);
     }
     args.ReturnSelf();
 }
 
 void JSListItem::SetSticky(int32_t sticky)
 {
-    JSViewSetProperty(&V2::ListItemComponent::SetSticky, sticky, STICKY_MODE_TABLE, V2::StickyMode::NONE);
+    ListItemModel::GetInstance()->SetSticky(static_cast<V2::StickyMode>(sticky));
 }
 
 void JSListItem::SetEditable(const JSCallbackInfo& args)
 {
-    do {
-        if (args.Length() < 1) {
-            LOGW("Not enough params");
-            break;
-        }
+    if (args.Length() < 1) {
+        LOGW("Not enough params");
+        return;
+    }
 
-        if (args[0]->IsBoolean()) {
-            uint32_t value =
-                args[0]->ToBoolean() ? V2::EditMode::DELETABLE | V2::EditMode::MOVABLE : V2::EditMode::SHAM;
-            JSViewSetProperty(&V2::ListItemComponent::SetEditMode, value);
-            break;
-        }
+    if (args[0]->IsBoolean()) {
+        uint32_t value = args[0]->ToBoolean() ? V2::EditMode::DELETABLE | V2::EditMode::MOVABLE : V2::EditMode::SHAM;
+        ListItemModel::GetInstance()->SetEditMode(value);
+        return;
+    }
 
-        if (args[0]->IsNumber()) {
-            auto value = args[0]->ToNumber<uint32_t>();
-            JSViewSetProperty(&V2::ListItemComponent::SetEditMode, value);
-            if (V2::EditMode::MOVABLE != value) {
-                auto* stack = ViewStackProcessor::GetInstance();
-                auto box = stack->GetBoxComponent();
-                box->SetEnableDragStart(false);
-            }
-            break;
-        }
-
-        LOGW("Invalid params, unknown type");
-    } while (false);
-
-    args.ReturnSelf();
+    if (args[0]->IsNumber()) {
+        auto value = args[0]->ToNumber<uint32_t>();
+        ListItemModel::GetInstance()->SetEditMode(value);
+        return;
+    }
+    LOGW("Invalid params, unknown type");
 }
 
 void JSListItem::SetSelectable(bool selectable)
 {
-    auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (listItem) {
-        listItem->SetSelectable(selectable);
-    }
+    ListItemModel::GetInstance()->SetSelectable(selectable);
 }
 
 void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
@@ -190,36 +140,28 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
         LOGE("fail to bind SwiperAction event due to info is not object");
         return;
     }
-    auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!listItem) {
-        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListItemComponent>());
-        return;
-    }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    std::function<void()> startAction;
     auto startObject = obj->GetProperty("start");
     if (startObject->IsFunction()) {
-        ScopedViewStackProcessor builderViewStackProcessor;
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(startObject));
-        builderFunc->Execute();
-        RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
-        listItem->SetSwiperStartComponent(customComponent);
+        startAction = [builderFunc]() { builderFunc->Execute(); };
     }
 
+    std::function<void()> endAction;
     auto endObject = obj->GetProperty("end");
     if (endObject->IsFunction()) {
-        ScopedViewStackProcessor builderViewStackProcessor;
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(endObject));
-        builderFunc->Execute();
-        RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
-        listItem->SetSwiperEndComponent(customComponent);
+        endAction = [builderFunc]() { builderFunc->Execute(); };
     }
 
     auto edgeEffect = obj->GetProperty("edgeEffect");
+    V2::SwipeEdgeEffect swipeEdgeEffect = V2::SwipeEdgeEffect::Spring;
     if (edgeEffect->IsNumber()) {
-        JSViewSetProperty(&V2::ListItemComponent::SetEdgeEffect, edgeEffect->ToNumber<int32_t>(),
-            SWIPE_EDGE_EFFECT_TABLE, V2::SwipeEdgeEffect::Spring);
+        swipeEdgeEffect = static_cast<V2::SwipeEdgeEffect>(edgeEffect->ToNumber<int32_t>());
     }
+    ListItemModel::GetInstance()->SetSwiperAction(std::move(startAction), std::move(endAction), swipeEdgeEffect);
 }
 
 void JSListItem::SelectCallback(const JSCallbackInfo& args)
@@ -230,16 +172,11 @@ void JSListItem::SelectCallback(const JSCallbackInfo& args)
     }
 
     RefPtr<JsMouseFunction> jsOnSelectFunc = AceType::MakeRefPtr<JsMouseFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto onSelectId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc)](bool isSelected) {
+    auto onSelect = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc)](bool isSelected) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->SelectExecute(isSelected);
     };
-    auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!listItem) {
-        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListItemComponent>());
-        return;
-    }
-    listItem->SetOnSelectId(onSelectId);
+    ListItemModel::GetInstance()->SetSelectCallback(std::move(onSelect));
 }
 
 void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
@@ -249,13 +186,13 @@ void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
     if (!JSViewAbstract::ParseJsDimensionVp(info[0], borderRadius)) {
         return;
     }
-    JSViewSetProperty(&V2::ListItemComponent::SetBorderRadius, borderRadius);
+    ListItemModel::GetInstance()->SetBorderRadius(borderRadius);
 }
 
 void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 {
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
         DragItemInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
@@ -273,7 +210,7 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
-#if !defined(PREVIEW)
+#if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
         itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
 #endif
@@ -283,15 +220,7 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
         itemInfo.customComponent = component;
         return itemInfo;
     };
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnDragStartId(onDragStartId);
-
-    auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!listItem) {
-        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListItemComponent>());
-        return;
-    }
-    listItem->MarkIsDragStart(true);
+    ListItemModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
 }
 
 void JSListItem::JSBind(BindingTarget globalObj)

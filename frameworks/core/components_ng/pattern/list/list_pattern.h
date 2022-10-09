@@ -122,29 +122,34 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         auto property = GetLayoutProperty<ListLayoutProperty>();
         if (!property) {
             return ScopeFocusAlgorithm();
         }
-        auto isVertical = false;
-        if (property->GetListDirection() == Axis::VERTICAL) {
-            isVertical = true;
-        }
+        auto isVertical = property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
         return ScopeFocusAlgorithm(isVertical, true, ScopeType::OTHERS);
     }
 
+    const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
+    {
+        return itemPosition_;
+    }
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     float MainSize() const;
-    void PlaySpringAnimation(double dragVelocity);
     void ResetScrollableEvent(bool scrollable);
+    bool IsOutOfBoundary();
+    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
+    void RemoveScrollEdgeEffect();
 
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<Animator> springController_;
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;

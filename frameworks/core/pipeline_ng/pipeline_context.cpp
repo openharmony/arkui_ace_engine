@@ -143,6 +143,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
     FlushBuild();
+    if (isEtsCard_ && drawDelegate_) {
+        auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
+        drawDelegate_->DrawRSFrame(renderContext);
+        drawDelegate_ = nullptr;
+    }
     FlushTouchEvents();
     taskScheduler_.FlushTask();
     auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
@@ -216,7 +221,21 @@ void PipelineContext::FlushFocus()
     }
 }
 
-void PipelineContext::FlushPipelineWithoutAnimation() {}
+void PipelineContext::FlushPipelineImmediately()
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+    FlushPipelineWithoutAnimation();
+}
+
+void PipelineContext::FlushPipelineWithoutAnimation()
+{
+    FlushBuild();
+    FlushTouchEvents();
+    taskScheduler_.FlushTask();
+    FlushMessages();
+    FlushFocus();
+}
 
 void PipelineContext::FlushBuild()
 {
@@ -260,6 +279,7 @@ void PipelineContext::SetupRootElement()
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    dragDropManager_ = MakeRefPtr<DragDropManager>();
     LOGI("SetupRootElement success!");
 }
 
@@ -491,6 +511,13 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
     // Need update while key tab pressed
+    if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
+        (event.code == KeyCode::KEY_TAB || event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_LEFT ||
+            event.code == KeyCode::KEY_DPAD_DOWN || event.code == KeyCode::KEY_DPAD_RIGHT)) {
+        isNeedShowFocus_ = true;
+        FlushFocus();
+        return true;
+    }
     auto lastPage = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(lastPage, false);
     if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, lastPage)) {
@@ -613,6 +640,27 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
             ++iter;
         }
     }
+}
+
+void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
+{
+    if (isDragged_) {
+        return;
+    }
+
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+
+    std::string extraInfo;
+    manager->GetExtraInfoFromClipboard(extraInfo);
+
+    if (action == DragEventAction::DRAG_EVENT_END) {
+        manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
+        manager->RestoreClipboardData();
+        return;
+    }
+
+    manager->OnDragMove(static_cast<float>(x), static_cast<float>(y), extraInfo);
 }
 
 } // namespace OHOS::Ace::NG

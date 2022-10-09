@@ -30,6 +30,20 @@ void PagePattern::OnAttachToFrameNode()
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
 }
 
+bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
+{
+    if (!isLoaded_) {
+        isOnShow_ = true;
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, false);
+        if (onPageShow_) {
+            context->PostAsyncEvent([onPageShow = onPageShow_]() { onPageShow(); });
+        }
+        isLoaded_ = true;
+    }
+    return false;
+}
+
 bool PagePattern::TriggerPageTransition(PageTransitionType type) const
 {
     auto host = GetHost();
@@ -41,7 +55,7 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type) const
 
 void PagePattern::OnShow()
 {
-    if (isOnShow_) {
+    if (isOnShow_ || !isLoaded_) {
         return;
     }
     isOnShow_ = true;

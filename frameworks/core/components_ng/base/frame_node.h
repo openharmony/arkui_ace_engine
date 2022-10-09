@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -240,6 +241,8 @@ public:
 
     void OnWindowHide() override;
 
+    OffsetF GetOffsetRelativeToWindow() const;
+
 private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
@@ -265,9 +268,20 @@ private:
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
-    std::vector<RectF> GetResponseRegionList();
+    std::vector<RectF> GetResponseRegionList(const RectF& rect);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
+    struct ZIndexComparator {
+        bool operator()(const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) const
+        {
+            if (left && right) {
+                return left->GetRenderContext()->GetZIndexValue(1) < right->GetRenderContext()->GetZIndexValue(1);
+            }
+            return false;
+        }
+    };
+    // sort in ZIndex.
+    std::multiset<RefPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     RefPtr<LayoutProperty> layoutProperty_;

@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
-#include <list>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
@@ -56,7 +55,6 @@ public:
     {
         LOGI("OverlayManager Destructor.");
         popupMap_.clear();
-        toastStack_.clear();
     }
 
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popup);
@@ -66,6 +64,9 @@ public:
         return popupMap_[targetId];
     }
 
+    void ShowMenu(int32_t targetId, RefPtr<FrameNode> menu = nullptr);
+    void HideMenu(int32_t targetId);
+
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
     void PopToast(int32_t toastId);
 
@@ -74,9 +75,11 @@ public:
     void CloseDialog(RefPtr<FrameNode> dialogNode);
 
 private:
-    std::list<NG::ToastInfo> toastStack_;
+    NG::ToastInfo toastInfo_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
+    // K: target frameNode ID, V: menuNode
+    std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     WeakPtr<UINode> rootNodeWeak_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);

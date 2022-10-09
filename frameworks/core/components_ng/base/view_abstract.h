@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <cstdint>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -32,12 +33,16 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/clip_path.h"
 
 namespace OHOS::Ace::NG {
+
+using OptionParam = std::pair<std::string, std::function<void()>>;
+
 class ACE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength& width);
@@ -127,6 +132,15 @@ public:
     static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
+    static void SetOnDragStart(
+        std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
+    static void SetOnDragEnter(
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragEnter);
+    static void SetOnDragLeave(
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave);
+    static void SetOnDragMove(
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove);
+    static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
 
     // flex properties
     static void SetAlignSelf(int32_t value);
@@ -137,6 +151,9 @@ public:
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam>& param);
+    static void BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode);
+    static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode);
+    static void ShowMenu(int32_t targetId);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
     // transition
@@ -146,6 +163,9 @@ public:
     static void SetEdgeClip(bool isClip);
 
     static void Pop();
+
+private:
+    static void AddDragFrameNodeToManager();
 };
 } // namespace OHOS::Ace::NG
 

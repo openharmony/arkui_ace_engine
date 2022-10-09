@@ -18,26 +18,11 @@
 
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-
-struct ImagePaintConfig {
-    ImagePaintConfig(const RectF& srcRect, const RectF& dstRect) : srcRect_(srcRect), dstRect_(dstRect) {}
-    ~ImagePaintConfig() = default;
-
-    RectF srcRect_;
-    RectF dstRect_;
-    ImageRenderMode renderMode_ = ImageRenderMode::ORIGINAL;
-    ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
-    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
-    std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
-    bool needFlipCanvasHorizontally_ = false;
-    bool isSvg = false;
-};
 
 class ImagePainter {
 public:

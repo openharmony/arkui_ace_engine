@@ -122,12 +122,12 @@ FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<Pipelin
     if (!currentDartState) {
         return;
     }
-
+#ifndef GPU_DISABLED
     renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
         currentDartState->GetSkiaUnrefQueue(),
         currentDartState->GetIOManager(),
         currentDartState->GetTaskRunners().GetIOTaskRunner());
-
+#endif
     InitFilterFunc();
 }
 void FlutterRenderOffscreenCanvas::AddRect(const Rect& rect)

@@ -582,7 +582,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isInfiniteLayout_ = GreatOrEqual(mainAxisSize_, Infinity<float>());
     }
     if (isInfiniteLayout_) {
-        LOGW("The main axis size is not defined or infinity, disallow flex and weight mode");
+        LOGD("The main axis size is not defined or infinity, disallow flex and weight mode");
     }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto paddingLeft = padding.left.value_or(0.0f);

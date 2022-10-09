@@ -34,7 +34,8 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     // case 2: image component is not set with size, use image source size to determine component size
     // if image data and altImage are both not ready, can not decide content size,
     // return std::nullopt and wait for next layout task triggered by [OnImageDataReady]
-    if (!loadingCtx_->GetImageSize().IsPositive() && (!altLoadingCtx_ || !altLoadingCtx_->GetImageSize().IsPositive())) {
+    if ((!loadingCtx_ || !loadingCtx_->GetImageSize().IsPositive()) &&
+        (!altLoadingCtx_ || !altLoadingCtx_->GetImageSize().IsPositive())) {
         return std::nullopt;
     }
     // if image data is valid, use image source, or use altImage data
@@ -48,7 +49,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
         SizeF layoutConstraintMaxSize = imageLayoutProperty->GetLayoutConstraint()->maxSize;
         bool fitOriginalSize =
-            (imageLayoutProperty == nullptr) ? true : imageLayoutProperty->GetFitOriginalSize().value_or(true);
+            (imageLayoutProperty == nullptr) || imageLayoutProperty->GetFitOriginalSize().value_or(true);
         if (contentConstraint.selfIdealSize.IsNull()) {
             if (!fitOriginalSize) {
                 componentSize.SetSizeT(layoutConstraintMaxSize);

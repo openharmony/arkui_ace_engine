@@ -31,8 +31,11 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSRenderImage* scroller);
 
-    void JsWidth(const JSCallbackInfo& info);
-    void JsHeight(const JSCallbackInfo& info);
+    void JsSetWidth(const JSCallbackInfo& info);
+    void JsSetHeight(const JSCallbackInfo& info);
+    void JsGetWidth(const JSCallbackInfo& info);
+    void JsGetHeight(const JSCallbackInfo& info);
+    void JsClose(const JSCallbackInfo& info);
     double GetWidth();
     double GetHeight();
     std::string GetSrc();

@@ -50,14 +50,6 @@ public:
         return type_ == XComponentType::SURFACE;
     }
 
-    std::optional<std::string> GetSurfaceNodeName() const override
-    {
-        if (type_ == XComponentType::COMPONENT) {
-            return std::nullopt;
-        }
-        return id_ + "Surface";
-    }
-
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<XComponentLayoutProperty>();
@@ -132,6 +124,8 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnRebuildFrame() override;
+
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -151,7 +145,8 @@ private:
     std::string libraryname_;
     RefPtr<XComponentController> xcomponentController_;
 
-    RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
+    RefPtr<RenderSurface> renderSurface_;
+    RefPtr<RenderContext> renderContextForSurface_;
 
     OH_NativeXComponent* nativeXComponent_ = nullptr;
     WeakPtr<NativeXComponentImpl> nativeXComponentImpl_;

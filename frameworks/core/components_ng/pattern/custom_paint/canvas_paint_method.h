@@ -66,6 +66,8 @@ public:
         return lastLayoutSize_.Height();
     }
 
+    void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
+    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
     std::string ToDataURL(const std::string& args);
@@ -83,8 +85,10 @@ private:
     void ImageObjReady(const RefPtr<ImageObject>& imageObj) override;
     void ImageObjFailed() override;
     sk_sp<SkImage> GetImage(const std::string& src) override;
+    void SetPaintImage() override {};
 
-    void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = true);
+    void PaintText(
+        const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = true);
     double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = true);

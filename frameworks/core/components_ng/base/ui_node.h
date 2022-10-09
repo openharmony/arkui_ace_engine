@@ -47,6 +47,8 @@ public:
 
     virtual int32_t FrameCount() const;
 
+    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) const;
+
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT);
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child);

@@ -50,15 +50,13 @@ void SubContainer::Initialize()
         LOGE("could not got main pipeline executor");
         return;
     }
+
     auto taskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(executor);
     if (!taskExecutor) {
         LOGE("main pipeline context executor is not flutter taskexecutor");
         return;
     }
     taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskExecutor);
-
-    frontend_ = AceType::MakeRefPtr<CardFrontend>();
-    frontend_->Initialize(FrontendType::JS_CARD, taskExecutor_);
 }
 
 void SubContainer::Destroy()
@@ -141,13 +139,27 @@ void SubContainer::UpdateSurfaceSize()
 }
 
 void SubContainer::RunCard(int64_t id, const std::string& path, const std::string& module, const std::string& data,
-    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc)
+    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
+    const FrontendType& cardType)
 {
     if (id == runningCardId_) {
         LOGE("the card is showing, no need run again");
         return;
     }
     runningCardId_ = id;
+    cardType_ = cardType;
+
+    if (cardType_ == FrontendType::ETS_CARD) {
+        frontend_ = AceType::MakeRefPtr<CardFrontendDeclarative>();
+    } else if (cardType_ == FrontendType::JS_CARD){
+        frontend_ = AceType::MakeRefPtr<CardFrontend>();
+    } else {
+        LOGE("Run Card failed, card type unknown");
+        return;
+    }
+
+    frontend_->Initialize(cardType_, taskExecutor_);
+
     if (onFormAcquiredCallback_) {
         onFormAcquiredCallback_(id);
     }
@@ -166,6 +178,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
         basePaths.emplace_back("assets/js/share/");
         basePaths.emplace_back("");
         basePaths.emplace_back("js/");
+        basePaths.emplace_back("ets/");
         auto assetProvider = CreateAssetProvider(path, basePaths);
         if (assetProvider) {
             LOGI("push card asset provider to queue.");
@@ -180,15 +193,24 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
     frontend_->SetCardWindowConfig(GetWindowConfig());
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
 
-    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
-        std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
+    if (cardType_ == FrontendType::ETS_CARD) { // ETS Card : API9 only support New Pipeline
+        pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
+    } else { // JS Card : API9 only support Old Pipeline
+        pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
+    }
+
     ContainerScope scope(instanceId_);
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
     auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
     pipelineContext_->SetEventManager(eventManager);
     ProcessSharedImage(imageDataMap);
     UpdateRootElementSize();
-    pipelineContext_->SetIsJsCard(true);
+    pipelineContext_->SetIsJsCard(true); // JSCard & eTSCard both use this flag
+    if (cardType_ == FrontendType::ETS_CARD) {
+        pipelineContext_->SetIsEtsCard(true); // only eTSCard use this flag
+    }
 
     ResourceInfo cardResourceInfo;
     ResourceConfiguration resConfig;
@@ -242,49 +264,71 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
         [weakContext]() {
             auto context = weakContext.Upgrade();
             if (context == nullptr) {
-                LOGE("context or root box is nullptr");
+                LOGE("RunCard PostTask Task failed, context is nullptr");
                 return;
             }
             context->SetupRootElement();
         },
         TaskExecutor::TaskType::UI);
 
-    if (frontend_) {
-        frontend_->AttachPipelineContext(pipelineContext_);
-    }
+    frontend_->AttachPipelineContext(pipelineContext_);
+    frontend_->SetLoadCardCallBack(outSidePipelineContext_);
+    frontend_->SetRunningCardId(runningCardId_);
+    frontend_->SetDensity(density_);
+    UpdateSurfaceSize();
 
-    auto cardFronted = AceType::DynamicCast<CardFrontend>(frontend_);
-    if (frontend_) {
-        frontend_->SetDensity(density_);
-        UpdateSurfaceSize();
-    }
+    if (cardType_ == FrontendType::ETS_CARD) { // ETS Card : API9 only support NG-Host & NG-eTSCard
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto pattern = formPattern_.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto pipelineContext = DynamicCast<NG::PipelineContext>(pipelineContext_);
+            if(!pipelineContext) {
+                LOGE("RunCard failed, pipeline context is nullptr");
+                return;
+            }
+            pipelineContext->SetDrawDelegate(pattern->GetDrawDelegate());
+            frontend_->RunPage(0, "", data);
+            return;
+        } else {
+            LOGE("ETS Card not support old pipeline");
+            return;
+        }
+    } else if (cardType_ == FrontendType::JS_CARD) { // JS Card : API9 only support Old Pipeline JSCard, Host can be NG or Old
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto pattern = formPattern_.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto pipelineContext = DynamicCast<PipelineContext>(pipelineContext_);
+            if(!pipelineContext) {
+                LOGE("RunCard failed, pipeline context is nullptr");
+                return;
+            }
+            pipelineContext->SetDrawDelegate(pattern->GetDrawDelegate());
+            frontend_->RunPage(0, "", data);
+            return;
+        }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto pattern = formPattern_.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pipelineContext_->SetDrawDelegate(pattern->GetDrawDelegate());
+        auto form = AceType::DynamicCast<FormElement>(GetFormElement().Upgrade());
+        if (!form) {
+            LOGE("set draw delegate could not get form element");
+            return;
+        }
+        auto renderNode = form->GetRenderNode();
+        if (!renderNode) {
+            LOGE("set draw delegate could not get render node");
+            return;
+        }
+        auto formRender = AceType::DynamicCast<RenderForm>(renderNode);
+        if (!formRender) {
+            LOGE("set draw delegate could not get render form");
+            return;
+        }
+        auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
+        pipelineContext->SetDrawDelegate(formRender->GetDrawDelegate());
+
         frontend_->RunPage(0, "", data);
-        return;
+    } else {
+        LOGE("SubContainer::RunCard card type error");
     }
-
-    auto form = AceType::DynamicCast<FormElement>(GetFormElement().Upgrade());
-    if (!form) {
-        LOGE("set draw delegate could not get form element");
-        return;
-    }
-    auto renderNode = form->GetRenderNode();
-    if (!renderNode) {
-        LOGE("set draw delegate could not get render node");
-        return;
-    }
-    auto formRender = AceType::DynamicCast<RenderForm>(renderNode);
-    if (!formRender) {
-        LOGE("set draw delegate could not get render form");
-        return;
-    }
-    pipelineContext_->SetDrawDelegate(formRender->GetDrawDelegate());
-
-    frontend_->RunPage(0, "", data);
 }
 
 void SubContainer::ProcessSharedImage(const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap)

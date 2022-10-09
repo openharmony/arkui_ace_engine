@@ -390,4 +390,9 @@ std::string SystemProperties::GetPartialUpdatePkg()
     return system::GetParameter("persist.ace.partial.pkgname", "");
 }
 
+int32_t SystemProperties::GetSvgMode()
+{
+    return system::GetIntParameter<int>("persist.ace.svg.mode", 0);
+}
+
 } // namespace OHOS::Ace

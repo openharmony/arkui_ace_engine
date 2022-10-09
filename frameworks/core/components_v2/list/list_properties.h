@@ -56,6 +56,26 @@ enum class StickyStyle : uint32_t {
     FOOTER = 2,
 };
 
+enum class StickyMode {
+    NONE = 0,
+    NORMAL,
+    OPACITY,
+};
+
+enum class SwipeEdgeEffect {
+    Spring = 0,
+    None,
+};
+
+struct EditMode {
+    enum : uint32_t {
+        NONE = 0,
+        DELETABLE = (1 << 0),
+        MOVABLE = (1 << 1),
+        SHAM = (1 << 2), // this enum value [SHAM] is added for inspector use, it works as [NONE]
+    };
+};
+
 struct ItemDivider final {
     Dimension strokeWidth = 0.0_vp;
     Dimension startMargin = 0.0_vp;
@@ -81,6 +101,7 @@ using OnItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
 using OnItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
 using OnItemDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
 using OnItemDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
+using OnSelectFunc = std::function<void(bool)>;
 
 } // namespace OHOS::Ace
 

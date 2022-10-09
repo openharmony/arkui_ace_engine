@@ -89,7 +89,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   private persistProp<T>(propName: string, defaultValue: T): void {
     if (this.persistProp1(propName, defaultValue)) {
       // persist new prop
-      console.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
+      stateMgmtConsole.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
       PersistentStorage.Storage_.set(propName, this.links_.get(propName).get());
     }
   }
@@ -99,24 +99,24 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   // does everything except writing prop to disk
   private persistProp1<T>(propName: string, defaultValue: T): boolean {
     if (defaultValue == null || defaultValue == undefined) {
-      console.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
+      stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
       return false;
     }
 
     if (this.links_.get(propName)) {
-      console.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
+      stateMgmtConsole.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
       return false;
     }
 
     let link = AppStorage.Link(propName, this);
     if (link) {
-      console.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
+      stateMgmtConsole.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
       this.links_.set(propName, link);
     } else {
       let newValue: T = PersistentStorage.Storage_.get(propName);
       let returnValue: T;
       if (!newValue) {
-        console.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
+        stateMgmtConsole.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
         returnValue = defaultValue;
       }
       else {
@@ -124,7 +124,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
       }
       link = AppStorage.SetAndLink(propName, returnValue, this);
       this.links_.set(propName, link);
-      console.debug(`PersistentStorage: created new persistent prop for ${propName}`);
+      stateMgmtConsole.debug(`PersistentStorage: created new persistent prop for ${propName}`);
     }
     return true;
   }
@@ -143,29 +143,29 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
       link.aboutToBeDeleted();
       this.links_.delete(propName);
       PersistentStorage.Storage_.delete(propName);
-      console.debug(`PersistentStorage: deleteProp: no longer persisting '${propName}'.`);
+      stateMgmtConsole.debug(`PersistentStorage: deleteProp: no longer persisting '${propName}'.`);
     } else {
-      console.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
+      stateMgmtConsole.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
     }
   }
 
   private write(): void {
     this.links_.forEach((link, propName, map) => {
-      console.debug(`PersistentStorage: writing ${propName} to storage`);
+      stateMgmtConsole.debug(`PersistentStorage: writing ${propName} to storage`);
       PersistentStorage.Storage_.set(propName, link.get());
     });
   }
 
   public propertyHasChanged(info?: PropertyInfo): void {
-    console.debug("PersistentStorage: property changed");
+    stateMgmtConsole.debug("PersistentStorage: property changed");
     this.write();
   }
 
   // public required by the interface, use the static method instead!
   public aboutToBeDeleted(): void {
-    console.debug("PersistentStorage: about to be deleted");
+    stateMgmtConsole.debug("PersistentStorage: about to be deleted");
     this.links_.forEach((val, key, map) => {
-      console.debug(`PersistentStorage: removing ${key}`);
+      stateMgmtConsole.debug(`PersistentStorage: removing ${key}`);
       val.aboutToBeDeleted();
     });
 
@@ -188,7 +188,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   * @param key property that has changed
   */
   public static NotifyHasChanged(propName: string) {
-    console.debug(`PersistentStorage: force writing '${propName}'-
+    stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
         '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
     PersistentStorage.Storage_.set(propName,
       PersistentStorage.GetOrCreate().links_.get(propName).get());

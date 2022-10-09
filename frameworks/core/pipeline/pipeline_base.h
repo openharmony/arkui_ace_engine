@@ -29,6 +29,7 @@
 #include "base/thread/task_executor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
@@ -399,6 +400,16 @@ public:
         return isJsCard_;
     }
 
+    void SetIsEtsCard(bool isEtsCard)
+    {
+        isEtsCard_ = isEtsCard;
+    }
+
+    bool IsEtsCard() const
+    {
+        return isEtsCard_;
+    }
+
     // Get the dp scale which used to covert dp to logic px.
     double GetDipScale() const
     {
@@ -547,6 +558,26 @@ public:
 
     Rect GetCurrentWindowRect() const;
 
+    void SetPluginOffset(const Offset& offset)
+    {
+        pluginOffset_ = offset;
+    }
+
+    Offset GetPluginOffset() const
+    {
+        return pluginOffset_;
+    }
+
+    void SetPluginEventOffset(const Offset& offset)
+    {
+        pluginEventOffset_ = offset;
+    }
+
+    Offset GetPluginEventOffset() const
+    {
+        return pluginEventOffset_;
+    }
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -566,6 +597,7 @@ protected:
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
+    bool isEtsCard_ = false;
     bool isRightToLeft_ = false;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
@@ -577,6 +609,9 @@ protected:
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
     FrontendType frontendType_;
+
+    Offset pluginOffset_ { 0, 0 };
+    Offset pluginEventOffset_ { 0, 0 };
 
     std::stack<bool> pendingImplicitLayout_;
     std::unique_ptr<Window> window_;
@@ -599,6 +634,9 @@ protected:
     ActionEventHandler actionEventHandler_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
+
+    RefPtr<Clipboard> clipboard_;
+    std::function<void(const std::string&)> clipboardCallback_ = nullptr;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

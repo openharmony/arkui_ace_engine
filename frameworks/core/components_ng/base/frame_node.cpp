@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include <list>
+#include <type_traits>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -136,20 +137,18 @@ void FrameNode::InitializePatternAndContext()
 
 void FrameNode::DumpInfo()
 {
-    DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
     DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
                                                    : "NA"));
-    DumpLog::GetInstance().AddDesc(std::string("LayoutConstraint: ")
-                                       .append(layoutProperty_->GetLayoutConstraint().has_value()
-                                                   ? layoutProperty_->GetLayoutConstraint().value().ToString()
-                                                   : "NA"));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
                                                    ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
                                                    : "NA"));
+    if (pattern_) {
+        pattern_->DumpInfo();
+    }
 }
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -465,8 +464,10 @@ void FrameNode::RebuildRenderContextTree()
     if (!needSyncRenderTree_) {
         return;
     }
+    frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthVisibleFrame(children);
+    frameChildren_ = { children.begin(), children.end() };
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
     needSyncRenderTree_ = false;
@@ -619,7 +620,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
-    auto responseRegionList = GetResponseRegionList();
+    auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto responseRegionList = GetResponseRegionList(paintRect);
     if (SystemProperties::GetDebugEnabled()) {
         LOGD("TouchTest: point is %{public}s in %{public}s", parentLocalPoint.ToString().c_str(), GetTag().c_str());
         for (const auto& rect : responseRegionList) {
@@ -632,16 +634,16 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         return HitTestResult::OUT_OF_REGION;
     }
 
+    HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
     // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.) based on
     // the gesture attributes set by the current parent node (high and low priority, parallel gestures, etc.), the
     // newComingTargets is the template object to collect child nodes gesture and used by gestureHub to pack gesture
     // group.
     TouchTestResult newComingTargets;
-    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
-    const auto& children = GetChildren();
+    const auto localPoint = parentLocalPoint - paintRect.GetOffset();
     bool consumed = false;
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
             break;
         }
@@ -651,16 +653,25 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
-            if (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
+            if ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF)) {
                 break;
             }
         }
 
         // In normal process, the node block the brother node.
-        if (childHitResult == HitTestResult::BUBBLING && child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
+        if (childHitResult == HitTestResult::BUBBLING &&
+            ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF))) {
             consumed = true;
             break;
         }
+    }
+
+    // first update HitTestResult by children status.
+    if (consumed) {
+        testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
+        consumed = false;
     }
 
     if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
@@ -675,21 +686,33 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             newComingTargets.swap(finalResult);
         }
     }
+
+    // combine into exclusive recognizer group.
     result.splice(result.end(), std::move(newComingTargets));
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (gestureHub) {
         gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result);
     }
 
-    if (preventBubbling) {
-        return HitTestResult::STOP_BUBBLING;
+    // consumed by children and return result.
+    if (!consumed) {
+        return testResult;
     }
-    return consumed ? HitTestResult::BUBBLING : HitTestResult::OUT_OF_REGION;
+
+    if (testResult == HitTestResult::OUT_OF_REGION) {
+        // consume only by self.
+        if (preventBubbling) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        return (GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ? HitTestResult::SELF_TRANSPARENT
+                                                                      : HitTestResult::BUBBLING;
+    }
+    // consume by self and children.
+    return testResult;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionList()
+std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect)
 {
-    const auto& rect = geometryNode_->GetFrameRect();
     std::vector<RectF> responseRegionList;
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (!gestureHub) {
@@ -728,7 +751,7 @@ bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::
 HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
 {
-    const auto& rect = geometryNode_->GetFrameRect();
+    const auto& rect = renderContext_->GetPaintRectWithTransform();
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
     // TODO: disableTouchEvent || disabled_ need handle
@@ -740,10 +763,10 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
 
     bool preventBubbling = false;
 
-    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto localPoint = parentLocalPoint - rect.GetOffset();
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        auto& child = *iter;
+        const auto& child = *iter;
         auto childHitResult = child->MouseTest(globalPoint, localPoint, onMouseResult, onHoverResult, hoverNode);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
@@ -778,7 +801,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
 HitTestResult FrameNode::AxisTest(
     const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
 {
-    const auto& rect = geometryNode_->GetFrameRect();
+    const auto& rect = renderContext_->GetPaintRectWithTransform();
     LOGD("AxisTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
     // TODO: disableTouchEvent || disabled_ need handle
@@ -790,7 +813,7 @@ HitTestResult FrameNode::AxisTest(
 
     bool preventBubbling = false;
 
-    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto localPoint = parentLocalPoint - rect.GetOffset();
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
@@ -839,6 +862,18 @@ void FrameNode::OnWindowShow()
 void FrameNode::OnWindowHide()
 {
     pattern_->OnWindowHide();
+}
+
+OffsetF FrameNode::GetOffsetRelativeToWindow() const
+{
+    auto offset = geometryNode_->GetFrameOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        offset += parent->geometryNode_->GetFrameOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+
+    return offset;
 }
 
 } // namespace OHOS::Ace::NG

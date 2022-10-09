@@ -57,7 +57,9 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("save", &JSCanvasRenderer::JsSave);
     JSClass<JSRenderingContext>::CustomMethod("rotate", &JSCanvasRenderer::JsRotate);
     JSClass<JSRenderingContext>::CustomMethod("scale", &JSCanvasRenderer::JsScale);
+    JSClass<JSRenderingContext>::CustomMethod("getTransform", &JSCanvasRenderer::JsGetTransform);
     JSClass<JSRenderingContext>::CustomMethod("setTransform", &JSCanvasRenderer::JsSetTransform);
+    JSClass<JSRenderingContext>::CustomMethod("resetTransform", &JSCanvasRenderer::JsResetTransform);
     JSClass<JSRenderingContext>::CustomMethod("transform", &JSCanvasRenderer::JsTransform);
     JSClass<JSRenderingContext>::CustomMethod("translate", &JSCanvasRenderer::JsTranslate);
     JSClass<JSRenderingContext>::CustomMethod("setLineDash", &JSCanvasRenderer::JsSetLineDash);
@@ -69,7 +71,10 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("getImageData", &JSCanvasRenderer::JsGetImageData);
     JSClass<JSRenderingContext>::CustomMethod("getJsonData", &JSCanvasRenderer::JsGetJsonData);
     JSClass<JSRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
+    JSClass<JSRenderingContext>::CustomMethod("setPixelMap", &JSCanvasRenderer::JsSetPixelMap);
     JSClass<JSRenderingContext>::CustomMethod("drawBitmapMesh", &JSCanvasRenderer::JsDrawBitmapMesh);
+    JSClass<JSRenderingContext>::CustomMethod("filter", &JSCanvasRenderer::JsFilter);
+    JSClass<JSRenderingContext>::CustomMethod("direction", &JSCanvasRenderer::JsDirection);
 
     JSClass<JSRenderingContext>::CustomProperty("fillStyle", &JSCanvasRenderer::JsGetFillStyle,
                                                 &JSCanvasRenderer::JsSetFillStyle);

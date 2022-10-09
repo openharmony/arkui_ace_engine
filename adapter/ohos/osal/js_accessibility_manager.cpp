@@ -453,7 +453,7 @@ bool JsAccessibilityManager::SubscribeToastObserver()
     if (!toastObserver_) {
         return false;
     }
-    auto& config = OHOS::Singleton<OHOS::AccessibilityConfig::AccessibilityConfig>::GetInstance();
+    auto& config = OHOS::AccessibilityConfig::AccessibilityConfig::GetInstance();
     bool isSuccess = config.InitializeContext();
     if (!isSuccess) {
         LOGE("AccessibilityConfig InitializeContext failed");
@@ -469,7 +469,7 @@ bool JsAccessibilityManager::UnsubscribeToastObserver()
     if (!toastObserver_) {
         return false;
     }
-    auto& config = OHOS::Singleton<OHOS::AccessibilityConfig::AccessibilityConfig>::GetInstance();
+    auto& config = OHOS::AccessibilityConfig::AccessibilityConfig::GetInstance();
     bool isSuccess = config.InitializeContext();
     if (!isSuccess) {
         LOGE("AccessibilityConfig InitializeContext failed");

@@ -21,14 +21,14 @@
 #include "src/xml/SkXMLWriter.h"
 
 #include "base/memory/ace_type.h"
-
+#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "frameworks/core/components_ng/svg/parse/svg_context.h"
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
 #include "frameworks/core/components_ng/svg/parse/svg_style.h"
 
 namespace OHOS::Ace::NG {
-class SvgDom : public AceType {
-    DECLARE_ACE_TYPE(SvgDom, AceType);
+class SvgDom : public SvgDomBase {
+    DECLARE_ACE_TYPE(SvgDom, SvgDomBase);
 
 public:
     SvgDom();
@@ -40,7 +40,19 @@ public:
 
     bool ParseSvg(SkStream& svgStream);
 
-    void DrawImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color);
+    void DrawImage(
+        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) override;
+
+    SizeF GetContainerSize() const override
+    {
+        // TODO: return correct size
+        return {};
+    }
+    void SetContainerSize(const SizeF& containerSize) override {}
+    void SetSvgFillColor(const std::optional<Color>& color) override
+    {
+        fillColor_ = color;
+    }
 
 protected:
     void FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& layout);

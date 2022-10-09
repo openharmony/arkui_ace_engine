@@ -749,26 +749,6 @@ public:
         return isHoleValid_;
     }
 
-    void SetPluginOffset(const Offset& offset)
-    {
-        pluginOffset_ = offset;
-    }
-
-    Offset GetPluginOffset() const
-    {
-        return pluginOffset_;
-    }
-
-    void SetPluginEventOffset(const Offset& offset)
-    {
-        pluginEventOffset_ = offset;
-    }
-
-    Offset GetPluginEventOffset() const
-    {
-        return pluginEventOffset_;
-    }
-
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRSUIDirector();
@@ -1199,9 +1179,6 @@ private:
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
-    Offset pluginOffset_ { 0, 0 };
-    Offset pluginEventOffset_ { 0, 0 };
-
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
     bool isKeyboardA_ = false;
@@ -1219,12 +1196,10 @@ private:
     std::function<void(void)> windowStartMoveCallback_ = nullptr;
     std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
 
-    std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     Size selectedItemSize_ { 0.0, 0.0 };
     size_t selectedIndex_ = -1;
     size_t insertIndex_ = -1;
-    RefPtr<Clipboard> clipboard_;
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
     std::string selectedText_;

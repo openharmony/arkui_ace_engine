@@ -89,6 +89,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
 
     RefPtr<PageInfo> pageInfo_;
 
@@ -97,6 +98,7 @@ private:
     std::function<bool()> OnBackPressed_;
 
     bool isOnShow_ = false;
+    bool isLoaded_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

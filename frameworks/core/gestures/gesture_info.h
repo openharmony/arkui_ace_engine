@@ -82,6 +82,7 @@ enum class DragEventAction {
     DRAG_EVENT_START = 0,
     DRAG_EVENT_MOVE,
     DRAG_EVENT_END,
+    DRAG_EVENT_OUT,
 };
 
 struct PanDirection final {

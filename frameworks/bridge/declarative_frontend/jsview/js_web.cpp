@@ -1213,6 +1213,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDrop", &JSWeb::JsOnDrop);
     JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
     JSClass<JSWeb>::StaticMethod("pinchSmoothMode", &JSWeb::PinchSmoothModeEnabled);
+    JSClass<JSWeb>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -3036,7 +3037,7 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
     webComponent->SetScaleChangeId(eventMarker);
 }
 
-JSRef<JSVal> ScrollEventToJSValue(const OnScrollEvent& eventInfo)
+JSRef<JSVal> ScrollEventToJSValue(const WebOnScrollEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("xOffset", eventInfo.GetX());
@@ -3051,7 +3052,7 @@ void JSWeb::OnScroll(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc =
-        AceType::MakeRefPtr<JsEventFunction<OnScrollEvent, 1>>(JSRef<JSFunc>::Cast(args[0]), ScrollEventToJSValue);
+        AceType::MakeRefPtr<JsEventFunction<WebOnScrollEvent, 1>>(JSRef<JSFunc>::Cast(args[0]), ScrollEventToJSValue);
     if (Container::IsCurrentUseNewPipeline()) {
         auto instanceId = Container::CurrentId();
         auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
@@ -3061,7 +3062,7 @@ void JSWeb::OnScroll(const JSCallbackInfo& args)
             CHECK_NULL_VOID(context);
             context->PostAsyncEvent([execCtx, func = func, info]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto* eventInfo = TypeInfoHelper::DynamicCast<OnScrollEvent>(info.get());
+                auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnScrollEvent>(info.get());
                 func->Execute(*eventInfo);
             });
         };
@@ -3071,7 +3072,7 @@ void JSWeb::OnScroll(const JSCallbackInfo& args)
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<OnScrollEvent>(info);
+            auto eventInfo = TypeInfoHelper::DynamicCast<WebOnScrollEvent>(info);
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

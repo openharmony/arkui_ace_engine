@@ -80,7 +80,9 @@ void JSView::RenderJSExecution()
     }
     {
         ACE_SCORING_EVENT("Component.Build");
+        ViewStackProcessor::GetInstance()->PushKey(viewId_);
         jsViewFunction_->ExecuteRender();
+        ViewStackProcessor::GetInstance()->PopKey();
     }
     {
         ACE_SCORING_EVENT("Component.OnRenderDone");
@@ -100,8 +102,8 @@ void JSView::RestoreInstanceId()
 }
 
 JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
-    : viewId_(viewId)
 {
+    viewId_ = viewId;
     jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject, jsRenderFunction);
     LOGD("JSViewFullUpdate constructor");
 }

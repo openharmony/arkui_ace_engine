@@ -241,12 +241,14 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
         int32_t instanceID = context->GetInstanceId();
         formManagerBridge_->AddFormAcquireCallback(
             [weak = WeakClaim(this), instanceID](int64_t id, std::string path, std::string module, std::string data,
-                std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, AppExecFwk::FormJsInfo formJsInfo) {
+                std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, AppExecFwk::FormJsInfo formJsInfo,
+                const FrontendType& frontendType) {
                 ContainerScope scope(instanceID);
                 auto element = weak.Upgrade();
                 auto uiTaskExecutor = SingleTaskExecutor::Make(
                     element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID] {
+                uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak,
+                                        instanceID, frontendType] {
                     ContainerScope scope(instanceID);
                     auto form = weak.Upgrade();
                     if (form) {
@@ -254,7 +256,7 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                         if (container) {
                             container->SetWindowConfig(
                                 { formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
-                            container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc);
+                            container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType);
                         }
                     }
                 });

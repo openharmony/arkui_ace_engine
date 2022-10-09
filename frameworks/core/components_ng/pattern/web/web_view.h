@@ -19,8 +19,8 @@
 #include <functional>
 #include <string>
 
-#include "core/components/web/web_property.h"
 #include "core/components/box/drag_drop_event.h"
+#include "core/components/web/web_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,6 +30,7 @@ using SetWebIdCallback = std::function<void(int32_t)>;
 
 class ACE_EXPORT WebView {
 public:
+    static void Create(const std::string& webData);
     static void Create(const std::string& src, const RefPtr<WebController>& webController);
     static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback);
     static void SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType);

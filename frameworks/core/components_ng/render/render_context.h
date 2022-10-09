@@ -117,8 +117,20 @@ public:
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}
-    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+
     virtual void ClipWithRect(const RectF& rectF) {}
+
+    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+
+    virtual RectF GetPaintRectWithTransform()
+    {
+        return {};
+    }
+
+    virtual RectF GetPaintRectWithoutTransform()
+    {
+        return {};
+    }
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -193,7 +205,6 @@ protected:
     virtual void OnTransformScaleUpdate(const VectorF& value) {}
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
-
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
@@ -203,7 +214,7 @@ protected:
 
     virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
-    
+
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
     virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
