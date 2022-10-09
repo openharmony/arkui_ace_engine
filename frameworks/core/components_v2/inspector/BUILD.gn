@@ -92,5 +92,7 @@ build_component("inspector_v2") {
     "time_picker_dialog_composed_element.cpp",
     "toggle_composed_element.cpp",
     "wrap_composed_element.cpp",
+    "navigation_title_composed_element.cpp",
+    "navigation_menus_composed_element.cpp"
   ]
 }

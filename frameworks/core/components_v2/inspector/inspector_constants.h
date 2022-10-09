@@ -117,6 +117,12 @@ ACE_EXPORT extern const char TOOL_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
 
+// navigation title view
+ACE_EXPORT extern const char NAVIGATION_TITLE_COMPONENT_TAG[];
+
+// navigation menus view
+ACE_EXPORT extern const char NAVIGATION_MENUS_COMPONENT_TAG[];
+
 // row split
 ACE_EXPORT extern const char ROW_SPLIT_COMPONENT_TAG[];
 ACE_EXPORT extern const char ROW_SPLIT_ETS_TAG[];
