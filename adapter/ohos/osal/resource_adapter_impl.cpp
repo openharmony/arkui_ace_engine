@@ -278,11 +278,8 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
 
 std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
 {
-    if (Ace::SystemProperties::GetUnZipHap()) {
-        return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
-    } else {
-        return "resource://RAWFILE/" + fileName;
-    }
+    return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
+    // as web component not support resource format: resource://RAWFILE/{fileName}, use old format
 }
 
 bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
