@@ -277,11 +277,10 @@ void UINode::OnAttachToMainTree() {}
 void UINode::DumpTree(int32_t depth)
 {
     if (DumpLog::GetInstance().GetDumpFile()) {
-        DumpLog::GetInstance().AddDesc("tag: " + tag_);
-        DumpLog::GetInstance().AddDesc("id: " + std::to_string(nodeId_));
+        DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
         DumpInfo();
-        DumpLog::GetInstance().Print(depth, AceType::TypeName(this), static_cast<int32_t>(children_.size()));
+        DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(children_.size()));
     }
 
     for (const auto& item : children_) {

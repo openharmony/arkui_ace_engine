@@ -142,6 +142,15 @@ void FrameNode::DumpInfo()
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
                                                    : "NA"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("top: ").append(std::to_string(GetOffsetRelativeToWindow().GetY())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("left: ").append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("width: ").append(std::to_string(geometryNode_->GetFrameRect().Width())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("height: ").append(std::to_string(geometryNode_->GetFrameRect().Height())));
+    DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
                                                    ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
@@ -155,6 +164,9 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
+    if (renderContext_) {
+        renderContext_->ToJsonValue(json);
+    }
 }
 
 void FrameNode::OnAttachToMainTree()
