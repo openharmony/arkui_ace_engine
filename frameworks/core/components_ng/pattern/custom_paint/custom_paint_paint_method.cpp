@@ -661,6 +661,25 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
     }
 }
 
+void CustomPaintPaintMethod::Clip()
+{
+    skCanvas_->clipPath(skPath_);
+}
+
+void CustomPaintPaintMethod::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    CHECK_NULL_VOID(path);
+    auto offset = OffsetF(0, 0);
+    ParsePath2D(offset, path);
+    Path2DClip();
+    skPath2d_.reset();
+}
+
+void CustomPaintPaintMethod::Path2DClip()
+{
+    skCanvas_->clipPath(skPath2d_);
+}
+
 void CustomPaintPaintMethod::BeginPath()
 {
     skPath_.reset();

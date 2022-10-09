@@ -118,6 +118,26 @@ void CustomPaintPattern::Stroke(const RefPtr<CanvasPath2D>& path)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::Clip()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Clip();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Clip(path);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::BeginPath()
 {
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
