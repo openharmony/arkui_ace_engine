@@ -99,7 +99,7 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "hicollie_native:libhicollie",
       "hisysevent_native:libhisysevent",
-      "hitrace_native:libhitrace",
+      "hitrace_native:libhitracechain",
     ]
     deps += [ "//foundation/graphic/graphic_2d/rosen/modules/frame_analyzer:libframe_analyzer" ]
   }
