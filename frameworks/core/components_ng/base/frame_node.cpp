@@ -634,6 +634,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         return HitTestResult::OUT_OF_REGION;
     }
 
+    HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
     // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.) based on
     // the gesture attributes set by the current parent node (high and low priority, parallel gestures, etc.), the
@@ -652,16 +653,25 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
-            if (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
+            if ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF)) {
                 break;
             }
         }
 
         // In normal process, the node block the brother node.
-        if (childHitResult == HitTestResult::BUBBLING && child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
+        if (childHitResult == HitTestResult::BUBBLING &&
+            ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF))) {
             consumed = true;
             break;
         }
+    }
+
+    // first update HitTestResult by children status.
+    if (consumed) {
+        testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
+        consumed = false;
     }
 
     if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
@@ -676,16 +686,29 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             newComingTargets.swap(finalResult);
         }
     }
+
+    // combine into exclusive recognizer group.
     result.splice(result.end(), std::move(newComingTargets));
     auto gestureHub = eventHub_->GetGestureEventHub();
-    if (gestureHub && consumed) {
+    if (gestureHub) {
         gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result);
     }
 
-    if (preventBubbling) {
-        return HitTestResult::STOP_BUBBLING;
+    // consumed by children and return result.
+    if (!consumed) {
+        return testResult;
     }
-    return consumed ? HitTestResult::BUBBLING : HitTestResult::OUT_OF_REGION;
+
+    if (testResult == HitTestResult::OUT_OF_REGION) {
+        // consume only by self.
+        if (preventBubbling) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        return (GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ? HitTestResult::SELF_TRANSPARENT
+                                                                      : HitTestResult::BUBBLING;
+    }
+    // consume by self and children.
+    return testResult;
 }
 
 std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect)

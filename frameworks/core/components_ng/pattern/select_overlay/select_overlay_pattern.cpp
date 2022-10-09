@@ -221,15 +221,26 @@ void SelectOverlayPattern::HandlePanCancel()
 void SelectOverlayPattern::CheckHandleReverse()
 {
     bool handleReverseChanged = false;
-    if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
-        if (!info_->handleReverse) {
-            info_->handleReverse = true;
-            handleReverseChanged = true;
+    if (NearEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top(), info_->singleLineHeight)) {
+        if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
+            if (!info_->handleReverse) {
+                info_->handleReverse = true;
+                handleReverseChanged = true;
+            }
+        } else {
+            if (info_->handleReverse) {
+                info_->handleReverse = false;
+                handleReverseChanged = true;
+            }
         }
-    }
-    if (info_->firstHandle.paintRect.Left() < info_->secondHandle.paintRect.Left()) {
+    } else if (GreatNotEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top())) {
         if (info_->handleReverse) {
             info_->handleReverse = false;
+            handleReverseChanged = true;
+        }
+    } else {
+        if (!info_->handleReverse) {
+            info_->handleReverse = true;
             handleReverseChanged = true;
         }
     }
@@ -246,8 +257,12 @@ void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& i
     info_->firstHandle = info;
     CheckHandleReverse();
     UpdateHandleHotZone();
-    auto host = GetHost();
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
+    if (!info_->menuInfo.menuIsShow) {
+        info_->menuInfo.menuIsShow = true;
+        host->UpdateToolBar(false);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -259,8 +274,12 @@ void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& 
     info_->secondHandle = info;
     CheckHandleReverse();
     UpdateHandleHotZone();
-    auto host = GetHost();
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
+    if (!info_->menuInfo.menuIsShow) {
+        info_->menuInfo.menuIsShow = true;
+        host->UpdateToolBar(false);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

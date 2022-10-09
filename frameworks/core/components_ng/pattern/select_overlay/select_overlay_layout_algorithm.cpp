@@ -68,7 +68,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     const auto& firstHandleRect = info_->firstHandle.paintRect;
     if (info_->isSingleHandle) {
         double menuSpacing = menuSpacingBetweenText;
-        menuPosition = OffsetF((firstHandleRect.Left() - menuWidth) / 2.0f,
+        menuPosition = OffsetF((firstHandleRect.Left() + firstHandleRect.Right() - menuWidth) / 2.0f,
             static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
     } else {
         double menuSpacing = menuSpacingBetweenText + menuSpacingBetweenHandle;
