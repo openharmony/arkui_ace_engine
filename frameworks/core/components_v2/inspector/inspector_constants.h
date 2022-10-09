@@ -228,6 +228,9 @@ ACE_EXPORT extern const char BLANK_ETS_TAG[];
 ACE_EXPORT extern const char BUTTON_COMPONENT_TAG[];
 ACE_EXPORT extern const char BUTTON_ETS_TAG[];
 
+// common
+ACE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
+
 // divider
 ACE_EXPORT extern const char DIVIDER_COMPONENT_TAG[];
 ACE_EXPORT extern const char DIVIDER_ETS_TAG[];

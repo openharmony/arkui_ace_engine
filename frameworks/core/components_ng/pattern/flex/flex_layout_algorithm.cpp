@@ -582,7 +582,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isInfiniteLayout_ = GreatOrEqual(mainAxisSize_, Infinity<float>());
     }
     if (isInfiniteLayout_) {
-        LOGW("The main axis size is not defined or infinity, disallow flex and weight mode");
+        LOGD("The main axis size is not defined or infinity, disallow flex and weight mode");
     }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto paddingLeft = padding.left.value_or(0.0f);
@@ -635,7 +635,7 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
-        LOGE("FlexLayoutAlgorithm::GetTotalAllocatedSize, children is empty");
+        LOGD("FlexLayoutAlgorithm::GetTotalAllocatedSize, children is empty");
         allocatedSize_ = 0.0f;
         return;
     }
@@ -659,7 +659,7 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
-        LOGE("FlexLayoutAlgorithm::Layout, children is empty");
+        LOGD("FlexLayoutAlgorithm::Layout, children is empty");
         return;
     }
     auto contentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
