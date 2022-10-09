@@ -132,16 +132,24 @@ public:
         return ScopeFocusAlgorithm(isVertical, true, ScopeType::OTHERS);
     }
 
+    const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
+    {
+        return itemPosition_;
+    }
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     float MainSize() const;
-    void PlaySpringAnimation(double dragVelocity);
     void ResetScrollableEvent(bool scrollable);
+    bool IsOutOfBoundary();
+    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
+    void RemoveScrollEdgeEffect();
 
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<Animator> springController_;
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
