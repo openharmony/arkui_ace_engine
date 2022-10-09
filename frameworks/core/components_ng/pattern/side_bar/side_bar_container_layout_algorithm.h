@@ -64,6 +64,16 @@ public:
         needInitRealSideBarWidth_ = needInitRealSideBarWidth;
     }
 
+    float GetRealSideBarHeight() const
+    {
+        return realSideBarHeight_;
+    }
+
+    OffsetF GetSideBarOffset() const
+    {
+        return sideBarOffset_;
+    }
+
 private:
     void MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth);
@@ -78,9 +88,11 @@ private:
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;
+    float realSideBarHeight_ = 0.0f;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
     bool showControlButton_ = true;
     bool needInitRealSideBarWidth_ = true;
+    OffsetF sideBarOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerLayoutAlgorithm);
 };

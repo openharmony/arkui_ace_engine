@@ -100,6 +100,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     auto sideBarConstraint = layoutProperty->CreateChildConstraint();
     sideBarConstraint.selfIdealSize = OptionalSizeF(sideBarIdealSize);
 
+    realSideBarHeight_ = sideBarIdealSize.Height();
     sideBarLayoutWrapper->Measure(sideBarConstraint);
 }
 
@@ -221,8 +222,8 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
             break;
     }
 
-    auto sideBarOffset = OffsetF(sideBarOffsetX, 0.0f);
-    sideBarLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset);
+    sideBarOffset_ = OffsetF(sideBarOffsetX, 0.0f);
+    sideBarLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset_);
     sideBarLayoutWrapper->Layout();
 }
 
