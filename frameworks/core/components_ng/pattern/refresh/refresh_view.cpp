@@ -23,7 +23,7 @@
 #include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/progress/progress_pattern.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -71,20 +71,16 @@ void RefreshView::Pop()
     textLayoutProperty->UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
     textLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 
-    auto progressChild = FrameNode::CreateFrameNode(V2::PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<ProgressPattern>());
-    CHECK_NULL_VOID(progressChild);
-    refreshNode->AddChild(progressChild);
-    auto progressLayoutProperty = progressChild->GetLayoutProperty<ProgressLayoutProperty>();
+    auto loadingProgressChild =
+        FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
+    CHECK_NULL_VOID(loadingProgressChild);
+    refreshNode->AddChild(loadingProgressChild);
+    auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
-    auto progressPaintProperty = progressChild->GetPaintProperty<ProgressPaintProperty>();
+
+    auto progressPaintProperty = loadingProgressChild->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
-    progressPaintProperty->UpdateValue(10.0);
-    progressPaintProperty->UpdateMaxValue(10.0);
-    progressPaintProperty->UpdateColor(Color::BLUE);
-    progressLayoutProperty->UpdateType(ProgressType::SCALE);
-    progressLayoutProperty->UpdateStrokeWidth(Dimension(15, DimensionUnit::VP));
-    progressPaintProperty->UpdateScaleCount(15);
-    progressPaintProperty->UpdateScaleWidth(Dimension(5, DimensionUnit::VP));
+    progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue(Color::BLUE));
     progressLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 }
 void RefreshView::SetRefreshing(bool isRefreshing)
