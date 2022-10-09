@@ -144,6 +144,8 @@ public:
     {
         panda::JSNApi::SetBundle(vm_, isBundle);
     }
+
+    bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
 #endif
 
 private:

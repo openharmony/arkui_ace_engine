@@ -112,6 +112,13 @@ bool ArkJSRuntime::StartDebugger()
     return ret;
 }
 
+#if defined(PREVIEW)
+bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename)
+{
+    return JSNApi::ExecuteModuleBuffer(vm_, data, size, filename);
+}
+#endif
+
 shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)
 {
     return NewUndefined();
