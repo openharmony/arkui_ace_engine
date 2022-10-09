@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -119,6 +120,28 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // TODO: add center position when grid item is less than ceil.
         childWrapper->GetGeometryNode()->SetMarginFrameOffset(CalculateChildOffset(index, layoutWrapper));
         childWrapper->Layout();
+    }
+
+    for (const auto& mainLine : gridLayoutInfo_.gridMatrix_) {
+        int32_t itemIdex = -1;
+        for (const auto& crossLine : mainLine.second) {
+            // If item index is the same, must be the same GridItem, need't layout again.
+            if (itemIdex == crossLine.second) {
+                continue;
+            }
+            itemIdex = crossLine.second;
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
+            if (!wrapper) {
+                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
+                continue;
+            }
+            auto layoutProperty = wrapper->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+            CHECK_NULL_VOID(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
+            gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
+        }
     }
 }
 

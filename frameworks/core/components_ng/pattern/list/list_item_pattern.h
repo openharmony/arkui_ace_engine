@@ -43,6 +43,11 @@ public:
         }
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
 

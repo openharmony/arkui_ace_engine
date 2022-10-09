@@ -186,6 +186,11 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
     pageFocusHub->SetParentFocusable(false);
+
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        context->SetIsNeedShowFocus(false);
+    }
 }
 
 void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
@@ -203,6 +208,11 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageFocusHub);
     pageFocusHub->SetParentFocusable(true);
     pageFocusHub->RequestFocus();
+
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        context->SetIsNeedShowFocus(false);
+    }
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()

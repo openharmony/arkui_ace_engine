@@ -49,7 +49,7 @@ enum class FocusStep : int32_t {
     RIGHT = 2,
     DOWN = 3,
 };
-using GetNextFocusNodeFunc = std::function<WeakPtr<FocusHub>(FocusStep, WeakPtr<FocusHub>)>;
+using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
 struct FocusPattern final {
     FocusPattern() = default;
@@ -339,7 +339,11 @@ public:
 
     void FlushChildrenFocusHub();
 
-    void GetChildren(std::list<RefPtr<FocusHub>>& children) const;
+    std::list<RefPtr<FocusHub>>& GetChildren()
+    {
+        FlushChildrenFocusHub();
+        return focusNodes_;
+    }
 
     bool IsChild() const
     {

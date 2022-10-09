@@ -49,6 +49,25 @@ public:
         }
     }
 
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        auto layoutProperty = dirty->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+        mainIndex_ = gridItemLayoutProperty->GetMainIndex().value_or(-1);
+        crossIndex_ = gridItemLayoutProperty->GetCrossIndex().value_or(-1);
+        return false;
+    }
+
+    int32_t GetMainIndex() const
+    {
+        return mainIndex_;
+    }
+    int32_t GetCrossIndex() const
+    {
+        return crossIndex_;
+    }
+
     void SetForceRebuild(bool forceRebuild)
     {
         forceRebuild_ = forceRebuild;
@@ -69,10 +88,17 @@ public:
         return selectable_;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;
     bool selectable_ = true;
+    int32_t mainIndex_ = -1;
+    int32_t crossIndex_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridItemPattern);
 };

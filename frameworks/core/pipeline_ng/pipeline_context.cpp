@@ -506,6 +506,13 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
     // Need update while key tab pressed
+    if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
+        (event.code == KeyCode::KEY_TAB || event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_LEFT ||
+            event.code == KeyCode::KEY_DPAD_DOWN || event.code == KeyCode::KEY_DPAD_RIGHT)) {
+        isNeedShowFocus_ = true;
+        FlushFocus();
+        return true;
+    }
     auto lastPage = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(lastPage, false);
     if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, lastPage)) {
