@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include <utility>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -104,26 +105,27 @@ void ScrollPattern::OnModifyDone()
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
 
     scrollableEvent_->SetScrollPositionCallback(std::move(offsetTask));
-    RegisterOnScrollTask();
-    RegisterScrollBeginTask();
+    RegisterScrollEventTask();
     gestureHub->AddScrollEdgeEffect(axis_, scrollEffect_);
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
-void ScrollPattern::RegisterOnScrollTask()
+void ScrollPattern::RegisterScrollEventTask()
 {
     auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScrollEvent = eventHub->GetOnScrollEvent();
-    CHECK_NULL_VOID(onScrollEvent);
-    scrollableEvent_->SetOnScrollCallback(std::move(onScrollEvent));
-}
-
-void ScrollPattern::RegisterScrollBeginTask()
-{
-    auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
+    if (onScrollEvent) {
+        scrollableEvent_->SetOnScrollCallback(std::move(onScrollEvent));
+    }
     auto scrollBeginEvent = eventHub->GetScrollBeginEvent();
-    scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginEvent));
+    if (scrollBeginEvent) {
+        scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginEvent));
+    }
+    auto scrollEndEvent = eventHub->GetScrollEndEvent();
+    if (scrollEndEvent) {
+        scrollableEvent_->SetScrollEndCallback(std::move(scrollEndEvent));
+    }
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

@@ -143,8 +143,7 @@ private:
     void HandleCrashTop() const;
     void HandleCrashBottom() const;
 
-    void RegisterScrollBeginTask();
-    void RegisterOnScrollTask();
+    void RegisterScrollEventTask();
     void CreateOrStopAnimator();
     void HandleScrollEffect();
     void HandleScrollBarOutBoundary();

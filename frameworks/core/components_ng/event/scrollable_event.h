@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 
 using OnScrollCallback = std::function<void(Dimension, Dimension)>;
+using ScrollEndCallback = std::function<void()>;
 
 class GestureEventHub;
 
@@ -75,6 +76,19 @@ public:
         return onScrollCallback_;
     }
 
+    void SetScrollEndCallback(ScrollEndCallback&& scrollEndCallback)
+    {
+        if (!scrollEndCallback) {
+            return;
+        }
+        scrollEndCallback_ = std::move(scrollEndCallback);
+    }
+
+    const ScrollEndCallback& GetScrollEndCallback() const
+    {
+        return scrollEndCallback_;
+    }
+
     void SetOutBoundaryCallback(OutBoundaryCallback&& outBoundaryCallback)
     {
         if (!outBoundaryCallback) {
@@ -97,6 +111,7 @@ private:
     ScrollPositionCallback callback_;
     OnScrollCallback onScrollCallback_;
     ScrollBeginCallback scrollBeginCallback_;
+    ScrollEndCallback scrollEndCallback_;
     OutBoundaryCallback outBoundaryCallback_;
     Axis axis_ = Axis::VERTICAL;
 };
