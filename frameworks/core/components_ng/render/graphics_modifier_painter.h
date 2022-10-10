@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 class GrayScaleModifier : public RSForegroundStyleModifier {
 public:
     GrayScaleModifier() = default;
-    ~GrayScaleModifier() = default;
+    ~GrayScaleModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override
     {
@@ -54,7 +54,7 @@ private:
 class BrightnessModifier : public RSForegroundStyleModifier {
 public:
     BrightnessModifier() = default;
-    ~BrightnessModifier() = default;
+    ~BrightnessModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override
     {
@@ -79,7 +79,7 @@ private:
 class ContrastModifier : public RSForegroundStyleModifier {
 public:
     ContrastModifier() = default;
-    ~ContrastModifier() = default;
+    ~ContrastModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override
     {
@@ -104,7 +104,7 @@ private:
 class SaturateModifier : public RSForegroundStyleModifier {
 public:
     SaturateModifier() = default;
-    ~SaturateModifier() = default;
+    ~SaturateModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override
     {
@@ -129,7 +129,7 @@ private:
 class SepiaModifier : public RSForegroundStyleModifier {
 public:
     SepiaModifier() = default;
-    ~SepiaModifier() = default;
+    ~SepiaModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override
     {
@@ -154,7 +154,7 @@ private:
 class InvertModifier : public RSForegroundStyleModifier {
 public:
     InvertModifier() = default;
-    ~InvertModifier() = default;
+    ~InvertModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override
     {
@@ -179,7 +179,7 @@ private:
 class HueRotateModifier : public RSForegroundStyleModifier {
 public:
     HueRotateModifier() = default;
-    ~HueRotateModifier() = default;
+    ~HueRotateModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override
     {
@@ -205,7 +205,7 @@ class ColorBlend : public RSAnimatableArithmetic<ColorBlend> {
 public:
     ColorBlend() = default;
     explicit ColorBlend(const Color& color) : colorBlend_(color) {}
-    ~ColorBlend() = default;
+    ~ColorBlend() override = default;
 
     ColorBlend Add(const ColorBlend& value) const override
     {
@@ -239,7 +239,7 @@ private:
 class ColorBlendModifier : public RSForegroundStyleModifier {
 public:
     ColorBlendModifier() = default;
-    ~ColorBlendModifier() = default;
+    ~ColorBlendModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override
     {

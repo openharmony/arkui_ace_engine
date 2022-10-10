@@ -34,9 +34,11 @@
 #include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t COLOR_MASK = 0xff000000;
+
 namespace {
-constexpr int CORNER_NUMS = 4;
+
+constexpr int32_t CORNER_NUMS = 4;
+constexpr uint32_t COLOR_MASK = 0xff000000;
 
 template<typename T>
 class Evaluator : public AceType {
@@ -935,7 +937,7 @@ void SkiaDecorationPainter::PaintGrayScale(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-            float matrix[20] = { 0 };
+            float matrix[20] = { 0.0f };
             matrix[0] = matrix[5] = matrix[10] = 0.2126f * scale;
             matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
             matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
@@ -962,7 +964,7 @@ void SkiaDecorationPainter::PaintBrightness(
         canvas->clipRRect(outerRRect, true);
         SkPaint paint;
         paint.setAntiAlias(true);
-        float matrix[20] = { 0 };
+        float matrix[20] = { 0.0f };
         // shift brightness to (-1, 1)
         bright = bright - 1;
         matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
@@ -987,7 +989,7 @@ void SkiaDecorationPainter::PaintContrast(
         canvas->clipRRect(outerRRect, true);
         SkPaint paint;
         paint.setAntiAlias(true);
-        float matrix[20] = { 0 };
+        float matrix[20] = { 0.0f };
         matrix[0] = matrix[6] = matrix[12] = contrasts;
         matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts) / 255;
         matrix[18] = 1.0f;
@@ -1027,7 +1029,7 @@ void SkiaDecorationPainter::PaintSaturate(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-            float matrix[20] = { 0 };
+            float matrix[20] = { 0.0f };
             matrix[0] = 0.3086f * (1 - saturates) + saturates;
             matrix[1] = matrix[11] = 0.6094f * (1 - saturates);
             matrix[2] = matrix[7] = 0.0820f * (1 - saturates);
@@ -1056,7 +1058,7 @@ void SkiaDecorationPainter::PaintSepia(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-            float matrix[20] = { 0 };
+            float matrix[20] = { 0.0f };
             matrix[0] = 0.393f * sepias;
             matrix[1] = 0.769f * sepias;
             matrix[2] = 0.189f * sepias;
@@ -1087,7 +1089,7 @@ void SkiaDecorationPainter::PaintInvert(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-            float matrix[20] = { 0 };
+            float matrix[20] = { 0.0f };
             if (inverts > 1.0) {
                 inverts = 1.0;
             }
@@ -1118,7 +1120,7 @@ void SkiaDecorationPainter::PaintHueRotate(
             while (GreatOrEqual(hueRotate, 360)) {
                 hueRotate -= 360;
             }
-            float matrix[20] = { 0 };
+            float matrix[20] = { 0.0f };
             int32_t type = hueRotate / 120;
             float N = (hueRotate - 120 * type) / 120;
             switch (type) {
@@ -1149,4 +1151,5 @@ void SkiaDecorationPainter::PaintHueRotate(
         }
     }
 }
+
 } // namespace OHOS::Ace::NG
