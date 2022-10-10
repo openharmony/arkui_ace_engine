@@ -3109,7 +3109,7 @@ class ViewPU extends NativeViewPartialUpdate {
         branchfunc();
     }
     /*
-       Partial updates for ForEach
+       Partial updates for ForEach (no index in itemGenFunc)
        1. Generate IDs for new array.
        2. Set new IDs and get diff to old one stored in C++.
        3. Create new elements.
@@ -3140,6 +3140,43 @@ class ViewPU extends NativeViewPartialUpdate {
         diffIndexArray.forEach((indx) => {
             ForEach.createNewChildStart(newIdArray[indx], this);
             itemGenFunc(arr[indx]);
+            ForEach.createNewChildFinish(newIdArray[indx], this);
+        });
+    }
+    /*
+        Partial updates for ForEach (index in itemGenFunc)
+        1. Generate IDs for new array.
+        2. Set new IDs and get diff to old one stored in C++.
+        3. Create new elements.
+      */
+    forEachWithIndexUpdateFunction(elmtId, _arr, itemGenFunc, _idGenFunc) {
+        
+        if (_idGenFunc == undefined) {
+            
+        }
+        let idGenFunc = function makeIdGenFunction() {
+            // index in local scope
+            // this works as long as idGenFunc in incrementing loop like below
+            let index = 0;
+            // include the index to generate default idGenFunc and also to supplement the given idGenFunc
+            return (item) => `${index++}__${_idGenFunc ? _idGenFunc(item) : JSON.stringify(item)}`;
+        }();
+        let diffIndexArray = []; // New indexes compared to old one.
+        let newIdArray = [];
+        const arr = _arr; // just to trigger a 'get' onto the array
+        // Create array of new ids.
+        arr.forEach((item) => {
+            newIdArray.push(idGenFunc(item));
+        });
+        // set new array on C++ side
+        // C++ returns array of indexes of newly added array items
+        // these are indexes in new child list.
+        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
+        
+        // Create new elements if any.
+        diffIndexArray.forEach((indx) => {
+            ForEach.createNewChildStart(newIdArray[indx], this);
+            itemGenFunc(arr[indx], indx);
             ForEach.createNewChildFinish(newIdArray[indx], this);
         });
     }

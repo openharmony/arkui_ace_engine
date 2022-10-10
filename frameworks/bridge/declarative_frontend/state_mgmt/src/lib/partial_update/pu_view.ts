@@ -317,47 +317,98 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
  /*
-    Partial updates for ForEach
+    Partial updates for ForEach (no index in itemGenFunc)
     1. Generate IDs for new array.
     2. Set new IDs and get diff to old one stored in C++.
     3. Create new elements.
   */
-forEachUpdateFunction(elmtId, _arr, itemGenFunc, idGenFunc) {
-
+forEachUpdateFunction(elmtId : number, 
+  _arr : Array<any>, 
+  itemGenFunc : (item : any) => void, 
+  idGenFunc : (item : any) => string) : void {
   stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction ... `);
 
   if (idGenFunc === undefined) {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
       idGenFunc = function makeIdGenFunction() {
           let index = 0;
-          // Developer should give ID gen function. If not use this default.
-          return (item) => `${index++}_${JSON.stringify(item)}`;
+        // Developer should give ID gen function. If not use this default.
+        return (item) => `${index++}_${JSON.stringify(item)}`;
       }();
-  }
+    }
 
-  let diffIndexArray = []; // New indexes compared to old one.
-  let newIdArray = [];
-  const arr = _arr; // just to trigger a 'get' onto the array
+    let diffIndexArray = []; // New indexes compared to old one.
+    let newIdArray = [];
+    const arr = _arr; // just to trigger a 'get' onto the array
 
-  // Create array of new ids.
-  arr.forEach((item) => {
+    // Create array of new ids.
+    arr.forEach((item) => {
       newIdArray.push(idGenFunc(item));
-  });
+    });
 
-  // set new array on C++ side
-  // C++ returns array of indexes of newly added array items
-  // these are indexes in new child list.
-  ForEach.setIdArray(elmtId, newIdArray,diffIndexArray);
+    // set new array on C++ side
+    // C++ returns array of indexes of newly added array items
+    // these are indexes in new child list.
+    ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
 
-  stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
 
-  // Create new elements if any.
-  diffIndexArray.forEach((indx) => {
+    // Create new elements if any.
+    diffIndexArray.forEach((indx) => {
       ForEach.createNewChildStart(newIdArray[indx], this);
       itemGenFunc(arr[indx]);
       ForEach.createNewChildFinish(newIdArray[indx], this);
-  });
-}
+    });
+  }
+
+  /*
+      Partial updates for ForEach (index in itemGenFunc)
+      1. Generate IDs for new array.
+      2. Set new IDs and get diff to old one stored in C++.
+      3. Create new elements.
+    */
+  forEachWithIndexUpdateFunction(elmtId: number,
+    _arr: Array<any>,
+    itemGenFunc: (item: any, index: number) => void,
+    _idGenFunc: (item: any) => string): void {
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction (witjh item gen index param)... `);
+
+    if (_idGenFunc == undefined) {
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
+    }
+
+    let idGenFunc: (item: any) => string = function makeIdGenFunction() {
+      // index in local scope
+      // this works as long as idGenFunc in incrementing loop like below
+      let index = 0;
+      // include the index to generate default idGenFunc and also to supplement the given idGenFunc
+      return (item) => `${index++}__${_idGenFunc ? _idGenFunc(item) : JSON.stringify(item)}`;
+    }();
+
+    let diffIndexArray = []; // New indexes compared to old one.
+    let newIdArray = [];
+    const arr = _arr; // just to trigger a 'get' onto the array
+
+    // Create array of new ids.
+    arr.forEach((item) => {
+      newIdArray.push(idGenFunc(item));
+    });
+
+    // set new array on C++ side
+    // C++ returns array of indexes of newly added array items
+    // these are indexes in new child list.
+    ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
+
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
+
+    // Create new elements if any.
+    diffIndexArray.forEach((indx) => {
+      ForEach.createNewChildStart(newIdArray[indx], this);
+      itemGenFunc(arr[indx], indx);
+      ForEach.createNewChildFinish(newIdArray[indx], this);
+    });
+  }
+
 
   /**
      * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
@@ -409,4 +460,4 @@ forEachUpdateFunction(elmtId, _arr, itemGenFunc, idGenFunc) {
         : undefined
     ) as SynchedPropertySimpleOneWayPU<T>;
   }
-}
+} 
