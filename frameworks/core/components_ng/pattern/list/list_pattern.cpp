@@ -228,8 +228,12 @@ Axis ListPattern::GetDirection() const
 
 bool ListPattern::IsOutOfBoundary()
 {
-    auto outOfStart = itemPosition_.begin()->second.first >= 0;
-    auto outOfEnd = itemPosition_.rbegin()->second.second <= MainSize();
+    bool outOfStart = false;
+    bool outOfEnd = false;
+    if (!itemPosition_.empty()) {
+        outOfStart = itemPosition_.begin()->second.first >= 0;
+        outOfEnd = itemPosition_.rbegin()->second.second <= MainSize();
+    }
     return outOfStart || outOfEnd;
 }
 
