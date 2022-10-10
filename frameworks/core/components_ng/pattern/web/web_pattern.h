@@ -176,6 +176,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     void UpdateTouchHandleForOverlay();
+    void UpdateLocale();
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
