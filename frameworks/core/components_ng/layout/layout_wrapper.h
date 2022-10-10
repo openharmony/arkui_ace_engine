@@ -113,6 +113,7 @@ public:
 
     RefPtr<FrameNode> GetHostNode() const;
     std::string GetHostTag() const;
+    int32_t GetHostDepth() const;
 
     bool IsActive() const
     {
@@ -188,6 +189,19 @@ public:
         return distance;
     }
 
+    bool IsOutOfLayout() const
+    {
+        return outOfLayout_;
+    }
+
+    void SetOutOfLayout(bool outOfLayout)
+    {
+        outOfLayout_ = outOfLayout;
+    }
+
+    // Gets the flag attribute with descendant node
+    PropertyChangeFlag GetFlagWithDescendant();
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;
@@ -209,7 +223,11 @@ private:
     bool isActive_ = false;
     bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;
-    bool measureContent_ = false;
+    std::optional<bool> skipMeasureContent_;
+    std::optional<PropertyChangeFlag> descendantFlag_;
+
+    // When the location property is set, it departs from the layout flow.
+    bool outOfLayout_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

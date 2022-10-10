@@ -192,6 +192,10 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             state_ = DetectState::DETECTED;
             if (useCatchMode_) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+                if (state_ == DetectState::DETECTED) {
+                    LOGW("fail to fire Adjudicate, reset state.");
+                    Reset();
+                }
             } else {
                 OnAccepted();
             }

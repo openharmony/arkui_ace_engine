@@ -16,6 +16,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -103,23 +104,32 @@ std::string LayoutWrapper::GetHostTag() const
     return "";
 }
 
+int32_t LayoutWrapper::GetHostDepth() const
+{
+    auto host = GetHostNode();
+    if (host) {
+        return host->GetDepth();
+    }
+    return -1;
+}
+
 // This will call child and self measure process.
 void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipMeasure()) {
-        LOGD("the layoutAlgorithm skip measure");
-        return;
-    }
     auto host = GetHostNode();
     if (!layoutProperty_ || !geometryNode_ || !host) {
         LOGE("Measure failed: the layoutProperty_ or geometryNode_ or host is nullptr");
         return;
     }
 
-    if (parentConstraint == geometryNode_->GetParentLayoutConstraint()) {
-        isContraintNoChanged_ = true;
+    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipMeasure()) {
+        LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
+            host->GetDepth());
+        return;
     }
 
+    auto preConstraint = layoutProperty_->GetLayoutConstraint();
+    auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
     if (parentConstraint) {
         geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
         layoutProperty_->UpdateGridConstraint(GetHostNode());
@@ -134,55 +144,84 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     layoutProperty_->UpdateContentConstraint();
     geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
 
-    LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
+    isContraintNoChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
+    if (!isContraintNoChanged_) {
+        isContraintNoChanged_ =
+            contentConstraint ? contentConstraint == layoutProperty_->GetContentLayoutConstraint() : false;
+    }
+
+    LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", host->GetTag().c_str(), host->GetDepth(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
-    if (isContraintNoChanged_ && !CheckNeedMeasure(layoutProperty_->GetPropertyChangeFlag())) {
-        LOGD("%{public}s skip measure content, constrain flag: %{public}d, measure flag: %{public}d",
-            host->GetTag().c_str(), isContraintNoChanged_, layoutProperty_->GetPropertyChangeFlag());
-    } else {
-        auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
-        measureContent_ = true;
-        if (size.has_value()) {
-            geometryNode_->SetContentSize(size.value());
+    if (isContraintNoChanged_ && !skipMeasureContent_) {
+        // need check descendant flag.
+        descendantFlag_ = descendantFlag_ ? descendantFlag_ : GetFlagWithDescendant();
+        // Need to remove layout flag when measure and layout make independent in each pattern layoutAlgorithm like
+        // flex.
+        if (!(CheckNeedMeasure(descendantFlag_.value()) || CheckNeedLayout(descendantFlag_.value()))) {
+            LOGD("%{public}s (depth: %{public}d) skip measure content, constrain flag: %{public}d, measure flag: "
+                 "%{public}d",
+                host->GetTag().c_str(), host->GetDepth(), isContraintNoChanged_,
+                layoutProperty_->GetPropertyChangeFlag() | descendantFlag_.value());
+            skipMeasureContent_ = true;
         }
     }
 
-    layoutAlgorithm_->Measure(this);
+    if (!skipMeasureContent_.value_or(false)) {
+        skipMeasureContent_ = false;
+        auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
+        if (size.has_value()) {
+            geometryNode_->SetContentSize(size.value());
+        }
+        layoutAlgorithm_->Measure(this);
 
-    // check aspect radio.
-    const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
-    auto hasAspectRatio = magicItemProperty ? magicItemProperty->HasAspectRatio() : false;
-    if (hasAspectRatio) {
-        auto aspectRatio = magicItemProperty->GetAspectRatioValue();
-        // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and aspectRatio
-        // are all set, the height is not used.
-        auto width = geometryNode_->GetFrameSize().Width();
-        LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
-            geometryNode_->GetFrameSize().Height());
-        auto height = width / aspectRatio;
-        LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
-        geometryNode_->SetFrameSize(SizeF({ width, height }));
+        // check aspect radio.
+        const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
+        auto hasAspectRatio = magicItemProperty ? magicItemProperty->HasAspectRatio() : false;
+        if (hasAspectRatio) {
+            auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+            // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
+            // aspectRatio are all set, the height is not used.
+            auto width = geometryNode_->GetFrameSize().Width();
+            LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
+                geometryNode_->GetFrameSize().Height());
+            auto height = width / aspectRatio;
+            LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
+            geometryNode_->SetFrameSize(SizeF({ width, height }));
+        }
     }
 
-    LOGD("on Measure Done: %{public}s, Size: %{public}s", GetHostTag().c_str(),
-        geometryNode_->GetFrameSize().ToString().c_str());
+    LOGD("on Measure Done: type: %{public}s, depth: %{public}d, Size: %{public}s", host->GetTag().c_str(),
+        host->GetDepth(), geometryNode_->GetFrameSize().ToString().c_str());
 }
 
 // Called to perform layout children.
 void LayoutWrapper::Layout()
 {
-    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipLayout()) {
-        LOGD("the layoutAlgorithm skip layout");
-        return;
-    }
     auto host = GetHostNode();
     if (!layoutProperty_ || !geometryNode_ || !host) {
         LOGE("Layout failed: the layoutProperty_ or geometryNode_ or host or frameNode is nullptr");
         return;
     }
 
-    LOGD("On Layout begin: %{public}s", GetHostTag().c_str());
+    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipLayout()) {
+        LOGD(
+            "%{public}s, depth: %{public}d: the layoutAlgorithm skip layout", host->GetTag().c_str(), host->GetDepth());
+        return;
+    }
+
+    LOGD("On Layout begin: type: %{public}s, depth: %{public}d", host->GetTag().c_str(), host->GetDepth());
+
+    if ((skipMeasureContent_ == true)) {
+        LOGD("%{public}s (depth: %{public}d) skip measure content and layout flag is %{public}d, descendant flag "
+             "is %{public}d skip layout process",
+            host->GetTag().c_str(), host->GetDepth(), layoutProperty_->GetPropertyChangeFlag(),
+            descendantFlag_.value());
+        LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
+            host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
+        return;
+    }
+
     if (!layoutProperty_->GetLayoutConstraint()) {
         const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
         if (parentLayoutConstraint) {
@@ -199,13 +238,38 @@ void LayoutWrapper::Layout()
     // TODO: add grid container offset prop.
 
     layoutAlgorithm_->Layout(this);
-    LOGD("On Layout Done: %{public}s, Offset: %{public}s", GetHostTag().c_str(),
-        geometryNode_->GetFrameOffset().ToString().c_str());
+    LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
+        host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
 }
 
 bool LayoutWrapper::SkipMeasureContent() const
 {
-    return !measureContent_;
+    return (skipMeasureContent_ == true) || layoutAlgorithm_->SkipMeasure();
+}
+
+PropertyChangeFlag LayoutWrapper::GetFlagWithDescendant()
+{
+    if (descendantFlag_) {
+        return descendantFlag_.value();
+    }
+    PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
+    for (const auto& child : children_) {
+        if (!child) {
+            continue;
+        }
+        flag = child->GetFlagWithDescendant() | flag;
+    }
+    if (layoutWrapperBuilder_) {
+        const auto& children = layoutWrapperBuilder_->GetCachedChildLayoutWrapper();
+        for (const auto& child : children) {
+            if (!child) {
+                continue;
+            }
+            flag = child->GetFlagWithDescendant() | flag;
+        }
+    }
+    descendantFlag_ = flag;
+    return descendantFlag_.value();
 }
 
 void LayoutWrapper::MountToHostOnMainThread()
