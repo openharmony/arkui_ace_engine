@@ -653,6 +653,11 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
         return;
     }
     container->SetWindowPos(rect.posX_, rect.posY_);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        pipelineContext->SetDisplayWindowRectInfo(
+            Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
+    }
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("OnSizeChange: taskExecutor is null.");

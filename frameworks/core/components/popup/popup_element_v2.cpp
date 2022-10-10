@@ -65,9 +65,10 @@ void PopupElementV2::HandleDeclarativePerformBuild()
             auto targetRender = targetElement->GetRenderNode();
             if (targetRender) {
                 auto targetSize_ = targetRender->GetLayoutSize();
-                auto targetOffset_ = targetRender->GetOffsetToPage();
+                auto targetOffset_ = targetRender->GetGlobalOffset();
                 popup_->GetPopupParam()->SetTargetSize(targetSize_);
-                popup_->GetPopupParam()->SetTargetOffset(targetOffset_);
+                popup_->GetPopupParam()->SetTargetOffset(
+                    targetOffset_ + context->GetDisplayWindowRectInfo().GetOffset());
             }
         }
     }
