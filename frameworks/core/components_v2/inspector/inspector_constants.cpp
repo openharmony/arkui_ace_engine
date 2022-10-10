@@ -112,6 +112,16 @@ const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
 const char TOOL_BAR_ETS_TAG[] = "ToolBar";
 const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";
+const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
+const char NAVBAR_ETS_TAG[] = "NavBar";
+
+// navRouter view
+const char NAVROUTER_VIEW_ETS_TAG[] = "NavRouterView";
+
+// navDestination view
+const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestinationView";
+const char NAVDESTINATION_TITLE_BAR_ETS_TAG[] = "NavDestinationTitleBar";
+const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 
 // row split
 const char ROW_SPLIT_COMPONENT_TAG[] = "RowSplitComponent";

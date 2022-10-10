@@ -90,8 +90,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
@@ -1091,8 +1093,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
+    { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "Navigator", JSNavigator::JSBind },
+    { "NavRouter", JSNavRouter::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },

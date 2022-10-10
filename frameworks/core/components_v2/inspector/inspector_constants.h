@@ -116,6 +116,16 @@ ACE_EXPORT extern const char NAVIGATION_CONTENT_ETS_TAG[];
 ACE_EXPORT extern const char TOOL_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
+ACE_EXPORT extern const char NAVBAR_CONTENT_ETS_TAG[];
+ACE_EXPORT extern const char NAVBAR_ETS_TAG[];
+
+// navRouter view
+ACE_EXPORT extern const char NAVROUTER_VIEW_ETS_TAG[];
+
+// navDestination view
+ACE_EXPORT extern const char NAVDESTINATION_VIEW_ETS_TAG[];
+ACE_EXPORT extern const char NAVDESTINATION_TITLE_BAR_ETS_TAG[];
+ACE_EXPORT extern const char NAVDESTINATION_CONTENT_ETS_TAG[];
 
 // row split
 ACE_EXPORT extern const char ROW_SPLIT_COMPONENT_TAG[];

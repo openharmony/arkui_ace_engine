@@ -13,30 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVIGATION_VIEW_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVIGATION_VIEW_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVROUTER_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVROUTER_H
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSNavigation : public JSContainerBase {
+class JSNavRouter : public JSContainerBase {
 public:
     static void Create();
     static void JSBind(BindingTarget globalObj);
-    static void SetTitleMode(int32_t value);
-    static void SetTitle(const JSCallbackInfo& info);
-    static void SetSubTitle(const std::string& subTitle);
-    static void SetHideTitleBar(bool hide);
-    static void SetHideBackButton(bool hide);
-    static void SetHideToolBar(bool hide);
-    static void SetToolBar(const JSCallbackInfo& info);
-    static void SetMenus(const JSCallbackInfo& info);
-    static void SetMenuCount(int32_t menuCount);
-    static void SetOnTitleModeChanged(const JSCallbackInfo& info);
-    static void SetNavigationMode(int32_t value);
+    static void SetOnStateChange(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVIGATION_VIEW_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVROUTER_H
