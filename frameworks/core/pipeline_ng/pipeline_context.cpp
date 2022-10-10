@@ -367,10 +367,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
-        eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+        eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
 
         for (const auto& weakContext : touchPluginPipelineContext_) {
-            auto pipelineContext = DynamicCast<OHOS::Ace::PipelineContext>(weakContext.Upgrade());
+            auto pipelineContext = DynamicCast<OHOS::Ace::PipelineBase>(weakContext.Upgrade());
             if (!pipelineContext) {
                 continue;
             }
@@ -381,8 +381,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             if (eventManager) {
                 eventManager->SetInstanceId(pipelineContext->GetInstanceId());
             }
+
             pipelineContext->OnTouchEvent(pluginPoint, true);
         }
+    }
+    if (isSubPipe) {
+        return;
     }
 
     if (scalePoint.type == TouchType::MOVE) {
@@ -405,6 +409,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             eventManager_->DispatchTouchEvent(lastMoveEvent.value());
         }
     }
+
     eventManager_->DispatchTouchEvent(scalePoint);
     hasIdleTasks_ = true;
     window_->RequestFrame();
