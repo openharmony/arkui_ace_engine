@@ -77,7 +77,7 @@ void WebPattern::InitEvent()
             WebPattern->UpdateLocale();
         }
     }
-    context.SetConfigChangedCallback(std::move(langTask));
+    context->SetConfigChangedCallback(std::move(langTask));
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
