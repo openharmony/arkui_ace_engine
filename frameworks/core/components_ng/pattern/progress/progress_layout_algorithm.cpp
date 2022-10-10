@@ -36,8 +36,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    auto themeManager = pipeline->GetThemeManager();
-    auto progressTheme = themeManager->GetTheme<ProgressTheme>();
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);

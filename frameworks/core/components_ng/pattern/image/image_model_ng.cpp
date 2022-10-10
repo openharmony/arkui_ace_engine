@@ -32,7 +32,7 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
     auto nodeId = stack->ClaimNodeId();
     ImageSourceInfo imageSourceInfo(src);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, nodeId, [imageSourceInfo]() { return AceType::MakeRefPtr<ImagePattern>(imageSourceInfo); });
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
 }

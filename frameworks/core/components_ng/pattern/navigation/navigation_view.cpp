@@ -58,7 +58,7 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ImageSourceInfo info(src);
-    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>(info));
+    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info);

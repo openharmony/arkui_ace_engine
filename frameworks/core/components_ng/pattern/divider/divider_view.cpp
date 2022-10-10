@@ -58,9 +58,7 @@ void DividerView::LoadTheme(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<DividerTheme>();
+    auto theme = pipeline->GetTheme<DividerTheme>();
     CHECK_NULL_VOID(theme);
     auto castDividerRenderProperty = frameNode->GetLayoutProperty<DividerRenderProperty>();
     if (castDividerRenderProperty) {

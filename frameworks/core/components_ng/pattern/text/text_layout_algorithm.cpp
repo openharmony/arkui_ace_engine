@@ -41,9 +41,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
-    auto themeManager = pipeline->GetThemeManager();
     TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
-        textLayoutProperty->GetTextLineStyle(), themeManager ? themeManager->GetTheme<TextTheme>() : nullptr);
+        textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraphAndLayout(textStyle, textLayoutProperty->GetContent().value_or(""), contentConstraint)) {
             return std::nullopt;

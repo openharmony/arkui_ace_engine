@@ -92,7 +92,7 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto badgeTheme = pipeline->GetThemeManager()->GetTheme<BadgeTheme>();
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
 
     auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
     if (badgeParameters.badgeValue.has_value()) {

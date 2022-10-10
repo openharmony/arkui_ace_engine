@@ -63,9 +63,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     CHECK_NULL_RETURN(dialogContext, dialogNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, dialogNode);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, dialogNode);
-    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, dialogNode);
     dialogContext->UpdateBackgroundColor(dialogTheme->GetMaskColorEnd());
     // data used for inspector

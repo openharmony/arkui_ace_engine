@@ -38,9 +38,7 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto ratingTheme = themeManager->GetTheme<RatingTheme>();
+    auto ratingTheme = pipelineContext->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, nullptr);
 
     auto ratingRenderProperty = DynamicCast<RatingRenderProperty>(paintWrapper->GetPaintProperty());

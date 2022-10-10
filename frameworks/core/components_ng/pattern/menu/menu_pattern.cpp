@@ -31,9 +31,7 @@ void MenuPattern::OnModifyDone()
     // get theme from SelectThemeManager
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>();
 
     // set background color
     auto bgColor = theme->GetBackgroundColor();

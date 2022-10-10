@@ -30,9 +30,7 @@ void ImageAnimatorView::Create()
         V2::IMAGE_ANIMATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImageAnimatorPattern>(); });
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
-        ImageSourceInfo imageSourceInfo("");
-        auto imageNode =
-            FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>(imageSourceInfo));
+        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(imageNode);
         auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
         CHECK_NULL_VOID(imageLayoutProperty);

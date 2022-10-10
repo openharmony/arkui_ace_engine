@@ -42,9 +42,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, nullptr);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto toastTheme = themeManager->GetTheme<ToastTheme>();
+    auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, nullptr);
 
     // update toast props

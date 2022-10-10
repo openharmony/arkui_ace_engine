@@ -53,13 +53,9 @@ void DatePickerView::CreateDatePicker()
 
     auto context = dateNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-    if (!pickerTheme) {
-        LOGE("Theme is null.");
-        return;
-    }
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+
     uint32_t showCount = pickerTheme->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
         SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {

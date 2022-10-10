@@ -21,7 +21,6 @@
 #include "base/geometry/rect.h"
 #include "base/geometry/rrect.h"
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/data_panel/data_panel_theme.h"
@@ -64,12 +63,8 @@ void DataPanelPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) c
     canvas.Save();
     auto offset = paintWrapper->GetContentOffset();
     canvas.Translate(offset.GetX(), offset.GetY());
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
     auto type = paintProperty->GetDataPanelType();
     if (type.has_value() && type.value() == 1) {
         PaintLinearProgress(canvas, paintWrapper);
@@ -79,7 +74,7 @@ void DataPanelPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) c
     auto frameSize = paintWrapper->GetContentSize();
     arcData.center = Offset(frameSize.Width() / 2.0f, frameSize.Height() / 2.0f);
     arcData.radius = std::min(frameSize.Width(), frameSize.Height()) / 2.0f;
-    auto theme = themeManager->GetTheme<DataPanelTheme>();
+    auto theme = pipelineContext->GetTheme<DataPanelTheme>();
     auto colors = theme->GetColorsArray();
     auto defaultThickness = theme->GetThickness().ConvertToPx();
     if (defaultThickness >= arcData.radius) {
@@ -160,10 +155,8 @@ void DataPanelPaintMethod::PaintLinearProgress(RSCanvas& canvas, PaintWrapper* p
     }
     auto height = frameSize.Height();
     auto widthSegment = offset.GetX();
-    auto container = Container::Current();
-    auto pipelineContext = container->GetPipelineContext();
-    auto themeManager = pipelineContext->GetThemeManager();
-    auto theme = themeManager->GetTheme<DataPanelTheme>();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto theme = pipelineContext->GetTheme<DataPanelTheme>();
     auto colors = theme->GetColorsArray();
     PaintBackground(canvas, paintWrapper, totalWidth, height);
 

@@ -111,9 +111,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, OffsetF());
-    auto popupTheme = themeManager->GetTheme<PopupTheme>();
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, OffsetF());
     padding_ = popupTheme->GetPadding();
     border_.SetBorderRadius(popupTheme->GetRadius());

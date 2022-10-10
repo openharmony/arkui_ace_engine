@@ -50,7 +50,7 @@ void RadioPaintMethod::InitializeParam()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetThemeManager()->GetTheme<RadioTheme>();
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
     shadowWidth_ = radioTheme->GetShadowWidth().ConvertToPx();
     borderWidth_ = radioTheme->GetBorderWidth().ConvertToPx();
     activeColor_ = radioTheme->GetActiveColor();

@@ -72,13 +72,9 @@ void TextPickerPattern::OnColumnsBuilding()
 
 uint32_t TextPickerPattern::GetShowOptionCount() const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, 0);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, 0);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, 0);
     auto showCount = pickerTheme->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
@@ -105,9 +101,7 @@ void TextPickerPattern::FlushCurrentOptions()
 
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     Size optionSize;
     DimensionUnit optionSizeUnit = DimensionUnit::PX;
@@ -187,13 +181,9 @@ void TextPickerPattern::UpdateColumnChildPosition(double y)
         return;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     jumpInterval_ = Dimension(pickerTheme->GetJumpInterval().ConvertToPx(), DimensionUnit::PX);
     // the abs of drag delta is less than jump interval.

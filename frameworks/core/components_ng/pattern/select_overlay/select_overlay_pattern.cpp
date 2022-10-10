@@ -91,7 +91,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextOverlayTheme>();
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
     firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
