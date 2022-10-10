@@ -557,7 +557,7 @@ protected:
     virtual void FlushPipelineWithoutAnimation() = 0;
     virtual void FlushMessages() = 0;
     virtual void FlushUITasks() = 0;
-    virtual void OnVirtualKeyboardHeightChange(double keyboardHeight) {}
+    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 

@@ -73,28 +73,24 @@ public:
         caretOffsetX_ = offsetX;
     }
 
-private:
-    void UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
-        TextStyle& textStyle);
-    void UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    static TextDirection GetTextDirection(const std::string& content);
+
+    static void UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
+    static void UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
+
+private:
     void CreateParagraph(const TextStyle& textStyle, std::string content);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline);
     bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
-    static TextDirection GetTextDirection(const std::string& content);
 
     float GetTextFieldDefaultHeight();
     float GetTextFieldDefaultImageHeight();
 
-    void UpdateCaretPositionByTextEdit(LayoutWrapper* layoutWrapper);
-    void UpdateCaretPositionByTouchOffset(LayoutWrapper* layoutWrapper);
-    void CalcCaretByPosition(const RefPtr<Pattern>& pattern, int32_t position);
-    bool ComputeOffsetForCaretDownstream(
-        const TextEditingValue& textEditingValue, int32_t extent, CaretMetrics& result) const;
-    void UpdatePositionOfTextEditingValue(int32_t position, LayoutWrapper* layoutWrapper);
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
 
     std::shared_ptr<RSParagraph> paragraph_;
