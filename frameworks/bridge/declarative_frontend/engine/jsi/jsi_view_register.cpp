@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <vector>
-
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/log/log.h"

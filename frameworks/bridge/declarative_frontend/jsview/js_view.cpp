@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
-#include <string>
-#include <utility>
-
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
@@ -802,6 +799,7 @@ void JSViewPartialUpdate::MarkNeedUpdate()
  */
 void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
 {
+    LOGD("Creating new JSViewPartialUpdate for partial update");
     ACE_DCHECK(Container::IsCurrentUsePartialUpdate());
 
     if (info[0]->IsObject()) {

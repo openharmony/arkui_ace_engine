@@ -14,9 +14,6 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
-// #include "frameworks/bridge/declarative_frontend/jsview/js_view_measure_layout.h"
-#include <cstddef>
-#include <string>
 
 #include "base/log/ace_trace.h"
 #include "bridge/codec/function_call.h"
