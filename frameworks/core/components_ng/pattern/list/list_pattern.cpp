@@ -230,7 +230,7 @@ bool ListPattern::IsOutOfBoundary()
 {
     bool outOfStart = false;
     bool outOfEnd = false;
-    if (!itemPostion.empty()) {
+    if (!itemPosition_.empty()) {
         outOfStart = itemPosition_.begin()->second.first >= 0;
         outOfEnd = itemPosition_.rbegin()->second.second <= MainSize();
     }
