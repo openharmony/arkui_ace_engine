@@ -43,7 +43,7 @@ public:
         auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
         auto drawVertical = (axis == Axis::HORIZONTAL);
-        return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_, drawVertical, std::move(itemPosition_));
+        return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_, drawVertical, itemPosition_);
     }
 
     bool IsAtomicNode() const override
