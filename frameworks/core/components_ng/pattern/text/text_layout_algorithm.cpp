@@ -40,6 +40,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
     TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
         textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());

@@ -55,6 +55,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateDialogAlignment(param.alignment);
     dialogLayoutProp->UpdateDialogOffset(param.offset);
     dialogLayoutProp->UpdateGridCount(param.gridCount);
+    dialogLayoutProp->UpdateUseCustom(param.useCustom);
     auto dialogRenderProp = dialogNode->GetPaintProperty<DialogRenderProperty>();
     CHECK_NULL_RETURN(dialogRenderProp, dialogNode);
     dialogRenderProp->UpdateAutoCancel(param.autoCancel);
@@ -69,7 +70,6 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     // data used for inspector
     std::string data;
     BuildChild(dialogNode, param, data, dialogTheme, customNode);
-
     BuildButtons(param.buttons, dialogTheme, dialogNode);
     dialogNode->MarkModifyDone();
     // TODO: build animation.

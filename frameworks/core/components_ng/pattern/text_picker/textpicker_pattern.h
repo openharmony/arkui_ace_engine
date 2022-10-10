@@ -71,6 +71,8 @@ public:
 
     uint32_t GetShowOptionCount() const;
 
+    std::string GetSelectedObject(bool isColumnChange, int32_t status) const;
+
     void SetSelected(uint32_t value)
     {
         selectedIndex_ = value;
@@ -92,6 +94,11 @@ public:
     const std::vector<std::string>& GetRange() const
     {
         return range_;
+    }
+
+    std::string GetCurrentText() const
+    {
+        return GetOption(GetCurrentIndex());
     }
 
     uint32_t GetCurrentIndex() const

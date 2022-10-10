@@ -25,6 +25,7 @@
 #include "core/components/picker/picker_base_component.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_view.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -192,12 +193,19 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         return;
     }
 
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto dailogEvent = AddEvent(info);
+        TextPickerDialogShow(paramObject, dailogEvent);
+        return;
+    }
+
     auto PickerText = AceType::MakeRefPtr<PickerTextComponent>();
     if (!PickerText) {
         LOGE("PickerText Component is null");
         return;
     }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
     ParseText(PickerText, paramObject);
     DialogProperties properties {};
     properties.alignment = DialogAlignment::CENTER;
@@ -206,6 +214,105 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     AddEvent(PickerText, info);
     PickerText->SetDialogName("pickerTextDialog");
     PickerText->OpenDialog(properties);
+}
+
+void JSTextPickerDialog::TextPickerDialogShow(
+    const JSRef<JSObject>& paramObj, std::map<std::string, NG::DailogTextChangeEvent> dailogEvent)
+{
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    if (!pipelineContext) {
+        return;
+    }
+
+    auto executor = pipelineContext->GetTaskExecutor();
+    if (!executor) {
+        return;
+    }
+
+    auto getSelected = paramObj->GetProperty("selected");
+    auto defaultHeight = paramObj->GetProperty("defaultPickerItemHeight");
+    JSRef<JSArray> getRange = paramObj->GetProperty("range");
+    std::vector<std::string> getRangeVector;
+    if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
+        LOGE("parse range failed");
+        return;
+    }
+
+    std::string value;
+    uint32_t selected = 0;
+    auto getValue = paramObj->GetProperty("value");
+    if (!JSViewAbstract::ParseJsInteger(getSelected, selected) && JSViewAbstract::ParseJsString(getValue, value)) {
+        auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
+        if (valueIterator != getRangeVector.end()) {
+            selected = std::distance(getRangeVector.begin(), valueIterator);
+        }
+    }
+
+    if (selected < 0 || selected >= getRangeVector.size()) {
+        LOGE("selected is out of range");
+    }
+
+    Dimension height;
+    if (defaultHeight->IsNumber() && !JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
+        return;
+    }
+
+    DialogProperties properties;
+    ButtonInfo buttonInfo;
+    properties.alignment = DialogAlignment::CENTER;
+    properties.useCustom = false;
+    buttonInfo.text = "confirm";
+    properties.buttons.emplace_back(buttonInfo);
+    buttonInfo.text = "cancel";
+    properties.buttons.emplace_back(buttonInfo);
+
+    auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    executor->PostTask(
+        [properties, selected, getRangeVector, dailogEvent, height,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ShowTextDialog(properties, selected, height, getRangeVector, dailogEvent);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+std::map<std::string, NG::DailogTextChangeEvent> JSTextPickerDialog::AddEvent(const JSCallbackInfo& info)
+{
+    std::map<std::string, NG::DailogTextChangeEvent> dailogChangeEvent;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("TextPicker AddEvent error, info is non-valid");
+        return dailogChangeEvent;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto onAccept = paramObject->GetProperty("onAccept");
+    if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
+        auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onAccept");
+            func->Execute(keys, info);
+        };
+        dailogChangeEvent["acceptId"] = acceptId;
+    }
+    auto onChange = paramObject->GetProperty("onChange");
+    if (!onChange->IsUndefined() && onChange->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
+        auto changeId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onChange");
+            func->Execute(keys, info);
+        };
+        dailogChangeEvent["changeId"] = changeId;
+    }
+    return dailogChangeEvent;
 }
 
 void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSCallbackInfo& info)
@@ -221,7 +328,7 @@ void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSC
         auto acceptId =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::vector<std::string> keys = { "value", "index"};
+                std::vector<std::string> keys = { "value", "index" };
                 ACE_SCORING_EVENT("TextPickerDialog.onAccept");
                 func->Execute(keys, info);
             });
@@ -230,12 +337,11 @@ void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSC
     auto onCancel = paramObject->GetProperty("onCancel");
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        auto cancelId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("TextPickerDialog.onCancel");
-                func->Execute();
-            });
+        auto cancelId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("TextPickerDialog.onCancel");
+            func->Execute();
+        });
         picker->SetDialogCancelEvent(cancelId);
     }
     auto onChange = paramObject->GetProperty("onChange");
@@ -244,7 +350,7 @@ void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSC
         auto changeId =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::vector<std::string> keys = { "value", "index"};
+                std::vector<std::string> keys = { "value", "index" };
                 ACE_SCORING_EVENT("TextPickerDialog.onChange");
                 func->Execute(keys, info);
             });
