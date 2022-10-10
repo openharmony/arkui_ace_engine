@@ -353,6 +353,7 @@ public:
     void HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction);
     RefPtr<PixelMap> GetDragPixelMap();
     std::string GetUrl();
+    void UpdateLocale();
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);

@@ -35,6 +35,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/back_end_event_manager.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
+#include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
 #include "nweb_adapter_helper.h"
@@ -3260,6 +3261,18 @@ std::string WebDelegate::GetUrl()
         return nweb_->GetUrl();
     }
     return "";
+}
+
+void WebDelegate::UpdateLocale()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        std::string language = AceApplicationInfo::GetInstance().GetLanguage();
+        std::string region = AceApplicationInfo::GetInstance().GetCountryOrRegion();
+        if (!language.empty() || !region.empty()) {
+            nweb_->UpdateLocale(language, region);
+        }
+    }
 }
 #endif
 

@@ -68,6 +68,16 @@ void WebPattern::InitEvent()
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitFocusEvent(focusHub);
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto langTask = [weak = AceType::WeakClaim(this)]() {
+        auto WebPattern = weak.Upgrade();
+        if (WebPattern) {
+            WebPattern->UpdateLocale();
+        }
+    };
+    context->SetConfigChangedCallback(std::move(langTask));
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -860,5 +870,11 @@ void WebPattern::UpdateTouchHandleForOverlay()
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
     }
+}
+
+void WebPattern::UpdateLocale()
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateLocale();
 }
 } // namespace OHOS::Ace::NG
