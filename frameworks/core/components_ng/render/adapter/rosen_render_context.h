@@ -179,19 +179,30 @@ private:
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
     void OnRadialGradientUpdate(const NG::Gradient& value) override;
 
+    void OnFrontBrightnessUpdate(const Dimension& brightness) override;
+    void OnFrontGrayScaleUpdate(const Dimension& grayScale) override;
+    void OnFrontContrastUpdate(const Dimension& contrast) override;
+    void OnFrontSaturateUpdate(const Dimension& saturate) override;
+    void OnFrontSepiaUpdate(const Dimension& sepia) override;
+    void OnFrontInvertUpdate(const Dimension& invert) override;
+    void OnFrontHueRotateUpdate(float hueRotate) override;
+    void OnFrontColorBlendUpdate(const Color& colorBlend) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
     bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
         std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
         std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex);
 
+    void PaintBackground();
+    void PaintClip(const SizeF& frameSize);
+    void PaintGradient(const SizeF& frameSize);
+    void PaintGraphics();
+    void OnPaintGraphics();
+
     RectF AdjustPaintRect();
 
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
-    void PaintBackground();
-    void PaintClip(const SizeF& size);
-    void PaintGradient(const SizeF& frameSize);
-
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
     RefPtr<ImageLoadingContext> bgLoadingCtx_;

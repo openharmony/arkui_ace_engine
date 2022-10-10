@@ -77,6 +77,17 @@ struct DecorationProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
 };
 
+struct GraphicsProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBrightness, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontGrayScale, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontContrast, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontSaturate, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontSepia, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontInvert, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontHueRotate, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontColorBlend, Color);
+};
+
 struct RenderPositionProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Position, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Offset, OffsetT<Dimension>);

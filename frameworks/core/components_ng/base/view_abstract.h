@@ -81,6 +81,16 @@ public:
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
 
+    // graphics
+    static void SetBrightness(const Dimension& value);
+    static void SetGrayScale(const Dimension& value);
+    static void SetContrast(const Dimension& value);
+    static void SetSaturate(const Dimension& value);
+    static void SetSepia(const Dimension& value);
+    static void SetInvert(const Dimension& value);
+    static void SetHueRotate(float value);
+    static void SetColorBlend(const Color& value);
+
     // gradient
     static void SetLinearGradient(const NG::Gradient& gradient);
     static void SetSweepGradient(const NG::Gradient& gradient);

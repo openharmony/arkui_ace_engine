@@ -164,6 +164,18 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
     // Border
+    // Graphics
+    ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBrightness, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontGrayScale, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontContrast, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSaturate, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSepia, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
+
+    // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
@@ -224,6 +236,15 @@ protected:
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
     virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+
+    virtual void OnFrontBrightnessUpdate(const Dimension& value) {}
+    virtual void OnFrontGrayScaleUpdate(const Dimension& value) {}
+    virtual void OnFrontContrastUpdate(const Dimension& value) {}
+    virtual void OnFrontSaturateUpdate(const Dimension& value) {}
+    virtual void OnFrontSepiaUpdate(const Dimension& value) {}
+    virtual void OnFrontInvertUpdate(const Dimension& value) {}
+    virtual void OnFrontHueRotateUpdate(float value) {}
+    virtual void OnFrontColorBlendUpdate(const Color& value) {}
 
 private:
     std::function<void()> requestFrame_;

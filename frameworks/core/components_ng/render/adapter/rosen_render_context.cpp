@@ -17,6 +17,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <memory>
 
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
@@ -28,6 +29,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
+
 #include "core/animation/page_transition_common.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -41,6 +43,7 @@
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/components_ng/render/graphics_modifier_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
 
@@ -139,6 +142,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     if (propClip_) {
         SizeF frameSize(paintRect.Width(), paintRect.Height());
         PaintClip(frameSize);
+    }
+
+    if (propGraphics_) {
+        PaintGraphics();
     }
 }
 
@@ -264,35 +271,29 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
 
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
-    if (!rsNode_) {
-        return;
-    }
+    CHECK_NULL_VOID(rsNode_);
     rsNode_->SetScale(scale.x, scale.y);
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnTransformTranslateUpdate(const Vector3F& translate)
 {
-    if (!rsNode_) {
-        return;
-    }
+    CHECK_NULL_VOID(rsNode_);
     rsNode_->SetTranslate(translate.x, translate.y, translate.z);
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
 {
-    if (!rsNode_) {
-        return;
-    }
+    CHECK_NULL_VOID(rsNode_);
     float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2));
     // pi = 4*atan(1)
-    float angle = rotate.w / 2 * 4 * std::atan(1) / 180;
+    float angle = rotate.w / 2 * 4 * std::atan(1) / 180.0;
     float dx = rotate.x * std::sin(angle) / norm;
     float dy = rotate.y * std::sin(angle) / norm;
     float dz = rotate.z * std::sin(angle) / norm;
     float dw = std::cos(angle);
-    rsNode_->SetRotation(OHOS::Rosen::Quaternion(dx, dy, dz, dw));
+    rsNode_->SetRotation(Rosen::Quaternion(dx, dy, dz, dw));
     RequestNextFrame();
 }
 
@@ -888,6 +889,116 @@ void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
     rsNode_->SetShadowElevation(shadow.GetElevation());
     RequestNextFrame();
+}
+
+void RosenRenderContext::PaintGraphics()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto& graphicsProperty = GetOrCreateGraphics();
+    if (graphicsProperty->HasFrontColorBlend()) {
+        auto colorBlend = graphicsProperty->GetFrontColorBlendValue();
+        auto modifier = std::make_shared<ColorBlendModifier>();
+        modifier->SetCustomData(NG::ColorBlend(colorBlend));
+        rsNode_->AddModifier(modifier);
+    }
+
+    if (graphicsProperty->HasFrontGrayScale()) {
+        auto grayScale = graphicsProperty->GetFrontGrayScaleValue();
+        auto modifier = std::make_shared<GrayScaleModifier>();
+        modifier->SetCustomData(grayScale.Value());
+        rsNode_->AddModifier(modifier);
+    }
+
+    if (graphicsProperty->HasFrontBrightness()) {
+        auto brightness = graphicsProperty->GetFrontBrightnessValue();
+        auto modifier = std::make_shared<BrightnessModifier>();
+        modifier->SetCustomData(brightness.Value());
+        rsNode_->AddModifier(modifier);
+    }
+
+    if (graphicsProperty->HasFrontContrast()) {
+        auto contrast = graphicsProperty->GetFrontContrastValue();
+        auto modifier = std::make_shared<ContrastModifier>();
+        modifier->SetCustomData(contrast.Value());
+        rsNode_->AddModifier(modifier);
+    }
+
+    if (graphicsProperty->HasFrontSaturate()) {
+        auto saturate = graphicsProperty->GetFrontSaturateValue();
+        auto modifier = std::make_shared<SaturateModifier>();
+        modifier->SetCustomData(saturate.Value());
+        rsNode_->AddModifier(modifier);
+    }
+
+    if (graphicsProperty->HasFrontSepia()) {
+        auto sepia = graphicsProperty->GetFrontSepiaValue();
+        auto modifier = std::make_shared<SepiaModifier>();
+        modifier->SetCustomData(sepia.Value());
+        rsNode_->AddModifier(modifier);
+    }
+
+    if (graphicsProperty->HasFrontInvert()) {
+        auto invert = graphicsProperty->GetFrontInvertValue();
+        auto modifier = std::make_shared<InvertModifier>();
+        modifier->SetCustomData(invert.Value());
+        rsNode_->AddModifier(modifier);
+    }
+
+    if (graphicsProperty->HasFrontHueRotate()) {
+        auto hueRotate = graphicsProperty->GetFrontHueRotateValue();
+        auto modifier = std::make_shared<HueRotateModifier>();
+        modifier->SetCustomData(hueRotate);
+        rsNode_->AddModifier(modifier);
+    }
+}
+
+void RosenRenderContext::OnPaintGraphics()
+{
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGraphics();
+    }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnFrontBrightnessUpdate(const Dimension& /*brightness*/)
+{
+    OnPaintGraphics();
+}
+
+void RosenRenderContext::OnFrontGrayScaleUpdate(const Dimension& /*grayScale*/)
+{
+    OnPaintGraphics();
+}
+
+void RosenRenderContext::OnFrontContrastUpdate(const Dimension& /*contrast*/)
+{
+    OnPaintGraphics();
+}
+
+void RosenRenderContext::OnFrontSaturateUpdate(const Dimension& /*saturate*/)
+{
+    OnPaintGraphics();
+}
+
+void RosenRenderContext::OnFrontSepiaUpdate(const Dimension& /*sepia*/)
+{
+    OnPaintGraphics();
+}
+
+void RosenRenderContext::OnFrontInvertUpdate(const Dimension& /*invert*/)
+{
+    OnPaintGraphics();
+}
+
+void RosenRenderContext::OnFrontHueRotateUpdate(float /*hueRotate*/)
+{
+    OnPaintGraphics();
+}
+
+void RosenRenderContext::OnFrontColorBlendUpdate(const Color& /*colorBlend*/)
+{
+    OnPaintGraphics();
 }
 
 void RosenRenderContext::UpdateTransition(const TransitionOptions& options)

@@ -20,6 +20,8 @@
 #include "include/core/SkRRect.h"
 #include "include/core/SkShader.h"
 #include "include/core/SkPath.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkCanvas.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -55,6 +57,15 @@ public:
     static float SkiaDimensionToPx(const Dimension& value, const SizeF& size, LengthMode type);
     static float SkiaGetFloatRadiusValue(
         const Dimension& src, const Dimension& dest, const SizeF& size, LengthMode type);
+        
+    static void PaintGrayScale(const SizeF& frameSize, SkCanvas* canvas, float grayscale);
+    static void PaintBrightness(const SizeF& frameSize, SkCanvas* canvas, float brightness);
+    static void PaintContrast(const SizeF& frameSize, SkCanvas* canvas, float contrast);
+    static void PaintColorBlend(const SizeF& frameSize, SkCanvas* canvas, const Color& colorBlend);
+    static void PaintSaturate(const SizeF& frameSize, SkCanvas* canvas, float saturate);
+    static void PaintSepia(const SizeF& frameSize, SkCanvas* canvas, float sepia);
+    static void PaintInvert(const SizeF& frameSize, SkCanvas* canvas, float invert);
+    static void PaintHueRotate(const SizeF& frameSize, SkCanvas* canvas, float hueRotate);
 };
 } // namespace OHOS::Ace::NG
 

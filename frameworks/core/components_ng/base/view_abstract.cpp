@@ -677,4 +677,44 @@ void ViewAbstract::SetEdgeClip(bool isClip)
 {
     ACE_UPDATE_RENDER_CONTEXT(ClipEdge, isClip);
 }
+
+void ViewAbstract::SetBrightness(const Dimension& brightness)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontBrightness, brightness);
+}
+
+void ViewAbstract::SetGrayScale(const Dimension& grayScale)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontGrayScale, grayScale);
+}
+
+void ViewAbstract::SetContrast(const Dimension& contrast)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontContrast, contrast);
+}
+
+void ViewAbstract::SetSaturate(const Dimension& saturate)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontSaturate, saturate);
+}
+
+void ViewAbstract::SetSepia(const Dimension& sepia)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
+}
+
+void ViewAbstract::SetInvert(const Dimension& invert)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontInvert, invert);
+}
+
+void ViewAbstract::SetHueRotate(float hueRotate)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontHueRotate, hueRotate);
+}
+
+void ViewAbstract::SetColorBlend(const Color& colorBlend)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
+}
 } // namespace OHOS::Ace::NG
