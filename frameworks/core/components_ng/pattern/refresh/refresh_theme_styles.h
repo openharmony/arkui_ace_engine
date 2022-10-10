@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REFRESH_STYLES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REFRESH_STYLES_H
 
-#include "base/geometry/dimension.h"
-#include "base/utils/macros.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/property/property.h"
+#include "frameworks/base/geometry/dimension.h"
+#include "frameworks/base/utils/macros.h"
+#include "frameworks/core/components/common/properties/text_style.h"
+#include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 

@@ -20,12 +20,12 @@
 #include <sys/time.h>
 #include <utility>
 
-#include "base/i18n/localization.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
+#include "frameworks/base/i18n/localization.h"
+#include "frameworks/base/utils/time_util.h"
+#include "frameworks/base/utils/utils.h"
+#include "frameworks/core/components/common/layout/constants.h"
+#include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,6 +38,7 @@ constexpr float DEFAULT_SHOW_TIME_HEIGHT = 300.0;               // Default time 
 constexpr float PERCENT = 0.01;                                 // Percent
 constexpr char REFRESH_LAST_UPDATED[] = "refresh.last_updated"; // I18n for last updated
 constexpr int32_t DEFAULT_INDICATOR_OFFSET = 16.0;
+constexpr int32_t CHILD_COUNT = 2;
 
 } // namespace
 
@@ -143,7 +144,7 @@ void RefreshPattern::HandleDragStart()
         refreshLayoutProperty->UpdateRefreshStatus(RefreshStatus::DRAG);
         FireStateChange(static_cast<int>(RefreshStatus::DRAG));
     }
-    if (host->TotalChildCount() < 2) {
+    if (host->TotalChildCount() < CHILD_COUNT) {
         LOGI("%{public}s have %{public}d child", host->GetTag().c_str(), host->TotalChildCount());
         return;
     }
@@ -176,7 +177,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
     auto lastTimeText = refreshRenderProperty->GetLastTimeTextValue();
     auto timeText = StringUtils::FormatString(lastTimeText.c_str(), GetFormatDateTime().c_str());
     refreshRenderProperty->UpdateTimeText(timeText);
-    if (host->TotalChildCount() < 2) {
+    if (host->TotalChildCount() < CHILD_COUNT) {
         return;
     }
     if (!progressChild_ || !textChild_) {
@@ -234,7 +235,7 @@ void RefreshPattern::HandleDragEnd()
     } else {
         FireStateChange(static_cast<int>(refreshStatus));
     }
-    if (host->TotalChildCount() < 2) {
+    if (host->TotalChildCount() < CHILD_COUNT) {
         LOGI("%{public}s have %{public}d child", host->GetTag().c_str(), host->TotalChildCount());
         return;
     }

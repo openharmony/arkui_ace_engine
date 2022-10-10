@@ -16,14 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_PATTERN_H
 
-#include "base/memory/referenced.h"
-#include "core/common/window/window_extension_connection_proxy.h"
-#include "core/components_ng/pattern/ability_component/ability_component_event_hub.h"
-#include "core/components_ng/pattern/ability_component/ability_component_layout_algorithm.h"
-#include "core/components_ng/pattern/ability_component/ability_component_render_property.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/canvas_image.h"
+#include "frameworks/base/memory/referenced.h"
+#include "frameworks/core/common/window/window_extension_connection_proxy.h"
+#include "frameworks/core/components_ng/pattern/ability_component/ability_component_event_hub.h"
+#include "frameworks/core/components_ng/pattern/ability_component/ability_component_layout_algorithm.h"
+#include "frameworks/core/components_ng/pattern/ability_component/ability_component_render_property.h"
+#include "frameworks/core/components_ng/pattern/pattern.h"
+#include "frameworks/core/components_ng/property/property.h"
+#include "frameworks/core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 

@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_RENDER_PROPERTY_H
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paint_property.h"
+#include "frameworks/core/components/common/layout/constants.h"
+#include "frameworks/core/components_ng/layout/layout_property.h"
+#include "frameworks/core/components_ng/property/property.h"
+#include "frameworks/core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,7 +47,12 @@ public:
         ResetTimeText();
         ResetLastTimeText();
     }
-
+    
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put("refreshing", propIsRefreshing_.value_or(false) ? "true" : "false");
+    }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRefreshing, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TimeText, std::string, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LastTimeText, std::string, PROPERTY_UPDATE_LAYOUT);

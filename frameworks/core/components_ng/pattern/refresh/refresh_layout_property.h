@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_PROPERTY_H
 
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/refresh/refresh_theme_styles.h"
-#include "core/components_ng/property/property.h"
+#include "frameworks/core/components_ng/layout/layout_property.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_theme_styles.h"
+#include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -75,6 +75,15 @@ public:
         ResetScrollableOffset();
         ResetLoadingProcessOffset();
         ResetTriggerRefreshDistance();
+    }
+
+    
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+
+        json->Put("offset", propIndicatorOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("friction", propFriction_.value_or(1));
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RefreshDistance, Dimension, PROPERTY_UPDATE_LAYOUT);

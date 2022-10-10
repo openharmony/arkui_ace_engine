@@ -17,57 +17,52 @@
 
 #include <cstdint>
 
-#include "core/components/refresh/refresh_component.h"
-#include "core/components/refresh/refresh_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/refresh/refresh_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
+#include "frameworks/core/components/refresh/refresh_theme.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<RefreshModel> RefreshModel::instance_ = nullptr;
+
+RefreshModel* RefreshModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::RefreshModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::RefreshModelNG());
+        } else {
+            instance_.reset(new Framework::RefreshModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
-void ParseRefreshingObject(
-    const JSCallbackInfo& info, const JSRef<JSObject>& refreshing, const RefPtr<RefreshComponent>& refreshComponent)
-{
-    JSRef<JSVal> changeEventVal = refreshing->GetProperty("changeEvent");
-    if (changeEventVal->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-        auto eventMarker =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-
-                if (param != "true" && param != "false") {
-                    LOGE("param is not equal true or false, invalid.");
-                    return;
-                }
-
-                bool newValue = StringToBool(param);
-                JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
-                func->ExecuteJS(1, &newJSVal);
-            });
-        refreshComponent->SetChangeEvent(eventMarker);
-    }
-}
 
 void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& refreshing)
 {
     JSRef<JSVal> changeEventVal = refreshing->GetProperty("changeEvent");
-    if (changeEventVal->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-        auto eventMarker = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            if (param != "true" && param != "false") {
-                LOGE("param is not equal true or false, invalid.");
-                return;
-            }
-            bool newValue = StringToBool(param);
-            ACE_SCORING_EVENT("Refresh.ChangeEvent");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::RefreshView::SetChangeEvent(eventMarker);
-    }
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        if (param != "true" && param != "false") {
+            LOGE("param is not equal true or false, invalid.");
+            return;
+        }
+        bool newValue = StringToBool(param);
+        ACE_SCORING_EVENT("Refresh.ChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    RefreshModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
 
 void JSRefresh::JSBind(BindingTarget globalObj)
@@ -98,131 +93,69 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto refreshing = paramObject->GetProperty("refreshing");
     auto jsOffset = paramObject->GetProperty("offset");
-    Dimension offset;
     auto friction = paramObject->GetProperty("friction");
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::RefreshView::Create();
-        NG::RefreshView::SetLoadingDistance(theme->GetLoadingDistance());
-        NG::RefreshView::SetRefreshDistance(theme->GetRefreshDistance());
-        NG::RefreshView::SetProgressDistance(theme->GetProgressDistance());
-        NG::RefreshView::SetProgressDiameter(theme->GetProgressDiameter());
-        NG::RefreshView::SetMaxDistance(theme->GetMaxDistance());
-        NG::RefreshView::SetShowTimeDistance(theme->GetShowTimeDistance());
-        NG::RefreshView::SetTextStyle(theme->GetTextStyle());
-        NG::RefreshView::SetProgressColor(theme->GetProgressColor());
-        NG::RefreshView::SetProgressBackgroundColor(theme->GetBackgroundColor());
+    RefreshModel::GetInstance()->Create();
+    RefreshModel::GetInstance()->SetLoadingDistance(theme->GetLoadingDistance());
+    RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
+    RefreshModel::GetInstance()->SetProgressDistance(theme->GetProgressDistance());
+    RefreshModel::GetInstance()->SetProgressDiameter(theme->GetProgressDiameter());
+    RefreshModel::GetInstance()->SetMaxDistance(theme->GetMaxDistance());
+    RefreshModel::GetInstance()->SetShowTimeDistance(theme->GetShowTimeDistance());
+    RefreshModel::GetInstance()->SetTextStyle(theme->GetTextStyle());
+    RefreshModel::GetInstance()->SetProgressColor(theme->GetProgressColor());
+    RefreshModel::GetInstance()->SetProgressBackgroundColor(theme->GetBackgroundColor());
 
-        if (refreshing->IsBoolean()) {
-            NG::RefreshView::SetRefreshing(refreshing->ToBoolean());
-        } else {
-            JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
-            ParseRefreshingObject(info, refreshingObj);
-            NG::RefreshView::SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
-        }
-        if (ParseJsDimensionVp(jsOffset, offset)) {
-            if (LessOrEqual(offset.Value(), 0.0)) {
-                NG::RefreshView::SetRefreshDistance(theme->GetRefreshDistance());
-            } else {
-                NG::RefreshView::SetUseOffset(true);
-                NG::RefreshView::SetIndicatorOffset(offset);
-            }
-        }
-        if (friction->IsNumber()) {
-            NG::RefreshView::SetFriction(friction->ToNumber<int32_t>());
-            if (friction->ToNumber<int32_t>() <= 0) {
-                NG::RefreshView::IsRefresh(true);
-            }
-        }
-
+    if (refreshing->IsBoolean()) {
+        RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
     } else {
-        RefPtr<RefreshComponent> refreshComponent = AceType::MakeRefPtr<RefreshComponent>();
-        if (!refreshComponent) {
-            LOGE("refreshComponent is null");
-            return;
-        }
-
-        refreshComponent->SetLoadingDistance(theme->GetLoadingDistance());
-        refreshComponent->SetRefreshDistance(theme->GetRefreshDistance());
-        refreshComponent->SetProgressDistance(theme->GetProgressDistance());
-        refreshComponent->SetProgressDiameter(theme->GetProgressDiameter());
-        refreshComponent->SetMaxDistance(theme->GetMaxDistance());
-        refreshComponent->SetShowTimeDistance(theme->GetShowTimeDistance());
-        refreshComponent->SetTextStyle(theme->GetTextStyle());
-        refreshComponent->SetProgressColor(theme->GetProgressColor());
-        refreshComponent->SetBackgroundColor(theme->GetBackgroundColor());
-
-        if (refreshing->IsBoolean()) {
-            refreshComponent->SetRefreshing(refreshing->ToBoolean());
+        JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
+        ParseRefreshingObject(info, refreshingObj);
+        RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
+    }
+    Dimension offset;
+    if (ParseJsDimensionVp(jsOffset, offset)) {
+        if (LessOrEqual(offset.Value(), 0.0)) {
+            RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
         } else {
-            JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
-            ParseRefreshingObject(info, refreshingObj, refreshComponent);
-            refreshComponent->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
+            RefreshModel::GetInstance()->SetUseOffset(true);
+            RefreshModel::GetInstance()->SetIndicatorOffset(offset);
         }
-        if (ParseJsDimensionVp(jsOffset, offset)) {
-            if (LessOrEqual(offset.Value(), 0.0)) {
-                refreshComponent->SetRefreshDistance(theme->GetRefreshDistance());
-            } else {
-                refreshComponent->SetUseOffset(true);
-                refreshComponent->SetIndicatorOffset(offset);
-            }
+    }
+    if (friction->IsNumber()) {
+        RefreshModel::GetInstance()->SetFriction(friction->ToNumber<int32_t>());
+        if (friction->ToNumber<int32_t>() <= 0) {
+            RefreshModel::GetInstance()->IsRefresh(true);
         }
-        if (friction->IsNumber()) {
-            refreshComponent->SetFriction(friction->ToNumber<int32_t>());
-            if (friction->ToNumber<int32_t>() <= 0) {
-                refreshComponent->IsRefresh(true);
-            }
-        }
-        ViewStackProcessor::GetInstance()->Push(refreshComponent);
     }
 }
 
 void JSRefresh::Pop()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::RefreshView::Pop();
-        NG::ViewStackProcessor::GetInstance()->PopContainer();
-        return;
-    }
-    JSContainerBase::Pop();
+    RefreshModel::GetInstance()->Pop();
 }
 
 void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-        auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const int32_t& value) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Refresh.OnStateChange");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::RefreshView::SetOnStateChange(onStateChange);
-        return;
-    }
-
-    if (!JSViewBindEvent(&RefreshComponent::SetOnStateChange, args)) {
-        LOGW("Failed to bind event");
-    }
-    args.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const int32_t& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Refresh.OnStateChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
 }
 
 void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-        auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Refresh.OnRefreshing");
-            auto newJSVal = JSRef<JSVal>::Make();
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::RefreshView::SetOnRefreshing(onRefreshing);
-        return;
-    }
-    if (!JSViewBindEvent(&RefreshComponent::SetOnRefreshing, args)) {
-        LOGW("Failed to bind event");
-    }
-    args.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Refresh.OnRefreshing");
+        auto newJSVal = JSRef<JSVal>::Make();
+        func->ExecuteJS(1, &newJSVal);
+    };
+    RefreshModel::GetInstance()->SetOnRefreshing(std::move(onRefreshing));
 }
 
 } // namespace OHOS::Ace::Framework

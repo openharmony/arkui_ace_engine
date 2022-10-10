@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_EVENT_HUB_H
 
-#include "base/memory/ace_type.h"
-#include "base/utils/noncopyable.h"
-#include "core/components_ng/event/event_hub.h"
+#include "frameworks/base/memory/ace_type.h"
+#include "frameworks/base/utils/noncopyable.h"
+#include "frameworks/core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
 

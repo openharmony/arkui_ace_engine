@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/ability_component/ability_component_view.h"
+#include "frameworks/core/components_ng/pattern/ability_component/ability_component_model_ng.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/ability_component/ability_component_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/core/components/common/layout/constants.h"
+#include "frameworks/core/components_ng/base/frame_node.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
+#include "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.h"
+#include "frameworks/core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-void AbilityComponentView::Create()
+void AbilityComponentModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -32,12 +32,12 @@ void AbilityComponentView::Create()
     stack->Push(frameNode);
 }
 
-void AbilityComponentView::SetWant(const std::string& want)
+void AbilityComponentModelNG::SetWant(const std::string& want)
 {
     ACE_UPDATE_PAINT_PROPERTY(AbilityComponentRenderProperty, Want, want);
 }
 
-void AbilityComponentView::SetOnConnect(ConnectEvent&& onConnect)
+void AbilityComponentModelNG::SetOnConnect(std::function<void()>&& onConnect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -46,7 +46,7 @@ void AbilityComponentView::SetOnConnect(ConnectEvent&& onConnect)
     eventHub->SetOnConnect(std::move(onConnect));
 }
 
-void AbilityComponentView::SetOnDisConnect(DisConnectEvent&& onDisConnect)
+void AbilityComponentModelNG::SetOnDisConnect(std::function<void()>&& onDisConnect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

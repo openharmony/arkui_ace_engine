@@ -256,6 +256,7 @@ template("declarative_js_engine") {
       "jsview/models/lazy_for_each_model_impl.cpp",
       "jsview/models/list_item_model_impl.cpp",
       "jsview/models/list_model_impl.cpp",
+      "jsview/models/refresh_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
       "jsview/models/text_field_model_impl.cpp",
@@ -289,6 +290,7 @@ template("declarative_js_engine") {
       sources += [
         "jsview/js_ability_component.cpp",
         "jsview/js_ability_component_controller.cpp",
+        "jsview/models/ability_component_model_impl.cpp",
       ]
     }
 

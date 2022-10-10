@@ -16,8 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_ABILITY_COMPONENT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_ABILITY_COMPONENT_H
 
-#include "core/components/ability_component/ability_component.h"
-#include "core/components_v2/ability_component/ability_component.h"
+#include "frameworks/core/components/ability_component/ability_component.h"
+#include "frameworks/core/components_v2/ability_component/ability_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
