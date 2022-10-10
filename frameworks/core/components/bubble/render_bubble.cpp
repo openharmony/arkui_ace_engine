@@ -92,6 +92,11 @@ void RenderBubble::Update(const RefPtr<Component>& component)
     weakStack_ = bubble->GetWeakStack();
     useCustom_ = bubble->GetPopupParam()->IsUseCustom();
     targetSpace_ = bubble->GetPopupParam()->GetTargetSpace();
+    isShowInSubWindow_ = bubble->GetPopupParam()->IsShowInSubWindow();
+    if (isShowInSubWindow_) {
+        targetSize_ = bubble->GetPopupParam()->GetTargetSize();
+        targetOffset_ = bubble->GetPopupParam()->GetTargetOffset();
+    }
     SetDisableTouchEvent(bubble->IsDisabledStatus());
     SetInterceptTouchEvent(bubbleComponent_->GetPopupParam()->HasAction() || bubble->IsDisabledStatus());
 
@@ -320,18 +325,20 @@ void RenderBubble::InitTargetSizeAndPosition()
     if (!context) {
         return;
     }
-    auto targetElement = context->GetComposedElementById(targetId_);
-    if (!targetElement) {
-        LOGE("Get target element by target id return null");
-        isShow_ = false;
-        return;
+    if (!isShowInSubWindow_) {
+        auto targetElement = context->GetComposedElementById(targetId_);
+        if (!targetElement) {
+            LOGE("Get target element by target id return null");
+            isShow_ = false;
+            return;
+        }
+        auto targetRender = targetElement->GetRenderNode();
+        if (!targetRender) {
+            return;
+        }
+        targetSize_ = targetRender->GetLayoutSize();
+        targetOffset_ = targetRender->GetOffsetToPage();
     }
-    auto targetRender = targetElement->GetRenderNode();
-    if (!targetRender) {
-        return;
-    }
-    targetSize_ = targetRender->GetLayoutSize();
-    targetOffset_ = targetRender->GetOffsetToPage();
     if (bubbleComponent_ && bubbleComponent_->GetPopupParam()) {
         auto targetMargin = bubbleComponent_->GetPopupParam()->GetTargetMargin();
         targetSize_ -= targetMargin.GetLayoutSizeInPx(context->GetDipScale());
@@ -837,6 +844,21 @@ double RenderBubble::GetArrowOffset(const Placement& placement)
     }
     return std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() * motionRange :
         NormalizeToPx(arrowOffset_), 0.0, motionRange);
+}
+
+void RenderBubble::OnPaintFinish()
+{
+    if (isShowInSubWindow_) {
+        if (bubbleComponent_->GetPopupParam()->HasAction()) {
+            std::vector<Rect> rects;
+            rects.emplace_back(GetRectBasedWindowTopLeft());
+            SubwindowManager::GetInstance()->SetHotAreas(rects);
+            return;
+        }
+        std::vector<Rect> rects;
+        rects.emplace_back(Rect(childOffset_, childSize_));
+        SubwindowManager::GetInstance()->SetHotAreas(rects);
+    }
 }
 
 } // namespace OHOS::Ace

@@ -16,6 +16,7 @@
 #include "third_party/skia/include/core/SkPath.h"
 
 #include "base/geometry/dimension.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/slider/render_slider.h"
@@ -52,6 +53,7 @@ public:
     void FirePopEvent();
     bool HandleMouseEvent(const MouseEvent& event) override;
     double GetArrowOffset(const Placement& placement);
+    void OnPaintFinish() override;
 
 protected:
     enum class ErrorPositionType {
@@ -90,6 +92,7 @@ protected:
     bool showBottomArrow_ = true;
     bool showCustomArrow_ = false;
     bool useCustom_ = false;
+    bool isShowInSubWindow_ = false;
     Edge padding_;
     Edge margin_;
     Border border_;
