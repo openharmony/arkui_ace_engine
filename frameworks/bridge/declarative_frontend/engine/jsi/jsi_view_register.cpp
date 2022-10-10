@@ -342,6 +342,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
 
 panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    LOGD("Load eTS Card start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {
