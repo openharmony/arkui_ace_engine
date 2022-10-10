@@ -31,6 +31,27 @@ public:
     void OnDetachFromMainTree() override;
     static RefPtr<TabContentNode> GetOrCreateTabContentNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+
+    void ResetTabBarItemId()
+    {
+        tabBarItemId_.reset();
+    }
+
+    bool HasTabBarItemId() const
+    {
+        return tabBarItemId_.has_value();
+    }
+
+    int32_t GetTabBarItemId()
+    {
+        if (!tabBarItemId_.has_value()) {
+            tabBarItemId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return tabBarItemId_.value();
+    }
+
+private:
+    std::optional<int32_t> tabBarItemId_;
     ACE_DISALLOW_COPY_AND_MOVE(TabContentNode);
 };
 

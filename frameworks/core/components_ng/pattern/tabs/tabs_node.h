@@ -60,22 +60,6 @@ public:
         return tabBarId_.value();
     }
 
-    int32_t GetTabBarItemByContentId(int32_t tabContentId)
-    {
-        auto iter = tabBarItemIds_.find(tabContentId);
-        if (iter == tabBarItemIds_.end()) {
-            auto tabBarId = ElementRegister::GetInstance()->MakeUniqueId();
-            tabBarItemIds_.try_emplace(tabContentId, tabBarId);
-            return tabBarId;
-        }
-        return iter->second;
-    }
-
-    bool HasTabBarItemByContentId(int32_t tabContentId)
-    {
-        return tabBarItemIds_.find(tabContentId) != tabBarItemIds_.end();
-    }
-
     RefPtr<UINode> GetBuilderByContentId(int32_t tabContentId, const RefPtr<UINode>& builderNode)
     {
         auto iter = builderNode_.find(tabContentId);
@@ -109,7 +93,6 @@ private:
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;
     std::set<int32_t> swiperChildren_;
-    std::map<int32_t, int32_t> tabBarItemIds_;      // Key is id of TabContent, value is id of Column of TabBar.
     std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
 };
 

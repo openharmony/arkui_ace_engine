@@ -59,7 +59,7 @@ void TabContentNode::OnDetachFromMainTree()
         if (currentIdx == deletedIdx) {
             swiperPattern->GetSwiperController()->SwipeTo(0);
         }
-        TabContentView::RemoveTabBarItem(tabs, GetId());
+        TabContentView::RemoveTabBarItem(Referenced::Claim(this));
 
         // Removing tab before current, re-focus on the same tab with new index
         if (currentIdx > deletedIdx) {

@@ -102,24 +102,25 @@ void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t pos
     CHECK_NULL_VOID(tabContent);
     auto tabContentId = tabContent->GetId();
 
-    auto tabContentFrameNode = AceType::DynamicCast<FrameNode>(tabContent);
-    CHECK_NULL_VOID(tabContentFrameNode);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContent);
+    CHECK_NULL_VOID(tabContentNode);
 
     auto tabsNode = FindTabsNode(tabContent);
     CHECK_NULL_VOID(tabsNode);
 
-    if (update && !tabsNode->HasTabBarItemByContentId(tabContentId)) {
-        LOGD("Update only, do nothing");
+    if (update && !tabContentNode->HasTabBarItemId()) {
+        LOGD("Update only, do nothing, tab bar item id  %{public}d", tabContentNode->GetTabBarItemId());
         return;
     }
 
     auto tabBarNode = tabsNode->GetTabBar();
     CHECK_NULL_VOID(tabBarNode);
-    auto tabBarParam = tabContentFrameNode->GetPattern<TabContentPattern>()->GetTabBarParam();
+    auto tabBarParam = tabContentNode->GetPattern<TabContentPattern>()->GetTabBarParam();
 
     // Create column node to contain image and text or builder.
-    auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetTabBarItemByContentId(tabContentId),
+    auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabContentNode->GetTabBarItemId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+
     auto linearLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(linearLayoutProperty);
     linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
@@ -192,17 +193,21 @@ void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t pos
     columnNode->MarkModifyDone();
 }
 
-void TabContentView::RemoveTabBarItem(const RefPtr<TabsNode>& tabsNode, int32_t tabContentId)
+void TabContentView::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)
 {
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = tabsNode->GetTabBar();
-    CHECK_NULL_VOID(tabBarNode);
+    CHECK_NULL_VOID(tabContentNode);
+    if (!tabContentNode->HasTabBarItemId()) {
+        return;
+    }
 
-    auto tabBarItemId = tabsNode->GetTabBarItemByContentId(tabContentId);
-    LOGD("Tab ID: %{public}d, Bar item ID: %{public}d", tabContentId, tabBarItemId);
-
+    auto tabBarItemId = tabContentNode->GetTabBarItemId();
+    LOGD("Tab ID: %{public}d, Bar item ID: %{public}d", tabContentNode->GetId(), tabBarItemId);
     auto tabBarItemNode = ElementRegister::GetInstance()->GetUINodeById(tabBarItemId);
+    CHECK_NULL_VOID(tabBarItemNode);
+    auto tabBarNode = tabBarItemNode->GetParent();
     tabBarNode->RemoveChild(tabBarItemNode);
+    CHECK_NULL_VOID(tabBarNode);
+    tabContentNode->ResetTabBarItemId();
 }
 
 void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
