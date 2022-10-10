@@ -101,6 +101,13 @@ public:
         }
     }
 
+    void SetClipToBounds(bool useClip) override
+    {
+        if (rsNode_) {
+            rsNode_->SetClipToBounds(useClip);
+        }
+    }
+
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 
     void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
@@ -112,6 +119,7 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateBackShadow(const Shadow& shadow) override;
+    void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
     void UpdateTransition(const TransitionOptions& options) override;
@@ -152,7 +160,6 @@ private:
 
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
-    void UpdateBorderWidth(const BorderWidthPropertyF& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
     void OnOpacityUpdate(double opacity) override;
 

@@ -2877,6 +2877,7 @@ void PipelineContext::WindowFocus(bool isFocus)
 {
     onFocus_ = isFocus;
     if (!isFocus) {
+        RootLostFocus();
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }

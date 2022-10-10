@@ -399,6 +399,18 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
         }
     }
 
+    JSRef<JSVal> showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
+    if (showInSubWindowValue->IsBoolean()) {
+        if (popupComponent) {
+            auto param = popupComponent->GetPopupParam();
+            param->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
+        } else if (popupParam) {
+            popupParam->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
+        } else {
+            LOGI("Empty popup.");
+        }
+    }
+
     JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
     if (placementOnTopVal->IsBoolean()) {
         if (popupComponent) {
@@ -593,6 +605,11 @@ void ParseCustomPopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     auto enableArrowValue = popupObj->GetProperty("enableArrow");
     if (enableArrowValue->IsBoolean()) {
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
+    }
+
+    auto showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
+    if (showInSubWindowValue->IsBoolean()) {
+        popupParam->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
     }
 
     auto autoCancelValue = popupObj->GetProperty("autoCancel");
@@ -2960,7 +2977,6 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        Color borderColor;
         if (ParseJsColor(args, borderColor)) {
             NG::ViewAbstract::SetBorderColor(borderColor);
             return;

@@ -118,6 +118,8 @@ public:
 
     void OnHide() override;
 
+    void WindowFocus(bool isFocus) override;
+
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
     {
@@ -177,6 +179,11 @@ public:
 
     void RemoveWindowStateChangedCallback(int32_t nodeId);
 
+    void AddWindowFocusChangedCallback(int32_t nodeId);
+
+    void RemoveWindowFocusChangedCallback(int32_t nodeId);
+
+
     bool GetIsFocusingByTab() const
     {
         return isFocusingByTab_;
@@ -229,6 +236,8 @@ protected:
 private:
     void FlushWindowStateChangedCallback(bool isShow);
 
+    void FlushWindowFocusChangedCallback(bool isFocus);
+
     void FlushTouchEvents();
 
     void FlushBuildFinishCallbacks();
@@ -266,8 +275,12 @@ private:
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
-    // window on show or on hide.
+
+    // window on show or on hide
     std::list<int32_t> onWindowStateChangedCallbacks_;
+    // window on focused or on unfocused
+    std::list<int32_t> onWindowFocusChangedCallbacks_;
+
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;

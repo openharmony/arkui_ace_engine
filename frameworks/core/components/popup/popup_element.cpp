@@ -15,6 +15,7 @@
 
 #include "core/components/popup/popup_element.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "core/components/box/render_box.h"
 #include "core/components/bubble/bubble_component.h"
@@ -50,6 +51,58 @@ void PopupElement::PerformBuild()
     });
 }
 
+bool PopupElement::ShowPopupInSubWindow()
+{
+    const auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    if (!popup_ || popup_->GetPopupParam()->GetTargetId().empty()) {
+        return false;
+    }
+
+    if (!GetThemeManager() || !GetThemeManager()->GetTheme<PopupTheme>()) {
+        return false;
+    }
+
+    auto theme = GetThemeManager()->GetTheme<PopupTheme>();
+    auto showAlphaAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, Curves::FAST_OUT_SLOW_IN);
+
+    TweenOption showOption;
+    showOption.SetDuration(theme->GetShowTime());
+    showOption.SetOpacityAnimation(showAlphaAnimation);
+    RefPtr<TweenComponent> tween = AceType::MakeRefPtr<TweenComponent>(popup_->GetId(), popup_->GetId());
+    tween->SetShadow(ShadowConfig::DefaultShadowM);
+    tween->SetIsFirstFrameShow(false);
+    tween->SetAnimationOperation(AnimationOperation::PLAY);
+    tween->SetTweenOption(showOption);
+
+    RefPtr<BubbleComponent> bubble = AceType::MakeRefPtr<BubbleComponent>(popup_->GetChild());
+    bubble->SetPopupParam(popup_->GetPopupParam());
+    bubble->SetId(popup_->GetId());
+    bubble->SetDisabledStatus(popup_->IsDisabledStatus());
+    bubble->SetStateChangeEvent([weak = WeakClaim(this)](bool isVisible) {
+        auto popup = weak.Upgrade();
+        if (popup) {
+            popup->OnStateChange(isVisible);
+        }
+    });
+    tween->SetChild(bubble);
+    SubwindowManager::GetInstance()->ShowPopup(tween, false);
+    weakStack_ = bubble->GetWeakStack();
+    auto stackElement = weakStack_.Upgrade();
+    if (!stackElement) {
+        return false;
+    }
+    return true;
+}
+
+bool PopupElement::CancelPopupInSubWindow(const ComposeId& id)
+{
+    return SubwindowManager::GetInstance()->CancelPopup(id);
+}
+
 bool PopupElement::ShowPopup()
 {
     const auto context = context_.Upgrade();
@@ -82,11 +135,11 @@ bool PopupElement::ShowPopup()
     bubble->SetId(popup_->GetId());
     bubble->SetDisabledStatus(popup_->IsDisabledStatus());
     bubble->SetStateChangeEvent([weak = WeakClaim(this)](bool isVisible) {
-                auto popup = weak.Upgrade();
-                if (popup) {
-                    popup->OnStateChange(isVisible);
-                }
-            });
+        auto popup = weak.Upgrade();
+        if (popup) {
+            popup->OnStateChange(isVisible);
+        }
+    });
 
     auto stackElement = context->GetLastStack();
     if (!stackElement) {

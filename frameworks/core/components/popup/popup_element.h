@@ -48,6 +48,8 @@ public:
 protected:
     bool ShowPopup();
     bool CancelPopup(const ComposeId& id);
+    bool ShowPopupInSubWindow();
+    bool CancelPopupInSubWindow(const ComposeId& id);
 
     WeakPtr<StackElement> weakStack_;
     RefPtr<PopupComponent> popup_;

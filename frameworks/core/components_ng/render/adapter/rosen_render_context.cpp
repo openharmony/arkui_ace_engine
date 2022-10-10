@@ -386,7 +386,7 @@ void RosenRenderContext::OnBorderColorUpdate(const BorderColorProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateBorderWidth(const BorderWidthPropertyF& value)
+void RosenRenderContext::UpdateBorderWidthF(const BorderWidthPropertyF& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerBorderWidth;

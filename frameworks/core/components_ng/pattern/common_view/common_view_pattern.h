@@ -28,6 +28,10 @@ class CommonViewPattern : public Pattern {
 public:
     CommonViewPattern() = default;
     ~CommonViewPattern() override = default;
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace::NG

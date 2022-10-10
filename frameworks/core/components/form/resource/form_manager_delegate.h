@@ -26,6 +26,7 @@
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_js_info.h"
 #include "want.h"
+#include "want_params_wrapper.h"
 #endif
 
 namespace OHOS::Ace {

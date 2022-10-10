@@ -16,10 +16,8 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include <list>
-#include <type_traits>
 
 #include "base/geometry/ng/point_t.h"
-#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
@@ -34,12 +32,10 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
-#include "core/pipeline/base/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -138,6 +134,8 @@ void FrameNode::InitializePatternAndContext()
 void FrameNode::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
     DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
@@ -271,11 +269,11 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
                     renderContext_->GetBorderStyle()->styleBottom.value_or(BorderStyle::SOLID) });
         }
         if (layoutProperty_->GetLayoutConstraint().has_value()) {
-            renderContext_->UpdateBorderWidth(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
                 ScaleProperty::CreateScaleProperty(),
                 layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
         } else {
-            renderContext_->UpdateBorderWidth(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
                 ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
         }
     }
@@ -862,6 +860,16 @@ void FrameNode::OnWindowShow()
 void FrameNode::OnWindowHide()
 {
     pattern_->OnWindowHide();
+}
+
+void FrameNode::OnWindowFocused()
+{
+    pattern_->OnWindowFocused();
+}
+
+void FrameNode::OnWindowUnfocused()
+{
+    pattern_->OnWindowUnfocused();
 }
 
 OffsetF FrameNode::GetOffsetRelativeToWindow() const

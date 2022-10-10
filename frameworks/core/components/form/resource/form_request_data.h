@@ -30,6 +30,7 @@ struct RequestFormInfo {
     std::string bundleName;
     std::string abilityName;
     std::string moduleName;
+    std::string want;
     bool temporary = false;
     int32_t dimension = -1;
     bool allowUpdate = true;
@@ -40,7 +41,7 @@ struct RequestFormInfo {
     std::string ToString() const
     {
         std::stringstream paramStream;
-        paramStream << bundleName << abilityName << moduleName << cardName << dimension << index << temporary;
+        paramStream << bundleName << abilityName << moduleName << cardName << dimension << index << temporary << want;
         return paramStream.str();
     }
 
@@ -50,7 +51,7 @@ struct RequestFormInfo {
                abilityName == formInfo.abilityName && moduleName == formInfo.moduleName &&
                temporary == formInfo.temporary && dimension == formInfo.dimension &&
                allowUpdate == formInfo.allowUpdate && width == formInfo.width && height == formInfo.height &&
-               index == formInfo.index;
+               index == formInfo.index && want == formInfo.want;
     }
 };
 

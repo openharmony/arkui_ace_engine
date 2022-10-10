@@ -44,7 +44,6 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     }
 
 private:
