@@ -49,13 +49,10 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
 
 bool GeometryNode::Measure(NG::LayoutWrapper* layoutWrapper)
 {
-    LOGD("%s, call geometryNode_ Measure in, %p", OHOS::Ace::DEVTAG.c_str(), this);
     if (measureFunc_) {
-        LOGD("%s, call geometryNode_ Measure in ok", OHOS::Ace::DEVTAG.c_str());
         measureFunc_(layoutWrapper);
         return true;
     }
-    LOGD("%s, call geometryNode_ Measure in fail", OHOS::Ace::DEVTAG.c_str());
     return false;
 }
 

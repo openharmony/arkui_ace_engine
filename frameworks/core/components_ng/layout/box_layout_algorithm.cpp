@@ -30,7 +30,6 @@ namespace OHOS::Ace::NG {
 void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    LOGD("%s, BoxLayoutAlgorithm::Measure, %d", OHOS::Ace::DEVTAG.c_str(), layoutWrapper->GetAllChildrenWithBuild().size());
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
     }
@@ -40,7 +39,6 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
-    LOGD("%s, BoxLayoutAlgorithm::Layout, %d", OHOS::Ace::DEVTAG.c_str(), layoutWrapper->GetAllChildrenWithBuild().size());
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout();
     }

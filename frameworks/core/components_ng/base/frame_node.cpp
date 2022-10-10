@@ -305,7 +305,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         return std::nullopt;
     }
     ACE_SCOPED_TRACE("CreateLayoutTask:PrepareTask");
-    LOGD("%s, CreateLayoutTask:PrepareTask, %d", OHOS::Ace::DEVTAG.c_str(), forceUseMainThread);
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();

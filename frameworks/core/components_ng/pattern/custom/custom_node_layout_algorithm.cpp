@@ -25,7 +25,6 @@ namespace OHOS::Ace::NG {
 
 void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    LOGD("%s, CustomNodeLayoutAlgorithm::Measure, in", OHOS::Ace::DEVTAG.c_str());
     auto host = DynamicCast<CustomMeasureLayoutNode>(layoutWrapper->GetHostNode());
     if (renderFunction_ && host) {
         {
@@ -35,20 +34,11 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         {
             ACE_SCOPED_TRACE("CustomNode:BuildItem");
             // first create child node and wrapper.
-            LOGD("%s, CustomNodeLayoutAlgorithm::Measure, call render", OHOS::Ace::DEVTAG.c_str());
             auto child = renderFunction_();
             renderFunction_ = nullptr;
             CHECK_NULL_VOID(child);
             buildItem_ = child;
             child->AdjustLayoutWrapperTree(Claim(layoutWrapper), true, true);
-        }
-    } else {
-        if (!host) {
-            LOGD("%s, CustomNodeLayoutAlgorithm::Measure, host empty", OHOS::Ace::DEVTAG.c_str());
-        }
-        
-        if(!renderFunction_) {
-            LOGD("%s, CustomNodeLayoutAlgorithm::Measure, renderFunction_ empty", OHOS::Ace::DEVTAG.c_str());
         }
     }
     // then use normal measure step.
@@ -57,9 +47,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     // call js measure
     if (layoutWrapper->GetGeometryNode()->Measure(layoutWrapper)) {
-        LOGD("%s, CustomNodeLayoutAlgorithm::Measure, %d", OHOS::Ace::DEVTAG.c_str(), children.size());
     } else {
-        LOGD("%s, CustomNodeLayoutAlgorithm::Measure, default measure", OHOS::Ace::DEVTAG.c_str());
         for (auto&& child : children) {
             child->Measure(layoutConstraint);
         }
@@ -70,13 +58,9 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void CustomNodeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    LOGD("%s, CustomNodeLayoutAlgorithm::Layout, %d", OHOS::Ace::DEVTAG.c_str(),
-        layoutWrapper->GetAllChildrenWithBuild().size());
     PerformLayout(layoutWrapper);
     if (layoutWrapper->GetGeometryNode()->Layout(layoutWrapper)) {
-        LOGD("%s, CustomNodeLayoutAlgorithm::Layout, custom layout", OHOS::Ace::DEVTAG.c_str());
     } else {
-        LOGD("%s, CustomNodeLayoutAlgorithm::Layout, default layout", OHOS::Ace::DEVTAG.c_str());
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Layout();
         }

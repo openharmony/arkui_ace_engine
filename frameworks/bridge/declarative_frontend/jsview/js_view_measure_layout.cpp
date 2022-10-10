@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,6 @@ std::map<std::string, Local<JSValueRef>> parseJsObject(Local<ObjectRef> obj, Loc
 Local<JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    LOGD("%s, js call measure in", OHOS::Ace::DEVTAG.c_str());
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
@@ -80,11 +79,10 @@ Local<JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCallInfo* runtim
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    LOGD("%s, js call layout in", OHOS::Ace::DEVTAG.c_str());
     auto jsParams = runtimeCallInfo->GetCallArgRef(0)->ToObject(vm);
     auto names = jsParams->GetOwnPropertyNames(vm);
     if (names->Length(vm) != 2) {
-        LOGE("%s, invalid param", OHOS::Ace::DEVTAG.c_str());
+        LOGE("invalid param number for layout");
         (*iterLayoutChildren_)->Layout();
         iterLayoutChildren_++;
         return panda::JSValueRef::Undefined(vm);
@@ -95,7 +93,6 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     auto second = parseJsObject(posInfo, posInfo->ToObject(vm)->GetOwnPropertyNames(vm), vm);
     auto xVal = second.at("x")->ToNumber(vm)->Value();
     auto yVal = second.at("y")->ToNumber(vm)->Value();
-    LOGD("%s, js call layout in, info %f, %f", OHOS::Ace::DEVTAG.c_str(), xVal, yVal);
     (*iterLayoutChildren_)->GetGeometryNode()->SetMarginFrameOffset(NG::OffsetF(xVal, yVal));
     iterLayoutChildren_++;
     return panda::JSValueRef::Undefined(vm);

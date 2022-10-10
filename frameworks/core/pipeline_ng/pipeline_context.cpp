@@ -118,15 +118,11 @@ void PipelineContext::FlushDirtyNodeUpdate()
     for (const auto& weakNode : dirtyNodes) {
         auto node = weakNode.Upgrade();
         if (AceType::InstanceOf<NG::CustomNode>(node)) {
-            LOGD("%s PipelineContext::FlushDirtyNodeUpdate 1", OHOS::Ace::DEVTAG.c_str());
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
             customNode->Update();
         } else if (AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
-            LOGD("%s PipelineContext::FlushDirtyNodeUpdate 2", OHOS::Ace::DEVTAG.c_str());
             auto customNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
             customNode->Update();
-        } else {
-            LOGD("%s PipelineContext::FlushDirtyNodeUpdate 3", OHOS::Ace::DEVTAG.c_str());
         }
     }
 

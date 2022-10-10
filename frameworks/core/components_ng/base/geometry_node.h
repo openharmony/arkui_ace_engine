@@ -193,8 +193,6 @@ public:
     void SetMeasureFunction(std::function<void(NG::LayoutWrapper* layoutWrapper)>&& measureFunc)
     {
         measureFunc_ = std::move(measureFunc);
-        LOGD("%s, set js measure start GeometryNode::SetMeasureFunction, %p, %p", OHOS::Ace::DEVTAG.c_str(), this,
-            &measureFunc_);
     }
 
     void SetBaselineDistance(float baselineDistance)

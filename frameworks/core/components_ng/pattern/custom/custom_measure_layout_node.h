@@ -53,8 +53,6 @@ public:
         auto pattern = DynamicCast<CustomNodePattern>(GetPattern());
         if (pattern) {
             pattern->SetRenderFunction(renderFunction);
-        } else {
-            LOGD("%s SetRenderFunction fail pattern empry", OHOS::Ace::DEVTAG.c_str());
         }
     }
 

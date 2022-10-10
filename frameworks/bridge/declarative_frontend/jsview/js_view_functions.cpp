@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 // #include "frameworks/bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 #include <cstddef>
+#include <string>
 
 #include "base/log/ace_trace.h"
 #include "bridge/codec/function_call.h"
@@ -56,7 +57,6 @@ void ViewFunctions::InitViewFunctions(
 
     JSRef<JSVal> jsAppearFunc = jsObject->GetProperty("aboutToAppear");
     if (jsAppearFunc->IsFunction()) {
-        LOGD("%s, receive js function aboutToAppear", OHOS::Ace::DEVTAG.c_str());
         jsAppearFunc_ = JSRef<JSFunc>::Cast(jsAppearFunc);
     }
 
@@ -69,13 +69,11 @@ void ViewFunctions::InitViewFunctions(
 
     JSRef<JSVal> jsLayoutFunc = jsObject->GetProperty("onLayout");
     if (jsLayoutFunc->IsFunction()) {
-        LOGD("%s, receive js function onLayout", OHOS::Ace::DEVTAG.c_str());
         jsLayoutFunc_ = JSRef<JSFunc>::Cast(jsLayoutFunc);
     }
 
     JSRef<JSVal> jsMeasureFunc = jsObject->GetProperty("onMeasure");
     if (jsMeasureFunc->IsFunction()) {
-        LOGD("%s, receive js function onMeasure", OHOS::Ace::DEVTAG.c_str());
         jsMeasureFunc_ = JSRef<JSFunc>::Cast(jsMeasureFunc);
     }
 
@@ -198,19 +196,86 @@ JSRef<JSObject> genConstraint(const std::optional<NG::LayoutConstraintF>& parent
     return constraint;
 }
 
+void copyPadding(NG::PaddingProperty& padding, const std::unique_ptr<NG::PaddingProperty>& target)
+{
+    padding.left = target->left;
+    padding.right = target->right;
+    padding.top = target->top;
+    padding.bottom = target->bottom;
+}
+
+JSRef<JSObject> genPadding(const NG::PaddingProperty& padding_)
+{
+    JSRef<JSObject> padding = JSRef<JSObject>::New();
+    padding->SetProperty("top", padding_.top->ToString());
+    padding->SetProperty("right", padding_.right->ToString());
+    padding->SetProperty("bottom", padding_.bottom->ToString());
+    padding->SetProperty("left", padding_.left->ToString());
+    return padding;
+}
+
+JSRef<JSObject> genBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
+{
+    auto borderWidth = layoutWrapper->GetLayoutProperty()->GetBorderWidthProperty()->leftDimen;
+    NG::PaddingProperty margin;
+    NG::PaddingProperty padding;
+    copyPadding(margin, layoutWrapper->GetLayoutProperty()->GetMarginProperty());
+    copyPadding(padding, layoutWrapper->GetLayoutProperty()->GetPaddingProperty());
+
+    JSRef<JSObject> borderInfo = JSRef<JSObject>::New();
+    borderInfo->SetProperty("borderWidth", borderWidth->ToString());
+    borderInfo->SetPropertyObject("margin", genPadding(margin));
+    borderInfo->SetPropertyObject("padding", genPadding(padding));
+    return borderInfo;
+}
+
+JSRef<JSObject> genPositionInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
+{
+    auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    JSRef<JSObject> position = JSRef<JSObject>::New();
+    position->SetProperty("x", offset.GetX());
+    position->SetProperty("y", offset.GetY());
+    return position;
+}
+
+void fillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapper>& layoutWrapper, const size_t& index)
+{
+    info->SetProperty<std::string>("name", "");
+    info->SetProperty<std::string>("id", std::to_string(index));
+    info->SetPropertyObject("constraint", genConstraint(layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()));
+    info->SetPropertyObject("borderInfo", genBorderInfo(layoutWrapper));
+    info->SetPropertyObject("position", genPositionInfo(layoutWrapper));
+}
+
 JSRef<JSArray> genLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
 {
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
-    size_t index = 0;
-
     JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSLayout);
+    size_t index = 0;
 
     for (const auto& iter : children) {
         JSRef<JSObject> info = JSRef<JSObject>::New();
-        info->SetProperty<std::string>("name", iter->GetGeometryNode()->GetFrameSize().ToString());
+        fillSubComponetProperty(info, iter, index);
         info->SetPropertyObject("layout", layoutFunc);
         childInfo->SetValueAt(index++, info);
     }
+
+    return childInfo;
+}
+
+JSRef<JSArray> genMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
+{
+    JSRef<JSArray> childInfo = JSRef<JSArray>::New();
+    JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSMeasure);
+    size_t index = 0;
+
+    for (const auto& iter : children) {
+        JSRef<JSObject> info = JSRef<JSObject>::New();
+        fillSubComponetProperty(info, iter, index);
+        info->SetPropertyObject("measure", measureFunc);
+        childInfo->SetValueAt(index++, info);
+    }
+
     return childInfo;
 }
 
@@ -218,67 +283,31 @@ JSRef<JSArray> genLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
 {
-    LOGD("%s, ExecuteLayout ------------------------------------------------ in", OHOS::Ace::DEVTAG.c_str());
-
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
-
-    auto jsConstraint = genConstraint(parentConstraint);
+    auto constraint = genConstraint(parentConstraint);
     auto childArray = genLayoutChildArray(children);
-
-    JSRef<JSVal> params[2] = { childArray, jsConstraint };
+    JSRef<JSVal> params[2] = { childArray, constraint };
 
     ViewMeasureLayout::SetLayoutChildren(layoutWrapper->GetAllChildrenWithBuild());
     ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
     jsLayoutFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
-    LOGD("%s, ExecuteLayout ------------------------------------------------ out", OHOS::Ace::DEVTAG.c_str());
 }
 
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
 {
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
-    LOGD("%s, ExecuteMeasure ------------------------------------------------ in", OHOS::Ace::DEVTAG.c_str());
-    LOGD("%s, do Measure, info, child size %d", OHOS::Ace::DEVTAG.c_str(), children.size());
-
-    for (const auto& child : children) {
-        auto childGeometryNode = child->GetGeometryNode();
-        auto childFrameSize = childGeometryNode->GetFrameSize();
-        auto childFrameOffset = childGeometryNode->GetFrameOffset();
-        LOGD("%s, do Measure child info, %s, %s", OHOS::Ace::DEVTAG.c_str(), childFrameSize.ToString().c_str(),
-            childFrameOffset.ToString().c_str());
-    }
+    auto constraint = genConstraint(parentConstraint);
+    auto childArray = genMeasureChildArray(children);
     JSRef<JSVal> params[2];
 
-    auto minSize = parentConstraint->minSize;
-    auto maxSize = parentConstraint->maxSize;
-    JSRef<JSObject> constraint = JSRef<JSObject>::New();
-    constraint->SetProperty<double>("minWidth", minSize.Width());
-    constraint->SetProperty<double>("minHeight", minSize.Height());
-    constraint->SetProperty<double>("maxWidth", maxSize.Width());
-    constraint->SetProperty<double>("maxHeight", maxSize.Height());
-
-    JSRef<JSArray> childInfo = JSRef<JSArray>::New();
-    JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSMeasure);
-    size_t index = 0;
-    for (const auto& iter : children) {
-        JSRef<JSObject> info = JSRef<JSObject>::New();
-        info->SetProperty<std::string>("name", iter->GetGeometryNode()->GetFrameSize().ToString());
-        info->SetPropertyObject("measure", measureFunc);
-        childInfo->SetValueAt(index++, info);
-    }
-
-    params[0] = childInfo;
+    params[0] = childArray;
     params[1] = constraint;
 
     ViewMeasureLayout::SetMeasureChildren(children);
     ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
-
     jsMeasureFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
-
-    LOGD("%s, do Measure, info: %s, %s", OHOS::Ace::DEVTAG.c_str(), minSize.ToString().c_str(),
-        maxSize.ToString().c_str());
-    LOGD("%s, ExecuteMeasure ------------------------------------------------ out", OHOS::Ace::DEVTAG.c_str());
 }
 
 #else

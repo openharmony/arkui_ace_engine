@@ -38,7 +38,6 @@
 #define DECLARE_ACE_TYPE(...) DECLARE_RELATIONSHIP_OF_CLASSES(__VA_ARGS__)
 
 namespace OHOS::Ace {
-    const std::string DEVTAG = "LAYOUT_MEASURE";
 
 // Inherit 'AceType' to manager pointers using 'RefPtr', 'WeakPtr' and 'AceType::DynamicCast'.
 class AceType : public virtual TypeInfoBase, public virtual Referenced {

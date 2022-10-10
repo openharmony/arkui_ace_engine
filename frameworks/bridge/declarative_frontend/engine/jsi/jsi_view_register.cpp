@@ -205,7 +205,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             }
             pageNode->Clean();
         }
-        auto pageRootNode = view->CreateUINode(pageNode);
+        auto pageRootNode = view->CreateUINode();
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
         // update page life cycle function.

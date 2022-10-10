@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
-#include "core/components_ng/pattern/stage/page_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 
@@ -42,11 +41,6 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<PageLayoutAlgorithm>();
     }
 
     const RefPtr<PageInfo>& GetPageInfo() const
