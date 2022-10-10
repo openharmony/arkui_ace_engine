@@ -69,7 +69,6 @@ public:
         }
         listLayoutAlgorithm->SetCurrentOffset(currentDelta_);
         listLayoutAlgorithm->SetIsInitialized(isInitialized_);
-        listLayoutAlgorithm->SetPlayEdgeEffectAnimation(playEdgeEffectAnimation_);
         return listLayoutAlgorithm;
     }
 
@@ -155,7 +154,6 @@ private:
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     bool isInitialized_ = false;
-    bool playEdgeEffectAnimation_ = false;
     float totalOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
 
