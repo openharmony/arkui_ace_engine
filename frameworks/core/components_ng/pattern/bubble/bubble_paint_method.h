@@ -34,22 +34,14 @@ class ACE_EXPORT BubblePaintMethod : public NodePaintMethod {
 public:
     BubblePaintMethod() = default;
     ~BubblePaintMethod() override = default;
-    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override
+
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
             auto bubble = weak.Upgrade();
             if (bubble) {
                 bubble->PaintMask(canvas, paintWrapper);
                 bubble->PaintBubble(canvas, paintWrapper);
-            }
-        };
-    }
-
-    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-            auto bubble = weak.Upgrade();
-            if (bubble) {
                 bubble->PaintBorder(canvas, paintWrapper);
             }
         };
@@ -115,6 +107,8 @@ private:
     Placement arrowPlacement_ = Placement::BOTTOM;
     bool enableArrow_ = false;
     Dimension arrowOffset_;
+    Color maskColor_;
+    Color backgroundColor_;
 
     // Get from pattern
     OffsetF childOffset_;

@@ -349,13 +349,16 @@ const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Pl
     Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT, Placement::LEFT_TOP,
     Placement::LEFT_BOTTOM, Placement::RIGHT_TOP, Placement::RIGHT_BOTTOM };
 
-void ParseShowObject(
-    const JSCallbackInfo& info, const JSRef<JSObject>& showObj, const RefPtr<PopupComponentV2>& popupComponent)
+void ParseShowObject(const JSCallbackInfo& info, const JSRef<JSObject>& showObj,
+    const RefPtr<PopupComponentV2>& popupComponent, const RefPtr<PopupParam>& popupParam)
 {
     JSRef<JSVal> changeEventVal = showObj->GetProperty("changeEvent");
-    if (changeEventVal->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    if (!changeEventVal->IsFunction()) {
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+
+    if (popupComponent) {
         auto eventMarker =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -371,6 +374,25 @@ void ParseShowObject(
                 func->ExecuteJS(1, &newJSVal);
             });
         popupComponent->SetChangeEvent(eventMarker);
+        return;
+    }
+
+    if (popupParam) {
+        auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                         const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+
+            if (param != "true" && param != "false") {
+                LOGE("param is not equal true or false, invalid.");
+                return;
+            }
+
+            bool newValue = StringToBool(param);
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        popupParam->SetOnStateChange(onStateChangeCallback);
+        return;
     }
 }
 
@@ -401,7 +423,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 
 #if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-        "emulator or a real device instead.");
+         "emulator or a real device instead.");
 #else
     JSRef<JSVal> showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
     if (showInSubWindowValue->IsBoolean()) {
@@ -568,19 +590,17 @@ void ParseCustomPopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             builderFunc->Execute();
         }
         customComponent = ViewStackProcessor::GetInstance()->Finish();
-    } else if (ngPopupParam) {
-        LOGI("Builder.");
     }
-    if (popupComponent) {
-        popupComponent->SetCustomComponent(customComponent);
-    } else if (ngPopupParam) {
-        ngPopupParam->SetUseCustomComponent(customComponent);
-    }
+
     auto popupParam = ngPopupParam;
     if (popupComponent) {
+        popupComponent->SetCustomComponent(customComponent);
         popupParam = popupComponent->GetPopupParam();
+        popupParam->SetUseCustomComponent(true);
+    } else if (ngPopupParam) {
+        ngPopupParam->SetUseCustomComponent(true);
     }
-    popupParam->SetUseCustomComponent(true);
+
     auto placementValue = popupObj->GetProperty("placement");
     if (placementValue->IsNumber()) {
         auto placement = placementValue->ToNumber<int32_t>();
@@ -614,7 +634,7 @@ void ParseCustomPopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
 
 #if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-        "emulator or a real device instead.");
+         "emulator or a real device instead.");
 #else
     auto showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
     if (showInSubWindowValue->IsBoolean()) {
@@ -644,6 +664,7 @@ void ParseCustomPopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](
                                              const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("popup.onStateChange");
                 func->Execute(keys, param);
             };
             ngPopupParam->SetOnStateChange(onStateChangeCallback);
@@ -2320,9 +2341,8 @@ void JsBindMenuNG(const JSCallbackInfo& info)
         }
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
         CHECK_NULL_VOID(builderFunc);
-        event = [builderFunc, targetNode](const GestureEvent& /*info*/) mutable {
-            CreateCustomMenu(builderFunc, targetNode);
-        };
+        event = [builderFunc, targetNode](
+                    const GestureEvent& /*info*/) mutable { CreateCustomMenu(builderFunc, targetNode); };
     } else {
         LOGE("bindMenu info is invalid");
         return;
@@ -4326,6 +4346,57 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
 }
 
 #ifndef WEARABLE_PRODUCT
+void JSViewAbstract::JsBindPopupNG(const JSCallbackInfo& info)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    // Set IsShow to popupParam
+    if (info[0]->IsBoolean()) {
+        popupParam->SetIsShow(info[0]->ToBoolean());
+    } else {
+        JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
+        ParseShowObject(info, showObj, nullptr, popupParam);
+        popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
+    }
+
+    // Set popup to popupParam
+    auto popupObj = JSRef<JSObject>::Cast(info[1]);
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (popupObj->GetProperty("message")->IsString()) {
+        ParsePopupParam(info, popupObj, nullptr, popupParam); // Parse PopupOptions param
+        NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
+    } else if (!popupObj->GetProperty("builder").IsEmpty()) {
+        ParseCustomPopupParam(info, popupObj, nullptr, popupParam); // Parse CustomPopupOptions param
+        auto builderValue = popupObj->GetProperty("builder");
+        if (!builderValue->IsObject()) {
+            LOGE("builder param is not an object.");
+            return;
+        }
+
+        JSRef<JSObject> builderObj;
+        builderObj = JSRef<JSObject>::Cast(builderValue);
+        auto builder = builderObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        CHECK_NULL_VOID(builderFunc);
+        CreateCustomPopup(builderFunc, targetNode, popupParam);
+    } else {
+        LOGE("BindPop info is invalid");
+        return;
+    }
+}
+
+void JSViewAbstract::CreateCustomPopup(
+    RefPtr<JsFunction>& builder, const RefPtr<NG::FrameNode>& targetNode, const RefPtr<PopupParam>& popupParam)
+{
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    builder->Execute();
+    auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    NG::ViewAbstract::BindPopup(popupParam, targetNode, customNode);
+}
+
 void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 {
     if (info.Length() < 2) {
@@ -4342,22 +4413,9 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         LOGE("The second param type is not object, invalid.");
         return;
     }
+    // NG
     if (Container::IsCurrentUseNewPipeline()) {
-        auto popupParam = AceType::MakeRefPtr<PopupParam>();
-        if (info[0]->IsBoolean()) {
-            popupParam->SetIsShow(info[0]->ToBoolean());
-        } else {
-            JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
-            // TODO: need to parse show object
-            popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
-        }
-        auto popupObj = JSRef<JSObject>::Cast(info[1]);
-        if (popupObj->GetProperty("message")->IsString()) {
-            ParsePopupParam(info, popupObj, nullptr, popupParam);
-        } else {
-            ParseCustomPopupParam(info, popupObj, nullptr, popupParam);
-        }
-        NG::ViewAbstract::BindPopup(popupParam);
+        JsBindPopupNG(info);
         return;
     }
 
@@ -4384,7 +4442,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         popupParam->SetIsShow(info[0]->ToBoolean());
     } else {
         JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
-        ParseShowObject(info, showObj, popupComponent);
+        ParseShowObject(info, showObj, popupComponent, nullptr);
         popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
 
@@ -4900,7 +4958,7 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    
+
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetBrightness(value);
         return;

@@ -60,7 +60,7 @@ public:
         popupMap_.clear();
     }
 
-    void UpdatePopupNode(int32_t targetId, const PopupInfo& popup);
+    void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {

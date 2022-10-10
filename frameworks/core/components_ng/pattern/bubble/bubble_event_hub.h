@@ -16,13 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUBBLE_BUBBLE_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUBBLE_BUBBLE_EVENT_HUB_H
 
+#include <string>
+
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
-using StateChangeEvent = std::function<void(bool)>;
+using StateChangeEvent = std::function<void(const std::string&)>;
 
 class BubbleEventHub : public EventHub {
     DECLARE_ACE_TYPE(BubbleEventHub, EventHub)
@@ -39,12 +41,15 @@ public:
     void FireChangeEvent(bool isVisible) const
     {
         if (changeEvent_) {
-            changeEvent_(isVisible);
+            auto visibleStr = std::to_string(isVisible);
+            changeEvent_(visibleStr);
         }
     }
 
 private:
     StateChangeEvent changeEvent_;
+    
+    ACE_DISALLOW_COPY_AND_MOVE(BubbleEventHub);
 };
 
 } // namespace OHOS::Ace::NG
