@@ -219,8 +219,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
             InitJsExportsUtilObject();
             InitJsNativeModuleObject();
             InitPerfUtilModule();
-        }
-        if (!isModuleInitialized_) {
             InitJsContextModuleObject();
         }
     }
@@ -310,6 +308,9 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
+
+    //preload getContext
+    JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
 
     // preload perfutil
     shared_ptr<JsValue> perfObj = arkRuntime->NewObject();
