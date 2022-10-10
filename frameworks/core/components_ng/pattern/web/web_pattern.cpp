@@ -76,7 +76,7 @@ void WebPattern::InitEvent()
         if (WebPattern) {
             WebPattern->UpdateLocale();
         }
-    }
+    };
     context->SetConfigChangedCallback(std::move(langTask));
 }
 
