@@ -32,6 +32,7 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
@@ -214,9 +215,14 @@ void AceAbility::OnStart(const Want& want)
         ImageCache::SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();
     });
-
+    AceNewPipeJudgement::InitAceNewPipeConfig();
     // TODO: now choose pipeline using param set as package name, later enable for all.
-    bool useNewPipe = AceApplicationInfo::GetInstance().GetPackageName() == SystemProperties::GetNewPipePkg();
+    auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
+    auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
+    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabled(
+        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
+    LOGI("AceAbility: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
+        apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
