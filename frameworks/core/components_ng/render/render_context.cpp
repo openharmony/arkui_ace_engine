@@ -39,4 +39,10 @@ RefPtr<FrameNode> RenderContext::GetHost() const
 {
     return host_.Upgrade();
 }
+
+void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    ACE_PROPERTY_TO_JSON_VALUE(propBorder_, BorderProperty);
+    json->Put("zIndex", propZIndex_.value_or(0));
+}
 } // namespace OHOS::Ace::NG

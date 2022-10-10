@@ -45,6 +45,22 @@ struct BorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderStyle, BorderStyleProperty);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        static const char* BORDER_STYLE[] = {
+            "BorderStyle.Solid",
+            "BorderStyle.Dashed",
+            "BorderStyle.Dotted",
+        };
+        json->Put("borderStyle",
+            BORDER_STYLE[static_cast<int>(
+                propBorderStyle.value_or(BorderStyleProperty()).styleLeft.value_or(BorderStyle::SOLID))]);
+        json->Put("borderColor",
+            propBorderColor.value_or(BorderColorProperty()).leftColor.value_or(Color()).ColorToString().c_str());
+        json->Put("borderRadius", propBorderRadius.value_or(BorderRadiusProperty())
+                                      .radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+    }
 };
 
 struct TransformProperty {
