@@ -578,6 +578,18 @@ public:
         return pluginEventOffset_;
     }
 
+    void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
+    {
+        displayWindowRectInfo_ = displayWindowRectInfo;
+    }
+
+    // This method can get the coordinates and size of the current window,
+    // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
+    const Rect& GetDisplayWindowRectInfo() const
+    {
+        return displayWindowRectInfo_;
+    }
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -637,6 +649,7 @@ protected:
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
+    Rect displayWindowRectInfo_;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

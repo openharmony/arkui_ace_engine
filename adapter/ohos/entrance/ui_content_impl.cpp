@@ -803,6 +803,11 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         return;
     }
     container->SetWindowPos(config.Left(), config.Top());
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        pipelineContext->SetDisplayWindowRectInfo(
+            Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+    }
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("UpdateViewportConfig: taskExecutor is null.");
