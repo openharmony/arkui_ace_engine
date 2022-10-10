@@ -112,6 +112,8 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(constraint);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
     MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
