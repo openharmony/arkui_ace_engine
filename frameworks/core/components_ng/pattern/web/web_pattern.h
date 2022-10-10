@@ -64,6 +64,7 @@ class WebPattern : public Pattern {
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using JsProxyCallback = std::function<void()>;
 
     WebPattern();
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
@@ -133,6 +134,18 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
+    {
+        jsProxyCallback_ = std::move(jsProxyCallback);
+    }
+
+    void CallJsProxyCallback()
+    {
+        if (jsProxyCallback_) {
+            jsProxyCallback_();
+        }
     }
 
     RefPtr<WebEventHub> GetWebEventHub()
@@ -251,6 +264,7 @@ private:
     std::optional<std::string> webData_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    JsProxyCallback jsProxyCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;

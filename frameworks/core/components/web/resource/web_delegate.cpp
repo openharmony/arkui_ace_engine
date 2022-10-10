@@ -1508,6 +1508,19 @@ void WebDelegate::RunSetWebIdCallback()
     setWebIdCallback(webId);
 }
 
+void WebDelegate::RunJsProxyCallback()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CallJsProxyCallback();
+        return;
+    }
+    auto webCom = webComponent_.Upgrade();
+    CHECK_NULL_VOID(webCom);
+    webCom->CallJsProxyCallback();
+}
+
 void WebDelegate::SetWebCallBack()
 {
     RefPtr<WebController> webController;
@@ -1995,6 +2008,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             delegate->nweb_->PutFindCallback(findListenerImpl);
             delegate->UpdateSettting(Container::IsCurrentUseNewPipeline());
             delegate->RunSetWebIdCallback();
+            delegate->RunJsProxyCallback();
         },
         TaskExecutor::TaskType::PLATFORM);
 }

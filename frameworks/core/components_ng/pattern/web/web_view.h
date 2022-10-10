@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 using OnWebSyncFunc = std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>;
 using OnWebAsyncFunc = std::function<void(const std::shared_ptr<BaseEventInfo>& info)>;
 using SetWebIdCallback = std::function<void(int32_t)>;
+using JsProxyCallback = std::function<void()>;
 
 class ACE_EXPORT WebView {
 public:
@@ -91,6 +92,7 @@ public:
     static void SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId);
     static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
     static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
+    static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
 };
 } // namespace OHOS::Ace::NG
 

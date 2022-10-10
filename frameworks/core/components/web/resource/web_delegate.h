@@ -444,6 +444,7 @@ private:
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
     void RunSetWebIdCallback();
+    void RunJsProxyCallback();
 
     // Backward and forward
     void Backward();

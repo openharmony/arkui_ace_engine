@@ -2773,9 +2773,41 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     }
     auto paramObject = JSRef<JSObject>::Cast(args[0]);
     auto controllerObj = paramObject->GetProperty("controller");
-    auto controller = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSWebController>();
-    if (controller) {
-        controller->SetJavascriptInterface(args);
+    auto object = JSRef<JSVal>::Cast(paramObject->GetProperty("object"));
+    auto name = JSRef<JSVal>::Cast(paramObject->GetProperty("name"));
+    auto methodList = JSRef<JSVal>::Cast(paramObject->GetProperty("methodList"));
+    if (!controllerObj->IsObject()) {
+        LOGE("web create error, controllerObj is invalid");
+        return;
+    }
+    auto controller = JSRef<JSObject>::Cast(controllerObj);
+    auto setWebIdFunction = controller->GetProperty("setWebId");
+    auto registerJsProxyFunction = controller->GetProperty("registerJavaScriptProxy");
+    if (setWebIdFunction->IsFunction()) {
+        LOGI("The controller is WebviewController.");
+        auto jsProxyCallback = [webviewController = controller,
+            func = JSRef<JSFunc>::Cast(registerJsProxyFunction),
+            object, name, methodList]() {
+            JSRef<JSVal> argv[] = {object, name, methodList};
+            func->Call(webviewController, 3, argv);
+        };
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::WebView::SetJsProxyCallback(std::move(jsProxyCallback));
+            return;
+        }
+        auto stack = ViewStackProcessor::GetInstance();
+        auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+        if (!webComponent) {
+            LOGE("JSWeb: MainComponent is null.");
+            return;
+        }
+        webComponent->SetJsProxyCallback(std::move(jsProxyCallback));
+        return;
+    }
+    LOGI("The controller is WebController.");
+    auto jsWebController = controller->Unwrap<JSWebController>();
+    if (jsWebController) {
+        jsWebController->SetJavascriptInterface(args);
     }
 }
 
