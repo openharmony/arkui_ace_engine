@@ -298,9 +298,6 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
     } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize) || (endCachedCount_ < cachedCount_));
     currentEndPos = currentEndPos - spaceWidth_;
 
-    if (playEdgeEffectAnimation_) {
-        edgeEffectOffset_ = currentOffset_;
-    }
     // adjust offset.
     if (LessNotEqual(currentEndPos, endMainPos_) && !itemPosition_.empty()) {
         auto firstItemTop = itemPosition_.begin()->second.first;
@@ -369,9 +366,6 @@ void ListLayoutAlgorithm::LayoutBackward(
             currentStartPos, currentEndPos);
     } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize) || (startCachedCount_ < cachedCount_));
 
-    if (playEdgeEffectAnimation_) {
-        edgeEffectOffset_ = currentOffset_;
-    }
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
@@ -407,7 +401,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto paddingOffset = OffsetF(left, top);
 
     // layout items.
-    for (const auto& pos : itemPosition_) {
+    for (auto& pos : itemPosition_) {
         int index = pos.first;
         auto offset = paddingOffset;
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -415,18 +409,18 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             LOGI("wrapper is out of boundary");
             continue;
         }
+        pos.second.first -= currentOffset_;
+        pos.second.second -= currentOffset_;
         if (lanes_.has_value() && lanes_.value() > 1) {
             int32_t laneIndex = index % lanes_.value();
             float laneCrossOffset = CalculateLaneCrossOffset(GetCrossAxisSize(size, axis),
                 GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize() * lanes_.value(), axis));
             if (axis == Axis::VERTICAL) {
-                offset = offset + OffsetF(0, pos.second.first - currentOffset_) +
-                         OffsetF(size.Width() / lanes_.value() * laneIndex, 0) + OffsetF(laneCrossOffset, 0) +
-                         OffsetF(0, edgeEffectOffset_);
+                offset = offset + OffsetF(0, pos.second.first) +
+                         OffsetF(size.Width() / lanes_.value() * laneIndex, 0) + OffsetF(laneCrossOffset, 0);
             } else {
-                offset = offset + OffsetF(pos.second.first - currentOffset_, 0) +
-                         OffsetF(0, size.Width() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset) +
-                         OffsetF(edgeEffectOffset_, 0);
+                offset = offset + OffsetF(pos.second.first, 0) +
+                         OffsetF(0, size.Width() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset);
             }
         } else {
             lanes_ = 1;
@@ -434,11 +428,9 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
             float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
             if (axis == Axis::VERTICAL) {
-                offset = offset + OffsetF(0, pos.second.first - currentOffset_) +
-                         OffsetF(laneCrossOffset, 0) + OffsetF(0, edgeEffectOffset_);
+                offset = offset + OffsetF(0, pos.second.first) + OffsetF(laneCrossOffset, 0);
             } else {
-                offset = offset + OffsetF(pos.second.first - currentOffset_, 0) +
-                         OffsetF(0, laneCrossOffset) + OffsetF(edgeEffectOffset_, 0);
+                offset = offset + OffsetF(pos.second.first, 0) + OffsetF(0, laneCrossOffset);
             }
         }
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
