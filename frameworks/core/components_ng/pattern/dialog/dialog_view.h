@@ -38,8 +38,12 @@ public:
 
     static void BuildChild(const RefPtr<FrameNode>& dialogNode, const DialogProperties& prop, std::string& data,
         const RefPtr<DialogTheme>& theme, const RefPtr<UINode>& customNode);
+
     static RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons,
         const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dialog);
+    // build ActionSheet items
+    static RefPtr<FrameNode> BuildSheet(
+        const std::vector<ActionSheetInfo>& sheets, const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode> dialog);
 };
 } // namespace OHOS::Ace::NG
 

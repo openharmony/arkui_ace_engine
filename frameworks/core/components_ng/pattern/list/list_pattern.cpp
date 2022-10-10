@@ -189,6 +189,7 @@ void ListPattern::ResetScrollableEvent(bool scrollable)
     CHECK_NULL_VOID(gestureHub);
 
     if (scrollable && !initScrollable_) {
+        CHECK_NULL_VOID(scrollableEvent_);
         gestureHub->AddScrollableEvent(scrollableEvent_);
         initScrollable_ = true;
         return;
