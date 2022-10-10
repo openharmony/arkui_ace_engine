@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+#include "third_party/quickjs/quickjs.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -195,6 +196,15 @@ inline bool CheckAndGetJsProperty(JSContext* ctx, JSValueConst fromMap, JSProper
         return false;
     }
     return true;
+}
+
+inline void ThrowJsError(JSContext* ctx, const std::string& message, int32_t code)
+{
+    JSValue error = JS_NewError(ctx);
+    JS_SetPropertyStr(ctx, error, "code", JS_DupValue(ctx, JS_NewUint32(ctx, code)));
+    JS_SetPropertyStr(ctx, error, "message", JS_DupValue(ctx, JS_NewString(ctx, message.c_str())));
+
+    JS_Throw(ctx, error);
 }
 
 } // namespace OHOS::Ace::Framework

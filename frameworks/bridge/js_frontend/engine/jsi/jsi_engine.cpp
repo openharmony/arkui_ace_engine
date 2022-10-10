@@ -1845,7 +1845,7 @@ shared_ptr<JsValue> JsHandleAnimator(
         return runtime->NewNull();
     }
     std::string arguments = arg->ToString(runtime);
-    if (methodName == ANIMATOR_CREATE_ANIMATOR) {
+    if (methodName == ANIMATOR_CREATE_ANIMATOR || methodName == ANIMATOR_CREATE) {
         int32_t bridgeId = JsiAnimatorBridgeUtils::JsCreateBridgeId();
         auto animatorContext = JsiAnimatorBridgeUtils::CreateAnimatorContext(runtime, page->GetPageId(), bridgeId);
         auto animatorBridge = AceType::MakeRefPtr<JsiAnimatorBridge>(runtime, animatorContext);

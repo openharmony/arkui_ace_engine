@@ -215,6 +215,7 @@ JSValue AnimatorBridgeUtils::JsAnimatorUpdate(JSContext* ctx, JSValueConst value
 {
     if ((!argv) || (argc != 1)) {
         LOGE("argc error, argc = %{private}d", argc);
+        ThrowJsError(ctx, "Parameter error. The type of the parameter 1 is not object.", ERROR_CODE_PARAM_INVALID);
         return JS_NULL;
     }
     JSPropertyEnum* pTab = nullptr;
@@ -245,6 +246,7 @@ JSValue AnimatorBridgeUtils::JsAnimatorUpdate(JSContext* ctx, JSValueConst value
     auto page = GetPageById(instance, pageId);
     if (!page) {
         LOGE("no page found for bridgeId: %{public}d", bridgeId);
+        ThrowJsError(ctx, "Internal error. Can not find the page for pageId.", ERROR_CODE_INTERNAL_ERROR);
         return JS_NULL;
     }
     auto task = AceType::MakeRefPtr<AnimatorTaskUpdate>(params);

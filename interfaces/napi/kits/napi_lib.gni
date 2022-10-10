@@ -20,6 +20,7 @@ common_napi_libs = [
   "grid",
   "mediaquery",
   "prompt",
+  "promptaction",
   "router",
 ]
 

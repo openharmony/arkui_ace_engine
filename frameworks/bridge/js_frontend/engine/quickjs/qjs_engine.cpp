@@ -1206,7 +1206,7 @@ JSValue JsHandleAnimator(JSContext* ctx, JSValueConst argv, const std::string& m
         return JS_NULL;
     }
     auto resultAnimator = JSValue();
-    if (methodName == ANIMATOR_CREATE_ANIMATOR) {
+    if (methodName == ANIMATOR_CREATE_ANIMATOR || methodName == ANIMATOR_CREATE) {
         int32_t bridgeId = AnimatorBridgeUtils::JsCreateBridgeId();
         resultAnimator = AnimatorBridgeUtils::CreateAnimatorContext(ctx, page->GetPageId(), bridgeId);
         auto animatorBridge = AceType::MakeRefPtr<AnimatorBridge>(ctx, resultAnimator);
