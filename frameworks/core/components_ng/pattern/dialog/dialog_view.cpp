@@ -109,6 +109,7 @@ void DialogView::BuildChild(const RefPtr<FrameNode>& dialog, const DialogPropert
     if (customNode) {
         if (!AceType::InstanceOf<CustomNode>(customNode)) {
             LOGE("dialogNode's child isn't FrameNode");
+            return;
         }
         auto contentNode = AceType::DynamicCast<FrameNode>(customNode->GetChildAtIndex(0));
         auto contentRenderContext = contentNode->GetRenderContext();
