@@ -27,13 +27,14 @@
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
-
+using ToastAnimationCallback = std::function<void()>;
 class ToastComponent final : public Singleton<ToastComponent> {
     DECLARE_SINGLETON(ToastComponent);
 
 public:
     void Show(const RefPtr<PipelineContext>& context, const std::string& message, int32_t duration,
         const std::string& bottom, bool isRightToLeft);
+    void SetToastStopListenerCallback(std::function<void()>&& stopCallback);
 
 private:
     static int32_t GenerateNextToastId();
@@ -44,6 +45,7 @@ private:
 
     TweenOption tweenOption_;
     float toastDurationTime_ = 0.0f;
+    ToastAnimationCallback stopCallback_;
 };
 
 } // namespace OHOS::Ace

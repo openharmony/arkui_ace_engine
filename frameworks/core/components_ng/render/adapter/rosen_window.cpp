@@ -86,7 +86,9 @@ void RosenWindow::RequestFrame()
         return;
     }
     LOGD("request next vsync");
-    rsWindow_->RequestVsync(vsyncCallback_);
+    if (rsWindow_) {
+        rsWindow_->RequestVsync(vsyncCallback_);
+    }
     isRequestVsync_ = true;
     auto taskExecutor = taskExecutor_.Upgrade();
     if (taskExecutor) {
