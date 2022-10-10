@@ -107,11 +107,6 @@ public:
         return lanes_;
     }
 
-    void SetPlayEdgeEffectAnimation(bool playEdgeEffectAnimation)
-    {
-        playEdgeEffectAnimation_ = playEdgeEffectAnimation;
-    }
-
     bool Scrollable() const
     {
         return scrollable_;
@@ -171,12 +166,10 @@ private:
     std::optional<float> maxLaneLength_;
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
-    bool playEdgeEffectAnimation_ = false;
     bool mainSizeIsDefined_ = false;
     float contentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
-    float edgeEffectOffset_ = 0.0f;
 
     // List is scrollable when content size is greater than list size in main axis.
     bool scrollable_ = true;
