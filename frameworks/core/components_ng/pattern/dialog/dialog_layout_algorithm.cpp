@@ -186,9 +186,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     OffsetF topLeftPoint;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, OffsetF());
-    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
+    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
     const auto& layoutConstraint = prop->GetLayoutConstraint();
     CHECK_NULL_RETURN(dialogTheme, OffsetF());
     auto dialogOffsetX =

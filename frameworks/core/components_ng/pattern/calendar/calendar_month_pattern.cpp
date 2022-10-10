@@ -17,10 +17,11 @@
 
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/gestures/gesture_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -88,13 +89,9 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     CHECK_NULL_RETURN(host, false);
     auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, false);
-    RefPtr<CalendarTheme> theme = themeManager->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, false);
     auto topPadding = theme->GetCalendarTheme().topPadding.ConvertToPx();
     auto weekHeight = paintProperty->GetWeekHeight().value_or(theme->GetCalendarTheme().weekHeight).ConvertToPx();

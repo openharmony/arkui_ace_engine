@@ -34,9 +34,7 @@ namespace OHOS::Ace::NG {
         do {                                                             \
             auto pipelineContext = PipelineContext::GetCurrentContext(); \
             CHECK_NULL_RETURN(pipelineContext, std::nullopt);            \
-            auto themeManager = pipelineContext->GetThemeManager();      \
-            CHECK_NULL_RETURN(themeManager, std::nullopt);               \
-            auto ratingTheme = themeManager->GetTheme<RatingTheme>();    \
+            auto ratingTheme = pipelineContext->GetTheme<RatingTheme>(); \
             CHECK_NULL_RETURN(ratingTheme, std::nullopt);                \
             return ratingTheme->Get##name();                             \
         } while (false);                                                 \

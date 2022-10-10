@@ -16,14 +16,12 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
-
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-
-ImagePattern::ImagePattern(const ImageSourceInfo&  /*imageSourceInfo*/) {}
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
 {
@@ -90,7 +88,7 @@ void ImagePattern::OnImageLoadSuccess()
     LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
         loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
         geometryNode->GetFrameSize().Height(), 1);
-    imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
+    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
     // update src data
     lastCanvasImage_ = loadingCtx_->GetCanvasImage();
     lastSrcRect_ = loadingCtx_->GetSrcRect();
@@ -163,7 +161,7 @@ void ImagePattern::SetImagePaintConfig(
         imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
     auto pipelineCtx = PipelineContext::GetCurrentContext();
-    bool isRightToLeft = pipelineCtx ? pipelineCtx->IsRightToLeft() : false;
+    bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
     imagePaintConfig.needFlipCanvasHorizontally_ =
         isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
     auto colorFilterMatrix = imageRenderProperty->GetColorFilter();
@@ -201,6 +199,7 @@ void ImagePattern::OnModifyDone()
     auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageRenderProperty);
     auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    UpdateInternalResource(currentSourceInfo);
     std::optional<Color> svgFillColorOpt = std::nullopt;
     if (currentSourceInfo.IsSvg()) {
         svgFillColorOpt = imageRenderProperty->GetSvgFillColor() ? imageRenderProperty->GetSvgFillColor()
@@ -286,6 +285,24 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         CHECK_NULL_VOID(pattern->lastAltCanvasImage_->imagePaintConfig_);
     };
     return task;
+}
+
+void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
+{
+    if (!sourceInfo.IsInternalResource()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
+    if (!iconPath.empty()) {
+        sourceInfo.SetSrc(iconPath);
+        auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+    }
 }
 
 } // namespace OHOS::Ace::NG

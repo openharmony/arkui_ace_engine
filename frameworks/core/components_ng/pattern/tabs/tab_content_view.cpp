@@ -116,7 +116,7 @@ void TabContentView::Pop(const RefPtr<FrameNode>& tabContent)
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
         ImageSourceInfo imageSourceInfo(tabBarParam.icon);
         imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            [imageSourceInfo]() { return AceType::MakeRefPtr<ImagePattern>(imageSourceInfo); });
+            []() { return AceType::MakeRefPtr<ImagePattern>(); });
         textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<TextPattern>(); });
         columnNode->MountToParent(tabBarNode);

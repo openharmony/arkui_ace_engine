@@ -104,8 +104,7 @@ void ButtonPattern::OnTouchDown()
     CHECK_NULL_VOID(pipeline);
     if (buttonEventHub->GetStateEffect()) {
         const auto& renderContext = host->GetRenderContext();
-        auto themeManager = pipeline->GetThemeManager();
-        renderContext->BlendBgColor(themeManager->GetTheme<ButtonTheme>()->GetClickedColor());
+        renderContext->BlendBgColor(pipeline->GetTheme<ButtonTheme>()->GetClickedColor());
     }
 }
 

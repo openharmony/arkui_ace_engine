@@ -33,7 +33,7 @@ class ACE_EXPORT ImagePattern : public Pattern {
     DECLARE_ACE_TYPE(ImagePattern, Pattern);
 
 public:
-    explicit ImagePattern(const ImageSourceInfo& imageSourceInfo);
+    ImagePattern() = default;
     ~ImagePattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -86,6 +86,7 @@ private:
     void CacheImageObject();
     void SetImagePaintConfig(
         const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg);
+    void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
         DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();

@@ -42,9 +42,7 @@ void TextPickerView::Create()
 
     auto context = textPickerNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
 
     uint32_t showCount = pickerTheme->GetShowOptionCount();

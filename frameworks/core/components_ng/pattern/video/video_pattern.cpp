@@ -66,9 +66,7 @@ float CalControlBarHeight()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0f);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, 0.0f);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, 0.0f);
     auto controlsHeight =
         pipelineContext->NormalizeToPx(Dimension(videoTheme->GetBtnSize().Height(), DimensionUnit::VP));
@@ -438,7 +436,7 @@ void VideoPattern::AddPreviewNodeIfNeeded()
         if (!isExist) {
             auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
             auto posterNode =
-                FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>(posterSourceInfo));
+                FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
             CHECK_NULL_VOID(posterNode);
             auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
             posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
@@ -522,9 +520,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
     auto controlBar = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(controlBar, nullptr);
@@ -562,11 +558,9 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
-    auto sliderTheme = themeManager->GetTheme<SliderTheme>();
+    auto sliderTheme = pipelineContext->GetTheme<SliderTheme>();
 
     auto sliderNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
     CHECK_NULL_RETURN(sliderNode, nullptr);
@@ -603,9 +597,7 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
@@ -631,9 +623,7 @@ RefPtr<FrameNode> VideoPattern::CreateButton()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
     auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());

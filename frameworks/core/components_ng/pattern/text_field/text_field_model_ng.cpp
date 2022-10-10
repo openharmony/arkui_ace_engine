@@ -56,9 +56,7 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());

@@ -24,7 +24,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
@@ -297,13 +296,9 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
 
 void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& paintProperty)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    RefPtr<CalendarTheme> theme = themeManager->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
 
     weekColor_ = ToRSColor(paintProperty->GetWeekColor().value_or(theme->GetCalendarTheme().weekColor));

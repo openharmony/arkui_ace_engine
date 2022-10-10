@@ -33,9 +33,7 @@ void CounterView::Create()
     CHECK_NULL_VOID(counterPattern);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto counterTheme = themeManager->GetTheme<CounterTheme>();
+    auto counterTheme = pipeline->GetTheme<CounterTheme>();
     CHECK_NULL_VOID(counterTheme);
     counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));

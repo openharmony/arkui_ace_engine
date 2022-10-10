@@ -124,7 +124,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(bool isFloatingTitle)
     // create title icon
     ImageSourceInfo imageSourceInfo;
     auto titleIcon = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<ImagePattern>(imageSourceInfo));
+        AceType::MakeRefPtr<ImagePattern>());
     imageSourceInfo.SetSrc(themeConstants->GetMediaPath(pipeline->GetAppIconId()));
     auto imageLayoutProperty = titleIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -211,7 +211,7 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     // button image icon
     ImageSourceInfo imageSourceInfo;
     auto imageIcon = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<ImagePattern>(imageSourceInfo));
+        AceType::MakeRefPtr<ImagePattern>());
     imageSourceInfo.SetResourceId(icon);
     auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);

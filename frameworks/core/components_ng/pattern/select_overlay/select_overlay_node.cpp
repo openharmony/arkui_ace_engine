@@ -55,7 +55,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     text->MountToParent(button);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, button);
-    auto textOverlayTheme = pipeline->GetThemeManager()->GetTheme<TextOverlayTheme>();
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, button);
     auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
@@ -113,7 +113,7 @@ void SelectOverlayNode::CreateToolBar()
     selectMenu_->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto textOverlayTheme = pipeline->GetThemeManager()->GetTheme<TextOverlayTheme>();
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     selectMenu_->GetRenderContext()->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
 

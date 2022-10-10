@@ -71,7 +71,7 @@ void RadioLayoutAlgorithm::InitializeParam()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetThemeManager()->GetTheme<RadioTheme>();
+    auto checkBoxTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
     defaultWidth_ = checkBoxTheme->GetDefaultWidth().ConvertToPx();
     defaultHeight_ = checkBoxTheme->GetDefaultHeight().ConvertToPx();

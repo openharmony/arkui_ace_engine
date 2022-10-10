@@ -71,9 +71,7 @@ float CalControlBarHeight()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0f);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, 0.0f);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, 0.0f);
     auto controlsHeight =
         pipelineContext->NormalizeToPx(Dimension(videoTheme->GetBtnSize().Height(), DimensionUnit::VP));

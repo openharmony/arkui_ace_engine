@@ -372,6 +372,15 @@ public:
         themeManager_ = std::move(theme);
     }
 
+    template<typename T>
+    RefPtr<T> GetTheme() const
+    {
+        if (themeManager_) {
+            return themeManager_->GetTheme<T>();
+        }
+        return {};
+    }
+
     const RefPtr<ManagerInterface>& GetTextFieldManager()
     {
         return textFieldManager_;

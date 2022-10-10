@@ -26,7 +26,7 @@ Dimension SelectHandleInfo::GetDefaultLineWidth()
     const Dimension defaultLineWidth = 1.5_vp;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, defaultLineWidth);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextOverlayTheme>();
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, defaultLineWidth);
     return theme->GetHandleLineWidth();
 }
