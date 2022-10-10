@@ -375,16 +375,16 @@ void ListLayoutAlgorithm::LayoutBackward(
         startMainPos_ = currentStartPos;
     }
     // Mark inactive in wrapper.
-    auto cachedPos = itemPosition_.rbegin();
-    for (int i = 0; i < cachedCount_ && cachedPos != itemPosition_.rend(); i++, cachedPos++) {}
-    for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend();) {
-        if (cachedPos == itemPosition_.rend() || LessOrEqual(cachedPos->second.first, endMainPos_ + cacheSize)) {
+    for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); pos++) {
+        if (LessOrEqual(pos->second.first, endMainPos_ + cacheSize)) {
+            auto recyclePos = itemPosition_.find(pos->first + 1 + cachedCount_);
+            while (recyclePos != itemPosition_.end()) {
+                LOGI("recycle item:%{public}d", recyclePos->first);
+                layoutWrapper->RemoveChildInRenderTree(recyclePos->first);
+                itemPosition_.erase(recyclePos++);
+            }
             break;
         }
-        cachedPos++;
-        LOGI("recycle item:%{public}d", pos->first);
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
-        itemPosition_.erase((pos++)->first);
     }
 }
 
