@@ -57,9 +57,7 @@ RosenRenderContext::~RosenRenderContext()
 
 void RosenRenderContext::StartRecording()
 {
-    if (rsNode_ == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID(rsNode_);
     auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>();
     if (rsCanvasNode) {
         rosenCanvas_ = Canvas::Create(
@@ -109,18 +107,14 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::strin
 
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
 {
-    if (!rsNode_) {
-        return;
-    }
+    CHECK_NULL_VOID(rsNode_);
     auto paintRect = AdjustPaintRect();
     SyncGeometryProperties(paintRect);
 }
 
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 {
-    if (!rsNode_) {
-        return;
-    }
+    CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetPivot(0.5f, 0.5f); // default pivot is center
@@ -164,9 +158,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
-    if (!rsNode_) {
-        return;
-    }
+    CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBackgroundColor(value.GetValue());
     RequestNextFrame();
 }
@@ -550,6 +542,7 @@ void RosenRenderContext::OnModifyDone()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(rsNode_);
     const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
     if (!size.IsPositive()) {
         LOGD("first modify, make change in SyncGeometryProperties");
@@ -572,6 +565,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     RectF rect;
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, rect);
+    CHECK_NULL_RETURN(rsNode_, rect);
     const auto& geometryNode = frameNode->GetGeometryNode();
     if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
         rect = geometryNode->GetContent() ? geometryNode->GetContent()->GetRect() : RectF();
@@ -751,9 +745,8 @@ sk_sp<SkPicture> RosenRenderContext::FinishRecordingAsPicture()
 void RosenRenderContext::Restore()
 {
     const auto& canvas = GetCanvas();
-    if (canvas != nullptr) {
-        canvas->Restore();
-    }
+    CHECK_NULL_VOID(canvas);
+    canvas->Restore();
 }
 
 void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
@@ -897,9 +890,8 @@ void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>&
     auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
     CHECK_NULL_VOID(rosenRenderContext);
     auto rsNode = rosenRenderContext->GetRSNode();
-    if (rsNode) {
-        rsNode_->MoveChild(rsNode, index);
-    }
+    // no need to check nullptr since MoveChild will take care of it
+    rsNode_->MoveChild(rsNode, index);
 }
 
 void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
@@ -1149,6 +1141,7 @@ void RosenRenderContext::OnFrontColorBlendUpdate(const Color& /*colorBlend*/)
 
 void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
 {
+    CHECK_NULL_VOID(rsNode_);
     if (options.Type == TransitionType::ALL || options.Type == TransitionType::APPEARING) {
         if (!propTransitionAppearing_) {
             propTransitionAppearing_ = std::make_unique<TransitionOptions>(options);
@@ -1276,6 +1269,7 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
 
 void RosenRenderContext::ClipWithRect(const RectF& rectF)
 {
+    CHECK_NULL_VOID(rsNode_);
     SkPath skPath;
     skPath.addRect(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
@@ -1343,6 +1337,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type) const
 
 void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, int index)
 {
+    CHECK_NULL_VOID(rsNode_);
     auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(rosenRenderContext);
     auto child = rosenRenderContext->GetRSNode();
@@ -1351,6 +1346,7 @@ void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, in
 
 void RosenRenderContext::SetBounds(float positionX, float positionY, float width, float height)
 {
+    CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 

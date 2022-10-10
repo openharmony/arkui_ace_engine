@@ -86,23 +86,20 @@ public:
 
     void SetDrawContentAtLast(bool useDrawContentLastOrder) override
     {
-        if (rsNode_) {
-            rsNode_->SetPaintOrder(useDrawContentLastOrder);
-        }
+        CHECK_NULL_VOID(rsNode_);
+        rsNode_->SetPaintOrder(useDrawContentLastOrder);
     }
 
     void SetClipToFrame(bool useClip) override
     {
-        if (rsNode_) {
-            rsNode_->SetClipToFrame(useClip);
-        }
+        CHECK_NULL_VOID(rsNode_);
+        rsNode_->SetClipToFrame(useClip);
     }
 
     void SetClipToBounds(bool useClip) override
     {
-        if (rsNode_) {
-            rsNode_->SetClipToBounds(useClip);
-        }
+        CHECK_NULL_VOID(rsNode_);
+        rsNode_->SetClipToBounds(useClip);
     }
 
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
