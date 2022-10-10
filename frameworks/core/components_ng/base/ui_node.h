@@ -183,6 +183,10 @@ public:
 
     virtual void OnWindowHide() {}
 
+    virtual void OnWindowFocused() {}
+
+    virtual void OnWindowUnfocused() {}
+
 protected:
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {

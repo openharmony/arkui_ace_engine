@@ -195,7 +195,6 @@ ImageSourceInfo RatingPattern::GetImageSourceInfoFromTheme(int32_t imageFlag)
         default:
             break;
     }
-    imageSourceInfo.UpdateSrcType();
     return imageSourceInfo;
 }
 
