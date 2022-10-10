@@ -450,8 +450,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 #endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         rootNode_->DumpTree(0);
-        // auto pageNode = stageManager_->GetLastPage();
-        // pageNode->DumpTree(pageNode->GetDepth());
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {

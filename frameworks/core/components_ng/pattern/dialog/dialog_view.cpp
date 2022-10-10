@@ -131,14 +131,13 @@ void DialogView::BuildChild(const RefPtr<FrameNode>& dialog, const DialogPropert
     LOGI("build dialog child");
     // append customNode
     if (customNode) {
-        if (!AceType::InstanceOf<CustomNode>(customNode)) {
-            LOGE("dialogNode's child isn't FrameNode");
-            return;
-        }
-        auto contentNode = AceType::DynamicCast<FrameNode>(customNode->GetChildAtIndex(0));
-        UpdateContentRenderContext(contentNode, dialogTheme);
-        customNode->MountToParent(dialog);
-        LOGD("customNode tag = %s mounted to dialog", customNode->GetTag().c_str());
+        // wrap custom node to set background color and round corner
+        auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        CHECK_NULL_VOID(contentWrapper);
+        UpdateContentRenderContext(contentWrapper, dialogTheme);
+        customNode->MountToParent(contentWrapper);
+        contentWrapper->MountToParent(dialog);
         return;
     }
     auto deviceType = SystemProperties::GetDeviceType();
@@ -242,7 +241,7 @@ void DialogView::BuildChild(const RefPtr<FrameNode>& dialog, const DialogPropert
 }
 
 // to close dialog when clicked
-void BindCloseCallBack(const RefPtr<GestureEventHub> hub, const RefPtr<FrameNode>& dialog)
+void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, const RefPtr<FrameNode>& dialog)
 {
     auto closeCallback = [dialog](GestureEvent& /*info*/) {
         auto container = Container::Current();
@@ -383,7 +382,7 @@ RefPtr<FrameNode> BuildSheetItem(
 }
 
 RefPtr<FrameNode> DialogView::BuildSheet(
-    const std::vector<ActionSheetInfo>& sheets, const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode> dialog)
+    const std::vector<ActionSheetInfo>& sheets, const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dialog)
 {
     LOGI("start building action sheet items");
     auto listId = ElementRegister::GetInstance()->MakeUniqueId();

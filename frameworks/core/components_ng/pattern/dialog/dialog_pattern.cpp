@@ -68,6 +68,7 @@ void DialogPattern::HandleTouchUp(const Offset& clickPosition)
     auto autoCancel = dialogRenderProp->GetAutoCancel().value_or(true);
     if (autoCancel) {
         auto content = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_VOID(content);
         auto contentRect = content->GetGeometryNode()->GetFrameRect();
         // close dialog if clicked outside content rect
         if (!contentRect.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {

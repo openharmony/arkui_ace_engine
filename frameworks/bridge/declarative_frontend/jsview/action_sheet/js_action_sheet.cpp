@@ -218,6 +218,8 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->ShowDialog(properties, nullptr, false);
+        args.SetReturnValue(args.This());
+        return;
     }
 
     // Show ActionSheet.
