@@ -86,7 +86,7 @@ private:
     void CacheImageObject();
     void SetImagePaintConfig(
         const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg);
-    static void UpdateInternalResource(ImageSourceInfo& sourceInfo);
+    void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
         DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();

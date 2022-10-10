@@ -299,6 +299,9 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
     if (!iconPath.empty()) {
         sourceInfo.SetSrc(iconPath);
+        auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     }
 }
 
