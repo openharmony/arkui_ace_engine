@@ -27,6 +27,7 @@
 #include "js_runtime_utils.h"
 #include "native_reference.h"
 #include "service_extension_context.h"
+
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -35,6 +36,7 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
@@ -42,8 +44,8 @@
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/rect.h"
-#include "base/log/log.h"
 #include "base/log/ace_trace.h"
+#include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
@@ -321,7 +323,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         ImageCache::SetImageCacheFilePath(context->GetCacheDir());
         ImageCache::SetCacheFileInfo();
     });
-    bool useNewPipe = AceApplicationInfo::GetInstance().GetPackageName() == SystemProperties::GetNewPipePkg();
+    AceNewPipeJudgement::InitAceNewPipeConfig();
+    auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
+    auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
+    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabled(
+        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
+    LOGI("UIContent: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
+        apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
