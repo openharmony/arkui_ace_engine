@@ -533,9 +533,10 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
 #endif
     if (delegate && delegate->GetAssetManager()) {
         std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
+        auto appLibPathKey = delegate->GetAssetManager()->GetAppLibPathKey();
         if (!packagePath.empty()) {
             auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
-            arkNativeEngine->SetPackagePath(packagePath);
+            arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
         }
     }
     RegisterWorker();

@@ -82,8 +82,9 @@ public:
 
     std::string GetAssetPath(const std::string& assetName) override;
 
-    void SetLibPath(const std::vector<std::string>& packagePath) override
+    void SetLibPath(const std::string& appLibPathKey, const std::vector<std::string>& packagePath) override
     {
+        appLibPathKey_ = appLibPathKey;
         packagePath_ = packagePath;
     }
 
@@ -92,11 +93,17 @@ public:
         return packagePath_;
     }
 
+    std::string GetAppLibPathKey() const override
+    {
+        return appLibPathKey_;
+    }
+
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const override;
 
 private:
     std::deque<RefPtr<AssetProvider>> providers_;
     std::vector<std::string> packagePath_;
+    std::string appLibPathKey_;
 };
 
 } // namespace OHOS::Ace

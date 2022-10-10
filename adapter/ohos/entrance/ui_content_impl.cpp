@@ -474,7 +474,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             }
         }
     }
-    if (appInfo && flutterAssetManager) {
+    auto hapInfo = context->GetHapModuleInfo();
+    if (appInfo && flutterAssetManager && hapInfo) {
         /* Note: DO NOT modify the sequence of adding libPath  */
         std::string nativeLibraryPath = appInfo->nativeLibraryPath;
         std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
@@ -489,8 +490,14 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             libPaths.push_back(libPath);
             LOGI("napi lib path = %{private}s", libPath.c_str());
         }
+        auto isLibIsolated = hapInfo->isLibIsolated;
         if (!libPaths.empty()) {
-            flutterAssetManager->SetLibPath(libPaths);
+            if (!isLibIsolated) {
+                flutterAssetManager->SetLibPath("default", libPaths);
+            } else {
+                std::string appLibPathKey = hapInfo->bundleName + "/" + hapInfo->moduleName;
+                flutterAssetManager->SetLibPath(appLibPathKey, libPaths);
+            }
         }
     }
 
