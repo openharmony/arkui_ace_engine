@@ -411,6 +411,11 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
     }
 }
 
+void NavigationView::SetNavigationMode(NavigationMode mode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, static_cast<NG::NavigationMode>(mode));
+}
+
 void NavigationView::SetHideTitleBar(bool hideTitleBar)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideTitleBar, hideTitleBar);

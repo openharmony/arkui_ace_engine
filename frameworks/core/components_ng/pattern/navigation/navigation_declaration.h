@@ -87,5 +87,20 @@ enum class NavigationTitleMode {
     FULL,
     MINI,
 };
+
+enum class NavigationMode {
+    AUTO = 0,
+    SPLIT,
+    STACK,
+    OVERLAY,
+};
+
+enum class ChildNodeOperation {
+    ADD,
+    // remove case only used for back button
+    REMOVE,
+    REPLACE,
+    NONE
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

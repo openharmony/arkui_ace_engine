@@ -42,6 +42,7 @@ public:
     static void SetMenuItems(std::list<BarItem>&& menuItems);
     // title mode change
     static void SetOnTitleModeChange(std::function<void(NavigationTitleMode)>&& onTitleModeChange);
+    static void SetNavigationMode(NG::NavigationMode mode);
 };
 
 } // namespace OHOS::Ace::NG

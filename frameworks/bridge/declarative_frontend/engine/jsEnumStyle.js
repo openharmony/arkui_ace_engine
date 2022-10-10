@@ -694,6 +694,13 @@ var NavigationTitleMode;
   NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
 })(NavigationTitleMode || (NavigationTitleMode = {}));
 
+var NavigationMode;
+(function (NavigationMode) {
+  NavigationMode[NavigationMode["Stack"] = 0] = "Stack";
+  NavigationMode[NavigationMode["Split"] = 1] = "Split";
+  NavigationMode[NavigationMode["Auto"] = 2] = "Auto";
+})(NavigationMode || (NavigationMode = {}));
+
 var ResponseType;
 (function (ResponseType) {
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
