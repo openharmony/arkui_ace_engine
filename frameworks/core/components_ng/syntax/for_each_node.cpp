@@ -98,6 +98,7 @@ void ForEachNode::CompareAndUpdateChildren()
 void ForEachNode::FlushUpdateAndMarkDirty()
 {
     // mark parent dirty to flush measure.
+    MarkNeedSyncRenderTree();
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
