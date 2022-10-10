@@ -635,7 +635,7 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
-        LOGE("FlexLayoutAlgorithm::GetTotalAllocatedSize, children is empty");
+        LOGD("FlexLayoutAlgorithm::GetTotalAllocatedSize, children is empty");
         allocatedSize_ = 0.0f;
         return;
     }
@@ -659,7 +659,7 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
-        LOGE("FlexLayoutAlgorithm::Layout, children is empty");
+        LOGD("FlexLayoutAlgorithm::Layout, children is empty");
         return;
     }
     auto contentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();

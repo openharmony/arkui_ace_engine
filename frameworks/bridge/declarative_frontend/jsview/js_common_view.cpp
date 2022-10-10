@@ -16,11 +16,16 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 
 #include "core/components/proxy/proxy_component.h"
+#include "core/components_ng/pattern/common_view/common_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 void JSCommonView::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::CommonView::Create();
+        return;
+    }
     auto specializedBox = AceType::MakeRefPtr<OHOS::Ace::ProxyComponent>();
     specializedBox->SetPassMinSize(false);
     ViewStackProcessor::GetInstance()->Push(specializedBox);

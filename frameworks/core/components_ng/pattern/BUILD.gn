@@ -45,6 +45,7 @@ build_component_ng("pattern_ng") {
     "checkboxgroup/checkboxgroup_paint_method.cpp",
     "checkboxgroup/checkboxgroup_pattern.cpp",
     "checkboxgroup/checkboxgroup_view.cpp",
+    "common_view/common_view.cpp",
     "container_modal/container_modal_pattern.cpp",
     "container_modal/container_modal_view.cpp",
     "counter/counter_node.cpp",

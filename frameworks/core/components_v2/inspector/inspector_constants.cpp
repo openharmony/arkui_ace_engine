@@ -220,6 +220,8 @@ const char BLANK_ETS_TAG[] = "Blank";
 ACE_EXPORT extern const char BUTTON_COMPONENT_TAG[] = "ButtonComponent";
 ACE_EXPORT extern const char BUTTON_ETS_TAG[] = "Button";
 
+// common view
+const char COMMON_VIEW_ETS_TAG[] = "__Common__";
 // option
 ACE_EXPORT extern const char OPTION_COMPONENT_TAG[] = "OptionComponent";
 ACE_EXPORT extern const char OPTION_ETS_TAG[] = "Option";
