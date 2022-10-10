@@ -18,6 +18,7 @@
 #include <cstddef>
 
 #include "base/log/ace_trace.h"
+#include "bridge/codec/function_call.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/composed_element.h"
@@ -181,6 +182,8 @@ void ViewFunctions::ExecuteDisappear()
     ExecuteFunction(jsDisappearFunc_, "aboutToDisappear");
 }
 
+#ifdef USE_ARK_ENGINE
+
 namespace {
 
 JSRef<JSObject> genConstraint(const std::optional<NG::LayoutConstraintF>& parentConstraint)
@@ -195,13 +198,17 @@ JSRef<JSObject> genConstraint(const std::optional<NG::LayoutConstraintF>& parent
     return constraint;
 }
 
-JSRef<JSArray> genChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
+JSRef<JSArray> genLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
 {
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
     size_t index = 0;
+
+    JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSLayout);
+
     for (const auto& iter : children) {
         JSRef<JSObject> info = JSRef<JSObject>::New();
         info->SetProperty<std::string>("name", iter->GetGeometryNode()->GetFrameSize().ToString());
+        info->SetPropertyObject("layout", layoutFunc);
         childInfo->SetValueAt(index++, info);
     }
     return childInfo;
@@ -217,14 +224,12 @@ void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
 
     auto jsConstraint = genConstraint(parentConstraint);
-    auto childArray = genChildArray(children);
+    auto childArray = genLayoutChildArray(children);
 
     JSRef<JSVal> params[2] = { childArray, jsConstraint };
 
-    layoutChildren_ = layoutWrapper->GetAllChildrenWithBuild();
-    iterLayoutChildren_ = layoutChildren_.begin();
-    parentGlobalOffset = layoutWrapper->GetGeometryNode()->GetParentGlobalOffset();
-
+    ViewMeasureLayout::SetLayoutChildren(layoutWrapper->GetAllChildrenWithBuild());
+    ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
     jsLayoutFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
     LOGD("%s, ExecuteLayout ------------------------------------------------ out", OHOS::Ace::DEVTAG.c_str());
 }
@@ -254,19 +259,20 @@ void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
     constraint->SetProperty<double>("maxHeight", maxSize.Height());
 
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
+    JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSMeasure);
     size_t index = 0;
     for (const auto& iter : children) {
         JSRef<JSObject> info = JSRef<JSObject>::New();
         info->SetProperty<std::string>("name", iter->GetGeometryNode()->GetFrameSize().ToString());
+        info->SetPropertyObject("measure", measureFunc);
         childInfo->SetValueAt(index++, info);
     }
 
     params[0] = childInfo;
     params[1] = constraint;
 
-    measureChildren_ = children;
-    iterMeasureChildren_ = measureChildren_.begin();
-    measureDefaultConstraint_ = parentConstraint.value();
+    ViewMeasureLayout::SetMeasureChildren(children);
+    ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
 
     jsMeasureFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
 
@@ -274,6 +280,20 @@ void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
         maxSize.ToString().c_str());
     LOGD("%s, ExecuteMeasure ------------------------------------------------ out", OHOS::Ace::DEVTAG.c_str());
 }
+
+#else
+
+void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
+{
+    return;
+}
+
+void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
+{
+    return;
+}
+
+#endif
 
 bool ViewFunctions::HasLayout() const
 {

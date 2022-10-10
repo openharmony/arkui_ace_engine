@@ -16,17 +16,53 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_MEASURE_LAYOUT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_MEASURE_LAYOUT_H
 
+#include <utility>
+
+#include "base/memory/ace_type.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 
 namespace OHOS::Ace::Framework {
 
-extern ACE_EXPORT thread_local std::list<RefPtr<NG::LayoutWrapper>> measureChildren_;
-extern ACE_EXPORT thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator iterMeasureChildren_;
-extern ACE_EXPORT thread_local std::list<RefPtr<NG::LayoutWrapper>> layoutChildren_;
-extern ACE_EXPORT thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator iterLayoutChildren_;
-extern ACE_EXPORT thread_local int measureIndex_;
-extern ACE_EXPORT thread_local NG::LayoutConstraintF measureDefaultConstraint_;
-extern ACE_EXPORT thread_local NG::OffsetF parentGlobalOffset;
+class ACE_EXPORT ViewMeasureLayout : AceType {
+    DECLARE_ACE_TYPE(ViewMeasureLayout, AceType);
+
+public:
+    ViewMeasureLayout() = default;
+    ~ViewMeasureLayout() override
+    {
+        LOGD("Destroy: ViewFunctions");
+    }
+
+#ifdef USE_ARK_ENGINE
+    static Local<JSValueRef> JSMeasure(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static Local<JSValueRef> JSLayout(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+
+    static void SetMeasureChildren(std::list<RefPtr<NG::LayoutWrapper>> children)
+    {
+        measureChildren_ = std::move(children);
+        iterMeasureChildren_ = measureChildren_.begin();
+    }
+
+    static void SetLayoutChildren(std::list<RefPtr<NG::LayoutWrapper>> children)
+    {
+        layoutChildren_ = std::move(children);
+        iterLayoutChildren_ = layoutChildren_.begin();
+    }
+
+    static void SetDefaultMeasureConstraint(NG::LayoutConstraintF constraint)
+    {
+        measureDefaultConstraint_ = constraint;
+    }
+
+private:
+    static thread_local std::list<RefPtr<NG::LayoutWrapper>> measureChildren_;
+    static thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator iterMeasureChildren_;
+    static thread_local std::list<RefPtr<NG::LayoutWrapper>> layoutChildren_;
+    static thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator iterLayoutChildren_;
+    static thread_local NG::LayoutConstraintF measureDefaultConstraint_;
+#endif
+};
 
 } // namespace OHOS::Ace::Framework
 

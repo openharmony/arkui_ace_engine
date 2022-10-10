@@ -27,6 +27,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -72,6 +73,7 @@ RefPtr<PageTransitionComponent> JSView::BuildPageTransitionComponent()
 void JSView::RenderJSExecution()
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+    LOGD("%s, JSView::RenderJSExecution", OHOS::Ace::DEVTAG.c_str());
     if (!jsViewFunction_) {
         LOGE("JSView: InternalRender jsViewFunction_ error");
         return;
@@ -175,7 +177,7 @@ RefPtr<Component> JSViewFullUpdate::CreateComponent()
     return composedComponent;
 }
 
-RefPtr<NG::CustomNode> JSViewFullUpdate::CreateUINode(const RefPtr<NG::FrameNode>& pageNode)
+RefPtr<NG::UINode> JSViewFullUpdate::CreateUINode(const RefPtr<NG::FrameNode>& pageNode)
 {
     ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
     // create component, return new something, need to set proper ID
@@ -600,16 +602,83 @@ RefPtr<Component> JSViewPartialUpdate::InitialRender()
     return buildComponent;
 }
 
-RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode(const RefPtr<NG::FrameNode>& pageNode)
+void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> customNode)
 {
-    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
-    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
-    viewId_ = std::to_string(viewId);
-    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
-    LOGD("%s Creating CustomNode with claimed elmtId %{public}d.", OHOS::Ace::DEVTAG.c_str(), viewId);
-    auto customNode = NG::CustomNode::CreateCustomNode(viewId, key);
-    node_ = customNode;
+    auto appearFunction = [weak = AceType::WeakClaim(this)]() {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
+        if (jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteAppear();
+        }
+    };
+    customNode->SetAppearFunction(std::move(appearFunction));
 
+    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::UINode> {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, nullptr);
+        if (!jsView->isFirstRender_) {
+            LOGW("the js view has already called initial render");
+            return nullptr;
+        }
+        LOGD("%s, renderFunction = [weak = AceType::WeakClaim(this)], call render", OHOS::Ace::DEVTAG.c_str());
+        jsView->isFirstRender_ = false;
+        return jsView->InitialUIRender();
+    };
+    customNode->SetRenderFunction(renderFunction);
+
+    auto updateFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        if (!jsView->needsUpdate_) {
+            LOGW("the js view does not need to update");
+            return;
+        }
+        jsView->needsUpdate_ = false;
+        LOGD("Rerender function start for ComposedElement elmtId %{public}s - start...", jsView->viewId_.c_str());
+        {
+            ACE_SCOPED_TRACE("JSView: ExecuteRerender");
+            jsView->jsViewFunction_->ExecuteRerender();
+        }
+    };
+    customNode->SetUpdateFunction(std::move(updateFunction));
+
+    // partial update relies on remove function
+    auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        LOGD("call remove view function");
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        jsView->Destroy(nullptr);
+        jsView->node_.Reset();
+    };
+    customNode->SetDestroyFunction(std::move(removeFunction));
+
+    auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+        LOGD("%s, call js measure in", OHOS::Ace::DEVTAG.c_str());
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        LOGD("%s, call js measure execute", OHOS::Ace::DEVTAG.c_str());
+        jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
+    };
+    LOGD("%s, set js measure start", OHOS::Ace::DEVTAG.c_str());
+    if (jsViewFunction_->HasMeasure()) {
+        customNode->GetGeometryNode()->SetMeasureFunction(std::move(measureFunc));
+    }
+
+    auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        LOGD("%s, call js layout", OHOS::Ace::DEVTAG.c_str());
+        jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
+    };
+    LOGD("%s, set js layout", OHOS::Ace::DEVTAG.c_str());
+    if (jsViewFunction_->HasLayout()) {
+        customNode->GetGeometryNode()->SetLayoutFunction(std::move(layoutFunc));
+    }
+}
+
+void JSViewPartialUpdate::UpdateNormalFrame(RefPtr<NG::CustomNode> customNode)
+{
     auto appearFunction = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
@@ -657,50 +726,33 @@ RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode(const RefPtr<NG::FrameN
         jsView->node_.Reset();
     };
     customNode->SetDestroyFunction(std::move(removeFunction));
+}
 
-    auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
-        LOGD("%s, call js measure in", OHOS::Ace::DEVTAG.c_str());
-        auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID(jsView);
-        LOGD("%s, call js measure execute", OHOS::Ace::DEVTAG.c_str());
-        jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
-    };
-    LOGD("%s, set js measure start", OHOS::Ace::DEVTAG.c_str());
-    if (jsViewFunction_->HasMeasure()) {
-        LOGD("%s, set js measure start 1", OHOS::Ace::DEVTAG.c_str());
-        RefPtr<NG::FrameNode> node;
-        if (pageNode) {
-            LOGD("%s, set js measure start 2", OHOS::Ace::DEVTAG.c_str());
-            node = pageNode;
-        } else {
-            LOGD("%s, set js measure start 3", OHOS::Ace::DEVTAG.c_str());
-            node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        }
-        node->GetGeometryNode()->SetMeasureFunction(std::move(measureFunc));
+RefPtr<NG::UINode> JSViewPartialUpdate::CreateUINode(const RefPtr<NG::FrameNode>& pageNode)
+{
+    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    viewId_ = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
+    LOGD("%s Creating CustomNode with claimed elmtId %{public}d.", OHOS::Ace::DEVTAG.c_str(), viewId);
+
+    if (jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout()) {
+        auto customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);
+        UpdateCustomFrame(customNode);
+        node_ = customNode;
+        return customNode;
     }
 
-    auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
-        auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID(jsView);
-        LOGD("%s, call js layout", OHOS::Ace::DEVTAG.c_str());
-        jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
-    };
-    LOGD("%s, set js layout", OHOS::Ace::DEVTAG.c_str());
-    if (jsViewFunction_->HasLayout()) {
-        RefPtr<NG::FrameNode> node;
-        if (pageNode) {
-            node = pageNode;
-        } else {
-            node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        }
-        node->GetGeometryNode()->SetLayoutFunction(std::move(layoutFunc));
-    }
-
-    return customNode;
+    // normal node donot contain onlayout onmeasure
+    auto normalNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    UpdateNormalFrame(normalNode);
+    node_ = normalNode;
+    return normalNode;
 }
 
 RefPtr<NG::UINode> JSViewPartialUpdate::InitialUIRender()
 {
+    LOGD("%s, JSViewPartialUpdate::InitialUIRender", OHOS::Ace::DEVTAG.c_str());
     needsUpdate_ = false;
     RenderJSExecution();
     return NG::ViewStackProcessor::GetInstance()->Finish();
@@ -734,13 +786,24 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
 void JSViewPartialUpdate::MarkNeedUpdate()
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        auto customNode = node_.Upgrade();
-        if (!customNode) {
+        auto node = node_.Upgrade();
+        if (!node) {
             LOGE("fail to update due to custom Node is null");
             return;
         }
-        needsUpdate_ = true;
-        customNode->MarkNeedUpdate();
+        if (AceType::InstanceOf<NG::CustomNode>(node)) {
+            LOGD("%s JSViewPartialUpdate::MarkNeedUpdate 1", OHOS::Ace::DEVTAG.c_str());
+            auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            needsUpdate_ = true;
+            customNode->MarkNeedUpdate();
+        } else if (AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
+            LOGD("%s JSViewPartialUpdate::MarkNeedUpdate 2", OHOS::Ace::DEVTAG.c_str());
+            auto customNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
+            needsUpdate_ = true;
+            customNode->MarkNeedUpdate();
+        } else {
+            LOGD("%s JSViewPartialUpdate::MarkNeedUpdate 3", OHOS::Ace::DEVTAG.c_str());
+        }
         return;
     }
     JSView::MarkNeedUpdate();
@@ -764,12 +827,94 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
         }
         if (Container::IsCurrentUseNewPipeline()) {
             NG::ViewStackProcessor::GetInstance()->Push(view->CreateUINode(), true);
+            // if (view->getJSViewFunction()->HasLayout() || view->getJSViewFunction()->HasMeasure()) {
+            //     LOGD("%s Creating new JSViewPartialUpdate for CreateCustomMeasureLayoutNode",
+            //     OHOS::Ace::DEVTAG.c_str()); auto* viewPU = object.Unwrap<JSViewPartialUpdate>();
+            //     NG::ViewStackProcessor::GetInstance()->Push(viewPU->CreateCustomMeasureLayoutNode(), true);
+            // } else {
+            //     NG::ViewStackProcessor::GetInstance()->Push(view->CreateUINode(), true);
+            // }
         } else {
             ViewStackProcessor::GetInstance()->Push(view->CreateComponent(), true);
         }
     } else {
         LOGE("View Object is expected.");
     }
+}
+
+RefPtr<NG::CustomMeasureLayoutNode> JSViewPartialUpdate::CreateCustomMeasureLayoutNode()
+{
+    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    viewId_ = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
+    LOGD("%s Creating CustomNode with claimed elmtId %{public}d.", OHOS::Ace::DEVTAG.c_str(), viewId);
+    auto customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);
+    measureLayoutNode_ = customNode;
+
+    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::UINode> {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, nullptr);
+        if (!jsView->isFirstRender_) {
+            LOGW("the js view has already called initial render");
+            return nullptr;
+        }
+        jsView->isFirstRender_ = false;
+        return jsView->InitialUIRender();
+    };
+    customNode->SetRenderFunction(renderFunction);
+
+    auto updateFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        if (!jsView->needsUpdate_) {
+            LOGW("the js view does not need to update");
+            return;
+        }
+        jsView->needsUpdate_ = false;
+        LOGD("Rerender function start for ComposedElement elmtId %{public}s - start...", jsView->viewId_.c_str());
+        {
+            ACE_SCOPED_TRACE("JSView: ExecuteRerender");
+            jsView->jsViewFunction_->ExecuteRerender();
+        }
+    };
+    customNode->SetUpdateFunction(std::move(updateFunction));
+
+    // partial update relies on remove function
+    auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        LOGD("call remove view function");
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        jsView->Destroy(nullptr);
+        jsView->measureLayoutNode_.Reset();
+    };
+    customNode->SetDestroyFunction(std::move(removeFunction));
+
+    auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+        LOGD("%s, call js measure in", OHOS::Ace::DEVTAG.c_str());
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        LOGD("%s, call js measure execute", OHOS::Ace::DEVTAG.c_str());
+        jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
+    };
+    LOGD("%s, set js measure start", OHOS::Ace::DEVTAG.c_str());
+    if (jsViewFunction_->HasMeasure()) {
+        LOGD("%s, set js measure start 1", OHOS::Ace::DEVTAG.c_str());
+        customNode->GetGeometryNode()->SetMeasureFunction(std::move(measureFunc));
+    }
+
+    auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        LOGD("%s, call js layout", OHOS::Ace::DEVTAG.c_str());
+        jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
+    };
+    LOGD("%s, set js layout", OHOS::Ace::DEVTAG.c_str());
+    if (jsViewFunction_->HasLayout()) {
+        customNode->GetGeometryNode()->SetLayoutFunction(std::move(layoutFunc));
+    }
+
+    return customNode;
 }
 
 void JSViewPartialUpdate::JSBind(BindingTarget object)

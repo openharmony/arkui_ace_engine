@@ -22,6 +22,7 @@
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 
 namespace OHOS::Ace {
 class ComposedElement;

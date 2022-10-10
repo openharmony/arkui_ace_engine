@@ -1316,114 +1316,6 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     JSRenderingContextSettings::JSBind(globalObj);
 }
 
-panda::Local<panda::JSValueRef> JSMeasure(panda::JsiRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    LOGD("%s, js call measure in", OHOS::Ace::DEVTAG.c_str());
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
-
-    if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
-        (*iterMeasureChildren_)->Measure(measureDefaultConstraint_);
-        return panda::JSValueRef::Undefined(vm);
-    }
-
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-
-    if (!firstArg->IsObject()) {
-        LOGE("The arg is wrong, value must be ConstraintSizeOptions");
-    }
-
-    auto value_ = firstArg->ToObject(vm);
-
-    auto names = value_->GetOwnPropertyNames(vm);
-    auto length = names->Length(vm);
-
-    NG::LayoutConstraintF jsConstraint_;
-    NG::SizeF minSize_;
-    NG::SizeF maxSize_;
-
-    std::map<std::string, double> jsValue_;
-
-    for (int i = 0; i < length; i++) {
-        auto value = panda::ArrayRef::GetValueAt(vm, names, i);
-        if (value->IsString()) {
-            auto key = value->ToString(vm)->ToString();
-            auto val = value_->Get(vm, value->ToString(vm));
-            if (val->IsNumber()) {
-                LOGD("%s, js call measure in, %s, %f", OHOS::Ace::DEVTAG.c_str(), key.c_str(),
-                    val->ToNumber(vm)->Value());
-                jsValue_.insert({ key, val->ToNumber(vm)->Value() });
-            } else {
-                LOGE("%s, val->IsNumber()", OHOS::Ace::DEVTAG.c_str());
-            }
-        }
-    }
-
-    minSize_.SetWidth(jsValue_.at("minWidth"));
-    minSize_.SetHeight(jsValue_.at("minHeight"));
-    maxSize_.SetWidth(jsValue_.at("maxWidth"));
-    maxSize_.SetHeight(jsValue_.at("maxHeight"));
-
-    jsConstraint_.minSize = minSize_;
-    jsConstraint_.maxSize = maxSize_;
-
-    (*iterMeasureChildren_)->Measure(jsConstraint_);
-    iterMeasureChildren_++;
-    return panda::JSValueRef::Undefined(vm);
-}
-
-namespace {
-
-std::map<std::string, Local<JSValueRef>> parseJsObject(Local<ObjectRef> obj, Local<ArrayRef> names, EcmaVM* vm)
-{
-    std::map<std::string, Local<JSValueRef>> jsValue_;
-    auto length = names->Length(vm);
-
-    for (int i = 0; i < length; i++) {
-        auto value = panda::ArrayRef::GetValueAt(vm, names, i);
-        if (value->IsString()) {
-            auto key = value->ToString(vm)->ToString();
-            auto val = obj->Get(vm, value->ToString(vm));
-            jsValue_.insert({ key, val });
-        }
-    }
-
-    return jsValue_;
-}
-} // namespace
-
-panda::Local<panda::JSValueRef> JSLayout(panda::JsiRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    LOGD("%s, js call layout in", OHOS::Ace::DEVTAG.c_str());
-
-    auto jsParams = runtimeCallInfo->GetCallArgRef(0)->ToObject(vm);
-
-    auto names = jsParams->GetOwnPropertyNames(vm);
-    if (names->Length(vm) != 2) {
-        LOGE("%s, invalid param", OHOS::Ace::DEVTAG.c_str());
-        (*iterLayoutChildren_)->Layout();
-        iterLayoutChildren_++;
-        return panda::JSValueRef::Undefined(vm);
-    }
-
-    auto first = parseJsObject(jsParams, names, vm);
-
-    auto posInfo = first.at("posittion");
-
-    auto second = parseJsObject(posInfo, posInfo->ToObject(vm)->GetOwnPropertyNames(vm), vm);
-
-    auto xVal = second.at("x")->ToNumber(vm)->Value();
-    auto yVal = second.at("y")->ToNumber(vm)->Value();
-
-    LOGD("%s, js call layout in, info %f, %f", OHOS::Ace::DEVTAG.c_str(), xVal, yVal);
-
-    (*iterLayoutChildren_)->GetGeometryNode()->SetMarginFrameOffset(NG::OffsetF(xVal, yVal));
-    iterLayoutChildren_++;
-    return panda::JSValueRef::Undefined(vm);
-}
-
 void JsRegisterViews(BindingTarget globalObj)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
@@ -1468,10 +1360,6 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendKeyEvent));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendMouseEvent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendMouseEvent));
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "measure"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSMeasure));
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "layout"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSLayout));
     globalObj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "vp2px"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px));
     globalObj->Set(

@@ -19,14 +19,14 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace::NG {
 
 void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     LOGD("%s, CustomNodeLayoutAlgorithm::Measure, in", OHOS::Ace::DEVTAG.c_str());
-    auto host = DynamicCast<CustomNode>(layoutWrapper->GetHostNode());
+    auto host = DynamicCast<CustomMeasureLayoutNode>(layoutWrapper->GetHostNode());
     if (renderFunction_ && host) {
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
@@ -35,11 +35,20 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         {
             ACE_SCOPED_TRACE("CustomNode:BuildItem");
             // first create child node and wrapper.
+            LOGD("%s, CustomNodeLayoutAlgorithm::Measure, call render", OHOS::Ace::DEVTAG.c_str());
             auto child = renderFunction_();
             renderFunction_ = nullptr;
             CHECK_NULL_VOID(child);
             buildItem_ = child;
             child->AdjustLayoutWrapperTree(Claim(layoutWrapper), true, true);
+        }
+    } else {
+        if (!host) {
+            LOGD("%s, CustomNodeLayoutAlgorithm::Measure, host empty", OHOS::Ace::DEVTAG.c_str());
+        }
+        
+        if(!renderFunction_) {
+            LOGD("%s, CustomNodeLayoutAlgorithm::Measure, renderFunction_ empty", OHOS::Ace::DEVTAG.c_str());
         }
     }
     // then use normal measure step.
