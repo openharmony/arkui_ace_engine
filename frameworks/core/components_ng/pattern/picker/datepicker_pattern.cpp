@@ -187,6 +187,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh) const
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
+        datePickerEventHub->FireDailogChangeEvent(str);
     }
 }
 
@@ -648,8 +649,9 @@ PickerDate DatePickerPattern::GetCurrentDate() const
 
     if (!IsShowLunar()) {
         currentDate.SetYear(startDateSolar_.GetYear() + yearDatePickerColumnPattern->GetCurrentIndex());
-        currentDate.SetMonth(monthDatePickerColumnPattern->GetCurrentIndex() + 1); // month from 1 to 12, index from 0 to 11.
-        currentDate.SetDay(dayDatePickerColumnPattern->GetCurrentIndex() + 1);     // day from 1 to 31, index from 0 to 30.
+        currentDate.SetMonth(
+            monthDatePickerColumnPattern->GetCurrentIndex() + 1); // month from 1 to 12, index from 0 to 11.
+        currentDate.SetDay(dayDatePickerColumnPattern->GetCurrentIndex() + 1); // day from 1 to 31, index from 0 to 30.
         return currentDate;
     }
 

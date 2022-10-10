@@ -87,6 +87,7 @@ struct DialogProperties {
     DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
     DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
     int32_t gridCount = 0;
+    bool useCustom = true;
 
     // These ids is used for AlertDialog of declarative.
     EventMarker primaryId;   // first button's callback.

@@ -36,6 +36,7 @@ public:
         value->propDialogAlignment_ = CloneDialogAlignment();
         value->propDialogOffset_ = CloneDialogOffset();
         value->propGridCount_ = CloneGridCount();
+        value->propUseCustom_ = CloneUseCustom();
         return value;
     }
 
@@ -45,6 +46,7 @@ public:
         ResetDialogAlignment();
         ResetDialogOffset();
         ResetGridCount();
+        ResetUseCustom();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogAlignment, DialogAlignment, PROPERTY_UPDATE_MEASURE);

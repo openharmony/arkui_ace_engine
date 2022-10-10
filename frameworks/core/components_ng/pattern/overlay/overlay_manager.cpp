@@ -23,9 +23,14 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
+#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
+#include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
+#include "core/components_ng/pattern/time_picker/timepicker_view.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -166,6 +171,43 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     LOGD("dialog mounted to root node");
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialog;
+}
+
+void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
+    std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
+    std::map<std::string, NG::DailogChangeEvent> dialogEvent)
+{
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent));
+    CHECK_NULL_VOID(dialogNode);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    dialogNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
+    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
+    std::map<std::string, NG::DailogChangeEvent> dialogEvent)
+{
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProps, std::move(timePickerProperty), isUseMilitaryTime, std::move(dialogEvent));
+    CHECK_NULL_VOID(dialogNode);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    dialogNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
+    const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextChangeEvent> dialogEvent)
+{
+    auto dialogNode = TextPickerDialogView::Show(dialogProps, selected, height, getRangeVector, std::move(dialogEvent));
+    CHECK_NULL_VOID(dialogNode);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    dialogNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void OverlayManager::CloseDialog(RefPtr<FrameNode> dialogNode)

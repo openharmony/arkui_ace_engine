@@ -30,7 +30,7 @@ public:
     static void SetEndDate(const PickerDate& value);
     static void SetSelectedDate(const PickerDate& value);
     static void SetShowLunar(bool lunar);
-    static void SetOnChange(ChangeEvent&& onChange);
+    static void SetOnChange(DateChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 

@@ -26,7 +26,7 @@ public:
     static void Create();
     static void SetSelected(uint32_t value);
     static void SetRange(const std::vector<std::string>& value);
-    static void SetOnChange(ChangeEvent&& onChange);
+    static void SetOnChange(TextChangeEvent&& onChange);
     static void SetDefaultPickerItemHeight(const Dimension& value);
 };
 } // namespace OHOS::Ace::NG

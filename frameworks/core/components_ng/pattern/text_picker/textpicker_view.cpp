@@ -84,7 +84,7 @@ void TextPickerView::SetDefaultPickerItemHeight(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value);
 }
 
-void TextPickerView::SetOnChange(ChangeEvent&& onChange)
+void TextPickerView::SetOnChange(TextChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

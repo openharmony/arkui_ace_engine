@@ -22,7 +22,10 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -72,6 +75,12 @@ public:
 
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
+    void ShowDateDialog(const DialogProperties& dialogProps, std::map<std::string, PickerDate> datePickerProperty,
+        bool isLunar, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+    void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> datePickerProperty,
+        bool isUseMilitaryTime, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+    void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
+        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextChangeEvent> dialogEvent);
     void CloseDialog(RefPtr<FrameNode> dialogNode);
 
 private:
