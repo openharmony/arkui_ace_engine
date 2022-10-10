@@ -703,7 +703,7 @@ bool RenderWeb::IsTouchHandleShow(
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
 {
     if (handle->GetAlpha() > 0 &&
-        GreatOrEqual(handle->GetY(), handle->GetEdgeHeight()) &&
+        GreatOrEqual(handle->GetY(), static_cast<int32_t>(handle->GetEdgeHeight())) &&
         GreatNotEqual(GetLayoutSize().Height(), handle->GetY())) {
         return true;
     }

@@ -623,7 +623,7 @@ bool WebPattern::IsTouchHandleShow(
         return false;
     }
     if (handle->GetAlpha() > 0 &&
-        GreatOrEqual(handle->GetY(), handle->GetEdgeHeight()) &&
+        GreatOrEqual(handle->GetY(), static_cast<int32_t>(handle->GetEdgeHeight())) &&
         GreatNotEqual(GetHostFrameSize().value_or(SizeF()).Height(), handle->GetY())) {
         return true;
     }
