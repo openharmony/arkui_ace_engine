@@ -18,9 +18,9 @@ ohos_unittest("relative_container_layout_test_ng") {
   module_out_path = "$test_output_path/relative_container"
 
   sources = [
-    "relative_container_layout_test_ng.cpp",
     "relative_container_common_ng.cpp",
     "relative_container_common_ng.h",
+    "relative_container_layout_test_ng.cpp",
   ]
 
   deps = [
