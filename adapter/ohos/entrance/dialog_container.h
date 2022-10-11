@@ -62,6 +62,26 @@ public:
         return pipelineContext_;
     }
 
+    int32_t GetViewPosX() const override
+    {
+        return aceView_ ? aceView_->GetPosX() : 0;
+    }
+
+    int32_t GetViewPosY() const override
+    {
+        return aceView_ ? aceView_->GetPosY() : 0;
+    }
+
+    void SetWindowId(uint32_t windowId) override
+    {
+        windowId_ = windowId;
+    }
+
+    uint32_t GetWindowId() const override
+    {
+        return windowId_;
+    }
+
     int32_t GetViewWidth() const override
     {
         return aceView_ ? aceView_->GetWidth() : 0;
@@ -162,6 +182,7 @@ private:
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
 
+    uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
     int32_t instanceId_ = -1;
     AceView* aceView_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
