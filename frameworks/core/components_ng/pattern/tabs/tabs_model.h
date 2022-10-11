@@ -45,7 +45,7 @@ public:
     virtual void SetScrollable(bool scrollable) = 0;
     virtual void SetAnimationDuration(float duration) = 0;
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
-    
+
 private:
     static std::unique_ptr<TabsModel> instance_;
 };

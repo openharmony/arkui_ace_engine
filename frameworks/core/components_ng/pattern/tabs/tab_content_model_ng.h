@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_MODEL_NG_H
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -23,16 +23,18 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_model.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT TabContentView {
+class ACE_EXPORT TabContentModelNG : public OHOS::Ace::TabContentModel {
 public:
-    static void Create(std::function<void()>&& deepRenderFunc);
-    static void Create();
-    static void Pop(const RefPtr<FrameNode>& tabContent);
-    static void SetTabBar(const std::string& text, const std::string& icon, TabBarBuilderFunc&& builder);
+    void Create(std::function<void()>&& deepRenderFunc) override;
+    void Create() override;
+    void Pop() override;
+    void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
+        TabBarBuilderFunc&& builder, bool useContentOnly) override;
 };
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_MODEL_NG_H
