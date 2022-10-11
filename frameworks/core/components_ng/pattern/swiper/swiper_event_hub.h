@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
@@ -27,7 +28,7 @@ enum class Direction {
     NEXT,
 };
 
-using ChangeEvent = std::function<void(const int32_t)>;
+using ChangeEvent = std::function<void(const BaseEventInfo*)>;
 using ChangeDoneEvent = std::function<void()>;
 
 class SwiperEventHub : public EventHub {
@@ -62,10 +63,10 @@ public:
     void FireChangeEvent(int32_t index) const
     {
         if (changeEvent_) {
-            changeEvent_(index);
+            changeEvent_(std::make_shared<TabContentChangeEvent>(index).get());
         }
     }
-    
+
     Direction GetDirection()
     {
         return direction_;

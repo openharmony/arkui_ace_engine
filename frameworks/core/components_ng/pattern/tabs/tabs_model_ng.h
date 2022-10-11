@@ -13,36 +13,37 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_MODEL_NG_H
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_model.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 
 namespace OHOS::Ace::NG {
 
 class SwiperPaintProperty;
-class ACE_EXPORT TabsView {
+class ACE_EXPORT TabsModelNG : public OHOS::Ace::TabsModel {
 public:
-    static void Create();
-    static void Pop();
-    static void SetIndex(int32_t index);
-    static void SetTabBarPosition(BarPosition tabBarPosition);
-    static void SetTabBarMode(TabBarMode tabBarMode);
-    static void SetTabBarWidth(const Dimension& tabBarWidth);
-    static void SetTabBarHeight(const Dimension& tabBarHeight);
-    static void SetAxis(Axis axis);
-    static void SetScrollable(bool scrollable);
-    static void SetAnimationDuration(int32_t duration);
-    static void SetOnChange(ChangeEvent&& onChange);
-    static RefPtr<SwiperController> GetSwiperController();
+    void Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& tabController,
+        const RefPtr<SwiperController>& swiperController) override;
+    void Pop() override;
+    void SetIndex(int32_t index) override;
+    void SetTabBarPosition(BarPosition tabBarPosition) override;
+    void SetTabBarMode(TabBarMode tabBarMode) override;
+    void SetTabBarWidth(const Dimension& tabBarWidth) override;
+    void SetTabBarHeight(const Dimension& tabBarHeight) override;
+    void SetIsVertical(bool isVertical) override;
+    void SetScrollable(bool scrollable) override;
+    void SetAnimationDuration(float duration) override;
+    void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) override;
 
 private:
     static RefPtr<TabsNode> GetOrCreateTabsNode(
@@ -54,4 +55,4 @@ private:
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_MODEL_NG_H

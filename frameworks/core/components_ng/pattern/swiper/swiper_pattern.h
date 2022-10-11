@@ -83,6 +83,11 @@ public:
         return swiperController_;
     }
 
+    void SetSwiperController(const RefPtr<SwiperController>& swiperController)
+    {
+        swiperController_ = swiperController;
+    }
+
     int GetCurrentIndex() const
     {
         return currentIndex_;

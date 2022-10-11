@@ -46,6 +46,11 @@ public:
         swiperController_ = swiperController;
     }
 
+    const RefPtr<SwiperController>& GetSwiperController() const
+    {
+        return swiperController_;
+    }
+
 private:
     RefPtr<TabController> controller_;
     RefPtr<SwiperController> swiperController_; // used by ng structure

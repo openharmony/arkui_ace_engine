@@ -27,6 +27,7 @@ int32_t g_tabControllerId = 0;
 JSTabsController::JSTabsController()
 {
     controller_ = CreateController();
+    swiperController_ = MakeRefPtr<SwiperController>();
 }
 
 void JSTabsController::JSBind(BindingTarget globalObj)
