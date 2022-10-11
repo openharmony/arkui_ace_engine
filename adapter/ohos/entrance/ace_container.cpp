@@ -1001,7 +1001,7 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
         }
     }
     if (flutterAssetManager) {
-        flutterAssetManager->SetLibPath(libPath);
+        flutterAssetManager->SetLibPath("default", libPath);
     }
 }
 

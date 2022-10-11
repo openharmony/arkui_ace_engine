@@ -383,7 +383,7 @@ void PaContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>&
         AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(flutterAssetManager);
     }
     if (flutterAssetManager) {
-        flutterAssetManager->SetLibPath(libPath);
+        flutterAssetManager->SetLibPath("default", libPath);
     }
 }
 
