@@ -2642,6 +2642,56 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
     }
 }
 
+void JSViewAbstract::JsBorderImageForNG(const JSRef<JSObject>& object)
+{
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    auto valueSource = object->GetProperty("source");
+    if (!valueSource->IsString() && !valueSource->IsObject()) {
+        LOGE("Border image source type not recognized");
+        return;
+    }
+    std::string srcResult;
+    if (valueSource->IsString()) {
+        srcResult = valueSource->ToString();
+        if (!srcResult.empty()) {
+            borderImage->SetSrc(srcResult);
+            NG::ViewAbstract::SetBorderImageSource(srcResult);
+        }
+    } else if (valueSource->IsObject()) {
+        if (ParseJsMedia(valueSource, srcResult)) {
+            borderImage->SetSrc(srcResult);
+            NG::ViewAbstract::SetBorderImageSource(srcResult);
+        } else {
+            ParseBorderImageLinearGradientForNG(valueSource);
+        }
+    }
+    auto valueOutset = object->GetProperty("outset");
+    if (valueOutset->IsNumber() || valueOutset->IsString() || valueOutset->IsObject()) {
+        NG::ViewAbstract::SetHasBorderImageOutset(true);
+        ParseBorderImageOutset(valueOutset, borderImage);
+    }
+    auto valueRepeat = object->GetProperty("repeat");
+    if (!valueRepeat->IsNull()) {
+        NG::ViewAbstract::SetHasBorderImageRepeat(true);
+        ParseBorderImageRepeat(valueRepeat, borderImage);
+    }
+    auto valueSlice = object->GetProperty("slice");
+    if (valueSlice->IsNumber() || valueSlice->IsString() || valueSlice->IsObject()) {
+        NG::ViewAbstract::SetHasBorderImageSlice(true);
+        ParseBorderImageSlice(valueSlice, borderImage);
+    }
+    auto valueWidth = object->GetProperty("width");
+    if (valueWidth->IsNumber() || valueWidth->IsString() || valueWidth->IsObject()) {
+        NG::ViewAbstract::SetHasBorderImageWidth(true);
+        ParseBorderImageWidth(valueWidth, borderImage);
+    }
+    auto needFill = object->GetProperty("fill");
+    if (needFill->IsBoolean()) {
+        borderImage->SetNeedFillCenter(needFill->ToBoolean());
+    }
+    NG::ViewAbstract::SetBorderImage(borderImage);
+}
+
 void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -2651,6 +2701,11 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     if (object->IsEmpty()) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        JsBorderImageForNG(object);
+        info.ReturnSelf();
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -2815,6 +2870,66 @@ void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, Re
     GetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
     backDecoration->SetBorderImageGradient(lineGradient);
     backDecoration->SetHasBorderImageGradient(true);
+}
+
+void JSViewAbstract::ParseBorderImageLinearGradientForNG(const JSRef<JSVal>& args)
+{
+    auto argsPtrItem = JsonUtil::ParseJsonString(args->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Parse border image linear gradient failed. argsPtr is null. %{public}s", args->ToString().c_str());
+        return;
+    }
+    NG::Gradient lineGradient;
+    lineGradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    // angle
+    std::optional<float> degree;
+    GetAngle("angle", argsPtrItem, degree);
+    if (degree) {
+        lineGradient.GetLinearGradient()->angle = Dimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // direction
+    auto direction = static_cast<NG::GradientDirection>(
+        argsPtrItem->GetInt("direction", static_cast<int32_t>(NG::GradientDirection::NONE)));
+    switch (direction) {
+        case NG::GradientDirection::LEFT:
+            lineGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+            break;
+        case NG::GradientDirection::RIGHT:
+            lineGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
+            break;
+        case NG::GradientDirection::TOP:
+            lineGradient.GetLinearGradient()->linearY = NG::GradientDirection::TOP;
+            break;
+        case NG::GradientDirection::BOTTOM:
+            lineGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case NG::GradientDirection::LEFT_TOP:
+            lineGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+            lineGradient.GetLinearGradient()->linearY = NG::GradientDirection::TOP;
+            break;
+        case NG::GradientDirection::LEFT_BOTTOM:
+            lineGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+            lineGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case NG::GradientDirection::RIGHT_TOP:
+            lineGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
+            lineGradient.GetLinearGradient()->linearY = NG::GradientDirection::TOP;
+            break;
+        case NG::GradientDirection::RIGHT_BOTTOM:
+            lineGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
+            lineGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case NG::GradientDirection::NONE:
+        case NG::GradientDirection::START_TO_END:
+        case NG::GradientDirection::END_TO_START:
+        default:
+            break;
+    }
+    auto repeating = argsPtrItem->GetBool("repeating", false);
+    lineGradient.SetRepeat(repeating);
+    NewGetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
+    NG::ViewAbstract::SetBorderImageGradient(lineGradient);
 }
 
 void JSViewAbstract::ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)

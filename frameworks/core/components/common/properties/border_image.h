@@ -76,14 +76,14 @@ public:
         needFillCenter_ = needFillCenter;
     }
 
-    bool GetNeedFillCenter()
+    bool GetNeedFillCenter() const
     {
         return needFillCenter_;
     }
 
     BorderImageEdge& GetBorderImageEdge(BorderImageDirection direction);
 
-    bool HasBorderImageWidth()
+    bool HasBorderImageWidth() const
     {
         return hasBorderImageWidth_;
     }

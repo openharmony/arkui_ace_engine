@@ -41,6 +41,16 @@ struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundBlurStyle, BlurStyle);
 };
 
+struct BorderImageProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImage, RefPtr<BorderImage>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImageSource, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageSlice, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageWidth, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageOutset, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageRepeat, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImageGradient, Gradient);
+};
+
 struct BorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderColor, BorderColorProperty);

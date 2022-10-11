@@ -156,6 +156,16 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundBlurStyle, BlurStyle);
 
+    // BorderImage
+    ACE_DEFINE_PROPERTY_GROUP(BdImage, BorderImageProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImage, RefPtr<BorderImage>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImageSource, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageSlice, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageWidth, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageOutset, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageRepeat, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImageGradient, Gradient);
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
 
@@ -214,6 +224,14 @@ protected:
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
     virtual void OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle) {}
+
+    virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
+    virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}
+    virtual void OnHasBorderImageSliceUpdate(bool tag) {}
+    virtual void OnHasBorderImageWidthUpdate(bool tag) {}
+    virtual void OnHasBorderImageOutsetUpdate(bool tag) {}
+    virtual void OnHasBorderImageRepeatUpdate(bool tag) {}
+    virtual void OnBorderImageGradientUpdate(const Gradient& gradient) {}
 
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}

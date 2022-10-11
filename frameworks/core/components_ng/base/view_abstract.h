@@ -76,6 +76,14 @@ public:
     static void SetBorderStyle(const BorderStyleProperty& value);
     static void SetOpacity(double opacity);
 
+    static void SetBorderImage(const RefPtr<BorderImage>& borderImage);
+    static void SetBorderImageSource(const std::string& bdImageSrc);
+    static void SetHasBorderImageSlice(bool tag);
+    static void SetHasBorderImageWidth(bool tag);
+    static void SetHasBorderImageOutset(bool tag);
+    static void SetHasBorderImageRepeat(bool tag);
+    static void SetBorderImageGradient(const NG::Gradient& gradient);
+
     // decoration
     static void SetBackdropBlur(const Dimension& radius);
     static void SetFrontBlur(const Dimension& radius);
