@@ -134,8 +134,9 @@ void ThreadStuckTask(int32_t seconds)
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId),
-      platformResRegister_(std::move(platformResRegister)), timeProvider_(g_defaultTimeProvider)
+    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
+        (std::move(platformResRegister))),
+      timeProvider_(g_defaultTimeProvider)
 {
     RegisterEventHandler(frontend->GetEventHandler());
     focusAnimationManager_ = AceType::MakeRefPtr<FocusAnimationManager>();

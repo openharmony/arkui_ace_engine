@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 class ACE_EXPORT PluginWindow : public Window {
 public:
-    explicit PluginWindow(WeakPtr<PipelineContext> context) : Window(nullptr), outSidePipelineContext_(context) {}
+    explicit PluginWindow(WeakPtr<PipelineBase> context) : Window(nullptr), outSidePipelineContext_(context) {}
     ~PluginWindow() = default;
 
     void RequestFrame() override;
@@ -41,7 +41,7 @@ public:
     void SetVsyncCallback(AceVsyncCallback&& callback) override;
 
 private:
-    WeakPtr<PipelineContext> outSidePipelineContext_;
+    WeakPtr<PipelineBase> outSidePipelineContext_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PluginWindow);
 };

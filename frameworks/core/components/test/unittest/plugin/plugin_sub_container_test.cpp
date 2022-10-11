@@ -287,7 +287,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContainerSetAssetManager001, TestSize.
      * @tc.expected: step2. Set Asset Manager success.
      */
     pluginSubContainer->frontend_ = AceType::MakeRefPtr<PluginFrontend>();
-    RefPtr<FlutterAssetManager> flutterAssetManager = pluginSubContainer->SetAssetManager(PATH, "plugincomponent1");
+    RefPtr<AssetManager> flutterAssetManager = pluginSubContainer->SetAssetManager(PATH, "plugincomponent1");
     EXPECT_TRUE(flutterAssetManager != nullptr);
 }
 

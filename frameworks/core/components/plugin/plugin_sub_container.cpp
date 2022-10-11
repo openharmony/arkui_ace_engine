@@ -18,6 +18,8 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
+#include "core/components/plugin/file_asset_provider.h"
+#include "core/components_ng/pattern/plugin/plugin_layout_property.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
@@ -108,7 +110,7 @@ void PluginSubContainer::Destroy()
 
     auto outPipelineContext = outSidePipelineContext_.Upgrade();
     if (outPipelineContext) {
-        outPipelineContext->RemoveTouchPipeline(WeakPtr<PipelineContext>(pipelineContext_));
+        outPipelineContext->RemoveTouchPipeline(WeakPtr<PipelineBase>(pipelineContext_));
     }
     assetManager_.Reset();
     pipelineContext_.Reset();
@@ -117,19 +119,33 @@ void PluginSubContainer::Destroy()
 
 void PluginSubContainer::UpdateRootElementSize()
 {
-    auto pluginComponent = AceType::DynamicCast<PluginComponent>(pluginComponent_);
     Dimension rootWidth = 0.0_vp;
     Dimension rootHeight = 0.0_vp;
-    if (pluginComponent) {
-        rootWidth = pluginComponent->GetWidth();
-        rootHeight = pluginComponent->GetHeight();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto plugin = pluginPattern_.Upgrade();
+        CHECK_NULL_VOID(plugin);
+        auto layoutProperty = plugin->GetLayoutProperty<NG::PluginLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto pluginInfo = layoutProperty->GetRequestPluginInfo();
+        if (pluginInfo.has_value()) {
+            rootWidth = pluginInfo->width;
+            rootHeight = pluginInfo->height;
+        }
+        LOGI("PluginSubContainer::UpdateRootElementSize: ploginInfo->widt:%{public}lf,"
+             "ploginInfo->height:%{public}lf",
+            pluginInfo->width.Value(), pluginInfo->height.Value());
+    } else {
+        auto pluginComponent = AceType::DynamicCast<PluginComponent>(pluginComponent_);
+        if (pluginComponent) {
+            rootWidth = pluginComponent->GetWidth();
+            rootHeight = pluginComponent->GetHeight();
+        }
     }
 
     if (rootWidth_ == rootWidth && rootHeight_ == rootHeight) {
         LOGE("size not changed, should not change");
         return;
     }
-
     surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
     surfaceHeight_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootHeight);
     if (pipelineContext_) {
@@ -146,22 +162,22 @@ void PluginSubContainer::UpdateSurfaceSize()
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
     taskExecutor_->PostTask(
         [weakContext, surfaceWidth = surfaceWidth_, surfaceHeight = surfaceHeight_]() {
-          auto context = weakContext.Upgrade();
-          if (context == nullptr) {
-              LOGE("context is nullptr");
-              return;
-          }
-          if (NearZero(surfaceWidth) && NearZero(surfaceHeight)) {
-              LOGE("surface is zero, should not update");
-              return;
-          }
-          context->OnSurfaceChanged(surfaceWidth, surfaceHeight);
+            auto context = weakContext.Upgrade();
+            if (context == nullptr) {
+                LOGE("context is nullptr");
+                return;
+            }
+            if (NearZero(surfaceWidth) && NearZero(surfaceHeight)) {
+                LOGE("surface is zero, should not update");
+                return;
+            }
+            context->OnSurfaceChanged(surfaceWidth, surfaceHeight);
         },
         TaskExecutor::TaskType::UI);
 }
 
-void PluginSubContainer::RunPlugin(const std::string& path, const std::string& module,
-    const std::string& source, const std::string& moduleResPath, const std::string& data)
+void PluginSubContainer::RunPlugin(const std::string& path, const std::string& module, const std::string& source,
+    const std::string& moduleResPath, const std::string& data)
 {
     ContainerScope scope(instanceId_);
 
@@ -169,10 +185,8 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     auto flutterAssetManager = SetAssetManager(path, module);
 
     auto&& window = std::make_unique<PluginWindow>(outSidePipelineContext_);
-    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
-        std::move(window), taskExecutor_, assetManager_,
-        outSidePipelineContext_.Upgrade()->GetPlatformResRegister(),
-        frontend_, instanceId_);
+    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), taskExecutor_, assetManager_,
+        outSidePipelineContext_.Upgrade()->GetPlatformResRegister(), frontend_, instanceId_);
 
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
     auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
@@ -185,7 +199,8 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
     taskExecutor_->PostTask(
-        [weakContext]() {
+        [weakContext, this]() {
+            ContainerScope scope(instanceId_);
             auto context = weakContext.Upgrade();
             if (context == nullptr) {
                 LOGE("context or root box is nullptr");
@@ -194,11 +209,20 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
             context->SetupRootElement();
         },
         TaskExecutor::TaskType::UI);
-    frontend_->AttachPipelineContext(pipelineContext_);
 
+    frontend_->AttachPipelineContext(pipelineContext_);
     if (frontend_) {
         frontend_->SetDensity(density_);
         UpdateSurfaceSize();
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pluginPattern = pluginPattern_.Upgrade();
+        CHECK_NULL_VOID(pluginPattern);
+        pipelineContext_->SetDrawDelegate(pluginPattern->GetDrawDelegate());
+        frontend_->SetInstanceName(module);
+        frontend_->RunPage(0, source, data);
+        return;
     }
 
     auto plugin = AceType::DynamicCast<PluginElement>(GetPluginElement().Upgrade());
@@ -223,7 +247,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
 }
 
 void PluginSubContainer::SetPluginComponentTheme(
-    const std::string& path, const RefPtr<FlutterAssetManager>& flutterAssetManager)
+    const std::string& path, const RefPtr<AssetManager>& flutterAssetManager)
 {
     ResourceInfo pluginResourceInfo;
     ResourceConfiguration resConfig;
@@ -263,22 +287,21 @@ void PluginSubContainer::SetActionEventHandler()
 {
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto container = weak.Upgrade();
-        if (!container) {
-            LOGE("ActionEventHandler sub container is null!");
-            return;
+        CHECK_NULL_VOID(container);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto plugin = container->GetPluginPattern();
+            CHECK_NULL_VOID(plugin);
+            plugin->OnActionEvent(action);
+        } else {
+            auto plugin = AceType::DynamicCast<PluginElement>(container->GetPluginElement().Upgrade());
+            CHECK_NULL_VOID(plugin);
+            plugin->OnActionEvent(action);
         }
-        auto plugin = AceType::DynamicCast<PluginElement>(container->GetPluginElement().Upgrade());
-        if (!plugin) {
-            LOGE("ActionEventHandler plugin is null!");
-            return;
-        }
-
-        plugin->OnActionEvent(action);
     };
     pipelineContext_->SetActionEventHandler(actionEventHandler);
 }
 
-RefPtr<FlutterAssetManager> PluginSubContainer::SetAssetManager(const std::string& path, const std::string& module)
+RefPtr<AssetManager> PluginSubContainer::SetAssetManager(const std::string& path, const std::string& module)
 {
     RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
     if (flutterAssetManager) {
@@ -298,7 +321,6 @@ RefPtr<FlutterAssetManager> PluginSubContainer::SetAssetManager(const std::strin
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }
-
     return flutterAssetManager;
 }
 

@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_RESOURCE_PLUGIN_REQUEST_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_RESOURCE_PLUGIN_REQUEST_DATA_H
 
+#include <sstream>
 #include <string>
+
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 struct RequestPluginInfo {
@@ -38,6 +42,15 @@ struct RequestPluginInfo {
         std::stringstream paramStream;
         paramStream << bundleName << abilityName << moduleName << pluginName << source << dimension << index;
         return paramStream.str();
+    }
+
+    bool operator==(const RequestPluginInfo& pluginInfo) const
+    {
+        return id == pluginInfo.id && pluginName == pluginInfo.pluginName && bundleName == pluginInfo.bundleName &&
+               abilityName == pluginInfo.abilityName && moduleName == pluginInfo.moduleName &&
+               source == pluginInfo.source && moduleResPath == pluginInfo.moduleResPath &&
+               dimension == pluginInfo.dimension && allowUpdate == pluginInfo.allowUpdate &&
+               width == pluginInfo.width && height == pluginInfo.height && index == pluginInfo.index;
     }
 };
 } // namespace OHOS::Ace

@@ -428,7 +428,10 @@ template("ace_core_source_set") {
 
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
-      deps += [ "$ace_root/frameworks/core/components/plugin:ace_core_components_plugin_$platform" ]
+      deps += [
+        "$ace_root/frameworks/core/components/plugin:ace_core_components_plugin_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern/plugin:ace_core_components_plugin_pattern_ng_$platform",
+      ]
       sources += [ "common/plugin_manager.cpp" ]
       deps += [ "//commonlibrary/c_utils/base:utils" ]
     }

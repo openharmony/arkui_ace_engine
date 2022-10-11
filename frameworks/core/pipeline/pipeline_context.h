@@ -265,12 +265,7 @@ public:
     void OnSystemBarHeightChanged(double statusBar, double navigationBar) override;
 
     void OnSurfaceDestroyed() override;
-
-    RefPtr<PlatformResRegister> GetPlatformResRegister() const
-    {
-        return platformResRegister_;
-    }
-
+    
     // SemiModal and DialogModal have their own enter/exit animation and will exit after animation done.
     void Finish(bool autoFinish = true) const override;
 
@@ -472,11 +467,6 @@ public:
 
     void MovePage(const Offset& rootRect, double offsetHeight);
 
-    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
-    {
-        drawDelegate_ = std::move(delegate);
-    }
-
     void SetBuildAfterCallback(const std::function<void()>& callback) override
     {
         buildAfterCallback_.emplace_back(callback);
@@ -487,11 +477,6 @@ public:
     bool IsKeyEvent() const
     {
         return isKeyEvent_;
-    }
-
-    void SetIsJsPlugin(bool isJsPlugin)
-    {
-        isJsPlugin_ = isJsPlugin;
     }
 
     bool IsJsPlugin() const
@@ -941,7 +926,7 @@ private:
     std::list<RefPtr<FlushEvent>> postAnimationFlushListeners_;
     std::list<RefPtr<FlushEvent>> preFlushListeners_;
     RefPtr<FocusAnimationManager> focusAnimationManager_;
-    RefPtr<PlatformResRegister> platformResRegister_;
+
     RefPtr<RootElement> rootElement_;
     WeakPtr<FocusNode> dirtyFocusNode_;
     WeakPtr<FocusNode> dirtyFocusScope_;
@@ -1007,7 +992,6 @@ private:
     std::atomic<bool> onFocus_ = true;
     bool isKeyEvent_ = false;
     bool needWindowBlurRegionRefresh_ = false;
-    bool isJsPlugin_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
     bool isDragStart_ = false;
@@ -1019,7 +1003,6 @@ private:
     int32_t hoverNodeId_ = DEFAULT_HOVER_ENTER_ANIMATION_ID;
     uint32_t modalColor_ = 0x00000000;
     std::list<RefPtr<RenderNode>> hoverNodes_;
-    std::unique_ptr<DrawDelegate> drawDelegate_;
     std::function<void(std::function<void()>&&)> screenOffCallback_;
     std::function<void(std::function<void()>&&)> screenOnCallback_;
 #if defined(ENABLE_NATIVE_VIEW)
