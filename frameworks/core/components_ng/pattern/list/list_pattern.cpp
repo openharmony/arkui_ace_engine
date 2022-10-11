@@ -113,7 +113,6 @@ void ListPattern::OnModifyDone()
     initScrollable_ = true;
     
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    edgeEffect = EdgeEffect::NONE;
     if (edgeEffect == EdgeEffect::SPRING) {
         auto scrollEdgeEffect = AceType::MakeRefPtr<NG::ScrollSpringEffect>();
         SetScrollEdgeEffect(scrollEdgeEffect);
