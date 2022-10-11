@@ -27,7 +27,7 @@ const std::string CONFIG_PATH = "/etc/";
 const std::string ACE_NEW_PIPE_CONFIG_FILE_NAME = "acenewpipe.config";
 const std::string ACE_NEW_PIPE_DISABLED_TAG = "DISABLED";
 const std::string ACE_NEW_PIPE_ENABLED_FOR_ALL_TAG = "ENABLED_FOR_ALL";
-const std::string NEW_PIPE_ENABLED_RELEASE_TYPE = "Release";
+const std::string NEW_PIPE_ENABLED_RELEASE_TYPE = "Beta5";
 constexpr int32_t NEW_PIPE_MIN_VERSION = 9;
 
 } // namespace
