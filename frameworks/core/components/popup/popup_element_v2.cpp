@@ -55,6 +55,38 @@ void PopupElementV2::HandleDeclarativePerformBuild()
         LOGE("popup is null.");
         return;
     }
+    if (popup_->GetPopupParam()->IsShowInSubWindow()) {
+        auto context = context_.Upgrade();
+        if (context) {
+            auto id = popup_->GetPopupParam()->GetTargetId();
+            auto targetElement = context->GetComposedElementById(id);
+            if (!targetElement) {
+            }
+            auto targetRender = targetElement->GetRenderNode();
+            if (targetRender) {
+                auto targetSize_ = targetRender->GetLayoutSize();
+                auto targetOffset_ = targetRender->GetGlobalOffset();
+                popup_->GetPopupParam()->SetTargetSize(targetSize_);
+                popup_->GetPopupParam()->SetTargetOffset(
+                    targetOffset_ + context->GetDisplayWindowRectInfo().GetOffset());
+            }
+        }
+    }
+
+    if (popup_->GetPopupParam()->IsShowInSubWindow()) {
+        if (popup_->GetPopupParam()->IsShow()) {
+            if (!hasShown_ && ShowPopupInSubWindow()) {
+                showId_ = GetId();
+                OnStateChange(true);
+            }
+        } else {
+            if (hasShown_ && CancelPopupInSubWindow(showId_)) {
+                showId_.clear();
+                OnStateChange(false);
+            }
+        }
+        return;
+    }
 
     if (popup_->GetPopupParam()->IsShow()) {
         if (!hasShown_ && ShowPopup()) {

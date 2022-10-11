@@ -95,9 +95,13 @@ public:
 
     virtual void BlendBorderColor(const Color& color) {}
 
-    virtual void UpdateBorderWidth(const BorderWidthPropertyF& value) {}
+    virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
+    // clip node without padding
     virtual void SetClipToFrame(bool useClip) {}
+
+    // clip node with padding
+    virtual void SetClipToBounds(bool useClip) {}
 
     virtual RefPtr<Canvas> GetCanvas() = 0;
 
@@ -117,8 +121,22 @@ public:
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}
-    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+
     virtual void ClipWithRect(const RectF& rectF) {}
+
+    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+
+    virtual RectF GetPaintRectWithTransform()
+    {
+        return {};
+    }
+
+    virtual RectF GetPaintRectWithoutTransform()
+    {
+        return {};
+    }
+
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -145,6 +163,18 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
     ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
+    // Border
+    // Graphics
+    ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBrightness, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontGrayScale, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontContrast, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSaturate, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSepia, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
+
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
@@ -155,13 +185,13 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(TransitionAppearing, TransitionOptions);
     ACE_DEFINE_PROPERTY_GROUP(TransitionDisappearing, TransitionOptions);
 
-    // Position.
+    // Position
     ACE_DEFINE_PROPERTY_GROUP(PositionProperty, RenderPositionProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Position, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Offset, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Anchor, OffsetT<Dimension>);
 
-    // zIndex.
+    // zIndex
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ZIndex, int32_t);
 
     // Clip
@@ -193,7 +223,6 @@ protected:
     virtual void OnTransformScaleUpdate(const VectorF& value) {}
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
-
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
@@ -203,10 +232,19 @@ protected:
 
     virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
-    
+
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
     virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+
+    virtual void OnFrontBrightnessUpdate(const Dimension& value) {}
+    virtual void OnFrontGrayScaleUpdate(const Dimension& value) {}
+    virtual void OnFrontContrastUpdate(const Dimension& value) {}
+    virtual void OnFrontSaturateUpdate(const Dimension& value) {}
+    virtual void OnFrontSepiaUpdate(const Dimension& value) {}
+    virtual void OnFrontInvertUpdate(const Dimension& value) {}
+    virtual void OnFrontHueRotateUpdate(float value) {}
+    virtual void OnFrontColorBlendUpdate(const Color& value) {}
 
 private:
     std::function<void()> requestFrame_;

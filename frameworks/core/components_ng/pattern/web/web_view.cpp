@@ -442,4 +442,32 @@ void WebView::SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdatePinchSmoothModeEnabled(isPinchSmoothModeEnabled);
 }
+
+void WebView::SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnWindowNewEvent(std::move(windowNewEventId));
+}
+
+void WebView::SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnWindowExitEvent(std::move(windowExitEventId));
+}
+
+void WebView::SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMultiWindowAccessEnabled(isMultiWindowAccessEnabled);
+}
+
+void WebView::SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetJsProxyCallback(std::move(jsProxyCallback));
+}
 } // namespace OHOS::Ace::NG

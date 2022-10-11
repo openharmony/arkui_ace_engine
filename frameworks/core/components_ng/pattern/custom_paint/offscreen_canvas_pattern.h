@@ -38,6 +38,8 @@ public:
     void Fill(const RefPtr<CanvasPath2D>& path);
     void Stroke();
     void Stroke(const RefPtr<CanvasPath2D>& path);
+    void Clip();
+    void Clip(const RefPtr<CanvasPath2D>& path);
     void BeginPath();
     void ClosePath();
     void MoveTo(double x, double y);
@@ -97,6 +99,7 @@ public:
     void Scale(double x, double y);
     void Rotate(double angle);
     void SetTransform(const TransformParam& param);
+    void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
     std::string ToDataURL(const std::string& type, const double quality);

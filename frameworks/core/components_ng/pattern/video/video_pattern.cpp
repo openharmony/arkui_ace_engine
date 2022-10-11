@@ -66,9 +66,7 @@ float CalControlBarHeight()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0f);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, 0.0f);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, 0.0f);
     auto controlsHeight =
         pipelineContext->NormalizeToPx(Dimension(videoTheme->GetBtnSize().Height(), DimensionUnit::VP));
@@ -412,32 +410,49 @@ void VideoPattern::OnAttachToFrameNode()
 
 void VideoPattern::OnModifyDone()
 {
+    AddPreviewNodeIfNeeded();
+    // Create the control bar
+    AddControlBarNodeIfNeeded();
+    UpdateMediaPlayer();
+}
+
+void VideoPattern::AddPreviewNodeIfNeeded()
+{
+    if (hasInit_) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (layoutProperty->HasPosterImageInfo()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto children = host->GetChildren();
+        bool isExist = false;
+        for (const auto& child : children) {
+            if (child->GetTag() == V2::IMAGE_ETS_TAG) {
+                isExist = true;
+                break;
+            }
+        }
+        if (!isExist) {
+            auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
+            auto posterNode =
+                FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+            CHECK_NULL_VOID(posterNode);
+            auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
+            posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+            host->AddChild(posterNode);
+            posterNode->MarkModifyDone();
+        }
+    }
+    hasInit_ = true;
+}
+
+void VideoPattern::AddControlBarNodeIfNeeded()
+{
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
-    if (!hasInit_) {
-        if (layoutProperty->HasPosterImageInfo()) {
-            bool isExist = false;
-            for (const auto& child : children) {
-                if (child->GetTag() == V2::IMAGE_ETS_TAG) {
-                    isExist = true;
-                    break;
-                }
-            }
-            if (!isExist) {
-                auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
-                auto posterNode = FrameNode::CreateFrameNode(
-                    V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>(posterSourceInfo));
-                CHECK_NULL_VOID(posterNode);
-                auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
-                posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
-                host->AddChild(posterNode);
-            }
-        }
-    }
-    hasInit_ = true;
-    // Create the control bar
     if (layoutProperty->GetControlsValue(false)) {
         bool isExist = false;
         for (const auto& child : children) {
@@ -451,18 +466,19 @@ void VideoPattern::OnModifyDone()
             host->AddChild(controlBar);
         }
     } else {
-        for (const auto& child : children) {
-            if (child->GetTag() == V2::ROW_ETS_TAG) {
-                host->RemoveChild(child);
+        auto iter = children.begin();
+        while (iter != children.end()) {
+            if ((*iter)->GetTag() == V2::ROW_ETS_TAG) {
+                host->RemoveChild(*iter);
                 host->RebuildRenderContextTree();
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 context->RequestFrame();
                 break;
             }
+            ++iter;
         }
     }
-    UpdateMediaPlayer();
 }
 
 void VideoPattern::OnRebuildFrame()
@@ -504,9 +520,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
     auto controlBar = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(controlBar, nullptr);
@@ -544,11 +558,9 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
-    auto sliderTheme = themeManager->GetTheme<SliderTheme>();
+    auto sliderTheme = pipelineContext->GetTheme<SliderTheme>();
 
     auto sliderNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
     CHECK_NULL_RETURN(sliderNode, nullptr);
@@ -585,9 +597,7 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
@@ -613,9 +623,7 @@ RefPtr<FrameNode> VideoPattern::CreateButton()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
     auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
@@ -726,15 +734,18 @@ void VideoPattern::Start()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         const auto& children = host->GetChildren();
-        for (const auto& child : children) {
-            if (child->GetTag() == V2::IMAGE_ETS_TAG) {
-                host->RemoveChild(child);
+        auto iter = children.begin();
+        while (iter != children.end()) {
+            if ((*iter)->GetTag() == V2::IMAGE_ETS_TAG) {
+                iter = host->RemoveChild(*iter);
                 host->RebuildRenderContextTree();
                 context->RequestFrame();
-            } else if (child->GetTag() == V2::ROW_ETS_TAG) {
-                auto playBtn = DynamicCast<FrameNode>(child->GetChildAtIndex(0));
+                continue;
+            } else if ((*iter)->GetTag() == V2::ROW_ETS_TAG) {
+                auto playBtn = DynamicCast<FrameNode>((*iter)->GetChildAtIndex(0));
                 ChangePlayButtonTag(true, playBtn);
             }
+            ++iter;
         }
         LOGD("Video Start");
         auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);

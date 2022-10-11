@@ -18,8 +18,10 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -312,7 +314,38 @@ void JSCustomDialogController::CloseDialog()
 
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
-    LOGD("JSCustomDialogController(JsOpenDialog)");
+    LOGI("JSCustomDialogController(JsOpenDialog)");
+    if (!jsBuilderFunction_) {
+        LOGE("Builder of CustomDialog is null.");
+        return;
+    }
+    // NG
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_VOID(context);
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        LOGD("custom JS node building");
+        jsBuilderFunction_->Execute();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_VOID(customNode);
+
+        dialogProperties_.onStatusChanged = [this](bool isShown) {
+            if (!isShown) {
+                this->isShown_ = isShown;
+            }
+        };
+        dialogNode_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+        return;
+    }
+
+    CHECK_NULL_VOID(jsBuilderFunction_);
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -325,10 +358,6 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         customDialog_ = nullptr;
     }
 
-    if (!jsBuilderFunction_) {
-        LOGE("Builder of CustomDialog is null.");
-        return;
-    }
     {
         ACE_SCORING_EVENT("CustomDialog.builder");
         jsBuilderFunction_->Execute();
@@ -345,7 +374,21 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
-    LOGD("JSCustomDialogController(JsCloseDialog)");
+    LOGI("JSCustomDialogController(JsCloseDialog)");
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_VOID(context);
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->CloseDialog(dialogNode_);
+        return;
+    }
+
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.

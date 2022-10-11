@@ -109,6 +109,7 @@ ACE_EXPORT extern const char ANIMATION_CANCEL_ANIMATION_FRAME[];
 
 // for animator
 ACE_EXPORT extern const char ANIMATOR_CREATE_ANIMATOR[];
+ACE_EXPORT extern const char ANIMATOR_CREATE[];
 
 // for curves
 ACE_EXPORT extern const char CURVES_INIT[];

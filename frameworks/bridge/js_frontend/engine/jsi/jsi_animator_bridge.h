@@ -40,6 +40,8 @@ public:
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
     static shared_ptr<JsValue> JsAnimatorUpdate(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+    static shared_ptr<JsValue> JsAnimatorReset(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
+        const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
     static int32_t JsCreateBridgeId();
 };
 

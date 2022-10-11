@@ -121,8 +121,7 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int3
     if (frameNode) {
         wrapper = frameNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
     } else {
-        // TODO: Check only ifelse syntax node can use LazyForEach and get wrapper from ifelse syntax node.
-        LOGW("syntax node is not support yet");
+        wrapper = uiNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
     }
     CHECK_NULL_RETURN(wrapper, nullptr);
     if (index == (startIndex_.value() - 1)) {

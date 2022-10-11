@@ -24,8 +24,11 @@ template("card_frontend") {
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
+      "$ace_root/frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.cpp",
       "card_frontend.cpp",
+      "card_frontend_declarative.cpp",
       "card_frontend_delegate.cpp",
+      "card_frontend_delegate_declarative.cpp",
       "js_card_parser.cpp",
     ]
 

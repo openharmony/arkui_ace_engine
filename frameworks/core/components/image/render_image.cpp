@@ -146,7 +146,6 @@ void RenderImage::UpdateThemeIcon(ImageSourceInfo& sourceInfo)
         auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
         if (!iconPath.empty()) {
             sourceInfo.SetSrc(iconPath);
-            sourceInfo.UpdateSrcType();
         }
     }
 }

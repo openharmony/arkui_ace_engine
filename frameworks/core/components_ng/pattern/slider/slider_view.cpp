@@ -95,9 +95,7 @@ void SliderView::LoadTheme(const RefPtr<FrameNode>& frameNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<SliderTheme>();
+    auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
     auto castSliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     if (castSliderLayoutProperty) {

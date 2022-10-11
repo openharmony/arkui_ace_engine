@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 
 using ChangeEvent = std::function<void(const BaseEventInfo* info)>;
+using DailogChangeEvent = std::function<void(const std::string&)>;
 
 class TimePickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TimePickerEventHub, EventHub)
@@ -42,8 +43,21 @@ public:
         }
     }
 
+    void SetDailogChange(DailogChangeEvent&& onChange)
+    {
+        dailogChangeEvent_ = std::move(onChange);
+    }
+
+    void FireDailogChangeEvent(const std::string& info) const
+    {
+        if (dailogChangeEvent_) {
+            dailogChangeEvent_(info);
+        }
+    }
+
 private:
     ChangeEvent changeEvent_;
+    DailogChangeEvent dailogChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerEventHub);
 };

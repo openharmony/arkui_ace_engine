@@ -1901,9 +1901,9 @@ void RenderTextField::UpdateRemoteEditingIfNeeded(bool needFireChangeEvent)
 #if defined(ENABLE_STANDARD_INPUT)
     UpdateRemoteEditing(needFireChangeEvent);
 #else
+    UpdateRemoteEditing(needFireChangeEvent);
     if (!lastKnownRemoteEditingValue_ || GetEditingValue() != *lastKnownRemoteEditingValue_) {
         lastKnownRemoteEditingValue_ = std::make_shared<TextEditingValue>(GetEditingValue());
-        UpdateRemoteEditing(needFireChangeEvent);
     }
 #endif
 }

@@ -19,6 +19,8 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/picker/picker_base_component.h"
+#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
+#include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 
 namespace OHOS::Ace::Framework {
 class JSDatePicker : public JSViewAbstract {
@@ -41,10 +43,12 @@ private:
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
 
-class JSDatePickerDialog {
+class JSDatePickerDialog : JSAlertDialog {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
+    static void DatePickerDialogShow(
+        const JSRef<JSObject>& paramObj, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
 
 private:
     static void CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
@@ -72,6 +76,8 @@ class JSTimePickerDialog {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
+    static void TimePickerDialogShow(
+        const JSRef<JSObject>& paramObj, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
 
 private:
     static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);

@@ -32,8 +32,11 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/common/card_scope.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/click_event.h"
+#include "core/components_ng/event/long_press_event.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -396,6 +399,18 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
         }
     }
 
+    JSRef<JSVal> showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
+    if (showInSubWindowValue->IsBoolean()) {
+        if (popupComponent) {
+            auto param = popupComponent->GetPopupParam();
+            param->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
+        } else if (popupParam) {
+            popupParam->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
+        } else {
+            LOGI("Empty popup.");
+        }
+    }
+
     JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
     if (placementOnTopVal->IsBoolean()) {
         if (popupComponent) {
@@ -590,6 +605,11 @@ void ParseCustomPopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     auto enableArrowValue = popupObj->GetProperty("enableArrow");
     if (enableArrowValue->IsBoolean()) {
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
+    }
+
+    auto showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
+    if (showInSubWindowValue->IsBoolean()) {
+        popupParam->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
     }
 
     auto autoCancelValue = popupObj->GetProperty("autoCancel");
@@ -2221,10 +2241,92 @@ void JSViewAbstract::ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<Menu
     LOGI("Context menu is added.");
 }
 
+// menuItem <value, action>
+GestureEventFunc JsBindOptionMenuNG(const JSCallbackInfo& info, const RefPtr<NG::FrameNode>& targetNode)
+{
+    auto paramArray = JSRef<JSArray>::Cast(info[0]);
+    std::vector<NG::OptionParam> params(paramArray->Length());
+    // parse paramArray
+    LOGD("parsing paramArray size = %{public}d", static_cast<int>(paramArray->Length()));
+    for (size_t i = 0; i < paramArray->Length(); ++i) {
+        auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+        JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].first);
+        LOGD("option #%{public}d is %{public}s", static_cast<int>(i), params[i].first.c_str());
+        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(indexObject->GetProperty("action")));
+        // set onClick function
+        params[i].second = [func = std::move(action), context = info.GetExecutionContext()]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
+            ACE_SCORING_EVENT("menu.action");
+            if (func) {
+                func->ExecuteJS();
+            }
+        };
+    }
+    GestureEventFunc event = [params, targetNode](GestureEvent& /*info*/) mutable {
+        // menu already created
+        if (params.empty()) {
+            NG::ViewAbstract::ShowMenu(targetNode->GetId());
+            return;
+        }
+        NG::ViewAbstract::BindMenuWithItems(params, targetNode);
+        // clear paramArray after creation
+        params.clear();
+    };
+    return event;
+}
+
+void CreateCustomMenu(RefPtr<JsFunction>& builder, const RefPtr<NG::FrameNode>& targetNode)
+{
+    // builder already executed, just show menu
+    if (!builder) {
+        NG::ViewAbstract::ShowMenu(targetNode->GetId());
+        return;
+    }
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    builder->Execute();
+    auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode);
+    // nullify builder
+    builder.Reset();
+    LOGD("check if builderFunc is deleted successfully %{public}p", AceType::RawPtr(builder));
+}
+
+void JsBindMenuNG(const JSCallbackInfo& info)
+{
+    // this FrameNode
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    GestureEventFunc event;
+    // Array<MenuItem>
+    if (info[0]->IsArray()) {
+        event = JsBindOptionMenuNG(info, targetNode);
+    } else if (info[0]->IsObject()) {
+        // CustomBuilder
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        auto builder = obj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        CHECK_NULL_VOID(builderFunc);
+        event = [builderFunc, targetNode](const GestureEvent& /*info*/) mutable {
+            CreateCustomMenu(builderFunc, targetNode);
+        };
+    } else {
+        LOGE("bindMenu info is invalid");
+        return;
+    }
+    auto hub = targetNode->GetOrCreateGestureEventHub();
+    auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(event));
+    hub->AddClickEvent(onClick);
+}
+
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     // NG
     if (Container::IsCurrentUseNewPipeline()) {
+        JsBindMenuNG(info);
         return;
     }
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
@@ -2875,7 +2977,6 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        Color borderColor;
         if (ParseJsColor(args, borderColor)) {
             NG::ViewAbstract::SetBorderColor(borderColor);
             return;
@@ -3429,12 +3530,18 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             LOGW("themeConstants is nullptr");
             return false;
         }
-        auto typeInteger = type->ToNumber<int32_t>();
-        if (typeInteger == static_cast<int>(ResourceType::MEDIA)) {
+        if (type->ToNumber<int32_t>() == static_cast<int>(ResourceType::MEDIA)) {
             result = themeConstants->GetMediaPath(resId->ToNumber<uint32_t>());
+            if (SystemProperties::GetUnZipHap()) {
+                return true;
+            }
+            auto pos = result.find_last_of('.');
+            if (pos != std::string::npos) {
+                result = "resource:///" + std::to_string(resId->ToNumber<uint32_t>()) + result.substr(pos);
+            }
             return true;
         }
-        if (typeInteger == static_cast<int>(ResourceType::RAWFILE)) {
+        if (type->ToNumber<int32_t>() == static_cast<int>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
             if (!args->IsArray()) {
                 LOGW("args is not Array");
@@ -4648,6 +4755,11 @@ void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
         value.SetValue(1.0);
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetGrayScale(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetGrayScale(value);
 }
@@ -4661,6 +4773,11 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
 
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBrightness(value);
         return;
     }
 
@@ -4683,6 +4800,12 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetContrast(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetContrast(value);
 }
@@ -4701,6 +4824,12 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetSaturate(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetSaturate(value);
 }
@@ -4720,6 +4849,12 @@ void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetSepia(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetSepia(value);
 }
@@ -4737,6 +4872,12 @@ void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetInvert(value);
+        return;
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetInvert(value);
 }
@@ -4763,6 +4904,10 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
     deg = std::fmod(deg, ROUND_UNIT);
     if (deg < 0.0f) {
         deg += ROUND_UNIT;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetHueRotate(deg);
+        return;
     }
     auto decoration = GetFrontDecoration();
     if (decoration) {
@@ -5142,17 +5287,38 @@ void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
     inspector->SetAccessibilityImportance(importance);
 }
 
-void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
+void JsBindContextMenuNG(RefPtr<JsFunction>& builder, int32_t responseType)
 {
-    ViewStackProcessor::GetInstance()->GetCoverageComponent();
-    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
-    if (!menuComponent) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto hub = targetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+
+    if (responseType == static_cast<int32_t>(ResponseType::RIGHT_CLICK)) {
+        OnMouseEventFunc event = [builder, targetNode](MouseInfo& info) mutable {
+            if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                CreateCustomMenu(builder, targetNode);
+            }
+        };
+        NG::ViewAbstract::SetOnMouse(std::move(event));
+    } else if (responseType == static_cast<int32_t>(ResponseType::LONGPRESS)) {
+        // create or show menu on long press
+        auto event = [builder, targetNode](const GestureEvent& /*info*/) mutable {
+            LOGD("long press event triggered");
+            CreateCustomMenu(builder, targetNode);
+        };
+        auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
+
+        hub->AddLongPressEvent(longPress);
+        LOGD("add longPress successful");
+    } else {
+        LOGE("The arg responseType is invalid.");
         return;
     }
-#if defined(MULTIPLE_WINDOW_SUPPORTED)
-    menuComponent->SetIsContextMenu(true);
-#endif
+}
 
+void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
+{
     // Check the parameters
     if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("Builder param is invalid, not an object.");
@@ -5165,16 +5331,27 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         return;
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    if (!builderFunc) {
-        LOGE("builder function is null.");
-        return;
-    }
+    CHECK_NULL_VOID(builderFunc);
 
     int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
     if (info.Length() == 2 && info[1]->IsNumber()) {
         responseType = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %d.", responseType);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JsBindContextMenuNG(builderFunc, responseType);
+        return;
+    }
+
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
+    if (!menuComponent) {
+        return;
+    }
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+    menuComponent->SetIsContextMenu(true);
+#endif
 
     auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
     if (responseType == static_cast<int32_t>(ResponseType::RIGHT_CLICK)) {
@@ -5599,6 +5776,10 @@ void JSViewAbstract::SetBlur(float radius)
 
 void JSViewAbstract::SetColorBlend(Color color)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetColorBlend(color);
+        return;
+    }
     auto decoration = GetFrontDecoration();
     if (decoration) {
         decoration->SetColorBlend(color);
@@ -5858,6 +6039,24 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
             moduleName = module->ToString();
         }
     }
+
+    auto cardId = CardScope::CurrentId();
+    if (cardId != INVALID_CARD_ID) {
+        auto container = Container::Current();
+        auto weak = container->GetCardPipeline(cardId);
+        auto cardPipelineContext = weak.Upgrade();
+        if (!cardPipelineContext) {
+            LOGE("card pipelineContext is null!");
+            return nullptr;
+        }
+        auto cardThemeManager = cardPipelineContext->GetThemeManager();
+        if (!cardThemeManager) {
+            LOGE("card themeManager is null!");
+            return nullptr;
+        }
+        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
+    }
+
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
         auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());

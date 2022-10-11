@@ -214,7 +214,7 @@ void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, Fl
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    auto dir = linearLayoutProperty->GetLayoutDirection();
+    auto dir = linearLayoutProperty ? linearLayoutProperty->GetLayoutDirection() : TextDirection::AUTO;
     if (dir == TextDirection::AUTO) {
         dir = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }

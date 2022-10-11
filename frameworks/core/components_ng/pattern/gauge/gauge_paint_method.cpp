@@ -41,12 +41,8 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<GaugePaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
     auto offset = paintWrapper->GetContentOffset();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     RenderRingInfo data;
@@ -73,7 +69,7 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     if (NearZero(sweepDegree)) {
         sweepDegree = 360.0f;
     }
-    auto theme = themeManager->GetTheme<ProgressTheme>();
+    auto theme = pipelineContext->GetTheme<ProgressTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
     if (paintProperty->GetStrokeWidth().has_value()) {
         data.thickness = paintProperty->GetStrokeWidth()->ConvertToPx();

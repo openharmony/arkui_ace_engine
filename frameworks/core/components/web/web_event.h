@@ -507,6 +507,20 @@ public:
     virtual void Grant(std::vector<std::string>& resources) const = 0;
 };
 
+class ACE_EXPORT WebWindowNewHandler : public AceType {
+    DECLARE_ACE_TYPE(WebWindowNewHandler, AceType)
+
+public:
+    WebWindowNewHandler() = default;
+    ~WebWindowNewHandler() = default;
+
+    virtual void SetWebController(int32_t id) = 0;
+
+    virtual bool IsFrist() const = 0;
+
+    virtual int32_t GetId() const = 0;
+};
+
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
 
@@ -1075,6 +1089,50 @@ private:
     int activeMatchOrdinal_;
     int numberOfMatches_;
     bool isDoneCounting_;
+};
+
+class ACE_EXPORT WebWindowNewEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebWindowNewEvent, BaseEventInfo);
+
+public:
+    WebWindowNewEvent(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
+        const RefPtr<WebWindowNewHandler>& handler)
+        : BaseEventInfo("WebWindowNewEvent"), targetUrl_(targetUrl), isAlert_(isAlert),
+          isUserTrigger_(isUserTrigger), handler_(handler) {}
+    ~WebWindowNewEvent() = default;
+
+    const std::string& GetTargetUrl() const
+    {
+        return targetUrl_;
+    }
+
+    bool IsAlert() const
+    {
+        return isAlert_;
+    }
+
+    bool IsUserTrigger() const
+    {
+        return isUserTrigger_;
+    }
+
+    const RefPtr<WebWindowNewHandler>& GetWebWindowNewHandler() const
+    {
+        return handler_;
+    }
+private:
+    std::string targetUrl_;
+    bool isAlert_;
+    bool isUserTrigger_;
+    RefPtr<WebWindowNewHandler> handler_;
+};
+
+class ACE_EXPORT WebWindowExitEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebWindowExitEvent, BaseEventInfo);
+
+public:
+    WebWindowExitEvent() : BaseEventInfo("WebWindowExitEvent") {}
+    ~WebWindowExitEvent() = default;
 };
 } // namespace OHOS::Ace
 

@@ -23,6 +23,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -89,8 +90,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
@@ -162,6 +165,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
+#include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/container.h"
 #include "frameworks/core/components_ng/base/inspector.h"
 #include "frameworks/core/components_v2/inspector/inspector.h"
@@ -256,6 +260,61 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     });
 }
 
+void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
+{
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
+        LOGE("UpdateCardRootComponent: argument provided is not a View!");
+        return;
+    }
+
+    auto container = Container::Current();
+    if (container && container->IsUseNewPipeline()) {
+        auto cardId = CardScope::CurrentId();
+        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_VOID(frontEnd);
+
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_VOID(delegate);
+
+        auto pageRouterManager = delegate->GetPageRouterManager();
+        CHECK_NULL_VOID(pageRouterManager);
+
+        auto pageNode = pageRouterManager->GetCurrentPageNode();
+        CHECK_NULL_VOID(pageNode);
+
+        auto pageRootNode = view->CreateUINode();
+        CHECK_NULL_VOID(pageRootNode);
+        pageRootNode->MountToParent(pageNode);
+
+        // update page life cycle function.
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnShow();
+            }
+        });
+        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnHide();
+            }
+        });
+        pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            if (view) {
+                return view->FireOnBackPress();
+            }
+            return false;
+        });
+        return;
+    } else {
+        LOGE("eTSCard not only support NG structure");
+    }
+}
+
 panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     LOGD("Load Document start");
@@ -272,7 +331,34 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     }
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+#if defined(PREVIEW)
+    panda::Global<panda::ObjectRef> rootView(vm, obj->ToObject(vm));
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    arkRuntime->AddRootView(rootView);
+#endif
     UpdateRootComponent(obj);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    LOGD("Load eTS Card start");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc > 2) {
+        LOGE("The arg is wrong, must have no more than two argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject()) {
+        LOGE("The arg is wrong, value must be object");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    UpdateCardRootComponent(obj);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -341,6 +427,14 @@ panda::Local<panda::JSValueRef> JsStorePreviewComponents(panda::JsiRuntimeCallIn
     }
 
     return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsGetRootView(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    LOGD("JsGetRootView");
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    return arkRuntime->GetRootView().ToLocal();
 }
 #endif
 
@@ -999,8 +1093,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
+    { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "Navigator", JSNavigator::JSBind },
+    { "NavRouter", JSNavRouter::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
@@ -1225,6 +1321,8 @@ void JsRegisterViews(BindingTarget globalObj)
     auto vm = runtime->GetEcmaVm();
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadEtsCard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadEtsCard));
 #if defined(PREVIEW)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewComponent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsPreviewerComponent));
@@ -1232,6 +1330,8 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetPreviewComponentFlag));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "storePreviewComponents"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsStorePreviewComponents));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "GetRootView"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetRootView));
 #endif
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "dumpMemoryStats"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsDumpMemoryStats));

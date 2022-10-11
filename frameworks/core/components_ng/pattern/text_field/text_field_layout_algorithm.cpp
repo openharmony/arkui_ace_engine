@@ -67,9 +67,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, std::nullopt);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     TextStyle textStyle;
@@ -244,9 +242,7 @@ float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()
     const auto defaultHeight = 40.0_vp;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, defaultHeight.ConvertToPx());
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, defaultHeight.ConvertToPx());
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, defaultHeight.ConvertToPx());
     auto height = textFieldTheme->GetHeight();
     return static_cast<float>(height.ConvertToPx());
@@ -257,9 +253,7 @@ float TextFieldLayoutAlgorithm::GetTextFieldDefaultImageHeight()
     const auto defaultHeight = 40.0_vp;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, defaultHeight.ConvertToPx());
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, defaultHeight.ConvertToPx());
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, defaultHeight.ConvertToPx());
     auto height = textFieldTheme->GetIconHotZoneSize();
     return static_cast<float>(height.ConvertToPx());

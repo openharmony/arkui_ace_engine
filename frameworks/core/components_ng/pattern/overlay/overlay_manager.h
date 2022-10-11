@@ -16,14 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
-#include <list>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -56,7 +58,6 @@ public:
     {
         LOGI("OverlayManager Destructor.");
         popupMap_.clear();
-        toastStack_.clear();
     }
 
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popup);
@@ -66,16 +67,28 @@ public:
         return popupMap_[targetId];
     }
 
+    void ShowMenu(int32_t targetId, RefPtr<FrameNode> menu = nullptr);
+    void HideMenu(int32_t targetId);
+
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
     void PopToast(int32_t toastId);
 
-    void ShowDialog(const DialogProperties& dialogProps, bool isRightToLeft);
+    RefPtr<FrameNode> ShowDialog(
+        const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
+    void ShowDateDialog(const DialogProperties& dialogProps, std::map<std::string, PickerDate> datePickerProperty,
+        bool isLunar, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+    void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> datePickerProperty,
+        bool isUseMilitaryTime, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+    void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
+        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextChangeEvent> dialogEvent);
     void CloseDialog(RefPtr<FrameNode> dialogNode);
 
 private:
-    std::list<NG::ToastInfo> toastStack_;
+    NG::ToastInfo toastInfo_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
+    // K: target frameNode ID, V: menuNode
+    std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     WeakPtr<UINode> rootNodeWeak_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);

@@ -32,6 +32,7 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
@@ -214,9 +215,14 @@ void AceAbility::OnStart(const Want& want)
         ImageCache::SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();
     });
-
+    AceNewPipeJudgement::InitAceNewPipeConfig();
     // TODO: now choose pipeline using param set as package name, later enable for all.
-    bool useNewPipe = AceApplicationInfo::GetInstance().GetPackageName() == SystemProperties::GetNewPipePkg();
+    auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
+    auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
+    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabled(
+        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
+    LOGI("AceAbility: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
+        apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
@@ -306,6 +312,8 @@ void AceAbility::OnStart(const Want& want)
 
     AceApplicationInfo::GetInstance().SetAbilityName(info ? info->name : "");
     std::string moduleName = info ? info->moduleName : "";
+    std::string moduleHapPath = info ? info->hapPath : "";
+
     std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
     std::vector<ModuleInfo> moduleList = appInfo->moduleInfos;
 
@@ -316,6 +324,18 @@ void AceAbility::OnStart(const Want& want)
             auto moduleSourceDir = std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
             resPath = moduleSourceDir + "/assets/" + module.moduleName + FILE_SEPARATOR;
             break;
+        }
+    }
+    std::string hapPath;
+    if (!moduleHapPath.empty()) {
+        if (moduleHapPath.find(ABS_BUNDLE_CODE_PATH) == std::string::npos) {
+            hapPath = moduleHapPath;
+        } else {
+            auto pos = moduleHapPath.find_last_of('/');
+            if (pos != std::string::npos) {
+                hapPath = LOCAL_BUNDLE_CODE_PATH + moduleHapPath.substr(pos + 1);
+                LOGI("In FA mode, hapPath:%{private}s", hapPath.c_str());
+            }
         }
     }
 
@@ -347,6 +367,7 @@ void AceAbility::OnStart(const Want& want)
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
+    container->SetHapPath(hapPath);
     container->SetBundlePath(abilityContext->GetBundleCodeDir());
     container->SetFilesDataPath(abilityContext->GetFilesDir());
     if (window->IsDecorEnable()) {
@@ -653,6 +674,11 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
         return;
     }
     container->SetWindowPos(rect.posX_, rect.posY_);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        pipelineContext->SetDisplayWindowRectInfo(
+            Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
+    }
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("OnSizeChange: taskExecutor is null.");

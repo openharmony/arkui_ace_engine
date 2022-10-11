@@ -18,6 +18,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "third_party/quickjs/quickjs.h"
 

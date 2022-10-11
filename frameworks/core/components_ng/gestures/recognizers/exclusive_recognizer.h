@@ -20,6 +20,7 @@
 #include <set>
 #include <type_traits>
 
+#include "base/memory/ace_type.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
@@ -42,6 +43,8 @@ public:
     {
         recognizers_.swap(recognizers);
         for (auto& recognizer : recognizers_) {
+            LOGE("ExclusiveRecognizer combine: %{public}s, %{public}p, %{public}zu", AceType::TypeName(recognizer),
+                AceType::RawPtr(recognizer), recognizers_.size());
             recognizer->SetGestureGroup(AceType::WeakClaim(this));
         }
     }
@@ -53,15 +56,7 @@ public:
     bool HandleEvent(const TouchEvent& point) override;
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
-    void ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers)
-    {
-        // TODO: add state adjustment.
-        recognizers_.clear();
-        std::swap(recognizers_, recognizers);
-        for (auto& recognizer : recognizers_) {
-            recognizer->SetGestureGroup(AceType::WeakClaim(this));
-        }
-    }
+    void ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers);
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};
@@ -76,9 +71,12 @@ private:
     void AcceptSubGesture(const RefPtr<GestureRecognizer>& recognizer);
     bool CheckAllFailed();
     void Reset();
+    void ResetStatus();
 
     std::list<RefPtr<GestureRecognizer>> recognizers_;
     RefPtr<GestureRecognizer> activeRecognizer_;
+
+    bool pendingReset_ = false;
 };
 
 } // namespace OHOS::Ace::NG

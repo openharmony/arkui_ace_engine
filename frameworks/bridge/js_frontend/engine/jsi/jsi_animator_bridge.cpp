@@ -327,6 +327,7 @@ shared_ptr<JsValue> JsiAnimatorBridgeUtils::CreateAnimatorContext(
         { "cancel", JsAnimatorCancel },
         { "reverse", JsAnimatorReverse },
         { "update", JsAnimatorUpdate },
+        { "reset", JsAnimatorReset },
     };
     auto animatorContext = runtime->NewObject();
     for (const auto& iter : contextTable) {
@@ -382,6 +383,7 @@ shared_ptr<JsValue> JsiAnimatorBridgeUtils::JsAnimatorReverse(shared_ptr<JsRunti
     return runtime->NewUndefined();
 }
 
+// animator.update api function is deprecated since 9
 shared_ptr<JsValue> JsiAnimatorBridgeUtils::JsAnimatorUpdate(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -412,6 +414,49 @@ shared_ptr<JsValue> JsiAnimatorBridgeUtils::JsAnimatorUpdate(shared_ptr<JsRuntim
     auto page = GetPageById(runtime, pageId);
     if (!page) {
         LOGE("no page found for pageId: %{public}d", pageId);
+        EventReport::SendAnimationException(AnimationExcepType::ANIMATION_PAGE_ERR);
+        return runtime->NewUndefined();
+    }
+    auto task = AceType::MakeRefPtr<JsiAnimatorTaskUpdate>(runtime, params);
+    page->PushCommand(Referenced::MakeRefPtr<JsCommandAnimator>(bridgeId, task));
+    return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> JsiAnimatorBridgeUtils::JsAnimatorReset(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argv.empty()) {
+        runtime->ThrowError("Parameter error. The number of parameters must be greater than or equal to 1.",
+            ERROR_CODE_PARAM_INVALID);
+        return runtime->NewUndefined();
+    }
+    shared_ptr<JsValue> paramObj = argv[0]->GetElement(runtime, 0);
+    if (!paramObj || !paramObj->IsObject(runtime)) {
+        LOGE("JsAnimatorUpdate failed, first argument is not an object!");
+        runtime->ThrowError("Parameter error. The type of the parameter 1 is not object.", ERROR_CODE_PARAM_INVALID);
+        return runtime->NewUndefined();
+    }
+    int32_t len = 0;
+    shared_ptr<JsValue> properties;
+    if (!paramObj->GetPropertyNames(runtime, properties, len)) {
+        LOGE("JsAnimatorUpdate failed, fail to get object property list!");
+        runtime->ThrowError("Internal error. Fail to get object property list.", ERROR_CODE_INTERNAL_ERROR);
+        return runtime->NewUndefined();
+    }
+    std::unordered_map<std::string, std::string> params;
+    for (int32_t i = 0; i < len; ++i) {
+        shared_ptr<JsValue> key = properties->GetElement(runtime, i);
+        shared_ptr<JsValue> val = paramObj->GetProperty(runtime, key);
+        std::string keyStr = key->ToString(runtime);
+        std::string valStr = val->ToString(runtime);
+        params[keyStr] = valStr;
+    }
+    int32_t pageId = GetCurrentPageId(runtime, thisObj);
+    int32_t bridgeId = GetCurrentBridgeId(runtime, thisObj);
+    auto page = GetPageById(runtime, pageId);
+    if (!page) {
+        LOGE("no page found for pageId: %{public}d", pageId);
+        runtime->ThrowError("Internal error. Can not find the page for pageId.", ERROR_CODE_INTERNAL_ERROR);
         EventReport::SendAnimationException(AnimationExcepType::ANIMATION_PAGE_ERR);
         return runtime->NewUndefined();
     }

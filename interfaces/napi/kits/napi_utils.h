@@ -19,12 +19,13 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
-#include <vector>
 #include <regex>
+#include <vector>
 
-#include "base/log/log.h"
+#include "native_engine/native_value.h"
 
 #include "base/i18n/localization.h"
+#include "base/log/log.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 
@@ -47,6 +48,33 @@ enum class ResourceType : uint32_t {
 
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 
+} // namespace
+
+static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
+    { Framework::ERROR_CODE_PERMISSION_DENIED, "Permission denied. " },
+    { Framework::ERROR_CODE_PARAM_INVALID, "Parameter error. " },
+    { Framework::ERROR_CODE_SYSTEMCAP_ERROR, "Capability not supported. " },
+    { Framework::ERROR_CODE_INTERNAL_ERROR, "Internal error. " },
+    { Framework::ERROR_CODE_URI_ERROR, "Uri error. " },
+    { Framework::ERROR_CODE_PAGE_STACK_FULL, "Page stack error. " },
+    { Framework::ERROR_CODE_URI_ERROR_LITE, "Uri error. " }
+};
+
+void NapiThrow(napi_env env, const std::string& message, int32_t errCode)
+{
+    napi_value code = nullptr;
+    std::string strCode = std::to_string(errCode);
+    napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+
+    napi_value msg = nullptr;
+    auto iter = ERROR_CODE_TO_MSG.find(errCode);
+    std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + message;
+    LOGE("napi throw errCode %d strMsg %s", errCode, strMsg.c_str());
+    napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
+
+    napi_value error = nullptr;
+    napi_create_error(env, code, msg, &error);
+    napi_throw(env, error);
 }
 
 void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int32_t containCount)

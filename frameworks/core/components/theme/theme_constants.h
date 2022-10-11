@@ -164,6 +164,23 @@ public:
         return resAdapter_->GetResource(resId, dest);
     }
 
+    template<class T>
+    bool GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+    {
+        if (!resAdapter_) {
+            return false;
+        }
+        return resAdapter_->GetMediaData(resId, len, dest);
+    }
+
+    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+    {
+        if (!resAdapter_) {
+            return false;
+        }
+        return resAdapter_->GetRawFileData(rawFile, len, dest);
+    }
+
     bool GetResourceIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const;
 
     void LoadCustomStyle(const RefPtr<AssetManager>& assetManager);

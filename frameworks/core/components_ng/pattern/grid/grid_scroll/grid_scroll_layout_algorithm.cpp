@@ -19,11 +19,15 @@
 #include <optional>
 #include <utility>
 
+#include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -99,6 +103,12 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::CENTER);
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
             wrapper->Layout();
+            auto layoutProperty = wrapper->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+            CHECK_NULL_VOID(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateMainIndex(line.first);
+            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
         }
         prevLineHeight +=
             gridLayoutInfo_.lineHeightMap_[line.first] + GridUtils::GetMainGap(gridLayoutProperty, size, axis_);
@@ -191,6 +201,11 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
 
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
+    if (LessNotEqual(lengthOfItemsInViewport, mainSize)) {
+        gridLayoutInfo_.currentOffset_ = 0;
+        gridLayoutInfo_.prevOffset_ = 0;
+        return;
+    }
     float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
 
     // Step3. modify [currentOffset_]
@@ -540,6 +555,7 @@ bool GridScrollLayoutAlgorithm::CheckGridPlaced(
         }
         gridLayoutInfo_.gridMatrix_[i] = mainMap;
     }
+
     return true;
 }
 
@@ -553,6 +569,8 @@ float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(LayoutWrapper* layoutW
     auto columnsGap =
         ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
     auto crossGap = axis_ == Axis::VERTICAL ? columnsGap : rowsGap;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto crossPaddingOffset = axis_ == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
 
     float position = 0.0f;
     for (int32_t index = 0; index < crossStart; ++index) {
@@ -560,7 +578,7 @@ float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(LayoutWrapper* layoutW
             position += itemsCrossSize_.at(index);
         }
     }
-    position += crossStart * crossGap;
+    position += crossStart * crossGap + crossPaddingOffset;
     return position;
 }
 

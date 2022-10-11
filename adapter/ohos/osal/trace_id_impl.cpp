@@ -23,7 +23,7 @@ class TraceIdImpl : public TraceId {
 public:
     TraceIdImpl()
     {
-        traceId_ = std::make_unique<OHOS::HiviewDFX::HiTraceId>(OHOS::HiviewDFX::HiTrace::GetId());
+        traceId_ = std::make_unique<OHOS::HiviewDFX::HiTraceId>(OHOS::HiviewDFX::HiTraceChain::GetId());
     }
 
     ~TraceIdImpl() = default;
@@ -31,13 +31,13 @@ public:
     void SetTraceId() override
     {
         if (traceId_ && traceId_->IsValid()) {
-            OHOS::HiviewDFX::HiTrace::SetId(*(traceId_.get()));
+            OHOS::HiviewDFX::HiTraceChain::SetId(*(traceId_.get()));
         }
     }
 
     void ClearTraceId() override
     {
-        OHOS::HiviewDFX::HiTrace::ClearId();
+        OHOS::HiviewDFX::HiTraceChain::ClearId();
     }
 
 private:

@@ -22,10 +22,10 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 #ifdef USE_V8_ENGINE
 #include "bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
@@ -163,6 +163,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pipelineContextBase);
     if (info[0]->IsNull() || !info[0]->IsObject()) {
         if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
             pipelineContextBase->CloseImplicitAnimation();
         } else {
             LOGE("JSAnimation: info[0] is null or not object.");

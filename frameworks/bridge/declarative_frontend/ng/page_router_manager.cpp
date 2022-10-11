@@ -50,6 +50,19 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     LoadPage(GenerateNextPageId(), info, params);
 }
 
+void PageRouterManager::RunCard(const std::string& url, const std::string& params, uint64_t cardId)
+{
+    CHECK_RUN_ON(JS);
+    RouterPageInfo info { url };
+    if (!info.url.empty()) {
+        info.path = manifestParser_->GetRouter()->GetPagePath(url);
+    } else {
+        info.path = manifestParser_->GetRouter()->GetEntry();
+        info.url = manifestParser_->GetRouter()->GetEntry("");
+    }
+    LoadCard(0, info, params, cardId);
+}
+
 void PageRouterManager::Push(const RouterPageInfo& target, const std::string& params, RouterMode mode)
 {
     CHECK_RUN_ON(JS);
@@ -412,6 +425,34 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
     LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s. success", pageId, target.url.c_str());
 }
 
+void PageRouterManager::LoadCard(
+    int32_t pageId, const RouterPageInfo& target, const std::string& params, uint64_t cardId, bool /*isRestore*/, bool needHideLast)
+{
+    CHECK_RUN_ON(JS);
+    auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, params);
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
+    auto pageNode =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageRouterStack_.emplace_back(pageNode);
+
+    if (!loadCard_) {
+        LOGE("PageRouterManager loadCard_ is nullptr");
+        return;
+    }
+    auto result = loadCard_(target.url, cardId);
+    if (!result) {
+        LOGE("fail to load page file");
+        pageRouterStack_.pop_back();
+        return;
+    }
+
+    if (!OnPageReady(pageNode, needHideLast, needHideLast, isCardRouter, cardId)) {
+        LOGE("fail to mount page");
+        pageRouterStack_.pop_back();
+        return;
+    }
+}
+
 void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params,
     bool needHideLast, bool forceShowCurrent, bool needTransition)
 {
@@ -538,12 +579,21 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
     pageInfo->ReplacePageParams(tempParam);
 }
 
-bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition)
+bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
+    bool isCardRouter, uint64_t cardId)
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipeline, false);
+    RefPtr<PipelineBase> pipeline;
+    if (isCardRouter) {
+        auto weak = container->GetCardPipeline(cardId);
+        pipeline = weak.Upgrade();
+        CHECK_NULL_RETURN(pipeline, false);
+    } else {
+        pipeline = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipeline, false);
+    }
+
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {

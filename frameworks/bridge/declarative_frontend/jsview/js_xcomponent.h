@@ -163,6 +163,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JsOnLoad(const JSCallbackInfo& args);
     static void JsOnDestroy(const JSCallbackInfo& args);
+    static void OmitEvent(const JSCallbackInfo& args);
 
 private:
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);

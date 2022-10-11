@@ -114,10 +114,14 @@ void TextTimerPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
-    ACE_DCHECK(textChild);
-    textLayoutProperty_ = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty_);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetPositionProperty()) {
+        layoutProperty->UpdateAlignment(
+            layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
+    } else {
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+    }
 
     isCountDown_ = GetIsCountDown();
     inputCount_ = GetInputCount();
@@ -130,13 +134,15 @@ void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
 
     // format time text.
     std::string timerText = Localization::GetInstance()->FormatDuration(elapsedTime, GetFormat());
-    if (textLayoutProperty_->GetContent() == timerText) {
+    if (textLayoutProperty->GetContent() == timerText) {
         return; // needless to update
     }
-    textLayoutProperty_->UpdateContent(timerText); // Update child node time text.
+    textLayoutProperty->UpdateContent(timerText); // Update time text.
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

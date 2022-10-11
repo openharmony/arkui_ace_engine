@@ -16,9 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
 
-#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing.h"
@@ -42,13 +40,6 @@ public:
     ~LoadingProgressModifier() override = default;
     void onDraw(DrawingContext& context, const float& date) override
     {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto pipeline = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipeline);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto parogressTheme = themeManager->GetTheme<ProgressTheme>();
         float scale_ = 1.0;
         scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + COMET_WIDTH.ConvertToPx())),
                      (context.height /

@@ -101,6 +101,13 @@ public:
         }
     }
 
+    void SetClipToBounds(bool useClip) override
+    {
+        if (rsNode_) {
+            rsNode_->SetClipToBounds(useClip);
+        }
+    }
+
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 
     void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
@@ -112,6 +119,7 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateBackShadow(const Shadow& shadow) override;
+    void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
     void UpdateTransition(const TransitionOptions& options) override;
@@ -138,6 +146,10 @@ public:
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const Vector3F& value) override;
 
+    RectF GetPaintRectWithTransform() override;
+
+    RectF GetPaintRectWithoutTransform() override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
@@ -148,7 +160,6 @@ private:
 
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
-    void UpdateBorderWidth(const BorderWidthPropertyF& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
     void OnOpacityUpdate(double opacity) override;
 
@@ -168,19 +179,30 @@ private:
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
     void OnRadialGradientUpdate(const NG::Gradient& value) override;
 
+    void OnFrontBrightnessUpdate(const Dimension& brightness) override;
+    void OnFrontGrayScaleUpdate(const Dimension& grayScale) override;
+    void OnFrontContrastUpdate(const Dimension& contrast) override;
+    void OnFrontSaturateUpdate(const Dimension& saturate) override;
+    void OnFrontSepiaUpdate(const Dimension& sepia) override;
+    void OnFrontInvertUpdate(const Dimension& invert) override;
+    void OnFrontHueRotateUpdate(float hueRotate) override;
+    void OnFrontColorBlendUpdate(const Color& colorBlend) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
     bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
         std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
         std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex);
 
+    void PaintBackground();
+    void PaintClip(const SizeF& frameSize);
+    void PaintGradient(const SizeF& frameSize);
+    void PaintGraphics();
+    void OnPaintGraphics();
+
     RectF AdjustPaintRect();
 
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
-    void PaintBackground();
-    void PaintClip(const SizeF& size);
-    void PaintGradient(const SizeF& frameSize);
-
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
     RefPtr<ImageLoadingContext> bgLoadingCtx_;

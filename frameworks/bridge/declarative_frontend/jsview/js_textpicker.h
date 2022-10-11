@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/picker/picker_text_component.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -44,6 +45,10 @@ class JSTextPickerDialog {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
+    static void TextPickerDialogShow(
+        const JSRef<JSObject>& paramObj, std::map<std::string, NG::DailogTextChangeEvent> dailogEvent);
+    static std::map<std::string, NG::DailogTextChangeEvent> AddEvent(const JSCallbackInfo& info);
+
 private:
     static void ParseText(RefPtr<PickerTextComponent>& component, const JSRef<JSObject>& paramObj);
     static void AddEvent(RefPtr<PickerTextComponent>& picker, const JSCallbackInfo& info);

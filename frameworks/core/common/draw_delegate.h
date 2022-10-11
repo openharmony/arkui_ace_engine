@@ -25,10 +25,15 @@ class RSNode;
 
 namespace OHOS::Ace {
 
+namespace NG {
+class RenderContext;
+}
+
 class DrawDelegate {
 public:
     using DoDrawFrame = std::function<void(RefPtr<Flutter::Layer>&, const Rect&)>;
     using DoDrawRSFrame = std::function<void(std::shared_ptr<Rosen::RSNode>&, const Rect&)>;
+    using DoDrawRSFrameByRenderContext = std::function<void(RefPtr<NG::RenderContext>&)>;
     using DoDrawLastFrame = std::function<void(const Rect&)>;
 
     DrawDelegate() = default;
@@ -45,6 +50,13 @@ public:
     {
         if (doDrawRSFrameCallback_) {
             doDrawRSFrameCallback_(node, dirty);
+        }
+    }
+
+    void DrawRSFrame(RefPtr<NG::RenderContext>& renderContext)
+    {
+        if (doDrawRSFrameByRenderContextCallback_) {
+            doDrawRSFrameByRenderContextCallback_(renderContext);
         }
     }
 
@@ -65,6 +77,11 @@ public:
         doDrawRSFrameCallback_ = doRSFrameCallback;
     }
 
+    void SetDrawRSFrameByRenderContextCallback(DoDrawRSFrameByRenderContext&& doRSFrameByRenderContextCallback)
+    {
+        doDrawRSFrameByRenderContextCallback_ = doRSFrameByRenderContextCallback;
+    }
+
     void SetDrawFrameRepeatCallback(DoDrawLastFrame&& doFrameCallback)
     {
         doDrawLastFrameCallback_ = doFrameCallback;
@@ -73,6 +90,7 @@ public:
 private:
     DoDrawFrame doDrawFrameCallback_;
     DoDrawRSFrame doDrawRSFrameCallback_;
+    DoDrawRSFrameByRenderContext doDrawRSFrameByRenderContextCallback_;
     DoDrawLastFrame doDrawLastFrameCallback_;
 };
 

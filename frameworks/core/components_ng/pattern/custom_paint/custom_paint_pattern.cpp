@@ -118,6 +118,26 @@ void CustomPaintPattern::Stroke(const RefPtr<CanvasPath2D>& path)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::Clip()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Clip();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Clip(path);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::BeginPath()
 {
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
@@ -280,6 +300,9 @@ std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, do
         data->dirtyWidth = width;
         data->dirtyHeight = height;
         return data;
+    }
+    if (paintMethod_->HasTask()) {
+        paintMethod_->FlushPipelineImmediately();
     }
     return paintMethod_->GetImageData(left, top, width, height);
 }
@@ -641,6 +664,16 @@ void CustomPaintPattern::SetTransform(const TransformParam& param)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::ResetTransform()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.ResetTransform();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::Transform(const TransformParam& param)
 {
     auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
@@ -663,6 +696,9 @@ void CustomPaintPattern::Translate(double x, double y)
 
 std::string CustomPaintPattern::ToDataURL(const std::string& args)
 {
+    if (paintMethod_->HasTask()) {
+        paintMethod_->FlushPipelineImmediately();
+    }
     return paintMethod_->ToDataURL(args);
 }
 

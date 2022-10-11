@@ -240,6 +240,8 @@ public:
         reservedNodeId_ = ElementRegister::UndefinedElementId;
     }
 
+    void FlushImplicitAnimation();
+
 private:
     ViewStackProcessor();
 

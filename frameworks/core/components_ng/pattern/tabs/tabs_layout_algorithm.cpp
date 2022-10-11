@@ -42,6 +42,7 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     geometryNode->SetFrameSize(idealSize);
+    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
 
@@ -116,10 +117,14 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
 
-    tabBarGeometryNode->SetMarginFrameOffset(tabBarOffset);
+    auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+
+    tabBarGeometryNode->SetMarginFrameOffset(tabBarOffset + padding.Offset());
     tabBarWrapper->Layout();
 
-    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);
+    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset + padding.Offset());
     swiperWrapper->Layout();
 }
 

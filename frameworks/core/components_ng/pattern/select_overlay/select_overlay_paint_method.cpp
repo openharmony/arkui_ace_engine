@@ -38,10 +38,16 @@ void SelectOverlayPaintMethod::DrawHandles(const std::shared_ptr<SelectOverlayIn
     LOGE("paint handles");
     if (info->isSingleHandle) {
         // Paint one handle.
-        PaintHandle(canvas, info->firstHandle.paintRect, false);
+        if (info->firstHandle.isShow) {
+            PaintHandle(canvas, info->firstHandle.paintRect, false);
+        }
     } else {
-        PaintHandle(canvas, info->firstHandle.paintRect, !info->handleReverse);
-        PaintHandle(canvas, info->secondHandle.paintRect, info->handleReverse);
+        if (info->firstHandle.isShow) {
+            PaintHandle(canvas, info->firstHandle.paintRect, !info->handleReverse);
+        }
+        if (info->secondHandle.isShow) {
+            PaintHandle(canvas, info->secondHandle.paintRect, info->handleReverse);
+        }
     }
 }
 
@@ -49,7 +55,7 @@ void SelectOverlayPaintMethod::PaintHandle(RSCanvas& canvas, const RectF& handle
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextOverlayTheme>();
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto handleColor = theme->GetHandleColor();
     auto innerHandleColor = theme->GetHandleColorInner();

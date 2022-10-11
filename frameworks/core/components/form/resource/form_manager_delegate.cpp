@@ -21,6 +21,7 @@
 
 #include "base/log/log.h"
 #include "frameworks/base/json/json_util.h"
+#include "frameworks/core/common/frontend.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_callback_client.h"
@@ -105,6 +106,15 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     wantCache_.SetElementName(info.bundleName, info.abilityName);
+
+    if (!info.want.empty()) {
+        auto wantJson = JsonUtil::ParseJsonString(info.want);
+        auto params = wantJson->GetValue("parameters");
+        LOGI("AddForm: Host want params : %{public}s", params->ToString().c_str());
+        AAFwk::WantParams parameters = AAFwk::WantParamWrapper::ParseWantParams(params->ToString());
+        wantCache_.SetParams(parameters);
+    }
+
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, info.id);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_MODULE_NAME_KEY, info.moduleName);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_NAME_KEY, info.cardName);
@@ -416,8 +426,12 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
             return;
         }
         hasCreated_ = true;
+        OHOS::Ace::FrontendType type = OHOS::Ace::FrontendType::JS_CARD;
+        if (formJsInfo.type == AppExecFwk::FormType::ETS) {
+            type = OHOS::Ace::FrontendType::ETS_CARD;
+        }
         onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath, formJsInfo.formName,
-            formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo);
+            formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo, type);
     } else {
         if (formJsInfo.formData.empty()) {
             LOGE("update form data success, but data is empty!!!");

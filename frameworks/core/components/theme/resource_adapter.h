@@ -56,6 +56,18 @@ public:
     {
         return "";
     }
+    virtual bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+    {
+        return false;
+    }
+    virtual bool GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+    {
+        return false;
+    }
+    virtual bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+    {
+        return false;
+    }
     virtual bool GetBoolean(uint32_t resId) const
     {
         return false;

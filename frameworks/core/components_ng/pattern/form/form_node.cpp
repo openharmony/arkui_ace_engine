@@ -34,7 +34,8 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
     CHECK_NULL_RETURN(pattern, HitTestResult::BUBBLING);
     auto subContainer = pattern->GetSubContainer();
     CHECK_NULL_RETURN(subContainer, HitTestResult::BUBBLING);
-    auto subContext = DynamicCast<OHOS::Ace::PipelineContext>(subContainer->GetPipelineContext());
+
+    auto subContext = DynamicCast<OHOS::Ace::PipelineBase>(subContainer->GetPipelineContext());
     CHECK_NULL_RETURN(subContext, HitTestResult::BUBBLING);
     auto selfGlobalOffset = GetGeometryNode()->GetParentGlobalOffset() + GetGeometryNode()->GetFrameOffset();
     subContext->SetPluginEventOffset(Offset(selfGlobalOffset.GetX(), selfGlobalOffset.GetY()));

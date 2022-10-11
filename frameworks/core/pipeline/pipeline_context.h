@@ -271,17 +271,6 @@ public:
         return platformResRegister_;
     }
 
-    WindowModal GetWindowModal() const
-    {
-        return windowModal_;
-    }
-
-    bool IsFullScreenModal() const
-    {
-        return windowModal_ == WindowModal::NORMAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN ||
-               windowModal_ == WindowModal::CONTAINER_MODAL || isFullWindow_;
-    }
-
     // SemiModal and DialogModal have their own enter/exit animation and will exit after animation done.
     void Finish(bool autoFinish = true) const override;
 
@@ -293,11 +282,6 @@ public:
         webPaintCallback_.push_back(std::move(listener));
     }
     void NotifyWebPaint() const;
-
-    float GetViewScale() const
-    {
-        return viewScale_;
-    }
 
     // Get the font scale used to covert fp to logic px.
     double GetFontUnitScale() const
@@ -383,7 +367,7 @@ public:
 
     BaseId::IdType AddPageTransitionListener(const PageTransitionListenable::CallbackFuncType& funcObject);
 
-    const RefPtr<OverlayElement>& GetOverlayElement() const;
+    const RefPtr<OverlayElement> GetOverlayElement() const;
 
     void RemovePageTransitionListener(typename BaseId::IdType id);
 
@@ -452,7 +436,7 @@ public:
 
     void FlushFocus();
 
-    void WindowFocus(bool isFocus);
+    void WindowFocus(bool isFocus) override;
 
     void OnPageShow() override;
 
@@ -474,11 +458,6 @@ public:
     int32_t GetAppearingDuration() const
     {
         return cardAppearingDuration_;
-    }
-
-    void SetWindowModal(WindowModal modal)
-    {
-        windowModal_ = modal;
     }
 
     void SetModalHeight(int32_t height)
@@ -614,11 +593,6 @@ public:
 
     void SetAppBgColor(const Color& color) override;
 
-    const Color& GetAppBgColor() const
-    {
-        return appBgColor_;
-    }
-
     void SetPhotoCachePath(const std::string& photoCachePath)
     {
         photoCachePath_ = photoCachePath;
@@ -749,26 +723,6 @@ public:
         return isHoleValid_;
     }
 
-    void SetPluginOffset(const Offset& offset)
-    {
-        pluginOffset_ = offset;
-    }
-
-    Offset GetPluginOffset() const
-    {
-        return pluginOffset_;
-    }
-
-    void SetPluginEventOffset(const Offset& offset)
-    {
-        pluginEventOffset_ = offset;
-    }
-
-    Offset GetPluginEventOffset() const
-    {
-        return pluginEventOffset_;
-    }
-
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRSUIDirector();
@@ -818,116 +772,6 @@ public:
     void SubscribeCtrlA(SubscribeCtrlACallback callback)
     {
         subscribeCtrlA_ = std::move(callback);
-    }
-
-    void SetWindowMinimizeCallBack(std::function<bool(void)>&& callback)
-    {
-        windowMinimizeCallback_ = std::move(callback);
-    }
-
-    void SetWindowMaximizeCallBack(std::function<bool(void)>&& callback)
-    {
-        windowMaximizeCallback_ = std::move(callback);
-    }
-
-    void SetWindowRecoverCallBack(std::function<bool(void)>&& callback)
-    {
-        windowRecoverCallback_ = std::move(callback);
-    }
-
-    void SetWindowCloseCallBack(std::function<bool(void)>&& callback)
-    {
-        windowCloseCallback_ = std::move(callback);
-    }
-
-    void SetWindowSplitCallBack(std::function<bool(void)>&& callback)
-    {
-        windowSplitCallback_ = std::move(callback);
-    }
-
-    void SetWindowGetModeCallBack(std::function<WindowMode(void)>&& callback)
-    {
-        windowGetModeCallback_ = std::move(callback);
-    }
-
-    void SetWindowStartMoveCallBack(std::function<void(void)>&& callback)
-    {
-        windowStartMoveCallback_ = std::move(callback);
-    }
-
-    bool FireWindowMinimizeCallBack() const
-    {
-        if (windowMinimizeCallback_) {
-            return windowMinimizeCallback_();
-        }
-        return false;
-    }
-
-    bool FireWindowMaximizeCallBack() const
-    {
-        if (windowMaximizeCallback_) {
-            return windowMaximizeCallback_();
-        }
-        return false;
-    }
-
-    bool FireWindowRecoverCallBack() const
-    {
-        if (windowRecoverCallback_) {
-            return windowRecoverCallback_();
-        }
-        return false;
-    }
-
-    bool FireWindowSplitCallBack() const
-    {
-        if (windowSplitCallback_) {
-            return windowSplitCallback_();
-        }
-        return false;
-    }
-
-    bool FireWindowCloseCallBack() const
-    {
-        if (windowCloseCallback_) {
-            return windowCloseCallback_();
-        }
-        return false;
-    }
-
-    void FireWindowStartMoveCallBack() const
-    {
-        if (windowStartMoveCallback_) {
-            windowStartMoveCallback_();
-        }
-    }
-
-    WindowMode FireWindowGetModeCallBack() const
-    {
-        if (windowGetModeCallback_) {
-            return windowGetModeCallback_();
-        }
-        return WindowMode::WINDOW_MODE_UNDEFINED;
-    }
-
-    void SetAppIconId(int32_t id)
-    {
-        appIconId_ = id;
-    }
-
-    int32_t GetAppIconId() const
-    {
-        return appIconId_;
-    }
-
-    void SetAppLabelId(int32_t id)
-    {
-        appLabelId_ = id;
-    }
-
-    int32_t GetAppLabelId() const
-    {
-        return appLabelId_;
     }
 
     void SetClipboardCallback(const std::function<void(const std::string&)>& callback)
@@ -1171,11 +1015,9 @@ private:
     bool isDensityUpdate_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
-    WindowModal windowModal_ = WindowModal::NORMAL;
     int32_t modalHeight_ = 0;
     int32_t hoverNodeId_ = DEFAULT_HOVER_ENTER_ANIMATION_ID;
     uint32_t modalColor_ = 0x00000000;
-    bool isFullWindow_ = false;
     std::list<RefPtr<RenderNode>> hoverNodes_;
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::function<void(std::function<void()>&&)> screenOffCallback_;
@@ -1184,7 +1026,6 @@ private:
     int32_t frameCount_ = 0;
 #endif
 
-    Color appBgColor_ = Color::WHITE;
     int32_t width_ = 0;
     int32_t height_ = 0;
     bool isFirstPage_ = true;
@@ -1199,25 +1040,12 @@ private:
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
-    Offset pluginOffset_ { 0, 0 };
-    Offset pluginEventOffset_ { 0, 0 };
-
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
     bool isKeyboardA_ = false;
     bool isTabKeyPressed_ = false;
     bool isFocusingByTab_ = false;
     SubscribeCtrlACallback subscribeCtrlA_;
-
-    int32_t appLabelId_ = 0;
-    int32_t appIconId_ = 0;
-    std::function<bool(void)> windowMinimizeCallback_ = nullptr;
-    std::function<bool(void)> windowMaximizeCallback_ = nullptr;
-    std::function<bool(void)> windowRecoverCallback_ = nullptr;
-    std::function<bool(void)> windowCloseCallback_ = nullptr;
-    std::function<bool(void)> windowSplitCallback_ = nullptr;
-    std::function<void(void)> windowStartMoveCallback_ = nullptr;
-    std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     Size selectedItemSize_ { 0.0, 0.0 };

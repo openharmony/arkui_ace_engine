@@ -21,7 +21,8 @@
 
 namespace OHOS::Ace::NG {
 
-using ChangeEvent = std::function<void(const std::string&, double)>;
+using TextChangeEvent = std::function<void(const std::string&, double)>;
+using DailogTextChangeEvent = std::function<void(const std::string&)>;
 
 class TextPickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextPickerEventHub, EventHub)
@@ -30,20 +31,33 @@ public:
     TextPickerEventHub() = default;
     ~TextPickerEventHub() override = default;
 
-    void SetOnChange(ChangeEvent&& changeEvent)
+    void SetOnChange(TextChangeEvent&& TextChangeEvent)
     {
-        changeEvent_ = std::move(changeEvent);
+        TextChangeEvent_ = std::move(TextChangeEvent);
     }
 
     void FireChangeEvent(const std::string& value, double index) const
     {
-        if (changeEvent_) {
-            changeEvent_(value, index);
+        if (TextChangeEvent_) {
+            TextChangeEvent_(value, index);
+        }
+    }
+
+    void SetDailogChange(DailogTextChangeEvent&& onChange)
+    {
+        dailogChangeEvent_ = std::move(onChange);
+    }
+
+    void FireDailogChangeEvent(const std::string& info) const
+    {
+        if (dailogChangeEvent_) {
+            dailogChangeEvent_(info);
         }
     }
 
 private:
-    ChangeEvent changeEvent_;
+    TextChangeEvent TextChangeEvent_;
+    DailogTextChangeEvent dailogChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerEventHub);
 };

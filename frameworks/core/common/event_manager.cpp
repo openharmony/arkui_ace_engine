@@ -59,13 +59,13 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
 }
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-    const TouchRestrict& touchRestrict, bool needAppend)
+    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
     ContainerScope scope(instanceId_);
 
     ACE_FUNCTION_TRACE();
     if (!frameNode) {
-        LOGW("renderNode is null.");
+        LOGW("frameNode is null.");
         return;
     }
     // first clean.
@@ -76,6 +76,13 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, touchRestrict, hitTestResult);
     if (needAppend) {
+#ifdef OHOS_STANDARD_SYSTEM
+        for (auto entry = hitTestResult.begin(); entry != hitTestResult.end(); ++entry) {
+            if ((*entry)) {
+                (*entry)->SetSubPipelineGlobalOffset(offset, viewScale);
+            }
+        }
+#endif
         TouchTestResult prevHitTestResult = touchTestResults_[touchPoint.id];
         hitTestResult.splice(hitTestResult.end(), prevHitTestResult);
     }

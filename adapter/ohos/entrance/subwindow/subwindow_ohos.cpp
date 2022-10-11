@@ -26,6 +26,7 @@
 #include "base/utils/system_properties.h"
 #include "core/common/container_scope.h"
 #include "core/common/frontend.h"
+#include "core/components/bubble/bubble_component.h"
 #include "core/components/popup/popup_component.h"
 
 namespace OHOS::Ace {
@@ -98,6 +99,7 @@ void SubwindowOhos::InitContainer()
     container->SetAssetManager(parentContainer->GetAssetManager());
     container->SetResourceConfiguration(parentContainer->GetResourceConfiguration());
     container->SetPackagePathStr(parentContainer->GetPackagePathStr());
+    container->SetHapPath(parentContainer->GetHapPath());
     container->SetIsSubContainer(true);
     container->InitializeSubContainer(parentContainerId_);
     ViewportConfig config;
@@ -140,6 +142,43 @@ void SubwindowOhos::InitContainer()
         return;
     }
     subPipelineContext->SetupSubRootElement();
+}
+
+void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
+{
+    ShowWindow();
+    auto stack = GetStack();
+    if (!stack) {
+        LOGE("Get stack failed, it is null");
+        return;
+    }
+    auto popup = AceType::DynamicCast<TweenComponent>(newComponent);
+    if (!popup) {
+        LOGE("Add menu failed, this is not a popup component.");
+        return;
+    }
+    stack->PopPopup(popup->GetId());
+    stack->PushComponent(newComponent, disableTouchEvent);
+    auto bubble = AceType::DynamicCast<BubbleComponent>(popup->GetChild());
+    if (bubble) {
+        bubble->SetWeakStack(WeakClaim(RawPtr(stack)));
+    }
+}
+
+bool SubwindowOhos::CancelPopup(const std::string& id)
+{
+    auto stack = GetStack();
+    if (!stack) {
+        return false;
+    }
+    stack->PopPopup(id);
+    auto context = stack->GetContext().Upgrade();
+    if (!context) {
+        return false;
+    }
+    context->FlushPipelineImmediately();
+    HideWindow();
+    return true;
 }
 
 void SubwindowOhos::ShowWindow()

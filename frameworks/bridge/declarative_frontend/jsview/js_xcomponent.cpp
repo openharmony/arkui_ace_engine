@@ -29,6 +29,13 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("create", &JSXComponent::Create);
     JSClass<JSXComponent>::StaticMethod("onLoad", &JSXComponent::JsOnLoad);
     JSClass<JSXComponent>::StaticMethod("onDestroy", &JSXComponent::JsOnDestroy);
+    JSClass<JSXComponent>::StaticMethod("onAppear", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onDisAppear", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onTouch", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onClick", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onKeyEvent", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onMouse", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onHover", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::Inherit<JSViewAbstract>();
     JSClass<JSXComponent>::Bind(globalObj);
 }
@@ -132,6 +139,11 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
     }
     std::vector<std::string> keys = {"destroy"};
     xcomponentComponent->SetXComponentDestroyEventId(GetEventMarker(args, keys));
+}
+
+void JSXComponent::OmitEvent(const JSCallbackInfo& /*args*/)
+{
+    LOGW("This event is omitted, please use apis of native_xcomponent instead");
 }
 
 EventMarker JSXComponent::GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys)

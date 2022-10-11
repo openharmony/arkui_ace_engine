@@ -72,13 +72,9 @@ void TextPickerPattern::OnColumnsBuilding()
 
 uint32_t TextPickerPattern::GetShowOptionCount() const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, 0);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, 0);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, 0);
     auto showCount = pickerTheme->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
@@ -105,9 +101,7 @@ void TextPickerPattern::FlushCurrentOptions()
 
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     Size optionSize;
     DimensionUnit optionSizeUnit = DimensionUnit::PX;
@@ -118,11 +112,13 @@ void TextPickerPattern::FlushCurrentOptions()
     }
     auto child = host->GetChildren();
     auto iter = child.begin();
-    std::string optionValue;
+    if (child.size() != showCount) {
+        return;
+    }
+
     for (uint32_t index = 0; index < showCount; index++) {
-        currentChildIndex_ = index;
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
-        optionValue = textPickerPattern->GetOption(optionIndex);
+        auto optionValue = textPickerPattern->GetOption(optionIndex);
         auto textNode = DynamicCast<FrameNode>(*iter);
         CHECK_NULL_VOID(textNode);
         auto textPattern = textNode->GetPattern<TextPattern>();
@@ -141,6 +137,32 @@ void TextPickerPattern::FlushCurrentOptions()
         CHECK_NULL_VOID(textPickerEventHub);
         auto currentValue = textPickerPattern->GetOption(currentIndex);
         textPickerEventHub->FireChangeEvent(currentValue, currentIndex);
+        textPickerEventHub->FireDailogChangeEvent(GetSelectedObject(true, 1));
+    }
+}
+
+std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t status) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto value = selectedValue_;
+    auto index = selectedIndex_;
+    if (isColumnChange) {
+        value = GetCurrentText();
+        index = GetCurrentIndex();
+    }
+
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, "");
+
+    if (context->GetIsDeclarative()) {
+        return std::string("{\"value\":") + "\"" + value + "\"" +
+            ",\"index\":" + std::to_string(index) +
+            ",\"status\":" + std::to_string(status) + "}";
+    } else {
+        return std::string("{\"newValue\":") + "\"" + value + "\"" +
+            ",\"newSelected\":" + std::to_string(index) +
+            ",\"status\":" + std::to_string(status) + "}";
     }
 }
 
@@ -187,13 +209,9 @@ void TextPickerPattern::UpdateColumnChildPosition(double y)
         return;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     jumpInterval_ = Dimension(pickerTheme->GetJumpInterval().ConvertToPx(), DimensionUnit::PX);
     // the abs of drag delta is less than jump interval.

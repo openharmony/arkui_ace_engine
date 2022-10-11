@@ -27,7 +27,21 @@ void PagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-    host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    host->GetRenderContext()->UpdateBackgroundColor(PipelineContext::GetCurrentContext()->GetAppBgColor());
+}
+
+bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
+{
+    if (!isLoaded_) {
+        isOnShow_ = true;
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, false);
+        if (onPageShow_) {
+            context->PostAsyncEvent([onPageShow = onPageShow_]() { onPageShow(); });
+        }
+        isLoaded_ = true;
+    }
+    return false;
 }
 
 bool PagePattern::TriggerPageTransition(PageTransitionType type) const
@@ -41,7 +55,7 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type) const
 
 void PagePattern::OnShow()
 {
-    if (isOnShow_) {
+    if (isOnShow_ || !isLoaded_) {
         return;
     }
     isOnShow_ = true;

@@ -33,9 +33,7 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     float frameHeight = 0.0f;
     float frameWidth = 0.0f;
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, std::nullopt);
-    auto switchTheme = themeManager->GetTheme<SwitchTheme>();
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_RETURN(switchTheme, std::nullopt);
     if (contentConstraint.selfIdealSize.Width().has_value()) {
         frameWidth = contentConstraint.selfIdealSize.Width().value();

@@ -32,8 +32,7 @@ std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    auto themeManager = pipeline->GetThemeManager();
-    auto gaugeTheme = themeManager->GetTheme<ProgressTheme>();
+    auto gaugeTheme = pipeline->GetTheme<ProgressTheme>();
     float defaultThickness = gaugeTheme->GetTrackWidth().ConvertToPx();
     if ((NearEqual(contentConstraint.maxSize.Width(), Size::INFINITE_SIZE))) {
         float defaultWidth = gaugeTheme->GetTrackWidth().ConvertToPx();

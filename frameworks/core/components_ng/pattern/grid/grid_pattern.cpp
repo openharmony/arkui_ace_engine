@@ -16,8 +16,10 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -128,6 +130,77 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
     gridLayoutInfo_ = gridLayoutAlgorithm->GetGridLayoutInfo();
     return false;
+}
+
+WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    auto curFocus = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocus, nullptr);
+    auto curFrame = curFocus->GetFrameNode();
+    CHECK_NULL_RETURN(curFrame, nullptr);
+    auto curPattern = curFrame->GetPattern();
+    CHECK_NULL_RETURN(curPattern, nullptr);
+    auto curItemPattern = AceType::DynamicCast<GridItemPattern>(curPattern);
+    CHECK_NULL_RETURN(curItemPattern, nullptr);
+
+    auto curMainIndex = curItemPattern->GetMainIndex();
+    auto curCrossIndex = curItemPattern->GetCrossIndex();
+    if (curMainIndex < 0 || curCrossIndex < 0) {
+        LOGE("can't find focused child.");
+        return nullptr;
+    }
+    LOGD("Current item location is (%{public}d,%{public}d)", curMainIndex, curCrossIndex);
+
+    auto nextMainIndex = curMainIndex;
+    auto nextCrossIndex = curCrossIndex;
+    switch (step) {
+        case FocusStep::UP:
+            gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? --nextCrossIndex : --nextMainIndex;
+            break;
+        case FocusStep::DOWN:
+            gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? ++nextCrossIndex : ++nextMainIndex;
+            break;
+        case FocusStep::LEFT:
+            gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? --nextMainIndex : --nextCrossIndex;
+            break;
+        case FocusStep::RIGHT:
+            gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? ++nextMainIndex : ++nextCrossIndex;
+            break;
+        default:
+            break;
+    }
+    LOGD("Next item location is (%{public}d,%{public}d)", nextMainIndex, nextCrossIndex);
+    auto maxMainCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_).size());
+    auto maxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
+    if (nextMainIndex < 0 || nextMainIndex >= maxMainCount || nextCrossIndex < 0 || nextCrossIndex >= maxCrossCount) {
+        LOGD("Next item is not exist");
+        return nullptr;
+    }
+
+    auto gridFrame = GetHost();
+    CHECK_NULL_RETURN(gridFrame, nullptr);
+    auto gridFocus = gridFrame->GetFocusHub();
+    CHECK_NULL_RETURN(gridFocus, nullptr);
+    auto childFocusList = gridFocus->GetChildren();
+    for (const auto& childFocus : childFocusList) {
+        auto childFrame = childFocus->GetFrameNode();
+        if (!childFrame) {
+            continue;
+        }
+        auto childPattern = childFrame->GetPattern();
+        if (!childPattern) {
+            continue;
+        }
+        auto childItemPattern = AceType::DynamicCast<GridItemPattern>(childPattern);
+        if (!childItemPattern) {
+            continue;
+        }
+        if (childItemPattern->GetMainIndex() == nextMainIndex && childItemPattern->GetCrossIndex() == nextCrossIndex) {
+            return AceType::WeakClaim(AceType::RawPtr(childFocus));
+        }
+    }
+
+    return nullptr;
 }
 
 } // namespace OHOS::Ace::NG

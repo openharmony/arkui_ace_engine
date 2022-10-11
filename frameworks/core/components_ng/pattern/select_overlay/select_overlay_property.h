@@ -68,9 +68,11 @@ struct SelectOverlayInfo {
     bool isSingleHandle = false;
     // when handleReverse is true, The first one is on the right side of the second.
     bool handleReverse = false;
+    // Used to determine the range of judgment that is parallel to the first and second handles.
+    float singleLineHeight = 10.0f;
     SelectHandleInfo firstHandle;
     SelectHandleInfo secondHandle;
-    HitTestMode hitTestMode = HitTestMode::HTMTRANSPARENT;
+    HitTestMode hitTestMode = HitTestMode::HTMTRANSPARENT_SELF;
 
     // show area
     bool useFullScreen = true;

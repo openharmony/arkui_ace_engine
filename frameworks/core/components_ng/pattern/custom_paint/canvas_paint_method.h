@@ -87,7 +87,8 @@ private:
     sk_sp<SkImage> GetImage(const std::string& src) override;
     void SetPaintImage() override {};
 
-    void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = true);
+    void PaintText(
+        const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = true);
     double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = true);

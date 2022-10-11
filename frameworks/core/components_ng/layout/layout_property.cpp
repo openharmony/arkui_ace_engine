@@ -49,6 +49,7 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
 }
 
 RefPtr<LayoutProperty> LayoutProperty::Clone() const

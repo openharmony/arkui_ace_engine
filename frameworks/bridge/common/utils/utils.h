@@ -75,6 +75,17 @@ const char UNICODE_HEAD[] = "\\u";
 const char LEFT_CURLY_BRACES = '{';
 const char RIGHT_CURLY_BRACES = '}';
 
+// Common error code
+constexpr int32_t ERROR_CODE_PERMISSION_DENIED = 201; // The application does not have permission to call the interface.
+constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;     // Invalid input parameter.
+constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCapability names was not found.
+
+// Notification error code
+constexpr int32_t ERROR_CODE_INTERNAL_ERROR = 100001;      // Internal error.
+constexpr int32_t ERROR_CODE_URI_ERROR = 100002;           // Uri error.
+constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;     // The pages are pushed too much.
+constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;      // Uri error for lite.
+
 template<class T>
 bool GetAssetContentImpl(const RefPtr<AssetManager>& assetManager, const std::string& url, T& content)
 {

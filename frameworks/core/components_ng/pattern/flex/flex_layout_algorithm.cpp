@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 
+#include <algorithm>
 #include <iterator>
 
 #include "base/geometry/axis.h"
@@ -582,7 +583,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isInfiniteLayout_ = GreatOrEqual(mainAxisSize_, Infinity<float>());
     }
     if (isInfiniteLayout_) {
-        LOGW("The main axis size is not defined or infinity, disallow flex and weight mode");
+        LOGD("The main axis size is not defined or infinity, disallow flex and weight mode");
     }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto paddingLeft = padding.left.value_or(0.0f);
@@ -626,6 +627,11 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         finialCrossAxisSize += horizontalPadding;
         finialMainAxisSize += verticalPadding;
     }
+    finialMainAxisSize = std::clamp(finialMainAxisSize, GetMainAxisSizeHelper(layoutConstraint->minSize, direction_),
+        GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_));
+    finialCrossAxisSize = std::clamp(finialCrossAxisSize, GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_),
+        GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_));
+
     realSize.UpdateIllegalSizeWithCheck(
         GetCalcSizeHelper(finialMainAxisSize, finialCrossAxisSize, direction_).ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
@@ -635,7 +641,7 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
-        LOGE("FlexLayoutAlgorithm::GetTotalAllocatedSize, children is empty");
+        LOGD("FlexLayoutAlgorithm::GetTotalAllocatedSize, children is empty");
         allocatedSize_ = 0.0f;
         return;
     }
@@ -659,7 +665,7 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
-        LOGE("FlexLayoutAlgorithm::Layout, children is empty");
+        LOGD("FlexLayoutAlgorithm::Layout, children is empty");
         return;
     }
     auto contentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();

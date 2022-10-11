@@ -116,6 +116,16 @@ ACE_EXPORT extern const char NAVIGATION_CONTENT_ETS_TAG[];
 ACE_EXPORT extern const char TOOL_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
+ACE_EXPORT extern const char NAVBAR_CONTENT_ETS_TAG[];
+ACE_EXPORT extern const char NAVBAR_ETS_TAG[];
+
+// navRouter view
+ACE_EXPORT extern const char NAVROUTER_VIEW_ETS_TAG[];
+
+// navDestination view
+ACE_EXPORT extern const char NAVDESTINATION_VIEW_ETS_TAG[];
+ACE_EXPORT extern const char NAVDESTINATION_TITLE_BAR_ETS_TAG[];
+ACE_EXPORT extern const char NAVDESTINATION_CONTENT_ETS_TAG[];
 
 // row split
 ACE_EXPORT extern const char ROW_SPLIT_COMPONENT_TAG[];
@@ -227,6 +237,12 @@ ACE_EXPORT extern const char BLANK_ETS_TAG[];
 // button
 ACE_EXPORT extern const char BUTTON_COMPONENT_TAG[];
 ACE_EXPORT extern const char BUTTON_ETS_TAG[];
+
+// common
+ACE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
+// option
+ACE_EXPORT extern const char OPTION_COMPONENT_TAG[];
+ACE_EXPORT extern const char OPTION_ETS_TAG[];
 
 // divider
 ACE_EXPORT extern const char DIVIDER_COMPONENT_TAG[];
@@ -349,6 +365,7 @@ ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
 ACE_EXPORT extern const char MENU_TAG[];
 ACE_EXPORT extern const char MENU_ETS_TAG[];
+ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[];
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
@@ -365,6 +382,10 @@ ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[];
 // select
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[];
 ACE_EXPORT extern const char SELECT_ETS_TAG[];
+
+// select_popup
+ACE_EXPORT extern const char SELECT_POPUP_COMPONENT_TAG[];
+ACE_EXPORT extern const char SELECT_POPUP_ETS_TAG[];
 
 // marquee
 ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[];

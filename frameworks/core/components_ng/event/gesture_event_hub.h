@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H
 
 #include <list>
+#include <vector>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/referenced.h"
@@ -56,7 +57,14 @@ enum class HitTestMode {
      * Self not respond to the hit test for touch events,
      * but children respond to the hit test for touch events.
      */
-    HTMNONE
+    HTMNONE,
+
+    /**
+     * Self and child respond to the hit test for touch events,
+     * when self consumed allow hit test of other nodes which is masked by this node,
+     * when child consumed block hit test of other nodes.
+     */
+    HTMTRANSPARENT_SELF,
 };
 
 enum class HitTestResult {
@@ -66,6 +74,8 @@ enum class HitTestResult {
     STOP_BUBBLING,
     // node process events and bubble;
     BUBBLING,
+    // node process events and bubble;
+    SELF_TRANSPARENT,
 };
 
 struct DragDropInfo {
@@ -302,6 +312,9 @@ private:
 
     void UpdateGestureHierarchy();
 
+    // old path.
+    void UpdateExternalGestureRecognizer();
+
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
@@ -310,14 +323,15 @@ private:
     RefPtr<PanEventActuator> panEventActuator_;
     RefPtr<DragEventActuator> dragEventActuator_;
     RefPtr<ExclusiveRecognizer> innerExclusiveRecognizer_;
-    RefPtr<ExclusiveRecognizer> externalExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> nodeExclusiveRecognizer_;
-    RefPtr<ParallelRecognizer> externalParallelRecognizer_;
+    std::vector<RefPtr<ExclusiveRecognizer>> externalExclusiveRecognizer_;
+    std::vector<RefPtr<ParallelRecognizer>> externalParallelRecognizer_;
     RefPtr<DragDropProxy> dragDropProxy_;
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
     std::list<RefPtr<GestureRecognizer>> gestureHierarchy_;
+
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
     bool isResponseRegion_ = false;

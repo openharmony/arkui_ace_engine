@@ -46,6 +46,8 @@ public:
     void Fill(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
     void Stroke(PaintWrapper* paintWrapper);
     void Stroke(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
+    void Clip();
+    void Clip(const RefPtr<CanvasPath2D>& path);
     void BeginPath();
     void ClosePath();
     void MoveTo(PaintWrapper* paintWrapper, double x, double y);
@@ -63,6 +65,7 @@ public:
     void Scale(double x, double y);
     void Rotate(double angle);
     void SetTransform(const TransformParam& param);
+    void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
 
@@ -226,6 +229,11 @@ public:
         saveStates_.pop();
     }
 
+    void FlushPipelineImmediately()
+    {
+        context_->FlushPipelineImmediately();
+    }
+
 protected:
     bool HasShadow() const;
     void UpdateLineDash(SkPaint& paint);
@@ -236,6 +244,7 @@ protected:
 
     void Path2DFill(const OffsetF& offset);
     void Path2DStroke(const OffsetF& offset);
+    void Path2DClip();
     void ParsePath2D(const OffsetF& offset, const RefPtr<CanvasPath2D>& path);
     void Path2DAddPath(const OffsetF& offset, const PathArgs& args);
     void Path2DClosePath(const OffsetF& offset, const PathArgs& args);

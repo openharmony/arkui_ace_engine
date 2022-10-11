@@ -35,6 +35,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/back_end_event_manager.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
+#include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
 #include "nweb_adapter_helper.h"
@@ -405,6 +406,29 @@ void ContextMenuResultOhos::CopyImage() const
     if (callback_) {
         callback_->Continue(CI_IMAGE_COPY, EF_NONE);
     }
+}
+
+void WebWindowNewHandlerOhos::SetWebController(int32_t id)
+{
+    if (handler_) {
+        handler_->SetNWebHandlerById(id);
+    }
+}
+
+bool WebWindowNewHandlerOhos::IsFrist() const
+{
+    if (handler_) {
+        return handler_->IsFrist();
+    }
+    return true;
+}
+
+int32_t WebWindowNewHandlerOhos::GetId() const
+{
+    if (handler_) {
+        return handler_->GetId();
+    }
+    return -1;
 }
 
 WebDelegate::~WebDelegate()
@@ -1433,6 +1457,9 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
     onScrollV2_ = useNewPipe ? eventHub->GetOnScrollEvent()
                              : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                    webCom->GetScrollId(), oldContext);
+    onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetWindowExitEventId(), oldContext);
 }
 
 void WebDelegate::RegisterOHOSWebEventAndMethord()
@@ -1480,6 +1507,19 @@ void WebDelegate::RunSetWebIdCallback()
     auto setWebIdCallback = webCom->GetSetWebIdCallback();
     CHECK_NULL_VOID(setWebIdCallback);
     setWebIdCallback(webId);
+}
+
+void WebDelegate::RunJsProxyCallback()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CallJsProxyCallback();
+        return;
+    }
+    auto webCom = webComponent_.Upgrade();
+    CHECK_NULL_VOID(webCom);
+    webCom->CallJsProxyCallback();
 }
 
 void WebDelegate::SetWebCallBack()
@@ -1969,6 +2009,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             delegate->nweb_->PutFindCallback(findListenerImpl);
             delegate->UpdateSettting(Container::IsCurrentUseNewPipeline());
             delegate->RunSetWebIdCallback();
+            delegate->RunJsProxyCallback();
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -2309,6 +2350,23 @@ void WebDelegate::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess)
                 if (setting) {
                     setting->PutMediaPlayGestureAccess(isNeedGestureAccess);
                 }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isMultiWindowAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                setting->PutMultiWindowAccess(isMultiWindowAccessEnabled);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -3045,6 +3103,33 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
     return true;
 }
 
+void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
+    const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
+{
+    auto param = std::make_shared<WebWindowNewEvent>(targetUrl, isAlert, isUserTrigger,
+        AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnWindowNewEvent = webEventHub->GetOnWindowNewEvent();
+        CHECK_NULL_VOID(propOnWindowNewEvent);
+        propOnWindowNewEvent(param);
+        return;
+    }
+    auto webCom = webComponent_.Upgrade();
+    CHECK_NULL_VOID(webCom);
+    webCom->OnWindowNewEvent(param);
+}
+
+void WebDelegate::OnWindowExit()
+{
+    if (onWindowExitV2_) {
+        onWindowExitV2_(std::make_shared<WebWindowExitEvent>());
+    }
+}
+
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 {
     if (isRefreshPixelMap_) {
@@ -3131,7 +3216,11 @@ void WebDelegate::OnBlur()
 bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
-    // TODO: add ng pattern.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        return webPattern->RunQuickMenu(params, callback);
+    }
     auto renderWeb = renderWeb_.Upgrade();
     if (!renderWeb || !params || !callback) {
         LOGE("renderWeb is nullptr");
@@ -3143,7 +3232,12 @@ bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> 
 
 void WebDelegate::OnQuickMenuDismissed()
 {
-    // TODO: add ng pattern.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnQuickMenuDismissed();
+        return;
+    }
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_VOID(renderWeb);
     renderWeb->OnQuickMenuDismissed();
@@ -3153,7 +3247,12 @@ void WebDelegate::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchH
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
 {
-    // TODO: add ng pattern.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
+        return;
+    }
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_VOID(renderWeb);
     renderWeb->OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
@@ -3176,6 +3275,18 @@ std::string WebDelegate::GetUrl()
         return nweb_->GetUrl();
     }
     return "";
+}
+
+void WebDelegate::UpdateLocale()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        std::string language = AceApplicationInfo::GetInstance().GetLanguage();
+        std::string region = AceApplicationInfo::GetInstance().GetCountryOrRegion();
+        if (!language.empty() || !region.empty()) {
+            nweb_->UpdateLocale(language, region);
+        }
+    }
 }
 #endif
 

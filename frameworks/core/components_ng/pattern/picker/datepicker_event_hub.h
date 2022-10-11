@@ -24,7 +24,8 @@
 
 namespace OHOS::Ace::NG {
 
-using ChangeEvent = std::function<void(const BaseEventInfo* info)>;
+using DateChangeEvent = std::function<void(const BaseEventInfo* info)>;
+using DailogChangeEvent = std::function<void(const std::string&)>;
 class DatePickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(DatePickerEventHub, EventHub)
 
@@ -32,7 +33,7 @@ public:
     DatePickerEventHub() = default;
     ~DatePickerEventHub() override = default;
 
-    void SetOnChange(ChangeEvent&& onChange)
+    void SetOnChange(DateChangeEvent&& onChange)
     {
         changeEvent_ = std::move(onChange);
     }
@@ -44,8 +45,21 @@ public:
         }
     }
 
+    void SetDailogChange(DailogChangeEvent&& onChange)
+    {
+        dailogChangeEvent_ = std::move(onChange);
+    }
+
+    void FireDailogChangeEvent(const std::string& info) const
+    {
+        if (dailogChangeEvent_) {
+            dailogChangeEvent_(info);
+        }
+    }
+
 private:
-    ChangeEvent changeEvent_;
+    DateChangeEvent changeEvent_;
+    DailogChangeEvent dailogChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerEventHub);
 };

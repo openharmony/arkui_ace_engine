@@ -22,7 +22,6 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/picker/picker_option_component.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/theme/theme_manager.h"
@@ -32,13 +31,9 @@ namespace OHOS::Ace::NG {
 
 void ProgressPaintMethod::GetThemeDate()
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipeline = container->GetPipelineContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto progressTheme = themeManager->GetTheme<ProgressTheme>();
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
     color_ = progressTheme->GetTrackSelectedColor();
     bgColor_ = progressTheme->GetTrackBgColor();

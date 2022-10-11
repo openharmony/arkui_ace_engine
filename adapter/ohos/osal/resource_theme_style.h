@@ -35,6 +35,10 @@ public:
 
     void ParseContent() override;
 
+protected:
+    void OnParseStyle();
+    void OnParseResourceMedia(const std::string& attrName, const std::string& attrValue);
+
 private:
     RawAttrMap rawAttrs_; // key and value read from global resource api.
     RawPatternMap patternAttrs_;
