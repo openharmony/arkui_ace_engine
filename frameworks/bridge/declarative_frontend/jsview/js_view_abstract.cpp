@@ -3530,12 +3530,18 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             LOGW("themeConstants is nullptr");
             return false;
         }
-        auto typeInteger = type->ToNumber<int32_t>();
-        if (typeInteger == static_cast<int>(ResourceType::MEDIA)) {
+        if (type->ToNumber<int32_t>() == static_cast<int>(ResourceType::MEDIA)) {
             result = themeConstants->GetMediaPath(resId->ToNumber<uint32_t>());
+            if (SystemProperties::GetUnZipHap()) {
+                return true;
+            }
+            auto pos = result.find_last_of('.');
+            if (pos != std::string::npos) {
+                result = "resource:///" + std::to_string(resId->ToNumber<uint32_t>()) + result.substr(pos);
+            }
             return true;
         }
-        if (typeInteger == static_cast<int>(ResourceType::RAWFILE)) {
+        if (type->ToNumber<int32_t>() == static_cast<int>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
             if (!args->IsArray()) {
                 LOGW("args is not Array");

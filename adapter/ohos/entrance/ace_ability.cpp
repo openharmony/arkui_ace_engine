@@ -312,6 +312,8 @@ void AceAbility::OnStart(const Want& want)
 
     AceApplicationInfo::GetInstance().SetAbilityName(info ? info->name : "");
     std::string moduleName = info ? info->moduleName : "";
+    std::string moduleHapPath = info ? info->hapPath : "";
+
     std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
     std::vector<ModuleInfo> moduleList = appInfo->moduleInfos;
 
@@ -322,6 +324,18 @@ void AceAbility::OnStart(const Want& want)
             auto moduleSourceDir = std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
             resPath = moduleSourceDir + "/assets/" + module.moduleName + FILE_SEPARATOR;
             break;
+        }
+    }
+    std::string hapPath;
+    if (!moduleHapPath.empty()) {
+        if (moduleHapPath.find(ABS_BUNDLE_CODE_PATH) == std::string::npos) {
+            hapPath = moduleHapPath;
+        } else {
+            auto pos = moduleHapPath.find_last_of('/');
+            if (pos != std::string::npos) {
+                hapPath = LOCAL_BUNDLE_CODE_PATH + moduleHapPath.substr(pos + 1);
+                LOGI("In FA mode, hapPath:%{private}s", hapPath.c_str());
+            }
         }
     }
 
@@ -353,6 +367,7 @@ void AceAbility::OnStart(const Want& want)
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
+    container->SetHapPath(hapPath);
     container->SetBundlePath(abilityContext->GetBundleCodeDir());
     container->SetFilesDataPath(abilityContext->GetFilesDir());
     if (window->IsDecorEnable()) {
