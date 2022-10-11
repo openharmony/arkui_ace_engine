@@ -27,6 +27,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -197,6 +198,7 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     baselineProperties_.Reset();
     magicNodes_.clear();
     magicNodeWeights_.clear();
+    outOfLayoutChildren_.clear();
     textDir_ = layoutProperty->GetLayoutDirection();
     if (textDir_ == TextDirection::AUTO) {
         textDir_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
@@ -211,6 +213,10 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     const auto& childLayoutConstraint = layoutProperty->CreateChildConstraint();
     for (const auto& child : children) {
+        if (child->IsOutOfLayout()) {
+            outOfLayoutChildren_.emplace_back(child);
+            continue;
+        }
         const auto& childLayoutProperty = child->GetLayoutProperty();
         const auto& childMagicItemProperty = childLayoutProperty->GetMagicItemProperty();
         const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
@@ -251,6 +257,14 @@ void FlexLayoutAlgorithm::ResizeFlexSizeByItem(const RefPtr<LayoutWrapper>& chil
     crossAxisSize = std::max(crossAxisSize, GetChildCrossAxisSize(childLayoutWrapper));
     allocatedSize_ += mainAxisSize;
     allocatedSize_ += space_;
+}
+
+void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper)
+{
+    const auto& layoutConstrain = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    for (const auto& child : outOfLayoutChildren_) {
+        child->Measure(layoutConstrain);
+    }
 }
 
 void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties)
@@ -603,14 +617,21 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     selfIdealCrossAxisSize_ = GetCrossAxisSizeHelper(realSize, direction_);
     FlexItemProperties flexItemProperties;
+
     /**
      * first measure
      */
     MeasureAndCleanMagicNodes(flexItemProperties);
+
     /**
      * secondary measure
      */
     SecondaryMeasureByProperty(flexItemProperties);
+
+    /**
+     *  position property measure.
+     */
+    MeasureOutOfLayoutChildren(layoutWrapper);
 
     AdjustTotalAllocatedSize(layoutWrapper);
 
@@ -647,6 +668,9 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
     }
     allocatedSize_ = 0.0f;
     for (const auto& child : children) {
+        if (child->IsOutOfLayout()) {
+            continue;
+        }
         allocatedSize_ += GetChildMainAxisSize(child);
     }
 }
@@ -736,6 +760,12 @@ void FlexLayoutAlgorithm::PlaceChildren(
     float childCrossPos = 0.0f;
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& child : children) {
+        if (child->IsOutOfLayout()) {
+            // adjust by postion property.
+            child->GetGeometryNode()->SetMarginFrameOffset({});
+            child->Layout();
+            continue;
+        }
         auto alignItem = GetSelfAlign(child);
         auto crossDirection = FlipAxis(direction_);
         switch (alignItem) {

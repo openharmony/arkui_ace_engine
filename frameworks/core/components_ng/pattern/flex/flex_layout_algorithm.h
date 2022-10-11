@@ -80,6 +80,7 @@ private:
     FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     TextDirection AdjustTextDirectionByDir() const;
     float GetStretchCrossAxisLimit() const;
+    void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
     void MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties);
     void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
@@ -102,6 +103,8 @@ private:
     std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
     std::map<int32_t, float> magicNodeWeights_;
     std::list<MagicLayoutNode> secondaryMeasureList_;
+    std::list<RefPtr<LayoutWrapper>> outOfLayoutChildren_;
+
     FlexDirection direction_ = FlexDirection::ROW;
     friend class LinearLayoutUtils;
     BaselineProperties baselineProperties_;

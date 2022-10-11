@@ -138,6 +138,11 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int3
     return wrapper;
 }
 
+const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::GetCachedChildLayoutWrapper()
+{
+    return childWrappers_;
+}
+
 const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::OnExpandChildLayoutWrapper()
 {
     auto total = GetTotalCount();
