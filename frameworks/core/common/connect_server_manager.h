@@ -30,6 +30,7 @@ public:
     ~ConnectServerManager();
     static ConnectServerManager& Get();
     void AddInstance(int32_t instanceId, const std::string& instanceName = "PandaDebugger");
+    void SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
     void RemoveInstance(int32_t instanceId);
 
 private:

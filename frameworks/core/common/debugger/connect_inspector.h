@@ -36,15 +36,24 @@ void SendMessage(const std::string& message);
 
 void StoreMessage(int32_t instanceId, const std::string& message);
 
+void StoreInspectorInfo(const std::string& jsonTreeStr,  const std::string& jsonSnapshotStr);
+
 void RemoveMessage(int32_t instanceId);
 
 bool WaitForDebugger();
+
+void SetCreatTreeCallBack(const std::function<void(int32_t)>& setConnectedStaus, int32_t instanceId);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif
 #endif /* End of #ifdef __cplusplus */
+
+struct LayoutInspectorInfo {
+    std::string tree;
+    std::string snapShot;
+};
 
 class ConnectInspector {
 public:
@@ -53,9 +62,12 @@ public:
 
     std::string componentName_;
     std::unordered_map<int32_t, std::string> infoBuffer_;
+    LayoutInspectorInfo layoutInspectorInfo_;
     std::unique_ptr<ConnectServer> connectServer_;
     std::atomic<bool> waitingForDebugger_ = true;
     std::queue<const std::string> ideMsgQueue_;
+    std::function<void(int32_t)> setConnectedStaus_;
+    int32_t instanceId_ = -1;
 };
 } // namespace OHOS::Ace
 

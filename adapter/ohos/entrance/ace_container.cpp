@@ -700,7 +700,6 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     HdcRegister::Get().StartHdcRegister(instanceId);
-    ConnectServerManager::Get();
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
@@ -714,6 +713,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
         return;
     }
     jsFront->SetInstanceName(instanceName);
+    ConnectServerManager::Get();
 }
 
 void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)

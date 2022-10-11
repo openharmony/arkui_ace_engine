@@ -57,6 +57,7 @@
 #include "core/common/manager_interface.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
+#include "core/common/layout_inspector.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_component.h"
@@ -1445,6 +1446,9 @@ void PipelineContext::AddDirtyElement(const RefPtr<Element>& dirtyElement)
     dirtyElements_.emplace(dirtyElement);
     hasIdleTasks_ = true;
     window_->RequestFrame();
+#if !defined(PREVIEW)
+    LayoutInspector::SupportInspector();
+#endif
 }
 
 void PipelineContext::AddNeedRebuildFocusElement(const RefPtr<Element>& focusElement)
