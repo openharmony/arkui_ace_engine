@@ -84,6 +84,7 @@ public:
 #ifdef OHOS_STANDARD_SYSTEM
     void OnAppShow() override;
     void OnAppHide() override;
+    void OnGlobalPositionChanged() override;
     void OnPositionChanged() override;
     void OnSizeChanged() override;
     void HandleTouchDown(const TouchEventInfo& info, bool fromOverlay);
@@ -181,6 +182,10 @@ private:
     bool showEndTouchHandle_ = false;
     bool isDragging_ = false;
     bool isW3cDragEvent_ = false;
+
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
 #endif
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
