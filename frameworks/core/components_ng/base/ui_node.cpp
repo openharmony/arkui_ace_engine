@@ -42,7 +42,6 @@ UINode::~UINode()
 void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
 {
     CHECK_NULL_VOID(child);
-
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d", 

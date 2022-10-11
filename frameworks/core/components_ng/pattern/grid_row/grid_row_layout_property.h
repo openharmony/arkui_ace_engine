@@ -34,10 +34,11 @@ public:
         auto value = MakeRefPtr<GridRowLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(this);
 
-        CloneColumns();
-        CloneGutter();
-        CloneBreakPoints();
-        CloneDirection();
+        value->propColumns_ = CloneColumns();
+        value->propGutter_ = CloneGutter();
+        value->propBreakPoints_ = CloneBreakPoints();
+        value->propDirection_ = CloneDirection();
+        value->propSizeType_ = CloneSizeType();
         return value;
     }
 
@@ -47,6 +48,7 @@ public:
         ResetGutter();
         ResetBreakPoints();
         ResetDirection();
+        ResetSizeType();
         LayoutProperty::Reset();
     }
 
@@ -54,6 +56,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Gutter, V2::Gutter, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BreakPoints, V2::BreakPoints, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, V2::GridRowDirection, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SizeType, V2::GridSizeType, PROPERTY_UPDATE_NORMAL);
 };
 } // namespace OHOS::Ace::NG
 #endif

@@ -46,7 +46,7 @@ void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainer
     gridContainerSize->xxl = containerSizeArray[5].value();
 }
 
-RefPtr<V2::GridContainerSize> ParserGridContianerSize(const JSRef<JSVal>& jsValue, int32_t defaultVal)
+RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValue, int32_t defaultVal)
 {
     if (jsValue->IsNumber()) {
         double columnNumber = 0.0;
@@ -84,7 +84,7 @@ RefPtr<V2::GridContainerSize> ParserGridContianerSize(const JSRef<JSVal>& jsValu
         InheritGridContainerSize(gridContainerSize, containerSizeArray, defaultVal);
         return gridContainerSize;
     } else {
-        LOGI("parse column error null or undefined");
+        LOGI("parse grid col property null or undefined");
         return AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
     }
 }
@@ -111,9 +111,9 @@ void JSGridCol::Create(const JSCallbackInfo& info)
         auto spanParam = gridParam->GetProperty("span");
         auto offsetParam = gridParam->GetProperty("offset");
         auto orderParam = gridParam->GetProperty("order");
-        auto span = ParserGridContianerSize(spanParam, 1);
-        auto offset = ParserGridContianerSize(offsetParam, 0);
-        auto order = ParserGridContianerSize(orderParam, 0);
+        auto span = ParserGridContainerSize(spanParam, 1);
+        auto offset = ParserGridContainerSize(offsetParam, 0);
+        auto order = ParserGridContainerSize(orderParam, 0);
 
         if (isNewPipeline) {
             NG::GridColView::Create(span, offset, order);
@@ -141,7 +141,7 @@ void JSGridCol::Span(const JSCallbackInfo& info)
         LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto span = ParserGridContianerSize(info[0], 1);
+    auto span = ParserGridContainerSize(info[0], 1);
     
     if (Container::IsCurrentUseNewPipeline()) {
         NG::GridColView::SetSpan(span);
@@ -161,7 +161,7 @@ void JSGridCol::Offset(const JSCallbackInfo& info)
         LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto offset = ParserGridContianerSize(info[0], 0);
+    auto offset = ParserGridContainerSize(info[0], 0);
     
     if (Container::IsCurrentUseNewPipeline()) {
         NG::GridColView::SetOffset(offset);
@@ -181,7 +181,7 @@ void JSGridCol::Order(const JSCallbackInfo& info)
         LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto order = ParserGridContianerSize(info[0], 0);
+    auto order = ParserGridContainerSize(info[0], 0);
     
     if (Container::IsCurrentUseNewPipeline()) {
         NG::GridColView::SetOrder(order);

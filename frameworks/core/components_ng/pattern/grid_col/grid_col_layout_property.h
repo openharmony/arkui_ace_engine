@@ -20,23 +20,23 @@
 #include <vector>
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT GridColLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(GridColLayoutProperty, LayoutProperty);
+class ACE_EXPORT GridColLayoutProperty : public LinearLayoutProperty {
+    DECLARE_ACE_TYPE(GridColLayoutProperty, LinearLayoutProperty);
 
 public:
+    GridColLayoutProperty() : LinearLayoutProperty(true) {}
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<GridColLayoutProperty>();
-        value->LayoutProperty::UpdateLayoutProperty(this);
-
-        CloneSpan();
-        CloneOffset();
-        CloneOrder();
+        LinearLayoutProperty::Clone(value);
+        value->propSpan_ = CloneSpan();
+        value->propOffset_ = CloneOffset();
+        value->propOrder_ = CloneOrder();
         return value;
     }
 
@@ -45,7 +45,7 @@ public:
         ResetSpan();
         ResetOffset();
         ResetOrder();
-        LayoutProperty::Reset();
+        LinearLayoutProperty::Reset();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Span, V2::GridContainerSize, PROPERTY_UPDATE_MEASURE);
