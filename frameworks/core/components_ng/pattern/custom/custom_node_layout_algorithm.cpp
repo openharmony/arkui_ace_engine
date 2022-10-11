@@ -46,8 +46,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     // call js measure
-    if (layoutWrapper->GetGeometryNode()->Measure(layoutWrapper)) {
-    } else {
+    if (!layoutWrapper->GetGeometryNode()->Measure(layoutWrapper)) {
         for (auto&& child : children) {
             child->Measure(layoutConstraint);
         }
@@ -59,8 +58,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void CustomNodeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
-    if (layoutWrapper->GetGeometryNode()->Layout(layoutWrapper)) {
-    } else {
+    if (!layoutWrapper->GetGeometryNode()->Layout(layoutWrapper)) {
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Layout();
         }

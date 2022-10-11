@@ -15,8 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 
-#include <iterator>
-
 namespace OHOS::Ace::Framework {
 
 #ifdef USE_ARK_ENGINE
@@ -29,9 +27,10 @@ thread_local NG::LayoutConstraintF ViewMeasureLayout::measureDefaultConstraint_;
 
 namespace {
 
-std::map<std::string, Local<JSValueRef>> parseJsObject(Local<ObjectRef> obj, Local<ArrayRef> names, EcmaVM* vm)
+std::unordered_map<std::string, Local<JSValueRef>> ParseJsObject(
+    Local<ObjectRef> obj, Local<ArrayRef> names, EcmaVM* vm)
 {
-    std::map<std::string, Local<JSValueRef>> jsValue_;
+    std::unordered_map<std::string, Local<JSValueRef>> jsValue_;
     auto length = names->Length(vm);
 
     for (int i = 0; i < length; i++) {
@@ -59,18 +58,18 @@ Local<JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCallInfo* runtim
     }
 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    NG::SizeF minSize_;
-    NG::SizeF maxSize_;
+    NG::SizeF minSize;
+    NG::SizeF maxSize;
     NG::LayoutConstraintF jsConstraint_;
     auto value_ = firstArg->ToObject(vm);
-    auto jsValue_ = parseJsObject(value_, value_->GetOwnPropertyNames(vm), vm);
+    auto jsValue_ = ParseJsObject(value_, value_->GetOwnPropertyNames(vm), vm);
 
-    minSize_.SetWidth(jsValue_.at("minWidth")->ToNumber(vm)->Value());
-    minSize_.SetHeight(jsValue_.at("minHeight")->ToNumber(vm)->Value());
-    maxSize_.SetWidth(jsValue_.at("maxWidth")->ToNumber(vm)->Value());
-    maxSize_.SetHeight(jsValue_.at("maxHeight")->ToNumber(vm)->Value());
-    jsConstraint_.minSize = minSize_;
-    jsConstraint_.maxSize = maxSize_;
+    minSize.SetWidth(jsValue_.at("minWidth")->ToNumber(vm)->Value());
+    minSize.SetHeight(jsValue_.at("minHeight")->ToNumber(vm)->Value());
+    maxSize.SetWidth(jsValue_.at("maxWidth")->ToNumber(vm)->Value());
+    maxSize.SetHeight(jsValue_.at("maxHeight")->ToNumber(vm)->Value());
+    jsConstraint_.minSize = minSize;
+    jsConstraint_.maxSize = maxSize;
     (*iterMeasureChildren_)->Measure(jsConstraint_);
     iterMeasureChildren_++;
     return panda::JSValueRef::Undefined(vm);
@@ -88,9 +87,9 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
         return panda::JSValueRef::Undefined(vm);
     }
 
-    auto first = parseJsObject(jsParams, names, vm);
+    auto first = ParseJsObject(jsParams, names, vm);
     auto posInfo = first.at("position");
-    auto second = parseJsObject(posInfo, posInfo->ToObject(vm)->GetOwnPropertyNames(vm), vm);
+    auto second = ParseJsObject(posInfo, posInfo->ToObject(vm)->GetOwnPropertyNames(vm), vm);
     auto xVal = second.at("x")->ToNumber(vm)->Value();
     auto yVal = second.at("y")->ToNumber(vm)->Value();
     (*iterLayoutChildren_)->GetGeometryNode()->SetMarginFrameOffset(NG::OffsetF(xVal, yVal));

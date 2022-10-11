@@ -123,11 +123,6 @@ public:
         return true;
     }
 
-    RefPtr<ViewFunctions> getJSViewFunction()
-    {
-        return jsViewFunction_;
-    }
-
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
@@ -139,7 +134,6 @@ protected:
 
     WeakPtr<ComposedElement> element_;
     WeakPtr<NG::UINode> node_;
-    WeakPtr<NG::CustomMeasureLayoutNode> measureLayoutNode_;
     // view id for custom view itself
     std::string viewId_;
 
@@ -260,8 +254,6 @@ public:
 
     RefPtr<NG::UINode> InitialUIRender();
     RefPtr<NG::UINode> CreateUINode() override;
-    RefPtr<NG::CustomMeasureLayoutNode> CreateCustomMeasureLayoutNode();
-
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
