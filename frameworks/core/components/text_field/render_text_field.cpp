@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
+#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/mousestyle/mouse_style.h"
@@ -36,7 +37,6 @@
 #include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/mouse_event.h"
-
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
 #endif
@@ -2098,6 +2098,7 @@ void RenderTextField::HandleOnCopy()
 
 void RenderTextField::HandleOnPaste()
 {
+    ACE_FUNCTION_TRACE();
     if (!clipboard_) {
         return;
     }
