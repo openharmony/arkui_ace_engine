@@ -301,7 +301,6 @@ void RenderWeb::PerformLayout()
 
     // render web do not support child.
     drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
-
     SetLayoutSize(drawSize_);
     SetNeedLayout(false);
     MarkNeedRender();
@@ -324,15 +323,20 @@ void RenderWeb::OnAppHide()
     }
 }
 
+void RenderWeb::OnGlobalPositionChanged()
+{
+    if (!textOverlay_ || !updateHandlePosition_) {
+        return;
+    }
+    OnTouchSelectionChanged(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+}
+
 void RenderWeb::OnPositionChanged()
 {
     PopTextOverlay();
 }
 
-void RenderWeb::OnSizeChanged()
-{
-    PopTextOverlay();
-}
+void RenderWeb::OnSizeChanged() {}
 
 void RenderWeb::Initialize()
 {
@@ -603,7 +607,9 @@ bool RenderWeb::RunQuickMenu(
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle,
                                                            beginTouchHandle,
                                                            endTouchHandle);
-
+    insertHandle_ = insertTouchHandle;
+    startSelectionHandle_ = beginTouchHandle;
+    endSelectionHandle_ = endTouchHandle;
     if (textOverlay_ || overlayType == INVALID_OVERLAY) {
         PopTextOverlay();
     }
@@ -826,6 +832,9 @@ void RenderWeb::OnTouchSelectionChanged(
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle,
                                                            startSelectionHandle,
                                                            endSelectionHandle);
+    insertHandle_ = insertHandle;
+    startSelectionHandle_ = startSelectionHandle;
+    endSelectionHandle_ = endSelectionHandle;
     if (overlayType == INVALID_OVERLAY) {
         PopTextOverlay();
         return;
