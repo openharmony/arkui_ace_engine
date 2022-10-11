@@ -1036,9 +1036,11 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
         if (isMainPage) {
+#if !defined(PREVIEW)
             if (LoadJsWithModule(urlName)) {
                 return;
             }
+#endif
             if (!ExecuteAbc("commons.abc")) {
                 return;
             }
@@ -1069,8 +1071,14 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
             arkRuntime->SetPathResolveCallback(bundleName_, assetPath_);
             arkRuntime->SetBundle(isBundle_);
-            if (!runtime->ExecuteJsBin(urlName)) {
-                LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+            std::vector<uint8_t> content;
+            if (!delegate->GetAssetContent("modules.abc", content)) {
+                LOGE("GetAssetContent \"%{public}s\" failed.", urlName.c_str());
+                return;
+            }
+            if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), urlName)) {
+                LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.c_str());
+                return;
             }
         } else {
             ExecuteAbc(urlName);
