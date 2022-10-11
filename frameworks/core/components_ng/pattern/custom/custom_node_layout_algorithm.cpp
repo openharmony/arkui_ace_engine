@@ -16,15 +16,16 @@
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace::NG {
 
 void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto host = DynamicCast<CustomNode>(layoutWrapper->GetHostNode());
+    auto host = DynamicCast<CustomMeasureLayoutNode>(layoutWrapper->GetHostNode());
     if (renderFunction_ && host) {
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
@@ -44,10 +45,24 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
 
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    for (auto&& child : children) {
-        child->Measure(layoutConstraint);
+    // call js measure
+    if (!layoutWrapper->GetGeometryNode()->Measure(layoutWrapper)) {
+        for (auto&& child : children) {
+            child->Measure(layoutConstraint);
+        }
     }
+
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+}
+
+void CustomNodeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    PerformLayout(layoutWrapper);
+    if (!layoutWrapper->GetGeometryNode()->Layout(layoutWrapper)) {
+        for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            child->Layout();
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

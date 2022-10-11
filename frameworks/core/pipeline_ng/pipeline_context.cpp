@@ -31,12 +31,14 @@
 #include "core/common/window.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline/pipeline_context.h"
@@ -76,7 +78,7 @@ float PipelineContext::GetCurrentRootHeight()
     return static_cast<float>(context->rootHeight_);
 }
 
-void PipelineContext::AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode)
+void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirtyNode);
@@ -115,8 +117,12 @@ void PipelineContext::FlushDirtyNodeUpdate()
     decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
     for (const auto& weakNode : dirtyNodes) {
         auto node = weakNode.Upgrade();
-        if (node) {
-            node->Update();
+        if (AceType::InstanceOf<NG::CustomNode>(node)) {
+            auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            customNode->Update();
+        } else if (AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
+            auto customNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
+            customNode->Update();
         }
     }
 

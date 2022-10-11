@@ -42,7 +42,7 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 
-class LayoutWrapper : public AceType {
+class ACE_EXPORT LayoutWrapper : public AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
     LayoutWrapper(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)

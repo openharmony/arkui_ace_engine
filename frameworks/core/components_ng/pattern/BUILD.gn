@@ -50,6 +50,7 @@ build_component_ng("pattern_ng") {
     "container_modal/container_modal_view.cpp",
     "counter/counter_node.cpp",
     "counter/counter_view.cpp",
+    "custom/custom_measure_layout_node.cpp",
     "custom/custom_node.cpp",
     "custom/custom_node_layout_algorithm.cpp",
     "custom/custom_node_pattern.cpp",
