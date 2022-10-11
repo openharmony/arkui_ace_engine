@@ -15,34 +15,44 @@
 
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 
-#include "dm/display_manager.h"
-#include "interfaces/inner_api/ace/viewport_config.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
-
 #include "adapter/ohos/entrance/ace_application_info.h"
+#if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
+#include "adapter/ohos/entrance/ace_rosen_sync_task.h"
+#endif
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "base/log/frame_report.h"
 #include "base/utils/system_properties.h"
+#include "core/common/connect_server_manager.h"
 #include "core/common/container_scope.h"
+#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/frontend.h"
+#include "core/common/hdc_register.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/popup/popup_component.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
+#include "dm/display_manager.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include <atomic>
 
 namespace OHOS::Ace {
 
 int32_t SubwindowOhos::id_ = 0;
-
+static std::atomic<int32_t> gToastDialogId = 0;
 RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
 {
     LOGI("Create Subwindow, parent container id is %{public}d", instanceId);
     return AceType::MakeRefPtr<SubwindowOhos>(instanceId);
 }
 
-SubwindowOhos::SubwindowOhos(int32_t instanceId)
+SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContainerId_(instanceId)
 {
-    parentContainerId_ = instanceId;
-    windowId_ = id_;
     SetSubwindowId(windowId_);
     id_++;
 }
@@ -318,4 +328,238 @@ void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
         rosenRect.posX_, rosenRect.posY_, rosenRect.width_, rosenRect.height_);
 }
 
+void SubwindowOhos::GetToastDialogWindowProperty(
+    int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const
+{
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density = defaultDisplay->GetVirtualPixelRatio();
+    }
+    auto mainWindow = Platform::AceContainer::GetUIWindow(parentContainerId_);
+    if (!mainWindow) {
+        LOGE("mainWindow is nullptr");
+        if (defaultDisplay) {
+            posX = 0;
+            posY = 0;
+            width = defaultDisplay->GetWidth();
+            height = defaultDisplay->GetHeight();
+        }
+    } else {
+        posX = static_cast<int32_t>(mainWindow->GetRect().posX_);
+        posY = static_cast<int32_t>(mainWindow->GetRect().posY_);
+        width = static_cast<int32_t>(mainWindow->GetRect().width_);
+        height = static_cast<int32_t>(mainWindow->GetRect().height_);
+    }
+    LOGI("Toast posX: %{public}d, posY: %{public}d, width: %{public}d, height: %{public}d, density: %{public}f",
+        posX, posY, width, height, density);
+}
+
+bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY)
+{
+    OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
+    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    windowOption->SetWindowRect({ posX, posY, width, height });
+    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    int32_t dialogId = gToastDialogId.fetch_add(1, std::memory_order_relaxed);
+    std::string windowName = "ARK_APP_SUBWINDOW_TOAST_DIALOG_" + std::to_string(dialogId);
+    dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
+    if (dialogWindow_ == nullptr) {
+        LOGI("create window error return");
+        return false;
+    }
+    LOGI("SubwindowOhos::InitToastDialogWindow end");
+    return true;
+}
+
+bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float density)
+{
+    LOGI("SubwindowOhos::InitToastDialogView begin");
+    dialogWindow_->SetUIContent("", nullptr, nullptr, false);
+    childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(dialogWindow_->GetWindowId());
+    SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
+
+    auto container = Platform::DialogContainer::GetContainer(childContainerId_);
+    if (!container) {
+        LOGE("Get container failed, container is null");
+        return false;
+    }
+    // create ace_view
+    auto* flutterAceView = Platform::FlutterAceView::CreateView(childContainerId_, true, true);
+    Platform::FlutterAceView::SurfaceCreated(flutterAceView, dialogWindow_);
+    // set view
+    Platform::DialogContainer::SetView(flutterAceView, density, width, height, dialogWindow_);
+    Ace::Platform::DialogContainer::SetUIWindow(childContainerId_, dialogWindow_);
+    flutter::ViewportMetrics metrics;
+    metrics.physical_width = width;
+    metrics.physical_height = height;
+    metrics.device_pixel_ratio = density;
+    Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+        if (rsUiDirector != nullptr) {
+            rsUiDirector->SetRSSurfaceNode(dialogWindow_->GetSurfaceNode());
+            rsUiDirector->SetUITaskRunner(
+                [taskExecutor = container->GetTaskExecutor()](
+                    const std::function<void()>& task) { taskExecutor->PostTask(task, TaskExecutor::TaskType::UI); });
+            auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
+            if (context != nullptr) {
+                LOGI("Init RSUIDirector");
+                context->SetRSUIDirector(rsUiDirector);
+            }
+            rsUiDirector->Init();
+            LOGI("UIContent Init Rosen Backend");
+        }
+    }
+#endif
+
+    auto pipelineContext = DynamicCast<PipelineContext>(container->GetPipelineContext());
+    if (!pipelineContext) {
+        LOGE("Get pipelineContext failed, pipelineContext is null");
+        return false;
+    }
+    pipelineContext->SetupRootElement();
+    LOGI("SubwindowOhos::InitToastDialogView end");
+    return true;
+}
+
+bool SubwindowOhos::CreateEventRunner()
+{
+    if (!eventLoop_) {
+        eventLoop_ = AppExecFwk::EventRunner::Create("Subwindow_Toast_Dialog");
+        if (eventLoop_ == nullptr) {
+            return false;
+        }
+
+        handler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
+        if (handler_ == nullptr) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+{
+    LOGI("SubwindowOhos::ShowToast begin");
+    bool ret = CreateEventRunner();
+    if (!ret) {
+        return;
+    }
+
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+    auto showDialogCallback = [message, duration, bottom]() {
+        int32_t posX = 0;
+        int32_t posY = 0;
+        int32_t width = 0;
+        int32_t height = 0;
+        float density = 1.0f;
+        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentWindow());
+        CHECK_NULL_VOID(subwindowOhos);
+        subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
+        auto childContainerId = subwindowOhos->GetChildContainerId();
+        auto window = Platform::DialogContainer::GetUIWindow(childContainerId);
+        auto dialogWindow = subwindowOhos->GetDialogWindow();
+        if (!dialogWindow || !window) {
+            bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY);
+            if (!ret) {
+                return;
+            }
+            ret = subwindowOhos->InitToastDialogView(width, height, density);
+            if (!ret) {
+                return;
+            }
+        }
+        childContainerId = subwindowOhos->GetChildContainerId();
+        Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
+        Platform::DialogContainer::ShowToast(childContainerId, message, duration, bottom);
+    };
+    if (!handler_->PostTask(showDialogCallback)) {
+        LOGE("Post sync task error");
+        return;
+    }
+    LOGI("SubwindowOhos::ShowToast end");
+}
+
+void SubwindowOhos::ShowDialog(const std::string& title, const std::string& message,
+    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    LOGI("SubwindowOhos::ShowDialog begin");
+    bool ret = CreateEventRunner();
+    if (!ret) {
+        return;
+    }
+
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+    auto showDialogCallback = [
+        title, message, &buttons, autoCancel, callbackParam = std::move(callback), &callbacks]() {
+        int32_t posX = 0;
+        int32_t posY = 0;
+        int32_t width = 0;
+        int32_t height = 0;
+        float density = 1.0f;
+        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentWindow());
+        CHECK_NULL_VOID(subwindowOhos);
+        subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
+        bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY);
+        if (!ret) {
+            return;
+        }
+        ret = subwindowOhos->InitToastDialogView(width, height, density);
+        if (!ret) {
+            return;
+        }
+        auto childContainerId = subwindowOhos->GetChildContainerId();
+        Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
+        Platform::DialogContainer::ShowDialog(childContainerId, title, message, buttons, autoCancel,
+            std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
+    };
+    if (!handler_->PostTask(showDialogCallback)) {
+        LOGE("Post sync task error");
+        return;
+    }
+    LOGI("SubwindowOhos::ShowDialog end");
+}
+
+void SubwindowOhos::ShowActionMenu(const std::string& title,
+    const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+{
+    LOGI("SubwindowOhos::ShowActionMenu begin");
+    bool ret = CreateEventRunner();
+    if (!ret) {
+        return;
+    }
+
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+    auto showDialogCallback = [title, &button, callbackParam = std::move(callback)]() {
+        int32_t posX = 0;
+        int32_t posY = 0;
+        int32_t width = 0;
+        int32_t height = 0;
+        float density = 1.0f;
+        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentWindow());
+        CHECK_NULL_VOID(subwindowOhos);
+        subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
+        bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY);
+        if (!ret) {
+            return;
+        }
+        ret = subwindowOhos->InitToastDialogView(width, height, density);
+        if (!ret) {
+            return;
+        }
+        auto childContainerId = subwindowOhos->GetChildContainerId();
+        Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
+        Platform::DialogContainer::ShowActionMenu(childContainerId, title, button,
+            std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)));
+    };
+    if (!handler_->PostTask(showDialogCallback)) {
+        LOGE("Post sync task error");
+        return;
+    }
+    LOGI("SubwindowOhos::ShowActionMenu end");
+}
 } // namespace OHOS::Ace

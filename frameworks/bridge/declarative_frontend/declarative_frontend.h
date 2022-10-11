@@ -223,6 +223,11 @@ public:
         }
     }
 
+    RefPtr<Framework::FrontendDelegate> GetDelegate() const
+    {
+        return AceType::DynamicCast<Framework::FrontendDelegate>(delegate_);
+    }
+
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
