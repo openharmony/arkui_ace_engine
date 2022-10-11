@@ -20,8 +20,8 @@
 
 namespace OHOS::Ace::NG {
 
-inline constexpr float DEFAULT_START_DEGREE = -150.0f;
-inline constexpr float DEFAULT_END_DEGREE = 150.0f;
+inline constexpr float DEFAULT_START_DEGREE = 0.0f;
+inline constexpr float DEFAULT_END_DEGREE = 360.0f;
 inline constexpr float EDGE = 15.0f;
 inline constexpr float HEIGHT_OFFSET = 5.0f;
 inline constexpr float INDICATOR_STROKE_WIDTH = 5.0f;
