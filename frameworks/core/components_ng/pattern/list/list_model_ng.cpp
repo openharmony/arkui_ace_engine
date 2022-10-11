@@ -48,6 +48,7 @@ void ListModelNG::SetListDirection(Axis axis)
 
 void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
 {
+    edgeEffect = EdgeEffect::NONE;
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, EdgeEffect, edgeEffect);
 }
 

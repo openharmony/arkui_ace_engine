@@ -319,6 +319,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
             // If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
             auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+            edgeEffect = EdgeEffect::NONE;
             if (edgeEffect != EdgeEffect::SPRING) {
                 currentOffset_ = currentEndPos - contentMainSize_;
                 LOGD("LayoutForward: adjust offset to %{public}f", currentOffset_);
@@ -374,6 +375,7 @@ void ListLayoutAlgorithm::LayoutBackward(
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    edgeEffect = EdgeEffect::NONE;
     if (GreatNotEqual(currentStartPos, startMainPos_) && (edgeEffect != EdgeEffect::SPRING)) {
         currentOffset_ = currentStartPos;
         endMainPos_ = currentOffset_ + contentMainSize_;
@@ -425,7 +427,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                          OffsetF(size.Width() / lanes_.value() * laneIndex, 0) + OffsetF(laneCrossOffset, 0);
             } else {
                 offset = offset + OffsetF(pos.second.first, 0) +
-                         OffsetF(0, size.Width() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset);
+                         OffsetF(0, size.Height() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset);
             }
         } else {
             lanes_ = 1;
