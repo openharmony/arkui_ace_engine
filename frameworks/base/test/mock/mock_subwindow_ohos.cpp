@@ -24,10 +24,7 @@ RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
     return AceType::MakeRefPtr<SubwindowOhos>(instanceId);
 }
 
-SubwindowOhos::SubwindowOhos(int32_t instanceId)
-{
-    
-}
+SubwindowOhos::SubwindowOhos(int32_t instanceId) {}
 
 void SubwindowOhos::InitContainer()
 {

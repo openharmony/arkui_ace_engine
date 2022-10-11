@@ -100,7 +100,7 @@ void DialogContainer::InitializeAxisEventCallback()
             },
             TaskExecutor::TaskType::UI);
     };
-    aceView_->RegisterAxisEventCallback(axisEventCallback);    
+    aceView_->RegisterAxisEventCallback(axisEventCallback);
 }
 
 void DialogContainer::InitializeKeyEventCallback()
@@ -434,7 +434,8 @@ sptr<OHOS::Rosen::Window> DialogContainer::GetUIWindowInner() const
     return uiWindow_;
 }
 
-void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, int32_t duration, const std::string& bottom)
+void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, int32_t duration,
+    const std::string& bottom)
 {
     LOGI("DialogContainer::ShowToast begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));

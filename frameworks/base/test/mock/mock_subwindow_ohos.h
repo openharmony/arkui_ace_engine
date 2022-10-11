@@ -32,8 +32,11 @@ public:
     RefPtr<SubwindowOhos> CreateSubwindow(int32_t instanceId);
     void ShowMenu(const RefPtr<Component>& newComponent) override {}
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override {}
-    bool CancelPopup(const std::string& id) override { return false; }
-    void CloseMenu()override {} 
+    bool CancelPopup(const std::string& id) override
+    {
+        return false;
+    }
+    void CloseMenu() override {} 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override {}
     void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
