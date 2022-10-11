@@ -75,7 +75,6 @@ void PopupElementV2::HandleDeclarativePerformBuild()
                 targetOffset_ + context->GetDisplayWindowRectInfo().GetOffset());
         }
     }
-
     if (popup_->GetPopupParam()->IsShowInSubWindow()) {
         if (popup_->GetPopupParam()->IsShow()) {
             if (!hasShown_ && ShowPopupInSubWindow()) {
@@ -90,7 +89,6 @@ void PopupElementV2::HandleDeclarativePerformBuild()
         }
         return;
     }
-
     if (popup_->GetPopupParam()->IsShow()) {
         if (!hasShown_ && ShowPopup()) {
             showId_ = GetId();
