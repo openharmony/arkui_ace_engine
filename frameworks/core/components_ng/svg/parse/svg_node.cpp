@@ -131,7 +131,7 @@ bool SvgNode::OnCanvas(RSCanvas& canvas)
     if (rsCanvas == nullptr) {
         return false;
     }
-    auto skCanvas_ = rsCanvas->ExportSkCanvas();
+    skCanvas_ = rsCanvas->ExportSkCanvas();
     return skCanvas_ == nullptr ? false : true;
 }
 

@@ -24,14 +24,4 @@ RefPtr<SvgNode> SvgClipPath::Create()
     return AceType::MakeRefPtr<SvgClipPath>();
 }
 
-SkPath SvgClipPath::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    for (const auto& child : children_) {
-        const SkPath childPath = child->AsPath(viewPort);
-        Op(path, childPath, kUnion_SkPathOp, &path);
-    }
-    return path;
-}
-
 } // namespace OHOS::Ace::NG

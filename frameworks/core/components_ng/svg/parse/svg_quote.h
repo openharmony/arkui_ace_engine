@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_QUOTE_H
 
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
+#include "include/pathops/SkPathOps.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,6 +30,16 @@ public:
         InitHrefFlag();
     }
     ~SvgQuote() override = default;
+
+    SkPath AsPath(const Size& viewPort) const override
+    {
+        SkPath path;
+        for (const auto& child : children_) {
+            const SkPath childPath = child->AsPath(viewPort);
+            Op(path, childPath, kUnion_SkPathOp, &path);
+        }
+        return path;
+    }
 
     void Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override
     {

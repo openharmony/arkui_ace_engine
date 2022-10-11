@@ -74,6 +74,7 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
 
 SvgDom::SvgDom()
 {
+    svgContext_ = AceType::MakeRefPtr<SvgContext>();
     attrCallback_ = [weakSvgDom = AceType::WeakClaim(this)](const std::string& styleName,
                     const std::pair<std::string, std::string>& attrPair) {
         auto svgDom = weakSvgDom.Upgrade();
@@ -107,7 +108,7 @@ RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const std::optional<Col
 bool SvgDom::ParseSvg(SkStream& svgStream)
 {
     SkDOM xmlDom;
-    if (!xmlDom.build(svgStream)) {
+    if (svgContext_ == nullptr || !xmlDom.build(svgStream)) {
         return false;
     }
     root_ = TranslateSvgNode(xmlDom, xmlDom.getRootNode(), nullptr);
@@ -120,10 +121,8 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     }
     svgSize_ = svg->GetSize();
     viewBox_ = svg->GetViewBox();
-    if (svgContext_ == nullptr) {
-        svgContext_ = AceType::MakeRefPtr<SvgContext>();
-        svgContext_->SetRootViewBox(viewBox_);
-    }
+    svgContext_->SetRootViewBox(viewBox_);
+    root_->InitStyle(nullptr);
     return true;
 }
 
@@ -271,10 +270,11 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
 
 void SvgDom::SetFunction(const FuncNormalizeToPx& funcNormalizeToPx, const FuncAnimateFlush& funcAnimateFlush)
 {
-    if (svgContext_) {
-        svgContext_->SetFuncNormalizeToPx(funcNormalizeToPx);
-        svgContext_->SetFuncAnimateFlush(funcAnimateFlush);
+    if (svgContext_ == nullptr) {
+        return;
     }
+    svgContext_->SetFuncNormalizeToPx(funcNormalizeToPx);
+    svgContext_->SetFuncAnimateFlush(funcAnimateFlush);
 }
 
 void SvgDom::DrawImage(
@@ -338,8 +338,11 @@ void SvgDom::FitViewPort(const Size& layout)
     }
 }
 
-void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
+void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY, bool skip)
 {
+    if (skip) {
+        return;
+    }
     switch (imageFit) {
         case ImageFit::FILL:
             ApplyFill(scaleX, scaleY);

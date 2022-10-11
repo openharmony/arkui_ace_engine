@@ -81,6 +81,7 @@ protected:
     SkPath path_;
     SkPaint fillPaint_;
     SkPaint strokePaint_;
+    FillState fillState_;
 };
 
 } // namespace OHOS::Ace::NG
