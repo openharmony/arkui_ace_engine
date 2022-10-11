@@ -375,6 +375,10 @@ private:
     void OnAttachToFrameNode() override;
     static void Init();
 
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    bool HandleDirectionKey(KeyCode code);
+
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     uint32_t showCount_ = 0;
     std::vector<RefPtr<FrameNode>> datePickerColumns_;

@@ -72,7 +72,11 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnTouchDown(const TouchEventInfo& info);
-    
+
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    bool MoveStep(int32_t step);
+
     RefPtr<TouchEventImpl> touchListener_;
     bool isInitialized_ = false;
     bool isTouch_ = false;

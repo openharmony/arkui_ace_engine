@@ -89,6 +89,22 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 }
 
+void EventManager::TouchTest(
+    const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+{
+    ContainerScope scope(instanceId_);
+
+    ACE_FUNCTION_TRACE();
+    if (!frameNode) {
+        LOGW("frameNode is null.");
+        return;
+    }
+    // collect
+    const NG::PointF point { event.x, event.y };
+    // For root node, the parent local point is the same as global point.
+    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_);
+}
+
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
 {
     if (touchPoint.type != TouchType::DOWN) {

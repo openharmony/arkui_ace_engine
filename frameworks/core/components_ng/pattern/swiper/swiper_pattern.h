@@ -90,6 +90,11 @@ public:
 
     void UpdateCurrentOffset(float offset);
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -100,6 +105,10 @@ private:
 
     // Init touch event, stop animation when touch down.
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+
+    // Init on key event
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
 
     // Init auto play, show next item in duration time when auto play.
     void InitAutoPlay();

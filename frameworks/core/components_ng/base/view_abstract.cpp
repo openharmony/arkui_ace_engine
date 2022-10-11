@@ -238,16 +238,9 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
-    auto gestureEvent = clickEventFunc;
-    auto focusEvent = clickEventFunc;
-
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetClickEvent(std::move(gestureEvent));
-
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetOnClickCallback(std::move(focusEvent));
+    gestureHub->SetClickEvent(std::move(clickEventFunc));
 }
 
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)

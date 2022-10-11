@@ -586,10 +586,18 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
          "%{public}d",
         scaleEvent.x, scaleEvent.y, scaleEvent.horizontalAxis, scaleEvent.verticalAxis, scaleEvent.action);
 
-    // Need develop here: AxisEvent to touchTest pan recognizer
+    // Need update here: zoom(ctrl+axis) event
 
-    eventManager_->AxisTest(scaleEvent, rootNode_);
-    eventManager_->DispatchAxisEventNG(scaleEvent);
+    if (event.action == AxisAction::BEGIN) {
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        eventManager_->TouchTest(scaleEvent, rootNode_, touchRestrict);
+    }
+    eventManager_->DispatchTouchEvent(scaleEvent);
+
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+        eventManager_->AxisTest(scaleEvent, rootNode_);
+        eventManager_->DispatchAxisEvent(scaleEvent);
+    }
 }
 
 void PipelineContext::OnShow()

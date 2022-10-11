@@ -52,6 +52,12 @@ void TextPickerPattern::OnModifyDone()
 {
     OnColumnsBuilding();
     FlushCurrentOptions();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
 }
 
 void TextPickerPattern::OnColumnsBuilding()
@@ -267,6 +273,43 @@ bool TextPickerPattern::InnerHandleScroll(bool isDown)
     FlushCurrentOptions();
     isIndexChanged_ = true;
     return true;
+}
+
+void TextPickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
+        HandleDirectionKey(event.code);
+        return true;
+    }
+    return false;
+}
+
+bool TextPickerPattern::HandleDirectionKey(KeyCode code)
+{
+    if (code == KeyCode::KEY_DPAD_UP) {
+        // Need to update: current selection
+        return true;
+    }
+    if (code == KeyCode::KEY_DPAD_DOWN) {
+        // Need to update: current selection
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

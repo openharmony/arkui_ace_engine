@@ -94,6 +94,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
     lastAxisEvent_ = event;
+    inputEventType_ = InputEventType::AXIS;
 
     if (state_ == DetectState::READY) {
         state_ = DetectState::DETECTING;
@@ -370,6 +371,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             info.SetMainVelocity(0.0);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetInputEventType(inputEventType_);
         (*callback)(info);
     }
 }

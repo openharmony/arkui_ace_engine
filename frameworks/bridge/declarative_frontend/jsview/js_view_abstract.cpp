@@ -5529,6 +5529,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
+    JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
 #if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
@@ -6205,6 +6206,61 @@ void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
     };
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetOnHoverId(onHoverId);
+}
+
+void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        LOGW("the info is not click function");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onClick = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](GestureEvent& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onClick");
+            func->Execute(info);
+        };
+        NG::ViewAbstract::SetOnClick(std::move(onClick));
+        return;
+    }
+
+    if (info[0]->IsFunction()) {
+        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        auto tapGesture = GetTapGesture(info);
+        if (tapGesture) {
+            click->SetOnClick(tapGesture);
+        }
+
+        auto onClickId = GetClickEventMarker(info);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnClickId(onClickId);
+        }
+    }
+}
+
+EventMarker JSViewAbstract::GetClickEventMarker(const JSCallbackInfo& info)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("fail to get inspector for on get click event marker");
+        return EventMarker();
+    }
+    auto impl = inspector->GetInspectorFunctionImpl();
+    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onClickId = EventMarker(
+        [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            auto newInfo = *clickInfo;
+            if (impl) {
+                impl->UpdateEventInfo(newInfo);
+            }
+            ACE_SCORING_EVENT("onClick");
+            func->Execute(newInfo);
+        });
+    return onClickId;
 }
 
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
