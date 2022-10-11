@@ -42,6 +42,7 @@ public:
     void FireOnInputFilterError(const std::string& value) const
     {
         if (onInputFilterError_) {
+            LOGI("On filter error %{private}s", value.c_str());
             onInputFilterError_(value);
         }
     }
@@ -54,6 +55,7 @@ public:
     void FireOnEditChanged(bool value)
     {
         if (onEditChanged_) {
+            LOGI("On edit change %{private}d", value);
             onEditChanged_(value);
         }
     }
@@ -66,6 +68,7 @@ public:
     void FireOnSubmit(int32_t value)
     {
         if (onSubmit_) {
+            LOGI("On submit %{private}d", value);
             onSubmit_(value);
         }
     }
@@ -78,7 +81,47 @@ public:
     void FireOnChange(const std::string& value)
     {
         if (onChange_) {
+            LOGI("On change %{private}s", value.c_str());
             onChange_(value);
+        }
+    }
+
+    void SetOnCopy(std::function<void(const std::string&)>&& func)
+    {
+        onCopy_ = std::move(func);
+    }
+
+    void FireOnCopy(const std::string& value)
+    {
+        if (onCopy_) {
+            LOGI("On copy %{private}s", value.c_str());
+            onCopy_(value);
+        }
+    }
+
+    void SetOnCut(std::function<void(const std::string&)>&& func)
+    {
+        onCut_ = std::move(func);
+    }
+
+    void FireOnCut(const std::string& value)
+    {
+        if (onCut_) {
+            LOGI("On cut %{private}s", value.c_str());
+            onCut_(value);
+        }
+    }
+
+    void SetOnPaste(std::function<void(const std::string&)>&& func)
+    {
+        onPaste_ = std::move(func);
+    }
+
+    void FireOnPaste(const std::string& value)
+    {
+        if (onPaste_) {
+            LOGI("On paste %{private}s", value.c_str());
+            onPaste_(value);
         }
     }
 
@@ -88,6 +131,9 @@ private:
     std::function<void(int32_t)> onSubmit_;
     std::function<void(const std::string&)> onChange_;
 
+    std::function<void(const std::string&)> onCopy_;
+    std::function<void(const std::string&)> onCut_;
+    std::function<void(const std::string&)> onPaste_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldEventHub);
 };
 

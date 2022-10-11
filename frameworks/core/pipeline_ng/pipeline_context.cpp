@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/event_report.h"
@@ -25,8 +26,11 @@
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
+#include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/manager_interface.h"
+#include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -306,13 +310,13 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
+    LOGI("SetRootRect width %{public}f, height %{public}f, %{public}f", width, height, offset);
     CHECK_RUN_ON(UI);
     UpdateRootSizeAndScale(width, height);
     if (!rootNode_) {
         LOGE("rootNode_ is nullptr");
         return;
     }
-    LOGI("SetRootRect %{public}f %{public}f", width, height);
     GridSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
     GridSystemManager::GetInstance().OnSurfaceChanged(width);
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
@@ -324,11 +328,34 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootNode_->UpdateLayoutConstraint(layoutConstraint);
         rootNode_->MarkDirtyNode();
     }
+    if (rootNode_->GetGeometryNode()->GetFrameOffset().GetY() != offset) {
+        OffsetF newOffset = rootNode_->GetGeometryNode()->GetFrameOffset();
+        newOffset.SetY(static_cast<float>(offset));
+        rootNode_->GetGeometryNode()->SetMarginFrameOffset(newOffset);
+        auto rootContext = rootNode_->GetRenderContext();
+        rootContext->SyncGeometryProperties(RawPtr(rootNode_->GetGeometryNode()));
+        RequestFrame();
+    }
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(double keyboardHeight)
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
 {
-    // TODO: add textfield opeartion.
+    CHECK_RUN_ON(UI);
+    float positionY = 0;
+    auto manager = PipelineBase::GetTextFieldManager();
+    if (manager) {
+        positionY = static_cast<float>(manager->GetClickPosition().GetY());
+    }
+    auto rootSize = rootNode_->GetGeometryNode()->GetFrameSize();
+    float offsetFix = (rootSize.Height() - positionY) > 100.0 ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
+                                                               : keyboardHeight;
+    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
+        (rootSize.Height() - keyboardHeight), offsetFix);
+    if (NearZero(keyboardHeight)) {
+        SetRootRect(rootSize.Width(), rootSize.Height(), 0);
+    } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
+        SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
+    }
 }
 
 bool PipelineContext::OnBackPressed()

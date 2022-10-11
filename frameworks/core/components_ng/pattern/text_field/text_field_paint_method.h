@@ -37,6 +37,7 @@ public:
 
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
+    void PaintSelection(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrapper);
 
 private:

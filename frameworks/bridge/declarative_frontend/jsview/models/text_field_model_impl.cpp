@@ -210,6 +210,14 @@ void TextFieldModelImpl::SetMaxLength(uint32_t value)
     component->SetMaxLength(value);
 }
 
+void TextFieldModelImpl::SetMaxLines(uint32_t value)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetTextMaxLines(value);
+}
+
 void TextFieldModelImpl::SetFontSize(const Dimension& value)
 {
     auto* stack = ViewStackProcessor::GetInstance();

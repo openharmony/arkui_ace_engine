@@ -41,6 +41,7 @@ public:
     void SetTextAlign(TextAlign value) override;
     void SetCaretColor(const Color& value) override;
     void SetMaxLength(uint32_t value) override;
+    void SetMaxLines(uint32_t value) override;
     void SetFontSize(const Dimension& value) override;
     void SetFontWeight(FontWeight value) override;
     void SetTextColor(const Color& value) override;

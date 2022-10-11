@@ -24,6 +24,8 @@ class ACE_EXPORT TextFieldModelNG : public TextFieldModel {
 public:
     TextFieldModelNG() = default;
     ~TextFieldModelNG() override = default;
+    void CreateNode(
+        const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea);
     RefPtr<TextFieldControllerBase> CreateTextInput(
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value) override;
 
@@ -37,6 +39,7 @@ public:
     void SetTextAlign(TextAlign value) override;
     void SetCaretColor(const Color& value) override;
     void SetMaxLength(uint32_t value) override;
+    void SetMaxLines(uint32_t value) override;
     void SetFontSize(const Dimension& value) override;
     void SetFontWeight(FontWeight value) override;
     void SetTextColor(const Color& value) override;

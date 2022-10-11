@@ -15,6 +15,10 @@
 
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
+#include <cstddef>
+
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -26,8 +30,8 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
-    const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
+void TextFieldModelNG::CreateNode(
+    const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -35,6 +39,7 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
         V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     stack->Push(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
     if (textFieldLayoutProperty) {
         if (value) {
             if (value->empty()) {
@@ -48,16 +53,21 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
         if (placeholder) {
             textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());
         }
-        textFieldLayoutProperty->UpdateMaxLines(1);
-        textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+        if (!isTextArea) {
+            textFieldLayoutProperty->UpdateMaxLines(1);
+            textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+        }
     }
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, nullptr);
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
@@ -65,13 +75,27 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     pattern->SetBasicPadding(static_cast<float>(radius.GetX().ConvertToPx()));
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
+    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
+}
+
+RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
+    const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
+{
+    CreateNode(placeholder, value, false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetTextFieldController();
 };
 
 RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextArea(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
 {
-    return nullptr;
+    CreateNode(placeholder, value, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetTextFieldController();
 }
 
 void TextFieldModelNG::SetType(TextInputType value)
@@ -98,6 +122,7 @@ void TextFieldModelNG::SetPlaceholderFont(const Font& value)
     if (!value.fontFamilies.empty()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontFamily, value.fontFamilies);
     }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
 }
 
 void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
@@ -118,15 +143,21 @@ void TextFieldModelNG::SetTextAlign(TextAlign value)
 }
 void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
+}
+void TextFieldModelNG::SetMaxLines(uint32_t value)
+{
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLines, value);
 }
 void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
 }
 void TextFieldModelNG::SetFontWeight(FontWeight value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontWeight, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
 }
 void TextFieldModelNG::SetTextColor(const Color& value)
 {
@@ -135,10 +166,12 @@ void TextFieldModelNG::SetTextColor(const Color& value)
 void TextFieldModelNG::SetFontStyle(Ace::FontStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ItalicFontStyle, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
 }
 void TextFieldModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
 }
 
 void TextFieldModelNG::SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError)
@@ -187,6 +220,9 @@ void TextFieldModelNG::SetOnCut(std::function<void(const std::string&)>&& func) 
 
 void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func) {}
 
-void TextFieldModelNG::SetCopyOption(CopyOptions copyOption) {}
+void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, copyOption);
+}
 
 } // namespace OHOS::Ace::NG
