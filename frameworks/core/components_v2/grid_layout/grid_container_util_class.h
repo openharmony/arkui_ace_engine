@@ -36,6 +36,8 @@ struct GridContainerSize : public AceType {
         xl = column;
         xxl = column;
     };
+    DEFINE_COPY_CONSTRUCTOR_AND_COPY_OPERATOR_AND_COMPARE_OPERATOR_WITH_PROPERTIES(
+        GridContainerSize, (xs)(sm)(md)(lg)(xl)(xxl))
     int32_t xs = DEFAULT_COLUMN_NUMBER;
     int32_t sm = DEFAULT_COLUMN_NUMBER;
     int32_t md = DEFAULT_COLUMN_NUMBER;
@@ -82,6 +84,8 @@ class Gutter : public AceType {
 
 public:
     Gutter() = default;
+    DEFINE_COPY_CONSTRUCTOR_AND_COPY_OPERATOR_AND_COMPARE_OPERATOR_WITH_PROPERTIES(
+        Gutter, (xXs)(yXs)(xSm)(ySm)(xMd)(yMd)(xLg)(yLg)(xXl)(yXl)(xXXl)(yXXl))
     explicit Gutter(Dimension dimension)
         : xXs(dimension), yXs(dimension), xSm(dimension), ySm(dimension), xMd(dimension), yMd(dimension),
           xLg(dimension), yLg(dimension), xXl(dimension), yXl(dimension), xXXl(dimension), yXXl(dimension) {};
@@ -126,6 +130,9 @@ class BreakPoints : public AceType {
     DECLARE_ACE_TYPE(BreakPoints, AceType);
 
 public:
+    BreakPoints() = default;
+    DEFINE_COPY_CONSTRUCTOR_AND_COPY_OPERATOR_AND_COMPARE_OPERATOR_WITH_PROPERTIES(
+        BreakPoints, (reference)(breakpoints))
     BreakPointsReference reference = BreakPointsReference::WindowSize;
     std::vector<std::string> breakpoints { "320vp", "520vp", "840vp" };
 };

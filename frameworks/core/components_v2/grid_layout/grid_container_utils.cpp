@@ -17,6 +17,7 @@
 
 #include "core/components/common/layout/grid_system_manager.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
@@ -36,6 +37,26 @@ RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
 }
 
 } // namespace
+
+GridSizeType GridContainerUtils::ProcessGridSizeType(const RefPtr<V2::BreakPoints>& breakpoints, const Size& size)
+{
+    auto threshold = ParseBreakpoints(breakpoints);
+    double windowWidth = 0.0;
+    if (breakpoints->reference == BreakPointsReference::WindowSize) {
+        windowWidth = GridSystemManager::GetInstance().GetScreenWidth();
+    } else {
+        windowWidth = size.Width();
+    }
+    auto context = NG::PipelineContext::GetCurrentContext();
+    int index = 0;
+    for (const auto& cur : threshold->sizeInfo) {
+        if (context->NormalizeToPx(cur) > windowWidth) {
+            break;
+        }
+        index++;
+    }
+    return static_cast<GridSizeType>(index);
+}
 
 GridSizeType GridContainerUtils::ProcessGridSizeType(
     const RefPtr<BreakPoints>& breakpoints, const Size& size, const RefPtr<PipelineContext>& pipeline)
@@ -57,24 +78,29 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(
     return static_cast<GridSizeType>(index);
 }
 
-std::pair<Dimension, Dimension> GridContainerUtils::ProcessGutter(GridSizeType sizeType, const RefPtr<Gutter>& gutter)
+std::pair<Dimension, Dimension> GridContainerUtils::ProcessGutter(GridSizeType sizeType, const Gutter& gutter)
 {
     switch (sizeType) {
         case GridSizeType::XS:
-            return std::pair<Dimension, Dimension>(gutter->xXs, gutter->yXs);
+            return std::pair<Dimension, Dimension>(gutter.xXs, gutter.yXs);
         case GridSizeType::SM:
-            return std::pair<Dimension, Dimension>(gutter->xSm, gutter->ySm);
+            return std::pair<Dimension, Dimension>(gutter.xSm, gutter.ySm);
         case GridSizeType::MD:
-            return std::pair<Dimension, Dimension>(gutter->xMd, gutter->yMd);
+            return std::pair<Dimension, Dimension>(gutter.xMd, gutter.yMd);
         case GridSizeType::LG:
-            return std::pair<Dimension, Dimension>(gutter->xLg, gutter->yLg);
+            return std::pair<Dimension, Dimension>(gutter.xLg, gutter.yLg);
         case GridSizeType::XL:
-            return std::pair<Dimension, Dimension>(gutter->xXl, gutter->yXl);
+            return std::pair<Dimension, Dimension>(gutter.xXl, gutter.yXl);
         case GridSizeType::XXL:
-            return std::pair<Dimension, Dimension>(gutter->xXXl, gutter->yXXl);
+            return std::pair<Dimension, Dimension>(gutter.xXXl, gutter.yXXl);
         default:
-            return std::pair<Dimension, Dimension>(gutter->xXs, gutter->yXs);
+            return std::pair<Dimension, Dimension>(gutter.xXs, gutter.yXs);
     }
+}
+
+std::pair<Dimension, Dimension> GridContainerUtils::ProcessGutter(GridSizeType sizeType, const RefPtr<Gutter>& gutter)
+{
+    return ProcessGutter(sizeType, *gutter);
 }
 
 int32_t GridContainerUtils::ProcessColumn(GridSizeType sizeType, const RefPtr<GridContainerSize>& columnNum)
@@ -97,12 +123,11 @@ int32_t GridContainerUtils::ProcessColumn(GridSizeType sizeType, const RefPtr<Gr
     }
 }
 
-double GridContainerUtils::ProcessColumnWidth(
-    const std::pair<double, double>& gutter, int32_t columnNum, const Size& size)
+double GridContainerUtils::ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, double width)
 {
     auto xGutter = gutter.first;
     if (columnNum != 0) {
-        return (size.Width() - (columnNum - 1) * xGutter) / columnNum;
+        return (width - (columnNum - 1) * xGutter) / columnNum;
     }
     return 0.0;
 }

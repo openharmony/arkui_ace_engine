@@ -31,12 +31,14 @@ class GridContainerUtils : public AceType {
 public:
     ~GridContainerUtils() override = default;
 
+    static GridSizeType ProcessGridSizeType(const RefPtr<V2::BreakPoints>& breakpoints, const Size& size);
     static GridSizeType ProcessGridSizeType(
         const RefPtr<BreakPoints>& breakpoints, const Size& size, const RefPtr<PipelineContext>& pipeline);
     static std::pair<Dimension, Dimension> ProcessGutter(GridSizeType sizeType, const RefPtr<Gutter>& gutter);
+    static std::pair<Dimension, Dimension> ProcessGutter(GridSizeType sizeType, const Gutter& gutter);
 
     static int32_t ProcessColumn(GridSizeType sizeType, const RefPtr<GridContainerSize>& columnNum);
-    static double ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, const Size& size);
+    static double ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, double size);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_COL_UTILS_H
