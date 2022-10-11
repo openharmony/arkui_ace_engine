@@ -85,6 +85,15 @@ void ViewStackProcessor::ImplicitPopBeforeContinue()
     }
 }
 
+void ViewStackProcessor::FlushImplicitAnimation()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->IsOnMainTree()) {
+        frameNode->MarkDirtyNode();
+    }
+}
+
 void ViewStackProcessor::FlushRerenderTask()
 {
     auto node = Finish();

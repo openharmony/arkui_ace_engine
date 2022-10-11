@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 
+#include <algorithm>
 #include <iterator>
 
 #include "base/geometry/axis.h"
@@ -626,6 +627,11 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         finialCrossAxisSize += horizontalPadding;
         finialMainAxisSize += verticalPadding;
     }
+    finialMainAxisSize = std::clamp(finialMainAxisSize, GetMainAxisSizeHelper(layoutConstraint->minSize, direction_),
+        GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_));
+    finialCrossAxisSize = std::clamp(finialCrossAxisSize, GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_),
+        GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_));
+
     realSize.UpdateIllegalSizeWithCheck(
         GetCalcSizeHelper(finialMainAxisSize, finialCrossAxisSize, direction_).ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
