@@ -319,6 +319,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
             // If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
             auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+            edgeEffect = EdgeEffect::NONE;
             if (edgeEffect != EdgeEffect::SPRING) {
                 currentOffset_ = currentEndPos - contentMainSize_;
                 LOGD("LayoutForward: adjust offset to %{public}f", currentOffset_);
@@ -374,6 +375,7 @@ void ListLayoutAlgorithm::LayoutBackward(
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    edgeEffect = EdgeEffect::NONE;
     if (GreatNotEqual(currentStartPos, startMainPos_) && (edgeEffect != EdgeEffect::SPRING)) {
         currentOffset_ = currentStartPos;
         endMainPos_ = currentOffset_ + contentMainSize_;
