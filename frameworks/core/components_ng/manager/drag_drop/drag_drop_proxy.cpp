@@ -65,6 +65,49 @@ void DragDropProxy::onDragCancel()
     manager->onDragCancel();
 }
 
+void DragDropProxy::OnItemDragStart(const GestureEvent& info)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+
+    manager->OnItemDragStart(
+        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()));
+}
+
+void DragDropProxy::OnItemDragMove(const GestureEvent& info, int32_t draggedIndex)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+
+    manager->OnItemDragMove(static_cast<float>(info.GetGlobalPoint().GetX()),
+        static_cast<float>(info.GetGlobalPoint().GetY()), draggedIndex);
+}
+
+void DragDropProxy::OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+
+    manager->OnItemDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
+        static_cast<float>(info.GetGlobalPoint().GetY()), draggedIndex);
+}
+
+void DragDropProxy::onItemDragCancel()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+
+    manager->onItemDragCancel();
+}
+
 void DragDropProxy::DestroyDragWindow()
 {
     auto pipeline = PipelineContext::GetCurrentContext();

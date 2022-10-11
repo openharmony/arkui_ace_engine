@@ -86,8 +86,8 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
 
 bool GridLayoutAlgorithm::CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan)
 {
-    auto rowIter = gridMatrix_.find(row);
-    if (rowIter != gridMatrix_.end()) {
+    auto rowIter = gridLayoutInfo_.gridMatrix_.find(row);
+    if (rowIter != gridLayoutInfo_.gridMatrix_.end()) {
         auto colIter = rowIter->second.find(col);
         if (colIter != rowIter->second.end()) {
             return false;
@@ -99,8 +99,8 @@ bool GridLayoutAlgorithm::CheckGridPlaced(int32_t index, int32_t row, int32_t co
     int32_t cSpan = 0;
     int32_t retColSpan = 1;
     while (rSpan < rowSpan) {
-        rowIter = gridMatrix_.find(rSpan + row);
-        if (rowIter != gridMatrix_.end()) {
+        rowIter = gridLayoutInfo_.gridMatrix_.find(rSpan + row);
+        if (rowIter != gridLayoutInfo_.gridMatrix_.end()) {
             cSpan = 0;
             while (cSpan < colSpan) {
                 if (rowIter->second.find(cSpan + col) != rowIter->second.end()) {
@@ -123,14 +123,14 @@ bool GridLayoutAlgorithm::CheckGridPlaced(int32_t index, int32_t row, int32_t co
     colSpan = retColSpan;
     for (int32_t i = row; i < row + rowSpan; ++i) {
         std::map<int32_t, int32_t> rowMap;
-        auto iter = gridMatrix_.find(i);
-        if (iter != gridMatrix_.end()) {
+        auto iter = gridLayoutInfo_.gridMatrix_.find(i);
+        if (iter != gridLayoutInfo_.gridMatrix_.end()) {
             rowMap = iter->second;
         }
         for (int32_t j = col; j < col + colSpan; ++j) {
             rowMap.emplace(std::make_pair(j, index));
         }
-        gridMatrix_[i] = rowMap;
+        gridLayoutInfo_.gridMatrix_[i] = rowMap;
     }
     return true;
 }

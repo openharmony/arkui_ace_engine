@@ -15,13 +15,15 @@
 
 #include "drag_window_ohos.h"
 
-#include "base/log/log_wrapper.h"
-#include "core/components/text/render_text.h"
-
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
 #include "fml/memory/ref_ptr.h"
+
+#include "base/geometry/ng/rect_t.h"
+#include "base/log/log_wrapper.h"
+#include "core/components/text/render_text.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -179,6 +181,28 @@ void DragWindowOhos::Destroy() const
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         LOGE("DragWindow::Destroy, drag window destroy failed, ret: %d", ret);
     }
+}
+
+void DragWindowOhos::DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode)
+{
+    CHECK_NULL_VOID(rootNode);
+
+    auto surfaceNode = dragWindow_->GetSurfaceNode();
+    rsUiDirector_ = Rosen::RSUIDirector::Create();
+    rsUiDirector_->Init();
+    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+    rsUiDirector_->SetRSSurfaceNode(surfaceNode);
+
+    auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootNode->GetRenderContext());
+    CHECK_NULL_VOID(renderContext);
+    auto rsNode = renderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+
+    rsUiDirector_->SetRoot(rsNode->GetId());
+    rsUiDirector_->SendMessages();
 }
 
 void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
