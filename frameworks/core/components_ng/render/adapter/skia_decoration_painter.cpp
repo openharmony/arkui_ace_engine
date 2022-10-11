@@ -32,6 +32,7 @@
 
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 

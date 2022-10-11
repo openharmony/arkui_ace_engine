@@ -714,4 +714,41 @@ void ViewAbstract::SetColorBlend(const Color& colorBlend)
 {
     ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
 }
+
+void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderImage, borderImage);
+}
+
+void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
+{
+    ImageSourceInfo imageSourceInfo(bdImageSrc);
+    ACE_UPDATE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo);
+}
+
+void ViewAbstract::SetHasBorderImageSlice(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageSlice, tag);
+}
+
+void ViewAbstract::SetHasBorderImageWidth(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageWidth, tag);
+}
+
+void ViewAbstract::SetHasBorderImageOutset(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageOutset, tag);
+}
+
+void ViewAbstract::SetHasBorderImageRepeat(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageRepeat, tag);
+}
+
+void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
+}
+
 } // namespace OHOS::Ace::NG

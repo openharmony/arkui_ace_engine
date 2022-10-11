@@ -158,6 +158,14 @@ private:
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
     void OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle) override;
 
+    void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) override;
+    void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) override;
+    void OnHasBorderImageSliceUpdate(bool tag) override;
+    void OnHasBorderImageWidthUpdate(bool tag) override;
+    void OnHasBorderImageOutsetUpdate(bool tag) override;
+    void OnHasBorderImageRepeatUpdate(bool tag) override;
+    void OnBorderImageGradientUpdate(const Gradient& gradient) override;
+
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
@@ -203,9 +211,15 @@ private:
 
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
+    DataReadyNotifyTask CreateBorderImageDataReadyCallback();
+    LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
+    void PaintBorderImage();
+    void PaintBorderImageGradient();
+
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
+    RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
     bool isHoveredScale_ = false;
