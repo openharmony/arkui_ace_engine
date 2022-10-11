@@ -282,6 +282,7 @@ void JSViewFullUpdate::JSBind(BindingTarget object)
     JSClass<JSViewFullUpdate>::Method("needsUpdate", &JSViewFullUpdate::NeedsUpdate);
     JSClass<JSViewFullUpdate>::Method("markStatic", &JSViewFullUpdate::MarkStatic);
     JSClass<JSViewFullUpdate>::CustomMethod("findChildById", &JSViewFullUpdate::FindChildById);
+    JSClass<JSViewFullUpdate>::CustomMethod("findChildByIdForPreview", &JSViewFullUpdate::FindChildByIdForPreview);
     JSClass<JSViewFullUpdate>::Inherit<JSViewAbstract>();
     JSClass<JSViewFullUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
 }
@@ -296,6 +297,28 @@ void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
         LOGE("JSView FindChildById with invalid arguments.");
         JSException::Throw("%s", "JSView FindChildById with invalid arguments.");
     }
+}
+
+void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
+{
+    std::string viewId = info[0]->ToString();
+    if (id_ == viewId) {
+        info.SetReturnValue(this);
+        return;
+    }
+    for (auto i : customViewChildren_) {
+        std::string childId = i.first;
+        auto pos = i.first.find_last_of('_');
+        if (pos != std::string::npos) {
+            childId = i.first.substr(pos + 1);
+        }
+        if (childId == viewId) {
+            info.SetReturnValue(i.second);
+            return;
+        }
+    }
+    LOGE("find child failed %{public}s", viewId.c_str());
+    return;
 }
 
 void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
