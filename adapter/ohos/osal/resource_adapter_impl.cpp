@@ -137,7 +137,7 @@ RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
         }
         theme->patternAttrs_[patternTag] = attrMap;
     }
-    LOGI("theme themeId=%{public}d, ret=%{public}d, attr size=%{public}zu, pattern size=%{public}zu",
+    LOGI("themeId=%{public}d, ret=%{public}d, attr size=%{public}zu, pattern size=%{public}zu",
         themeId, ret, theme->rawAttrs_.size(), theme->patternAttrs_.size());
     if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
         LOGW("theme resource get failed, use default theme config.");
