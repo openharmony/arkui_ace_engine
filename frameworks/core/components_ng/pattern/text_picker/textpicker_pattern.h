@@ -139,9 +139,18 @@ public:
         return currentOffset_;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    bool HandleDirectionKey(KeyCode code);
 
     uint32_t selectedIndex_ = 0;
     std::string selectedValue_;

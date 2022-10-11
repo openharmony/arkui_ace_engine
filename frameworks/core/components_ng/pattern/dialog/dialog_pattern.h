@@ -59,6 +59,11 @@ public:
         return MakeRefPtr<DialogEventHub>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     void OnModifyDone() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
