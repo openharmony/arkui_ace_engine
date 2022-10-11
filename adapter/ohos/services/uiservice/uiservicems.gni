@@ -16,5 +16,4 @@ uiservice_files = [
   "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_stub.cpp",
   "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_mgr_service.cpp",
   "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
-  "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/dialog_callback_proxy.cpp",
 ]

@@ -19,21 +19,16 @@
 #include <memory>
 #include <singleton.h>
 #include <thread_ex.h>
-#include <unistd.h>
 #include <unordered_map>
 
-#include "client_socket.h"
 #include "element_name.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "hilog_wrapper.h"
 #include "iremote_object.h"
 
-#include "runtime.h"
 #include "system_ability.h"
 #include "ui_service_mgr_stub.h"
-#include "uiservice_dialog/uiservice_dialog_interface.h"
-#include "uri.h"
 
 namespace OHOS {
 namespace Ace {
@@ -41,12 +36,6 @@ using EventRunner = OHOS::AppExecFwk::EventRunner;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 enum class UIServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 
-using AppSpawnMsg = AppSpawn::ClientSocket::AppProperty;
-
-union AppSpawnPidMsg {
-    pid_t pid = 0;
-    char pidBuf[sizeof(pid_t)];
-};
 class UIMgrService : public SystemAbility,
                           public UIServiceMgrStub,
                           public std::enable_shared_from_this<UIMgrService> {
@@ -57,63 +46,22 @@ public:
     void OnStop() override;
     UIServiceRunningState QueryServiceState() const;
 
-    int RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService) override;
-    int UnregisterCallBack(const AAFwk::Want& want) override;
-    int Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
+    int32_t RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService) override;
+    int32_t UnregisterCallBack(const AAFwk::Want& want) override;
+    int32_t Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
         const std::string& data, const std::string& extraData) override;
 
-    int Request(const AAFwk::Want& want, const std::string& name, const std::string& data) override;
-    int ReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
+    int32_t Request(const AAFwk::Want& want, const std::string& name, const std::string& data) override;
+    int32_t ReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
         const std::string& extraData) override;
 
-    int32_t AttachToUiService(const sptr<IRemoteObject>& dialog, int32_t pid) override;
-
-    int ShowDialog(
-        const std::string& name,
-        const std::string& params,
-        uint32_t windowType,
-        int x,
-        int y,
-        int width,
-        int height,
-        const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
-        int* id = nullptr) override;
-
-    int CancelDialog(int id) override;
-
-    int UpdateDialog(int id, const std::string& data) override;
-
-    int32_t RemoteDialogCallback(int32_t id, const std::string& event, const std::string& params) override;
-
-    int Dump(int fd, const std::vector<std::u16string>& args) override;
-
-    /**
-     * GetEventHandler, get the ui_service manager service's handler.
-     *
-     * @return Returns EventHandler ptr.
-     */
-    std::shared_ptr<EventHandler> GetEventHandler();
+    int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
 
 private:
-    struct DialogParam {
-        std::string name;
-        std::string params;
-        uint32_t windowType;
-        int32_t x;
-        int32_t y;
-        int32_t width;
-        int32_t height;
-        int32_t id;
-    };
-
     bool Init();
     bool CheckCallBackFromMap(const std::string& key);
-    int HandleRegister(const AAFwk::Want& want,  const sptr<IUIService>& uiService);
-    int HandleUnregister(const AAFwk::Want& want);
-    int32_t OpenAppSpawnConnection();
-    void CloseAppSpawnConnection();
-
-    AppSpawnMsg* MakeAppSpawnMsg(const std::string& name, int32_t id);
+    int32_t HandleRegister(const AAFwk::Want& want,  const sptr<IUIService>& uiService);
+    int32_t HandleUnregister(const AAFwk::Want& want);
 
     std::string GetCallBackKeyStr(const AAFwk::Want& want);
     std::shared_ptr<EventRunner> eventLoop_;
@@ -122,18 +70,6 @@ private:
 
     std::map<std::string, sptr<IUIService>> callbackMap_;
     std::mutex uiMutex_;
-
-    // app spawn client socket
-    std::shared_ptr<AppSpawn::ClientSocket> clientSocket_;
-
-    std::mutex dialogMapMutex_;
-    std::unordered_map<int32_t, sptr<OHOS::Ace::IUiServiceDialog>> dialogMap_; // dialog ID vs dialog client
-
-    std::unordered_map<int32_t, DialogParam> dialogRecords_; // pid vs dialog params
-
-    std::unordered_map<int32_t, int32_t> dialogIDMap_; // dialog ID vs dialog Pid
-
-    std::unordered_map<int32_t, sptr<OHOS::Ace::IDialogCallback>> dialogCallbackProxyMap_;
 };
 }  // namespace Ace
 }  // namespace OHOS
