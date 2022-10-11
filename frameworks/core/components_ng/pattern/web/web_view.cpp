@@ -463,4 +463,11 @@ void WebView::SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateMultiWindowAccessEnabled(isMultiWindowAccessEnabled);
 }
+
+void WebView::SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetJsProxyCallback(std::move(jsProxyCallback));
+}
 } // namespace OHOS::Ace::NG

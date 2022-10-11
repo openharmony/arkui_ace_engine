@@ -46,6 +46,7 @@ public:
     using MethodCall = std::function<void(const std::string&)>;
     using Method = std::string;
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using JsProxyCallback = std::function<void()>;
 
     WebComponent() = default;
     explicit WebComponent(const std::string& type);
@@ -817,12 +818,25 @@ public:
         onDropId_ = onDropId;
     }
 
+    void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
+    {
+        jsProxyCallback_ = std::move(jsProxyCallback);
+    }
+
+    void CallJsProxyCallback()
+    {
+        if (jsProxyCallback_) {
+            jsProxyCallback_();
+        }
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
     ReleasedCallback releasedCallback_ = nullptr;
     ErrorCallback errorCallback_ = nullptr;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    JsProxyCallback jsProxyCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebController> webController_;
     OnCommonDialogImpl onAlertImpl_;
