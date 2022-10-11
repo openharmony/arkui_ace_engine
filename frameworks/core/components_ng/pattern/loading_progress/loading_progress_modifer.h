@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
 
+#include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
@@ -32,15 +33,16 @@ const float FULL_COUNT = 100.0f;
 const float COUNT = 50.0f;
 const float HALF = 0.5f;
 
-class LoadingProgressModifier : public ContentModifierFloat {
-    DECLARE_ACE_TYPE(LoadingProgressModifier, ContentModifierFloat);
+class LoadingProgressModifier : public ContentModifier {
+    DECLARE_ACE_TYPE(LoadingProgressModifier, ContentModifier);
 
 public:
     LoadingProgressModifier();
     ~LoadingProgressModifier() override = default;
-    void onDraw(DrawingContext& context, const float& date) override
+    void onDraw(DrawingContext& context) override
     {
         float scale_ = 1.0;
+        float date = dateProp_->GetValue();
         scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + COMET_WIDTH.ConvertToPx())),
                      (context.height /
                         (RING_RADIUS.ConvertToPx() * (1 + RING_MOVEMENT) + RING_WIDTH.ConvertToPx() * HALF))) *
@@ -61,7 +63,16 @@ public:
         color_ = color;
     };
 
+    void SetDateProp(float value)
+    {
+        constexpr float speedOfModifier = 0.1f;
+        if (dateProp_) {
+            dateProp_->UpdatePropWithAnimation({ .speed = speedOfModifier, .repeatTimes = -1, .autoReverse = false }, value);
+        }
+    }
+
 private:
+    RefPtr<AnimatablePropFloat> dateProp_;
     Color color_ = Color::BLUE;
 
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);

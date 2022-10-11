@@ -46,10 +46,8 @@ public:
 
     void UpdateModifier(PaintWrapper* paintWrapper) override
     {
-        constexpr float speedOfModifier = 0.1f;
         if (loadingProgressModifier_) {
-            loadingProgressModifier_->UpdateModifier(
-                { .speed = speedOfModifier, .repeatTimes = -1, .autoReverse = false }, FULL_COUNT);
+            loadingProgressModifier_->SetDateProp(FULL_COUNT);
         }
     }
 

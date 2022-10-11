@@ -37,7 +37,10 @@ const float HALF_COUNT = 25.0f;
 
 } // namespace
 
-LoadingProgressModifier::LoadingProgressModifier() : ContentModifierFloat(0.0) {}
+LoadingProgressModifier::LoadingProgressModifier() : dateProp_(AceType::MakeRefPtr<AnimatablePropFloat>(0.0))
+{
+    AttachProp(dateProp_);
+}
 
 void LoadingProgressModifier::DrawRing(DrawingContext& context, float date, float scale_) const
 {
