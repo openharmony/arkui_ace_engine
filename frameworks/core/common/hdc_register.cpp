@@ -49,7 +49,6 @@ HdcRegister& HdcRegister::Get()
 
 void HdcRegister::LoadRegisterSo()
 {
-    LOGI("LoadRegisterSo");
     registerHandler_ = dlopen("libhdc_register.z.so", RTLD_LAZY);
     if (registerHandler_ == nullptr) {
         LOGE("cannot find register so");
