@@ -27,7 +27,7 @@ public:
     TitleBarNode(const std::string& tag, int32_t nodeId);
     TitleBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : FrameNode(tag, nodeId, pattern) {}
-    ~TitleBarNode() = default;
+    ~TitleBarNode() override = default;
     static RefPtr<TitleBarNode> GetOrCreateTitleBarNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 

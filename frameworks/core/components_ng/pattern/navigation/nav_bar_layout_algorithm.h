@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVIGATION_NAVIGATION_LAYOUT_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVIGATION_NAVIGATION_LAYOUT_ALGORITHM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVIGATION_NAV_BAR_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVIGATION_NAV_BAR_LAYOUT_ALGORITHM_H
 
 #include <cstdint>
 
@@ -24,12 +24,12 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT NavigationLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(NavigationLayoutAlgorithm, LayoutAlgorithm);
+class ACE_EXPORT NavBarLayoutAlgorithm : public LayoutAlgorithm {
+    DECLARE_ACE_TYPE(NavBarLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    NavigationLayoutAlgorithm() = default;
-    ~NavigationLayoutAlgorithm() override = default;
+    NavBarLayoutAlgorithm() = default;
+    ~NavBarLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -42,9 +42,9 @@ public:
 private:
     float lastScrollDistance_ = 0.0f;
 
-    ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
+    ACE_DISALLOW_COPY_AND_MOVE(NavBarLayoutAlgorithm);
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVIGATION_NAVIGATION_LAYOUT_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVIGATION_NAV_BAR_LAYOUT_ALGORITHM_H

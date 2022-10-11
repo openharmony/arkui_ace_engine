@@ -13,26 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAV_BAR_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAV_BAR_PATTERN_H
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_algorithm.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
-#include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class NavigationPattern : public Pattern {
-    DECLARE_ACE_TYPE(NavigationPattern, Pattern);
+class NavBarPattern : public Pattern {
+    DECLARE_ACE_TYPE(NavBarPattern, Pattern);
 
 public:
-    NavigationPattern() = default;
-    ~NavigationPattern() override = default;
+    NavBarPattern() = default;
+    ~NavBarPattern() override = default;
+
+    void OnAttachToFrameNode() override;
 
     bool IsAtomicNode() const override
     {
@@ -41,20 +44,22 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return MakeRefPtr<NavigationLayoutProperty>();
-    }
-
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<NavigationEventHub>();
+        return MakeRefPtr<NavBarLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<NavigationLayoutAlgorithm>();
+        return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+
+    void OnModifyDone() override;
+
+private:
+    float lastScrollDistance_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAV_BAR_PATTERN_H

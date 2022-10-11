@@ -13,41 +13,44 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
-RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
+RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
     if (frameNode) {
-        return AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+        return AceType::DynamicCast<NavBarNode>(frameNode);
     }
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
-    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>(tag, nodeId, pattern);
-    navDestinationNode->InitializePatternAndContext();
-    ElementRegister::GetInstance()->AddUINode(navDestinationNode);
-    return navDestinationNode;
+    auto navBarNode = AceType::MakeRefPtr<NavBarNode>(tag, nodeId, pattern);
+    navBarNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(navBarNode);
+    return navBarNode;
 }
 
-void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child)
 {
-    auto pattern = AceType::DynamicCast<Pattern>(GetPattern());
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
-    auto contentNode = GetContentNode();
+    auto contentNode = GetNavBarContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         contentNode = FrameNode::GetOrCreateFrameNode(
-            V2::NAVDESTINATION_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        SetContentNode(contentNode);
-        auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
+            V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        SetNavBarContentNode(contentNode);
+        auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         AddChild(contentNode);
     }
