@@ -30,14 +30,14 @@ namespace OHOS::Ace {
 namespace {
 #ifndef OS_ACCOUNT_EXISTS
 constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
-#endif // OS_ACCOUNT_EXISTS
+#endif  // OS_ACCOUNT_EXISTS
 
 ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 {
     userIds.clear();
 #ifdef OS_ACCOUNT_EXISTS
     return AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
-#else // OS_ACCOUNT_EXISTS
+#else  // OS_ACCOUNT_EXISTS
     LOGE("os account part not exists, use default id.");
     userIds.push_back(DEFAULT_OS_ACCOUNT_ID);
     return ERR_OK;
@@ -146,10 +146,8 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
     RenderElement::Prepare(parent);
 
     if (!pluginManagerBridge_) {
-        pluginManagerBridge_ =
-            AceType::MakeRefPtr<PluginManagerDelegate>(GetContext());
-        pluginManagerBridge_->AddPluginCompleteCallback(
-            [weak = WeakClaim(this)] () {
+        pluginManagerBridge_ = AceType::MakeRefPtr<PluginManagerDelegate>(GetContext());
+        pluginManagerBridge_->AddPluginCompleteCallback([weak = WeakClaim(this)]() {
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -160,8 +158,7 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
                 }
             });
         });
-        pluginManagerBridge_->AddPluginUpdateCallback(
-            [weak = WeakClaim(this)] (int64_t id, std::string data) {
+        pluginManagerBridge_->AddPluginUpdateCallback([weak = WeakClaim(this)](int64_t id, std::string data) {
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -172,8 +169,7 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
                 }
             });
         });
-        pluginManagerBridge_->AddPluginErrorCallback(
-            [weak = WeakClaim(this)](std::string code, std::string msg) {
+        pluginManagerBridge_->AddPluginErrorCallback([weak = WeakClaim(this)](std::string code, std::string msg) {
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -260,8 +256,8 @@ void PluginElement::RunPluginContainer()
 
     auto weak = WeakClaim(this);
     auto element = weak.Upgrade();
-    auto uiTaskExecutor = SingleTaskExecutor::Make(
-        element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    auto uiTaskExecutor =
+        SingleTaskExecutor::Make(element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
 
     auto pluginNode = AceType::DynamicCast<RenderPlugin>(renderNode_);
     if (!pluginNode) {
@@ -270,9 +266,7 @@ void PluginElement::RunPluginContainer()
     }
     pluginNode->SetPluginSubContainer(pluginSubContainer_);
 
-    uiTaskExecutor.PostTask([this, weak, plugin] {
-        RunPluginTask(weak, plugin);
-    });
+    uiTaskExecutor.PostTask([this, weak, plugin] { RunPluginTask(weak, plugin); });
 }
 
 RefPtr<RenderNode> PluginElement::CreateRenderNode()
@@ -421,8 +415,7 @@ void PluginElement::RunPluginTask(const WeakPtr<PluginElement>& weak, const RefP
     container->RunPlugin(packagePathStr, info.moduleName, info.source, info.moduleResPath, plugin->GetData());
 }
 
-std::string PluginElement::GerPackagePathByBms(
-    const WeakPtr<PluginElement>& weak, RequestPluginInfo& info,
+std::string PluginElement::GerPackagePathByBms(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info,
     const std::vector<std::string>& strList, const std::vector<int32_t>& userIds) const
 {
     std::string packagePathStr;

@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
-#include <string>
-
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
@@ -25,6 +23,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -173,7 +173,7 @@ RefPtr<Component> JSViewFullUpdate::CreateComponent()
     return composedComponent;
 }
 
-RefPtr<NG::CustomNode> JSViewFullUpdate::CreateUINode()
+RefPtr<NG::UINode> JSViewFullUpdate::CreateUINode()
 {
     ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
     // create component, return new something, need to set proper ID
@@ -598,16 +598,8 @@ RefPtr<Component> JSViewPartialUpdate::InitialRender()
     return buildComponent;
 }
 
-RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode()
+void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> customNode)
 {
-    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
-    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
-    viewId_ = std::to_string(viewId);
-    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
-    LOGD("Creating CustomNode with claimed elmtId %{public}d.", viewId);
-    auto customNode = NG::CustomNode::CreateCustomNode(viewId, key);
-    node_ = customNode;
-
     auto appearFunction = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
@@ -655,7 +647,96 @@ RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode()
         jsView->node_.Reset();
     };
     customNode->SetDestroyFunction(std::move(removeFunction));
-    return customNode;
+
+    auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
+    };
+    if (jsViewFunction_->HasMeasure()) {
+        customNode->GetGeometryNode()->SetMeasureFunction(std::move(measureFunc));
+    }
+
+    auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
+    };
+    if (jsViewFunction_->HasLayout()) {
+        customNode->GetGeometryNode()->SetLayoutFunction(std::move(layoutFunc));
+    }
+}
+
+void JSViewPartialUpdate::UpdateNormalFrame(RefPtr<NG::CustomNode> customNode)
+{
+    auto appearFunction = [weak = AceType::WeakClaim(this)]() {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
+        if (jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteAppear();
+        }
+    };
+    customNode->SetAppearFunction(std::move(appearFunction));
+
+    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::UINode> {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, nullptr);
+        if (!jsView->isFirstRender_) {
+            LOGW("the js view has already called initial render");
+            return nullptr;
+        }
+        jsView->isFirstRender_ = false;
+        return jsView->InitialUIRender();
+    };
+    customNode->SetRenderFunction(renderFunction);
+
+    auto updateFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        if (!jsView->needsUpdate_) {
+            LOGW("the js view does not need to update");
+            return;
+        }
+        jsView->needsUpdate_ = false;
+        LOGD("Rerender function start for ComposedElement elmtId %{public}s - start...", jsView->viewId_.c_str());
+        {
+            ACE_SCOPED_TRACE("JSView: ExecuteRerender");
+            jsView->jsViewFunction_->ExecuteRerender();
+        }
+    };
+    customNode->SetUpdateFunction(std::move(updateFunction));
+
+    // partial update relies on remove function
+    auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        LOGD("call remove view function");
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        jsView->Destroy(nullptr);
+        jsView->node_.Reset();
+    };
+    customNode->SetDestroyFunction(std::move(removeFunction));
+}
+
+RefPtr<NG::UINode> JSViewPartialUpdate::CreateUINode()
+{
+    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    viewId_ = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
+
+    if (jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout()) {
+        auto customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);
+        UpdateCustomFrame(customNode);
+        node_ = customNode;
+        return customNode;
+    }
+
+    // normal node donot contain onlayout onmeasure
+    auto normalNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    UpdateNormalFrame(normalNode);
+    node_ = normalNode;
+    return normalNode;
 }
 
 RefPtr<NG::UINode> JSViewPartialUpdate::InitialUIRender()
@@ -693,13 +774,20 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
 void JSViewPartialUpdate::MarkNeedUpdate()
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        auto customNode = node_.Upgrade();
-        if (!customNode) {
+        auto node = node_.Upgrade();
+        if (!node) {
             LOGE("fail to update due to custom Node is null");
             return;
         }
-        needsUpdate_ = true;
-        customNode->MarkNeedUpdate();
+        if (AceType::InstanceOf<NG::CustomNode>(node)) {
+            auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            needsUpdate_ = true;
+            customNode->MarkNeedUpdate();
+        } else if (AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
+            auto customNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
+            needsUpdate_ = true;
+            customNode->MarkNeedUpdate();
+        }
         return;
     }
     JSView::MarkNeedUpdate();

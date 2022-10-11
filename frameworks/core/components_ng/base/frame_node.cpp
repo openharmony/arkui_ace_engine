@@ -255,7 +255,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     // check if need to paint content.
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
+    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
     // TODO: temp use and need to delete.
@@ -402,6 +402,7 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
+    isLayoutDirtyMarked_ = false;
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         auto layoutWrapper =
             MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
@@ -410,15 +411,17 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     }
 
     pattern_->BeforeCreateLayoutWrapper();
-    isLayoutDirtyMarked_ = false;
+    if (!isActive_) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    }
     auto flag = layoutProperty_->GetPropertyChangeFlag();
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
         forceLayout);
     do {
-        if (CheckNeedMeasure(flag) || forceMeasure || !isActive_) {
+        if (CheckNeedMeasure(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
-            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure || !isActive_;
+            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure;
             UpdateChildrenLayoutWrapper(layoutWrapper, forceChildMeasure, false);
             break;
         }
@@ -430,6 +433,12 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         }
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
     } while (false);
+    // check position flag.
+    if (renderContext_->HasPosition()) {
+        layoutWrapper->SetOutOfLayout(true);
+    }
+    layoutWrapper->SetActive(isActive_);
+
     return layoutWrapper;
 }
 

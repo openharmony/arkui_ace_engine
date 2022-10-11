@@ -73,6 +73,10 @@ void TimePickerRowPattern::OnModifyDone()
             refPtr->FireChangeEvent(refresh);
         }
     });
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
 }
 
 void TimePickerRowPattern::SetEventCallback(EventCallback&& value)
@@ -441,6 +445,43 @@ std::string TimePickerRowPattern::AddZeroPrefix(const std::string& value) const
         return std::string("0") + value;                           // add prefix '0'
     }
     return value;
+}
+
+void TimePickerRowPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool TimePickerRowPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
+        HandleDirectionKey(event.code);
+        return true;
+    }
+    return false;
+}
+
+bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
+{
+    if (code == KeyCode::KEY_DPAD_UP) {
+        // Need to update: current selection
+        return true;
+    }
+    if (code == KeyCode::KEY_DPAD_DOWN) {
+        // Need to update: current selection
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

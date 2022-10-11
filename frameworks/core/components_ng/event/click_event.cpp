@@ -58,4 +58,20 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     result.emplace_back(clickRecognizer_);
 }
 
+GestureEventFunc ClickEventActuator::GetClickEvent()
+{
+    auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto actuator = weak.Upgrade();
+        for (const auto& callback : actuator->clickEvents_) {
+            if (callback) {
+                (*callback)(info);
+            }
+        }
+        if (actuator->userCallback_) {
+            (*actuator->userCallback_)(info);
+        }
+    };
+    return callback;
+}
+
 } // namespace OHOS::Ace::NG

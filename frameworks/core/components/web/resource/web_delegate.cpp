@@ -1985,6 +1985,9 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
                 std::string("--user-data-dir=").append(delegate->bundleDataPath_));
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
+            initArgs.web_engine_args_to_add.push_back(
+                std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
+                    "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
             sptr<Surface> surface = surfaceWeak.promote();
             CHECK_NULL_VOID(surface);
             delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);

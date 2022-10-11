@@ -58,6 +58,30 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     window_->SetVsyncCallback(vsyncCallback);
 }
 
+PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+    RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId,
+    RefPtr<PlatformResRegister> platformResRegister)
+    : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
+      weakFrontend_(frontend), instanceId_(instanceId),platformResRegister_(platformResRegister)
+{
+    CHECK_NULL_VOID(frontend);
+    frontendType_ = frontend->GetType();
+    eventManager_ = AceType::MakeRefPtr<EventManager>();
+    eventManager_->SetInstanceId(instanceId);
+    imageCache_ = ImageCache::Create();
+    fontManager_ = FontManager::Create();
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
+                               const uint64_t nanoTimestamp, const uint32_t frameCount) {
+        ContainerScope scope(instanceId);
+        auto context = weak.Upgrade();
+        if (context) {
+            context->OnVsyncEvent(nanoTimestamp, frameCount);
+        }
+    };
+    ACE_DCHECK(window_);
+    window_->SetVsyncCallback(vsyncCallback);
+}
+
 PipelineBase::~PipelineBase()
 {
     LOG_DESTROY();

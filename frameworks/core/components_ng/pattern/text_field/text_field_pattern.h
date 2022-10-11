@@ -179,6 +179,11 @@ public:
         return basicPadding_;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
 private:
     bool focusEventInitialized_ = false;
     void HandleFocusEvent();

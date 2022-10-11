@@ -143,7 +143,7 @@ public:
 
     bool OnBackPressed();
 
-    void AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode);
+    void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
@@ -273,7 +273,7 @@ private:
     UITaskScheduler taskScheduler_;
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
-    std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
+    std::set<WeakPtr<UINode>, NodeCompareWeak<WeakPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
 
     // window on show or on hide

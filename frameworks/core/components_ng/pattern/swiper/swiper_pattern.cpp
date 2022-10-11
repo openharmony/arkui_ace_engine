@@ -95,6 +95,10 @@ void SwiperPattern::OnModifyDone()
         return;
     }
     InitPanEvent(gestureHub);
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
 }
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -287,6 +291,9 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
         if (pattern) {
+            if (info.GetInputEventType() == InputEventType::AXIS) {
+                return;
+            }
             pattern->HandleDragStart();
         }
     };
@@ -294,7 +301,15 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->HandleDragUpdate(info);
+            if (info.GetInputEventType() == InputEventType::AXIS) {
+                if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+                    pattern->ShowPrevious();
+                } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+                    pattern->ShowNext();
+                }
+            } else {
+                pattern->HandleDragUpdate(info);
+            }
         }
     };
 
@@ -302,6 +317,9 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         if (pattern) {
+            if (info.GetInputEventType() == InputEventType::AXIS) {
+                return;
+            }
             pattern->HandleDragEnd(info.GetMainVelocity());
         }
     };
@@ -355,6 +373,36 @@ void SwiperPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void SwiperPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
+        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+        ShowPrevious();
+        return true;
+    }
+    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
+        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+        ShowNext();
+        return true;
+    }
+    return false;
 }
 
 void SwiperPattern::InitAutoPlay()

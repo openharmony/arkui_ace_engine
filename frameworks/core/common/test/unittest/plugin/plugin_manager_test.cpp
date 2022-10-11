@@ -51,7 +51,7 @@ HWTEST_F(PluginManagerTest, AddPluginSubContainer001, TestSize.Level1)
     /**
      * @tc.steps: step2. Add Plugin Sub Container.
      * @tc.expected: step2. Add Plugin Sub Container success.
-    */
+     */
     WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>();
     RefPtr<PluginSubContainer> pluginSubContainer = AceType::MakeRefPtr<PluginSubContainer>(context.Upgrade());
     EXPECT_TRUE(pluginSubContainer != nullptr);
@@ -76,7 +76,7 @@ HWTEST_F(PluginManagerTest, AddNonmatchedContainer001, TestSize.Level1)
     /**
      * @tc.steps: step2. Add Nonmatched Container.
      * @tc.expected: step2. Add Nonmatched Container success.
-    */
+     */
     WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>();
     RefPtr<PluginSubContainer> pluginSubContainer = AceType::MakeRefPtr<PluginSubContainer>(context.Upgrade());
     EXPECT_TRUE(pluginSubContainer != nullptr);
@@ -102,7 +102,7 @@ HWTEST_F(PluginManagerTest, MatchPluginSubContainerWithPluginId001, TestSize.Lev
     /**
      * @tc.steps: step2. Match Plugin SubContainer With Plugin Id.
      * @tc.expected: step2. When no Match Plugin SubContainer With Plugin Id return nullptr.
-    */
+     */
     EXPECT_TRUE(pluginManager.MatchPluginSubContainerWithPluginId(PLUGIN_ID, "PLUGIN_ID") == nullptr);
 }
 } // namespace OHOS::Ace

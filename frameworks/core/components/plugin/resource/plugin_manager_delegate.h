@@ -45,10 +45,10 @@ public:
 
     PluginManagerDelegate() = delete;
     ~PluginManagerDelegate() override;
-    explicit PluginManagerDelegate(const WeakPtr<PipelineContext>& context)
+    explicit PluginManagerDelegate(const WeakPtr<PipelineBase>& context)
         : PluginManagerResource("pluginAdaptor", context), state_(State::WAITINGFORSIZE) {}
 
-    void AddPlugin(const WeakPtr<PipelineContext>& context, const RequestPluginInfo& info);
+    void AddPlugin(const WeakPtr<PipelineBase>& context, const RequestPluginInfo& info);
     void AddPluginCompleteCallback(const OnPluginCompleteCallback& layoutChangeCallback);
     void AddPluginUpdateCallback(const OnPluginUpdateCallback& layoutChangeCallback);
     void AddPluginErrorCallback(const OnPluginErrorCallback& layoutChangeCallback);
@@ -64,7 +64,7 @@ public:
 #endif
 
 private:
-    void CreatePlatformResource(const WeakPtr<PipelineContext>& context, const RequestPluginInfo& info);
+    void CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestPluginInfo& info);
     void RegisterEvent();
     void UnregisterEvent();
 

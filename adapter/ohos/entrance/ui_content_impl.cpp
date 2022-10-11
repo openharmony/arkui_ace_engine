@@ -38,6 +38,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/ohos/entrance/capability_registry.h"
+#include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
@@ -49,6 +50,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/plugin_manager.h"
@@ -67,6 +69,7 @@ static std::atomic<int32_t> gInstanceId = 0;
 static std::atomic<int32_t> gSubWindowInstanceId = 100000;
 static std::atomic<int32_t> gSubInstanceId = 1000000;
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
+const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
 const int32_t REQUEST_CODE = -1;
 
 using ContentFinishCallback = std::function<void()>;
@@ -263,6 +266,10 @@ void UIContentImpl::DestroyUIDirector()
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
+    if (window && StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+        CommonInitialize(window, url, storage);
+        return;
+    }
     CommonInitialize(window, url, storage);
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
     // run page.
@@ -297,6 +304,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     startUrl_ = contentInfo;
     if (!window_) {
         LOGE("Null window, can't initialize UI content");
+        return;
+    }
+    if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+        InitializeSubWindow(window_, true);
         return;
     }
     if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_PREFIX)) {
@@ -483,7 +494,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             }
         }
     }
-    if (appInfo && flutterAssetManager) {
+    auto hapInfo = context->GetHapModuleInfo();
+    if (appInfo && flutterAssetManager && hapInfo) {
         /* Note: DO NOT modify the sequence of adding libPath  */
         std::string nativeLibraryPath = appInfo->nativeLibraryPath;
         std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
@@ -498,8 +510,14 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             libPaths.push_back(libPath);
             LOGI("napi lib path = %{private}s", libPath.c_str());
         }
+        auto isLibIsolated = hapInfo->isLibIsolated;
         if (!libPaths.empty()) {
-            flutterAssetManager->SetLibPath(libPaths);
+            if (!isLibIsolated) {
+                flutterAssetManager->SetLibPath("default", libPaths);
+            } else {
+                std::string appLibPathKey = hapInfo->bundleName + "/" + hapInfo->moduleName;
+                flutterAssetManager->SetLibPath(appLibPathKey, libPaths);
+            }
         }
     }
     std::string hapPath; // hap path in sandbox
@@ -682,7 +700,15 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
-    Platform::AceContainer::DestroyContainer(instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    if (!container) {
+        return;
+    }
+    if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
+        Platform::DialogContainer::DestroyContainer(instanceId_);
+    } else {
+        Platform::AceContainer::DestroyContainer(instanceId_);
+    }
 }
 
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
@@ -727,7 +753,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
 void UIContentImpl::SetBackgroundColor(uint32_t color)
 {
     LOGI("UIContentImpl::SetBackgroundColor color is %{public}u", color);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
     if (!container) {
         LOGE("SetBackgroundColor failed: container is null.");
         return;
@@ -751,9 +777,21 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed called");
-    if (Platform::AceContainer::OnBackPressed(instanceId_)) {
-        LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed return true");
-        return true;
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    if (!container) {
+        return false;
+    }
+    if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
+        if (Platform::DialogContainer::OnBackPressed(instanceId_)) {
+            LOGI("UIContentImpl::ProcessBackPressed DialogContainer return true");
+            return true;
+        }
+    } else {
+        LOGI("UIContentImpl::ProcessBackPressed AceContainer");
+        if (Platform::AceContainer::OnBackPressed(instanceId_)) {
+            LOGI("UIContentImpl::ProcessBackPressed AceContainer return true");
+            return true;
+        }
     }
     LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed return false");
     return false;
@@ -761,13 +799,13 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (container) {
-        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        Platform::FlutterAceView::DispatchTouchEvent(aceView, pointerEvent);
-        return true;
-    }
-    return false;
+    LOGI("UIContentImpl::ProcessPointerEvent begin");
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto aceView = static_cast<Platform::FlutterAceView*>(container->GetView());
+    Platform::FlutterAceView::DispatchTouchEvent(aceView, pointerEvent);
+    LOGI("UIContentImpl::ProcessPointerEvent end");
+    return true;
 }
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
@@ -775,12 +813,10 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
     LOGI("AceAbility::OnKeyUp called,touchEvent info: keyCode is %{private}d,"
          "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (container) {
-        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        return Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
-    }
-    return false;
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto aceView = static_cast<Platform::FlutterAceView*>(container->GetView());
+    return Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
 }
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
@@ -971,7 +1007,7 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
     window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
 }
 
-void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
+void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
 {
     window_ = window;
     LOGI("The window name is %{public}s", window->GetWindowName().c_str());
@@ -980,17 +1016,21 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
         return;
     }
 
-    RefPtr<Platform::AceContainer> container;
+    RefPtr<Container> container;
     instanceId_ = gSubInstanceId.fetch_add(1, std::memory_order_relaxed);
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
-    container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
-        runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
-            // Sub-window ,just return.
-            LOGI("Content event callback");
-        }),
-        false, true);
+    if (isDialog) {
+        container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
+    } else {
+        container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
+            runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                // Sub-window ,just return.
+                LOGI("Content event callback");
+            }),
+            false, true);
+    }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
     touchOutsideListener_ = new TouchOutsideListener(instanceId_);

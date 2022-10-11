@@ -15,6 +15,10 @@
 
 #include "core/components_ng/base/geometry_node.h"
 
+#include <utility>
+
+#include "core/components_ng/layout/layout_wrapper.h"
+
 namespace OHOS::Ace::NG {
 
 void GeometryNode::Reset()
@@ -38,7 +42,27 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     }
     node->parentGlobalOffset_ = parentGlobalOffset_;
     node->parentLayoutConstraint_ = parentLayoutConstraint_;
+    node->layoutFunc_ = layoutFunc_;
+    node->measureFunc_ = measureFunc_;
     return node;
+}
+
+bool GeometryNode::Measure(NG::LayoutWrapper* layoutWrapper)
+{
+    if (measureFunc_) {
+        measureFunc_(layoutWrapper);
+        return true;
+    }
+    return false;
+}
+
+bool GeometryNode::Layout(NG::LayoutWrapper* layoutWrapper)
+{
+    if (layoutFunc_) {
+        layoutFunc_(layoutWrapper);
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

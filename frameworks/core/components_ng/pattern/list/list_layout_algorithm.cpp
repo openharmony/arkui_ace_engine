@@ -193,9 +193,14 @@ void ListLayoutAlgorithm::LayoutList(
             LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalCount);
             jumpIndex_ = std::clamp(jumpIndex_.value(), 0, totalCount - 1);
         }
+        if (lanes_.has_value() && lanes_.value() > 1) {
+            jumpIndex_ = jumpIndex_.value() - jumpIndex_.value() % lanes_.value();
+        }
         LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0.0f);
-        float endPos = itemPosition_.begin()->second.second;
-        LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex(), endPos);
+        if (jumpIndex_.value() > 0) {
+            float endPos = itemPosition_.begin()->second.first - spaceWidth_;
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
+        }
     } else if (NonNegative(currentOffset_)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(preStartIndex_);
         if (!wrapper) {

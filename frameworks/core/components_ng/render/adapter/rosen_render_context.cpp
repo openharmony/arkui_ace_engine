@@ -40,6 +40,7 @@
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
+#include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/image_painter.h"
@@ -132,6 +133,14 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (bgLoadingCtx_ && bgLoadingCtx_->GetCanvasImage()) {
         PaintBackground();
+    }
+
+    if (bdImageLoadingCtx_ && bdImageLoadingCtx_->GetCanvasImage()) {
+        PaintBorderImage();
+    }
+
+    if (GetBorderImageGradient()) {
+        PaintBorderImageGradient();
     }
 
     if (propGradient_) {
@@ -405,6 +414,132 @@ void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
         static_cast<uint32_t>(value.styleRight.value_or(BorderStyle::SOLID)),
         static_cast<uint32_t>(value.styleBottom.value_or(BorderStyle::SOLID)));
     RequestNextFrame();
+}
+
+void RosenRenderContext::PaintBorderImage()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto paintBorderImageTask = [weak = WeakClaim(this)](std::shared_ptr<SkCanvas> canvas) {
+        auto rosenRenderContext = weak.Upgrade();
+        CHECK_NULL_VOID(rosenRenderContext);
+        CHECK_NULL_VOID(rosenRenderContext->GetBorderImage());
+        CHECK_NULL_VOID(rosenRenderContext->bdImageLoadingCtx_);
+        auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(rosenRenderContext->bdImageLoadingCtx_->GetCanvasImage());
+        CHECK_NULL_VOID(skiaCanvasImage);
+        auto skImage = skiaCanvasImage->GetCanvasImage();
+        auto layoutProperty = rosenRenderContext->GetHost()->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        auto paintRect = rosenRenderContext->GetPaintRectWithoutTransform();
+        if (NearZero(paintRect.Width()) || NearZero(paintRect.Height())) {
+            return;
+        }
+
+        RSCanvas rsCanvas(&canvas);
+        RSPen pen;
+        pen.SetAntiAlias(true);
+        rsCanvas.AttachPen(pen);
+        rsCanvas.Save();
+
+        BorderImagePainter borderImagePainter(rosenRenderContext->GetBdImage(),
+            layoutProperty->GetBorderWidthProperty(), paintRect.GetSize(), rosenRenderContext->GetBorderImage().value(),
+            skImage, NG::PipelineContext::GetCurrentContext()->GetDipScale());
+        borderImagePainter.InitPainter();
+
+        auto position = OffsetF(0.0, 0.0);
+        if (layoutProperty->GetMarginProperty()) {
+            auto margin = *layoutProperty->GetMarginProperty();
+            auto scaleProperty = ScaleProperty::CreateScaleProperty();
+            const auto& rect = rosenRenderContext->GetHost()->GetGeometryNode()->GetFrameRect();
+            position += OffsetF(ConvertToPx(margin.left, scaleProperty, rect.Width()).value_or(0.0),
+                ConvertToPx(margin.top, scaleProperty, rect.Height()).value_or(0.0));
+        }
+        borderImagePainter.PaintBorderImage(position, rsCanvas);
+        rsCanvas.Restore();
+    };
+
+    rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE, paintBorderImageTask);
+}
+
+DataReadyNotifyTask RosenRenderContext::CreateBorderImageDataReadyCallback()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        auto rosenRenderContext = weak.Upgrade();
+        CHECK_NULL_VOID(rosenRenderContext);
+        auto imageSourceInfo = rosenRenderContext->GetBorderImageSource().value_or(ImageSourceInfo(""));
+        if (imageSourceInfo != sourceInfo) {
+            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
+                imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
+            return;
+        }
+        rosenRenderContext->bdImageLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
+    };
+    return task;
+}
+
+LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        auto rosenRenderContext = weak.Upgrade();
+        CHECK_NULL_VOID(rosenRenderContext);
+        auto imageSourceInfo = rosenRenderContext->GetBorderImageSource().value_or(ImageSourceInfo(""));
+        if (imageSourceInfo != sourceInfo) {
+            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
+                imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
+            return;
+        }
+        if (rosenRenderContext->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
+            rosenRenderContext->PaintBorderImage();
+        }
+    };
+    return task;
+}
+
+void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
+
+void RosenRenderContext::OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (!bdImageLoadingCtx_ || borderImageSourceInfo != bdImageLoadingCtx_->GetSourceInfo()) {
+        LoadNotifier bgLoadNotifier(
+            CreateBorderImageDataReadyCallback(), CreateBorderImageLoadSuccessCallback(), nullptr);
+        bdImageLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(borderImageSourceInfo, std::move(bgLoadNotifier));
+        CHECK_NULL_VOID(bdImageLoadingCtx_);
+        bdImageLoadingCtx_->LoadImageData();
+    }
+}
+
+void RosenRenderContext::OnHasBorderImageSliceUpdate(bool tag) {}
+void RosenRenderContext::OnHasBorderImageWidthUpdate(bool tag) {}
+void RosenRenderContext::OnHasBorderImageOutsetUpdate(bool tag) {}
+void RosenRenderContext::OnHasBorderImageRepeatUpdate(bool tag) {}
+void RosenRenderContext::OnBorderImageGradientUpdate(const Gradient& gradient)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (!gradient.IsValid()) {
+        LOGE("Gradient not valid");
+        return;
+    }
+    if (GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
+        PaintBorderImageGradient();
+    }
+}
+
+void RosenRenderContext::PaintBorderImageGradient()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto PaintBorderImageGradientTask = [weak = WeakClaim(this)](std::shared_ptr<SkCanvas> canvas) {
+        auto rosenRenderContext = weak.Upgrade();
+        CHECK_NULL_VOID(rosenRenderContext);
+        CHECK_NULL_VOID(rosenRenderContext->GetBorderImageGradient());
+        auto gradient = rosenRenderContext->GetBorderImageGradient().value();
+        if (!gradient.IsValid()) {
+            LOGE("Gradient not valid");
+            return;
+        }
+        // TODO: PaintBorderImageGradient
+    };
+
+    rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE, PaintBorderImageGradientTask);
 }
 
 void RosenRenderContext::OnModifyDone()

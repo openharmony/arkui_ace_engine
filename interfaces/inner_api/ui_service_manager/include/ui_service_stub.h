@@ -24,21 +24,21 @@
 #include <iremote_object.h>
 #include <iremote_stub.h>
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
-class UIServiceStub : public IRemoteStub<IUIService> {
+class ACE_FORCE_EXPORT UIServiceStub : public IRemoteStub<IUIService> {
 public:
     UIServiceStub();
-    virtual ~UIServiceStub();
-
-    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    ~UIServiceStub() override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
-
-    int OnRequestCallBackInner(MessageParcel& data, MessageParcel& reply);
-    int OnPushCallBackInner(MessageParcel& data, MessageParcel& reply);
-    int OnReturnRequestInner(MessageParcel& data, MessageParcel& reply);
-    using RequestFuncType = int (UIServiceStub::*)(MessageParcel& data, MessageParcel& reply);
+    int32_t OnRequestCallBackInner(MessageParcel& data, MessageParcel& reply);
+    int32_t OnPushCallBackInner(MessageParcel& data, MessageParcel& reply);
+    int32_t OnReturnRequestInner(MessageParcel& data, MessageParcel& reply);
+    using RequestFuncType = int32_t (UIServiceStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, RequestFuncType> requestFuncMap_;
 
     DISALLOW_COPY_AND_MOVE(UIServiceStub);
@@ -52,8 +52,8 @@ class UIServiceCallbackRecipient : public IRemoteObject::DeathRecipient {
 public:
     using RemoteDiedHandler = std::function<void(const wptr<IRemoteObject>&)>;
     explicit UIServiceCallbackRecipient(RemoteDiedHandler handler);
-    virtual ~UIServiceCallbackRecipient();
-    virtual void OnRemoteDied(const wptr<IRemoteObject>& remote);
+    ~UIServiceCallbackRecipient() override;
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
 
 private:
     RemoteDiedHandler handler_;

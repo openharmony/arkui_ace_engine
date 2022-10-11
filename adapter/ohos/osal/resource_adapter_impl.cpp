@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/osal/resource_adapter_impl.h"
 
+#include <dirent.h>
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
@@ -81,6 +83,20 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_ICON
 };
 
+bool IsDirExist(const std::string& path)
+{
+    char realPath[PATH_MAX] = { 0x00 };
+    if (realpath(path.c_str(), realPath) == nullptr) {
+        return false;
+    }
+    DIR *dir = opendir(realPath);
+    if (dir) {
+        closedir(dir);
+        return true;
+    }
+    return false;
+}
+
 } // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
@@ -103,7 +119,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
         resConfig->GetColorMode(), resConfig->GetInputDevice());
     sysResourceManager_ = newResMgr;
     resourceManager_ = sysResourceManager_;
-    packagePathStr_ = resPath;
+    packagePathStr_ = IsDirExist(resPath) ? resPath : std::string();
     resConfig_ = resConfig;
 }
 
@@ -278,8 +294,11 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
 
 std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
 {
-    return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
     // as web component not support resource format: resource://RAWFILE/{fileName}, use old format
+    if (!packagePathStr_.empty()) {
+        return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
+    }
+    return "resource://RAWFILE/" + fileName;
 }
 
 bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)

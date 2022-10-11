@@ -116,6 +116,7 @@ public:
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
     static void JsBorderImage(const JSCallbackInfo& info);
+    static void JsBorderImageForNG(const JSRef<JSObject>& object);
     static void ParseBorderImageSource(
         const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage, RefPtr<Decoration>& boxDecoration);
     static void ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
@@ -125,6 +126,7 @@ public:
     static void ParseBorderImageDimension(
         const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension);
     static void ParseBorderImageLinearGradient(const JSRef<JSVal>& args, RefPtr<Decoration>& backDecoration);
+    static void ParseBorderImageLinearGradientForNG(const JSRef<JSVal>& args);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsColorBlend(const JSCallbackInfo& info);
     static void JsBackdropBlur(const JSCallbackInfo& info);
@@ -142,6 +144,8 @@ public:
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
+    static void JsOnClick(const JSCallbackInfo& info);
+    static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);

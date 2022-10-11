@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/memory/ace_type.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -41,7 +42,7 @@ public:
     using ErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using Method = std::string;
 
-    PluginManagerResource(const std::string& type, const WeakPtr<PipelineContext>& context)
+    PluginManagerResource(const std::string& type, const WeakPtr<PipelineBase>& context)
         : type_(type), context_(context)
     {}
     virtual ~PluginManagerResource() = default;
@@ -78,7 +79,7 @@ protected:
     int64_t id_ = INVALID_ID;
     std::string hash_;
     std::string type_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_RESOURCE_PLUGIN_MANAGER_RESOURCE_H

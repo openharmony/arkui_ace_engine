@@ -146,6 +146,7 @@ public:
         panda::JSNApi::SetBundle(vm_, isBundle);
     }
 
+    bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
     void AddRootView(const panda::Global<panda::ObjectRef> &RootView)
     {
         RootView_ = RootView;

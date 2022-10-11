@@ -16,11 +16,13 @@
 #include "frameworks/core/common/debugger/connect_server.h"
 #include <fstream>
 #include <iostream>
+#include <shared_mutex>
 #include <sys/types.h>
 #include <thread>
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
+std::shared_mutex g_sendMutex;
 
 void ConnectServer::RunServer()
 {
@@ -69,6 +71,7 @@ void ConnectServer::StopServer()
 
 void ConnectServer::SendMessage(const std::string& message) const
 {
+    std::unique_lock<std::shared_mutex> lock(g_sendMutex);
     try {
         if (webSocket_ == nullptr) {
             LOGE("Error Excpetion: SendMessage Failed");

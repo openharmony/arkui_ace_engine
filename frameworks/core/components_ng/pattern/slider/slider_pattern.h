@@ -62,6 +62,11 @@ public:
         return MakeRefPtr<SliderEventHub>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -78,6 +83,10 @@ private:
     void HandledGestureEvent();
     void UpdateValueByLocalLocation(const std::optional<Offset>& localLocation);
     void FireChangeEvent(int32_t mode) const;
+
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    bool MoveStep(int32_t stepCount);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };

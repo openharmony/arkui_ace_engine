@@ -23,6 +23,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace {
 
@@ -48,7 +49,7 @@ public:
     virtual RefPtr<Component> CreateComponent() = 0;
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
 
-    virtual RefPtr<NG::CustomNode> CreateUINode()
+    virtual RefPtr<NG::UINode> CreateUINode()
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
@@ -132,7 +133,7 @@ protected:
     }
 
     WeakPtr<ComposedElement> element_;
-    WeakPtr<NG::CustomNode> node_;
+    WeakPtr<NG::UINode> node_;
     // view id for custom view itself
     std::string viewId_;
 
@@ -153,7 +154,7 @@ public:
 
     // TODO: delete this after the toolchain for partial update is ready.
     RefPtr<NG::UINode> InternalRender();
-    RefPtr<NG::CustomNode> CreateUINode() override;
+    RefPtr<NG::UINode> CreateUINode() override;
 
     void MarkNeedUpdate() override;
 
@@ -252,8 +253,7 @@ public:
     RefPtr<Component> CreateComponent() override;
 
     RefPtr<NG::UINode> InitialUIRender();
-    RefPtr<NG::CustomNode> CreateUINode() override;
-
+    RefPtr<NG::UINode> CreateUINode() override;
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
@@ -340,6 +340,9 @@ private:
     // Destroy deleted the ref, and thereby triggers the deletion
     // GC -> JS View Object -> JSView C++ Object
     JSRef<JSObject> jsViewObject_;
+
+    void UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> customNode);
+    void UpdateNormalFrame(RefPtr<NG::CustomNode> customNode);
 };
 
 } // namespace OHOS::Ace::Framework

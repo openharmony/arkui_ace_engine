@@ -700,7 +700,6 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     HdcRegister::Get().StartHdcRegister(instanceId);
-    ConnectServerManager::Get();
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
@@ -714,6 +713,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
         return;
     }
     jsFront->SetInstanceName(instanceName);
+    ConnectServerManager::Get();
 }
 
 void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
@@ -756,6 +756,7 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), callback);
@@ -769,6 +770,7 @@ void AceContainer::SetViewNew(
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
@@ -1001,7 +1003,7 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
         }
     }
     if (flutterAssetManager) {
-        flutterAssetManager->SetLibPath(libPath);
+        flutterAssetManager->SetLibPath("default", libPath);
     }
 }
 

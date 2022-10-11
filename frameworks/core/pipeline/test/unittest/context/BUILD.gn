@@ -212,6 +212,7 @@ ohos_unittest("PipelineContextTest") {
     "$ace_root/frameworks/core/mock/mock_trace_id_impl.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/pipeline/test/unittest/mock/mock_element_register.cpp",
+    "$ace_root/frameworks/core/pipeline/test/unittest/mock/mock_layout_inspector.cpp",
   ]
 
   # add sources only needed by wearable like watch.

@@ -241,6 +241,7 @@ template("declarative_js_engine") {
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_context.cpp",
       "jsview/js_view_functions.cpp",
+      "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
       "jsview/js_water_flow.cpp",
       "jsview/js_water_flow_item.cpp",
@@ -405,6 +406,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_local_storage.cpp",
       "jsview/js_persistent.cpp",
       "jsview/js_view_functions.cpp",
+      "jsview/js_view_measure_layout.cpp",
       "sharedata/js_share_data.cpp",
 
       # jsviews

@@ -629,7 +629,7 @@ void QJSDeclarativeEngine::FireExternalEvent(
         return;
     }
     auto textureId = static_cast<uint64_t>(xcomponent->GetTextureId());
-    LOGE("FireExternalEvent textureId = %{public}"PRIu64, textureId);
+    LOGE("FireExternalEvent textureId = %{public}" PRIu64, textureId);
     nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
 #endif
 

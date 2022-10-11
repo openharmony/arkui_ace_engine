@@ -54,6 +54,7 @@ public:
     void OnRejected(size_t touchId) override;
     void OnPending(size_t touchId) override;
     bool HandleEvent(const TouchEvent& point) override;
+    bool HandleEvent(const AxisEvent& event) override;
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
     void ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers);

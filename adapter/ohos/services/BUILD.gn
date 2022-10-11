@@ -12,10 +12,7 @@
 # limitations under the License.
 
 group("services_target") {
-  deps = [
-    "uiservice:uiservice",
-    "uiservice/uiservice_plugins/uiservice_dialog:uiservicedialog",
-  ]
+  deps = [ "uiservice:uiservice" ]
 }
 
 group("unittest") {
