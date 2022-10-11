@@ -533,6 +533,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
     auto paintFlag = paintProperty_->GetPropertyChangeFlag();
     if (CheckNoChanged(layoutFlag | paintFlag)) {
+        LOGD("MarkDirtyNode: flag not changed");
         return;
     }
     auto context = GetContext();
@@ -540,6 +541,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 
     if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
         if (isLayoutDirtyMarked_) {
+            LOGD("MarkDirtyNode: isLayoutDirtyMarked is true");
             return;
         }
         isLayoutDirtyMarked_ = true;
@@ -547,6 +549,8 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
             auto parent = GetAncestorNodeOfFrame();
             if (parent) {
                 parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            } else {
+                context->AddDirtyLayoutNode(Claim(this));
             }
             return;
         }

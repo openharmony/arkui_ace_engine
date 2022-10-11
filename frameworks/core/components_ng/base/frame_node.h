@@ -247,6 +247,11 @@ public:
 
     OffsetF GetOffsetRelativeToWindow() const;
 
+    bool IsOnMainTree() const
+    {
+        return onMainTree_;
+    }
+
 private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
