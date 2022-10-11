@@ -18,32 +18,15 @@
 
 #include <string>
 
-#include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
-#include "base/utils/macros.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/popup_param.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT DialogView {
 public:
     static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode);
-
-    static RefPtr<FrameNode> CreateDialogWithType(DialogType type);
-
-    static void BuildChild(const RefPtr<FrameNode>& dialogNode, const DialogProperties& dialogProperties,
-        std::string& data, const RefPtr<DialogTheme>& theme, const RefPtr<UINode>& customNode);
-
-    static RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons,
-        const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dialog);
-    // build ActionSheet items
-    static RefPtr<FrameNode> BuildSheet(const std::vector<ActionSheetInfo>& sheets,
-        const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dialog);
 };
 } // namespace OHOS::Ace::NG
 
