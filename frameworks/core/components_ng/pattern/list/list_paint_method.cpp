@@ -33,8 +33,7 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
     int32_t endIndex = endIndex_;
     float startMargin = divider_.startMargin.ConvertToPx();
 
-    return [dividerPainter, startIndex, endIndex, itemPosition = std::move(itemPosition_), startMargin](
-               RSCanvas& canvas) { dividerPainter.DrawListLines(canvas, startIndex, endIndex,
-               itemPosition, startMargin); };
+    return [dividerPainter, startIndex, endIndex, itemPosition = std::move(itemPosition_), startMargin](RSCanvas& canvas)
+        { dividerPainter.DrawListLines(canvas, startIndex, endIndex, itemPosition, startMargin); };
 }
 } // namespace OHOS::Ace::NG
