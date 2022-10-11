@@ -19,27 +19,11 @@
 #include <functional>
 
 #include "core/animation/curve.h"
-#include "core/components/scroll/scroll_controller_interface.h"
+#include "core/components/scroll/scroll_controller.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
-
-constexpr uint32_t POSITION_MIDDLE = 0;
-constexpr uint32_t POSITION_TOP = 1 << 0;
-constexpr uint32_t POSITION_BOTTOM = 1 << 1;
-
-enum class ScrollEvent : size_t {
-    SCROLL_TOP = 0,
-    SCROLL_BOTTOM,
-    SCROLL_TOUCHUP,
-    SCROLL_END,
-    SCROLL_POSITION,
-    SCROLL_EDGE,
-    SCROLL_LEFT,
-    SCROLL_RIGHT,
-    UNKNOWN,
-};
 
 using OnScrollFunc = std::function<void(const std::string&)>;
 
@@ -86,7 +70,7 @@ private:
 
 using ScrollEventFunc = std::function<void(std::shared_ptr<ScrollEventInfo>&)>;
 class ACE_EXPORT ScrollPositionController : public ScrollController {
-    DECLARE_ACE_TYPE(ScrollPositionController, AceType);
+    DECLARE_ACE_TYPE(ScrollPositionController, ScrollController);
 
 public:
     ScrollPositionController() = default;
@@ -125,7 +109,7 @@ public:
     double GetCurrentPosition() const;
     Axis GetScrollDirection() const override;
 
-    void JumpTo(int32_t index, int32_t source = SCROLL_FROM_JUMP) override;
+    void JumpTo(int32_t index, int32_t source) override;
     void JumpTo(double position);
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
     bool AnimateTo(double position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,

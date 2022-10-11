@@ -154,6 +154,28 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
     return currentSubwindow_;
 }
 
+void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        LOGI("Subwindow is null, add a new one.");
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    subwindow->ShowPopup(newComponent, disableTouchEvent);
+}
+
+bool SubwindowManager::CancelPopup(const std::string& id)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        return subwindow->CancelPopup(id);
+    }
+    return false;
+}
+
 void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
 {
     auto containerId = Container::CurrentId();
@@ -191,4 +213,40 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects)
     }
 }
 
+RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
+{
+    auto containerId = Container::CurrentId();
+    LOGI("SubwindowManager::GetOrCreateSubWindow containerId = %{public}d.", containerId);
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        LOGI("Subwindow is null, add a new one.");
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        AddSubwindow(containerId, subwindow);
+    }
+    return subwindow;
+}
+
+void SubwindowManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+{
+    auto subwindow = GetOrCreateSubWindow();
+    CHECK_NULL_VOID(subwindow);
+    subwindow->ShowToast(message, duration, bottom);
+}
+
+void SubwindowManager::ShowDialog(const std::string& title, const std::string& message,
+    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
+    const std::set<std::string>& dialogCallbacks)
+{
+    auto subwindow = GetOrCreateSubWindow();
+    CHECK_NULL_VOID(subwindow);
+    subwindow->ShowDialog(title, message, buttons, autoCancel, std::move(napiCallback), dialogCallbacks);
+}
+
+void SubwindowManager::ShowActionMenu(const std::string& title,
+    const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+{
+    auto subwindow = GetOrCreateSubWindow();
+    CHECK_NULL_VOID(subwindow);
+    subwindow->ShowActionMenu(title, button, std::move(callback));
+}
 } // namespace OHOS::Ace

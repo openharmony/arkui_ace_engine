@@ -103,8 +103,8 @@ void TextFieldPattern::UpdateConfiguration()
     MiscServices::Configuration configuration;
     LOGI("Enter key type %{public}d", (int32_t)GetTextInputActionValue(TextInputAction::DONE));
     configuration.SetEnterKeyType(
-        static_cast<MiscServices::EnterKeyType>((int32_t)GetTextInputActionValue(TextInputAction::DONE)));
-    configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
+        static_cast<MiscServices::EnterKeyType>(static_cast<int32_t>(GetTextInputActionValue(TextInputAction::DONE))));
+    configuration.SetTextInputType(static_cast<MiscServices::TextInputType>(static_cast<int32_t>(keyboard_)));
     MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
 }
 #endif
@@ -123,7 +123,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         LOGD("OnDirtyLayoutWrapperSwap paragraph is null");
         return false;
     }
-    paragraph_ = textFieldLayoutAlgorithm->GetParagraph();
+    paragraph_ = paragraph;
     textRect_ = textFieldLayoutAlgorithm->GetTextRect();
     imageRect_ = textFieldLayoutAlgorithm->GetTextRect();
     if (caretUpdateType_ == CaretUpdateType::INPUT) {

@@ -29,10 +29,12 @@
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
+#include "core/common/card_scope.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -224,8 +226,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
             InitJsExportsUtilObject();
             InitJsNativeModuleObject();
             InitPerfUtilModule();
-        }
-        if (!isModuleInitialized_) {
             InitJsContextModuleObject();
         }
     }
@@ -315,6 +315,9 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
+
+    //preload getContext
+    JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
 
     // preload perfutil
     shared_ptr<JsValue> perfObj = arkRuntime->NewObject();
@@ -797,9 +800,10 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
         if (delegate && delegate->GetAssetManager()) {
             std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
+            auto appLibPathKey = delegate->GetAssetManager()->GetAppLibPathKey();
             if (!packagePath.empty()) {
                 auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
-                arkNativeEngine->SetPackagePath(packagePath);
+                arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
             }
         }
 
@@ -960,6 +964,50 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
     return true;
 }
 
+bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string &fileName, uint64_t cardId)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("ExecuteCardAbc failed, runtime is nullptr");
+        return false;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("ExecuteCardAbc failed, container is nullptr");
+        return false;
+    }
+
+    auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+    if (!frontEnd) {
+        LOGE("ExecuteCardAbc failed, frontEnd is nullptr");
+        return false;
+    }
+
+    auto delegate = frontEnd->GetDelegate();
+    if (!delegate) {
+        LOGE("ExecuteCardAbc failed, delegate is nullptr");
+        return false;
+    }
+
+    std::vector<uint8_t> content;
+    if (!delegate->GetAssetContent(fileName, content)) {
+        LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+        return true;
+    }
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
+    const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
+#else
+    const std::string& abcPath = fileName;
+#endif
+    CardScope cardScope(cardId);
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
+        LOGE("ExecuteCardAbc EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
+        return false;
+    }
+    return true;
+}
+
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs");
@@ -988,9 +1036,11 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
         if (isMainPage) {
+#if !defined(PREVIEW)
             if (LoadJsWithModule(urlName)) {
                 return;
             }
+#endif
             if (!ExecuteAbc("commons.abc")) {
                 return;
             }
@@ -1021,8 +1071,14 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
             arkRuntime->SetPathResolveCallback(bundleName_, assetPath_);
             arkRuntime->SetBundle(isBundle_);
-            if (!runtime->ExecuteJsBin(urlName)) {
-                LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+            std::vector<uint8_t> content;
+            if (!delegate->GetAssetContent("modules.abc", content)) {
+                LOGE("GetAssetContent \"%{public}s\" failed.", urlName.c_str());
+                return;
+            }
+            if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), urlName)) {
+                LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.c_str());
+                return;
             }
         } else {
             ExecuteAbc(urlName);
@@ -1084,6 +1140,12 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
         return true;
     }
     return ExecuteAbc(urlName.value());
+}
+
+bool JsiDeclarativeEngine::LoadCard(const std::string& url, uint64_t cardId)
+{
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadCard");
+    return ExecuteCardAbc(url, cardId);
 }
 
 #if defined(PREVIEW)

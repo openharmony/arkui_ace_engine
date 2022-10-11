@@ -130,9 +130,7 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double y)
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     jumpInterval_ = Dimension(pickerTheme->GetJumpInterval().ConvertToPx(), DimensionUnit::PX);
     // the abs of drag delta is less than jump interval.

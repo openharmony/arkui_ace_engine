@@ -16,7 +16,6 @@
 #include "core/common/plugin_manager.h"
 
 #include "base/log/log.h"
-#include "core/common/plugin_utils.h"
 
 namespace OHOS::Ace {
 std::shared_ptr<PluginUtils> PluginManager::pluginUtils_ = nullptr;

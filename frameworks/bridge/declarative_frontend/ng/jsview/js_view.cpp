@@ -45,7 +45,7 @@ RefPtr<Component> JSViewFullUpdate::CreateComponent()
     return nullptr;
 }
 
-RefPtr<NG::CustomNode> JSViewFullUpdate::CreateUINode()
+RefPtr<NG::UINode> JSViewFullUpdate::CreateUINode()
 {
     ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
     // create component, return new something, need to set proper ID
@@ -122,7 +122,7 @@ std::string JSViewFullUpdate::AddChildById(const std::string& viewId, const JSRe
     return "";
 }
 
-RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode()
+RefPtr<NG::UINode> JSViewPartialUpdate::CreateUINode()
 {
     ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
     auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
@@ -187,13 +187,19 @@ RefPtr<NG::UINode> JSViewPartialUpdate::InitialUIRender()
 
 void JSViewPartialUpdate::MarkNeedUpdate()
 {
-    auto customNode = node_.Upgrade();
-    if (!customNode) {
+    auto node = node_.Upgrade();
+    if (!node) {
         LOGE("fail to update due to custom Node is null");
         return;
     }
     needsUpdate_ = true;
-    customNode->MarkNeedUpdate();
+    if (AceType::InstanceOf<NG::CustomNode>(node)) {
+        auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+        customNode->MarkNeedUpdate();
+    } else if (AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
+        auto customNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
+        customNode->MarkNeedUpdate();
+    }
 }
 
 /**

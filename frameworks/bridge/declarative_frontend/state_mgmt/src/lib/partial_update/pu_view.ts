@@ -51,7 +51,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   protected get localStorage_() {
     if (!this.localStoragebackStore_) {
-      console.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
+      stateMgmtConsole.info(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
       this.localStoragebackStore_ = new LocalStorage({ /* emty */ });
     }
     return this.localStoragebackStore_;
@@ -63,7 +63,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return;
     }
     if (this.localStoragebackStore_) {
-      console.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+      stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
     }
     this.localStoragebackStore_ = instance;
   }
@@ -92,15 +92,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.localStoragebackStore_ = undefined;
     if (parent) {
       // this View is not a top-level View
-      console.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+      stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
       this.localStorage_ = parent.localStorage_;
     } else if (localStorage) {
       this.localStorage_ = localStorage;
-      console.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
+      stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
     }
 
     SubscriberManager.Get().add(this);
-    console.debug(`${this.constructor.name}(${this.id__()}): constructor done`);
+    stateMgmtConsole.debug(`${this.constructor.name}(${this.id__()}): constructor done`);
   }
 
   // globally unique id, this is different from compilerAssignedUniqueChildId!
@@ -131,12 +131,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
-    console.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
+    stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
     this.syncInstanceId();
 
     let cb = this.watchedProps.get(varName)
     if (cb) {
-      console.debug(`   .. calling @Watch function`);
+      stateMgmtConsole.debug(`   .. calling @Watch function`);
       cb.call(this, varName);
     }
 
@@ -146,10 +146,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
         // do not need to do this every time
         this.markNeedUpdate();
       }
-      console.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': elmtIds affected by value change [${Array.from(dependentElmtIds).toString()}].`)
+      stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': elmtIds affected by value change [${Array.from(dependentElmtIds).toString()}].`)
       const union: Set<number> = new Set<number>([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
       this.dirtDescendantElementIds_ = union;
-      console.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
+      stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
     }
     this.restoreInstanceId();
   }
@@ -214,7 +214,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   public markElemenDirtyById(elmtId: number): void {
     // TODO ace-ets2bundle, framework, compilated apps need to update together
     // this function will be removed after a short transiition periode
-    console.error(`markElemenDirtyById no longer supported. 
+    stateMgmtConsole.error(`markElemenDirtyById no longer supported. 
         Please update your ace-ets2bundle and recompile your application!`);
   }
 
@@ -225,7 +225,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    */
   public updateDirtyElements() {
     if (this.dirtDescendantElementIds_.size == 0) {
-      console.debug(`No dirty elements for ${this.constructor.name}`);
+      stateMgmtConsole.debug(`No dirty elements for ${this.constructor.name}`);
       return;
     }
 
@@ -234,7 +234,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return (a < b) ? -1 : (a > b) ? 1 : 0;
     };
 
-    console.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(compareNumber))}, starting ....`);
+    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(compareNumber))}, starting ....`);
 
     // request list of all (gloabbly) deleteelmtIds;
     let deletedElmtIds: number[] = [];
@@ -251,15 +251,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // do not process an Element that has been marked to be deleted
       const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
       if (updateFunc == undefined) {
-        console.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+        stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
       } else {
-        console.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update function on elmtId ${elmtId} start ...`);
+        stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update function on elmtId ${elmtId} start ...`);
         updateFunc(elmtId, /* isFirstRender */ false);
         // continue in native JSView
         // Finish the Update in JSView::JsFinishUpdateFunc
         // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
         this.finishUpdateFunc(elmtId);
-        console.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update function on ElementId ${elmtId} done`);
+        stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update function on ElementId ${elmtId} done`);
       }
     });
     this.dirtDescendantElementIds_.clear();
@@ -271,7 +271,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return;
     }
 
-    console.debug(`View ${this.constructor.name} elmtId ${this.id__()}.purgeDeletedElmtIds -  start.`);
+    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}.purgeDeletedElmtIds -  start.`);
 
     // rmElmtIds is the array of ElemntIds that 
     let removedElmtIds: number[] = [];
@@ -289,18 +289,18 @@ abstract class ViewPU extends NativeViewPartialUpdate
     });
 
     this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
-    console.debug(`View ${this.constructor.name} elmtId ${this.id__()}.purgeDeletedElmtIds: removed elemntIds  ${JSON.stringify(removedElmtIds)}.`);
-    console.debug(`   ... remaining update funcs for elmtIds ${JSON.stringify([... this.updateFuncByElmtId.keys()])} .`);
+    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}.purgeDeletedElmtIds: removed elemntIds  ${JSON.stringify(removedElmtIds)}.`);
+    stateMgmtConsole.debug(`   ... remaining update funcs for elmtIds ${JSON.stringify([... this.updateFuncByElmtId.keys()])} .`);
   }
 
   // the current executed update function
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-    console.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} start ....`);
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} start ....`);
     compilerAssignedUpdateFunc(elmtId, /* is first rneder */ true);
 
     this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
-    console.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} - DONE.`);
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} - DONE.`);
   }
 
   // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
@@ -308,7 +308,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const oldBranchid : number = If.getBranchId();
 
     if (branchId == oldBranchid) {
-      console.log(`${this.constructor.name}[${this.id__()}] IfElse branch unchanged, no work to do.`);
+      stateMgmtConsole.log(`${this.constructor.name}[${this.id__()}] IfElse branch unchanged, no work to do.`);
       return;
     }
 
@@ -336,10 +336,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
     _arr: Array<any>,
     itemGenFunc: (item: any) => void,
     idGenFunc?: (item: any) => string) {
-    console.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction elmtId ${elmtId} - start`);
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction elmtId ${elmtId} - start`);
 
     if (idGenFunc === undefined) {
-      console.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction: forEach does not specify id generation function. This will degrade performance`);
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction: forEach does not specify id generation function. This will degrade performance`);
       idGenFunc = function makeIdGenFunction() {
         let index = 0;
         // developers should always add an id gen function, because framework can not invent a good one
@@ -354,13 +354,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const prevIdArray: string[] = [];
     const success: boolean = ForEach.getIdArray(elmtId, prevIdArray) || false;  // step 2
 
-    console.debug(`${JSON.stringify(prevIdArray)}`);
+    stateMgmtConsole.debug(`${JSON.stringify(prevIdArray)}`);
 
     // create array of new ids
     let newIdArray: string[] = [];
     arr.forEach((item) => {
       let value = idGenFunc(item);
-      console.debug(`ID generator for ${item} returned: ${value}`)
+      stateMgmtConsole.debug(`ID generator for ${item} returned: ${value}`)
       newIdArray.push(value);
     });
 
@@ -379,11 +379,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
     //         ForEachComponent to ForEachElement update will change the slot
     //         based on info found in the new idArray
     newIdArray.forEach((id, newIndex) => {     // step 5
-      console.debug(`Handle item with item-id ${id}:`);
+      stateMgmtConsole.debug(`Handle item with item-id ${id}:`);
       if (prevIdArray.indexOf(id) < 0) {
         // id not in oldIdArray: create new child
 
-        console.debug(`   ... render children for item with item-id ${id} - start !`);
+        stateMgmtConsole.debug(`   ... render children for item with item-id ${id} - start !`);
         // on native side:
         //  viewStack->PushKey(id);
         //  viewStack->Push(AceType::MakeRefPtr<MultiComposedComponent>(viewStack->GetKey(), "ForEachItem"));
@@ -397,13 +397,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
         //   sync Component to Element
         ForEach.createNewChildFinish(id, /* View/JSView */ this);
 
-        console.debug(`   ... render children for item with item-id ${id} - done!`);
+        stateMgmtConsole.debug(`   ... render children for item with item-id ${id} - done!`);
       } else {
-        console.debug(`   ... item-id ${id} is no new item, will not render child - done!`);
+        stateMgmtConsole.debug(`   ... item-id ${id} is no new item, will not render child - done!`);
       }
     }); // newIdArray.forEach
 
-    console.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction elmtId ${elmtId} - done.`);
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction elmtId ${elmtId} - done.`);
   }
 
 

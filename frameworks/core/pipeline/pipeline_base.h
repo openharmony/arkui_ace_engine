@@ -29,9 +29,11 @@
 #include "base/thread/task_executor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
+#include "core/common/platform_res_register.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
@@ -59,6 +61,8 @@ public:
     PipelineBase() = default;
     PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
+    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+        const RefPtr<Frontend>& frontend, int32_t instanceId, RefPtr<PlatformResRegister> platformResRegister);
     ~PipelineBase() override;
 
     static RefPtr<PipelineBase> GetCurrentContext();
@@ -138,6 +142,8 @@ public:
 
     virtual void OnHide() = 0;
 
+    virtual void WindowFocus(bool isFocus) = 0;
+
     virtual void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
 
@@ -182,7 +188,16 @@ public:
         return true;
     }
 
-    virtual void SetAppBgColor(const Color& color) {}
+    virtual void SetAppBgColor(const Color& color)
+    {
+        appBgColor_ = color;
+    }
+
+    const Color& GetAppBgColor() const
+    {
+        return appBgColor_;
+    }
+
     virtual void RefreshRootBgColor() const {}
 
     virtual void PostponePageTransition() {}
@@ -360,6 +375,15 @@ public:
         themeManager_ = std::move(theme);
     }
 
+    template<typename T>
+    RefPtr<T> GetTheme() const
+    {
+        if (themeManager_) {
+            return themeManager_->GetTheme<T>();
+        }
+        return {};
+    }
+
     const RefPtr<ManagerInterface>& GetTextFieldManager()
     {
         return textFieldManager_;
@@ -394,9 +418,29 @@ public:
         isJsCard_ = isJsCard;
     }
 
+    void SetIsJsPlugin(bool isJsPlugin)
+    {
+        isJsPlugin_ = isJsPlugin;
+    }
+
+    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
+    {
+        drawDelegate_ = std::move(delegate);
+    }
+
     bool IsJsCard() const
     {
         return isJsCard_;
+    }
+
+    void SetIsEtsCard(bool isEtsCard)
+    {
+        isEtsCard_ = isEtsCard;
+    }
+
+    bool IsEtsCard() const
+    {
+        return isEtsCard_;
     }
 
     // Get the dp scale which used to covert dp to logic px.
@@ -440,6 +484,134 @@ public:
     double GetRootHeight() const
     {
         return rootHeight_;
+    }
+
+
+    // TODO:: Set up window manager class to manage window related operations
+    void SetWindowModal(WindowModal modal)
+    {
+        windowModal_ = modal;
+    }
+
+    WindowModal GetWindowModal() const
+    {
+        return windowModal_;
+    }
+
+    void SetAppIconId(int32_t id)
+    {
+        appIconId_ = id;
+    }
+
+    int32_t GetAppIconId() const
+    {
+        return appIconId_;
+    }
+
+    void SetAppLabelId(int32_t id)
+    {
+        appLabelId_ = id;
+    }
+
+    int32_t GetAppLabelId() const
+    {
+        return appLabelId_;
+    }
+
+    void SetWindowMinimizeCallBack(std::function<bool(void)>&& callback)
+    {
+        windowMinimizeCallback_ = std::move(callback);
+    }
+
+    void SetWindowMaximizeCallBack(std::function<bool(void)>&& callback)
+    {
+        windowMaximizeCallback_ = std::move(callback);
+    }
+
+    void SetWindowRecoverCallBack(std::function<bool(void)>&& callback)
+    {
+        windowRecoverCallback_ = std::move(callback);
+    }
+
+    void SetWindowCloseCallBack(std::function<bool(void)>&& callback)
+    {
+        windowCloseCallback_ = std::move(callback);
+    }
+
+    void SetWindowSplitCallBack(std::function<bool(void)>&& callback)
+    {
+        windowSplitCallback_ = std::move(callback);
+    }
+
+    void SetWindowGetModeCallBack(std::function<WindowMode(void)>&& callback)
+    {
+        windowGetModeCallback_ = std::move(callback);
+    }
+
+    void SetWindowStartMoveCallBack(std::function<void(void)>&& callback)
+    {
+        windowStartMoveCallback_ = std::move(callback);
+    }
+
+    bool FireWindowMinimizeCallBack() const
+    {
+        if (windowMinimizeCallback_) {
+            return windowMinimizeCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowMaximizeCallBack() const
+    {
+        if (windowMaximizeCallback_) {
+            return windowMaximizeCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowRecoverCallBack() const
+    {
+        if (windowRecoverCallback_) {
+            return windowRecoverCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowSplitCallBack() const
+    {
+        if (windowSplitCallback_) {
+            return windowSplitCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowCloseCallBack() const
+    {
+        if (windowCloseCallback_) {
+            return windowCloseCallback_();
+        }
+        return false;
+    }
+
+    void FireWindowStartMoveCallBack() const
+    {
+        if (windowStartMoveCallback_) {
+            windowStartMoveCallback_();
+        }
+    }
+
+    WindowMode FireWindowGetModeCallBack() const
+    {
+        if (windowGetModeCallback_) {
+            return windowGetModeCallback_();
+        }
+        return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+
+    bool IsFullScreenModal() const
+    {
+        return windowModal_ == WindowModal::NORMAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN ||
+               windowModal_ == WindowModal::CONTAINER_MODAL || isFullWindow_;
     }
 
     void SetIsRightToLeft(bool isRightToLeft)
@@ -495,6 +667,11 @@ public:
         return density_;
     }
 
+    RefPtr<PlatformResRegister> GetPlatformResRegister() const
+    {
+        return platformResRegister_;
+    }
+
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
@@ -547,6 +724,38 @@ public:
 
     Rect GetCurrentWindowRect() const;
 
+    void SetPluginOffset(const Offset& offset)
+    {
+        pluginOffset_ = offset;
+    }
+
+    Offset GetPluginOffset() const
+    {
+        return pluginOffset_;
+    }
+
+    void SetPluginEventOffset(const Offset& offset)
+    {
+        pluginEventOffset_ = offset;
+    }
+
+    Offset GetPluginEventOffset() const
+    {
+        return pluginEventOffset_;
+    }
+
+    void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
+    {
+        displayWindowRectInfo_ = displayWindowRectInfo;
+    }
+
+    // This method can get the coordinates and size of the current window,
+    // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
+    const Rect& GetDisplayWindowRectInfo() const
+    {
+        return displayWindowRectInfo_;
+    }
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -566,7 +775,11 @@ protected:
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
+    bool isEtsCard_ = false;
     bool isRightToLeft_ = false;
+    bool isFullWindow_ = false;
+
+    bool isJsPlugin_ = false;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
     float fontScale_ = 1.0f;
@@ -577,7 +790,13 @@ protected:
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
     FrontendType frontendType_;
+    WindowModal windowModal_ = WindowModal::NORMAL;
 
+    Offset pluginOffset_ { 0, 0 };
+    Offset pluginEventOffset_ { 0, 0 };
+    Color appBgColor_ = Color::WHITE;
+
+    std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
     std::unique_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -597,8 +816,13 @@ protected:
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
+    RefPtr<PlatformResRegister> platformResRegister_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
+
+    RefPtr<Clipboard> clipboard_;
+    std::function<void(const std::string&)> clipboardCallback_ = nullptr;
+    Rect displayWindowRectInfo_;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;
@@ -612,6 +836,17 @@ private:
     // OnRouterChangeCallback is function point, need to be initialized.
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
+
+    // for container modal
+    int32_t appLabelId_ = 0;
+    int32_t appIconId_ = 0;
+    std::function<bool(void)> windowMinimizeCallback_ = nullptr;
+    std::function<bool(void)> windowMaximizeCallback_ = nullptr;
+    std::function<bool(void)> windowRecoverCallback_ = nullptr;
+    std::function<bool(void)> windowCloseCallback_ = nullptr;
+    std::function<bool(void)> windowSplitCallback_ = nullptr;
+    std::function<void(void)> windowStartMoveCallback_ = nullptr;
+    std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

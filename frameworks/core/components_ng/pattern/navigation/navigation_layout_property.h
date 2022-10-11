@@ -37,26 +37,17 @@ public:
     {
         auto copy = MakeRefPtr<NavigationLayoutProperty>();
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        copy->propTitleMode_ = CloneTitleMode();
-        copy->propHideTitleBar_ = CloneHideTitleBar();
-        copy->propHideBackButton_ = CloneHideBackButton();
-        copy->propHideToolBar_ = CloneHideToolBar();
+        copy->propNavigationMode_ = CloneNavigationMode();
         return copy;
     }
 
     void Reset() override
     {
         LayoutProperty::Reset();
-        ResetTitleMode();
-        ResetHideTitleBar();
-        ResetHideBackButton();
-        ResetHideToolBar();
+        ResetNavigationMode();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideToolBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavigationMode, NavigationMode, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

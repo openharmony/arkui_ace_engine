@@ -24,8 +24,8 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT NavigationLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(NavigationLayoutAlgorithm, BoxLayoutAlgorithm);
+class ACE_EXPORT NavigationLayoutAlgorithm : public LayoutAlgorithm {
+    DECLARE_ACE_TYPE(NavigationLayoutAlgorithm, LayoutAlgorithm);
 
 public:
     NavigationLayoutAlgorithm() = default;

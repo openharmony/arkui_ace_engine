@@ -64,15 +64,16 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
-    void ControlButtonOnClick();
+    void DoSideBarAnimation();
     void CreateAnimation();
     void InitSideBar();
     void FireChangeEvent(bool isShow);
     void UpdateControlButtonIcon();
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
-    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
+    void UpdateResponseRegion(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
 
     RefPtr<ClickEvent> controlButtonClickEvent_;
     RefPtr<Animator> controller_;
@@ -85,6 +86,8 @@ private:
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
     bool showControlButton_ = true;
     bool needInitRealSideBarWidth_ = true;
+    RectF dragRect_;
+    float preSidebarWidth_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
 };

@@ -18,6 +18,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 config("uiservice_manager_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
+    "$ace_root/frameworks",
     "include/",
     "//drivers/peripheral/base",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
@@ -29,10 +30,6 @@ config("uiservice_manager_public_config") {
     "$ability_runtime_innerkits_path/ability_manager/include/",
     "$ability_runtime_path/interfaces/kits/native/ability/native",
     "$ability_runtime_services_path/uiservicemgr/include",
-    "//third_party/icu/icu4c/source/common",
-    "//third_party/icu/icu4c/source/i18n",
-    "//third_party/icu/icu4c/source/ohos",
-    "//third_party/icu/icu4c/source",
     "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
   ]
@@ -44,15 +41,16 @@ config("uiservice_manager_public_config") {
 
 ohos_shared_library("ui_service_mgr") {
   sources = [
-    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/dialog_callback_proxy.cpp",
-    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/dialog_callback_stub.cpp",
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_client.cpp",
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
   ]
 
-  configs = [ "//commonlibrary/c_utils/base:utils_config" ]
+  configs = [
+    "$ace_root:ace_config",
+    "//commonlibrary/c_utils/base:utils_config",
+  ]
 
   public_configs = [
     ":uiservice_manager_public_config",
@@ -63,13 +61,10 @@ ohos_shared_library("ui_service_mgr") {
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_manager",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
-    "input:libmmi-client",
     "ipc:ipc_core",
-    "window_manager:libdm",
   ]
 
   subsystem_name = ace_engine_subsystem

@@ -156,7 +156,7 @@ public:
     static std::string GetMediaResource(const std::string& targetMediaFileName);
     static int EvalBuf(JSContext* ctx, const char* buf, size_t bufLen, const char* filename, int evalFlags);
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void SetPreviewFlag(bool flag)
     {
         isComponentPreview_ = flag;
@@ -193,7 +193,7 @@ public:
 #endif
 
 private:
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
     std::unordered_map<std::string, JSValue> previewComponents_;

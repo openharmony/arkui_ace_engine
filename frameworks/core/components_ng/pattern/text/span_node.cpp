@@ -62,9 +62,7 @@ void SpanItem::UpdateParagraph(RSParagraphBuilder* builder)
     if (fontStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        auto themeManager = pipelineContext->GetThemeManager();
-        TextStyle textStyle =
-            CreateTextStyleUsingTheme(fontStyle, nullptr, themeManager ? themeManager->GetTheme<TextTheme>() : nullptr);
+        TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipelineContext->GetTheme<TextTheme>());
         builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     }
     auto displayText = content;

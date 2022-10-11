@@ -121,8 +121,7 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int3
     if (frameNode) {
         wrapper = frameNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
     } else {
-        // TODO: Check only ifelse syntax node can use LazyForEach and get wrapper from ifelse syntax node.
-        LOGW("syntax node is not support yet");
+        wrapper = uiNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
     }
     CHECK_NULL_RETURN(wrapper, nullptr);
     if (index == (startIndex_.value() - 1)) {
@@ -137,6 +136,11 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int3
     childWrappers_.emplace_back(wrapper);
     nodeIds_.emplace_back(id);
     return wrapper;
+}
+
+const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::GetCachedChildLayoutWrapper()
+{
+    return childWrappers_;
 }
 
 const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::OnExpandChildLayoutWrapper()

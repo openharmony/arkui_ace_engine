@@ -63,37 +63,15 @@ constexpr int32_t CENTER_ALIGN_DIVIDER = 2;
 // IsRightToLeft | IsListVertical | IsDirectionVertical | IsDirectionReverse
 const std::map<bool, std::map<bool, std::map<bool, std::map<bool, int32_t>>>> DIRECTION_MAP = {
     { false, // RTL is false
-        {
-            { false,
-                {
-                    { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_FORWARD }, { DIR_REVERSE, STEP_BACK } } },
-                    { DIR_VERTICAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } }
-                }
-            },
-            { true,
-                {
-                    { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } },
-                    { DIR_VERTICAL, { { DIR_FORWARD, STEP_FORWARD }, { DIR_REVERSE, STEP_BACK } } }
-                }
-            }
-        }
-    },
+        { { false, { { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_FORWARD }, { DIR_REVERSE, STEP_BACK } } },
+                       { DIR_VERTICAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } } } },
+            { true, { { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } },
+                        { DIR_VERTICAL, { { DIR_FORWARD, STEP_FORWARD }, { DIR_REVERSE, STEP_BACK } } } } } } },
     { true, // RTL is true
-        {
-            { false,
-                {
-                    { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_BACK }, { DIR_REVERSE, STEP_FORWARD } } },
-                    { DIR_VERTICAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } }
-                }
-            },
-            { true,
-                {
-                    { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } },
-                    { DIR_VERTICAL, { { DIR_FORWARD, STEP_BACK }, { DIR_REVERSE, STEP_FORWARD } } }
-                }
-            }
-        }
-    }
+        { { false, { { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_BACK }, { DIR_REVERSE, STEP_FORWARD } } },
+                       { DIR_VERTICAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } } } },
+            { true, { { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } },
+                        { DIR_VERTICAL, { { DIR_FORWARD, STEP_BACK }, { DIR_REVERSE, STEP_FORWARD } } } } } } }
 };
 } // namespace
 
@@ -376,7 +354,8 @@ void RenderList::ModifyLaneLength(const std::optional<std::pair<Dimension, Dimen
     }
     if (GreatNotEqual(minLaneLength_, maxLaneLength_)) {
         LOGI("minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, assign minLaneLength to"
-            " maxLaneLength", minLaneLength_, maxLaneLength_);
+             " maxLaneLength",
+            minLaneLength_, maxLaneLength_);
         maxLaneLength_ = minLaneLength_;
     }
 }
@@ -445,7 +424,8 @@ void RenderList::CalculateLanes()
         }
         lanes = 1;
         LOGE("unexpected situation, set lanes to 1, maxLanes: %{public}f, minLanes: %{public}f, minLaneLength_: "
-            "%{public}f, maxLaneLength_: %{public}f", maxLanes, minLanes, minLaneLength_, maxLaneLength_);
+             "%{public}f, maxLaneLength_: %{public}f",
+            maxLanes, minLanes, minLaneLength_, maxLaneLength_);
     } while (0);
     lanes_ = lanes;
     if (lanes > 1) { // if lanes changes, adjust startIndex_
@@ -828,8 +808,8 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
                     position = MakeValue<Offset>(
                         GetMainAxis(position), crossSize - childCrossSize / itemSet.size() - GetCrossAxis(position));
                 } else {
-                    position = MakeValue<Offset>(
-                        mainSize - childMainSize - GetMainAxis(position), GetCrossAxis(position));
+                    position =
+                        MakeValue<Offset>(mainSize - childMainSize - GetMainAxis(position), GetCrossAxis(position));
                 }
             }
             SetChildPosition(itemSet[i], position);
@@ -913,8 +893,8 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
                 auto position = MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0);
                 if (isRightToLeft_) {
                     if (IsVertical()) {
-                        position = MakeValue<Offset>(
-                            GetMainAxis(position), crossSize - GetCrossSize(stickyItemLayoutSize) - GetCrossAxis(position));
+                        position = MakeValue<Offset>(GetMainAxis(position),
+                            crossSize - GetCrossSize(stickyItemLayoutSize) - GetCrossAxis(position));
                     } else {
                         position = MakeValue<Offset>(
                             mainSize - mainStickySize - GetMainAxis(position), GetCrossAxis(position));
@@ -994,9 +974,11 @@ Size RenderList::SetItemsPosition(double mainSize)
 
         if (isRightToLeft_) {
             if (IsVertical()) {
-                offset = MakeValue<Offset>(GetMainAxis(offset), crossSize - GetCrossSize(childLayoutSize) - GetCrossAxis(offset));
+                offset = MakeValue<Offset>(
+                    GetMainAxis(offset), crossSize - GetCrossSize(childLayoutSize) - GetCrossAxis(offset));
             } else {
-                offset = MakeValue<Offset>(mainSize - GetMainSize(childLayoutSize) - GetMainAxis(offset), GetCrossAxis(offset));
+                offset = MakeValue<Offset>(
+                    mainSize - GetMainSize(childLayoutSize) - GetMainAxis(offset), GetCrossAxis(offset));
             }
         }
         SetChildPosition(child, offset);
@@ -1055,8 +1037,8 @@ Size RenderList::SetItemsPosition(double mainSize)
                     position = MakeValue<Offset>(
                         GetMainAxis(position), crossSize - GetCrossSize(stickyItemLayoutSize) - GetCrossAxis(position));
                 } else {
-                    position = MakeValue<Offset>(
-                        mainSize - mainStickySize - GetMainAxis(position), GetCrossAxis(position));
+                    position =
+                        MakeValue<Offset>(mainSize - mainStickySize - GetMainAxis(position), GetCrossAxis(position));
                 }
             }
             currentStickyItem_->SetPosition(position);
@@ -1118,12 +1100,10 @@ LayoutParam RenderList::MakeInnerLayoutForLane()
     Size maxSize;
     Size minSize;
     if (vertical_) {
-        maxSize =
-            Size(std::min(GetLayoutParam().GetMaxSize().Width() / lanes_, maxLaneLength_), Size::INFINITE_SIZE);
+        maxSize = Size(std::min(GetLayoutParam().GetMaxSize().Width() / lanes_, maxLaneLength_), Size::INFINITE_SIZE);
         minSize = Size(GetLayoutParam().GetMinSize().Width(), 0.0);
     } else {
-        maxSize =
-            Size(Size::INFINITE_SIZE, std::min(GetLayoutParam().GetMaxSize().Height() / lanes_, maxLaneLength_));
+        maxSize = Size(Size::INFINITE_SIZE, std::min(GetLayoutParam().GetMaxSize().Height() / lanes_, maxLaneLength_));
         minSize = Size(0.0, GetLayoutParam().GetMinSize().Height());
     }
     return LayoutParam(maxSize, minSize);
@@ -1325,18 +1305,15 @@ ItemPositionState RenderList::GetItemPositionState(double curMainPos, double las
     return ItemPositionState::IN_VIEWPORT;
 }
 
-#define RECYCLE_AND_ERASE_ITEMS_OUT_OF_VIEWPORT()                                            \
-    do                                                                                       \
-    {                                                                                        \
-        for (size_t i = 0; i < itemsInOneRow.size(); i++)                                    \
-        {                                                                                    \
-            if (currentStickyItem_ != itemsInOneRow[i] && selectedItem_ != itemsInOneRow[i]) \
-            {                                                                                \
-                /* Recycle list items out of view port */                                    \
-                RecycleListItem(curIndex - i);                                               \
-            }                                                                                \
-            it = items_.erase(--it);                                                         \
-        }                                                                                    \
+#define RECYCLE_AND_ERASE_ITEMS_OUT_OF_VIEWPORT()                                              \
+    do {                                                                                       \
+        for (size_t i = 0; i < itemsInOneRow.size(); i++) {                                    \
+            if (currentStickyItem_ != itemsInOneRow[i] && selectedItem_ != itemsInOneRow[i]) { \
+                /* Recycle list items out of view port */                                      \
+                RecycleListItem(curIndex - i);                                                 \
+            }                                                                                  \
+            it = items_.erase(--it);                                                           \
+        }                                                                                      \
     } while (0);
 
 double RenderList::LayoutOrRecycleCurrentItemsForLaneList(double mainSize)
@@ -2439,7 +2416,8 @@ void RenderList::CreateDragDropRecognizer()
             renderList->selectedDragItem_->SetHidden(true);
             renderList->MarkNeedLayout();
 
-            auto customComponent = onItemDragStart(dragInfo, int32_t(renderList->selectedItemIndex_));
+            auto customComponent =
+                DynamicCast<Component>(onItemDragStart(dragInfo, int32_t(renderList->selectedItemIndex_)));
             if (!customComponent) {
                 LOGE("Custom component is null.");
                 return;
@@ -2569,8 +2547,8 @@ void RenderList::CreateDragDropRecognizer()
             if (targetRenderlist == renderList) {
                 int32_t from = static_cast<int32_t>(renderList->selectedItemIndex_);
                 int32_t to = static_cast<int32_t>(renderList->insertItemIndex_);
-                auto moveRes = ResumeEventCallback(
-                    renderList->component_, &ListComponent::GetOnItemMove, true, from, to);
+                auto moveRes =
+                    ResumeEventCallback(renderList->component_, &ListComponent::GetOnItemMove, true, from, to);
                 (targetRenderlist->GetOnItemDrop())(dragInfo, from, to, moveRes);
                 renderList->MarkNeedLayout();
             } else {
@@ -3165,7 +3143,7 @@ void RenderList::AdjustForReachEnd(double mainSize, double curMainPos)
     currentOffset_ += delta;
 }
 
-void RenderList::AdjustForReachStart(double &curMainPos)
+void RenderList::AdjustForReachStart(double& curMainPos)
 {
     double delta = currentOffset_;
     for (const auto& child : items_) {

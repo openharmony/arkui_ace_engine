@@ -16,10 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_CALENDAR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_CALENDAR_PATTERN_H
 
+#include <cstdint>
 #include <optional>
 
 #include "base/memory/referenced.h"
 #include "core/components/calendar/calendar_data_adapter.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -93,19 +96,45 @@ public:
         return moveDirection_;
     }
 
+    void SetBackToToday(bool backToToday)
+    {
+        backToToday_ = backToToday;
+    }
+
+    void SetGoTo(bool goTo)
+    {
+        goTo_ = goTo;
+    }
+
+    RefPtr<CalendarControllerNg> GetCalendarControllerNg() const
+    {
+        return calendarControllerNg_;
+    }
+
+    void SetCalendarControllerNg(const RefPtr<CalendarControllerNg>& calendarController);
+
+    void FireFirstRequestData();
+    void FireGoToRequestData(int32_t year, int32_t month, int32_t day);
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnModifyDone() override;
-    void FireFirstRequestData();
     void FireRequestData(MonthState monthState);
+    void JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr<FrameNode>& curFrameNode,
+        const RefPtr<FrameNode>& nextFrameNode, const RefPtr<FrameNode>& swiperFrameNode);
+    static void FlushFocus(ObtainedMonth& obtainedMonth);
 
+    RefPtr<CalendarControllerNg> calendarControllerNg_;
     CalendarDay calendarDay_;
+    int32_t goToCalendarDay_;
     ObtainedMonth currentMonth_;
     ObtainedMonth preMonth_;
     ObtainedMonth nextMonth_;
     NG::Direction moveDirection_;
-    bool initialize = true;
+    bool initialize_ = true;
+    bool backToToday_ = false;
+    bool goTo_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPattern);
 };
 } // namespace OHOS::Ace::NG

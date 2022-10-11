@@ -41,10 +41,36 @@ struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundBlurStyle, BlurStyle);
 };
 
+struct BorderImageProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImage, RefPtr<BorderImage>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImageSource, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageSlice, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageWidth, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageOutset, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageRepeat, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImageGradient, Gradient);
+};
+
 struct BorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderStyle, BorderStyleProperty);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        static const char* BORDER_STYLE[] = {
+            "BorderStyle.Solid",
+            "BorderStyle.Dashed",
+            "BorderStyle.Dotted",
+        };
+        json->Put("borderStyle",
+            BORDER_STYLE[static_cast<int>(
+                propBorderStyle.value_or(BorderStyleProperty()).styleLeft.value_or(BorderStyle::SOLID))]);
+        json->Put("borderColor",
+            propBorderColor.value_or(BorderColorProperty()).leftColor.value_or(Color()).ColorToString().c_str());
+        json->Put("borderRadius", propBorderRadius.value_or(BorderRadiusProperty())
+                                      .radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+    }
 };
 
 struct TransformProperty {
@@ -59,6 +85,17 @@ struct DecorationProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurStyle, BlurStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
+};
+
+struct GraphicsProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBrightness, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontGrayScale, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontContrast, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontSaturate, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontSepia, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontInvert, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontHueRotate, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontColorBlend, Color);
 };
 
 struct RenderPositionProperty {

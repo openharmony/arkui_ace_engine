@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H
 
 #include <list>
+#include <vector>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/referenced.h"
@@ -29,6 +30,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
 namespace OHOS::Ace::NG {
 
@@ -55,7 +57,14 @@ enum class HitTestMode {
      * Self not respond to the hit test for touch events,
      * but children respond to the hit test for touch events.
      */
-    HTMNONE
+    HTMNONE,
+
+    /**
+     * Self and child respond to the hit test for touch events,
+     * when self consumed allow hit test of other nodes which is masked by this node,
+     * when child consumed block hit test of other nodes.
+     */
+    HTMTRANSPARENT_SELF,
 };
 
 enum class HitTestResult {
@@ -65,6 +74,13 @@ enum class HitTestResult {
     STOP_BUBBLING,
     // node process events and bubble;
     BUBBLING,
+    // node process events and bubble;
+    SELF_TRANSPARENT,
+};
+
+struct DragDropInfo {
+    RefPtr<PixelMap> pixelMap;
+    std::string extraInfo;
 };
 
 class EventHub;
@@ -100,6 +116,22 @@ public:
         scrollableActuator_->RemoveScrollableEvent(scrollableEvent);
     }
 
+    void AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& scrollEffect)
+    {
+        if (!scrollableActuator_) {
+            scrollableActuator_ = MakeRefPtr<ScrollableActuator>(WeakClaim(this));
+        }
+        scrollableActuator_->AddScrollEdgeEffect(axis, scrollEffect);
+    }
+
+    void RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
+    {
+        if (!scrollableActuator_) {
+            return;
+        }
+        scrollableActuator_->RemoveScrollEdgeEffect(scrollEffect);
+    }
+
     // Set by user define, which will replace old one.
     void SetTouchEvent(TouchEventFunc&& touchEventFunc)
     {
@@ -125,6 +157,8 @@ public:
         touchEventActuator_->RemoveTouchEvent(touchEvent);
     }
 
+    void SetFocusClickEvent(GestureEventFunc&& clickEvent);
+
     // Set by user define, which will replace old one.
     void SetClickEvent(GestureEventFunc&& clickEvent)
     {
@@ -132,6 +166,8 @@ public:
             clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
         }
         clickEventActuator_->ReplaceClickEvent(std::move(clickEvent));
+
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
     }
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -140,6 +176,8 @@ public:
             clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
         }
         clickEventActuator_->AddClickEvent(clickEvent);
+
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
     }
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -268,11 +306,20 @@ public:
         touchable_ = touchable;
     }
 
+    void InitDragDropEvent();
+    void HandleOnDragStart(const GestureEvent& info);
+    void HandleOnDragUpdate(const GestureEvent& info);
+    void HandleOnDragEnd(const GestureEvent& info);
+    void HandleOnDragCancel();
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult);
 
     void UpdateGestureHierarchy();
+
+    // old path.
+    void UpdateExternalGestureRecognizer();
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -282,13 +329,15 @@ private:
     RefPtr<PanEventActuator> panEventActuator_;
     RefPtr<DragEventActuator> dragEventActuator_;
     RefPtr<ExclusiveRecognizer> innerExclusiveRecognizer_;
-    RefPtr<ExclusiveRecognizer> externalExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> nodeExclusiveRecognizer_;
-    RefPtr<ParallelRecognizer> externalParallelRecognizer_;
+    std::vector<RefPtr<ExclusiveRecognizer>> externalExclusiveRecognizer_;
+    std::vector<RefPtr<ParallelRecognizer>> externalParallelRecognizer_;
+    RefPtr<DragDropProxy> dragDropProxy_;
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
     std::list<RefPtr<GestureRecognizer>> gestureHierarchy_;
+
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
     bool isResponseRegion_ = false;

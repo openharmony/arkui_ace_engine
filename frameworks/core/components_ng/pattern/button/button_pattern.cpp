@@ -52,7 +52,7 @@ bool ButtonPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         Dimension radius(dirty->GetGeometryNode()->GetFrameSize().Height() / 2.0f);
         BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        // TODO Dynamic and new borderarradius
+        // TODO Dynamic and new border radius
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     return false;
@@ -104,8 +104,7 @@ void ButtonPattern::OnTouchDown()
     CHECK_NULL_VOID(pipeline);
     if (buttonEventHub->GetStateEffect()) {
         const auto& renderContext = host->GetRenderContext();
-        auto themeManager = pipeline->GetThemeManager();
-        renderContext->BlendBgColor(themeManager->GetTheme<ButtonTheme>()->GetClickedColor());
+        renderContext->BlendBgColor(pipeline->GetTheme<ButtonTheme>()->GetClickedColor());
     }
 }
 

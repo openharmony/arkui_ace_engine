@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,25 +18,26 @@
 
 #include <memory>
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_styles.h"
 
 namespace OHOS::Ace::NG {
 // LinearLayoutAlgorithm acts as the underlying linear layout.
-class ACE_EXPORT LinearLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(LinearLayoutAlgorithm, LayoutAlgorithm);
+class ACE_EXPORT LinearLayoutAlgorithm : public FlexLayoutAlgorithm {
+    DECLARE_ACE_TYPE(LinearLayoutAlgorithm, FlexLayoutAlgorithm);
 
 public:
-    LinearLayoutAlgorithm() = default;
+    LinearLayoutAlgorithm()
+    {
+        SetLinearLayoutFeature();
+    }
     ~LinearLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-
-    void Layout(LayoutWrapper* layoutWrapper) override;
-
 private:
-    friend class LinearLayoutUtils;
+    ACE_DISALLOW_COPY_AND_MOVE(LinearLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 

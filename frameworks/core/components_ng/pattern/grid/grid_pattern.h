@@ -67,13 +67,20 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    ScopeFocusAlgorithm GetScopeFocusAlgorithm() const override
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         auto property = GetLayoutProperty<GridLayoutProperty>();
         if (!property) {
             return ScopeFocusAlgorithm();
         }
-        return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS);
+        return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS,
+            [wp = WeakClaim(this)](
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                auto grid = wp.Upgrade();
+                if (grid) {
+                    nextFocusNode = grid->GetNextFocusNode(step, currFocusNode);
+                }
+            });
     }
 
 private:
@@ -82,6 +89,7 @@ private:
     void AddScrollEvent();
     bool UpdateScrollPosition(float offset, int32_t source);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<ScrollableEvent> scrollableEvent_;

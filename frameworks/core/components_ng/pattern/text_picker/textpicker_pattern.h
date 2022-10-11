@@ -71,6 +71,8 @@ public:
 
     uint32_t GetShowOptionCount() const;
 
+    std::string GetSelectedObject(bool isColumnChange, int32_t status) const;
+
     void SetSelected(uint32_t value)
     {
         selectedIndex_ = value;
@@ -92,6 +94,11 @@ public:
     const std::vector<std::string>& GetRange() const
     {
         return range_;
+    }
+
+    std::string GetCurrentText() const
+    {
+        return GetOption(GetCurrentIndex());
     }
 
     uint32_t GetCurrentIndex() const
@@ -132,9 +139,18 @@ public:
         return currentOffset_;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    bool HandleDirectionKey(KeyCode code);
 
     uint32_t selectedIndex_ = 0;
     std::string selectedValue_;

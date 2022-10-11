@@ -73,6 +73,10 @@ const char COLUMN_COMPONENT_TAG[] = "ColumnComponent";
 const char COLUMN_ETS_TAG[] = "Column";
 const char COLUMN_ATTRS_ALIGN_ITEMS[] = "alignItems";
 
+// panel bar
+const char DRAG_BAR_COMPONENT_TAG[] = "DragBarComponent";
+const char DRAG_BAR_ETS_TAG[] = "DragBar";
+
 // text
 const char TEXT_COMPONENT_TAG[] = "TextComponentV2";
 const char TEXT_ETS_TAG[] = "Text";
@@ -108,6 +112,16 @@ const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
 const char TOOL_BAR_ETS_TAG[] = "ToolBar";
 const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";
+const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
+const char NAVBAR_ETS_TAG[] = "NavBar";
+
+// navRouter view
+const char NAVROUTER_VIEW_ETS_TAG[] = "NavRouterView";
+
+// navDestination view
+const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestinationView";
+const char NAVDESTINATION_TITLE_BAR_ETS_TAG[] = "NavDestinationTitleBar";
+const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 
 // row split
 const char ROW_SPLIT_COMPONENT_TAG[] = "RowSplitComponent";
@@ -216,6 +230,12 @@ const char BLANK_ETS_TAG[] = "Blank";
 ACE_EXPORT extern const char BUTTON_COMPONENT_TAG[] = "ButtonComponent";
 ACE_EXPORT extern const char BUTTON_ETS_TAG[] = "Button";
 
+// common view
+const char COMMON_VIEW_ETS_TAG[] = "__Common__";
+// option
+ACE_EXPORT extern const char OPTION_COMPONENT_TAG[] = "OptionComponent";
+ACE_EXPORT extern const char OPTION_ETS_TAG[] = "Option";
+
 // divider
 ACE_EXPORT extern const char DIVIDER_COMPONENT_TAG[] = "DividerComponent";
 ACE_EXPORT extern const char DIVIDER_ETS_TAG[] = "Divider";
@@ -253,6 +273,10 @@ const char SEARCH_ETS_TAG[] = "Search";
 // formComponent
 const char FORM_COMPONENT_TAG[] = "FormComponent";
 const char FORM_ETS_TAG[] = "FormComponent";
+
+// PluginComponent
+const char PLUGIN_COMPONENT_TAG[] = "PluginComponent";
+const char PLUGIN_ETS_TAG[] = "PluginComponent";
 
 // video
 const char VIDEO_COMPONENT_TAG[] = "VideoComponentV2";
@@ -336,6 +360,7 @@ ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[] = "MenuComponent";
 ACE_EXPORT extern const char MENU_TAG[] = "menu";
 ACE_EXPORT extern const char MENU_ETS_TAG[] = "Menu";
+ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
@@ -352,6 +377,10 @@ ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[] = "TextTimer";
 // select
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[] = "SelectComponent";
 ACE_EXPORT extern const char SELECT_ETS_TAG[] = "Select";
+
+// select_popup
+ACE_EXPORT extern const char SELECT_POPUP_COMPONENT_TAG[] = "SelectPopupComponent";
+ACE_EXPORT extern const char SELECT_POPUP_ETS_TAG[] = "SelectPopup";
 
 // marquee
 ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[] = "MarqueeComponent";

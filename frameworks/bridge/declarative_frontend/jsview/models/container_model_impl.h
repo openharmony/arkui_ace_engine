@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CONTAINER_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CONTAINER_MODEL_IMPL_H
 
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/pattern/container_model.h"
@@ -28,6 +29,26 @@ public:
     {
         ViewStackProcessor::GetInstance()->PopContainer();
     }
+
+    void NewScope() override
+    {
+        scopeStack_ = std::make_unique<ScopedViewStackProcessor>();
+    }
+
+    RefPtr<AceType> Finish() override
+    {
+        auto node = ViewStackProcessor::GetInstance()->Finish();
+        scopeStack_.reset();
+        return node;
+    }
+
+    std::string ProcessViewId(const std::string& viewId) override
+    {
+        return ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    }
+
+private:
+    std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };
 
 } // namespace OHOS::Ace::Framework

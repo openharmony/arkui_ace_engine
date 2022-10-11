@@ -22,6 +22,8 @@
 
 namespace OHOS::Ace::Framework {
 
+using AnimatorEvent = std::function<void()>;
+
 class JSImageAnimator : public JSContainerBase {
 public:
     static void Create();
@@ -45,6 +47,7 @@ public:
 private:
     static void ParseImages(const JSRef<JSVal>& image, ImageProperties& imageProperties);
     static EventMarker GetEventMarker(const JSCallbackInfo& info);
+    static AnimatorEvent GetAnimatorEvent(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

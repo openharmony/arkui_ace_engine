@@ -16,12 +16,159 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 
 #include "base/log/ace_trace.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/composed_element.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+
+#ifdef USE_ARK_ENGINE
+
+namespace {
+
+JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parentConstraint)
+{
+    auto minSize = parentConstraint->minSize;
+    auto maxSize = parentConstraint->maxSize;
+    JSRef<JSObject> constraint = JSRef<JSObject>::New();
+    constraint->SetProperty<double>("minWidth", minSize.Width());
+    constraint->SetProperty<double>("minHeight", minSize.Height());
+    constraint->SetProperty<double>("maxWidth", maxSize.Width());
+    constraint->SetProperty<double>("maxHeight", maxSize.Height());
+    return constraint;
+}
+
+void CopyPadding(NG::PaddingProperty& padding, const std::unique_ptr<NG::PaddingProperty>& target)
+{
+    padding.left = target->left;
+    padding.right = target->right;
+    padding.top = target->top;
+    padding.bottom = target->bottom;
+}
+
+JSRef<JSObject> GenPadding(const NG::PaddingProperty& padding_)
+{
+    JSRef<JSObject> padding = JSRef<JSObject>::New();
+    padding->SetProperty("top", padding_.top->ToString());
+    padding->SetProperty("right", padding_.right->ToString());
+    padding->SetProperty("bottom", padding_.bottom->ToString());
+    padding->SetProperty("left", padding_.left->ToString());
+    return padding;
+}
+
+JSRef<JSObject> GenBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
+{
+    auto borderWidth = layoutWrapper->GetLayoutProperty()->GetBorderWidthProperty()->leftDimen;
+    NG::PaddingProperty margin;
+    NG::PaddingProperty padding;
+    CopyPadding(margin, layoutWrapper->GetLayoutProperty()->GetMarginProperty());
+    CopyPadding(padding, layoutWrapper->GetLayoutProperty()->GetPaddingProperty());
+
+    JSRef<JSObject> borderInfo = JSRef<JSObject>::New();
+    borderInfo->SetProperty("borderWidth", borderWidth->ToString());
+    borderInfo->SetPropertyObject("margin", GenPadding(margin));
+    borderInfo->SetPropertyObject("padding", GenPadding(padding));
+    return borderInfo;
+}
+
+JSRef<JSObject> GenPositionInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
+{
+    auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    JSRef<JSObject> position = JSRef<JSObject>::New();
+    position->SetProperty("x", offset.GetX());
+    position->SetProperty("y", offset.GetY());
+    return position;
+}
+
+void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapper>& layoutWrapper, const size_t& index)
+{
+    info->SetProperty<std::string>("name", "");
+    info->SetProperty<std::string>("id", std::to_string(index));
+    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()));
+    info->SetPropertyObject("borderInfo", GenBorderInfo(layoutWrapper));
+    info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
+}
+
+JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
+{
+    JSRef<JSArray> childInfo = JSRef<JSArray>::New();
+    JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSLayout);
+    size_t index = 0;
+
+    for (const auto& iter : children) {
+        JSRef<JSObject> info = JSRef<JSObject>::New();
+        FillSubComponetProperty(info, iter, index);
+        info->SetPropertyObject("layout", layoutFunc);
+        childInfo->SetValueAt(index++, info);
+    }
+
+    return childInfo;
+}
+
+JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
+{
+    JSRef<JSArray> childInfo = JSRef<JSArray>::New();
+    JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSMeasure);
+    size_t index = 0;
+
+    for (const auto& iter : children) {
+        JSRef<JSObject> info = JSRef<JSObject>::New();
+        FillSubComponetProperty(info, iter, index);
+        info->SetPropertyObject("measure", measureFunc);
+        childInfo->SetValueAt(index++, info);
+    }
+
+    return childInfo;
+}
+
+} // namespace
+
+void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
+{
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+    auto constraint = GenConstraint(parentConstraint);
+    auto childArray = GenLayoutChildArray(children);
+    JSRef<JSVal> params[2] = { childArray, constraint };
+
+    ViewMeasureLayout::SetLayoutChildren(layoutWrapper->GetAllChildrenWithBuild());
+    ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
+    jsLayoutFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
+}
+
+void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
+{
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+    auto constraint = GenConstraint(parentConstraint);
+    auto childArray = GenMeasureChildArray(children);
+    JSRef<JSVal> params[2];
+
+    params[0] = childArray;
+    params[1] = constraint;
+
+    ViewMeasureLayout::SetMeasureChildren(children);
+    ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
+    jsMeasureFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
+}
+
+#else
+
+void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
+{
+    return;
+}
+
+void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
+{
+    return;
+}
+
+#endif
 
 void ViewFunctions::InitViewFunctions(
     const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsRenderFunction, bool partialUpdate)
@@ -58,6 +205,16 @@ void ViewFunctions::InitViewFunctions(
         jsDisappearFunc_ = JSRef<JSFunc>::Cast(jsDisappearFunc);
     } else {
         LOGD("aboutToDisappear is not a function");
+    }
+
+    JSRef<JSVal> jsLayoutFunc = jsObject->GetProperty("onLayout");
+    if (jsLayoutFunc->IsFunction()) {
+        jsLayoutFunc_ = JSRef<JSFunc>::Cast(jsLayoutFunc);
+    }
+
+    JSRef<JSVal> jsMeasureFunc = jsObject->GetProperty("onMeasure");
+    if (jsMeasureFunc->IsFunction()) {
+        jsMeasureFunc_ = JSRef<JSFunc>::Cast(jsMeasureFunc);
     }
 
     JSRef<JSVal> jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeleted");
@@ -161,6 +318,16 @@ void ViewFunctions::ExecuteAppear()
 void ViewFunctions::ExecuteDisappear()
 {
     ExecuteFunction(jsDisappearFunc_, "aboutToDisappear");
+}
+
+bool ViewFunctions::HasLayout() const
+{
+    return !jsLayoutFunc_.IsEmpty();
+}
+
+bool ViewFunctions::HasMeasure() const
+{
+    return !jsMeasureFunc_.IsEmpty();
 }
 
 void ViewFunctions::ExecuteAboutToBeDeleted()

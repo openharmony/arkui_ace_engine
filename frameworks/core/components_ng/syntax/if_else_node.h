@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_IF_ELSE_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_IF_ELSE_NODE_H
 
+#include <cstdint>
+
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -37,8 +39,10 @@ public:
     }
 
     void SetBranchId(int32_t value);
+
     int32_t GetBranchId()
     {
+        getProcessed_ = true;
         return branchId_;
     }
 
@@ -47,12 +51,13 @@ public:
 private:
     // uniquely identifies branches within if elseif else construct:
     // if() { branch } else if () { branch } else { branch}
-    // -1 means uninitialized, before first rneder
+    // -1 means uninitialized, before first rerender
     int32_t branchId_ = -1;
 
     // set by CompareBranchId
     // unset by FlushUpdateAndMarkDirty
     bool branchIdChanged_ = false;
+    bool getProcessed_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(IfElseNode);
 };

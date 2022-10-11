@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_method.h"
@@ -70,16 +69,6 @@ public:
         monthState_ = monthState;
     }
 
-    RefPtr<CalendarControllerNg> GetCalendarControllerNg() const
-    {
-        return calendarControllerNg_;
-    }
-
-    void SetCalendarController(const RefPtr<CalendarControllerNg>& calendarController)
-    {
-        calendarControllerNg_ = calendarController;
-    }
-
     const CalendarDay& GetCalendarDay() const
     {
         return calendarDay_;
@@ -109,7 +98,6 @@ private:
     ObtainedMonth obtainedMonth_;
     MonthState monthState_ = MonthState::CUR_MONTH;
     RefPtr<ClickEvent> clickListener_;
-    RefPtr<CalendarControllerNg> calendarControllerNg_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CalendarMonthPattern);
 };

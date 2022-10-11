@@ -16,61 +16,38 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 
+#ifdef NG_BUILD
+#include "include/core/SkColor.h"
+#include "modules/svg/include/SkSVGDOM.h"
+#else
 #include "experimental/svg/model/SkSVGDOM.h"
+#endif
 #include "include/core/SkStream.h"
 
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/image_provider/svg_dom.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 
 namespace OHOS::Ace::NG {
 
-union SkColorEx {
-    struct {
-        SkColor color : 32;
-        bool valid : 1;
-        uint32_t reserved : 31; // reserved
-    };
-    uint64_t value = 0;
-};
-
-class SkiaSvgDom : public SvgDom {
-    DECLARE_ACE_TYPE(SkiaSvgDom, SvgDom);
+class SkiaSvgDom : public SvgDomBase {
+    DECLARE_ACE_TYPE(SkiaSvgDom, SvgDomBase);
 
 public:
     SkiaSvgDom() = default;
     explicit SkiaSvgDom(const sk_sp<SkSVGDOM>& skiaDom) : skiaDom_(skiaDom) {}
 
-    static RefPtr<SkiaSvgDom> CreateSkiaSvgDom(const sk_sp<SkData>& skData, const std::optional<Color>& svgFillColor)
-    {
-        const auto svgStream = std::make_unique<SkMemoryStream>(skData);
-        SkColorEx skColor;
-        if (svgFillColor.has_value()) {
-            skColor.color = svgFillColor.value().GetValue();
-            skColor.valid = 1;
-        }
-        auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, skColor.value);
-        return AceType::MakeRefPtr<SkiaSvgDom>(skiaDom);
-    }
+    static RefPtr<SkiaSvgDom> CreateSkiaSvgDom(SkStream& svgStream, const std::optional<Color>& svgFillColor);
 
-    const sk_sp<SkSVGDOM>& GetSkiaSvgDom() const
-    {
-        return skiaDom_;
-    }
+    void DrawImage(
+        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) override;
 
-    void Render(SkCanvas* skCanvas)
-    {
-        skiaDom_->render(skCanvas);
-    }
+    const sk_sp<SkSVGDOM>& GetSkiaSvgDom() const;
 
-    SizeF GetContainerSize() const override
-    {
-        return SizeF(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-    }
+    void Render(SkCanvas* skCanvas);
 
-    void SetContainerSize(const SizeF& containerSize) override
-    {
-        skiaDom_->setContainerSize({containerSize.Width(), containerSize.Height()});
-    }
+    SizeF GetContainerSize() const override;
+    void SetContainerSize(const SizeF& containerSize) override;
+    void SetSvgFillColor(const std::optional<Color>& color) override {}
+
 private:
     sk_sp<SkSVGDOM> skiaDom_;
 };

@@ -60,24 +60,32 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void SetLinearLayoutFeature()
+    {
+        isLinearLayoutFeature_ = true;
+    }
+
 private:
     void InitFlexProperties(LayoutWrapper* layoutWrapper);
     void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper);
-    void ResizeFlexSizeByItem(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void ResizeFlexSizeByItem(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossAxisSize);
     float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     float GetChildCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     float GetSelfCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void CheckSizeValidity(const RefPtr<LayoutWrapper>& layoutWrapper);
     void CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper);
     void CalculateSpace(float remainSpace, float& frontSpace, float& betweenSpace) const;
-    void PlaceChildren(LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace);
+    void PlaceChildren(
+        LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace, const OffsetF& paddingOffset);
     FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     TextDirection AdjustTextDirectionByDir() const;
     float GetStretchCrossAxisLimit() const;
+    void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
     void MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties);
     void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
     void UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& layoutConstraint, float size);
+    void AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper);
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;
@@ -95,9 +103,14 @@ private:
     std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
     std::map<int32_t, float> magicNodeWeights_;
     std::list<MagicLayoutNode> secondaryMeasureList_;
+    std::list<RefPtr<LayoutWrapper>> outOfLayoutChildren_;
+
     FlexDirection direction_ = FlexDirection::ROW;
     friend class LinearLayoutUtils;
     BaselineProperties baselineProperties_;
+    bool isLinearLayoutFeature_ = false;
+    bool isInfiniteLayout_ = false;
+    TextDirection textDir_ = TextDirection::LTR;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);
 };

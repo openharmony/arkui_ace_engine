@@ -24,6 +24,14 @@ struct FlexLayoutAttribute {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexDirection, FlexDirection);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MainAxisAlign, FlexAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CrossAxisAlign, FlexAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Space, Dimension);
+};
+
+struct WrapLayoutAttribute {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WrapDirection, WrapDirection);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Alignment, WrapAlignment);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MainAlignment, WrapAlignment);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CrossAlignment, WrapAlignment);
 };
 } // namespace OHOS::Ace::NG
 

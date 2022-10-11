@@ -23,6 +23,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -89,7 +90,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override {}
+    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override {}
@@ -117,6 +118,8 @@ public:
 
     void OnHide() override;
 
+    void WindowFocus(bool isFocus) override;
+
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
     {
@@ -140,7 +143,7 @@ public:
 
     bool OnBackPressed();
 
-    void AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode);
+    void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
@@ -161,13 +164,25 @@ public:
         return selectOverlayManager_;
     }
 
+    const RefPtr<DragDropManager>& GetDragDropManager()
+    {
+        return dragDropManager_;
+    }
+
     void FlushBuild() override;
+
+    void FlushPipelineImmediately();
 
     void AddBuildFinishCallBack(std::function<void()>&& callback);
 
     void AddWindowStateChangedCallback(int32_t nodeId);
 
     void RemoveWindowStateChangedCallback(int32_t nodeId);
+
+    void AddWindowFocusChangedCallback(int32_t nodeId);
+
+    void RemoveWindowFocusChangedCallback(int32_t nodeId);
+
 
     bool GetIsFocusingByTab() const
     {
@@ -179,9 +194,29 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
+    bool GetIsNeedShowFocus() const
+    {
+        return isNeedShowFocus_;
+    }
+
+    void SetIsNeedShowFocus(bool isNeedShowFocus)
+    {
+        isNeedShowFocus_ = isNeedShowFocus;
+    }
+
+    void SetIsDragged(bool isDragged)
+    {
+        isDragged_ = isDragged;
+    }
+
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
+
+    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
+    {
+        drawDelegate_ = std::move(delegate);
+    }
 
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -200,6 +235,8 @@ protected:
 
 private:
     void FlushWindowStateChangedCallback(bool isShow);
+
+    void FlushWindowFocusChangedCallback(bool isFocus);
 
     void FlushTouchEvents();
 
@@ -236,22 +273,31 @@ private:
     UITaskScheduler taskScheduler_;
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
-    std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
+    std::set<WeakPtr<UINode>, NodeCompareWeak<WeakPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
-    // window on show or on hide.
+
+    // window on show or on hide
     std::list<int32_t> onWindowStateChangedCallbacks_;
+    // window on focused or on unfocused
+    std::list<int32_t> onWindowFocusChangedCallbacks_;
+
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
+    std::unique_ptr<DrawDelegate> drawDelegate_;
+
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
     RefPtr<SelectOverlayManager> selectOverlayManager_;
+    RefPtr<DragDropManager> dragDropManager_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
+    bool isNeedShowFocus_ = false;
+    bool isDragged_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

@@ -112,6 +112,13 @@ bool ArkJSRuntime::StartDebugger()
     return ret;
 }
 
+#if defined(PREVIEW)
+bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename)
+{
+    return JSNApi::ExecuteModuleBuffer(vm_, data, size, filename);
+}
+#endif
+
 shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)
 {
     return NewUndefined();
@@ -215,6 +222,16 @@ shared_ptr<JsValue> ArkJSRuntime::NewNativePointer(void* ptr)
 {
     LocalScope scope(vm_);
     return std::make_shared<ArkJSValue>(shared_from_this(), NativePointerRef::New(vm_, ptr));
+}
+
+void ArkJSRuntime::ThrowError(const std::string& msg, int32_t code)
+{
+    auto errorVal = panda::Exception::Error(vm_, panda::StringRef::NewFromUtf8(vm_, msg.c_str()));
+    auto codeVal = panda::Exception::Error(vm_, panda::StringRef::NewFromUtf8(vm_, std::to_string(code).c_str()));
+    Local<StringRef> codeKey = StringRef::NewFromUtf8(vm_, "code");
+    Local<ObjectRef> errorObj(errorVal);
+    errorObj->Set(vm_, codeKey, codeVal);
+    panda::JSNApi::ThrowException(vm_, errorObj);
 }
 
 void ArkJSRuntime::RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback)

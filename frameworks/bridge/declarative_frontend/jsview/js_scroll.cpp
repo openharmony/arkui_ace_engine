@@ -15,21 +15,45 @@
 
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_component.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_position_controller.h"
+#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_view.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE };
+
+void NGSetScrollControllerAndProxy(RefPtr<NG::ScrollPattern>& pattern, const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(pattern);
+    auto positionController = AceType::MakeRefPtr<NG::ScrollPositionController>();
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
+        if (jsScroller) {
+            jsScroller->SetController(positionController);
+            // TODO: Init scroll bar proxy.
+        }
+    }
+    pattern->SetScrollPositionController(positionController);
+    positionController->SetScrollPattern(pattern);
+}
 } // namespace
+
 void JSScroll::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ScrollView::Create();
+        auto frameNode = NG::ScrollView::Create();
+        auto pattern = AceType::DynamicCast<NG::ScrollPattern>(frameNode->GetPattern());
+        NGSetScrollControllerAndProxy(pattern, info);
         return;
     }
 
@@ -323,6 +347,21 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 
 void JSScroll::SetEdgeEffect(int edgeEffect)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto effect = static_cast<EdgeEffect>(edgeEffect);
+        RefPtr<NG::ScrollEdgeEffect> scrollEdgeEffect;
+        if (effect == EdgeEffect::SPRING) {
+            scrollEdgeEffect = AceType::MakeRefPtr<NG::ScrollSpringEffect>();
+        } else if (effect == EdgeEffect::NONE || effect == EdgeEffect::FADE) {
+            // TODO: not consider FADE
+            scrollEdgeEffect = AceType::MakeRefPtr<NG::ScrollEdgeEffect>(effect);
+        } else {
+            LOGW("edge effect type %{public}d is not support", edgeEffect);
+            return;
+        }
+        NG::ScrollView::SetScrollEdgeEffect(scrollEdgeEffect);
+        return;
+    }
     auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!scrollComponent) {
         return;

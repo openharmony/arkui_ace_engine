@@ -32,14 +32,14 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT DialogView {
 public:
-    static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param);
+    static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode);
 
     static RefPtr<FrameNode> CreateDialogWithType(DialogType type);
 
     static void BuildChild(const RefPtr<FrameNode>& dialogNode, const DialogProperties& prop, std::string& data,
-        const RefPtr<DialogTheme>& theme, const RefPtr<ThemeManager>& themeManager);
-    static void BuildButtons(const RefPtr<ThemeManager>& themeManager, const RefPtr<FrameNode>& dialog,
-        const std::vector<ButtonInfo>& buttons, const RefPtr<DialogTheme>& dialogTheme, std::string& data);
+        const RefPtr<DialogTheme>& theme, const RefPtr<UINode>& customNode);
+    static RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons,
+        const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dialog);
 };
 } // namespace OHOS::Ace::NG
 

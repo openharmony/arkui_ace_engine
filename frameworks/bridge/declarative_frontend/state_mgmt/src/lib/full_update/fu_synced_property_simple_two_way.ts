@@ -40,16 +40,16 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   // a set (newValue) is not done because get reads through for the source_
   hasChanged(newValue: T): void {
     if (!this.changeNotificationIsOngoing_) {
-      console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
+      stateMgmtConsole.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
       this.notifyHasChanged(newValue);
     }
   }
 
   // get 'read through` from the ObservedProperty
   public get(): T {
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`);
     if (!this.source_) {
-      console.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: get value is undefined.`);
+      stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: get value is undefined.`);
       return undefined;
     }
     this.notifyPropertyRead();
@@ -59,15 +59,15 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   // set 'writes through` to the ObservedProperty
   public set(newValue: T): void {
     if (!this.source_) {
-      console.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: set '${newValue}' ignoring.`);
+      stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: set '${newValue}' ignoring.`);
       return;
     }
     if (this.source_.get() == newValue) {
-      console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
     // the source_ ObservedProeprty will call: this.hasChanged(newValue);
     // the purpose of the changeNotificationIsOngoing_ is to avoid 
     // circular notifications @Link -> source @State -> other but alos same @Link

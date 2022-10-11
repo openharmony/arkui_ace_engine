@@ -42,6 +42,10 @@ void IndexerPattern::OnModifyDone()
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
 }
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -154,5 +158,62 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+void IndexerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool IndexerPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_DPAD_UP) {
+        return MoveStep(-1);
+    }
+    if (event.code == KeyCode::KEY_DPAD_DOWN) {
+        return MoveStep(1);
+    }
+    return false;
+}
+
+bool IndexerPattern::MoveStep(int32_t step)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+
+    auto nextSelected = selected_ + step;
+    if (nextSelected < 0 || nextSelected >= itemCount_) {
+        return false;
+    }
+    selected_ = nextSelected;
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_RETURN(indexerEventHub, false);
+
+    auto onSelected = indexerEventHub->GetOnSelected();
+    if (onSelected) {
+        onSelected(selected_);
+    }
+
+    auto onRequestPopupData = indexerEventHub->GetOnRequestPopupData();
+    if (onRequestPopupData) {
+        onRequestPopupData(selected_);
+    }
+
+    auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
+    if (onPopupSelected) {
+        onPopupSelected(selected_);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return false;
 }
 } // namespace OHOS::Ace::NG

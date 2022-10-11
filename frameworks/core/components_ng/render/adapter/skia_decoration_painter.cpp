@@ -22,6 +22,7 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkRRect.h"
 #include "include/core/SkScalar.h"
+#include "include/core/SkColorFilter.h"
 #include "include/utils/SkParsePath.h"
 #include "include/effects/SkGradientShader.h"
 
@@ -31,11 +32,14 @@
 
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr int CORNER_NUMS = 4;
+
+constexpr int32_t CORNER_NUMS = 4;
+constexpr uint32_t COLOR_MASK = 0xff000000;
 
 template<typename T>
 class Evaluator : public AceType {
@@ -922,4 +926,231 @@ void SkiaDecorationPainter::SkiaCreateRect(
     roundRect.setRectRadii(skRect, fRadii);
     skPath.addRRect(roundRect);
 }
+
+void SkiaDecorationPainter::PaintGrayScale(
+    const SizeF& frameSize, SkCanvas* canvas, float scale)
+{
+    SkRRect outerRRect = SkRRect::MakeRect(
+        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    if (GreatNotEqual(scale, 0.0)) {
+        if (canvas) {
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->clipRRect(outerRRect, true);
+            SkPaint paint;
+            paint.setAntiAlias(true);
+            float matrix[20] = { 0.0f };
+            matrix[0] = matrix[5] = matrix[10] = 0.2126f * scale;
+            matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
+            matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
+            matrix[18] = 1.0f * scale;
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
+            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+            canvas->saveLayer(slr);
+        }
+    }
+}
+
+void SkiaDecorationPainter::PaintBrightness(
+    const SizeF& frameSize, SkCanvas* canvas, float bright)
+{
+    SkRRect outerRRect = SkRRect::MakeRect(
+        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    // brightness range = (0, 2)
+    // skip painting when brightness is normal
+    if (NearEqual(bright, 1.0)) {
+        return;
+    }
+    if (canvas) {
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->clipRRect(outerRRect, true);
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        float matrix[20] = { 0.0f };
+        // shift brightness to (-1, 1)
+        bright = bright - 1;
+        matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
+        matrix[4] = matrix[9] = matrix[14] = bright;
+        paint.setColorFilter(SkColorFilters::Matrix(matrix));
+        SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+        canvas->saveLayer(slr);
+    }
+}
+
+void SkiaDecorationPainter::PaintContrast(
+    const SizeF& frameSize, SkCanvas* canvas, float contrasts)
+{
+    SkRRect outerRRect = SkRRect::MakeRect(
+        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    // skip painting if contrast is normal
+    if (NearEqual(contrasts, 1.0)) {
+        return;
+    }
+    if (canvas) {
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->clipRRect(outerRRect, true);
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        float matrix[20] = { 0.0f };
+        matrix[0] = matrix[6] = matrix[12] = contrasts;
+        matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts) / 255;
+        matrix[18] = 1.0f;
+        paint.setColorFilter(SkColorFilters::Matrix(matrix));
+        SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+        canvas->saveLayer(slr);
+    }
+}
+
+void SkiaDecorationPainter::PaintColorBlend(
+    const SizeF& frameSize, SkCanvas* canvas, const Color& colorBlend)
+{
+    SkRRect outerRRect = SkRRect::MakeRect(
+        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    if (colorBlend.GetValue() != COLOR_MASK) {
+        if (canvas) {
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->clipRRect(outerRRect, true);
+            SkPaint paint;
+            paint.setAntiAlias(true);
+            paint.setColorFilter(SkColorFilters::Blend(SkColorSetARGB(colorBlend.GetAlpha(),
+                colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()), SkBlendMode::kPlus));
+            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+            canvas->saveLayer(slr);
+        }
+    }
+}
+
+void SkiaDecorationPainter::PaintSaturate(
+    const SizeF& frameSize, SkCanvas* canvas, float saturates)
+{
+    SkRRect outerRRect = SkRRect::MakeRect(
+        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    if (!NearEqual(saturates, 1.0) && GreatOrEqual(saturates, 0.0)) {
+        if (canvas) {
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->clipRRect(outerRRect, true);
+            SkPaint paint;
+            paint.setAntiAlias(true);
+            float matrix[20] = { 0.0f };
+            matrix[0] = 0.3086f * (1 - saturates) + saturates;
+            matrix[1] = matrix[11] = 0.6094f * (1 - saturates);
+            matrix[2] = matrix[7] = 0.0820f * (1 - saturates);
+            matrix[5] = matrix[10] = 0.3086f * (1 - saturates);
+            matrix[6] = 0.6094f * (1 - saturates) + saturates;
+            matrix[12] = 0.0820f * (1 - saturates) + saturates;
+            matrix[18] = 1.0f;
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
+            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+            canvas->saveLayer(slr);
+        }
+    }
+}
+
+void SkiaDecorationPainter::PaintSepia(
+    const SizeF& frameSize, SkCanvas* canvas, float sepias)
+{
+    SkRRect outerRRect = SkRRect::MakeRect(
+        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    if (sepias > 1.0) {
+        sepias = 1.0;
+    }
+    if (GreatNotEqual(sepias, 0.0)) {
+        if (canvas) {
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->clipRRect(outerRRect, true);
+            SkPaint paint;
+            paint.setAntiAlias(true);
+            float matrix[20] = { 0.0f };
+            matrix[0] = 0.393f * sepias;
+            matrix[1] = 0.769f * sepias;
+            matrix[2] = 0.189f * sepias;
+
+            matrix[5] = 0.349f * sepias;
+            matrix[6] = 0.686f * sepias;
+            matrix[7] = 0.168f * sepias;
+
+            matrix[10] = 0.272f * sepias;
+            matrix[11] = 0.534f * sepias;
+            matrix[12] = 0.131f * sepias;
+            matrix[18] = 1.0f * sepias;
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
+            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+            canvas->saveLayer(slr);
+        }
+    }
+}
+
+void SkiaDecorationPainter::PaintInvert(
+    const SizeF& frameSize, SkCanvas* canvas, float inverts)
+{
+    SkRRect outerRRect = SkRRect::MakeRect(
+        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    if (GreatNotEqual(inverts, 0.0)) {
+        if (canvas) {
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->clipRRect(outerRRect, true);
+            SkPaint paint;
+            paint.setAntiAlias(true);
+            float matrix[20] = { 0.0f };
+            if (inverts > 1.0) {
+                inverts = 1.0;
+            }
+            // complete color invert when dstRGB = 1 - srcRGB
+            // map (0, 1) to (1, -1)
+            matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * inverts;
+            matrix[18] = 1.0f;
+            // inverts = 0.5 -> RGB = (0.5, 0.5, 0.5) -> image completely gray
+            matrix[4] = matrix[9] = matrix[14] = inverts;
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
+            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+            canvas->saveLayer(slr);
+        }
+    }
+}
+
+void SkiaDecorationPainter::PaintHueRotate(
+    const SizeF& frameSize, SkCanvas* canvas, float hueRotate)
+{
+    SkRRect outerRRect = SkRRect::MakeRect(
+        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    if (GreatNotEqual(hueRotate, 0.0)) {
+        if (canvas) {
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->clipRRect(outerRRect, true);
+            SkPaint paint;
+            paint.setAntiAlias(true);
+            while (GreatOrEqual(hueRotate, 360)) {
+                hueRotate -= 360;
+            }
+            float matrix[20] = { 0.0f };
+            int32_t type = hueRotate / 120;
+            float N = (hueRotate - 120 * type) / 120;
+            switch (type) {
+                case 0:
+                    // color change = R->G, G->B, B->R
+                    matrix[2] = matrix[5] = matrix[11] = N;
+                    matrix[0] = matrix[6] = matrix[12] = 1 - N;
+                    matrix[18] = 1.0f;
+                    break;
+                case 1:
+                    // compare to original: R->B, G->R, B->G
+                    matrix[1] = matrix[7] = matrix[10] = N;
+                    matrix[2] = matrix[5] = matrix[11] = 1 - N;
+                    matrix[18] = 1.0f;
+                    break;
+                case 2:
+                    // back to normal color
+                    matrix[0] = matrix[6] = matrix[12] = N;
+                    matrix[1] = matrix[7] = matrix[10] = 1 - N;
+                    matrix[18] = 1.0f;
+                    break;
+                default:
+                    break;
+            }
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
+            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+            canvas->saveLayer(slr);
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

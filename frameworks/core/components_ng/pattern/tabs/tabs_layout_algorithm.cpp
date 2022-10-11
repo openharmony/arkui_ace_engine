@@ -42,6 +42,7 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     geometryNode->SetFrameSize(idealSize);
+    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
 
@@ -95,28 +96,35 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     OffsetF tabBarOffset;
     OffsetF swiperOffset;
     if (axis == Axis::HORIZONTAL) {
+        float barPosX = (frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL)) / 2;
         if (barPosition == BarPosition::START) {
-            tabBarOffset = OffsetF();
+            tabBarOffset = OffsetF(barPosX, 0.0f);
             swiperOffset = OffsetF(0.0f, tabBarFrameSize.MainSize(Axis::VERTICAL));
         } else {
-            tabBarOffset = OffsetF(0.0f, frameSize.MainSize(Axis::VERTICAL) - tabBarFrameSize.MainSize(Axis::VERTICAL));
+            tabBarOffset =
+                OffsetF(barPosX, frameSize.MainSize(Axis::VERTICAL) - tabBarFrameSize.MainSize(Axis::VERTICAL));
             swiperOffset = OffsetF();
         }
     } else {
+        float barPosY = (frameSize.MainSize(Axis::VERTICAL) - tabBarFrameSize.MainSize(Axis::VERTICAL)) / 2;
         if (barPosition == BarPosition::START) {
-            tabBarOffset = OffsetF();
+            tabBarOffset = OffsetF(0.0f, barPosY);
             swiperOffset = OffsetF(tabBarFrameSize.MainSize(Axis::HORIZONTAL), 0.0f);
         } else {
             tabBarOffset =
-                OffsetF(frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL), 0.0f);
+                OffsetF(frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL), barPosY);
             swiperOffset = OffsetF();
         }
     }
 
-    tabBarGeometryNode->SetMarginFrameOffset(tabBarOffset);
+    auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+
+    tabBarGeometryNode->SetMarginFrameOffset(tabBarOffset + padding.Offset());
     tabBarWrapper->Layout();
 
-    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);
+    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset + padding.Offset());
     swiperWrapper->Layout();
 }
 

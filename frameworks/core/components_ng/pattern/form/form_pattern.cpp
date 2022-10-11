@@ -102,7 +102,8 @@ void FormPattern::InitFormManagerDelegate()
                                                    const std::string& module, const std::string& data,
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
                                                        imageDataMap,
-                                                   const AppExecFwk::FormJsInfo& formJsInfo) {
+                                                   const AppExecFwk::FormJsInfo& formJsInfo,
+                                                   const FrontendType& frontendType) {
         ContainerScope scope(instanceID);
         auto form = weak.Upgrade();
         CHECK_NULL_VOID(form);
@@ -110,14 +111,14 @@ void FormPattern::InitFormManagerDelegate()
         CHECK_NULL_VOID(host);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID] {
+        uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType] {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
             auto container = form->GetSubContainer();
             CHECK_NULL_VOID(container);
             container->SetWindowConfig({ formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
-            container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc);
+            container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType);
         });
     });
 
@@ -221,6 +222,7 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
     auto drawDelegate = std::make_unique<DrawDelegate>();
     drawDelegate->SetDrawRSFrameCallback(
         [weak = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
+            CHECK_NULL_VOID(node);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
             auto host = form->GetHost();
@@ -228,6 +230,24 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
             auto context = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
+            CHECK_NULL_VOID(rsNode);
+            rsNode->AddChild(node, -1);
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        });
+
+    drawDelegate->SetDrawRSFrameByRenderContextCallback(
+        [weak = WeakClaim(this)](RefPtr<OHOS::Ace::NG::RenderContext>& renderContext) {
+            auto context = DynamicCast<NG::RosenRenderContext>(renderContext);
+            CHECK_NULL_VOID(context);
+            auto node = context->GetRSNode();
+            CHECK_NULL_VOID(node);
+            auto form = weak.Upgrade();
+            CHECK_NULL_VOID(form);
+            auto host = form->GetHost();
+            CHECK_NULL_VOID(host);
+            auto formContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+            CHECK_NULL_VOID(formContext);
+            auto rsNode = formContext->GetRSNode();
             CHECK_NULL_VOID(rsNode);
             rsNode->AddChild(node, -1);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);

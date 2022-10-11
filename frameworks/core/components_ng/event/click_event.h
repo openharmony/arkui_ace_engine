@@ -81,6 +81,8 @@ public:
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
+    GestureEventFunc GetClickEvent();
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<ClickEvent>> clickEvents_;

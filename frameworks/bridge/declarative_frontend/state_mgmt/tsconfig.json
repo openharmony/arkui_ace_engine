@@ -2,6 +2,7 @@
   "files": [
     // common:
     // delcrations of C++ exposed classes
+    "src/lib/common/ace_console.native.d.ts",
     "src/lib/common/environment_setting.d.ts",
     "src/lib/common/storage.d.ts",
     "src/lib/common/local_storage_native.d.ts",
@@ -12,6 +13,9 @@
     "src/lib/common/i_property_subscriber.ts",
     "src/lib/common/i_property_subscriber_lookup.ts",
     "src/lib/common/i_storage.ts",
+
+    // common
+    "src/lib/common/state_mgmt_console.ts",
     "src/lib/common/local_storage.ts",
     "src/lib/common/app_storage.ts",
     "src/lib/common/persistent_storage.ts",

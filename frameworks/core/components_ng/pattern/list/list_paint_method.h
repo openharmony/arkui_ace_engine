@@ -30,9 +30,9 @@ class ACE_EXPORT ListPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListPaintMethod, NodePaintMethod)
 public:
     ListPaintMethod(const V2::ItemDivider& divider, int32_t startIndex, int32_t endIndex, bool vertical,
-        ListLayoutAlgorithm::PositionMap&& itemPosition)
+        ListLayoutAlgorithm::PositionMap& itemPosition)
         : divider_(divider), startIndex_(startIndex), endIndex_(endIndex), vertical_(vertical),
-          itemPosition_(std::move(itemPosition))
+          itemPosition_(itemPosition)
     {}
     ~ListPaintMethod() override = default;
 

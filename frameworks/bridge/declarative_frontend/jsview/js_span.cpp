@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "core/common/container.h"
 #include "core/components/declaration/span/span_declaration.h"
 #include "core/components_ng/pattern/text/span_view.h"
@@ -322,8 +323,9 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
 
 void JSSpan::JsRemoteMessage(const JSCallbackInfo& info)
 {
-    EventMarker remoteMessageEventId;
-    JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
+    RemoteCallback remoteCallback;
+    JSInteractableView::JsRemoteMessage(info, remoteCallback);
+    EventMarker remoteMessageEventId(std::move(remoteCallback));
     auto* stack = ViewStackProcessor::GetInstance();
     auto textSpanComponent = AceType::DynamicCast<TextSpanComponent>(stack->GetMainComponent());
     textSpanComponent->SetRemoteMessageEventId(remoteMessageEventId);

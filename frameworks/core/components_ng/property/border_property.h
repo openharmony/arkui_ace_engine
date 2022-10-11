@@ -224,6 +224,11 @@ struct BorderWidthPropertyT {
         str.append("bottomDimen: [").append(bottomDimen.has_value() ? bottomDimen->ToString() : "NA").append("]");
         return str;
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("borderWidth", leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+    }
 };
 
 template<>

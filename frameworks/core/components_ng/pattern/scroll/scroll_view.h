@@ -17,14 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_VIEW_H
 
 #include "base/geometry/axis.h"
+#include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "frameworks/core/components_ng/pattern/scroll/scroll_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ScrollView {
 public:
-    static void Create();
+    static RefPtr<FrameNode> Create();
     static void SetAxis(Axis axis);
     static void SetScrollBarColor(const Color& color);
     static void SetScrollBarWidth(const Dimension& width);
@@ -32,6 +35,7 @@ public:
     static void SetOnScrollBegin(ScrollBeginEvent&& event);
     static void SetOnScrollEdge(ScrollEdgeEvent&& event);
     static void SetOnScrollEnd(ScrollEndEvent&& event);
+    static void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
 };
 
 } // namespace OHOS::Ace::NG

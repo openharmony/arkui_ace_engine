@@ -18,21 +18,21 @@
 
 #include <mutex>
 
-#include "ability_info.h"
 #include "iremote_object.h"
-#include "dialog_callback_interface.h"
+#include "dialog_callback.h"
 #include "ui_service_interface.h"
 #include "ui_service_mgr_errors.h"
 #include "ui_service_mgr_interface.h"
-#include "uri.h"
 #include "wm_common.h"
+
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 /**
  * @class UIServiceMgrClient
  * UIServiceMgrClient is used to access UIService manager services.
  */
-class UIServiceMgrClient {
+class ACE_FORCE_EXPORT UIServiceMgrClient {
 public:
     UIServiceMgrClient();
     virtual ~UIServiceMgrClient();
@@ -53,19 +53,16 @@ public:
     ErrCode ShowDialog(const std::string& name,
                        const std::string& params,
                        OHOS::Rosen::WindowType windowType,
-                       int x,
-                       int y,
-                       int width,
-                       int height,
+                       int32_t x,
+                       int32_t y,
+                       int32_t width,
+                       int32_t height,
                        DialogCallback callback,
-                       int* id = nullptr);
+                       int32_t* id = nullptr);
 
     ErrCode CancelDialog(int32_t id);
 
     ErrCode UpdateDialog(int32_t id, const std::string& data);
-
-    ErrCode ShowAppPickerDialog(
-        const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, int32_t userId);
 
 private:
     /**
@@ -74,11 +71,6 @@ private:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode Connect();
-
-    const std::string GetPickerDialogParam(const AAFwk::Want& want,
-        const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, bool wideScreen = true) const;
-    void GetDisplayPosition(
-        int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height, bool& wideScreen);
 
     static std::mutex mutex_;
     static std::shared_ptr<UIServiceMgrClient> instance_;

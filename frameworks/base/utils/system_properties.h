@@ -182,6 +182,8 @@ public:
 
     static std::string GetPartialUpdatePkg();
 
+    static int32_t GetSvgMode();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
@@ -281,6 +283,16 @@ public:
 
     static size_t GetLongPauseTime();
 
+    static void SetUnZipHap(bool unZipHap = true)
+    {
+        unZipHap_ = unZipHap;
+    }
+
+    static bool GetUnZipHap()
+    {
+        return unZipHap_;
+    }
+
     static bool GetAsmInterpreterEnabled();
 
     static std::string GetAsmOpcodeDisableRange();
@@ -330,6 +342,7 @@ private:
     static ColorMode colorMode_;
     static ScreenShape screenShape_;
     static LongScreenType LongScreen_;
+    static bool unZipHap_;
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;

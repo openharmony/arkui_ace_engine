@@ -19,17 +19,19 @@
 #include <functional>
 #include <string>
 
-#include "core/components/web/web_property.h"
 #include "core/components/box/drag_drop_event.h"
+#include "core/components/web/web_property.h"
 
 namespace OHOS::Ace::NG {
 
 using OnWebSyncFunc = std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>;
 using OnWebAsyncFunc = std::function<void(const std::shared_ptr<BaseEventInfo>& info)>;
 using SetWebIdCallback = std::function<void(int32_t)>;
+using JsProxyCallback = std::function<void()>;
 
 class ACE_EXPORT WebView {
 public:
+    static void Create(const std::string& webData);
     static void Create(const std::string& src, const RefPtr<WebController>& webController);
     static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback);
     static void SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType);
@@ -87,6 +89,10 @@ public:
     static void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId);
     static void SetOnDropId(const OnDropFunc& onDropId);
     static void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
+    static void SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId);
+    static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
+    static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
+    static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
 };
 } // namespace OHOS::Ace::NG
 

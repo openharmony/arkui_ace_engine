@@ -82,6 +82,15 @@ enum class DragEventAction {
     DRAG_EVENT_START = 0,
     DRAG_EVENT_MOVE,
     DRAG_EVENT_END,
+    DRAG_EVENT_OUT,
+};
+
+enum class InputEventType {
+    TOUCH_SCREEN = 0,
+    TOUCH_PAD,
+    MOUSE_BUTTON,
+    AXIS,
+    KEYBOARD,
 };
 
 struct PanDirection final {
@@ -515,6 +524,16 @@ public:
         return mainDelta_;
     }
 
+    void SetInputEventType(InputEventType type)
+    {
+        inputEventType_ = type;
+    }
+
+    InputEventType GetInputEventType() const
+    {
+        return inputEventType_;
+    }
+
 private:
     bool repeat_ = false;
     bool pressed_ = false;
@@ -537,6 +556,7 @@ private:
     Offset pinchCenter_;
     Offset delta_;
     std::list<FingerInfo> fingerList_;
+    InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
 };
 
 using GestureEventFunc = std::function<void(GestureEvent& info)>;

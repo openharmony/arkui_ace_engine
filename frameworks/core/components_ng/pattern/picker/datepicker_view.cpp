@@ -53,13 +53,9 @@ void DatePickerView::CreateDatePicker()
 
     auto context = dateNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-    if (!pickerTheme) {
-        LOGE("Theme is null.");
-        return;
-    }
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+
     uint32_t showCount = pickerTheme->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
         SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
@@ -156,7 +152,7 @@ void DatePickerView::SetSelectedDate(const PickerDate& value)
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedDate, datePickerPattern->GetSelectDate());
 }
 
-void DatePickerView::SetOnChange(ChangeEvent&& onChange)
+void DatePickerView::SetOnChange(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

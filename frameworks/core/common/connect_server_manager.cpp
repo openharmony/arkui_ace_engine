@@ -16,11 +16,17 @@
 #include "core/common/connect_server_manager.h"
 
 #include <dlfcn.h>
+#include <string>
 #include <unistd.h>
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
+#include "core/common/ace_page.h"
+#include "core/common/container.h"
+#include "core/event/ace_event_handler.h"
+
 
 namespace OHOS::Ace {
 
@@ -30,8 +36,20 @@ using StartServer = bool (*)(const std::string& packageName);
 using SendMessage = void (*)(const std::string& message);
 using StopServer = void (*)(const std::string& packageName);
 using StoreMessage = void (*)(int32_t instanceId, const std::string& message);
+using StoreInspectorInfo = void (*)(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
 using RemoveMessage = void (*)(int32_t instanceId);
 using WaitForDebugger = bool (*)();
+using SetCreatTreeCallBack = void (*)(const std::function<void(int32_t)>& setConnectedStaus, int32_t instanceId);
+
+void SetCallbackFunc(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGE("Container is null");
+        return;
+    }
+    container->SetIdeDebuggerConnected(true);
+}
 
 } // namespace
 
@@ -142,6 +160,30 @@ void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
             storeMessage(instanceId, message);
         }
     }
+    SetCreatTreeCallBack setCreatTreeCallBack = (SetCreatTreeCallBack)dlsym(handlerConnectServerSo_,
+        "SetCreatTreeCallBack");
+    setCreatTreeCallBack(std::bind(&SetCallbackFunc, std::placeholders::_1), instanceId);
+}
+
+void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr)
+{
+    WaitForDebugger waitForDebugger = (WaitForDebugger)dlsym(handlerConnectServerSo_, "WaitForDebugger");
+    if (waitForDebugger == nullptr) {
+        return;
+    }
+    SendMessage sendMessage = (SendMessage)dlsym(handlerConnectServerSo_, "SendMessage");
+    StoreInspectorInfo storeInspectorInfo = (StoreInspectorInfo)dlsym(handlerConnectServerSo_, "StoreInspectorInfo");
+    if (sendMessage == nullptr) {
+        LOGE("sendMessage == nullptr");
+        return;
+    }
+    if (storeInspectorInfo == nullptr) {
+        LOGE("storeInspectorInfo == nullptr");
+        return;
+    }
+    sendMessage(jsonTreeStr);
+    sendMessage(jsonSnapshotStr);
+    storeInspectorInfo(jsonTreeStr, jsonSnapshotStr);
 }
 
 void ConnectServerManager::RemoveInstance(int32_t instanceId)

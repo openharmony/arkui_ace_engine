@@ -1,6 +1,7 @@
 {
   "files": [
     // mock of what is implemented on native side
+    "src/utest/common/state_mgmt_console_mock.ts",
     "src/utest/mock/common/mock_storage.ts",
     "src/utest/mock/common/mock_environment_backend.ts",
     "src/utest/mock/common/local_storage_native_mock.ts",

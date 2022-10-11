@@ -63,9 +63,7 @@ void BubblePaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(paintProperty);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto popupTheme = themeManager->GetTheme<PopupTheme>();
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     auto maskColor = paintProperty->GetMaskColor().value_or(popupTheme->GetMaskColor());
     auto layoutSize = paintWrapper->GetContentSize();
@@ -135,9 +133,7 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     arrowOffset_ = paintProperty->GetArrowOffset().value_or(0.0_px);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto popupTheme = themeManager->GetTheme<PopupTheme>();
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     border_.SetBorderRadius(popupTheme->GetRadius());
     padding_ = popupTheme->GetPadding();

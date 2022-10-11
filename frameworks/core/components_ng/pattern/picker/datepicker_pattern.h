@@ -127,6 +127,33 @@ public:
         return lunar_;
     }
 
+    const EventMarker& GetDialogAcceptEvent() const
+    {
+        return OnDialogAccept_;
+    }
+    void SetDialogAcceptEvent(const EventMarker& value)
+    {
+        OnDialogAccept_ = value;
+    }
+
+    const EventMarker& GetDialogCancelEvent() const
+    {
+        return OnDialogCancel_;
+    }
+    void SetDialogCancelEvent(const EventMarker& value)
+    {
+        OnDialogCancel_ = value;
+    }
+
+    const EventMarker& GetDialogChangeEvent() const
+    {
+        return OnDialogChange_;
+    }
+    void SetDialogChangeEvent(const EventMarker& value)
+    {
+        OnDialogChange_ = value;
+    }
+
     uint32_t GetOptionCount(RefPtr<FrameNode>& frmeNode)
     {
         return options_[frmeNode].size();
@@ -348,6 +375,10 @@ private:
     void OnAttachToFrameNode() override;
     static void Init();
 
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    bool HandleDirectionKey(KeyCode code);
+
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     uint32_t showCount_ = 0;
     std::vector<RefPtr<FrameNode>> datePickerColumns_;
@@ -355,6 +386,11 @@ private:
     std::optional<int32_t> yearId_;
     std::optional<int32_t> monthId_;
     std::optional<int32_t> dayId_;
+    std::optional<int32_t> dateNodeId_;
+
+    EventMarker OnDialogAccept_;
+    EventMarker OnDialogCancel_;
+    EventMarker OnDialogChange_;
 
     PickerDate startDateSolar_ = PickerDate(1970, 1, 1); // default start date is 1970-1-1 from FA document.
     LunarDate startDateLunar_;

@@ -55,7 +55,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     CHECK_NULL_RETURN(menuItem, OffsetF());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, OffsetF());
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextOverlayTheme>();
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
 
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.
@@ -68,7 +68,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     const auto& firstHandleRect = info_->firstHandle.paintRect;
     if (info_->isSingleHandle) {
         double menuSpacing = menuSpacingBetweenText;
-        menuPosition = OffsetF((firstHandleRect.Left() - menuWidth) / 2.0f,
+        menuPosition = OffsetF((firstHandleRect.Left() + firstHandleRect.Right() - menuWidth) / 2.0f,
             static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
     } else {
         double menuSpacing = menuSpacingBetweenText + menuSpacingBetweenHandle;

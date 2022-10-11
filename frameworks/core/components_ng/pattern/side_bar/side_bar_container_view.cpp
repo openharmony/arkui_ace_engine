@@ -83,7 +83,7 @@ void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& 
     info.SetDimension(imgWidth, imgHeight);
 
     int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imgNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imgNodeId, AceType::MakeRefPtr<ImagePattern>(info));
+    auto imgNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imgNodeId, AceType::MakeRefPtr<ImagePattern>());
 
     auto imgHub = imgNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(imgHub);

@@ -15,9 +15,12 @@
 
 #include "adapter/ohos/osal/resource_adapter_impl.h"
 
+#include <dirent.h>
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
+#include "base/utils/system_properties.h"
 #include "core/components/theme/theme_attributes.h"
 
 namespace OHOS::Ace {
@@ -80,6 +83,20 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_ICON
 };
 
+bool IsDirExist(const std::string& path)
+{
+    char realPath[PATH_MAX] = { 0x00 };
+    if (realpath(path.c_str(), realPath) == nullptr) {
+        return false;
+    }
+    DIR *dir = opendir(realPath);
+    if (dir) {
+        closedir(dir);
+        return true;
+    }
+    return false;
+}
+
 } // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
@@ -90,9 +107,10 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
 void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 {
     std::string resPath = resourceInfo.GetPackagePath();
+    std::string hapPath = resourceInfo.GetHapPath();
     auto resConfig = ConvertConfigToGlobal(resourceInfo.GetResourceConfiguration());
     std::shared_ptr<Global::Resource::ResourceManager> newResMgr(Global::Resource::CreateResourceManager());
-    std::string resIndexPath = resPath + "resources.index";
+    std::string resIndexPath = hapPath.empty() ? (resPath + "resources.index") : hapPath;
     auto resRet = newResMgr->AddResource(resIndexPath.c_str());
     auto configRet = newResMgr->UpdateResConfig(*resConfig);
     LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}d, "
@@ -101,7 +119,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
         resConfig->GetColorMode(), resConfig->GetInputDevice());
     sysResourceManager_ = newResMgr;
     resourceManager_ = sysResourceManager_;
-    packagePathStr_ = resPath;
+    packagePathStr_ = IsDirExist(resPath) ? resPath : std::string();
     resConfig_ = resConfig;
 }
 
@@ -276,7 +294,53 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
 
 std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
 {
-    return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
+    // as web component not support resource format: resource://RAWFILE/{fileName}, use old format
+    if (!packagePathStr_.empty()) {
+        return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
+    }
+    return "resource://RAWFILE/" + fileName;
+}
+
+bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+{
+    if (resourceManager_ == nullptr) {
+        return false;
+    }
+    auto rawFileObj = std::make_unique<OHOS::Global::Resource::ResourceManager::RawFile>();
+    auto state = resourceManager_->GetRawFileFromHap(rawFile, rawFileObj);
+    if (state != Global::Resource::SUCCESS || !rawFileObj || !rawFileObj->buffer) {
+        LOGE("GetRawFileFromHap error, raw filename:%{public}s, error:%{public}u", rawFile.c_str(), state);
+        return false;
+    }
+    len = rawFileObj->length;
+    dest.swap(rawFileObj->buffer);
+    return true;
+}
+
+bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+{
+    if (resourceManager_ == nullptr) {
+        return false;
+    }
+    auto state = resourceManager_->GetMediaDataById(resId, len, dest);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("GetMediaDataById error, id=%{public}u, error:%{public}u", resId, state);
+        return false;
+    }
+    return true;
+}
+
+bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+{
+    if (resourceManager_ == nullptr) {
+        return false;
+    }
+    auto state = resourceManager_->GetMediaDataByName(resName.c_str(), len, dest);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("GetMediaDataByName error, res=%{public}s, error:%{public}u", resName.c_str(), state);
+        return false;
+    }
+    return true;
 }
 
 void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, const std::string& moduleName)

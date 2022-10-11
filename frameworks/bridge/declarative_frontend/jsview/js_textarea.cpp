@@ -29,73 +29,6 @@
 
 namespace OHOS::Ace::Framework {
 
-namespace {
-
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
-const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
-constexpr uint32_t TEXTAREA_MAXLENGTH_VALUE_DEFAULT = std::numeric_limits<uint32_t>::max();
-
-}; // namespace
-
-void JSTextArea::InitDefaultStyle()
-{
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto stack = ViewStackProcessor::GetInstance();
-    auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    auto theme = GetTheme<TextFieldTheme>();
-    if (!boxComponent || !textAreaComponent || !theme) {
-        return;
-    }
-
-    textAreaComponent->SetTextMaxLines(TEXTAREA_MAXLENGTH_VALUE_DEFAULT);
-    textAreaComponent->SetCursorColor(theme->GetCursorColor());
-    textAreaComponent->SetPlaceholderColor(theme->GetPlaceholderColor());
-    textAreaComponent->SetFocusBgColor(theme->GetFocusBgColor());
-    textAreaComponent->SetFocusPlaceholderColor(theme->GetFocusPlaceholderColor());
-    textAreaComponent->SetFocusTextColor(theme->GetFocusTextColor());
-    textAreaComponent->SetBgColor(theme->GetBgColor());
-    textAreaComponent->SetTextColor(theme->GetTextColor());
-    textAreaComponent->SetSelectedColor(theme->GetSelectedColor());
-    textAreaComponent->SetHoverColor(theme->GetHoverColor());
-    textAreaComponent->SetPressColor(theme->GetPressColor());
-
-    TextStyle textStyle = textAreaComponent->GetTextStyle();
-    textStyle.SetTextColor(theme->GetTextColor());
-    textStyle.SetFontSize(theme->GetFontSize());
-    textStyle.SetFontWeight(theme->GetFontWeight());
-    textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
-    textAreaComponent->SetTextStyle(textStyle);
-    textAreaComponent->SetEditingStyle(textStyle);
-    textAreaComponent->SetPlaceHoldStyle(textStyle);
-
-    textAreaComponent->SetCountTextStyle(theme->GetCountTextStyle());
-    textAreaComponent->SetOverCountStyle(theme->GetOverCountStyle());
-    textAreaComponent->SetCountTextStyleOuter(theme->GetCountTextStyleOuter());
-    textAreaComponent->SetOverCountStyleOuter(theme->GetOverCountStyleOuter());
-    textAreaComponent->SetErrorBorderWidth(theme->GetErrorBorderWidth());
-    textAreaComponent->SetErrorBorderColor(theme->GetErrorBorderColor());
-
-    RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
-    backDecoration->SetPadding(theme->GetPadding());
-    backDecoration->SetBackgroundColor(theme->GetBgColor());
-    backDecoration->SetBorderRadius(theme->GetBorderRadius());
-    const auto& boxDecoration = boxComponent->GetBackDecoration();
-    if (boxDecoration) {
-        backDecoration->SetImage(boxDecoration->GetImage());
-        backDecoration->SetGradient(boxDecoration->GetGradient());
-    }
-    textAreaComponent->SetOriginBorder(backDecoration->GetBorder());
-    textAreaComponent->SetDecoration(backDecoration);
-    textAreaComponent->SetIconSize(theme->GetIconSize());
-    textAreaComponent->SetIconHotZoneSize(theme->GetIconHotZoneSize());
-    textAreaComponent->SetHeight(theme->GetHeight());
-
-    // text area need to extend height.
-    textAreaComponent->SetExtend(true);
-    boxComponent->SetHeight(-1.0, DimensionUnit::VP);
-}
-
 void JSTextArea::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextArea>::Declare("TextArea");
@@ -138,47 +71,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
 
 void JSTextArea::Create(const JSCallbackInfo& info)
 {
-    RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
-    textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
-    textAreaComponent->SetHoverAnimationType(HoverAnimationType::BOARD);
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-
-    ViewStackProcessor::GetInstance()->ClaimElementId(textAreaComponent);
-    ViewStackProcessor::GetInstance()->Push(textAreaComponent);
-    InitDefaultStyle();
-    Border boxBorder;
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto theme = GetTheme<TextFieldTheme>();
-    if (boxComponent->GetBackDecoration()) {
-        boxBorder = boxComponent->GetBackDecoration()->GetBorder();
-    }
-    JSTextField::UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
-
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
-
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("TextArea create without argument");
-        return;
-    }
-
-    std::string placeholder;
-    if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
-        textAreaComponent->SetPlaceholder(placeholder);
-    }
-    std::string text;
-    if (ParseJsString(paramObject->GetProperty("text"), text)) {
-        textAreaComponent->SetValue(text);
-    }
-
-    auto controllerObj = paramObject->GetProperty("controller");
-    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-        JSTextAreaController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextAreaController>();
-        if (jsController) {
-            jsController->SetController(textAreaComponent->GetTextFieldController());
-        }
-    }
+    JSTextField::CreateTextArea(info);
 }
 
 void JSTextAreaController::JSBind(BindingTarget globalObj)

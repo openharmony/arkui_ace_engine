@@ -50,4 +50,40 @@ void FlexView::CrossAxisAlign(const FlexAlign& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, value);
 }
+
+void FlexView::CreateWrap(
+    WrapDirection direction, WrapAlignment mainAxisAlign, WrapAlignment crossAxisAlign, WrapAlignment alignment)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::FLEX_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::FlexLayoutPattern>(true); });
+    stack->Push(frameNode);
+
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, WrapDirection, direction);
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, alignment);
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, mainAxisAlign);
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, crossAxisAlign);
+}
+
+void FlexView::SetWrapDirection(WrapDirection value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, WrapDirection, value);
+}
+
+void FlexView::SetWrapAlignment(WrapAlignment value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, value);
+}
+
+void FlexView::SetWrapMainAlignment(WrapAlignment value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, value);
+}
+
+void FlexView::SetWrapCrossAlignment(WrapAlignment value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, value);
+}
+
 } // namespace OHOS::Ace::NG

@@ -18,16 +18,28 @@
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
 
-#include "core/components_ng/pattern/image/image_view.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-#define SET_PROP_FOR_NG(propName, propType, propValue) \
-    ImageView::Set##propName(static_cast<propType>(propValue));
+void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ImageSourceInfo imageSourceInfo(src);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
+}
 
 void ImageModelNG::SetAlt(const std::string& src)
 {
-    SET_PROP_FOR_NG(Alt, std::string, src);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(src));
 }
 
 void ImageModelNG::SetBorder(const Border& border)
@@ -40,61 +52,64 @@ void ImageModelNG::SetBlur(double blur)
 
 void ImageModelNG::SetImageFit(int32_t value)
 {
-    SET_PROP_FOR_NG(ObjectFit, ImageFit, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, static_cast<ImageFit>(value));
 }
 
 void ImageModelNG::SetMatchTextDirection(bool value)
 {
-    NG::ImageView::SetMatchTextDirection(value);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value);
 }
 
 void ImageModelNG::SetFitMaxSize(bool value)
 {
-    SET_PROP_FOR_NG(FitOriginalSize, bool, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, value);
 }
 
 void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback)
 {
-    NG::ImageView::SetOnComplete(std::move(callback));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(callback));
 }
 
 void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback)
 {
-    NG::ImageView::SetOnError(std::move(callback));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError(std::move(callback));
 }
 
 void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
 {
 }
 
-void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
-{
-    NG::ImageView::Create(src);
-}
-
 void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& size)
 {
-    NG::ImageView::SetImageSourceSize(size);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, size);
 }
 
 void ImageModelNG::SetImageFill(const Color& color)
 {
-    NG::ImageView::SetSvgFillColor(color);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
 }
 
 void ImageModelNG::SetImageInterpolation(ImageInterpolation iterpolation)
 {
-    SET_PROP_FOR_NG(ImageInterpolation, ImageInterpolation, iterpolation);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, iterpolation);
 }
 
 void ImageModelNG::SetImageRepeat(ImageRepeat imageRepeat)
 {
-    SET_PROP_FOR_NG(ImageRepeat, ImageRepeat, imageRepeat);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat);
 }
 
 void ImageModelNG::SetImageRenderMode(ImageRenderMode imageRenderMode)
 {
-    SET_PROP_FOR_NG(ImageRenderMode, ImageRenderMode, imageRenderMode);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, imageRenderMode);
 }
 
 bool ImageModelNG::IsSrcSvgImage()
@@ -104,7 +119,7 @@ bool ImageModelNG::IsSrcSvgImage()
 
 void ImageModelNG::SetAutoResize(bool autoResize)
 {
-    SET_PROP_FOR_NG(AutoResize, bool, autoResize);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize);
 }
 
 void ImageModelNG::SetSyncMode(bool syncMode)
@@ -113,7 +128,7 @@ void ImageModelNG::SetSyncMode(bool syncMode)
 
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 {
-    NG::ImageView::SetColorFilterMatrix(matrix);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
 }
 
 void ImageModelNG::SetOnDragStartId(const OnDragFunc& onDragStartId)

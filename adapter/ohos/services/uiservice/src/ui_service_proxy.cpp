@@ -63,7 +63,7 @@ void UIServiceProxy::OnPushCallBack(const AAFwk::Want& want, const std::string& 
         HILOG_ERROR("fail to WriteString extraData");
         return;
     }
-    int result = remote->SendRequest(IUIService::UI_SERVICE_PUSH_CALL_BACK, dataParcel, reply, option);
+    int32_t result = remote->SendRequest(IUIService::UI_SERVICE_PUSH_CALL_BACK, dataParcel, reply, option);
     if (result == ERR_NONE) {
         HILOG_INFO("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
         return;
@@ -101,7 +101,7 @@ void UIServiceProxy::OnRequestCallBack(const AAFwk::Want& want, const std::strin
         HILOG_ERROR("fail to WriteString data");
         return;
     }
-    int result = remote->SendRequest(IUIService::UI_SERVICE_REQUEST_CALL_BACK, dataParcel, reply, option);
+    int32_t result = remote->SendRequest(IUIService::UI_SERVICE_REQUEST_CALL_BACK, dataParcel, reply, option);
     if (result == ERR_NONE) {
         HILOG_INFO("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
         return;
@@ -144,7 +144,7 @@ void UIServiceProxy::OnReturnRequest(
         HILOG_ERROR("fail to WriteString extraData");
         return;
     }
-    int result = remote->SendRequest(IUIService::UI_SERVICE_RETURN_REQUEST, dataParcel, reply, option);
+    int32_t result = remote->SendRequest(IUIService::UI_SERVICE_RETURN_REQUEST, dataParcel, reply, option);
     if (result == ERR_NONE) {
         HILOG_INFO("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
         return;

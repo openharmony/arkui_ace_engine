@@ -61,6 +61,12 @@ void DatePickerPattern::OnModifyDone()
             refPtr->FireChangeEvent(refresh);
         }
     });
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
 }
 
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
@@ -108,6 +114,43 @@ void DatePickerPattern::SetChangeCallback(ColumnChangeCallback&& value)
         CHECK_NULL_VOID(datePickerColumnPattern);
         datePickerColumnPattern->SetChangeCallback(std::move(value));
     }
+}
+
+void DatePickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool DatePickerPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
+        HandleDirectionKey(event.code);
+        return true;
+    }
+    return false;
+}
+
+bool DatePickerPattern::HandleDirectionKey(KeyCode code)
+{
+    if (code == KeyCode::KEY_DPAD_UP) {
+        // Need to update: current selection
+        return true;
+    }
+    if (code == KeyCode::KEY_DPAD_DOWN) {
+        // Need to update: current selection
+        return true;
+    }
+    return false;
 }
 
 std::unordered_map<std::string, RefPtr<FrameNode>> DatePickerPattern::GetAllChildNode()
@@ -187,6 +230,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh) const
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
+        datePickerEventHub->FireDailogChangeEvent(str);
     }
 }
 
@@ -648,8 +692,9 @@ PickerDate DatePickerPattern::GetCurrentDate() const
 
     if (!IsShowLunar()) {
         currentDate.SetYear(startDateSolar_.GetYear() + yearDatePickerColumnPattern->GetCurrentIndex());
-        currentDate.SetMonth(monthDatePickerColumnPattern->GetCurrentIndex() + 1); // month from 1 to 12, index from 0 to 11.
-        currentDate.SetDay(dayDatePickerColumnPattern->GetCurrentIndex() + 1);     // day from 1 to 31, index from 0 to 30.
+        currentDate.SetMonth(
+            monthDatePickerColumnPattern->GetCurrentIndex() + 1); // month from 1 to 12, index from 0 to 11.
+        currentDate.SetDay(dayDatePickerColumnPattern->GetCurrentIndex() + 1); // day from 1 to 31, index from 0 to 30.
         return currentDate;
     }
 

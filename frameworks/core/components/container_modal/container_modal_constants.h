@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONSTANTS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONSTANTS_H
 
+#include "core/components/common/properties/color.h"
+#include "frameworks/base/geometry/dimension.h"
+
 namespace OHOS::Ace {
 
 const Dimension CONTAINER_INNER_RADIUS = 14.0_vp;

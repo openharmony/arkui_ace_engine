@@ -23,10 +23,12 @@
 #include "base/memory/referenced.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 
 namespace OHOS::Ace::NG {
 
 using OnScrollCallback = std::function<void(Dimension, Dimension)>;
+using ScrollEndCallback = std::function<void()>;
 
 class GestureEventHub;
 
@@ -74,6 +76,32 @@ public:
         return onScrollCallback_;
     }
 
+    void SetScrollEndCallback(ScrollEndCallback&& scrollEndCallback)
+    {
+        if (!scrollEndCallback) {
+            return;
+        }
+        scrollEndCallback_ = std::move(scrollEndCallback);
+    }
+
+    const ScrollEndCallback& GetScrollEndCallback() const
+    {
+        return scrollEndCallback_;
+    }
+
+    void SetOutBoundaryCallback(OutBoundaryCallback&& outBoundaryCallback)
+    {
+        if (!outBoundaryCallback) {
+            return;
+        }
+        outBoundaryCallback_ = std::move(outBoundaryCallback);
+    }
+
+    const OutBoundaryCallback& GetOutBoundaryCallback() const
+    {
+        return outBoundaryCallback_;
+    }
+
     Axis GetAxis() const
     {
         return axis_;
@@ -83,6 +111,8 @@ private:
     ScrollPositionCallback callback_;
     OnScrollCallback onScrollCallback_;
     ScrollBeginCallback scrollBeginCallback_;
+    ScrollEndCallback scrollEndCallback_;
+    OutBoundaryCallback outBoundaryCallback_;
     Axis axis_ = Axis::VERTICAL;
 };
 
@@ -104,6 +134,9 @@ public:
         initialized_ = false;
     }
 
+    void AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& effect);
+    bool RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect);
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
@@ -112,6 +145,7 @@ private:
 
     std::unordered_map<Axis, RefPtr<ScrollableEvent>> scrollableEvents_;
     std::unordered_map<Axis, RefPtr<Scrollable>> scrollables_;
+    std::unordered_map<Axis, RefPtr<ScrollEdgeEffect>> scrollEffects_;
     WeakPtr<GestureEventHub> gestureEventHub_;
     bool initialized_ = false;
 };

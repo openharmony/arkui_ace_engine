@@ -45,7 +45,7 @@
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
-}
+} // namespace OHOS::MiscServices
 #endif
 
 namespace OHOS::Ace::NG {
@@ -337,7 +337,7 @@ private:
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
 #endif
-    int32_t instanceId_;
+    int32_t instanceId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

@@ -42,7 +42,7 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 
-class LayoutWrapper : public AceType {
+class ACE_EXPORT LayoutWrapper : public AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
     LayoutWrapper(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
@@ -97,7 +97,7 @@ public:
     // render area, and nodes in the render area will be mounted on the render tree after the layout is complete. You
     // can call the RemoveChildInRenderTree method to explicitly remove the node from the area to be rendered.
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(int32_t index, bool addToRenderTree = true);
-    std::list<RefPtr<LayoutWrapper>> GetAllChildrenWithBuild(bool addToRenderTree = true);
+    const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true);
 
     int32_t GetTotalChildCount() const
     {
@@ -113,6 +113,7 @@ public:
 
     RefPtr<FrameNode> GetHostNode() const;
     std::string GetHostTag() const;
+    int32_t GetHostDepth() const;
 
     bool IsActive() const
     {
@@ -188,11 +189,27 @@ public:
         return distance;
     }
 
+    bool IsOutOfLayout() const
+    {
+        return outOfLayout_;
+    }
+
+    void SetOutOfLayout(bool outOfLayout)
+    {
+        outOfLayout_ = outOfLayout;
+    }
+
+    // Gets the flag attribute with descendant node
+    PropertyChangeFlag GetFlagWithDescendant();
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;
     // Speed up the speed of getting child by index.
     std::unordered_map<int32_t, RefPtr<LayoutWrapper>> childrenMap_;
+    // cached for GetAllChildrenWithBuild function.
+    std::list<RefPtr<LayoutWrapper>> cachedList_;
+
     // The Wrapper Created by LazyForEach stores in the LayoutWrapperBuilder object.
     RefPtr<LayoutWrapperBuilder> layoutWrapperBuilder_;
 
@@ -206,6 +223,11 @@ private:
     bool isActive_ = false;
     bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;
+    std::optional<bool> skipMeasureContent_;
+    std::optional<PropertyChangeFlag> descendantFlag_;
+
+    // When the location property is set, it departs from the layout flow.
+    bool outOfLayout_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

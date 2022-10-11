@@ -239,6 +239,9 @@ void CustomPaintPaintMethod::InitImagePaint()
     } else {
         imagePaint_.setFilterQuality(SkFilterQuality::kNone_SkFilterQuality);
     }
+    if (isOffscreen_) {
+        SetPaintImage();
+    }
 }
 
 void CustomPaintPaintMethod::InitImageCallbacks()
@@ -265,51 +268,6 @@ void CustomPaintPaintMethod::InitImageCallbacks()
                                  ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {};
 
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
-}
-
-void CustomPaintPaintMethod::DrawImage(
-    PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
-{
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
-    std::string::size_type tmp = canvasImage.src.find(".svg");
-    if (tmp != std::string::npos) {
-        DrawSvgImage(paintWrapper, canvasImage);
-        return;
-    }
-
-    auto image = sk_sp<SkImage>();
-    if (!isOffscreen_) {
-        image = GetImage(canvasImage.src);
-    }
-
-    if (!image) {
-        LOGE("image is null");
-        return;
-    }
-    InitImagePaint();
-    InitPaintBlend(imagePaint_);
-
-    switch (canvasImage.flag) {
-        case 0:
-            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
-            break;
-        case 1: {
-            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            skCanvas_->drawImageRect(image, rect, &imagePaint_);
-            break;
-        }
-        case 2: {
-            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-            skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
-            break;
-        }
-        default:
-            break;
-    }
 }
 
 void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage)
@@ -376,54 +334,6 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
     }
 }
 
-void CustomPaintPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
-{
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
-    // get skImage form pixelMap
-    auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
-
-    // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> image;
-    if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
-    } else {
-#ifndef GPU_DISABLED
-        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
-#endif
-    }
-    if (!image) {
-        LOGE("image is null");
-        return;
-    }
-    InitImagePaint();
-    InitPaintBlend(imagePaint_);
-    switch (canvasImage.flag) {
-        case 0:
-            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
-            break;
-        case 1: {
-            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            skCanvas_->drawImageRect(image, rect, &imagePaint_);
-            break;
-        }
-        case 2: {
-            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-            skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
-            break;
-        }
-        default:
-            break;
-    }
-}
-
 void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData)
 {
     if (imageData.data.empty()) {
@@ -468,11 +378,11 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
         SkPath path;
         path.addRect(skRect);
         if (isOffscreen_) {
+            FlutterDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
+        } else {
 #ifdef ENABLE_ROSEN_BACKEND
             RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
 #endif
-        } else {
-            FlutterDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
         }
     }
     if (fillState_.GetGradient().IsValid()) {
@@ -511,9 +421,13 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
     if (HasShadow()) {
         SkPath path;
         path.addRect(skRect);
+        if (isOffscreen_) {
+            FlutterDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
+        } else {
 #ifdef ENABLE_ROSEN_BACKEND
-        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
+            RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
 #endif
+        }
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
@@ -582,9 +496,13 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
     if (HasShadow()) {
+        if (isOffscreen_) {
+            FlutterDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+        } else {
 #ifdef ENABLE_ROSEN_BACKEND
-        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+            RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
 #endif
+        }
     }
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
@@ -631,9 +549,13 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
     if (HasShadow()) {
+        if (isOffscreen_) {
+            FlutterDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+        } else {
 #ifdef ENABLE_ROSEN_BACKEND
-        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+            RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
 #endif
+        }
     }
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
@@ -667,9 +589,13 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
     if (HasShadow()) {
+        if (isOffscreen_) {
+            FlutterDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+        } else {
 #ifdef ENABLE_ROSEN_BACKEND
-        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+            RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
 #endif
+        }
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
@@ -711,9 +637,13 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
     if (HasShadow()) {
+        if (isOffscreen_) {
+            FlutterDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+        } else {
 #ifdef ENABLE_ROSEN_BACKEND
-        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+            RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
 #endif
+        }
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
@@ -729,6 +659,25 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
         cacheBitmap_.eraseColor(0);
     }
+}
+
+void CustomPaintPaintMethod::Clip()
+{
+    skCanvas_->clipPath(skPath_);
+}
+
+void CustomPaintPaintMethod::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    CHECK_NULL_VOID(path);
+    auto offset = OffsetF(0, 0);
+    ParsePath2D(offset, path);
+    Path2DClip();
+    skPath2d_.reset();
+}
+
+void CustomPaintPaintMethod::Path2DClip()
+{
+    skCanvas_->clipPath(skPath2d_);
 }
 
 void CustomPaintPaintMethod::BeginPath()
@@ -1039,8 +988,16 @@ void CustomPaintPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& a
 {
     double left = args.para1 + offset.GetX();
     double top = args.para2 + offset.GetY();
-    double right = args.para3 + args.para1 + offset.GetX();
-    double bottom = args.para4 + args.para2 + offset.GetY();
+    double right = 0.0;
+    double bottom = 0.0;
+    if (isOffscreen_) {
+        right = args.para3;
+        bottom = args.para4;
+    } else {
+        right = args.para3 + args.para1 + offset.GetX();
+        bottom = args.para4 + args.para2 + offset.GetY();
+    }
+
     skPath2d_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
 }
 
@@ -1159,6 +1116,11 @@ void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
             param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
     }
     skCanvas_->setMatrix(skMatrix);
+}
+
+void CustomPaintPaintMethod::ResetTransform()
+{
+    skCanvas_->resetMatrix();
 }
 
 void CustomPaintPaintMethod::Transform(const TransformParam& param)

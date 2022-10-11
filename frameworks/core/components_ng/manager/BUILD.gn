@@ -16,6 +16,8 @@ import(
 
 build_component_ng("manager_ng") {
   sources = [
+    "drag_drop/drag_drop_manager.cpp",
+    "drag_drop/drag_drop_proxy.cpp",
     "full_screen/full_screen_manager.cpp",
     "select_overlay/select_overlay_manager.cpp",
     "select_overlay/select_overlay_proxy.cpp",

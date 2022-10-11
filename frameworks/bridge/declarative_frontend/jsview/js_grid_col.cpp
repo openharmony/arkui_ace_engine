@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components_ng/pattern/grid_col/grid_col_view.h"
 #include "core/components_v2/grid_layout/grid_col_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -103,8 +104,8 @@ void JSGridCol::JSBind(BindingTarget globalObj)
 
 void JSGridCol::Create(const JSCallbackInfo& info)
 {
-    auto component = AceType::MakeRefPtr<V2::GridColComponent>();
-    ViewStackProcessor::GetInstance()->Push(component);
+    bool isNewPipeline = Container::IsCurrentUseNewPipeline();
+
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto gridParam = JSRef<JSObject>::Cast(info[0]);
         auto spanParam = gridParam->GetProperty("span");
@@ -113,9 +114,24 @@ void JSGridCol::Create(const JSCallbackInfo& info)
         auto span = ParserGridContianerSize(spanParam, 1);
         auto offset = ParserGridContianerSize(offsetParam, 0);
         auto order = ParserGridContianerSize(orderParam, 0);
-        component->SetSpan(span);
-        component->SetOffset(offset);
-        component->SetOrder(order);
+
+        if (isNewPipeline) {
+            NG::GridColView::Create(span, offset, order);
+        } else {
+            auto component = AceType::MakeRefPtr<V2::GridColComponent>();
+            ViewStackProcessor::GetInstance()->Push(component);
+            component->SetSpan(span);
+            component->SetOffset(offset);
+            component->SetOrder(order);
+        }
+        return;
+    }
+
+    if (isNewPipeline) {
+        NG::GridColView::Create();
+    } else {
+        auto component = AceType::MakeRefPtr<V2::GridColComponent>();
+        ViewStackProcessor::GetInstance()->Push(component);
     }
 }
 
@@ -126,6 +142,12 @@ void JSGridCol::Span(const JSCallbackInfo& info)
         return;
     }
     auto span = ParserGridContianerSize(info[0], 1);
+    
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GridColView::SetSpan(span);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gridCol = AceType::DynamicCast<V2::GridColComponent>(component);
     if (gridCol) {
@@ -140,6 +162,12 @@ void JSGridCol::Offset(const JSCallbackInfo& info)
         return;
     }
     auto offset = ParserGridContianerSize(info[0], 0);
+    
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GridColView::SetOffset(offset);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gridCol = AceType::DynamicCast<V2::GridColComponent>(component);
     if (gridCol) {
@@ -154,6 +182,12 @@ void JSGridCol::Order(const JSCallbackInfo& info)
         return;
     }
     auto order = ParserGridContianerSize(info[0], 0);
+    
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GridColView::SetOrder(order);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gridCol = AceType::DynamicCast<V2::GridColComponent>(component);
     if (gridCol) {

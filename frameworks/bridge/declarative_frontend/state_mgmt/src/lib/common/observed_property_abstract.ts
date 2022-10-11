@@ -68,7 +68,7 @@ abstract class ObservedPropertyAbstract<T>  {
 
 
   public subscribeMe(subscriber: ISinglePropertyChangeSubscriber<T>): void {
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
     this.subscribers_.add(subscriber.id__());
   }
 
@@ -80,7 +80,7 @@ abstract class ObservedPropertyAbstract<T>  {
   }
 
   protected notifyHasChanged(newValue: T) {
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
     var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = registry!.get(subscribedId)
@@ -92,13 +92,13 @@ abstract class ObservedPropertyAbstract<T>  {
           (subscriber as IMultiPropertiesChangeSubscriber).propertyHasChanged(this.info_);
         }
       } else {
-        console.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+        stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
       }
     });
   }
 
   protected notifyPropertyRead() {
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`)
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`)
     var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = registry!.get(subscribedId)

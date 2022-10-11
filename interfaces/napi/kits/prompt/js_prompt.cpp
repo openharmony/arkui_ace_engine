@@ -21,6 +21,7 @@
 
 #include "interfaces/napi/kits/napi_utils.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
 
@@ -78,14 +79,17 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         std::vector<std::string> params;
         if (!ParseResourceParam(env, messageNApi, id, type, params)) {
             LOGE("can not parse resource info from inout params.");
+            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(id, type, params, messageString)) {
             LOGE("can not get message from resource manager.");
+            NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
     } else {
         LOGE("The parameter type is incorrect.");
+        NapiThrow(env, "The type of message is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
 
@@ -100,10 +104,12 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         std::vector<std::string> params;
         if (!ParseResourceParam(env, durationNApi, id, type, params)) {
             LOGE("can not parse resource info from inout params.");
+            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(id, type, params, durationStr)) {
             LOGE("can not get message from resource manager.");
+            NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         duration = StringUtils::StringToInt(durationStr);
@@ -125,20 +131,29 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         std::vector<std::string> params;
         if (!ParseResourceParam(env, bottomNApi, id, type, params)) {
             LOGE("can not parse resource info from inout params.");
+            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(id, type, params, bottomString)) {
             LOGE("can not get message from resource manager.");
+            NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
     }
-
+#ifdef OHOS_STANDARD_SYSTEM
+    if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString);
+    }
+#else
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
+        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->ShowToast(messageString, duration, bottomString);
+#endif
+
     return nullptr;
 }
 
@@ -172,7 +187,11 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
-    NAPI_ASSERT(env, argc >= requireArgc, "requires 1 parameter");
+    if (argc < requireArgc) {
+        NapiThrow(env, "The number of parameters must be greater than or equal to 1.",
+            Framework::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
     auto asyncContext = new PromptAsyncContext();
     asyncContext->env = env;
     for (size_t i = 0; i < argc; i++) {
@@ -262,7 +281,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         } else {
             delete asyncContext;
             asyncContext = nullptr;
-            NAPI_ASSERT(env, false, "type mismatch");
+            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            return nullptr;
         }
     }
     napi_value result = nullptr;
@@ -297,7 +317,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                         break;
                     case 1:
                         napi_value message = nullptr;
-                        napi_create_string_utf8(env, "cancal", strlen("cancal"), &message);
+                        napi_create_string_utf8(env, "cancel", strlen("cancel"), &message);
                         napi_create_error(env, nullptr, message, &result[0]);
                         dialogResult = false;
                         break;
@@ -317,13 +337,40 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_delete_async_work(env, asyncContext->work);
                 delete asyncContext;
             };
+#ifdef OHOS_STANDARD_SYSTEM
+            if (SubwindowManager::GetInstance() != nullptr) {
+                SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
+                    asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+            }
+#else
             auto delegate = EngineHelper::GetCurrentDelegate();
             if (delegate) {
                 delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString,
                     asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
             } else {
                 LOGE("delegate is null");
+                // throw internal error
+                napi_value code = nullptr;
+                std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+                napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+                napi_value msg = nullptr;
+                auto iter = ERROR_CODE_TO_MSG.find(Framework::ERROR_CODE_INTERNAL_ERROR);
+                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + "Can not get delegate.";
+                napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
+                napi_value error = nullptr;
+                napi_create_error(env, code, msg, &error);
+
+                if (asyncContext->deferred) {
+                    napi_reject_deferred(env, asyncContext->deferred, error);
+                } else {
+                    napi_value ret1;
+                    napi_value callback = nullptr;
+                    napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+                    napi_call_function(env, nullptr, callback, 1, &error, &ret1);
+                    napi_delete_reference(env, asyncContext->callbackRef);
+                }
             }
+#endif
         },
         (void*)asyncContext, &asyncContext->work);
     napi_queue_async_work(env, asyncContext->work);
@@ -355,7 +402,11 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
-    NAPI_ASSERT(env, argc >= requireArgc, "requires 1 parameter");
+    if (argc < requireArgc) {
+        NapiThrow(env, "The number of parameters must be greater than or equal to 1.",
+            Framework::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
     auto asyncContext = new ShowActionMenuAsyncContext();
     asyncContext->env = env;
     for (size_t i = 0; i < argc; i++) {
@@ -438,7 +489,8 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         } else {
             delete asyncContext;
             asyncContext = nullptr;
-            NAPI_ASSERT(env, false, "type mismatch");
+            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            return nullptr;
         }
     }
     napi_value result = nullptr;
@@ -471,7 +523,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         break;
                     case 1:
                         napi_value message = nullptr;
-                        napi_create_string_utf8(env, "cancal", strlen("cancal"), &message);
+                        napi_create_string_utf8(env, "cancel", strlen("cancel"), &message);
                         napi_create_error(env, nullptr, message, &result[0]);
                         dialogResult = false;
                         break;
@@ -491,12 +543,38 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_delete_async_work(env, asyncContext->work);
                 delete asyncContext;
             };
+#ifdef OHOS_STANDARD_SYSTEM
+            if (SubwindowManager::GetInstance() != nullptr) {
+                SubwindowManager::GetInstance()->ShowActionMenu(asyncContext->titleString,
+                    asyncContext->buttons, std::move(callBack));
+            }
+#else
             auto delegate = EngineHelper::GetCurrentDelegate();
             if (delegate) {
                 delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
             } else {
                 LOGE("delegate is null");
+                napi_value code = nullptr;
+                std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+                napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+                napi_value msg = nullptr;
+                auto iter = ERROR_CODE_TO_MSG.find(Framework::ERROR_CODE_INTERNAL_ERROR);
+                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + "Can not get delegate.";
+                napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
+                napi_value error = nullptr;
+                napi_create_error(env, code, msg, &error);
+
+                if (asyncContext->deferred) {
+                    napi_reject_deferred(env, asyncContext->deferred, error);
+                } else {
+                    napi_value ret1;
+                    napi_value callback = nullptr;
+                    napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+                    napi_call_function(env, nullptr, callback, 1, &error, &ret1);
+                    napi_delete_reference(env, asyncContext->callbackRef);
+                }
             }
+#endif
         },
         (void*)asyncContext, &asyncContext->work);
     napi_queue_async_work(env, asyncContext->work);
@@ -524,9 +602,20 @@ static napi_module promptModule = {
     .reserved = { 0 },
 };
 
+static napi_module promptActionModule = {
+    .nm_version = 1,
+    .nm_flags = 0,
+    .nm_filename = nullptr,
+    .nm_register_func = PromptExport,
+    .nm_modname = "promptAction",
+    .nm_priv = ((void*)0),
+    .reserved = { 0 },
+};
+
 extern "C" __attribute__((constructor)) void PromptRegister()
 {
     napi_module_register(&promptModule);
+    napi_module_register(&promptActionModule);
 }
 
 } // namespace OHOS::Ace::Napi

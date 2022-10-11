@@ -42,7 +42,13 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (textFieldLayoutProperty) {
         if (value) {
-            textFieldLayoutProperty->UpdateValue(value.value());
+            if (value->empty()) {
+                if (textFieldLayoutProperty->HasValue()) {
+                    textFieldLayoutProperty->UpdateValue(value.value());
+                }
+            } else {
+                textFieldLayoutProperty->UpdateValue(value.value());
+            }
         }
         if (placeholder) {
             textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());

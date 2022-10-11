@@ -39,7 +39,7 @@ void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>&
     auto backButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(backButtonWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
-    if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
             constraint.selfIdealSize = OptionalSizeF(
                 static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()), static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()));
@@ -61,7 +61,7 @@ void MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& t
     CHECK_NULL_VOID(subtitleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
 
-    if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
             auto size = SizeF(
                 titleBarSize.Width() - static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()),
@@ -86,7 +86,7 @@ void MeasureTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titl
     CHECK_NULL_VOID(titleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
 
-    if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
             auto size = SizeF(
                 titleBarSize.Width() - static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()),
@@ -111,7 +111,7 @@ void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& title
     CHECK_NULL_VOID(menuWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
 
-    if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
             auto size = SizeF(
                 titleBarSize.Width() - static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()),
@@ -145,7 +145,7 @@ void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& ti
     CHECK_NULL_VOID(subtitleWrapper);
     auto geometryNode = subtitleWrapper->GetGeometryNode();
 
-    if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
             OffsetF subtitleOffset = OffsetF(static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()),
                 static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()));
@@ -170,7 +170,7 @@ void LayoutTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& title
     CHECK_NULL_VOID(titleWrapper);
     auto geometryNode = titleWrapper->GetGeometryNode();
 
-    if (titleBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
             OffsetF offset = OffsetF(static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()), 0.0f);
             titleWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
@@ -208,6 +208,8 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
     MeasureBackButton(layoutWrapper, titleBarNode, layoutProperty);
     MeasureMenu(layoutWrapper, titleBarNode, layoutProperty, size);
     MeasureTitle(layoutWrapper, titleBarNode, layoutProperty, size);
@@ -223,7 +225,7 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetHideTitleBar().value_or(false)) {
         return;
     }
-    if (layoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+    if (layoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         LayoutBackButton(layoutWrapper, titleBarNode);
     }
     LayoutTitle(layoutWrapper, titleBarNode, layoutProperty);

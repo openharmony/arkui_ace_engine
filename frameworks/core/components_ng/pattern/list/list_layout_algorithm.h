@@ -64,12 +64,12 @@ public:
 
     int32_t GetStartIndex() const
     {
-        return startIndex_.value_or(0);
+        return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
     }
 
     int32_t GetEndIndex() const
     {
-        return endIndex_.value_or(0);
+        return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
     }
 
     std::optional<int32_t> GetMaxListItemIndex() const
@@ -107,25 +107,24 @@ public:
         return lanes_;
     }
 
-    void SetPlayEdgeEffectAnimation(bool playEdgeEffectAnimation)
+    bool Scrollable() const
     {
-        playEdgeEffectAnimation_ = playEdgeEffectAnimation;
+        return scrollable_;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-
-    void LayoutForwardForLaneList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-    void LayoutBackwardForLaneList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int32_t startIndex, float startPos);
+    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int32_t endIndex, float endPos);
 
 private:
-    void LayoutListInIndexMode(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
 
-    void LayoutListInOffsetMode(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void LayoutList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
@@ -139,9 +138,14 @@ private:
     void CalculateLanes(const LayoutConstraintF& layoutConstraint, Axis axis);
     void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+    int LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int& currentIndex, float& mainLen);
+    int LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int& currentIndex, float& mainLen);
+
+    void ResetScrollable();
 
     std::optional<int32_t> jumpIndex_;
-    bool jumpIndexOutOfRange_ = false;
 
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;
@@ -149,8 +153,6 @@ private:
     float endMainPos_ = 0.0f;
     int32_t preStartIndex_ = -1;
     int32_t preEndIndex_ = -1;
-    std::optional<int32_t> startIndex_;
-    std::optional<int32_t> endIndex_;
 
     std::optional<int32_t> maxListItemIndex_;
     float spaceWidth_ = 0.0f;
@@ -164,12 +166,13 @@ private:
     std::optional<float> maxLaneLength_;
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
-    bool playEdgeEffectAnimation_ = false;
     bool mainSizeIsDefined_ = false;
     float contentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
-    float edgeEffectOffset_ = 0.0f;
+
+    // List is scrollable when content size is greater than list size in main axis.
+    bool scrollable_ = true;
 };
 } // namespace OHOS::Ace::NG
 

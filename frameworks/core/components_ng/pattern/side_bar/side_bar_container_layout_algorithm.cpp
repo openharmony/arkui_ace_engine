@@ -37,7 +37,7 @@ constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty() || children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         LOGE("SideBarContainerLayoutAlgorithm::Measure, children is empty or less than 3.");
         return;
@@ -100,6 +100,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     auto sideBarConstraint = layoutProperty->CreateChildConstraint();
     sideBarConstraint.selfIdealSize = OptionalSizeF(sideBarIdealSize);
 
+    realSideBarHeight_ = sideBarIdealSize.Height();
     sideBarLayoutWrapper->Measure(sideBarConstraint);
 }
 
@@ -149,7 +150,7 @@ void SideBarContainerLayoutAlgorithm::MeasureControlButton(const RefPtr<SideBarC
 
 void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty() || children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         LOGE("SideBarContainerLayoutAlgorithm::Measure, children is empty or less than 3.");
         return;
@@ -221,8 +222,8 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
             break;
     }
 
-    auto sideBarOffset = OffsetF(sideBarOffsetX, 0.0f);
-    sideBarLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset);
+    sideBarOffset_ = OffsetF(sideBarOffsetX, 0.0f);
+    sideBarLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset_);
     sideBarLayoutWrapper->Layout();
 }
 

@@ -178,10 +178,9 @@ ImageSourceInfo RatingPattern::GetImageSourceInfoFromTheme(int32_t imageFlag)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     ImageSourceInfo imageSourceInfo;
     CHECK_NULL_RETURN(pipelineContext, imageSourceInfo);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, imageSourceInfo);
-    auto ratingTheme = themeManager->GetTheme<RatingTheme>();
+    auto ratingTheme = pipelineContext->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, imageSourceInfo);
+
     switch (imageFlag) {
         case 0b001:
             imageSourceInfo.SetResourceId(ratingTheme->GetForegroundResourceId());
@@ -195,7 +194,6 @@ ImageSourceInfo RatingPattern::GetImageSourceInfoFromTheme(int32_t imageFlag)
         default:
             break;
     }
-    imageSourceInfo.UpdateSrcType();
     return imageSourceInfo;
 }
 

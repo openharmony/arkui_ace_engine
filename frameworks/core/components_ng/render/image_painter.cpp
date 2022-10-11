@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/image_painter.h"
 
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -95,6 +96,9 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
     const ImagePaintConfig& imagePaintConfig) const
 {
     CHECK_NULL_VOID(canvasImage_);
+    auto svgCanvasImage = AceType::DynamicCast<SvgCanvasImage>(canvasImage_);
+    CHECK_NULL_VOID(svgCanvasImage);
+    svgCanvasImage->SetSvgImageFit(imagePaintConfig.imageFit_);
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 

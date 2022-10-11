@@ -17,7 +17,9 @@
 
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -28,15 +30,6 @@ namespace {
 constexpr int32_t SCROLL_STATE_IDLE = 0;
 constexpr int32_t SCROLL_STATE_SCROLL = 1;
 constexpr int32_t SCROLL_STATE_FLING = 2;
-// TODO define as common method
-float CalculateFriction(float gamma)
-{
-    constexpr float SCROLL_RATIO = 0.72f;
-    if (GreatOrEqual(gamma, 1.0)) {
-        gamma = 1.0f;
-    }
-    return SCROLL_RATIO * static_cast<float>(std::pow(1.0 - gamma, SQUARE));
-}
 } // namespace
 
 void ListPattern::OnAttachToFrameNode()
@@ -117,6 +110,19 @@ void ListPattern::OnModifyDone()
         scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginTask));
     }
     gestureHub->AddScrollableEvent(scrollableEvent_);
+    initScrollable_ = true;
+    
+    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    if (edgeEffect == EdgeEffect::SPRING) {
+        auto scrollEdgeEffect = AceType::MakeRefPtr<NG::ScrollSpringEffect>();
+        SetScrollEdgeEffect(scrollEdgeEffect);
+    }
+    gestureHub->AddScrollEdgeEffect(GetDirection(), scrollEffect_);
+
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
 }
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -172,24 +178,31 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
 
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    // TODO: now only support spring effect
-    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    playEdgeEffectAnimation_ = false;
-    if (totalOffset_ != lastOffset_) {
-        if (startIndex_ == 0 && itemPosition_[0].first >= 0) {
-            if (edgeEffect == EdgeEffect::SPRING) {
-                PlaySpringAnimation(0.0);
-            }
-        }
-        if (endIndex_ == maxListItemIndex_ && itemPosition_[maxListItemIndex_].second <= MainSize()) {
-            if (edgeEffect == EdgeEffect::SPRING) {
-                PlaySpringAnimation(0.0);
-            }
-        }
-    }
     jumpIndex_.reset();
     currentDelta_ = 0.0f;
+    ResetScrollableEvent(listLayoutAlgorithm->Scrollable());
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
+}
+
+void ListPattern::ResetScrollableEvent(bool scrollable)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    if (scrollable && !initScrollable_) {
+        gestureHub->AddScrollableEvent(scrollableEvent_);
+        initScrollable_ = true;
+        return;
+    }
+
+    if (!scrollable && initScrollable_) {
+        gestureHub->RemoveScrollableEvent(scrollableEvent_);
+        initScrollable_ = false;
+    }
 }
 
 void ListPattern::UpdateCurrentOffset(float offset)
@@ -200,38 +213,6 @@ void ListPattern::UpdateCurrentOffset(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
-void ListPattern::PlaySpringAnimation(double dragVelocity)
-{
-    LOGI("Play spring animation start");
-    playEdgeEffectAnimation_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
-    }
-    springController_->ClearStopListeners();
-    springController_->ClearInterpolators();
-
-    // TODO: use theme.
-    constexpr float SPRING_SCROLL_MASS = 0.5f;
-    constexpr float SPRING_SCROLL_STIFFNESS = 100.0f;
-    constexpr float SPRING_SCROLL_DAMPING = 15.55635f;
-    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
-        AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
-    ExtentPair extentPair = ExtentPair(0.0, 0.0);
-    float friction = CalculateFriction(std::abs(totalOffset_) / MainSize());
-    auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
-        totalOffset_, dragVelocity * friction, extentPair, extentPair, DEFAULT_OVER_SPRING_PROPERTY);
-    scrollMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
-        auto list = weak.Upgrade();
-        if (list) {
-            list->UpdateCurrentOffset(-static_cast<float>(position));
-        }
-    });
-    springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {});
-    springController_->PlayMotion(scrollMotion);
 }
 
 float ListPattern::MainSize() const
@@ -248,5 +229,115 @@ Axis ListPattern::GetDirection() const
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listLayoutProperty, Axis::VERTICAL);
     return listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+}
+
+bool ListPattern::IsOutOfBoundary()
+{
+    bool outOfStart = false;
+    bool outOfEnd = false;
+    if (!itemPosition_.empty()) {
+        outOfStart = itemPosition_.begin()->second.first >= 0;
+        outOfEnd = itemPosition_.rbegin()->second.second <= MainSize();
+    }
+    return outOfStart || outOfEnd;
+}
+
+void ListPattern::SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
+{
+    if (scrollEffect && scrollEffect->IsSpringEffect()) {
+        auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEffect);
+        CHECK_NULL_VOID(springEffect);
+        springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
+            auto list = weak.Upgrade();
+            if (list) {
+                return list->IsOutOfBoundary();
+            }
+            return false;
+        });
+        // add callback to springEdgeEffect
+        SetEdgeEffectCallback(scrollEffect);
+    }
+    RemoveScrollEdgeEffect();
+    scrollEffect_ = scrollEffect;
+}
+
+void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
+{
+    scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto list = weak.Upgrade();
+        if (list) {
+            return list->GetItemPosition().begin()->second.first;
+        }
+        return 0.0;
+    });
+    scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto list = weak.Upgrade();
+        auto itemPosition = list->GetItemPosition();
+        return list->MainSize() - (itemPosition.rbegin()->second.second - itemPosition.begin()->second.first);
+    });
+    scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto list = weak.Upgrade();
+        return 0.0f;
+    });
+    scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto list = weak.Upgrade();
+        auto itemPosition = list->GetItemPosition();
+        return list->MainSize() - (itemPosition.rbegin()->second.second - itemPosition.begin()->second.first);
+    });
+    scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto list = weak.Upgrade();
+        return 0.0f;
+    });
+}
+
+void ListPattern::RemoveScrollEdgeEffect()
+{
+    if (!scrollEffect_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
+}
+
+void ListPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool ListPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
+        HandleDirectionKey(event.code);
+        return true;
+    }
+    return false;
+}
+
+bool ListPattern::HandleDirectionKey(KeyCode code)
+{
+    if (code == KeyCode::KEY_DPAD_UP) {
+        // Need to update: current selection
+        return true;
+    }
+    if (code == KeyCode::KEY_DPAD_DOWN) {
+        // Need to update: current selection
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

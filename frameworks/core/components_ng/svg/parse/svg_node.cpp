@@ -214,6 +214,21 @@ double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPor
     }
 }
 
+double SvgNode::ConvertDimensionToPx(const Dimension& value, double baseValue) const
+{
+    if (value.Unit() == DimensionUnit::PERCENT) {
+        return value.Value() * baseValue;
+    }
+    if (value.Unit() == DimensionUnit::PX) {
+        return value.Value();
+    }
+    auto svgContext = svgContext_.Upgrade();
+    if (svgContext) {
+        return svgContext->NormalizeToPx(value);
+    }
+    return 0.0;
+}
+
 std::optional<Gradient> SvgNode::GetGradient(const std::string& href)
 {
     auto svgContext = svgContext_.Upgrade();
@@ -241,7 +256,8 @@ const Rect& SvgNode::GetRootViewBox() const
     auto svgContext = svgContext_.Upgrade();
     if (!svgContext) {
         LOGE("Gradient failed, svgContext is null");
-        return Rect();
+        static Rect empty;
+        return empty;
     }
     return svgContext->GetRootViewBox();
 }

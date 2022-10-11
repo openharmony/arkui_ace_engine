@@ -1845,7 +1845,7 @@ shared_ptr<JsValue> JsHandleAnimator(
         return runtime->NewNull();
     }
     std::string arguments = arg->ToString(runtime);
-    if (methodName == ANIMATOR_CREATE_ANIMATOR) {
+    if (methodName == ANIMATOR_CREATE_ANIMATOR || methodName == ANIMATOR_CREATE) {
         int32_t bridgeId = JsiAnimatorBridgeUtils::JsCreateBridgeId();
         auto animatorContext = JsiAnimatorBridgeUtils::CreateAnimatorContext(runtime, page->GetPageId(), bridgeId);
         auto animatorBridge = AceType::MakeRefPtr<JsiAnimatorBridge>(runtime, animatorContext);
@@ -3146,8 +3146,9 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     ACE_DCHECK(delegate);
     if (delegate && delegate->GetAssetManager()) {
         std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
+        auto appLibPathKey = delegate->GetAssetManager()->GetAppLibPathKey();
         if (!packagePath.empty()) {
-            nativeEngine->SetPackagePath(packagePath);
+            nativeEngine->SetPackagePath(appLibPathKey, packagePath);
         }
     }
     engineInstance_->RegisterFaPlugin();

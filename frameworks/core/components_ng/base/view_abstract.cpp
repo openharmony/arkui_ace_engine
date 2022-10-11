@@ -19,12 +19,16 @@
 #include <optional>
 #include <utility>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/option/option_paint_property.h"
+#include "core/components_ng/pattern/option/option_view.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -150,6 +154,11 @@ void ViewAbstract::SetFlexGrow(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value);
 }
 
+void ViewAbstract::SetFlexBasis(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value);
+}
+
 void ViewAbstract::SetDisplayIndex(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, DisplayIndex, value);
@@ -229,16 +238,9 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
-    auto gestureEvent = clickEventFunc;
-    auto focusEvent = clickEventFunc;
-
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetClickEvent(std::move(gestureEvent));
-
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetOnClickCallback(std::move(focusEvent));
+    gestureHub->SetClickEvent(std::move(clickEventFunc));
 }
 
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
@@ -377,6 +379,71 @@ void ViewAbstract::SetHitTestMode(HitTestMode hitTestMode)
     gestureHub->SetHitTestMode(hitTestMode);
 }
 
+void ViewAbstract::AddDragFrameNodeToManager()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+}
+
+void ViewAbstract::SetOnDragStart(
+    std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->InitDragDropEvent();
+
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(std::move(onDragStart));
+
+    AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragEnter(
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragEnter)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragEnter(std::move(onDragEnter));
+
+    AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragLeave(
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragLeave(std::move(onDragLeave));
+
+    AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragMove(
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragMove(std::move(onDragMove));
+
+    AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDrop(std::move(onDrop));
+
+    AddDragFrameNodeToManager();
+}
+
 void ViewAbstract::SetAlign(Alignment alignment)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
@@ -479,6 +546,61 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
+// common function to bind menu
+void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId)
+{
+    LOGD("ViewAbstract::BindMenu");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    // pass in menuNode to register it in OverlayManager
+    overlayManager->ShowMenu(targetId, menuNode);
+    LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
+}
+
+void ViewAbstract::BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_VOID(targetNode);
+
+    if (params.empty()) {
+        LOGD("menu params is empty");
+        return;
+    }
+    auto menuNode = MenuView::Create(params, targetNode->GetTag(), targetNode->GetId());
+    BindMenu(menuNode, targetNode->GetId());
+}
+
+void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode)
+{
+    LOGD("ViewAbstract::BindMenuWithCustomNode");
+    CHECK_NULL_VOID(customNode);
+    CHECK_NULL_VOID(targetNode);
+
+    auto menuNode = MenuView::Create(customNode, targetNode->GetTag(), targetNode->GetId());
+    BindMenu(menuNode, targetNode->GetId());
+}
+
+void ViewAbstract::ShowMenu(int32_t targetId)
+{
+    LOGD("ViewAbstract::ShowMenu");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->ShowMenu(targetId);
+}
+
 void ViewAbstract::SetBackdropBlur(const Dimension& radius)
 {
     ACE_UPDATE_RENDER_CONTEXT(BackBlurRadius, radius);
@@ -545,4 +667,81 @@ void ViewAbstract::SetEdgeClip(bool isClip)
 {
     ACE_UPDATE_RENDER_CONTEXT(ClipEdge, isClip);
 }
+
+void ViewAbstract::SetBrightness(const Dimension& brightness)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontBrightness, brightness);
+}
+
+void ViewAbstract::SetGrayScale(const Dimension& grayScale)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontGrayScale, grayScale);
+}
+
+void ViewAbstract::SetContrast(const Dimension& contrast)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontContrast, contrast);
+}
+
+void ViewAbstract::SetSaturate(const Dimension& saturate)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontSaturate, saturate);
+}
+
+void ViewAbstract::SetSepia(const Dimension& sepia)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
+}
+
+void ViewAbstract::SetInvert(const Dimension& invert)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontInvert, invert);
+}
+
+void ViewAbstract::SetHueRotate(float hueRotate)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontHueRotate, hueRotate);
+}
+
+void ViewAbstract::SetColorBlend(const Color& colorBlend)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
+}
+
+void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderImage, borderImage);
+}
+
+void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
+{
+    ImageSourceInfo imageSourceInfo(bdImageSrc);
+    ACE_UPDATE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo);
+}
+
+void ViewAbstract::SetHasBorderImageSlice(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageSlice, tag);
+}
+
+void ViewAbstract::SetHasBorderImageWidth(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageWidth, tag);
+}
+
+void ViewAbstract::SetHasBorderImageOutset(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageOutset, tag);
+}
+
+void ViewAbstract::SetHasBorderImageRepeat(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageRepeat, tag);
+}
+
+void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
+}
+
 } // namespace OHOS::Ace::NG

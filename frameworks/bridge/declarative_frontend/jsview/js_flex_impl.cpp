@@ -16,8 +16,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 
 #include "core/components/flex/flex_component_v2.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_view.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -50,8 +50,8 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
             NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
             return;
         }
-        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
-            FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(
+            FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         row->SetInspectorTag("FlexComponentV2");
         ViewStackProcessor::GetInstance()->ClaimElementId(row);
         ViewStackProcessor::GetInstance()->Push(row);
@@ -63,8 +63,8 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
             NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
             return;
         }
-        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
-            FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(
+            FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         row->SetInspectorTag("FlexComponentV2");
         ViewStackProcessor::GetInstance()->ClaimElementId(row);
         ViewStackProcessor::GetInstance()->Push(row);
@@ -78,6 +78,11 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
         if (wrapNum == 0) {
             mainComponent = CreateFlexComponent(info);
         } else {
+            if (Container::IsCurrentUseNewPipeline()) {
+                // TODO: add wrap impl.
+                NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
+                return;
+            }
             mainComponent = CreateWrapComponent(info, wrapNum);
         }
     } else {
@@ -98,8 +103,8 @@ RefPtr<FlexComponent> JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info
             NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
             return nullptr;
         }
-        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
-            FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(
+            FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         return row;
     }
     if (!info[0]->IsObject()) {
@@ -107,8 +112,8 @@ RefPtr<FlexComponent> JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info
             NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
             return nullptr;
         }
-        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
-            FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(
+            FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         return row;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -167,6 +172,45 @@ RefPtr<WrapComponent> JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info
     JSRef<JSVal> justifyVal = obj->GetProperty("justifyContent");
     JSRef<JSVal> alignItemVal = obj->GetProperty("alignItems");
     JSRef<JSVal> alignContentVal = obj->GetProperty("alignContent");
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::FlexView::CreateWrap(WrapDirection::HORIZONTAL, WrapAlignment::START, WrapAlignment::STRETCH,
+            WrapAlignment::START);
+        if (directionVal->IsNumber()) {
+            auto direction = directionVal->ToNumber<int32_t>();
+            if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
+                // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
+                if (direction <= 1) {
+                    direction += 2 * (wrapVal - 1);
+                } else {
+                    direction -= 2 * (wrapVal - 1);
+                }
+                NG::FlexView::SetWrapDirection((WrapDirection)direction);
+            }
+        } else {
+            // No direction set case: wrapVal == 2 means FlexWrap.WrapReverse.
+            WrapDirection wrapDirection = wrapVal == 2 ? WrapDirection::HORIZONTAL_REVERSE : WrapDirection::HORIZONTAL;
+            NG::FlexView::SetWrapDirection(wrapDirection);
+        }
+        if (justifyVal->IsNumber()) {
+            auto mainAlign = justifyVal->ToNumber<int32_t>();
+            if (mainAlign >= 0 && mainAlign <= MAIN_ALIGN_MAX_VALUE) {
+                NG::FlexView::SetWrapMainAlignment(WRAP_TABLE[mainAlign]);
+            }
+        }
+        if (alignItemVal->IsNumber()) {
+            auto crossAlign = alignItemVal->ToNumber<int32_t>();
+            if (crossAlign >= 0 && crossAlign <= CROSS_ALIGN_MAX_VALUE) {
+                NG::FlexView::SetWrapCrossAlignment(WRAP_TABLE[crossAlign]);
+            }
+        }
+        if (alignContentVal->IsNumber()) {
+            auto alignContent = alignContentVal->ToNumber<int32_t>();
+            if (alignContent >= 0 && alignContent <= MAIN_ALIGN_MAX_VALUE) {
+                NG::FlexView::SetWrapAlignment(WRAP_TABLE[alignContent]);
+            }
+        }
+        return nullptr;
+    }
     std::list<RefPtr<Component>> children;
     auto wrapComponent = AceType::MakeRefPtr<WrapComponent>(children);
     wrapComponent->SetMainAlignment(WrapAlignment::START);

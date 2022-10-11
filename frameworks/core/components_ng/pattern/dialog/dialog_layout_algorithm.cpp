@@ -58,7 +58,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     LayoutConstraintF childLayoutConstraint;
     childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
     ComputeInnerLayoutParam(childLayoutConstraint);
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
     }
@@ -168,7 +168,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     auto selfSize = frameNode->GetGeometryNode()->GetFrameSize();
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
     }
@@ -177,6 +177,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
     UpdateTouchRegion();
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
+    child->Layout();
 }
 
 OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
@@ -185,9 +186,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     OffsetF topLeftPoint;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, OffsetF());
-    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
+    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
     const auto& layoutConstraint = prop->GetLayoutConstraint();
     CHECK_NULL_RETURN(dialogTheme, OffsetF());
     auto dialogOffsetX =

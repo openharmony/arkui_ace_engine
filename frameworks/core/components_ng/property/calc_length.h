@@ -21,7 +21,7 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-struct ScaleProperty {
+struct ACE_EXPORT ScaleProperty {
     float vpScale = 0.0f;
     float fpScale = 0.0f;
     float lpxScale = 0.0f;
@@ -101,6 +101,11 @@ public:
             return dimension_.ToString();
         }
         return calcValue_;
+    }
+
+    bool IsPercentLength() const
+    {
+        return dimension_.Unit() == DimensionUnit::PERCENT;
     }
 
 private:

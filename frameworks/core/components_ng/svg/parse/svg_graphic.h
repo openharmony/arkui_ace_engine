@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_GRAPHIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_GRAPHIC_H
 
-#include "frameworks/core/components_ng/svg/parse/svg_node.h"
-
 #include "include/core/SkPaint.h"
+
+#include "frameworks/core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,7 +34,10 @@ public:
 
     void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override
     {
+        fillPaint_.reset();
+        strokePaint_.reset();
         path_ = AsPath(layout); // asPath override by graphic tag
+        UpdateGradient(layout);
         if (UpdateFillStyle()) {
             OnGraphicFill();
         }
@@ -44,16 +47,6 @@ public:
     }
 
 protected:
-    bool UpdateStrokeStyle()
-    {
-        return false;
-    }
-
-    bool UpdateFillStyle()
-    {
-        return false;
-    }
-
     void OnGraphicFill()
     {
         if (skCanvas_) {
@@ -77,6 +70,13 @@ protected:
         styleTraversed_ = true;
         drawTraversed_ = true;
     }
+
+    // Update fillStates & strokeStates
+    void UpdateGradient(const Size& viewPort);
+    bool UpdateFillStyle(bool antiAlias = true);
+    bool UpdateStrokeStyle(bool antiAlias = true);
+    void SetGradientStyle(double opacity);
+    void UpdateLineDash();
 
     SkPath path_;
     SkPaint fillPaint_;

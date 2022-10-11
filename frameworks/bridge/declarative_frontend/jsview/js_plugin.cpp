@@ -16,6 +16,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/log_wrapper.h"
+#include "core/components_ng/pattern/plugin/plugin_pattern.h"
+#include "core/components_ng/pattern/plugin/plugin_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/components/box/box_component.h"
 #include "frameworks/core/components/plugin/plugin_component.h"
@@ -28,9 +31,8 @@ void JSPlugin::Create(const JSCallbackInfo& info)
         return;
     }
 
-    RequestPluginInfo pluginInfo;
-    RefPtr<PluginComponent> plugin = AceType::MakeRefPtr<OHOS::Ace::PluginComponent>();
     // Parse template
+    RequestPluginInfo pluginInfo;
     auto obj = JSRef<JSObject>::Cast(info[0]);
     auto templateObj = obj->GetProperty("template");
     if (templateObj->IsObject()) {
@@ -43,22 +45,32 @@ void JSPlugin::Create(const JSCallbackInfo& info)
         if (abilityVal->IsString()) {
             pluginInfo.bundleName = abilityVal->ToString();
         }
-        LOGD("JSPlugin::Create: source=%{public}s ability=%{public}s",
-            pluginInfo.pluginName.c_str(), pluginInfo.bundleName.c_str());
+        LOGD("JSPlugin::Create: source=%{public}s ability=%{public}s", pluginInfo.pluginName.c_str(),
+            pluginInfo.bundleName.c_str());
     }
 
     // Parse data
     auto dataValue = obj->GetProperty("data");
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::PluginView::Create(pluginInfo);
+        return;
+    }
+
+    RefPtr<PluginComponent> plugin = AceType::MakeRefPtr<OHOS::Ace::PluginComponent>();
     if (dataValue->IsObject()) {
         plugin->SetData(dataValue->ToString());
     }
-
     plugin->SetPluginRequestInfo(pluginInfo);
     ViewStackProcessor::GetInstance()->Push(plugin, false);
 }
 
 void JSPlugin::JsSize(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsSize(info);
+        return;
+    }
     if (info.Length() == 0) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -92,6 +104,17 @@ void JSPlugin::JsSize(const JSCallbackInfo& info)
 void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Plugin.OnComplete");
+            func->Execute();
+        };
+        NG::PluginView::SetOnComplete(std::move(OnComplete));
+        return;
+    }
+
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -111,6 +134,18 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 void JSPlugin::JsOnError(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Plugin.OnComplete");
+            std::vector<std::string> keys = { "errcode", "msg" };
+            func->Execute(keys, param);
+        };
+        NG::PluginView::SetOnError(std::move(onError));
+        return;
+    }
+
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

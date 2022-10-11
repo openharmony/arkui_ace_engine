@@ -44,6 +44,9 @@ public:
     bool GetBoolean(uint32_t resId) const override;
     std::string GetMediaPath(uint32_t resId) override;
     std::string GetRawfile(const std::string& fileName) override;
+    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]> &dest) override;
+    bool GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]> &dest) override;
+    bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]> &dest) override;
     void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) override;
 
 private:

@@ -1747,7 +1747,7 @@ void JsHandleAnimator(const v8::FunctionCallbackInfo<v8::Value>& args, const std
         return;
     }
     auto context = isolate->GetCurrentContext();
-    if (methodName == ANIMATOR_CREATE_ANIMATOR) {
+    if (methodName == ANIMATOR_CREATE_ANIMATOR || methodName == ANIMATOR_CREATE) {
         int32_t bridgeId = V8AnimatorBridgeUtils::JsCreateBridgeId();
         auto resultAnimator = V8AnimatorBridgeUtils::CreateAnimatorContext(context, page->GetPageId(), bridgeId);
         auto animatorBridge = AceType::MakeRefPtr<V8AnimatorBridge>(context, isolate, resultAnimator);

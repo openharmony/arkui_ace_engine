@@ -53,7 +53,12 @@ public:
         return "";
     }
 
-    void SetLibPath(const std::vector<std::string>& packagePath) override {}
+    void SetLibPath(const std::string& appLibPathKey, const std::vector<std::string>& packagePath) override {}
+
+    std::string GetAppLibPathKey() const override
+    {
+        return "";
+    }
 
     std::vector<std::string> GetLibPath() const override
     {

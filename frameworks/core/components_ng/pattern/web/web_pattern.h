@@ -23,11 +23,14 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/web/web_property.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
+#include "nweb_handler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -61,7 +64,9 @@ class WebPattern : public Pattern {
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using JsProxyCallback = std::function<void()>;
 
+    WebPattern();
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
     WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
 
@@ -131,6 +136,18 @@ public:
         return setWebIdCallback_;
     }
 
+    void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
+    {
+        jsProxyCallback_ = std::move(jsProxyCallback);
+    }
+
+    void CallJsProxyCallback()
+    {
+        if (jsProxyCallback_) {
+            jsProxyCallback_();
+        }
+    }
+
     RefPtr<WebEventHub> GetWebEventHub()
     {
         return GetEventHub<WebEventHub>();
@@ -161,9 +178,18 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, PinchSmoothModeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MultiWindowAccessEnabled, bool);
 
     void RequestFullScreen();
     void ExitFullScreen();
+    bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void OnQuickMenuDismissed();
+    void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+    void UpdateTouchHandleForOverlay();
+    void UpdateLocale();
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -191,6 +217,7 @@ private:
     void OnPinchSmoothModeEnabledUpdate(bool value);
     void OnBackgroundColorUpdate(int32_t value);
     void OnInitialScaleUpdate(float value);
+    void OnMultiWindowAccessEnabledUpdate(bool value);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -215,6 +242,18 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
+    bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
+    bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
+    WebOverlayType GetTouchHandleOverlayType(
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+    void RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void CloseSelectOverlay();
+    RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
+
     struct TouchInfo {
         float x = -1.0f;
         float y = -1.0f;
@@ -226,11 +265,17 @@ private:
     std::optional<std::string> webData_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    JsProxyCallback jsProxyCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> axisEvent_;
+    RefPtr<SelectOverlayProxy> selectOverlayProxy_ = nullptr;
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
+    float selectHotZone_ = 10.0f;
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
 

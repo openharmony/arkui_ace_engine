@@ -18,9 +18,7 @@
 
 #include <string>
 
-#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/texttimer/texttimer_controller.h"
 #include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
 
@@ -29,11 +27,6 @@ class ACE_EXPORT TextTimerView {
 public:
     static RefPtr<TextTimerController> Create();
     static void SetFormat(const std::string& format);
-    static void SetTextColor(const Color& textColor);
-    static void SetFontSize(const Dimension& fontSize);
-    static void SetFontWeight(const FontWeight& fontWeight);
-    static void SetItalicFontStyle(const FontStyle& fontStyle);
-    static void SetFontFamily(const std::vector<std::string>& fontFamilies);
     static void SetOnTimer(ChangeEvent&& onChange);
     static void SetIsCountDown(bool isCountDown);
     static void SetInputCount(double count);

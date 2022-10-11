@@ -189,6 +189,8 @@ public:
         return frameNode_.Upgrade();
     }
 
+    virtual void DumpInfo() {}
+
     template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
@@ -225,7 +227,7 @@ public:
         return { FocusType::DISABLE, false };
     }
 
-    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm() const
+    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
     {
         return ScopeFocusAlgorithm();
     }
@@ -237,6 +239,8 @@ public:
     // called by window life cycle.
     virtual void OnWindowShow() {}
     virtual void OnWindowHide() {}
+    virtual void OnWindowFocused() {}
+    virtual void OnWindowUnfocused() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

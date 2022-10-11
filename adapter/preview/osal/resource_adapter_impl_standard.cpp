@@ -215,6 +215,21 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
     return "file://" + packagePathStr_ + "/resources/rawfile/" + fileName;
 }
 
+bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+{
+    return false;
+}
+
+bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+{
+    return false;
+}
+
+bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+{
+    return false;
+}
+
 void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, const std::string& moduleName)
 {
     return;

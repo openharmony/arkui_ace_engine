@@ -172,7 +172,9 @@ void DeclarativeFrontend::Destroy()
     // To guarantee the jsEngine_ and delegate_ released in js thread
     delegate_.Reset();
     handler_.Reset();
-    jsEngine_->Destroy();
+    if (jsEngine_) {
+        jsEngine_->Destroy();
+    }
     jsEngine_.Reset();
     LOGI("DeclarativeFrontend Destroy end.");
 }

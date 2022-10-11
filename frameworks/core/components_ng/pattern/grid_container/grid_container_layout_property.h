@@ -45,7 +45,6 @@ public:
         LinearLayoutProperty::Clone(value);
         value->propContainerInfo_ = propContainerInfo_;
         value->childrenFramenode_ = childrenFramenode_;
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         return value;
     }
 

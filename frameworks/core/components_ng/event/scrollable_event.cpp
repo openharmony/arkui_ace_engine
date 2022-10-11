@@ -52,10 +52,38 @@ void ScrollableActuator::InitializeScrollable()
     for (const auto& [axis, event] : scrollableEvents_) {
         auto scrollable = MakeRefPtr<Scrollable>(event->GetScrollPositionCallback(), axis);
         scrollable->SetOnScrollBegin(event->GetScrollBeginCallback());
+        scrollable->SetScrollEndCallback(event->GetScrollEndCallback());
+        if (scrollEffects_.count(axis)) {
+            auto scrollEffect = scrollEffects_[axis];
+            scrollEffect->SetScrollable(scrollable);
+            scrollEffect->InitialEdgeEffect();
+        }
         scrollable->Initialize(host->GetContext());
         scrollables_[axis] = scrollable;
     }
     initialized_ = true;
+}
+
+void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& effect)
+{
+    if (!effect) {
+        return;
+    }
+    scrollEffects_[axis] = effect;
+}
+
+bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect)
+{
+    if (!effect) {
+        return false;
+    }
+    for (auto iter = scrollEffects_.begin(); iter != scrollEffects_.end(); ++iter) {
+        if (effect == iter->second) {
+            scrollEffects_.erase(iter);
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

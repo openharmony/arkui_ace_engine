@@ -54,6 +54,8 @@ public:
         forceLayout_ = forceLayout;
     }
 
+    const std::list<RefPtr<LayoutWrapper>>& GetCachedChildLayoutWrapper() override;
+
 protected:
     int32_t OnGetTotalCount() override;
     RefPtr<LayoutWrapper> OnGetOrCreateWrapperByIndex(int32_t index) override;

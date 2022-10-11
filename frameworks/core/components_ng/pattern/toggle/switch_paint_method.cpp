@@ -18,13 +18,13 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 CanvasDrawFunction SwitchPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
@@ -46,13 +46,9 @@ CanvasDrawFunction SwitchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 void SwitchPaintMethod::PaintContent(
     RSCanvas& canvas, RefPtr<SwitchPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    RefPtr<SwitchTheme> switchTheme = themeManager->GetTheme<SwitchTheme>();
+    auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
 
     auto width = contentSize.Width();

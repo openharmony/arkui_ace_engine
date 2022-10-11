@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/web/web_view.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -23,6 +24,19 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+void WebView::Create(const std::string& webData)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetWebData(webData);
+}
+
 void WebView::Create(const std::string& src, const RefPtr<WebController>& webController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -427,5 +441,33 @@ void WebView::SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdatePinchSmoothModeEnabled(isPinchSmoothModeEnabled);
+}
+
+void WebView::SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnWindowNewEvent(std::move(windowNewEventId));
+}
+
+void WebView::SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnWindowExitEvent(std::move(windowExitEventId));
+}
+
+void WebView::SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMultiWindowAccessEnabled(isMultiWindowAccessEnabled);
+}
+
+void WebView::SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetJsProxyCallback(std::move(jsProxyCallback));
 }
 } // namespace OHOS::Ace::NG

@@ -59,9 +59,7 @@ void ToggleButtonPattern::OnModifyDone()
     }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto toggleTheme = themeManager->GetTheme<ToggleTheme>();
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
     CHECK_NULL_VOID(toggleTheme);
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -111,9 +109,7 @@ void ToggleButtonPattern::OnClick()
     }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto toggleTheme = themeManager->GetTheme<ToggleTheme>();
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
     CHECK_NULL_VOID(toggleTheme);
     auto color = toggleTheme->GetCheckedColor();
     const auto& renderContext = host->GetRenderContext();

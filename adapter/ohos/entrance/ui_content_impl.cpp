@@ -27,6 +27,7 @@
 #include "js_runtime_utils.h"
 #include "native_reference.h"
 #include "service_extension_context.h"
+
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -35,18 +36,21 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/ohos/entrance/capability_registry.h"
+#include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/rect.h"
-#include "base/log/log.h"
 #include "base/log/ace_trace.h"
+#include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/plugin_manager.h"
@@ -65,6 +69,7 @@ static std::atomic<int32_t> gInstanceId = 0;
 static std::atomic<int32_t> gSubWindowInstanceId = 100000;
 static std::atomic<int32_t> gSubInstanceId = 1000000;
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
+const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
 const int32_t REQUEST_CODE = -1;
 
 using ContentFinishCallback = std::function<void()>;
@@ -170,8 +175,10 @@ public:
             case OHOS::Rosen::DragEvent::DRAG_EVENT_END:
                 action = DragEventAction::DRAG_EVENT_END;
                 break;
-            case OHOS::Rosen::DragEvent::DRAG_EVENT_MOVE:
             case OHOS::Rosen::DragEvent::DRAG_EVENT_OUT:
+                action = DragEventAction::DRAG_EVENT_OUT;
+                break;
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_MOVE:
                 action = DragEventAction::DRAG_EVENT_MOVE;
                 break;
             case OHOS::Rosen::DragEvent::DRAG_EVENT_IN:
@@ -259,6 +266,10 @@ void UIContentImpl::DestroyUIDirector()
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
+    if (window && StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+        CommonInitialize(window, url, storage);
+        return;
+    }
     CommonInitialize(window, url, storage);
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
     // run page.
@@ -295,6 +306,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         LOGE("Null window, can't initialize UI content");
         return;
     }
+    if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+        InitializeSubWindow(window_, true);
+        return;
+    }
     if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_PREFIX)) {
         InitializeSubWindow(window_);
         return;
@@ -319,7 +334,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         ImageCache::SetImageCacheFilePath(context->GetCacheDir());
         ImageCache::SetCacheFileInfo();
     });
-    bool useNewPipe = AceApplicationInfo::GetInstance().GetPackageName() == SystemProperties::GetNewPipePkg();
+    AceNewPipeJudgement::InitAceNewPipeConfig();
+    auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
+    auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
+    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabled(
+        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
+    LOGI("UIContent: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
+        apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
@@ -389,6 +410,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context->GetApplicationInfo();
     auto bundleName = info != nullptr ? info->bundleName : "";
+    std::string moduleHapPath = info != nullptr ? info->hapPath : "";
     std::string resPath;
     std::string pageProfile;
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
@@ -472,7 +494,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             }
         }
     }
-    if (appInfo && flutterAssetManager) {
+    auto hapInfo = context->GetHapModuleInfo();
+    if (appInfo && flutterAssetManager && hapInfo) {
         /* Note: DO NOT modify the sequence of adding libPath  */
         std::string nativeLibraryPath = appInfo->nativeLibraryPath;
         std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
@@ -487,8 +510,26 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             libPaths.push_back(libPath);
             LOGI("napi lib path = %{private}s", libPath.c_str());
         }
+        auto isLibIsolated = hapInfo->isLibIsolated;
         if (!libPaths.empty()) {
-            flutterAssetManager->SetLibPath(libPaths);
+            if (!isLibIsolated) {
+                flutterAssetManager->SetLibPath("default", libPaths);
+            } else {
+                std::string appLibPathKey = hapInfo->bundleName + "/" + hapInfo->moduleName;
+                flutterAssetManager->SetLibPath(appLibPathKey, libPaths);
+            }
+        }
+    }
+    std::string hapPath; // hap path in sandbox
+    if (!moduleHapPath.empty()) {
+        if (moduleHapPath.find(ABS_BUNDLE_CODE_PATH) == std::string::npos) {
+            hapPath = moduleHapPath;
+        } else {
+            auto pos = moduleHapPath.find_last_of('/');
+            if (pos != std::string::npos) {
+                hapPath = LOCAL_BUNDLE_CODE_PATH + moduleHapPath.substr(pos + 1);
+                LOGI("In Stage mode, hapPath:%{private}s", hapPath.c_str());
+            }
         }
     }
 
@@ -558,6 +599,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
+    container->SetHapPath(hapPath);
     container->SetAssetManager(flutterAssetManager);
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
@@ -658,7 +700,15 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
-    Platform::AceContainer::DestroyContainer(instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    if (!container) {
+        return;
+    }
+    if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
+        Platform::DialogContainer::DestroyContainer(instanceId_);
+    } else {
+        Platform::AceContainer::DestroyContainer(instanceId_);
+    }
 }
 
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
@@ -703,7 +753,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
 void UIContentImpl::SetBackgroundColor(uint32_t color)
 {
     LOGI("UIContentImpl::SetBackgroundColor color is %{public}u", color);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
     if (!container) {
         LOGE("SetBackgroundColor failed: container is null.");
         return;
@@ -727,9 +777,21 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed called");
-    if (Platform::AceContainer::OnBackPressed(instanceId_)) {
-        LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed return true");
-        return true;
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    if (!container) {
+        return false;
+    }
+    if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
+        if (Platform::DialogContainer::OnBackPressed(instanceId_)) {
+            LOGI("UIContentImpl::ProcessBackPressed DialogContainer return true");
+            return true;
+        }
+    } else {
+        LOGI("UIContentImpl::ProcessBackPressed AceContainer");
+        if (Platform::AceContainer::OnBackPressed(instanceId_)) {
+            LOGI("UIContentImpl::ProcessBackPressed AceContainer return true");
+            return true;
+        }
     }
     LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed return false");
     return false;
@@ -737,13 +799,13 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (container) {
-        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        Platform::FlutterAceView::DispatchTouchEvent(aceView, pointerEvent);
-        return true;
-    }
-    return false;
+    LOGI("UIContentImpl::ProcessPointerEvent begin");
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto aceView = static_cast<Platform::FlutterAceView*>(container->GetView());
+    Platform::FlutterAceView::DispatchTouchEvent(aceView, pointerEvent);
+    LOGI("UIContentImpl::ProcessPointerEvent end");
+    return true;
 }
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
@@ -751,12 +813,10 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
     LOGI("AceAbility::OnKeyUp called,touchEvent info: keyCode is %{private}d,"
          "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (container) {
-        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        return Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
-    }
-    return false;
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto aceView = static_cast<Platform::FlutterAceView*>(container->GetView());
+    return Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
 }
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
@@ -801,6 +861,11 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         return;
     }
     container->SetWindowPos(config.Left(), config.Top());
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        pipelineContext->SetDisplayWindowRectInfo(
+            Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+    }
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("UpdateViewportConfig: taskExecutor is null.");
@@ -942,7 +1007,7 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
     window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
 }
 
-void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
+void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
 {
     window_ = window;
     LOGI("The window name is %{public}s", window->GetWindowName().c_str());
@@ -951,17 +1016,21 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
         return;
     }
 
-    RefPtr<Platform::AceContainer> container;
+    RefPtr<Container> container;
     instanceId_ = gSubInstanceId.fetch_add(1, std::memory_order_relaxed);
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
-    container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
-        runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
-            // Sub-window ,just return.
-            LOGI("Content event callback");
-        }),
-        false, true);
+    if (isDialog) {
+        container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
+    } else {
+        container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
+            runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                // Sub-window ,just return.
+                LOGI("Content event callback");
+            }),
+            false, true);
+    }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
     touchOutsideListener_ = new TouchOutsideListener(instanceId_);

@@ -32,6 +32,7 @@
 namespace OHOS::Ace::NG {
 
 using LoadPageCallback = std::function<bool(const std::string&)>;
+using LoadCardCallback = std::function<bool(const std::string&, uint64_t cardId)>;
 
 enum class RouterMode {
     STANDARD = 0,
@@ -65,6 +66,8 @@ public:
 
     void RunPage(const std::string& url, const std::string& params);
 
+    void RunCard(const std::string& url, const std::string& params, uint64_t cardId);
+
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)
     {
         manifestParser_ = manifestParser;
@@ -73,6 +76,11 @@ public:
     void SetLoadJsCallback(LoadPageCallback&& callback)
     {
         loadJs_ = std::move(callback);
+    }
+
+    void SetLoadCardCallback(const LoadCardCallback& callback)
+    {
+        loadCard_ = callback;
     }
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
@@ -105,6 +113,12 @@ public:
     // Get the currently running JS page information in NG structure.
     RefPtr<Framework::RevSourceMap> GetCurrentPageSourceMap(const RefPtr<AssetManager>& assetManager);
 
+    void SetIsCard()
+    {
+        isCardRouter = true;
+        return;
+    }
+
 private:
     class RouterOptScope {
     public:
@@ -135,20 +149,27 @@ private:
 
     // page operations
     void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false,
-        bool needHideLast = true);
+        bool needHideLast = true, bool needTransition = true);
     void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params, bool needHideLast,
-        bool forceShowCurrent = false);
-    void PopPage(const std::string& params, bool needShowNext);
-    void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext);
+        bool forceShowCurrent = false, bool needTransition = true);
+    void PopPage(const std::string& params, bool needShowNext, bool needTransition);
+    void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition);
 
-    static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast);
-    static bool OnPopPage(bool needShowNext);
-    static bool OnPopPageToIndex(int32_t index, bool needShowNext);
+    static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
+        bool isCardRouter = false, uint64_t cardId = 0);
+    static bool OnPopPage(bool needShowNext, bool needTransition);
+    static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
-    bool inRouterOpt_ = false;
+    void LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, uint64_t cardId,
+        bool isRestore = false, bool needHideLast = true);
+        
     RefPtr<Framework::ManifestParser> manifestParser_;
+
+    bool inRouterOpt_ = false;
     LoadPageCallback loadJs_;
+    LoadCardCallback loadCard_;
+    bool isCardRouter = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
 

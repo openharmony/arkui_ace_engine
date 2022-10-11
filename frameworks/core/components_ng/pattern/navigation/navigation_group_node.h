@@ -22,24 +22,18 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
-enum class ChildNodeOperation {
-    ADD,
-    // remove case only used for back button
-    REMOVE,
-    REPLACE,
-    NONE
-};
 class ACE_EXPORT NavigationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode)
 public:
     NavigationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)
     {}
-    ~NavigationGroupNode() = default;
+    ~NavigationGroupNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child) override;
     static RefPtr<NavigationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
@@ -48,54 +42,15 @@ public:
     {
         return false;
     }
-    void SetBackButton(const RefPtr<UINode>& button)
+
+    void SetNavBarNode(const RefPtr<UINode>& navBarNode)
     {
-        backButton_ = button;
+        navBarNode_ = navBarNode;
     }
 
-    const RefPtr<UINode>& GetBackButton() const
+    const RefPtr<UINode>& GetNavBarNode() const
     {
-        return backButton_;
-    }
-
-    void SetTitle(const RefPtr<UINode>& title)
-    {
-        title_ = title;
-    }
-
-    const RefPtr<UINode>& GetTitle() const
-    {
-        return title_;
-    }
-
-    void SetSubtitle(const RefPtr<UINode>& subtitle)
-    {
-        subtitle_ = subtitle;
-    }
-
-    const RefPtr<UINode>& GetSubtitle() const
-    {
-        return subtitle_;
-    }
-
-    void SetMenu(const RefPtr<UINode>& menu)
-    {
-        menu_ = menu;
-    }
-
-    const RefPtr<UINode>& GetMenu() const
-    {
-        return menu_;
-    }
-
-    void SetTitleBarNode(const RefPtr<UINode>& title)
-    {
-        titleBarNode_ = title;
-    }
-
-    const RefPtr<UINode>& GetTitleBarNode() const
-    {
-        return titleBarNode_;
+        return navBarNode_;
     }
 
     void SetContentNode(const RefPtr<UINode>& contentNode)
@@ -108,55 +63,11 @@ public:
         return contentNode_;
     }
 
-    void SetToolBarNode(const RefPtr<UINode>& toolBarNode)
-    {
-        toolBarNode_ = toolBarNode;
-    }
-
-    const RefPtr<UINode>& GetToolBarNode() const
-    {
-        return toolBarNode_;
-    }
-
-    void SetPreToolBarNode(const RefPtr<UINode>& preToolBarNode)
-    {
-        preToolBarNode_ = preToolBarNode;
-    }
-
-    const RefPtr<UINode>& GetPreToolBarNode() const
-    {
-        return preToolBarNode_;
-    }
-
-    // custom node checking
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
-    void OnPrevTitleIsCustomUpdate(bool value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevMenuIsCustom, bool);
-    void OnPrevMenuIsCustomUpdate(bool value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevToolBarIsCustom, bool);
-    void OnPrevToolBarIsCustomUpdate(bool value) {}
-
-    // node operation related
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackButtonNodeOperation, ChildNodeOperation);
-    void OnBackButtonNodeOperationUpdate(ChildNodeOperation value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TitleNodeOperation, ChildNodeOperation);
-    void OnTitleNodeOperationUpdate(ChildNodeOperation value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SubtitleNodeOperation, ChildNodeOperation);
-    void OnSubtitleNodeOperationUpdate(ChildNodeOperation value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MenuNodeOperation, ChildNodeOperation);
-    void OnMenuNodeOperationUpdate(ChildNodeOperation value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ToolBarNodeOperation, ChildNodeOperation);
-    void OnToolBarNodeOperationUpdate(ChildNodeOperation value) {}
-
 private:
-    RefPtr<UINode> backButton_;
-    RefPtr<UINode> title_;
-    RefPtr<UINode> subtitle_;
-    RefPtr<UINode> menu_;
-    RefPtr<UINode> titleBarNode_;
+    void AddNavDestinationToNavigation(const RefPtr<UINode>& child);
+
+    RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
-    RefPtr<UINode> toolBarNode_;
-    RefPtr<UINode> preToolBarNode_;
 };
 
 } // namespace OHOS::Ace::NG

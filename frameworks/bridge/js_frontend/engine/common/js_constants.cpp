@@ -109,6 +109,7 @@ const char ANIMATION_CANCEL_ANIMATION_FRAME[] = "cancelAnimationFrame";
 
 // for animator
 const char ANIMATOR_CREATE_ANIMATOR[] = "createAnimator";
+const char ANIMATOR_CREATE[] = "create";
 
 // for curves
 const char CURVES_INIT[] = "init";

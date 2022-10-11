@@ -29,6 +29,7 @@
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t TITLE_MODE_RANGE = 2;
+constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? static_cast<int32_t>(NavigationTitleMode::MINI)
@@ -137,6 +138,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
     JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
+    JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetNavigationMode);
     JSClass<JSNavigation>::Inherit<JSContainerBase>();
     JSClass<JSNavigation>::Inherit<JSViewAbstract>();
     JSClass<JSNavigation>::Bind(globalObj);
@@ -430,6 +432,18 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
         }
     }
     info.ReturnSelf();
+}
+
+void JSNavigation::SetNavigationMode(int32_t value)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (value >= 0 && value <= NAVIGATION_MODE_RANGE) {
+        NG::NavigationView::SetNavigationMode(static_cast<NG::NavigationMode>(value));
+    } else {
+        LOGE("invalid value for navigationMode");
+    }
 }
 
 } // namespace OHOS::Ace::Framework

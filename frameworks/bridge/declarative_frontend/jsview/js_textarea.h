@@ -28,9 +28,6 @@ class JSTextArea : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-
-private:
-    static void InitDefaultStyle();
 };
 
 class JSTextAreaController final : public Referenced {

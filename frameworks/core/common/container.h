@@ -87,6 +87,12 @@ public:
     // Get the width/height of the view
     virtual int32_t GetViewWidth() const = 0;
     virtual int32_t GetViewHeight() const = 0;
+    virtual int32_t GetViewPosX() const = 0;
+    virtual int32_t GetViewPosY() const = 0;
+
+    virtual uint32_t GetWindowId() const = 0;
+    virtual void SetWindowId(uint32_t windowId) {}
+
     virtual void* GetView() const = 0;
 
     // Trigger garbage collection
@@ -97,6 +103,20 @@ public:
     virtual void NotifyFontNodes() {}
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
+
+    virtual void SetCardFrontend(WeakPtr<Frontend> frontend, uint64_t cardId) {}
+
+    virtual WeakPtr<Frontend> GetCardFrontend(uint64_t cardId) const
+    {
+        return nullptr;
+    }
+
+    virtual void SetCardPipeline(WeakPtr<PipelineBase>, uint64_t cardId) {}
+
+    virtual WeakPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const
+    {
+        return nullptr;
+    }
 
     // Get MutilModal ptr.
     virtual uintptr_t GetMutilModalPtr() const
@@ -226,6 +246,16 @@ public:
         return false;
     }
 
+    void SetIdeDebuggerConnected(bool IdeDebuggerConnected)
+    {
+        IdeDebuggerConnected_ = IdeDebuggerConnected;
+    }
+
+    bool GetIdeDebuggerConnected()
+    {
+        return IdeDebuggerConnected_;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -236,6 +266,7 @@ private:
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
+    bool IdeDebuggerConnected_ = false;
     bool usePartialUpdate_ = false;
     Settings settings_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);

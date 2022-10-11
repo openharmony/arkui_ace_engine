@@ -113,8 +113,10 @@ private:
 
     void OnUpdateTime(uint32_t time, int pos) const;
 
+    void AddPreviewNodeIfNeeded();
+    void AddControlBarNodeIfNeeded();
     RefPtr<FrameNode> CreateControlBar();
-    static RefPtr<FrameNode> CreateButton(const std::string& label, GestureEventFunc clickCallback);
+    static RefPtr<FrameNode> CreateButton();
     static RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn);

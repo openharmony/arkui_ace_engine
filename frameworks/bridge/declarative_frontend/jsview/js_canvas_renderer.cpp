@@ -1058,6 +1058,11 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 #endif
 }
 
+void JSCanvasRenderer::JsSetPixelMap(const JSCallbackInfo& info)
+{
+    return;
+}
+
 void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
 {
     RefPtr<OffscreenCanvas> offscreenCanvas;
@@ -1095,6 +1100,17 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
     }
 
     pool_->DrawBitmapMesh(offscreenCanvas, mesh, column, row);
+}
+
+void JSCanvasRenderer::JsFilter(const JSCallbackInfo& info)
+{
+
+    return;
+}
+
+void JSCanvasRenderer::JsDirection(const JSCallbackInfo& info)
+{
+    return;
 }
 
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)
@@ -1788,6 +1804,16 @@ void JSCanvasRenderer::JsClip(const JSCallbackInfo& info)
 
     if (info.Length() == 0 ||
         (info.Length() == 1 && info[0]->IsString())) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetFillRuleForPath(fillRule);
+                offscreenCanvasPattern_->Clip();
+            } else {
+                customPaintPattern_->UpdateFillRuleForPath(fillRule);
+                customPaintPattern_->Clip();
+            }
+            return;
+        }
         if (isOffscreen_) {
             offscreenCanvas_->SetFillRuleForPath(fillRule);
             offscreenCanvas_->Clip();
@@ -1804,6 +1830,16 @@ void JSCanvasRenderer::JsClip(const JSCallbackInfo& info)
         }
         auto path = jsCanvasPath->GetCanvasPath2d();
 
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetFillRuleForPath2D(fillRule);
+                offscreenCanvasPattern_->Clip(path);
+            } else {
+                customPaintPattern_->UpdateFillRuleForPath2D(fillRule);
+                customPaintPattern_->Clip(path);
+            }
+            return;
+        }
         if (isOffscreen_) {
             offscreenCanvas_->SetFillRuleForPath2D(fillRule);
             offscreenCanvas_->Clip(path);
@@ -1950,6 +1986,11 @@ void JSCanvasRenderer::JsScale(const JSCallbackInfo& info)
     }
 }
 
+void JSCanvasRenderer::JsGetTransform(const JSCallbackInfo& info)
+{
+    return;
+}
+
 void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
 {
     if (info.Length() == 6) {
@@ -2008,6 +2049,17 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
     } else {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
+    }
+}
+
+void JSCanvasRenderer::JsResetTransform(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            offscreenCanvasPattern_->ResetTransform();
+        } else {
+            customPaintPattern_->ResetTransform();
+        }
     }
 }
 

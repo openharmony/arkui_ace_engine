@@ -33,8 +33,7 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<FlexLayoutProperty>();
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propFlexLayoutAttribute_ = CloneFlexLayoutAttribute();
+        Clone(value);
         return value;
     }
 
@@ -42,6 +41,7 @@ public:
     {
         LayoutProperty::Reset();
         ResetFlexLayoutAttribute();
+        ResetWrapLayoutAttribute();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FlexLayoutAttribute, FlexLayoutAttribute);
@@ -49,6 +49,21 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, FlexDirection, FlexDirection, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, MainAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, Space, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_GROUP(WrapLayoutAttribute, WrapLayoutAttribute);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(WrapLayoutAttribute, WrapDirection, WrapDirection, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(WrapLayoutAttribute, Alignment, WrapAlignment, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(WrapLayoutAttribute, MainAlignment, WrapAlignment, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(WrapLayoutAttribute, CrossAlignment, WrapAlignment, PROPERTY_UPDATE_MEASURE);
+
+protected:
+    void Clone(RefPtr<LayoutProperty> property) const override
+    {
+        auto value = DynamicCast<FlexLayoutProperty>(property);
+        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propFlexLayoutAttribute_ = CloneFlexLayoutAttribute();
+        value->propWrapLayoutAttribute_ = CloneWrapLayoutAttribute();
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutProperty);

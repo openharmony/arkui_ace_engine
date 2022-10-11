@@ -30,9 +30,11 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/ace_container.cpp",
       "$ace_root/adapter/ohos/entrance/ace_data_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_form_ability.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_new_pipe_judgement.cpp",
       "$ace_root/adapter/ohos/entrance/ace_service_ability.cpp",
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
+      "$ace_root/adapter/ohos/entrance/dialog_container.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
       "$ace_root/adapter/ohos/entrance/flutter_ace_view.cpp",
       "$ace_root/adapter/ohos/entrance/hap_asset_provider.cpp",
@@ -43,7 +45,6 @@ template("ace_ohos_standard_source_set") {
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
-      "$ace_root/adapter/ohos/entrance/ui_dialog_impl.cpp",
 
       # drag window
       "$ace_root/adapter/ohos/entrance/window/drag_window_ohos.cpp",

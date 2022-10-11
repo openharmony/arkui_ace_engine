@@ -525,7 +525,10 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
     engineInstance_->SetArkNativeEngine(nativeEngine_);
     ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() { nativeEngine->Loop(LOOP_NOWAIT); });
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_, id = instanceId_]() {
+        ContainerScope scope(id);
+        nativeEngine->Loop(LOOP_NOWAIT);
+    });
     JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine_, delegate);
     SetPostTask(nativeEngine_);
 #if !defined(PREVIEW)
@@ -533,9 +536,10 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
 #endif
     if (delegate && delegate->GetAssetManager()) {
         std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
+        auto appLibPathKey = delegate->GetAssetManager()->GetAppLibPathKey();
         if (!packagePath.empty()) {
             auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
-            arkNativeEngine->SetPackagePath(packagePath);
+            arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
         }
     }
     RegisterWorker();
@@ -546,13 +550,14 @@ void JsiPaEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGD("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync]() {
+        delegate->PostJsTask([nativeEngine, needSync, id]() {
+            ContainerScope scope(id);
             if (nativeEngine == nullptr) {
                 return;
             }
@@ -1316,6 +1321,7 @@ Uri JsiPaEngine::DenormalizeUri(const Uri& uri, const CallingInfo& callingInfo)
 
 sptr<IRemoteObject> JsiPaEngine::OnConnectService(const OHOS::AAFwk::Want& want)
 {
+    ContainerScope scope(instanceId_);
     LOGI("JsiPaEngine OnConnectService");
     ACE_DCHECK(engineInstance_);
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
@@ -1342,6 +1348,7 @@ sptr<IRemoteObject> JsiPaEngine::OnConnectService(const OHOS::AAFwk::Want& want)
 
 void JsiPaEngine::OnDisconnectService(const OHOS::AAFwk::Want& want)
 {
+    ContainerScope scope(instanceId_);
     LOGI("JsiPaEngine OnDisconnectService");
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
     auto func = GetPaFunc("onDisconnect");
@@ -1350,6 +1357,7 @@ void JsiPaEngine::OnDisconnectService(const OHOS::AAFwk::Want& want)
 
 void JsiPaEngine::OnCommand(const OHOS::AAFwk::Want& want, int startId)
 {
+    ContainerScope scope(instanceId_);
     LOGI("JsiPaEngine OnCommand");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
@@ -1360,6 +1368,7 @@ void JsiPaEngine::OnCommand(const OHOS::AAFwk::Want& want, int startId)
 
 void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
 {
+    ContainerScope scope(instanceId_);
     LOGI("JsiPaEngine OnCreate");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();

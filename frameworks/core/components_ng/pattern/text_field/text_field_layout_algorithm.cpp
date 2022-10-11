@@ -67,9 +67,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, std::nullopt);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     TextStyle textStyle;
@@ -83,11 +81,18 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     CreateParagraph(textStyle, textContent);
 
+    float imageSize = 0.0f;
+    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(false);
+    imageSize = showPasswordIcon ? GetTextFieldDefaultImageHeight() : 0.0f;
+    if (contentConstraint.selfIdealSize.Height()) {
+        imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
+    }
+
     if (textStyle.GetMaxLines() == 1) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(Infinity<float>());
     } else {
-        paragraph_->Layout(contentConstraint.maxSize.Width());
+        paragraph_->Layout(contentConstraint.maxSize.Width() - imageSize);
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
@@ -95,7 +100,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     auto height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
     // check password image size.
-    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(false);
     if (!showPasswordIcon) {
         textRect_.SetSize(SizeF(contentConstraint.maxSize.Width(), height));
         imageRect_.SetSize(SizeF());
@@ -115,9 +119,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         return SizeF(contentConstraint.maxSize.Width(), imageHeight);
     }
     height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
-    textRect_.SetSize(SizeF(contentConstraint.maxSize.Width() - imageHeight, static_cast<float>(height)));
-    imageRect_.SetSize(SizeF(imageHeight, imageHeight));
-    return SizeF(contentConstraint.maxSize.Width(), imageHeight);
+    textRect_.SetSize(SizeF(contentConstraint.maxSize.Width() - imageSize, static_cast<float>(height)));
+    imageRect_.SetSize(SizeF(imageSize, imageSize));
+    return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, height));
 }
 
 void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -239,9 +243,7 @@ float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()
     const auto defaultHeight = 40.0_vp;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, defaultHeight.ConvertToPx());
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, defaultHeight.ConvertToPx());
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, defaultHeight.ConvertToPx());
     auto height = textFieldTheme->GetHeight();
     return static_cast<float>(height.ConvertToPx());
@@ -252,9 +254,7 @@ float TextFieldLayoutAlgorithm::GetTextFieldDefaultImageHeight()
     const auto defaultHeight = 40.0_vp;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, defaultHeight.ConvertToPx());
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, defaultHeight.ConvertToPx());
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, defaultHeight.ConvertToPx());
     auto height = textFieldTheme->GetIconHotZoneSize();
     return static_cast<float>(height.ConvertToPx());

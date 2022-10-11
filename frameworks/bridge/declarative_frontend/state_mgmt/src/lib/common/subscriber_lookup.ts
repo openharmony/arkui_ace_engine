@@ -24,7 +24,7 @@ class SubscriberManager implements IPropertySubscriberLookup {
   constructor() {
     this.subscriberById_ = new Map<number, IPropertySubscriber>();
     this.nextFreeId_ = 0;
-    console.debug("SubscriberManager has been created.");
+    stateMgmtConsole.debug("SubscriberManager has been created.");
   }
 
   public has(id: number): boolean {
@@ -37,7 +37,7 @@ class SubscriberManager implements IPropertySubscriberLookup {
 
   public delete(id: number): boolean {
     if (!this.has(id)) {
-      console.warn(`SubscriberManager.delete unknown id ${id} `);
+      stateMgmtConsole.warn(`SubscriberManager.delete unknown id ${id} `);
       return false;
     }
     return this.subscriberById_.delete(id);
@@ -63,11 +63,11 @@ class SubscriberManager implements IPropertySubscriberLookup {
    * for debug purposes dump all known subscriber's info to comsole
    */
   public dumpSubscriberInfo(): void {
-    console.debug("Dump of SubscriberManager +++ (sart)")
+    stateMgmtConsole.debug("Dump of SubscriberManager +++ (sart)")
     for (let [id, subscriber] of this.subscriberById_) {
-      console.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`)
+      stateMgmtConsole.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`)
     }
-    console.debug("Dump of SubscriberManager +++ (end)")
+    stateMgmtConsole.debug("Dump of SubscriberManager +++ (end)")
   }
 
   MakeId() {

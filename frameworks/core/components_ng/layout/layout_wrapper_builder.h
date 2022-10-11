@@ -35,6 +35,8 @@ public:
 
     RefPtr<LayoutWrapper> GetOrCreateWrapperByIndex(int32_t index);
 
+    virtual const std::list<RefPtr<LayoutWrapper>>& GetCachedChildLayoutWrapper() = 0;
+
     const std::list<RefPtr<LayoutWrapper>>& ExpandAllChildWrappers();
 
     int32_t GetTotalCount()

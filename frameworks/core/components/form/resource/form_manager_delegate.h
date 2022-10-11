@@ -26,6 +26,7 @@
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_js_info.h"
 #include "want.h"
+#include "want_params_wrapper.h"
 #endif
 
 namespace OHOS::Ace {
@@ -38,7 +39,8 @@ public:
         std::function<void(int64_t, const std::string&, const std::string&, const std::string&)>;
     using OnFormUpdateCallbackForJava = std::function<void(int64_t, const std::string&)>;
     using OnFormAcquiredCallback = std::function<void(int64_t, const std::string&, const std::string&,
-        const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&, const AppExecFwk::FormJsInfo&)>;
+        const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&,
+        const AppExecFwk::FormJsInfo&, const FrontendType& frontendType)>;
     using OnFormUpdateCallback =
         std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;

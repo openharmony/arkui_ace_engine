@@ -114,7 +114,7 @@ public:
         const std::optional<Color>& svgFillColor);
     static void PrepareImageData(const RefPtr<ImageObject>& imageObj, const LoadCallbacks& loadCallbacks);
     static void CreateImageObject(const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks,
-        const std::optional<Color>& svgFillColor = std::nullopt);
+        const std::optional<Color>& svgFillColor);
     static void MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
         const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
     static void MakeCanvasImageForSVG(

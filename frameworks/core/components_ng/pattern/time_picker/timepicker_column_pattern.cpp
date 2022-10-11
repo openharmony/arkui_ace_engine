@@ -40,6 +40,15 @@ void TimePickerColumnPattern::OnAttachToFrameNode()
     ScrollTimeColumn();
 }
 
+void TimePickerColumnPattern::OnModifyDone()
+{
+    auto host = GetHost();
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
+}
+
 void TimePickerColumnPattern::FlushCurrentOptions()
 {
     auto host = GetHost();
@@ -124,13 +133,10 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double y)
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     jumpInterval_ = Dimension(pickerTheme->GetJumpInterval().ConvertToPx(), DimensionUnit::PX);
     // the abs of drag delta is less than jump interval.
@@ -192,5 +198,42 @@ void TimePickerColumnPattern::UpdateCurrentOffset(float offset)
     currentOffset_ = currentOffset_ + offset;
     UpdateColumnChildPosition(GetCurrentOffset());
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void TimePickerColumnPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool TimePickerColumnPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
+        HandleDirectionKey(event.code);
+        return true;
+    }
+    return false;
+}
+
+bool TimePickerColumnPattern::HandleDirectionKey(KeyCode code)
+{
+    if (code == KeyCode::KEY_DPAD_UP) {
+        // Need to update: current selection
+        return true;
+    }
+    if (code == KeyCode::KEY_DPAD_DOWN) {
+        // Need to update: current selection
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

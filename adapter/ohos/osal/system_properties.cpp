@@ -259,6 +259,7 @@ int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
+bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 bool SystemProperties::debugBoundaryEnabled_ = false;
@@ -388,6 +389,11 @@ float SystemProperties::GetAnimationScale()
 std::string SystemProperties::GetPartialUpdatePkg()
 {
     return system::GetParameter("persist.ace.partial.pkgname", "");
+}
+
+int32_t SystemProperties::GetSvgMode()
+{
+    return system::GetIntParameter<int>("persist.ace.svg.mode", 0);
 }
 
 } // namespace OHOS::Ace

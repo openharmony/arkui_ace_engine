@@ -71,9 +71,7 @@ float CalControlBarHeight()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0f);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, 0.0f);
-    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, 0.0f);
     auto controlsHeight =
         pipelineContext->NormalizeToPx(Dimension(videoTheme->GetBtnSize().Height(), DimensionUnit::VP));
@@ -87,23 +85,16 @@ VideoLayoutAlgorithm::VideoLayoutAlgorithm() = default;
 void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
-
-    auto frameLayoutOffset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
     auto contentOffset = layoutWrapper->GetGeometryNode()->GetContentOffset();
-    auto layoutProperty = DynamicCast<VideoLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    if (layoutProperty->GetControlsValue(false)) {
-        contentOffset.SetY(frameLayoutOffset.GetY());
-        layoutWrapper->GetGeometryNode()->SetContentOffset(contentOffset);
-    }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout();
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
-            child->GetGeometryNode()->SetMarginFrameOffset({ 0, 0 });
-            child->GetGeometryNode()->SetContentOffset({ 0, 0 });
+            child->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
             auto controlBarHeight = CalControlBarHeight();
-            auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
-            child->GetGeometryNode()->SetMarginFrameOffset({ 0, frameSize.Height() - controlBarHeight });
+            auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
+            child->GetGeometryNode()->SetMarginFrameOffset(
+                { contentOffset.GetX(), contentOffset.GetY() + contentSize.Height() - controlBarHeight });
         }
     }
 }
@@ -133,15 +124,6 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
     PerformMeasureSelf(layoutWrapper);
-    if (contentSize.IsPositive()) {
-        const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-        if (layoutProperty->GetControlsValue(false)) {
-            auto controlBarHeight = CalControlBarHeight();
-            contentSize.AddHeight(controlBarHeight);
-        }
-        AddPaddingToSize(padding, contentSize);
-        layoutWrapper->GetGeometryNode()->SetFrameSize(contentSize);
-    }
 }
 
 std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
@@ -150,13 +132,8 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
     auto layoutProperty = DynamicCast<VideoLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                 : contentConstraint.maxSize;
-    auto controlBarHeight = 0.0f;
-    if (layoutProperty->GetControlsValue(false)) {
-        controlBarHeight = CalControlBarHeight();
-    }
     if (!layoutProperty->HasVideoSize()) {
         LOGW("VideoSize has not set");
-        layoutSize.MinusHeight(controlBarHeight);
         return layoutSize;
     }
     auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
@@ -182,7 +159,6 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
         default:
             contentSize = CalculateFitContain(videoSize, layoutSize);
     }
-    contentSize.SetHeight(layoutSize.Height() - controlBarHeight);
     return contentSize;
 }
 

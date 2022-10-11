@@ -139,7 +139,7 @@ void RenderGridRow::PerformLayout()
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, component->GetGutter());
     auto gutterInDouble = std::make_pair<double, double>(NormalizeToPx(gutter.first), NormalizeToPx(gutter.second));
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, component->GetTotalCol());
-    double columnUnitWidth = GridContainerUtils::ProcessColumnWidth(gutterInDouble, columnNum, maxSize);
+    double columnUnitWidth = GridContainerUtils::ProcessColumnWidth(gutterInDouble, columnNum, maxSize.Width());
     LayoutEachChild(columnUnitWidth, maxSize.Height(), gutterInDouble.first, sizeType, columnNum);
     int32_t offset = 0;
     Offset rowPosition;

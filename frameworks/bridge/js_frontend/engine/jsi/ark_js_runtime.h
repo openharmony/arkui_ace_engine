@@ -82,6 +82,7 @@ public:
     shared_ptr<JsValue> NewArray() override;
     shared_ptr<JsValue> NewFunction(RegisterFunctionType func) override;
     shared_ptr<JsValue> NewNativePointer(void* ptr) override;
+    void ThrowError(const std::string& msg, int32_t code) override;
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
     void HandleUncaughtException() override;
     bool HasPendingException() override;
@@ -144,6 +145,17 @@ public:
     {
         panda::JSNApi::SetBundle(vm_, isBundle);
     }
+
+    bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
+    void AddRootView(const panda::Global<panda::ObjectRef> &RootView)
+    {
+        RootView_ = RootView;
+    }
+
+    panda::Global<panda::ObjectRef> GetRootView()
+    {
+        return RootView_;
+    }
 #endif
 
 private:
@@ -160,6 +172,7 @@ private:
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
     std::unordered_map<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
+    panda::Global<panda::ObjectRef> RootView_;
 #endif
 };
 

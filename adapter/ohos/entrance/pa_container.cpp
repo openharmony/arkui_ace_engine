@@ -115,6 +115,7 @@ bool PaContainer::RunPa(int32_t instanceId, const std::string& content, const OH
         LOGE("PA: container is null");
         return false;
     }
+    ContainerScope scope(instanceId);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     if (!aceContainer) {
         LOGE("PA: aceContainer is null");
@@ -383,7 +384,7 @@ void PaContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>&
         AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(flutterAssetManager);
     }
     if (flutterAssetManager) {
-        flutterAssetManager->SetLibPath(libPath);
+        flutterAssetManager->SetLibPath("default", libPath);
     }
 }
 

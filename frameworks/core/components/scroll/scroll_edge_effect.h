@@ -16,118 +16,31 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLL_EDGE_EFFECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLL_EDGE_EFFECT_H
 
-#include <functional>
-
-#include "base/memory/ace_type.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components/scroll/scroll_edge_effect_base.h"
 
 namespace OHOS::Ace {
 
-using EdgeCallback = std::function<double()>;
-
-class ScrollEdgeEffect : public AceType {
-    DECLARE_ACE_TYPE(ScrollEdgeEffect, AceType);
+class ScrollEdgeEffect : public ScrollEdgeEffectBase {
+    DECLARE_ACE_TYPE(ScrollEdgeEffect, ScrollEdgeEffectBase);
 
 public:
-    explicit ScrollEdgeEffect(EdgeEffect edgeEffect)
-    {
-        edgeEffect_ = edgeEffect;
-    }
+    explicit ScrollEdgeEffect(EdgeEffect edgeEffect) : ScrollEdgeEffectBase(edgeEffect) {}
+
+    ScrollEdgeEffect() = default;
 
     ~ScrollEdgeEffect() override = default;
-
-    EdgeEffect GetEdgeEffect() const
-    {
-        return edgeEffect_;
-    }
-
-    // support layout out of boundary fill with blank
-    bool IsRestrictBoundary() const
-    {
-        return edgeEffect_ != EdgeEffect::SPRING;
-    }
-
-    bool IsFadeEffect() const
-    {
-        return edgeEffect_ == EdgeEffect::FADE;
-    }
-
-    bool IsNoneEffect() const
-    {
-        return edgeEffect_ == EdgeEffect::NONE;
-    }
-
-    bool IsSpringEffect() const
-    {
-        return edgeEffect_ == EdgeEffect::SPRING;
-    }
-
-    void SetScrollable(const RefPtr<Scrollable>& scrollable)
-    {
-        scrollable_ = scrollable;
-    }
 
     void SetScrollNode(const WeakPtr<RenderNode>& scroll)
     {
         scroll_ = scroll;
     }
 
-    void SetCurrentPositionCallback(const EdgeCallback& currentPositionCallback)
-    {
-        currentPositionCallback_ = currentPositionCallback;
-    }
-
-    void SetLeadingCallback(const EdgeCallback& leadingCallback)
-    {
-        leadingCallback_ = leadingCallback;
-    }
-
-    void SetTrailingCallback(const EdgeCallback& trainingCallback)
-    {
-        trailingCallback_ = trainingCallback;
-    }
-
-    void SetInitLeadingCallback(const EdgeCallback& initLeadingCallback)
-    {
-        initLeadingCallback_ = initLeadingCallback;
-    }
-
-    void SetInitTrailingCallback(const EdgeCallback& initTrainingCallback)
-    {
-        initTrailingCallback_ = initTrainingCallback;
-    }
-
-    // common use
-    virtual void InitialEdgeEffect() {}
-
-    // fade effect use
-    virtual double CalculateOverScroll(double oldPosition, bool isReachMax)
-    {
-        return 0.0;
-    }
-
     virtual void HandleOverScroll(Axis axis, double overScroll, const Size& viewPort) {}
 
     virtual void Paint(RenderContext& context, const Size& viewPort, const Offset& offset) {}
 
-    // spring effect use
-    virtual void RegisterSpringCallback() {}
-
-    virtual void ProcessScrollOver(double velocity) {}
-
 protected:
-    RefPtr<Scrollable> scrollable_;
     WeakPtr<RenderNode> scroll_;
-    EdgeCallback currentPositionCallback_; // get current position
-    EdgeCallback leadingCallback_; // get stable min extent
-    EdgeCallback trailingCallback_; // get stable max extent
-    EdgeCallback initLeadingCallback_; // get current min extent
-    EdgeCallback initTrailingCallback_; // get current max extent
-
-private:
-    EdgeEffect edgeEffect_ = EdgeEffect::SPRING;
 };
 
 } // namespace OHOS::Ace

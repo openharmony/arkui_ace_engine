@@ -21,6 +21,7 @@
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/component.h"
+#include "core/components_ng/event/click_event.h"
 
 namespace OHOS::Ace {
 
@@ -64,6 +65,7 @@ struct ButtonInfo {
     std::string textColor; // style of text in button.
     bool isBgColorSetted = false;
     Color bgColor; // background color of button.
+    RefPtr<NG::ClickEvent> action; // button click action
 
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const
@@ -81,9 +83,11 @@ struct DialogProperties {
     bool isMenu = false;
     std::vector<ButtonInfo> buttons;
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
+    std::function<void()> onCancel; // NG cancel callback
     DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
     DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
     int32_t gridCount = 0;
+    bool useCustom = true;
 
     // These ids is used for AlertDialog of declarative.
     EventMarker primaryId;   // first button's callback.

@@ -55,6 +55,40 @@
  * limitations under the License.
  */
 /*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// use own class for logging
+// allows to remap separately from other use of aceConsole
+//
+class stateMgmtConsole {
+    static log(...args) {
+        aceConsole.log(...args);
+    }
+    static debug(...args) {
+        aceConsole.debug(...args);
+    }
+    static info(...args) {
+        aceConsole.info(...args);
+    }
+    static warn(...args) {
+        aceConsole.warn(...args);
+    }
+    static error(...args) {
+        aceConsole.error(...args);
+    }
+}
+/*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,12 +197,12 @@ class LocalStorage extends NativeLocalStorage {
      */
     set(propName, newValue) {
         if (newValue == undefined) {
-            console.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+            stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            console.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+            stateMgmtConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
             return false;
         }
         p.set(newValue);
@@ -185,7 +219,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     setOrCreate(propName, newValue) {
         if (newValue == undefined) {
-            console.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
@@ -224,7 +258,7 @@ class LocalStorage extends NativeLocalStorage {
     link(propName, linkUser, subscribersName) {
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            console.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+            stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
             return undefined;
         }
         let linkResult = p.createLink(linkUser, propName);
@@ -259,7 +293,7 @@ class LocalStorage extends NativeLocalStorage {
     prop(propName, propUser, subscribersName) {
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            console.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+            stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
             return undefined;
         }
         let propResult = p.createProp(propUser, propName);
@@ -303,7 +337,7 @@ class LocalStorage extends NativeLocalStorage {
         var p = this.storage_.get(propName);
         if (p) {
             if (p.numberOfSubscrbers()) {
-                console.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
+                stateMgmtConsole.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
           ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
                 return false;
             }
@@ -312,7 +346,7 @@ class LocalStorage extends NativeLocalStorage {
             return true;
         }
         else {
-            console.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+            stateMgmtConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
             return false;
         }
     }
@@ -326,7 +360,7 @@ class LocalStorage extends NativeLocalStorage {
         for (let propName of this.keys()) {
             var p = this.storage_.get(propName);
             if (p.numberOfSubscrbers()) {
-                console.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
+                stateMgmtConsole.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
           has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
                 return false;
             }
@@ -387,7 +421,7 @@ class LocalStorage extends NativeLocalStorage {
             // property named 'storagePropName' not yet in storage
             // add new property to storage
             if (defaultValue === undefined) {
-                console.error(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
+                stateMgmtConsole.error(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
                 return undefined;
             }
             p = this.addNewPropertyInternal(storagePropName, defaultValue);
@@ -425,7 +459,7 @@ class AppStorage extends LocalStorage {
             AppStorage.Instance_ = new AppStorage(initializingPropersties);
         }
         else {
-            console.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!");
+            stateMgmtConsole.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!");
         }
     }
     /**
@@ -593,7 +627,7 @@ class AppStorage extends LocalStorage {
     }
     static GetOrCreate() {
         if (!AppStorage.Instance_) {
-            console.warn("AppStorage instance missing. Use AppStorage.CreateInstance(initObj). Creating instance without any initialization.");
+            stateMgmtConsole.warn("AppStorage instance missing. Use AppStorage.CreateInstance(initObj). Creating instance without any initialization.");
             AppStorage.Instance_ = new AppStorage({});
         }
         return AppStorage.Instance_;
@@ -678,11 +712,11 @@ class PersistentStorage {
     // does everything except writing prop to disk
     persistProp1(propName, defaultValue) {
         if (defaultValue == null || defaultValue == undefined) {
-            console.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
+            stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
         }
         if (this.links_.get(propName)) {
-            console.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
+            stateMgmtConsole.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
             return false;
         }
         let link = AppStorage.Link(propName, this);
@@ -719,7 +753,7 @@ class PersistentStorage {
             
         }
         else {
-            console.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
+            stateMgmtConsole.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
         }
     }
     write() {
@@ -804,11 +838,11 @@ class DistributedStorage {
     }
     link(propName, defaultValue) {
         if (defaultValue == null || defaultValue == undefined) {
-            console.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
+            stateMgmtConsole.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
         }
         if (this.links_.get(propName)) {
-            console.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
+            stateMgmtConsole.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
             return false;
         }
         let link = AppStorage.Link(propName, this);
@@ -845,7 +879,7 @@ class DistributedStorage {
             }
         }
         else {
-            console.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
+            stateMgmtConsole.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
         }
     }
     write(key) {
@@ -902,10 +936,10 @@ class DistributedStorage {
     }
     setDistributedProp(key, value) {
         if (!this.aviliable_) {
-            console.warn(`DistributedStorage is not aviliable`);
+            stateMgmtConsole.warn(`DistributedStorage is not aviliable`);
             return;
         }
-        console.error(`DistributedStorage value is object ${key}-${JSON.stringify(value)}`);
+        stateMgmtConsole.error(`DistributedStorage value is object ${key}-${JSON.stringify(value)}`);
         if (typeof value == 'object') {
             this.storage_.set(key, JSON.stringify(value));
             return;
@@ -976,7 +1010,7 @@ class Environment {
     envProp(key, value) {
         let prop = AppStorage.Prop(key);
         if (prop) {
-            console.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
+            stateMgmtConsole.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
             return false;
         }
         let tmp;
@@ -1028,7 +1062,7 @@ class Environment {
             
         }
         else {
-            console.warn(`Environment: onValueChanged: error changing ${key}! See results above.`);
+            stateMgmtConsole.warn(`Environment: onValueChanged: error changing ${key}! See results above.`);
         }
     }
     aboutToBeDeleted() {
@@ -1068,7 +1102,7 @@ class SubscriberManager {
     }
     delete(id) {
         if (!this.has(id)) {
-            console.warn(`SubscriberManager.delete unknown id ${id} `);
+            stateMgmtConsole.warn(`SubscriberManager.delete unknown id ${id} `);
             return false;
         }
         return this.subscriberById_.delete(id);
@@ -1182,7 +1216,7 @@ class SubscribaleAbstract {
                 }
             }
             else {
-                console.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                stateMgmtConsole.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
     }
@@ -1287,7 +1321,7 @@ class SubscribableHandler {
                 }
             }
             else {
-                console.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                stateMgmtConsole.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
     }
@@ -1394,7 +1428,7 @@ class ObservedObject extends ExtendableProxy {
         let handler = new SubscribableHandler(objectOwningProperty);
         super(obj, handler);
         if (ObservedObject.IsObservedObject(obj)) {
-            console.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
         }
     } // end of constructor
 }
@@ -1473,7 +1507,7 @@ class ObservedPropertyAbstract {
                 }
             }
             else {
-                console.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
@@ -1957,7 +1991,7 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     get() {
         
         if (!this.source_) {
-            console.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: get value is undefined.`);
+            stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: get value is undefined.`);
             return undefined;
         }
         this.notifyPropertyRead();
@@ -1966,7 +2000,7 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (!this.source_) {
-            console.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: set '${newValue}' ignoring.`);
+            stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: set '${newValue}' ignoring.`);
             return;
         }
         if (this.source_.get() == newValue) {
@@ -2136,7 +2170,7 @@ class View extends NativeViewFullUpdate {
     }
     get localStorage_() {
         if (!this.localStoragebackStore_) {
-            console.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
+            
             this.localStoragebackStore_ = new LocalStorage({ /* emty */});
         }
         return this.localStoragebackStore_;
@@ -2147,7 +2181,7 @@ class View extends NativeViewFullUpdate {
             return;
         }
         if (this.localStoragebackStore_) {
-            console.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
         }
         this.localStoragebackStore_ = instance;
     }
@@ -2284,7 +2318,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 }
             }
             else {
-                console.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
@@ -2295,7 +2329,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     markDependentElementsDirty(view) {
         // TODO ace-ets2bundle, framework, compilated apps need to update together
         // this function will be removed after a short transiition periode
-        console.warn(`markDependentElementsDirty no longer supported. App will work ok, but
+        stateMgmtConsole.warn(`markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
     }
     /**
@@ -2885,7 +2919,7 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     get localStorage_() {
         if (!this.localStoragebackStore_) {
-            console.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
+            
             this.localStoragebackStore_ = new LocalStorage({ /* emty */});
         }
         return this.localStoragebackStore_;
@@ -2896,7 +2930,7 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         if (this.localStoragebackStore_) {
-            console.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
         }
         this.localStoragebackStore_ = instance;
     }
@@ -2989,7 +3023,7 @@ class ViewPU extends NativeViewPartialUpdate {
     markElemenDirtyById(elmtId) {
         // TODO ace-ets2bundle, framework, compilated apps need to update together
         // this function will be removed after a short transiition periode
-        console.error(`markElemenDirtyById no longer supported. 
+        stateMgmtConsole.error(`markElemenDirtyById no longer supported. 
         Please update your ace-ets2bundle and recompile your application!`);
     }
     /**
@@ -3020,7 +3054,7 @@ class ViewPU extends NativeViewPartialUpdate {
             // do not process an Element that has been marked to be deleted
             const updateFunc = this.updateFuncByElmtId.get(elmtId);
             if (updateFunc == undefined) {
-                console.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+                stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
             }
             else {
                 
@@ -3199,7 +3233,7 @@ class ViewPU extends NativeViewPartialUpdate {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+stateMgmtConsole.error("ACE State Management component is initiaizing ...");
 PersistentStorage.ConfigureBackend(new Storage());
 Environment.ConfigureBackend(new EnvironmentSetting());
 

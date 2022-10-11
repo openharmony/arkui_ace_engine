@@ -24,7 +24,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/progress/progress_pattern.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -33,7 +33,7 @@ namespace {
 
 constexpr int32_t BASE_YEAR = 1900;
 const char LAST_UPDATE_FORMAT[] = "yyyy/M/d HH:mm"; // Date format for last updated
-constexpr float HALF = 0.5;
+constexpr float DIAMETER_HALF = 0.5;
 constexpr float DEFAULT_SHOW_TIME_HEIGHT = 300.0;               // Default time show height for time
 constexpr float PERCENT = 0.01;                                 // Percent
 constexpr char REFRESH_LAST_UPDATED[] = "refresh.last_updated"; // I18n for last updated
@@ -182,13 +182,16 @@ void RefreshPattern::HandleDragUpdate(float delta)
     if (!progressChild_ || !textChild_) {
         return;
     }
-    // auto triggerRefreshDistance = refreshLayoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx();
+    auto diameter = static_cast<float>(GetLoadingDiameter());
+    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    progressLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(diameter), CalcLength(diameter)));
     auto triggerLoadingDistance =
         refreshLayoutProperty->GetLoadingDistanceValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
     auto triggerShowTimeDistance =
         refreshLayoutProperty->GetShowTimeDistanceValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
     auto scrollableOffset = refreshLayoutProperty->GetScrollableOffsetValue();
-    auto progressChildLayoutProperty = progressChild_->GetLayoutProperty<ProgressLayoutProperty>();
+    auto progressChildLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     auto textChildLayoutProperty = textChild_->GetLayoutProperty<TextLayoutProperty>();
     if (scrollableOffset.GetY() > triggerLoadingDistance &&
         progressChildLayoutProperty->GetVisibilityValue() == VisibleType::INVISIBLE) {
@@ -241,7 +244,6 @@ void RefreshPattern::HandleDragEnd()
     refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 0));
     refreshLayoutProperty->UpdateLoadingProcessOffset(OffsetF(0, static_cast<float>(indicatorOffset)));
     refreshLayoutProperty->UpdateShowTimeOffset(OffsetF(0, static_cast<float>(triggerShowTimeDistance)));
-    LOGI("triggerShowTimeDistance = %{public}f = %{public}f", triggerShowTimeDistance, indicatorOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     host->MarkNeedSyncRenderTree();
     host->RebuildRenderContextTree();
@@ -298,7 +300,7 @@ RefreshStatus RefreshPattern::GetNextStatus()
                 if (textChildLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
                     textChildLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 }
-                auto progressChildLayoutProperty = progressChild_->GetLayoutProperty<ProgressLayoutProperty>();
+                auto progressChildLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
                 if (progressChildLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
                     progressChildLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -393,7 +395,7 @@ double RefreshPattern::GetLoadingDiameter() const
         double maxDistance = triggerRefreshDistance - triggerLoadingDistance;
         double actualDistance = scrollableOffset.GetY() - triggerLoadingDistance;
         // Get the diameter by actual distance
-        diameter = ((actualDistance * loadingDiameter * HALF) / maxDistance) + loadingDiameter * HALF;
+        diameter = ((actualDistance * loadingDiameter * DIAMETER_HALF) / maxDistance) + loadingDiameter * DIAMETER_HALF;
     } else {
         diameter = loadingDiameter;
     }
@@ -435,7 +437,8 @@ OffsetF RefreshPattern::GetLoadingOffset() const
         return offset;
     }
     if (!layoutProperty->GetIsUseOffsetValue()) {
-        return scrollableOffset * HALF - OffsetF(0.0, static_cast<float>(GetLoadingDiameter()) * HALF);
+        return scrollableOffset * DIAMETER_HALF -
+               OffsetF(0.0, static_cast<float>(GetLoadingDiameter()) * DIAMETER_HALF);
     }
     double factor =
         (scrollableOffset.GetY() - triggerLoadingDistance) / (triggerRefreshDistance - triggerLoadingDistance);

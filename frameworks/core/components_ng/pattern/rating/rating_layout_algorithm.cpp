@@ -32,9 +32,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     // case 2: Using the theme's height and width by default if rating component is not set size.
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, std::nullopt);
-    auto ratingTheme = themeManager->GetTheme<RatingTheme>();
+    auto ratingTheme = pipelineContext->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
 
     SizeF componentSize;
