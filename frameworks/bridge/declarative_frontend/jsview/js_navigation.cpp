@@ -30,6 +30,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
+constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? static_cast<int32_t>(NavigationTitleMode::MINI)
@@ -139,6 +140,10 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
     JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
     JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetNavigationMode);
+    JSClass<JSNavigation>::StaticMethod("navBarWidth", &JSNavigation::SetNavBarWidth);
+    JSClass<JSNavigation>::StaticMethod("navBarPosition", &JSNavigation::SetNavBarPosition);
+    JSClass<JSNavigation>::StaticMethod("hideNavBar", &JSNavigation::SetHideNavBar);
+    JSClass<JSNavigation>::StaticMethod("backButtonIcon", &JSNavigation::SetBackButtonIcon);
     JSClass<JSNavigation>::Inherit<JSContainerBase>();
     JSClass<JSNavigation>::Inherit<JSViewAbstract>();
     JSClass<JSNavigation>::Bind(globalObj);
@@ -240,6 +245,16 @@ void JSNavigation::SetHideTitleBar(bool hide)
         declaration->animationOption = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     }
 }
+
+void JSNavigation::SetHideNavBar(bool hide)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    NG::NavigationView::SetHideNavBar(hide);
+}
+
+void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info) {}
 
 void JSNavigation::SetHideBackButton(bool hide)
 {
@@ -444,6 +459,35 @@ void JSNavigation::SetNavigationMode(int32_t value)
     } else {
         LOGE("invalid value for navigationMode");
     }
+}
+
+void JSNavigation::SetNavBarPosition(int32_t value)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (value >= 0 && value <= NAV_BAR_POSITION_RANGE) {
+        NG::NavigationView::SetNavBarPosition(static_cast<NG::NavBarPosition>(value));
+    } else {
+        LOGE("invalid value for navBarPosition");
+    }
+}
+
+void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension navBarWidth;
+    if (!ParseJsDimensionVp(info[0], navBarWidth)) {
+        return;
+    }
+    NG::NavigationView::SetNavBarWidth(navBarWidth);
 }
 
 } // namespace OHOS::Ace::Framework

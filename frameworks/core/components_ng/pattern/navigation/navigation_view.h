@@ -43,6 +43,9 @@ public:
     // title mode change
     static void SetOnTitleModeChange(std::function<void(NavigationTitleMode)>&& onTitleModeChange);
     static void SetNavigationMode(NG::NavigationMode mode);
+    static void SetNavBarWidth(const Dimension& value);
+    static void SetNavBarPosition(NG::NavBarPosition mode);
+    static void SetHideNavBar(bool hideNavBar);
 };
 
 } // namespace OHOS::Ace::NG

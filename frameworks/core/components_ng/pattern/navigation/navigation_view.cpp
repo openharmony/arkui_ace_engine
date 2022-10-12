@@ -23,6 +23,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -66,6 +69,7 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(ICON_SIZE), CalcLength(ICON_SIZE)));
+    iconNode->MarkModifyDone();
     return iconNode;
 }
 
@@ -221,9 +225,11 @@ void NavigationView::Create()
             navBarNode->AddChild(toolBarNode);
             navBarNode->SetToolBarNode(toolBarNode);
             navBarNode->SetPreToolBarNode(toolBarNode);
+            navBarNode->UpdatePrevToolBarIsCustom(false);
         }
-        auto navBarlayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-        navBarlayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+        auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+        CHECK_NULL_VOID(navBarLayoutProperty);
+        navBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
     }
 
     // content node
@@ -235,9 +241,26 @@ void NavigationView::Create()
         navigationGroupNode->SetContentNode(contentNode);
     }
 
+    // divider node
+    if (!navigationGroupNode->GetDividerNode()) {
+        int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto dividerNode = FrameNode::GetOrCreateFrameNode(
+            V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        navigationGroupNode->AddChild(dividerNode);
+        navigationGroupNode->SetDividerNode(dividerNode);
+
+        auto dividerlayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+        CHECK_NULL_VOID(dividerlayoutProperty);
+        dividerlayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
+        dividerlayoutProperty->UpdateVertical(true);
+        auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_VOID(dividerRenderProperty);
+        dividerRenderProperty->UpdateDividerColor(DIVIDER_COLOR);
+    }
+
     stack->Push(navigationGroupNode);
-    auto layoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
-    layoutProperty->UpdateNavigationMode(NavigationMode::STACK);
+    auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
 }
 
 void NavigationView::SetTitle(const std::string& title)
@@ -429,24 +452,26 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto layoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
     bool needAddBackButton = false;
     bool needRemoveBackButton = false;
     do {
         // add back button if current mode is mini and one of the following condition:
         // first create or not first create but previous mode is not mini
-        if (layoutProperty->GetTitleModeValue() != NavigationTitleMode::MINI && mode == NavigationTitleMode::MINI) {
+        if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI &&
+            mode == NavigationTitleMode::MINI) {
             needAddBackButton = true;
             break;
         }
         // remove back button if current mode is not mini and previous mode is mini
-        if (layoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI && mode != NavigationTitleMode::MINI) {
+        if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI &&
+            mode != NavigationTitleMode::MINI) {
             needRemoveBackButton = true;
             break;
         }
     } while (false);
-    ACE_UPDATE_LAYOUT_PROPERTY(NavBarLayoutProperty, TitleMode, static_cast<NG::NavigationTitleMode>(mode));
+    navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(mode));
     if (needAddBackButton) {
         int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto backButtonNode = FrameNode::CreateFrameNode(
@@ -456,6 +481,7 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
         textLayoutProperty->UpdateContent(BACK_BUTTON);
         navBarNode->SetBackButton(backButtonNode);
         navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
+        navBarNode->MarkModifyDone();
         return;
     }
     if (needRemoveBackButton) {
@@ -463,24 +489,62 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
     }
 }
 
+void NavigationView::SetNavBarWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value);
+}
+
 void NavigationView::SetNavigationMode(NavigationMode mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, static_cast<NG::NavigationMode>(mode));
 }
 
+void NavigationView::SetNavBarPosition(NG::NavBarPosition mode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarPosition, static_cast<NG::NavBarPosition>(mode));
+}
+
+void NavigationView::SetHideNavBar(bool hideNavBar)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
+}
+
 void NavigationView::SetHideTitleBar(bool hideTitleBar)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavBarLayoutProperty, HideTitleBar, hideTitleBar);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
 }
 
 void NavigationView::SetHideBackButton(bool hideBackButton)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavBarLayoutProperty, HideBackButton, hideBackButton);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<NavBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
 void NavigationView::SetHideToolBar(bool hideToolBar)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavBarLayoutProperty, HideToolBar, hideToolBar);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
 }
 
 void NavigationView::SetToolBarItems(std::list<BarItem>&& toolBarItems)
@@ -501,7 +565,7 @@ void NavigationView::SetToolBarItems(std::list<BarItem>&& toolBarItems)
             navBarNode->MarkModifyDone();
             return;
         }
-        navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::ADD);
+        navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     }
     int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto toolBarNode = FrameNode::GetOrCreateFrameNode(
@@ -531,11 +595,10 @@ void NavigationView::SetCustomToolBar(const RefPtr<UINode>& customToolBar)
     CHECK_NULL_VOID(navBarNode);
     auto layoutProperty = navBarNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (navBarNode->HasPrevToolBarIsCustom() && navBarNode->GetPrevToolBarIsCustomValue()) {
+    if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
         if (customToolBar->GetId() == navBarNode->GetToolBarNode()->GetId()) {
             navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::NONE);
             navBarNode->UpdatePrevToolBarIsCustom(true);
-            navBarNode->MarkModifyDone();
             return;
         }
     }

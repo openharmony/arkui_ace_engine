@@ -46,7 +46,7 @@ void BuildTitleAndSubtitle(
     if (navBarNode->GetTitle() && navBarNode->HasTitleNodeOperation()) {
         if (navBarNode->GetTitleNodeOperationValue() != ChildNodeOperation::NONE) {
             if (navBarNode->GetTitleNodeOperationValue() == ChildNodeOperation::REPLACE) {
-                navBarNode->RemoveChild(titleBarNode->GetTitle());
+                titleBarNode->RemoveChild(titleBarNode->GetTitle());
             }
             titleBarNode->SetTitle(navBarNode->GetTitle());
             titleBarNode->AddChild(titleBarNode->GetTitle());
@@ -57,7 +57,7 @@ void BuildTitleAndSubtitle(
             return;
         }
         if (navBarNode->GetSubtitleNodeOperationValue() == ChildNodeOperation::REPLACE) {
-            navBarNode->RemoveChild(titleBarNode->GetSubtitle());
+            titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
         }
         titleBarNode->SetSubtitle(navBarNode->GetSubtitle());
         titleBarNode->AddChild(titleBarNode->GetSubtitle());
@@ -72,7 +72,7 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
             return;
         }
         if (navBarNode->GetMenuNodeOperationValue() == ChildNodeOperation::REPLACE) {
-            navBarNode->RemoveChild(titleBarNode->GetMenu());
+            titleBarNode->RemoveChild(titleBarNode->GetMenu());
         }
         titleBarNode->SetMenu(navBarNode->GetMenu());
         titleBarNode->AddChild(titleBarNode->GetMenu());
@@ -83,14 +83,8 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
 void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode,
     RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
 {
-    if (!navBarNode->GetTitleBarNode()) {
-        return;
-    }
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (navBarLayoutProperty->HasHideBackButton()) {
-        titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue());
-    }
     do {
         if (!navBarNode->HasBackButtonNodeOperation() ||
             navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI ||
@@ -105,7 +99,6 @@ void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
             textLayoutProperty->UpdateVisibility(VisibleType::GONE);
             break;
         }
-        // TODO: fix error for update condition when add or delete child
         if (titleBarNode->GetBackButton()) {
             auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
             CHECK_NULL_VOID(backButtonNode);
@@ -117,10 +110,7 @@ void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
         titleBarNode->SetBackButton(navBarNode->GetBackButton());
         titleBarNode->AddChild(titleBarNode->GetBackButton());
     } while (false);
-    titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue());
-    if (navBarLayoutProperty->HasHideTitleBar()) {
-        titleBarLayoutProperty->UpdateHideTitleBar(navBarLayoutProperty->GetHideTitleBarValue());
-    }
+    titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));
     BuildTitleAndSubtitle(navBarNode, titleBarNode);
     BuildMenu(navBarNode, titleBarNode);
 }
@@ -129,25 +119,56 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
 {
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-    if (!hostNode->GetTitle() && !hostNode->GetSubtitle() && !hostNode->GetMenu() &&
-        navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
-        return;
-    }
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+
+    if ((!hostNode->GetTitle() && !hostNode->GetSubtitle() && !hostNode->GetMenu() &&
+        navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI)) {
+        return;
+    }
     BuildTitleBar(hostNode, titleBarNode, navBarLayoutProperty);
+    if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        titleBarNode->MarkModifyDone();
+    } else {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        titleBarNode->MarkModifyDone();
+    }
 }
 
 void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 {
-    if (hostNode->GetToolBarNode() && hostNode->HasToolBarNodeOperation()) {
-        if (hostNode->GetToolBarNodeOperationValue() == ChildNodeOperation::NONE) {
-            return;
+    if (!hostNode->GetToolBarNode()) {
+        return;
+    }
+
+    auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(toolBarLayoutProperty);
+
+    if (hostNode->GetToolBarNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
+        if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
+            toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        } else {
+            toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         }
-        if (hostNode->GetToolBarNodeOperationValue() == ChildNodeOperation::REPLACE) {
-            hostNode->RemoveChild(hostNode->GetPreToolBarNode());
-        }
+        return;
+    }
+
+    if (hostNode->GetToolBarNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
+        hostNode->RemoveChild(hostNode->GetPreToolBarNode());
         hostNode->AddChild(hostNode->GetToolBarNode());
+    }
+
+    if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
+        toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    } else {
+        toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
 }
 } // namespace

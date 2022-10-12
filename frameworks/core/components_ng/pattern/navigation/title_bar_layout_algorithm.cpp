@@ -41,8 +41,8 @@ void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>&
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (!titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
-            constraint.selfIdealSize = OptionalSizeF(
-                static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()), static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()));
+            constraint.selfIdealSize = OptionalSizeF(static_cast<float>(BACK_BUTTON_WIDTH.ConvertToPx()),
+                static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()));
             backButtonWrapper->Measure(constraint);
             return;
         }
@@ -202,9 +202,6 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(titleBarNode);
     auto layoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetHideTitleBar().value_or(false)) {
-        return;
-    }
     const auto& constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
@@ -222,9 +219,6 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(titleBarNode);
     auto layoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    if (layoutProperty->GetHideTitleBar().value_or(false)) {
-        return;
-    }
     if (layoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         LayoutBackButton(layoutWrapper, titleBarNode);
     }
