@@ -19,6 +19,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/search/search_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -156,13 +157,54 @@ void SearchView::SetTextFont(const Font& font)
     }
 }
 
-void SearchView::SetOnChangeAndSubmit(ChangeAndSubmitEvent&& onChange)
+void SearchView::SetCopyOption(const CopyOptions& copyOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateCopyOptions(copyOptions);
+}
+
+void SearchView::SetOnSubmit(ChangeAndSubmitEvent&& onSubmit)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChangeAndSubmit(std::move(onChange));
+    eventHub->SetOnSubmit(std::move(onSubmit));
+}
+
+void SearchView::SetOnChange(ChangeAndSubmitEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
+void SearchView::SetOnCopy(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
+void SearchView::SetOnCut(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCut(std::move(func));
+}
+
+void SearchView::SetOnPaste(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPaste(std::move(func));
 }
 
 RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNode,
@@ -207,7 +249,14 @@ RefPtr<FrameNode> SearchView::CreateImage(const RefPtr<SearchNode>& parentNode, 
     auto nodeId = parentNode->GetImageId();
     ImageSourceInfo imageSourceInfo(src);
     if (src.empty()) {
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
+        auto pipeline = parentNode->GetContext();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto themeManager = pipeline->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        auto iconTheme = themeManager->GetTheme<IconTheme>();
+        CHECK_NULL_RETURN(iconTheme, nullptr);
+        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
+        imageSourceInfo.SetSrc(iconPath);
     }
     // else{TODO: Display system picture}
     auto frameNode = FrameNode::GetOrCreateFrameNode(

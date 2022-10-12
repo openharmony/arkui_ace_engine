@@ -213,12 +213,26 @@ void TextFieldModelNG::SetOnChange(std::function<void(const std::string&)>&& fun
     eventHub->SetOnChange(std::move(func));
 }
 
-// TODO: add text overlay.
-void TextFieldModelNG::SetOnCopy(std::function<void(const std::string&)>&& func) {}
+void TextFieldModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
 
-void TextFieldModelNG::SetOnCut(std::function<void(const std::string&)>&& func) {}
+void TextFieldModelNG::SetOnCut(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCut(std::move(func));
+}
 
-void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func) {}
+void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPaste(std::move(func));
+}
 
 void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
 {
