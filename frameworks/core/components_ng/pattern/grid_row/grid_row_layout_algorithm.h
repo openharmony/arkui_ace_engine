@@ -17,10 +17,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_ROW_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_ROW_LAYOUT_ALGORITHM_H
 
-#include "../grid_col/grid_col_layout_property.h"
 #include "grid_row_layout_property.h"
 
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/grid_col/grid_col_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -35,7 +35,6 @@ public:
         int32_t span = 0;
         float offsetY = 0;
     };
-    GridRowLayoutAlgorithm() = default;
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 

@@ -353,7 +353,19 @@ void JSGridRow::Direction(const JSCallbackInfo& info)
 
 void JSGridRow::JsBreakpointEvent(const JSCallbackInfo& info)
 {
-    JSViewBindEvent(&V2::GridRowComponent::SetbreakPointChange, info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onBreakpointChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                      const std::string& value) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("GridRow.onBreakpointChange");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::GridRowView::SetOnBreakPointChange(std::move(onBreakpointChange));
+    } else {
+        JSViewBindEvent(&V2::GridRowComponent::SetbreakPointChange, info);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

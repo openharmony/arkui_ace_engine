@@ -15,11 +15,12 @@
 
 #include "grid_row_view.h"
 
+#include "grid_row_layout_pattern.h"
+
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "grid_row_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 void GridRowView::Create()
@@ -44,5 +45,14 @@ void GridRowView::Create(const RefPtr<V2::GridContainerSize>& col, const RefPtr<
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction);
+}
+
+void GridRowView::SetOnBreakPointChange(std::function<void(const std::string)>&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridRowEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnBreakpointChange(std::move(onChange));
 }
 } // namespace OHOS::Ace::NG

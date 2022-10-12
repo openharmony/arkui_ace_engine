@@ -16,33 +16,37 @@
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
-
-RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
+RefPtr<GridSizeInfo> ParseBreakpoints(const BreakPoints& breakpoints)
 {
     auto sizeInfo = AceType::MakeRefPtr<GridSizeInfo>();
-    if (!breakpoints) {
-        LOGI("user hasnt set breakpoint, use WindowSize and xs: 320vp, sm: 520vp, md: 840vp");
-    } else {
-        sizeInfo->Reset();
-        for (const auto& breakpoint : breakpoints->breakpoints) {
-            sizeInfo->sizeInfo.push_back(Framework::StringToDimension(breakpoint));
-        }
+    sizeInfo->Reset();
+    for (const auto& breakpoint : breakpoints.breakpoints) {
+        sizeInfo->sizeInfo.push_back(Framework::StringToDimension(breakpoint));
     }
     return sizeInfo;
 }
 
+RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
+{
+    if (!breakpoints) {
+        LOGI("user hasnt set breakpoint, use WindowSize and xs: 320vp, sm: 520vp, md: 840vp");
+        return AceType::MakeRefPtr<GridSizeInfo>();
+    }
+    return ParseBreakpoints(*breakpoints);
+}
+
 } // namespace
 
-GridSizeType GridContainerUtils::ProcessGridSizeType(const RefPtr<V2::BreakPoints>& breakpoints, const Size& size)
+GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size)
 {
     auto threshold = ParseBreakpoints(breakpoints);
     double windowWidth = 0.0;
-    if (breakpoints->reference == BreakPointsReference::WindowSize) {
+    if (breakpoints.reference == BreakPointsReference::WindowSize) {
         windowWidth = GridSystemManager::GetInstance().GetScreenWidth();
     } else {
         windowWidth = size.Width();
@@ -103,24 +107,29 @@ std::pair<Dimension, Dimension> GridContainerUtils::ProcessGutter(GridSizeType s
     return ProcessGutter(sizeType, *gutter);
 }
 
-int32_t GridContainerUtils::ProcessColumn(GridSizeType sizeType, const RefPtr<GridContainerSize>& columnNum)
+int32_t GridContainerUtils::ProcessColumn(GridSizeType sizeType, const GridContainerSize& columnNum)
 {
     switch (sizeType) {
         case GridSizeType::XS:
-            return columnNum->xs;
+            return columnNum.xs;
         case GridSizeType::SM:
-            return columnNum->sm;
+            return columnNum.sm;
         case GridSizeType::MD:
-            return columnNum->md;
+            return columnNum.md;
         case GridSizeType::LG:
-            return columnNum->lg;
+            return columnNum.lg;
         case GridSizeType::XL:
-            return columnNum->xl;
+            return columnNum.xl;
         case GridSizeType::XXL:
-            return columnNum->xxl;
+            return columnNum.xxl;
         default:
-            return columnNum->xs;
+            return columnNum.xs;
     }
+}
+
+int32_t GridContainerUtils::ProcessColumn(GridSizeType sizeType, const RefPtr<GridContainerSize>& columnNum)
+{
+    return ProcessColumn(sizeType, *columnNum);
 }
 
 double GridContainerUtils::ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, double width)
