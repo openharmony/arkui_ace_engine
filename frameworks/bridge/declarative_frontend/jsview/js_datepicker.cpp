@@ -84,12 +84,12 @@ void AddEvent(RefPtr<PickerBaseComponent>& picker, const JSCallbackInfo& info, D
     }
 }
 
-std::map<std::string, NG::DailogChangeEvent> ChangeDialogEvent(const JSCallbackInfo& info, DatePickerType pickerType)
+std::map<std::string, NG::DailogEvent> ChangeDialogEvent(const JSCallbackInfo& info, DatePickerType pickerType)
 {
-    std::map<std::string, NG::DailogChangeEvent> dailogChangeEvent;
+    std::map<std::string, NG::DailogEvent> dailogEvent;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("DatePicker AddEvent error, info is non-valid");
-        return dailogChangeEvent;
+        return dailogEvent;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onChange = paramObject->GetProperty("onChange");
@@ -107,9 +107,41 @@ std::map<std::string, NG::DailogChangeEvent> ChangeDialogEvent(const JSCallbackI
             ACE_SCORING_EVENT("DatePickerDialog.onChange");
             func->Execute(keys, info);
         };
-        dailogChangeEvent["changeId"] = changeId;
+        dailogEvent["changeId"] = changeId;
     }
-    return dailogChangeEvent;
+    auto onAccept = paramObject->GetProperty("onAccept");
+    if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
+        auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
+            ACE_SCORING_EVENT("DatePickerDialog.onAccept");
+            func->Execute(keys, info);
+        };
+        dailogEvent["acceptId"] = acceptId;
+    }
+    return dailogEvent;
+}
+
+std::map<std::string, NG::DailogGestureEvent> DialogCancalEvent(const JSCallbackInfo& info)
+{
+    std::map<std::string, NG::DailogGestureEvent> dailogCancalEvent;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("DatePicker AddEvent error, info is non-valid");
+        return dailogCancalEvent;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto onCancel = paramObject->GetProperty("onCancel");
+    if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
+        auto cancelId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const GestureEvent& /*info*/) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onCancel");
+            func->Execute();
+        };
+        dailogCancalEvent["cancelId"] = cancelId;
+    }
+    return dailogCancalEvent;
 }
 
 JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventInfo)
@@ -403,7 +435,8 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     }
     if (Container::IsCurrentUseNewPipeline()) {
         auto dialogEvent = ChangeDialogEvent(info, DatePickerType::DATE);
-        DatePickerDialogShow(paramObject, dialogEvent);
+        auto dialogCancalEvent = DialogCancalEvent(info);
+        DatePickerDialogShow(paramObject, dialogEvent, dialogCancalEvent);
         return;
     }
 
@@ -440,8 +473,9 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     datePicker->OpenDialog(properties);
 }
 
-void JSDatePickerDialog::DatePickerDialogShow(
-    const JSRef<JSObject>& paramObj, std::map<std::string, NG::DailogChangeEvent> dialogEvent)
+void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
+    const std::map<std::string, NG::DailogEvent>& dialogEvent,
+    const std::map<std::string, NG::DailogGestureEvent>& dialogCancalEvent)
 {
     auto container = Container::Current();
     if (!container) {
@@ -476,10 +510,6 @@ void JSDatePickerDialog::DatePickerDialogShow(
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
     properties.useCustom = false;
-    buttonInfo.text = "confirm";
-    properties.buttons.emplace_back(buttonInfo);
-    buttonInfo.text = "cancel";
-    properties.buttons.emplace_back(buttonInfo);
 
     std::map<std::string, PickerDate> datePickerProperty;
     if (startDate->IsObject()) {
@@ -495,10 +525,11 @@ void JSDatePickerDialog::DatePickerDialogShow(
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, datePickerProperty, isLunar, dialogEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, datePickerProperty, isLunar, dialogEvent, dialogCancalEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowDateDialog(properties, datePickerProperty, isLunar, dialogEvent);
+            overlayManager->ShowDateDialog(properties, datePickerProperty, isLunar, dialogEvent, dialogCancalEvent);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -713,7 +744,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 
     if (Container::IsCurrentUseNewPipeline()) {
         auto dialogEvent = ChangeDialogEvent(info, DatePickerType::TIME);
-        TimePickerDialogShow(paramObject, dialogEvent);
+        auto dialogCancalEvent = DialogCancalEvent(info);
+        TimePickerDialogShow(paramObject, dialogEvent, dialogCancalEvent);
         return;
     }
 
@@ -730,8 +762,9 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     datePicker->OpenDialog(properties);
 }
 
-void JSTimePickerDialog::TimePickerDialogShow(
-    const JSRef<JSObject>& paramObj, std::map<std::string, NG::DailogChangeEvent> dialogEvent)
+void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
+    const std::map<std::string, NG::DailogEvent>& dialogEvent,
+    const std::map<std::string, NG::DailogGestureEvent>& dialogCancalEvent)
 {
     auto container = Container::Current();
     if (!container) {
@@ -755,10 +788,6 @@ void JSTimePickerDialog::TimePickerDialogShow(
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
     properties.useCustom = false;
-    buttonInfo.text = "confirm";
-    properties.buttons.emplace_back(buttonInfo);
-    buttonInfo.text = "cancel";
-    properties.buttons.emplace_back(buttonInfo);
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {
@@ -767,11 +796,12 @@ void JSTimePickerDialog::TimePickerDialogShow(
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, timePickerProperty, isUseMilitaryTime, dialogEvent,
+        [properties, timePickerProperty, isUseMilitaryTime, dialogEvent, dialogCancalEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(properties, timePickerProperty, isUseMilitaryTime, dialogEvent);
+            overlayManager->ShowTimeDialog(
+                properties, timePickerProperty, isUseMilitaryTime, dialogEvent, dialogCancalEvent);
         },
         TaskExecutor::TaskType::UI);
 }

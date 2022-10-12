@@ -31,10 +31,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-//TODO datepicker style modification
-constexpr float LAYOUT_WEIGHT = 30.0;
-constexpr float PADDING_WEIGHT = 10.0;
-}
+// TODO datepicker style modification
+constexpr float LAYOUT_WEIGHT = 30.0f;
+constexpr float PADDING_WEIGHT = 10.0f;
+} // namespace
 
 void DatePickerColumnPattern::OnAttachToFrameNode()
 {
@@ -67,6 +67,7 @@ void DatePickerColumnPattern::FlushCurrentOptions()
     if (child.size() != showOptionCount) {
         return;
     }
+    SetCurrentIndex(currentIndex);
     for (uint32_t index = 0; index < showOptionCount; index++) {
         currentChildIndex_ = index;
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;

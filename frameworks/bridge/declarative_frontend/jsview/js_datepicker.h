@@ -47,8 +47,9 @@ class JSDatePickerDialog : JSAlertDialog {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
-    static void DatePickerDialogShow(
-        const JSRef<JSObject>& paramObj, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+    static void DatePickerDialogShow(const JSRef<JSObject>& paramObj,
+        const std::map<std::string, NG::DailogEvent>& dialogEvent,
+        const std::map<std::string, NG::DailogGestureEvent>& dialogCancalEvent);
 
 private:
     static void CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
@@ -76,8 +77,9 @@ class JSTimePickerDialog {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
-    static void TimePickerDialogShow(
-        const JSRef<JSObject>& paramObj, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+    static void TimePickerDialogShow(const JSRef<JSObject>& paramObj,
+        const std::map<std::string, NG::DailogEvent>& dialogEvent,
+        const std::map<std::string, NG::DailogGestureEvent>& dialogCancalEvent);
 
 private:
     static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
