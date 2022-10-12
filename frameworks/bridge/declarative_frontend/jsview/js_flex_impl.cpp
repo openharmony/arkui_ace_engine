@@ -78,11 +78,6 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
         if (wrapNum == 0) {
             mainComponent = CreateFlexComponent(info);
         } else {
-            if (Container::IsCurrentUseNewPipeline()) {
-                // TODO: add wrap impl.
-                NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
-                return;
-            }
             mainComponent = CreateWrapComponent(info, wrapNum);
         }
     } else {
