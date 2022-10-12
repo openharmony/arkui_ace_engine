@@ -103,11 +103,6 @@ public:
         return calcValue_;
     }
 
-    bool IsPercentLength() const
-    {
-        return dimension_.Unit() == DimensionUnit::PERCENT;
-    }
-
 private:
     std::string calcValue_;
     Dimension dimension_;
