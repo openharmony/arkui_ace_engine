@@ -868,7 +868,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+#ifdef OHOS_PLATFORM
         ConnectServerManager::Get().AddInstance(gettid());
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
@@ -887,7 +887,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+#ifdef OHOS_PLATFORM
 void JsiDeclarativeEngine::RegisterOffWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
@@ -937,7 +937,7 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
 void JsiDeclarativeEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
+#ifdef OHOS_PLATFORM
     RegisterOffWorkerFunc();
 #endif
     RegisterAssetFunc();
@@ -952,7 +952,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
         LOGD("GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
     }
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
+#ifdef OHOS_PLATFORM
     const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
 #else
     const std::string& abcPath = fileName;

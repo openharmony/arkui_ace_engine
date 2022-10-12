@@ -424,7 +424,11 @@ template("ace_core_source_set") {
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      deps += [ "$ace_napi:ace_container_scope" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        deps += [ "$ace_napi:ace_container_scope_static" ]
+      } else {
+        deps += [ "$ace_napi:ace_container_scope" ]
+      }
     }
 
     if (defined(config.plugin_components_support) &&
