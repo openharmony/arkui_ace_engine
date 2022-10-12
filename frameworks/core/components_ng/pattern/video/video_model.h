@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_H
+
+#include "core/components/common/layout/constants.h"
+#include "core/components/video/video_controller_v2.h"
+
+namespace OHOS::Ace {
+using VideoEventFunc = std::function<void(const std::string&)>;
+class VideoModel {
+public:
+    static VideoModel* GetInstance();
+    virtual ~VideoModel() = default;
+
+    virtual void Create(const RefPtr<VideoControllerV2>& videoController) = 0;
+    virtual void SetSrc(const std::string& src) = 0;
+    virtual void SetProgressRate(double progressRate) = 0;
+    virtual void SetPosterSourceInfo(const std::string& posterUrl) = 0;
+    virtual void SetMuted(bool muted) = 0;
+    virtual void SetAutoPlay(bool autoPlay) = 0;
+    virtual void SetControls(bool controls) = 0;
+    virtual void SetObjectFit(ImageFit objectFit) = 0;
+    virtual void SetLoop(bool loop) = 0;
+
+    virtual void SetOnStart(VideoEventFunc&& onStart) = 0;
+    virtual void SetOnPause(VideoEventFunc&& onPause) = 0;
+    virtual void SetOnFinish(VideoEventFunc&& onFinish) = 0;
+    virtual void SetOnError(VideoEventFunc&& onError) = 0;
+    virtual void SetOnPrepared(VideoEventFunc&& onPrepared) = 0;
+    virtual void SetOnSeeking(VideoEventFunc&& onSeeking) = 0;
+    virtual void SetOnSeeked(VideoEventFunc&& onSeeked) = 0;
+    virtual void SetOnUpdate(VideoEventFunc&& onUpdate) = 0;
+    virtual void SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange) = 0;
+
+private:
+    static std::unique_ptr<VideoModel> instance_;
+};
+
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_H
