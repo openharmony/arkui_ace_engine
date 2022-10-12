@@ -48,7 +48,9 @@ void OnMessage(const std::string& message)
         std::string requestMessage = "tree";
         if (message.find(checkMessage, 0) != std::string::npos) {
             g_inspector->waitingForDebugger_ = false;
-            g_inspector->setConnectedStaus_(g_inspector->instanceId_);
+            if (g_inspector->setConnectedStaus_ != nullptr) {
+                g_inspector->setConnectedStaus_(g_inspector->instanceId_);
+            }
             for (auto& info : g_inspector->infoBuffer_) {
                 g_inspector->connectServer_->SendMessage(info.second);
             }
