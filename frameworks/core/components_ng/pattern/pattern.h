@@ -241,6 +241,7 @@ public:
     virtual void OnWindowHide() {}
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
+    virtual void OnNotifyMemoryLevel(int32_t level) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

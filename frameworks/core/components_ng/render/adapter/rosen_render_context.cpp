@@ -1343,4 +1343,10 @@ void RosenRenderContext::SetBounds(float positionX, float positionY, float width
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 
+void RosenRenderContext::ClearDrawCommands()
+{
+    StartRecording();
+    StopRecordingIfNeeded();
+}
+
 } // namespace OHOS::Ace::NG

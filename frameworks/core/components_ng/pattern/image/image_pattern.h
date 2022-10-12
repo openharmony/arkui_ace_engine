@@ -34,7 +34,16 @@ class ACE_EXPORT ImagePattern : public Pattern {
 
 public:
     ImagePattern() = default;
-    ~ImagePattern() override = default;
+    ~ImagePattern() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto id = host->GetId();
+        pipeline->RemoveWindowStateChangedCallback(id);
+        pipeline->RemoveNodesToNotifyMemoryLevel(id);
+    }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -66,6 +75,11 @@ public:
         return { FocusType::NODE, false };
     }
 
+    void LoadImageDataIfNeed();
+    void OnNotifyMemoryLevel(int32_t level) override;
+    void OnWindowHide() override;
+    void OnWindowShow() override;
+
 private:
     void OnModifyDone() override;
     void OnActive() override
@@ -88,7 +102,7 @@ private:
         const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
-        DataReadyNotifyTask CreateDataReadyCallback();
+    DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     LoadFailNotifyTask CreateLoadFailCallback();
 
@@ -102,6 +116,7 @@ private:
     RectF lastSrcRect_;
 
     bool isActive_ = false;
+    bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;

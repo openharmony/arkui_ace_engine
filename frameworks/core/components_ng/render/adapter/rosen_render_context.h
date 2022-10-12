@@ -150,6 +150,8 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
+    void ClearDrawCommands() override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;

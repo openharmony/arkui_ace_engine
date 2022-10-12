@@ -187,6 +187,8 @@ public:
 
     virtual void OnWindowUnfocused() {}
 
+    virtual void OnNotifyMemoryLevel(int32_t level) {}
+
 protected:
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {
