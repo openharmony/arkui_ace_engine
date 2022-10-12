@@ -30,7 +30,7 @@ namespace {
 std::unordered_map<std::string, Local<JSValueRef>> ParseJsObject(
     Local<ObjectRef> obj, Local<ArrayRef> names, EcmaVM* vm)
 {
-    std::unordered_map<std::string, Local<JSValueRef>> jsValue_;
+    std::unordered_map<std::string, Local<JSValueRef>> jsValue;
     auto length = names->Length(vm);
 
     for (int i = 0; i < length; i++) {
@@ -38,22 +38,24 @@ std::unordered_map<std::string, Local<JSValueRef>> ParseJsObject(
         if (value->IsString()) {
             auto key = value->ToString(vm)->ToString();
             auto val = obj->Get(vm, value->ToString(vm));
-            jsValue_.insert({ key, val });
+            jsValue.insert({ key, val });
         }
     }
 
-    return jsValue_;
+    return jsValue;
 }
 
 } // namespace
 
 Local<JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ACE_SCOPED_TRACE("ViewMeasureLayout::JSMeasure");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         (*iterMeasureChildren_)->Measure(measureDefaultConstraint_);
+        iterMeasureChildren_++;
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -77,6 +79,7 @@ Local<JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCallInfo* runtim
 
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ACE_SCOPED_TRACE("ViewMeasureLayout::JSLayout");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto jsParams = runtimeCallInfo->GetCallArgRef(0)->ToObject(vm);
     auto names = jsParams->GetOwnPropertyNames(vm);
