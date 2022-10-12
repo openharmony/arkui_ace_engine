@@ -47,6 +47,7 @@ public:
     void SetData(const RefPtr<ImageData>& data);
     void SetImageSize(const SizeF& imageSize);
     void ClearData();
+    void ClearCanvasImage();
 
     virtual void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) = 0;
 
