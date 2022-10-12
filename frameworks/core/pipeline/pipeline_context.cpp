@@ -246,6 +246,9 @@ void PipelineContext::FlushBuild()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
+#if !defined(PREVIEW)
+    LayoutInspector::SupportInspector();
+#endif
 }
 
 void PipelineContext::FlushPredictLayout(int64_t deadline)
@@ -1446,9 +1449,6 @@ void PipelineContext::AddDirtyElement(const RefPtr<Element>& dirtyElement)
     dirtyElements_.emplace(dirtyElement);
     hasIdleTasks_ = true;
     window_->RequestFrame();
-#if !defined(PREVIEW)
-    LayoutInspector::SupportInspector();
-#endif
 }
 
 void PipelineContext::AddNeedRebuildFocusElement(const RefPtr<Element>& focusElement)
