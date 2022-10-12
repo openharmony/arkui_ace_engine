@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 
+#include <memory>
+
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -42,36 +44,36 @@ JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parent
     return constraint;
 }
 
-void CopyPadding(NG::PaddingProperty& padding, const std::unique_ptr<NG::PaddingProperty>& target)
-{
-    padding.left = target->left;
-    padding.right = target->right;
-    padding.top = target->top;
-    padding.bottom = target->bottom;
-}
-
-JSRef<JSObject> GenPadding(const NG::PaddingProperty& padding_)
+JSRef<JSObject> GenPadding(const std::unique_ptr<NG::PaddingProperty>& padding_)
 {
     JSRef<JSObject> padding = JSRef<JSObject>::New();
-    padding->SetProperty("top", padding_.top->ToString());
-    padding->SetProperty("right", padding_.right->ToString());
-    padding->SetProperty("bottom", padding_.bottom->ToString());
-    padding->SetProperty("left", padding_.left->ToString());
+    padding->SetProperty("top", padding_->top->ToString());
+    padding->SetProperty("right", padding_->right->ToString());
+    padding->SetProperty("bottom", padding_->bottom->ToString());
+    padding->SetProperty("left", padding_->left->ToString());
     return padding;
 }
 
 JSRef<JSObject> GenBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
 {
-    auto borderWidth = layoutWrapper->GetLayoutProperty()->GetBorderWidthProperty()->leftDimen;
-    NG::PaddingProperty margin;
-    NG::PaddingProperty padding;
-    CopyPadding(margin, layoutWrapper->GetLayoutProperty()->GetMarginProperty());
-    CopyPadding(padding, layoutWrapper->GetLayoutProperty()->GetPaddingProperty());
-
     JSRef<JSObject> borderInfo = JSRef<JSObject>::New();
-    borderInfo->SetProperty("borderWidth", borderWidth->ToString());
-    borderInfo->SetPropertyObject("margin", GenPadding(margin));
-    borderInfo->SetPropertyObject("padding", GenPadding(padding));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (!layoutProperty) {
+        return borderInfo;
+    }
+
+    const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
+    if (layoutProperty->GetBorderWidthProperty()) {
+        borderInfo->SetProperty("borderWidth", layoutProperty->GetBorderWidthProperty()->leftDimen->ToString());
+    } else {
+        borderInfo->SetProperty("borderWidth", "0");
+    }
+
+    borderInfo->SetPropertyObject("margin",
+        GenPadding(layoutProperty->GetMarginProperty() ? layoutProperty->GetMarginProperty() : defaultPadding));
+    borderInfo->SetPropertyObject("padding",
+        GenPadding(layoutProperty->GetPaddingProperty() ? layoutProperty->GetPaddingProperty() : defaultPadding));
+
     return borderInfo;
 }
 
@@ -86,8 +88,8 @@ JSRef<JSObject> GenPositionInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
 
 void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapper>& layoutWrapper, const size_t& index)
 {
-    info->SetProperty<std::string>("name", "");
-    info->SetProperty<std::string>("id", std::to_string(index));
+    info->SetProperty<std::string>("name", layoutWrapper->GetHostNode()->GetTag());
+    info->SetProperty<std::string>("id", std::to_string(layoutWrapper->GetHostNode()->GetId()));
     info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()));
     info->SetPropertyObject("borderInfo", GenBorderInfo(layoutWrapper));
     info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
@@ -129,6 +131,7 @@ JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> childre
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
 {
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteLayout");
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
     auto constraint = GenConstraint(parentConstraint);
@@ -142,6 +145,7 @@ void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
 
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
 {
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteMeasure");
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
     auto constraint = GenConstraint(parentConstraint);
