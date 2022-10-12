@@ -27,10 +27,16 @@ class ACE_EXPORT TimePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties,
         std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
-        std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+        std::map<std::string, NG::DailogEvent> dialogEvent,
+        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
     static void SetSelectedTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
     static void SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime = false);
-    static void SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogChangeEvent&& onChange);
+    static void SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogEvent&& onChange);
+    static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& dateNode,
+        std::map<std::string, NG::DailogEvent> dialogEvent,
+        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
+    static void SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent onChange);
+    static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
 };
 } // namespace OHOS::Ace::NG
 

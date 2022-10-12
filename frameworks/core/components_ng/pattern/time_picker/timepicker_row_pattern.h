@@ -79,6 +79,32 @@ public:
 
     uint32_t GetHourFromAmPm(bool isAm, uint32_t amPmhour) const;
 
+    bool HasTitleNode() const
+    {
+        return titleId_.has_value();
+    }
+
+    int32_t GetTitleId()
+    {
+        if (!titleId_.has_value()) {
+            titleId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return titleId_.value();
+    }
+
+    bool HasButtonTitleNode() const
+    {
+        return ButtonTitleId_.has_value();
+    }
+
+    int32_t GetButtonTitleId()
+    {
+        if (!ButtonTitleId_.has_value()) {
+            ButtonTitleId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return ButtonTitleId_.value();
+    }
+
     uint32_t GetShowCount() const
     {
         return showCount_;
@@ -228,6 +254,8 @@ private:
     std::optional<int32_t> amPmId_;
     std::optional<int32_t> hourId_;
     std::optional<int32_t> minuteId_;
+    std::optional<int32_t> titleId_;
+    std::optional<int32_t> ButtonTitleId_;
     bool hasSecond_ = false;
     std::vector<RefPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();

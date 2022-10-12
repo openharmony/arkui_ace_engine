@@ -77,11 +77,14 @@ public:
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
     void ShowDateDialog(const DialogProperties& dialogProps, std::map<std::string, PickerDate> datePickerProperty,
-        bool isLunar, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+        bool isLunar, std::map<std::string, NG::DailogEvent> dialogEvent,
+        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
     void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> datePickerProperty,
-        bool isUseMilitaryTime, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+        bool isUseMilitaryTime, std::map<std::string, NG::DailogEvent> dialogEvent,
+        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
     void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextChangeEvent> dialogEvent);
+        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextEvent> dialogEvent,
+        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
     void CloseDialog(RefPtr<FrameNode> dialogNode);
 
 private:

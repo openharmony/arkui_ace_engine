@@ -28,12 +28,18 @@ class ACE_EXPORT DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties,
         std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
-        std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+        std::map<std::string, NG::DailogEvent> dialogEvent,
+        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
     static void SetStartDate(const RefPtr<DatePickerPattern>& datePickerPattern, const PickerDate& value);
     static void SetEndDate(const RefPtr<DatePickerPattern>& datePickerPattern, const PickerDate& value);
     static void SetSelectedDate(const RefPtr<DatePickerPattern>& datePickerPattern, const PickerDate& value);
     static void SetShowLunar(bool lunar = false);
-    static void SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogChangeEvent&& onChange);
+    static void SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogEvent&& onChange);
+    static void SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent onChange);
+    static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
+        std::map<std::string, NG::DailogEvent> dialogEvent,
+        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
+    static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
 };
 } // namespace OHOS::Ace::NG
 

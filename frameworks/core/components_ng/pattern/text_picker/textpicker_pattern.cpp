@@ -138,6 +138,7 @@ void TextPickerPattern::FlushCurrentOptions()
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         iter++;
     }
+    selectedIndex_ = currentIndex;
     if (isIndexChanged_) {
         auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
         CHECK_NULL_VOID(textPickerEventHub);
@@ -151,8 +152,8 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto value = selectedValue_;
-    auto index = selectedIndex_;
+    auto value = GetOption(GetSelected());
+    auto index = GetSelected();
     if (isColumnChange) {
         value = GetCurrentText();
         index = GetCurrentIndex();
