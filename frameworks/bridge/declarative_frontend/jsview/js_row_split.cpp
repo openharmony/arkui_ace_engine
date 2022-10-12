@@ -15,30 +15,19 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 
-#include "base/log/ace_trace.h"
-#include "core/components/split_container/row_split_component.h"
+#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSRowSplit::Create()
 {
-    std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-    auto rowSplit = AceType::MakeRefPtr<RowSplitComponent>(componentChildren);
-    ViewStackProcessor::GetInstance()->Push(rowSplit);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetBoxClipFlag(true);
+    LinearSplitModel::GetInstance()->Create(NG::SplitType::ROW_SPLIT);
 }
 
 void JSRowSplit::JsResizeable(bool resizeable)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto rowSplit = AceType::DynamicCast<RowSplitComponent>(stack->GetMainComponent());
-    if (rowSplit == nullptr) {
-        LOGE("Get RowSplitComponent failed");
-        return;
-    }
-    rowSplit->SetResizeable(resizeable);
+    LinearSplitModel::GetInstance()->SetResizeable(NG::SplitType::ROW_SPLIT, resizeable);
 }
 
 void JSRowSplit::JSBind(BindingTarget globalObj)
