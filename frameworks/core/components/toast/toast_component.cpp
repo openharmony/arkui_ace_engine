@@ -204,28 +204,14 @@ void ToastComponent::Show(const RefPtr<PipelineContext>& context, const std::str
     }
 
     WeakPtr<StackElement> weak = stackElement;
-    context->GetTaskExecutor()->PostDelayedTask([weak, toastId, tween, stopCallback = stopCallback_] {
+    context->GetTaskExecutor()->PostDelayedTask([weak, toastId] {
             auto ref = weak.Upgrade();
             if (ref == nullptr) {
                 return;
             }
             ref->PopToastComponent(toastId);
-            auto animator = tween->GetAnimator();
-            if (animator && stopCallback) {
-                animator->AddStopListener([stopCallback] () {
-                    LOGI("Animator stop callback.");
-                    if (stopCallback) {
-                        stopCallback();
-                    }
-                });
-            }
         },
         TaskExecutor::TaskType::UI, duration);
-}
-
-void ToastComponent::SetToastStopListenerCallback(std::function<void()>&& stopCallback)
-{
-    stopCallback_ = std::move(stopCallback);
 }
 
 } // namespace OHOS::Ace

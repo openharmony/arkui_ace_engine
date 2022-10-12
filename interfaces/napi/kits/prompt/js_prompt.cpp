@@ -15,13 +15,11 @@
 
 #include <string>
 
+#include "interfaces/napi/kits/napi_utils.h"
 #include "napi/native_api.h"
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
 
-#include "interfaces/napi/kits/napi_utils.h"
-
-#include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
 
@@ -140,11 +138,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-#ifdef OHOS_STANDARD_SYSTEM
-    if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString);
-    }
-#else
+
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
@@ -152,8 +146,6 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         return nullptr;
     }
     delegate->ShowToast(messageString, duration, bottomString);
-#endif
-
     return nullptr;
 }
 
@@ -337,12 +329,6 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_delete_async_work(env, asyncContext->work);
                 delete asyncContext;
             };
-#ifdef OHOS_STANDARD_SYSTEM
-            if (SubwindowManager::GetInstance() != nullptr) {
-                SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-                    asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
-            }
-#else
             auto delegate = EngineHelper::GetCurrentDelegate();
             if (delegate) {
                 delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString,
@@ -370,7 +356,6 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_delete_reference(env, asyncContext->callbackRef);
                 }
             }
-#endif
         },
         (void*)asyncContext, &asyncContext->work);
     napi_queue_async_work(env, asyncContext->work);
@@ -543,12 +528,6 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_delete_async_work(env, asyncContext->work);
                 delete asyncContext;
             };
-#ifdef OHOS_STANDARD_SYSTEM
-            if (SubwindowManager::GetInstance() != nullptr) {
-                SubwindowManager::GetInstance()->ShowActionMenu(asyncContext->titleString,
-                    asyncContext->buttons, std::move(callBack));
-            }
-#else
             auto delegate = EngineHelper::GetCurrentDelegate();
             if (delegate) {
                 delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
@@ -574,7 +553,6 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     napi_delete_reference(env, asyncContext->callbackRef);
                 }
             }
-#endif
         },
         (void*)asyncContext, &asyncContext->work);
     napi_queue_async_work(env, asyncContext->work);

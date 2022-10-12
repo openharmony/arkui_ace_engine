@@ -17,20 +17,12 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_SUBWINDOW_OHOS_H
 
 #include "wm/window.h"
-#include "adapter/ohos/entrance/platform_event_callback.h"
-#include "base/resource/asset_manager.h"
-#include "base/thread/task_executor.h"
+
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "core/common/ace_view.h"
-#include "core/common/js_message_dispatcher.h"
-#include "core/components/dialog/dialog_properties.h"
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/tween/tween_component.h"
-#include "event_handler.h"
-#include "event_runner.h"
-#include "resource_manager.h"
 
 namespace OHOS::Rosen {
 class Window;
@@ -56,21 +48,6 @@ public:
 
     void SetHotAreas(const std::vector<Rect>& rects) override;
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
-    void ShowDialog(const std::string& title, const std::string& message,
-        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
-        const std::set<std::string>& callbacks) override;
-    void ShowActionMenu(const std::string& title,
-        const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback) override;
-    int32_t GetChildContainerId() const
-    {
-        return childContainerId_;
-    }
-    sptr<OHOS::Rosen::Window> GetDialogWindow() const
-    {
-        return dialogWindow_;
-    }
-
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -80,12 +57,6 @@ private:
     // Convert Rect to Rosen::Rect
     void RectConverter(const Rect& rect, Rosen::Rect& rosenRect);
 
-    bool CreateEventRunner();
-    void GetToastDialogWindowProperty(
-        int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
-    bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY);
-    bool InitToastDialogView(int32_t width, int32_t height, float density);
-
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
@@ -93,10 +64,6 @@ private:
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
-
-    sptr<OHOS::Rosen::Window> dialogWindow_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventRunner> eventLoop_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 };
 
 } // namespace OHOS::Ace

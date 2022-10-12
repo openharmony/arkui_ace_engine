@@ -78,12 +78,12 @@ Animator::~Animator()
 {
     CHECK_RUN_ON(UI);
     LOGD("Animator destructor. id:%{public}d", controllerId_);
-    if (!IsStopped()) {
-        Stop();
-    }
     // Clear all listeners first to make its destruction silently.
     ClearAllListeners();
     ClearInterpolators();
+    if (!IsStopped()) {
+        Stop();
+    }
 }
 
 void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
