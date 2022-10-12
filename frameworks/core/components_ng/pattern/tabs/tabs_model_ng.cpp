@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/tabs/tabs_view.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 
 #include <type_traits>
 
@@ -35,7 +35,8 @@
 
 namespace OHOS::Ace::NG {
 
-void TabsView::Create()
+void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
+    const RefPtr<SwiperController>& swiperController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -54,11 +55,15 @@ void TabsView::Create()
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateCachedCount(0);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto swiperController = swiperPattern->GetSwiperController();
+    auto controller = swiperController;
+    if (!controller) {
+        controller = AceType::MakeRefPtr<SwiperController>();
+    }
+    swiperPattern->SetSwiperController(controller);
 
     // Create TabBar to contain TabBar of TabContent.
-    auto tabBarNode = FrameNode::GetOrCreateFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId,
-        [swiperController]() { return AceType::MakeRefPtr<TabBarPattern>(swiperController); });
+    auto tabBarNode = FrameNode::GetOrCreateFrameNode(
+        V2::TAB_BAR_ETS_TAG, tabBarId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
     if (!hasTabBarNode) {
         tabBarNode->MountToParent(tabsNode);
     }
@@ -66,21 +71,24 @@ void TabsView::Create()
         swiperNode->MountToParent(tabsNode);
     }
     ViewStackProcessor::GetInstance()->Push(tabsNode);
+
+    SetTabBarPosition(barPosition);
+    SetIndex(index);
 }
 
-void TabsView::SetTabBarPosition(BarPosition tabBarPosition)
+void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPosition);
 }
 
-void TabsView::SetTabBarMode(TabBarMode tabBarMode)
+void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
 {
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateTabBarMode(tabBarMode);
 }
 
-void TabsView::SetTabBarWidth(const Dimension& tabBarWidth)
+void TabsModelNG::SetTabBarWidth(const Dimension& tabBarWidth)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
@@ -92,7 +100,7 @@ void TabsView::SetTabBarWidth(const Dimension& tabBarWidth)
     tabBarLayoutProperty->UpdateTabBarWidth(tabBarWidth);
 }
 
-void TabsView::SetTabBarHeight(const Dimension& tabBarHeight)
+void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
@@ -104,8 +112,9 @@ void TabsView::SetTabBarHeight(const Dimension& tabBarHeight)
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
 }
 
-void TabsView::SetAxis(Axis axis)
+void TabsModelNG::SetIsVertical(bool isVertical)
 {
+    auto axis = isVertical ? Axis::VERTICAL : Axis::HORIZONTAL;
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, Axis, axis);
 
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
@@ -117,28 +126,28 @@ void TabsView::SetAxis(Axis axis)
     swiperLayoutProperty->UpdateDirection(axis);
 }
 
-void TabsView::SetIndex(int32_t index)
+void TabsModelNG::SetIndex(int32_t index)
 {
     auto swiperLayoutProperty = GetSwiperLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateIndex(index);
 }
 
-void TabsView::SetScrollable(bool scrollable)
+void TabsModelNG::SetScrollable(bool scrollable)
 {
     auto swiperPaintProperty = GetSwiperPaintProperty();
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateDisableSwipe(!scrollable);
 }
 
-void TabsView::SetAnimationDuration(int32_t duration)
+void TabsModelNG::SetAnimationDuration(float duration)
 {
     auto swiperPaintProperty = GetSwiperPaintProperty();
     CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDuration(duration);
+    swiperPaintProperty->UpdateDuration(static_cast<int32_t>(duration));
 }
 
-void TabsView::SetOnChange(ChangeEvent&& onChange)
+void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
@@ -149,7 +158,7 @@ void TabsView::SetOnChange(ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
-RefPtr<TabBarLayoutProperty> TabsView::GetTabBarLayoutProperty()
+RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty()
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(tabsNode, nullptr);
@@ -160,7 +169,7 @@ RefPtr<TabBarLayoutProperty> TabsView::GetTabBarLayoutProperty()
     return tabBarLayoutProperty;
 }
 
-RefPtr<SwiperLayoutProperty> TabsView::GetSwiperLayoutProperty()
+RefPtr<SwiperLayoutProperty> TabsModelNG::GetSwiperLayoutProperty()
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(tabsNode, nullptr);
@@ -171,7 +180,7 @@ RefPtr<SwiperLayoutProperty> TabsView::GetSwiperLayoutProperty()
     return swiperLayoutProperty;
 }
 
-RefPtr<SwiperPaintProperty> TabsView::GetSwiperPaintProperty()
+RefPtr<SwiperPaintProperty> TabsModelNG::GetSwiperPaintProperty()
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(tabsNode, nullptr);
@@ -182,18 +191,7 @@ RefPtr<SwiperPaintProperty> TabsView::GetSwiperPaintProperty()
     return swiperPaintProperty;
 }
 
-RefPtr<SwiperController> TabsView::GetSwiperController()
-{
-    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(tabsNode, nullptr);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
-    CHECK_NULL_RETURN(swiperNode, nullptr);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_RETURN(swiperNode, nullptr);
-    return swiperPattern->GetSwiperController();
-}
-
-void TabsView::Pop()
+void TabsModelNG::Pop()
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
@@ -204,9 +202,11 @@ void TabsView::Pop()
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
     CHECK_NULL_VOID(swiperNode);
     swiperNode->MarkModifyDone();
+
+    ViewStackProcessor::GetInstance()->PopContainer();
 }
 
-RefPtr<TabsNode> TabsView::GetOrCreateTabsNode(
+RefPtr<TabsNode> TabsModelNG::GetOrCreateTabsNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto tabsNode = ElementRegister::GetInstance()->GetSpecificItemById<TabsNode>(nodeId);

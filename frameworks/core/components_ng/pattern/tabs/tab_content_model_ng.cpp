@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/tabs/tab_content_view.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -41,7 +41,7 @@ constexpr Dimension TAB_BAR_SPACE = 2.0_vp;
 
 } // namespace
 
-void TabContentView::Create(std::function<void()>&& deepRenderFunc)
+void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -60,10 +60,10 @@ void TabContentView::Create(std::function<void()>&& deepRenderFunc)
             return AceType::MakeRefPtr<TabContentPattern>(shallowBuilder);
         });
     stack->Push(frameNode);
-    SetTabBar(DEFAULT_TAB_BAR_NAME, "", nullptr); // Set default tab bar.
+    SetTabBar(DEFAULT_TAB_BAR_NAME, "", nullptr, true); // Set default tab bar.
 }
 
-void TabContentView::Create()
+void TabContentModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
@@ -72,8 +72,11 @@ void TabContentView::Create()
     stack->Push(frameNode);
 }
 
-void TabContentView::Pop(const RefPtr<FrameNode>& tabContent)
+void TabContentModelNG::Pop()
 {
+    auto tabContent = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    NG::ViewStackProcessor::GetInstance()->PopContainer();
+
     CHECK_NULL_VOID(tabContent);
     auto tabContentId = tabContent->GetId();
     auto swiperNode = tabContent->GetParent();
@@ -158,9 +161,10 @@ void TabContentView::Pop(const RefPtr<FrameNode>& tabContent)
     columnNode->MarkModifyDone();
 }
 
-void TabContentView::SetTabBar(const std::string& text, const std::string& icon, TabBarBuilderFunc&& builder)
+void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
+    TabBarBuilderFunc&& builder, bool /*useContentOnly*/)
 {
-    TabBarParam tabBarParam { .text = text, .icon = icon, .builder = std::move(builder) };
+    TabBarParam tabBarParam { .text = text.value_or(""), .icon = icon.value_or(""), .builder = std::move(builder) };
     ViewStackProcessor::GetInstance()->PushTabBar(tabBarParam);
 }
 

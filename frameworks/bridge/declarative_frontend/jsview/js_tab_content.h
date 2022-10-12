@@ -50,16 +50,9 @@ protected:
     }
 
 private:
+    static void CreateForPartialUpdate(const JSCallbackInfo& info);
     static void CreateForNG(const JSCallbackInfo& info);
     static void SetTabBarForNG(const JSCallbackInfo& info);
-    static RefPtr<Component> ProcessTabBarBuilderFunction(const JSCallbackInfo& info,
-        RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc);
-    static RefPtr<Component> ProcessTabBarTextIconPair(
-        RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> text, JSRef<JSVal> icon);
-    static RefPtr<Component> CreateTabBarLabelComponent(
-        RefPtr<V2::TabContentItemComponent>& tabContent, const std::string& labelStr);
-    static RefPtr<Component> ProcessTabBarLabel(
-        RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> labelVal);
 };
 
 } // namespace OHOS::Ace::Framework
