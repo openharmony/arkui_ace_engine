@@ -909,4 +909,9 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     return offset;
 }
 
+void FrameNode::OnNotifyMemoryLevel(int32_t level)
+{
+    pattern_->OnNotifyMemoryLevel(level);
+}
+
 } // namespace OHOS::Ace::NG

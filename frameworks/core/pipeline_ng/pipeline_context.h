@@ -217,11 +217,14 @@ public:
     {
         drawDelegate_ = std::move(delegate);
     }
+    void AddNodesToNotifyMemoryLevel(int32_t nodeId);
+    void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
+    void NotifyMemoryLevel(int32_t level) override;
+    void FlushMessages() override;
 
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
-    void FlushMessages() override;
     void FlushFocus();
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
@@ -280,6 +283,8 @@ private:
     std::list<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
     std::list<int32_t> onWindowFocusChangedCallbacks_;
+
+    std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
 

@@ -138,6 +138,8 @@ public:
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
+    virtual void ClearDrawCommands() {}
+
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 

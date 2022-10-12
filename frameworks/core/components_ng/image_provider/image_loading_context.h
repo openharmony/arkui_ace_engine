@@ -47,6 +47,8 @@ public:
     void LoadImageData();
     void MakeCanvasImage(const SizeF& dstSize, bool needResize, ImageFit imageFit = ImageFit::COVER,
         const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
+    void ResetLoading();
+    void ResumeLoading();
 
     /* interfaces to get properties */
     SizeF GetImageSize() const;
@@ -60,12 +62,12 @@ public:
     std::optional<SizeF> GetSourceSize() const;
     bool NeedAlt() const;
     const std::optional<Color>& GetSvgFillColor() const;
-    void SetSvgFillColor(const std::optional<Color>& svgFillColorOpt);
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
     void SetNeedResize(bool needResize);
     void SetSourceSize(const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
+    void SetSvgFillColor(const std::optional<Color>& svgFillColorOpt);
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult, loadResultNotifierName)                                         \
@@ -96,6 +98,8 @@ private:
     EnterStateTask CreateOnMakeCanvasImageTask();
     EnterStateTask CreateOnLoadSuccessTask();
     EnterStateTask CreateOnLoadFailTask();
+
+    void RestoreLoadingParams();
 
     ImageSourceInfo sourceInfo_;
     RefPtr<ImageStateManager> stateManager_;

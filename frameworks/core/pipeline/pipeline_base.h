@@ -743,6 +743,7 @@ public:
     {
         return pluginEventOffset_;
     }
+    virtual void NotifyMemoryLevel(int32_t level) {}
 
     void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
     {
@@ -755,6 +756,7 @@ public:
     {
         return displayWindowRectInfo_;
     }
+    virtual void FlushMessages() = 0;
 
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
@@ -764,7 +766,6 @@ protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
-    virtual void FlushMessages() = 0;
     virtual void FlushUITasks() = 0;
     virtual void OnVirtualKeyboardHeightChange(double keyboardHeight) {}
 

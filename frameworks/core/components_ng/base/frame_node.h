@@ -245,6 +245,8 @@ public:
 
     void OnWindowUnfocused() override;
 
+    void OnNotifyMemoryLevel(int32_t level) override;
+
     OffsetF GetOffsetRelativeToWindow() const;
 
     bool IsOnMainTree() const

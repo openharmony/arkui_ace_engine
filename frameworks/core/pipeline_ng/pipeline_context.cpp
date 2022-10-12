@@ -719,4 +719,29 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     manager->OnDragMove(static_cast<float>(x), static_cast<float>(y), extraInfo);
 }
 
+void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)
+{
+    nodesToNotifyMemoryLevel_.emplace_back(nodeId);
+}
+
+void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId)
+{
+    nodesToNotifyMemoryLevel_.remove(nodeId);
+}
+
+void PipelineContext::NotifyMemoryLevel(int32_t level)
+{
+    LOGI("PipelineContext: NotifyMemoryLevel called");
+    auto iter = nodesToNotifyMemoryLevel_.begin();
+    while (iter != nodesToNotifyMemoryLevel_.end()) {
+        auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
+        if (!node) {
+            iter = nodesToNotifyMemoryLevel_.erase(iter);
+        } else {
+            node->OnNotifyMemoryLevel(level);
+        }
+        ++iter;
+    }
+}
+
 } // namespace OHOS::Ace::NG

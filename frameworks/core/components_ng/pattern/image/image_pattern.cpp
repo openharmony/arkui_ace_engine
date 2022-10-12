@@ -192,7 +192,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     return lastCanvasImage_;
 }
 
-void ImagePattern::OnModifyDone()
+void ImagePattern::LoadImageDataIfNeed()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
@@ -229,6 +229,11 @@ void ImagePattern::OnModifyDone()
             altLoadingCtx_->LoadImageData();
         }
     }
+}
+
+void ImagePattern::OnModifyDone()
+{
+    LoadImageDataIfNeed();
 }
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
@@ -303,6 +308,62 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     }
+}
+
+void ImagePattern::OnNotifyMemoryLevel(int32_t level)
+{
+    LOGI("Receive Memory level notification, level: %{public}d", level);
+    // level = 0: MEMORY_LEVEL_MODERATE;
+    // level = 1: MEMORY_LEVEL_LOW;
+    // level = 2: MEMORY_LEVEL_CRITICAL;
+    // TODO: do different data cleaning operation according to level
+    // when image component is [onShow], do not clean image data
+    // TODO: use [isActive_] to determine image data management
+    if (isShow_) {
+        return;
+    }
+    // TODO: clean cache data when cache mechanism is ready
+    // Step1: drive stateMachine to reset loading procedure
+    if (altLoadingCtx_) {
+        altLoadingCtx_->ResetLoading();
+    }
+    if (loadingCtx_) {
+        loadingCtx_->ResetLoading();
+    }
+
+    // Step2: clean data and reset params
+    // clear src data
+    lastCanvasImage_ = nullptr;
+    lastSrcRect_ = RectF();
+    lastDstRect_ = RectF();
+    // clear alt data
+    altLoadingCtx_ = nullptr;
+    lastAltCanvasImage_ = nullptr;
+    lastAltDstRect_.reset();
+    lastAltSrcRect_.reset();
+
+    // Step3: clean rs node to release the sk_sp<SkImage> held by it
+    // TODO: release PixelMap resource when use PixelMap resource to draw image
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->ClearDrawCommands();
+
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushMessages();
+}
+
+void ImagePattern::OnWindowHide()
+{
+    isShow_ = false;
+}
+
+void ImagePattern::OnWindowShow()
+{
+    isShow_ = true;
+    LoadImageDataIfNeed();
 }
 
 } // namespace OHOS::Ace::NG
