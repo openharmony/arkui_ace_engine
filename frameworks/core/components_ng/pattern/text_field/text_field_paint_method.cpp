@@ -52,13 +52,14 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
     CHECK_NULL_RETURN(textFieldPattern->GetParagraph(), nullptr);
     auto offset = paintWrapper->GetContentOffset();
     auto paintOffset = offset - OffsetF(-static_cast<float>(textFieldPattern->GetBasicPadding()),
-        textFieldPattern->GetBaseLineOffset());
-
-    auto drawFunction = [paragraph = textFieldPattern->GetParagraph(), paintOffset, textFieldPattern](
-                            RSCanvas& canvas) {
-        auto textRect = textFieldPattern->GetTextRect();
-        RSRect rect(textRect.GetX(), textRect.GetY(), textRect.Width(), textRect.Height());
-        canvas.ClipRect(rect, RSClipOp::INTERSECT);
+                                    textFieldPattern->GetBaseLineOffset());
+    auto drawFunction = [paragraph = textFieldPattern->GetParagraph(), paintOffset, textFieldPattern,
+                            contentSize = paintWrapper->GetContentSize(),
+                            contentOffset = paintWrapper->GetContentOffset()](RSCanvas& canvas) {
+        RSRect clipInnerRect(paintOffset.GetX(), contentOffset.GetY(),
+            paintOffset.GetX() + contentSize.Width() - textFieldPattern->GetBasicPadding() * 2.0f,
+            contentOffset.GetY() + contentSize.Height());
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         paragraph->Paint(&canvas, paintOffset.GetX(), paintOffset.GetY());
     };
     return drawFunction;
