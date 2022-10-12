@@ -29,11 +29,6 @@ UIServiceMgrStub::UIServiceMgrStub()
     requestFuncMap_[PUSH] = &UIServiceMgrStub::PushInner;
     requestFuncMap_[REQUEST] = &UIServiceMgrStub::RequestInner;
     requestFuncMap_[RETURN_REQUEST] = &UIServiceMgrStub::ReturnRequestInner;
-    requestFuncMap_[SHOW_DIALOG] = &UIServiceMgrStub::ShowDialogInner;
-    requestFuncMap_[CANCEL_DIALOG] = &UIServiceMgrStub::CancelDialogInner;
-    requestFuncMap_[UPDATE_DIALOG] = &UIServiceMgrStub::UpdateDialogInner;
-    requestFuncMap_[ATTACH_DIALOG] = &UIServiceMgrStub::AttachToUiServiceInner;
-    requestFuncMap_[REMOTE_DIALOG_CALLBACK] = &UIServiceMgrStub::RemoteDialogCallbackInner;
 }
 
 UIServiceMgrStub::~UIServiceMgrStub()
@@ -41,7 +36,7 @@ UIServiceMgrStub::~UIServiceMgrStub()
     requestFuncMap_.clear();
 }
 
-int UIServiceMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+int32_t UIServiceMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
     HILOG_DEBUG("UIServiceMgrStub::OnRemoteRequest, cmd = %d, flags= %d", code, option.GetFlags());
@@ -62,7 +57,7 @@ int UIServiceMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& reply)
+int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -82,7 +77,7 @@ int UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& 
     return NO_ERROR;
 }
 
-int UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessageParcel& reply)
+int32_t UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -94,7 +89,7 @@ int UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessageParcel
     return NO_ERROR;
 }
 
-int UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
+int32_t UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -111,7 +106,7 @@ int UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
     return NO_ERROR;
 }
 
-int UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply)
+int32_t UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply)
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -125,7 +120,7 @@ int UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply)
     return NO_ERROR;
 }
 
-int UIServiceMgrStub::ReturnRequestInner(MessageParcel& data, MessageParcel& reply)
+int32_t UIServiceMgrStub::ReturnRequestInner(MessageParcel& data, MessageParcel& reply)
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -138,63 +133,5 @@ int UIServiceMgrStub::ReturnRequestInner(MessageParcel& data, MessageParcel& rep
     int32_t result = ReturnRequest(*want, source, dataStr, extraData);
     reply.WriteInt32(result);
     return NO_ERROR;
-}
-
-int UIServiceMgrStub::ShowDialogInner(MessageParcel &data, MessageParcel &reply)
-{
-    const std::string& name = data.ReadString();
-    const std::string& params = data.ReadString();
-    auto windowType = data.ReadUint32();
-    int x = data.ReadInt32();
-    int y = data.ReadInt32();
-    int width = data.ReadInt32();
-    int height = data.ReadInt32();
-    int id = 0;
-    auto object = data.ReadRemoteObject();
-    if (object == nullptr) {
-        HILOG_ERROR("ShowDialogInner read remote object failed");
-        return ERR_INVALID_VALUE;
-    }
-    auto dialogCallback = iface_cast<OHOS::Ace::IDialogCallback>(object);
-    int32_t result = ShowDialog(name, params, windowType, x, y, width, height, dialogCallback, &id);
-    reply.WriteInt32(id);
-    reply.WriteInt32(result);
-    return NO_ERROR;
-}
-
-int UIServiceMgrStub::CancelDialogInner(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t id = data.ReadInt32();
-    int32_t result = CancelDialog(id);
-    reply.WriteInt32(result);
-    return NO_ERROR;
-}
-
-int UIServiceMgrStub::UpdateDialogInner(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t id = data.ReadInt32();
-    std::string updateData = data.ReadString();
-    int32_t result = UpdateDialog(id, updateData);
-    reply.WriteInt32(result);
-    return NO_ERROR;
-}
-
-int32_t UIServiceMgrStub::AttachToUiServiceInner(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<IRemoteObject> client = data.ReadRemoteObject();
-    if (client == nullptr) {
-        HILOG_ERROR("AttachToUiServiceInner read remote object failed");
-        return -1;
-    }
-    int32_t pid = data.ReadInt32();
-    return AttachToUiService(client, pid);
-}
-
-int32_t UIServiceMgrStub::RemoteDialogCallbackInner(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t id = data.ReadInt32();
-    std::string event = data.ReadString();
-    std::string params = data.ReadString();
-    return RemoteDialogCallback(id, event, params);
 }
 }

@@ -254,8 +254,8 @@ void FlutterRenderTextField::PaintIcon(const Offset& offset, RenderContext& cont
             renderShowIcon_->RenderWithContext(context, passwordIconOffset);
         }
         passwordIconRect_ = Rect(
-            passwordIconOffset - Offset((iconHotZoneSize_ - iconSize_) / 2.0, (iconHotZoneSize_ - iconSize_) / 2.0) +
-                GetGlobalOffset(), Size(iconHotZoneSize_, iconHotZoneSize_));
+            passwordIconOffset - Offset((iconHotZoneSize_ - iconSize_) / 2.0, (iconHotZoneSize_ - iconSize_) / 2.0),
+            Size(iconHotZoneSize_, iconHotZoneSize_));
     }
 }
 

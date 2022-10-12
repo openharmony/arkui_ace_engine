@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STACK_STACK_PATTERN_H
 
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,11 +26,6 @@ class ACE_EXPORT StackPattern : public Pattern {
 public:
     StackPattern() = default;
     ~StackPattern() override = default;
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<StackLayoutAlgorithm>();
-    }
 
     bool IsAtomicNode() const override
     {

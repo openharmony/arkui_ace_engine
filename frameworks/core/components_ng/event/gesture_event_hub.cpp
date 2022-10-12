@@ -365,4 +365,14 @@ void GestureEventHub::HandleOnDragCancel()
     dragDropProxy_ = nullptr;
 }
 
+void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_VOID(eventHub);
+    auto focusHub = eventHub->GetFocusHub();
+    if (focusHub) {
+        focusHub->SetOnClickCallback(std::move(clickEvent));
+    }
+}
+
 } // namespace OHOS::Ace::NG

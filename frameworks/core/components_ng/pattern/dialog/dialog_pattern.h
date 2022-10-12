@@ -63,6 +63,11 @@ public:
         return MakeRefPtr<DialogEventHub>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
     void BuildChild(const DialogProperties& dialogProperties);
 
 private:

@@ -16,7 +16,8 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-
+#define private public
+#define protected public
 #include "mock_ui_service_stub.h"
 
 #include "ui_mgr_service.h"
@@ -71,7 +72,7 @@ HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_GetEventHandler_0100, TestSize.Level
     GTEST_LOG_(INFO) << "UIMgrServiceTest_GetEventHandler_0100 start";
     auto uiMgrService = DelayedSingleton<UIMgrService>::GetInstance();
 
-    const std::shared_ptr<EventHandler> retVal = uiMgrService->GetEventHandler();
+    const std::shared_ptr<EventHandler> retVal = uiMgrService->handler_;
 
     EXPECT_EQ(nullptr, retVal.get());
 
@@ -92,7 +93,7 @@ HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_OnStart_0100, TestSize.Level1)
 
     uiMgrService->OnStart();
     EXPECT_EQ(testValue, uiMgrService->QueryServiceState());
-    EXPECT_NE(nullptr, uiMgrService->GetEventHandler().get());
+    EXPECT_NE(nullptr, uiMgrService->handler_.get());
 
     GTEST_LOG_(INFO) << "UIMgrServiceTest_OnStart_0100 end";
 }
@@ -207,7 +208,7 @@ HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_OnStop_0100, TestSize.Level1)
 
     uiMgrService->OnStop();
     EXPECT_EQ(testValue, uiMgrService->QueryServiceState());
-    EXPECT_EQ(nullptr, uiMgrService->GetEventHandler().get());
+    EXPECT_EQ(nullptr, uiMgrService->handler_.get());
 
     GTEST_LOG_(INFO) << "UIMgrServiceTest_OnStop_0100 end";
 }

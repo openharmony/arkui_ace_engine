@@ -19,25 +19,16 @@ namespace OHOS::Ace::NG {
 
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
 {
+    LOGI("[OnTextChangedListenerImpl] insert value %{private}s", StringUtils::Str16ToStr8(text).c_str());
     if (text.empty()) {
         LOGE("the text is null");
         return;
     }
-
     auto task = [textFieldPattern = pattern_, text] {
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        auto host = client->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto value = client->GetEditingValue();
-        auto textEditingValue = std::make_shared<TextEditingValue>();
-        textEditingValue->text =
-            value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
-        textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
-        client->UpdateEditingValue(textEditingValue, true);
+        client->InsertValue(StringUtils::Str16ToStr8(text));
     };
     PostTaskToUI(task);
 }
@@ -54,18 +45,7 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        auto host = client->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto value = client->GetEditingValue();
-        auto start = value.selection.GetStart();
-        auto end = value.selection.GetEnd();
-        auto textEditingValue = std::make_shared<TextEditingValue>();
-        textEditingValue->text = value.text;
-        textEditingValue->UpdateSelection(start, end);
-        textEditingValue->Delete(start, start == end ? end + length : end);
-        client->UpdateEditingValue(textEditingValue, true);
+        client->DeleteBackward(length);
     };
     PostTaskToUI(task);
 }
@@ -82,18 +62,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        auto host = client->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto value = client->GetEditingValue();
-        auto start = value.selection.GetStart();
-        auto end = value.selection.GetEnd();
-        auto textEditingValue = std::make_shared<TextEditingValue>();
-        textEditingValue->text = value.text;
-        textEditingValue->UpdateSelection(start, end);
-        textEditingValue->Delete(start == end ? start - length : start, end);
-        client->UpdateEditingValue(textEditingValue, true);
+        client->DeleteForward(length);
     };
     PostTaskToUI(task);
 }
@@ -118,24 +87,51 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
             return;
         }
         ContainerScope scope(client->GetInstanceId());
-        TextInputAction action_ = static_cast<TextInputAction>(functionKey);
-        switch (action_) {
+        TextInputAction action = static_cast<TextInputAction>(functionKey);
+        switch (action) {
             case TextInputAction::DONE:
             case TextInputAction::NEXT:
             case TextInputAction::SEARCH:
             case TextInputAction::SEND:
             case TextInputAction::GO:
-                client->PerformAction(action_);
+                client->PerformAction(action);
                 break;
             default:
-                LOGE("TextInputAction  is not support: %{public}d", action_);
+                LOGE("TextInputAction  is not support: %{public}d", action);
                 break;
         }
     };
     PostTaskToUI(task);
 }
 
-void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction) {}
+void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
+{
+    auto task = [textField = pattern_, direction] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            return;
+        }
+        ContainerScope scope(client->GetInstanceId());
+        switch (direction) {
+            case MiscServices::Direction::UP:
+                client->CursorMoveUp();
+                break;
+            case MiscServices::Direction::DOWN:
+                client->CursorMoveDown();
+                break;
+            case MiscServices::Direction::LEFT:
+                client->CursorMoveLeft();
+                break;
+            case MiscServices::Direction::RIGHT:
+                client->CursorMoveRight();
+                break;
+            default:
+                LOGE("direction is not support: %{public}d", direction);
+                break;
+        }
+    };
+    PostTaskToUI(task);
+}
 
 void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
 {

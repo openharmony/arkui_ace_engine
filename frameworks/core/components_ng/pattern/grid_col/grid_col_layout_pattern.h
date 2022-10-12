@@ -16,16 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_COL_PATTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_COL_PATTER_H
 
-#include "base/utils/macros.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "grid_col_layout_property.h"
-#include "grid_col_layout_algorithm.h"
+
+#include "base/utils/macros.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 class GridColLayoutPattern : public Pattern {
     DECLARE_ACE_TYPE(GridColLayoutPattern, Pattern);
 
 public:
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<GridColLayoutProperty>();
@@ -33,7 +38,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<GridColLayoutAlgorithm>();
+        return MakeRefPtr<LinearLayoutAlgorithm>();
     }
 };
 } // namespace OHOS::Ace::NG

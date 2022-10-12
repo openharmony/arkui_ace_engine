@@ -157,6 +157,8 @@ public:
         touchEventActuator_->RemoveTouchEvent(touchEvent);
     }
 
+    void SetFocusClickEvent(GestureEventFunc&& clickEvent);
+
     // Set by user define, which will replace old one.
     void SetClickEvent(GestureEventFunc&& clickEvent)
     {
@@ -164,6 +166,8 @@ public:
             clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
         }
         clickEventActuator_->ReplaceClickEvent(std::move(clickEvent));
+
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
     }
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -172,6 +176,8 @@ public:
             clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
         }
         clickEventActuator_->AddClickEvent(clickEvent);
+
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
     }
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)

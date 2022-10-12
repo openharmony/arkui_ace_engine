@@ -39,19 +39,25 @@ void NavDestinationView::Create()
     int32_t nodeId = stack->ClaimNodeId();
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    
     // titleBar node
-    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    if (!navDestinationNode->GetTitleBarNode()) {
+        int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+            V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+        navDestinationNode->AddChild(titleBarNode);
+        navDestinationNode->SetTitleBarNode(titleBarNode);
+    }
+    
     // content node
-    int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG,
-        contentNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    if (!navDestinationNode->GetTitleBarNode()) {
+        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG,
+            contentNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        navDestinationNode->AddChild(contentNode);
+        navDestinationNode->SetContentNode(contentNode);
+    }
 
-    navDestinationNode->AddChild(titleBarNode);
-    navDestinationNode->SetTitleBarNode(titleBarNode);
-    navDestinationNode->AddChild(contentNode);
-    navDestinationNode->SetContentNode(contentNode);
     stack->Push(navDestinationNode);
     auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);

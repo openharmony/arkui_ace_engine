@@ -227,7 +227,7 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void OnVirtualKeyboardHeightChange(double keyboardHeight) override;
+    void OnVirtualKeyboardHeightChange(float keyboardHeight) override;
 
     // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);

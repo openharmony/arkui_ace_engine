@@ -238,16 +238,9 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
-    auto gestureEvent = clickEventFunc;
-    auto focusEvent = clickEventFunc;
-
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetClickEvent(std::move(gestureEvent));
-
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetOnClickCallback(std::move(focusEvent));
+    gestureHub->SetClickEvent(std::move(clickEventFunc));
 }
 
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
@@ -714,4 +707,41 @@ void ViewAbstract::SetColorBlend(const Color& colorBlend)
 {
     ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
 }
+
+void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderImage, borderImage);
+}
+
+void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
+{
+    ImageSourceInfo imageSourceInfo(bdImageSrc);
+    ACE_UPDATE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo);
+}
+
+void ViewAbstract::SetHasBorderImageSlice(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageSlice, tag);
+}
+
+void ViewAbstract::SetHasBorderImageWidth(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageWidth, tag);
+}
+
+void ViewAbstract::SetHasBorderImageOutset(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageOutset, tag);
+}
+
+void ViewAbstract::SetHasBorderImageRepeat(bool tag)
+{
+    ACE_UPDATE_RENDER_CONTEXT(HasBorderImageRepeat, tag);
+}
+
+void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
+}
+
 } // namespace OHOS::Ace::NG

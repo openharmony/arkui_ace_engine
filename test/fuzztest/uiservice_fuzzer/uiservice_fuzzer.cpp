@@ -52,28 +52,6 @@ namespace OHOS {
         OHOS::Ace::UIServiceMgrClient client;
         return client.ReturnRequest(want, randomString, randomString, randomString) == ERR_OK;
     }
-
-    bool CancelDialogTest(const uint8_t* data)
-    {
-        int32_t randomNumber = static_cast<int32_t>(U32_AT(data));
-        OHOS::Ace::UIServiceMgrClient client;
-        return client.CancelDialog(randomNumber) == ERR_OK;
-    }
-
-    bool UpdateDialogTest(const uint8_t* data)
-    {
-        std::string randomString = reinterpret_cast<const char*>(data);
-        int32_t randomNumber = static_cast<int32_t>(U32_AT(data));
-        OHOS::Ace::UIServiceMgrClient client;
-        return client.UpdateDialog(randomNumber, randomString) == ERR_OK;
-    }
-
-    bool ShowAppPickerDialogTest(const uint8_t* data, const AAFwk::Want& want)
-    {
-        std::vector<OHOS::AppExecFwk::AbilityInfo> abilityInfos;
-        OHOS::Ace::UIServiceMgrClient client;
-        return client.ShowAppPickerDialog(want, abilityInfos, static_cast<int32_t>(U32_AT(data))) == ERR_OK;
-    }
 }
 
 /* Fuzzer entry point */
@@ -87,9 +65,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::PushTest(data, want);
     OHOS::RequestTest(data, want);
     OHOS::ReturnRequestTest(data, want);
-    OHOS::CancelDialogTest(data);
-    OHOS::UpdateDialogTest(data);
-    OHOS::ShowAppPickerDialogTest(data, want);
     OHOS::UnregisterCallBackTest(data, want);
     return 0;
 }

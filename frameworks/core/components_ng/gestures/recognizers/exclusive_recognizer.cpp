@@ -125,6 +125,34 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
+bool ExclusiveRecognizer::HandleEvent(const AxisEvent& event)
+{
+    switch (event.action) {
+        case AxisAction::BEGIN:
+        case AxisAction::UPDATE:
+        case AxisAction::END:
+        case AxisAction::NONE:
+            if (activeRecognizer_) {
+                activeRecognizer_->HandleEvent(event);
+            } else {
+                for (auto& recognizer : recognizers_) {
+                    recognizer->HandleEvent(event);
+                }
+            }
+            break;
+        default:
+            LOGW("exclusive recognizer received unknown touch type");
+            break;
+    }
+
+    if ((activeRecognizer_ && (activeRecognizer_->GetDetectState() != DetectState::DETECTED)) || pendingReset_) {
+        LOGD("sub detected gesture has finished, change the exclusive recognizer to be ready");
+        Reset();
+    }
+
+    return true;
+}
+
 void ExclusiveRecognizer::ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers)
 {
     // TODO: add state adjustment.

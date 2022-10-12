@@ -41,6 +41,10 @@ void SliderPattern::OnModifyDone()
     InitTouchEvent(gestureHub);
     InitClickEvent(gestureHub);
     InitPanEvent(gestureHub);
+    auto focusHub = hub->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
 }
 
 bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
@@ -118,7 +122,11 @@ void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 {
-    UpdateValueByLocalLocation(info.GetLocalLocation());
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        info.GetMainDelta() > 0.0 ? MoveStep(-1) : MoveStep(1);
+    } else {
+        UpdateValueByLocalLocation(info.GetLocalLocation());
+    }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -197,6 +205,64 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panDirection.type = direction_ == Axis::VERTICAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
     float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+}
+
+void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool SliderPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
+        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+        MoveStep(-1);
+    }
+    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
+        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+        MoveStep(1);
+    }
+    return false;
+}
+
+bool SliderPattern::MoveStep(int32_t stepCount)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, false);
+    float step = sliderPaintProperty->GetStep().value_or(1.0f);
+    float min = sliderPaintProperty->GetMin().value_or(0.0f);
+    float max = sliderPaintProperty->GetMax().value_or(100.0f);
+    if (NearZero(step)) {
+        return false;
+    }
+    float nextValue = -1.0;
+    nextValue = value_ + static_cast<float>(stepCount) * step;
+    if (NearEqual(nextValue, -1.0)) {
+        return false;
+    }
+    nextValue = std::clamp(nextValue, min, max);
+    nextValue = std::round(nextValue / step) * step;
+    if (nextValue == value_) {
+        return false;
+    }
+    value_ = nextValue;
+    valueRatio_ = (value_ - min) / (max - min);
+    LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
+    FireChangeEvent(SliderChangeMode::Click);
+    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return true;
 }
 
 void SliderPattern::FireChangeEvent(int32_t mode) const

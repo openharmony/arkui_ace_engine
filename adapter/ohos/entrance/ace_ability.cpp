@@ -66,7 +66,6 @@ FrontendType GetFrontendType(const std::string& frontendType)
     } else if (frontendType == "declarative") {
         return FrontendType::DECLARATIVE_JS;
     } else {
-        LOGW("frontend type not supported. return default frontend: JS frontend.");
         return FrontendType::JS;
     }
 }
@@ -255,7 +254,7 @@ void AceAbility::OnStart(const Want& want)
         density_ = defaultDisplay->GetVirtualPixelRatio();
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
-        LOGI("AceAbility: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
+        LOGI("deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
             deviceHeight, density_);
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density_, false);
@@ -371,7 +370,7 @@ void AceAbility::OnStart(const Want& want)
     container->SetBundlePath(abilityContext->GetBundleCodeDir());
     container->SetFilesDataPath(abilityContext->GetFilesDir());
     if (window->IsDecorEnable()) {
-        LOGI("AceAbility: Container modal is enabled.");
+        LOGI("Container modal is enabled.");
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
     container->SetWindowName(window->GetWindowName());
@@ -665,8 +664,8 @@ void AceAbility::OnRemoteTerminated()
 
 void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason)
 {
-    LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d",
-        rect.width_, rect.height_, rect.posX_, rect.posY_);
+    LOGI("width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d", rect.width_, rect.height_,
+        rect.posX_, rect.posY_);
     SystemProperties::SetDeviceOrientation(rect.height_ >= rect.width_ ? 0 : 1);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {

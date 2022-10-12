@@ -20,12 +20,18 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "grid_row_layout_property.h"
 #include "grid_row_layout_algorithm.h"
+#include "grid_row_event_hub.h"
 
 namespace OHOS::Ace::NG {
 class GridRowLayoutPattern : public Pattern {
     DECLARE_ACE_TYPE(GridRowLayoutPattern, Pattern);
 
 public:
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+    
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<GridRowLayoutProperty>();
@@ -34,6 +40,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<GridRowLayoutAlgorithm>();
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<GridRowEventHub>();
     }
 };
 } // namespace OHOS::Ace::NG

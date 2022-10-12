@@ -751,7 +751,6 @@ void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& dec
     // set AntiAlias
     SkPaint paint;
     paint.setAntiAlias(true);
-    paint.setAntiAlias(true);
     if (decoration->GetHasBorderImageSource()) {
         if (!image) {
             return;
@@ -786,7 +785,7 @@ void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& dec
         std::unique_ptr<SkCanvas> skCanvas = std::make_unique<SkCanvas>(skBitmap);
         skCanvas->drawPaint(paint);
         sk_sp<SkImage> skImage = SkImage::MakeFromBitmap(skBitmap);
-        
+
         BorderImagePainter borderImagePainter(paintSize, decoration, skImage, dipScale);
         borderImagePainter.InitPainter();
         borderImagePainter.UpdateExtraOffsetToPaintSize(extraOffset);

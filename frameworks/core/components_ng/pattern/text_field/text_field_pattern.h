@@ -29,12 +29,14 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -48,14 +50,12 @@ class OnTextChangedListener;
 
 namespace OHOS::Ace::NG {
 
-enum class TextModifiedType {
-    INPUT_METHOD,
-    TOUCH_OR_KEY,
-    NONE,
-};
+enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
-class TextFieldPattern : public Pattern, public TextInputClient, public ValueChangeObserver {
-    DECLARE_ACE_TYPE(TextFieldPattern, Pattern, TextInputClient, ValueChangeObserver);
+enum class CaretUpdateType { CLICK, EVENT, INPUT, NONE };
+
+class TextFieldPattern : public Pattern, public ValueChangeObserver {
+    DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
 
 public:
     TextFieldPattern();
@@ -91,8 +91,23 @@ public:
     {
         return instanceId_;
     }
-    // controller related
-    void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+
+    void UpdateCaretPositionByTextEdit();
+    void UpdateCaretPositionByTouchOffset();
+    void UpdateSelectionOffset();
+
+    void CalcCursorOffsetXByPosition(int32_t position);
+
+    bool ComputeOffsetForCaretDownstream(
+        const TextEditingValueNG& TextEditingValueNG, int32_t extent, CaretMetrics& result) const;
+
+    int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
+
+    void InsertValue(const std::string& insertValue);
+    void DeleteBackward(int32_t length);
+    void DeleteForward(int32_t length);
+
+    float GetTextOrPlaceHolderFontSize();
 
     void SetTextFieldController(const RefPtr<TextFieldController>& controller)
     {
@@ -109,18 +124,24 @@ public:
         textEditingController_ = textEditController;
     }
 
-    const TextEditingValue& GetEditingValue() const;
+    const TextEditingValueNG& GetEditingValue() const;
 
-    void SetEditingValue(const TextEditingValue& newValue, bool needFireChangeEvent = true);
+    void SetEditingValueToProperty(const std::string& newValueText);
 
     void UpdatePositionOfParagraph(int32_t pos);
     void UpdateCaretPositionByTouch(const Offset& offset);
+    void UpdateCaretOffsetByKeyEvent();
 
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose);
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
     void UpdateConfiguration();
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false);
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
     void ClearEditingValue();
@@ -149,9 +170,14 @@ public:
         return lastTouchOffset_;
     }
 
-    TextDirection GetTextDirection()
+    float GetSelectionBaseOffsetX() const
     {
-        return textDirection_;
+        return selectionBaseOffsetX_;
+    }
+
+    float GetSelectionDestinationOffsetX() const
+    {
+        return selectionDestinationOffsetX_;
     }
 
     float GetCaretOffsetX() const
@@ -164,9 +190,9 @@ public:
         caretOffsetX_ = offsetX;
     }
 
-    TextModifiedType GetTextModified() const
+    CaretUpdateType GetCaretUpdateType() const
     {
-        return textModified_;
+        return caretUpdateType_;
     }
 
     void SetBasicPadding(float padding)
@@ -179,17 +205,62 @@ public:
         return basicPadding_;
     }
 
+    const RectF& GetTextRect()
+    {
+        return textRect_;
+    }
+
+    const TextSelector& GetTextSelector()
+    {
+        return textSelector_;
+    }
+
+    void SetInSelectMode(SelectionMode selectionMode)
+    {
+        selectionMode_ = selectionMode;
+    }
+
+    bool InSelectMode() const
+    {
+        return selectionMode_ != SelectionMode::NONE;
+    }
+
+    void CursorMoveLeft();
+    void CursorMoveRight();
+    void CursorMoveUp();
+    void CursorMoveDown();
+
 private:
-    bool focusEventInitialized_ = false;
-    void HandleFocusEvent();
+    bool IsTextArea();
     void HandleBlurEvent();
+    bool OnKeyEvent(const KeyEvent& event);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void HandleDirectionalKey(const KeyEvent& keyEvent);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
+    void InitClickEvent();
+    void HandleClickEvent(const GestureEvent& info);
     void InitFocusEvent();
     void InitTouchEvent();
     void CursorMoveOnClick(const Offset& offset);
+
+    void HandleSelectionUp();
+    void HandleSelectionDown();
+    void HandleSelectionLeft();
+    void HandleSelectionRight();
+
+    void HandleOnUndoAction();
+    void HandleOnRedoAction();
+    void HandleOnSelectAll();
+    void HandleOnCopy();
+    void HandleOnPaste();
+    void HandleOnCut();
+
+    void FireEventHubOnChange(const std::string& text);
+
+    void UpdateSelection(int32_t both);
+    void UpdateSelection(int32_t start, int32_t end);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
@@ -198,11 +269,18 @@ private:
 
     void UpdateTextFieldManager(const Offset& offset);
     void OnTextInputActionUpdate(TextInputAction value);
+    void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    void FilterWithRegex(const std::string& filter, std::string& valueToUpdate);
+    void EditingValueFilter(std::string& valueToUpdate);
+    float PreferredLineHeight();
 
     RectF textRect_;
     RectF imageRect_;
     std::shared_ptr<RSParagraph> paragraph_;
+    TextStyle lineHeightMeasureUtilTextStyle_;
+    std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
 
     RefPtr<ImageLoadingContext> ShowPasswordImageLoadingCtx_;
     RefPtr<ImageLoadingContext> HidePasswordImageLoadingCtx_;
@@ -224,9 +302,17 @@ private:
     Offset lastTouchOffset_;
     float basicPadding_ = 0.0f;
     float baselineOffset_ = 0.0f;
+    float selectionBaseOffsetX_ = 0.0f;
+    float selectionDestinationOffsetX_ = 0.0f;
     float caretOffsetX_ = 0.0f;
+    float caretOffsetY_ = 0.0f;
+    bool focusRequested_ = false;
     bool cursorVisible_ = false;
-    TextModifiedType textModified_ = TextModifiedType::NONE;
+    bool focusEventInitialized_ = false;
+    bool preferredLineHeightNeedToUpdate = true;
+
+    SelectionMode selectionMode_ = SelectionMode::NONE;
+    CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
 
@@ -234,10 +320,20 @@ private:
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
+    std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
+
     RefPtr<TextFieldController> textFieldController_;
     RefPtr<TextEditController> textEditingController_;
+    TextEditingValueNG textEditingValue_;
+    TextSelector textSelector_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
+    CopyOptions copyOption_ = CopyOptions::Distributed;
+    RefPtr<Clipboard> clipboard_;
+    std::vector<TextEditingValueNG> operationRecords_;
+    std::vector<TextEditingValueNG> redoOperationRecords_;
+    std::vector<TextSelector> textSelectorRecords_;
+    std::vector<TextSelector> redoTextSelectorRecords_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
 #endif
