@@ -17,14 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_SUBWINDOW_SUBWINDOW_MANAGER_H
 
 #include <mutex>
-#include <set>
 #include <unordered_map>
 
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/dialog/dialog_properties.h"
 
 namespace OHOS::Ace {
 
@@ -68,16 +66,7 @@ public:
 
     void SetHotAreas(const std::vector<Rect>& rects);
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom);
-    void ShowDialog(const std::string& title, const std::string& message,
-        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
-        const std::set<std::string>& dialogCallbacks);
-    void ShowActionMenu(const std::string& title,
-        const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback);
-
 private:
-    RefPtr<Subwindow> GetOrCreateSubWindow();
-
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 

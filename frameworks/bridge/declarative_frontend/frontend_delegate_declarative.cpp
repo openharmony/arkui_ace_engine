@@ -1320,14 +1320,11 @@ void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t 
         TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateDeclarative::SetToastStopListenerCallback(std::function<void()>&& stopCallback)
+void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std::string& message,
+    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
 {
-    ToastComponent::GetInstance().SetToastStopListenerCallback(std::move(stopCallback));
-}
-
-void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProperties,
-    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
-{
+    LOGI("FrontendDelegateDeclarative::ShowDialog");
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     if (callbacks.find(COMMON_SUCCESS) != callbacks.end()) {
         auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
@@ -1358,7 +1355,14 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
             });
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);
     }
-    dialogProperties.callbacks = std::move(callbackMarkers);
+
+    DialogProperties dialogProperties = {
+        .title = title,
+        .content = message,
+        .autoCancel = autoCancel,
+        .buttons = buttons,
+        .callbacks = std::move(callbackMarkers),
+    };
     auto pipelineContext = pipelineContextHolder_.Get();
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
@@ -1379,35 +1383,8 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
     context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
-void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std::string& message,
-    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
-    const std::set<std::string>& callbacks)
-{
-    DialogProperties dialogProperties = {
-        .title = title,
-        .content = message,
-        .autoCancel = autoCancel,
-        .buttons = buttons,
-    };
-    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
-}
-
-void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std::string& message,
-    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
-    const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
-{
-    DialogProperties dialogProperties = {
-        .title = title,
-        .content = message,
-        .autoCancel = autoCancel,
-        .buttons = buttons,
-        .onStatusChanged = std::move(onStatusChanged),
-    };
-    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
-}
-
-void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
-    const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+void FrontendDelegateDeclarative::ShowActionMenu(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
@@ -1433,37 +1410,19 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
                 TaskExecutor::TaskType::JS);
         });
     callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
-    dialogProperties.callbacks = std::move(callbackMarkers);
+
+    DialogProperties dialogProperties = {
+        .title = title,
+        .autoCancel = true,
+        .isMenu = true,
+        .buttons = button,
+        .callbacks = std::move(callbackMarkers),
+    };
     ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(context);
     context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
-}
-
-void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
-    std::function<void(int32_t, int32_t)>&& callback)
-{
-    DialogProperties dialogProperties = {
-        .title = title,
-        .autoCancel = true,
-        .isMenu = true,
-        .buttons = button,
-    };
-    ShowActionMenuInner(dialogProperties, button, std::move(callback));
-}
-
-void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
-    std::function<void(int32_t, int32_t)>&& callback, std::function<void(bool)>&& onStatusChanged)
-{
-    DialogProperties dialogProperties = {
-        .title = title,
-        .autoCancel = true,
-        .isMenu = true,
-        .buttons = button,
-        .onStatusChanged = std::move(onStatusChanged),
-    };
-    ShowActionMenuInner(dialogProperties, button, std::move(callback));
 }
 
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(

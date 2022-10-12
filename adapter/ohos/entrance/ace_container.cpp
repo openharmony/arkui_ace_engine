@@ -756,7 +756,6 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), callback);
@@ -770,7 +769,6 @@ void AceContainer::SetViewNew(
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);

@@ -359,12 +359,10 @@ void TweenElement::Update()
                 controller->AttachScheduler(context_);
             }
             controllerCustom_ = controller;
-            tweenComponent->SetAnimator(controllerCustom_);
         }
         if (!controller_) {
             isDelegatedController_ = false;
             controller_ = AceType::MakeRefPtr<Animator>(context_);
-            tweenComponent->SetAnimator(controller_);
             LOGD("set animator to component when update.");
         }
 
@@ -379,9 +377,9 @@ void TweenElement::Update()
 TweenElement::~TweenElement()
 {
     if (isComponentController_ && controllerCustom_) {
-        controllerCustom_->Stop();
         controllerCustom_->ClearInterpolators();
         controllerCustom_->ClearAllListeners();
+        controllerCustom_->Stop();
     }
 }
 
