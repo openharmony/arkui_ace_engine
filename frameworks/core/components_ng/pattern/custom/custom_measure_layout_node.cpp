@@ -25,6 +25,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+
 RefPtr<CustomMeasureLayoutNode> CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
     int32_t nodeId, const std::string& viewKey)
 {
