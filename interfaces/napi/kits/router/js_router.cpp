@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <string>
 
-#include "interfaces/napi/kits/napi_utils.h"
+#include "interfaces/napi/kits/utils/napi_utils.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "napi/native_api.h"
@@ -244,8 +244,7 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
 
                 napi_value msg = nullptr;
-                auto iter = ERROR_CODE_TO_MSG.find(errCode);
-                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + message;
+                std::string strMsg = ErrorToMessage(errCode) + message;
                 LOGE("napi throw errCode %d strMsg %s", errCode, strMsg.c_str());
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
 
@@ -275,8 +274,7 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
                 std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
                 napi_value msg = nullptr;
-                auto iter = ERROR_CODE_TO_MSG.find(Framework::ERROR_CODE_INTERNAL_ERROR);
-                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + "Can not get delegate.";
+                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
                 napi_value error = nullptr;
                 napi_create_error(env, code, msg, &error);
@@ -392,8 +390,7 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
 
                 napi_value msg = nullptr;
-                auto iter = ERROR_CODE_TO_MSG.find(errCode);
-                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + message;
+                std::string strMsg = ErrorToMessage(errCode) + message;
                 LOGE("napi throw errCode %{public}d strMsg %{public}s", errCode, strMsg.c_str());
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
 
@@ -423,8 +420,7 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
                 std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
                 napi_value msg = nullptr;
-                auto iter = ERROR_CODE_TO_MSG.find(Framework::ERROR_CODE_INTERNAL_ERROR);
-                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + "Can not get delegate.";
+                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
                 napi_value error = nullptr;
                 napi_create_error(env, code, msg, &error);

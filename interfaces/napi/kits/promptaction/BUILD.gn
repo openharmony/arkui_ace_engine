@@ -18,23 +18,7 @@ template("napi_promptaction_static") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
-    defines += invoker.defines
-    cflags_cc += invoker.cflags_cc
-
-    include_dirs = [
-      "//foundation/arkui",
-      "$ace_root",
-      "$ace_root/frameworks",
-      "$root_out_dir/arkui/framework",
-    ]
-
-    sources = [ "../prompt/js_prompt.cpp" ]
-
-    deps = [ "//foundation/arkui/napi/:ace_napi" ]
-
-    if (defined(config.libace_target)) {
-      deps += [ config.libace_target ]
-    }
+    deps = [ "../prompt:prompt_static_${platform}" ]
 
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
@@ -43,21 +27,6 @@ template("napi_promptaction_static") {
 
 foreach(item, ace_platforms) {
   napi_promptaction_static("promptaction_static_" + item.name) {
-    defines = []
-    cflags_cc = []
-    config = {
-    }
-
-    if (defined(item.config)) {
-      config = item.config
-    }
-
-    if (defined(config.defines)) {
-      defines = config.defines
-    }
-
-    if (defined(config.cflags_cc)) {
-      cflags_cc = config.cflags_cc
-    }
+    platform = item.name
   }
 }
