@@ -16,11 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_SUBWINDOW_SUBWINDOW_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_SUBWINDOW_SUBWINDOW_H
 
-#include <set>
-
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components/dialog/dialog_properties.h"
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
@@ -50,13 +47,6 @@ public:
     {
         subwindowId_ = id;
     }
-
-    virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) = 0;
-    virtual void ShowDialog(const std::string& title, const std::string& message,
-        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
-        const std::set<std::string>& callbacks) = 0;
-    virtual void ShowActionMenu(const std::string& title,
-        const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback) = 0;
 
 private:
     int32_t subwindowId_ = 0;

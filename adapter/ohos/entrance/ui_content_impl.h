@@ -85,7 +85,7 @@ public:
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info);
-    void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
+    void InitializeSubWindow(OHOS::Rosen::Window* window);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
