@@ -27,8 +27,6 @@ public:
     SvgClipPath() = default;
     ~SvgClipPath() override = default;
     static RefPtr<SvgNode> Create();
-
-    SkPath AsPath(const Size& viewPort) const override;
 };
 
 } // namespace OHOS::Ace::NG

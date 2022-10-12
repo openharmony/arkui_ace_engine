@@ -22,6 +22,8 @@ namespace OHOS::Ace::NG {
 SvgStop::SvgStop() : SvgNode()
 {
     declaration_ = AceType::MakeRefPtr<SvgStopDeclaration>();
+    declaration_->Init();
+    declaration_->InitializeStyle();
 }
 
 RefPtr<SvgNode> SvgStop::Create()

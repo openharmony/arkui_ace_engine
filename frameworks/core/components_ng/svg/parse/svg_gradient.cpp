@@ -22,6 +22,8 @@ namespace OHOS::Ace::NG {
 SvgGradient::SvgGradient(GradientType gradientType) : SvgNode()
 {
     gradientDeclaration_ = AceType::MakeRefPtr<SvgGradientDeclaration>();
+    gradientDeclaration_->Init();
+    gradientDeclaration_->InitializeStyle();
     gradientDeclaration_->SetGradientType(gradientType);
     InitNoneFlag();
 }

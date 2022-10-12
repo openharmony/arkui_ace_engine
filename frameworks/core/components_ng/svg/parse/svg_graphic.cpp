@@ -24,8 +24,8 @@
 namespace OHOS::Ace::NG {
 void SvgGraphic::UpdateGradient(const Size& viewPort)
 {
-    auto fillState = declaration_->GetFillState();
-    auto& gradient = fillState.GetGradient();
+    fillState_ = declaration_->GetFillState();
+    auto& gradient = fillState_.GetGradient();
     if (!gradient) {
         return;
     }
@@ -76,25 +76,23 @@ void SvgGraphic::UpdateGradient(const Size& viewPort)
 
 bool SvgGraphic::UpdateFillStyle(bool antiAlias)
 {
-    auto fillState = declaration_->GetFillState();
-    if (fillState.GetColor() == Color::TRANSPARENT && !fillState.GetGradient()) {
+    if (fillState_.GetColor() == Color::TRANSPARENT && !fillState_.GetGradient()) {
         return false;
     }
-    double curOpacity = fillState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
+    double curOpacity = fillState_.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
     fillPaint_.setStyle(SkPaint::Style::kFill_Style);
     fillPaint_.setAntiAlias(antiAlias);
-    if (fillState.GetGradient()) {
+    if (fillState_.GetGradient()) {
         SetGradientStyle(curOpacity);
     } else {
-        fillPaint_.setColor(fillState.GetColor().BlendOpacity(curOpacity).GetValue());
+        fillPaint_.setColor(fillState_.GetColor().BlendOpacity(curOpacity).GetValue());
     }
     return true;
 }
 
 void SvgGraphic::SetGradientStyle(double opacity)
 {
-    auto fillState = declaration_->GetFillState();
-    auto gradient = fillState.GetGradient();
+    auto gradient = fillState_.GetGradient();
     CHECK_NULL_VOID(gradient);
     auto gradientColors = gradient->GetColors();
     if (gradientColors.empty()) {
