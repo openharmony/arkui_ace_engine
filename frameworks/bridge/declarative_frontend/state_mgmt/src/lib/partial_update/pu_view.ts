@@ -51,7 +51,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   protected get localStorage_() {
     if (!this.localStoragebackStore_) {
-      console.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
       this.localStoragebackStore_ = new LocalStorage({ /* emty */ });
     }
     return this.localStoragebackStore_;
