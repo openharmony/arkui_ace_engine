@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
+import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
@@ -21,7 +21,7 @@ abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
 
-es2abc_gen_abc("gen_stateMgmt_abc") {
+ts2abc_gen_abc("gen_stateMgmt_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmt.js")
@@ -31,7 +31,7 @@ es2abc_gen_abc("gen_stateMgmt_abc") {
   out_puts = [ base_output_path + "/stateMgmt.abc" ]
 }
 
-es2abc_gen_abc("gen_jsEnumStyle_abc") {
+ts2abc_gen_abc("gen_jsEnumStyle_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js")
@@ -41,7 +41,7 @@ es2abc_gen_abc("gen_jsEnumStyle_abc") {
   out_puts = [ base_output_path + "/jsEnumStyle.abc" ]
 }
 
-es2abc_gen_abc("gen_js_mock_system_plugin_abc") {
+ts2abc_gen_abc("gen_js_mock_system_plugin_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
   src_js = rebase_path(
           "$root_out_dir/obj/third_party/jsframework/dist/jsMockSystemPlugin.js")
