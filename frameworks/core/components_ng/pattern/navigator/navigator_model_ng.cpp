@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/navigator/navigator_view.h"
+#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void NavigatorView::Create()
+void NavigatorModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -31,7 +31,7 @@ void NavigatorView::Create()
     stack->Push(frameNode);
 }
 
-void NavigatorView::SetType(NavigatorType value)
+void NavigatorModelNG::SetType(NavigatorType value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
@@ -39,7 +39,7 @@ void NavigatorView::SetType(NavigatorType value)
     eventHub->SetType(value);
 }
 
-void NavigatorView::SetActive(bool active)
+void NavigatorModelNG::SetActive(bool active)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
@@ -47,7 +47,7 @@ void NavigatorView::SetActive(bool active)
     eventHub->SetActive(active);
 }
 
-void NavigatorView::SetUri(const std::string& uri)
+void NavigatorModelNG::SetUri(const std::string& uri)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
@@ -55,7 +55,7 @@ void NavigatorView::SetUri(const std::string& uri)
     eventHub->SetUrl(uri);
 }
 
-void NavigatorView::SetParams(const std::string& params)
+void NavigatorModelNG::SetParams(const std::string& params)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();

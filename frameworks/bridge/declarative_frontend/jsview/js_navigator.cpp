@@ -17,8 +17,32 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/navigator/navigator_component.h"
+#include "core/components_ng/pattern/navigator/navigator_model.h"
+#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/navigator_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_ng/pattern/navigator/navigator_view.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<NavigatorModel> NavigatorModel::instance_ = nullptr;
+
+NavigatorModel* NavigatorModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::NavigatorModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::NavigatorModelNG());
+        } else {
+            instance_.reset(new Framework::NavigatorModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -26,82 +50,40 @@ void JSNavigator::Create(const JSCallbackInfo& info)
 {
     LOGD("Create component: JSNavigator");
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigatorView::Create();
-        if (info.Length() > 0 && info[0]->IsObject()) {
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-            JSRef<JSVal> target = obj->GetProperty("target");
-            if (target->IsString()) {
-                NG::NavigatorView::SetUri(target->ToString());
-            }
-
-            JSRef<JSVal> type = obj->GetProperty("type");
-            if (type->IsNumber()) {
-                auto navigatorType = NG::NavigatorType(type->ToNumber<uint32_t>());
-                if (navigatorType == NG::NavigatorType::DEFAULT) {
-                    NG::NavigatorView::SetType(NG::NavigatorType::PUSH);
-                } else {
-                    NG::NavigatorView::SetType(navigatorType);
-                }
-            }
-        } else {
-            NG::NavigatorView::SetType(NG::NavigatorType::BACK);
-        }
-        LOGI("NG navigator created");
-        return;
-    }
-
-    // when the navigator is created, we don't know the child. so I use an empty box here
-    RefPtr<OHOS::Ace::Component> child;
-    auto navigatorComponent = AceType::MakeRefPtr<OHOS::Ace::NavigatorComponent>(child);
-
+    NavigatorModel::GetInstance()->Create();
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> target = obj->GetProperty("target");
         if (target->IsString()) {
-            navigatorComponent->SetUri(target->ToString());
+            NavigatorModel::GetInstance()->SetUri(target->ToString());
         }
 
         JSRef<JSVal> type = obj->GetProperty("type");
         if (type->IsNumber()) {
-            NavigatorType navigatorType = NavigatorType(type->ToNumber<uint32_t>());
+            auto navigatorType = NavigatorType(type->ToNumber<uint32_t>());
             if (navigatorType == NavigatorType::DEFAULT) {
-                navigatorComponent->SetType(NavigatorType::PUSH);
+                NavigatorModel::GetInstance()->SetType(NavigatorType::PUSH);
             } else {
-                navigatorComponent->SetType(navigatorType);
+                NavigatorModel::GetInstance()->SetType(navigatorType);
             }
         }
     } else {
-        navigatorComponent->SetType(NavigatorType::BACK);
+        NavigatorModel::GetInstance()->SetType(NavigatorType::BACK);
     }
-
-    ViewStackProcessor::GetInstance()->Push(navigatorComponent);
-    LOGI("old framework navigator created");
 }
 
 void JSNavigator::SetTarget(const std::string& value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigatorView::SetUri(value);
-        return;
-    }
-    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    navigator->SetUri(value);
+    NavigatorModel::GetInstance()->SetUri(value);
 }
 
 void JSNavigator::SetType(int32_t value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigatorView::SetType(NG::NavigatorType(value));
-        return;
-    }
-
-    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    NavigatorType navigatorType = NavigatorType(value);
+    auto navigatorType = NavigatorType(value);
     if (navigatorType == NavigatorType::DEFAULT) {
-        navigator->SetType(NavigatorType::PUSH);
+        NavigatorModel::GetInstance()->SetType(NavigatorType::PUSH);
     } else {
-        navigator->SetType(navigatorType);
+        NavigatorModel::GetInstance()->SetType(navigatorType);
     }
 }
 
@@ -133,34 +115,13 @@ void JSNavigator::JSBind(BindingTarget globalObj)
 
 void JSNavigator::SetActive(bool active)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigatorView::SetActive(active);
-        return;
-    }
-    
-    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (navigator) {
-        navigator->SetActive(active);
-    }
+    NavigatorModel::GetInstance()->SetActive(active);
 }
 
 void JSNavigator::SetParams(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (args.Length() > 0 && args[0]->IsObject()) {
-            JSRef<JSVal> val = JSRef<JSVal>::Cast(args[0]);
-            NG::NavigatorView::SetParams(val->ToString());
-        }
-        return;
-    }
-
-    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (navigator) {
-        if (args.Length() > 0 && args[0]->IsObject()) {
-            JSRef<JSVal> val = JSRef<JSVal>::Cast(args[0]);
-            navigator->SetParams(val->ToString());
-        }
-    }
+    JSRef<JSVal> val = JSRef<JSVal>::Cast(args[0]);
+    NavigatorModel::GetInstance()->SetParams(val->ToString());
 }
 
 void JSNavigator::JsWidth(const JSCallbackInfo& info)
@@ -170,20 +131,12 @@ void JSNavigator::JsWidth(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsWidth(info);
-        return;
-    }
-
     JsWidth(info[0]);
 }
 
 void JSNavigator::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (navigator) {
-        navigator->SetIsDefWidth(true);
-    }
+    NavigatorModel::GetInstance()->SetIsDefWidth(true);
     JSViewAbstract::JsWidth(jsValue);
 }
 
@@ -194,20 +147,12 @@ void JSNavigator::JsHeight(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsHeight(info);
-        return;
-    }
-
     JsHeight(info[0]);
 }
 
 void JSNavigator::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (navigator) {
-        navigator->SetIsDefHeight(true);
-    }
+    NavigatorModel::GetInstance()->SetIsDefHeight(true);
     JSViewAbstract::JsHeight(jsValue);
 }
 
@@ -220,11 +165,6 @@ void JSNavigator::JsSize(const JSCallbackInfo& info)
 
     if (!info[0]->IsObject()) {
         LOGE("arg is not Object or String.");
-        return;
-    }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsSize(info);
         return;
     }
 
