@@ -815,7 +815,7 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
             return;
         }
     }
-    double scale;
+    double scale = 0.0;
     if (ParseJsDouble(info[0], scale)) {
         if (Container::IsCurrentUseNewPipeline()) {
             // new pipeline
@@ -1951,6 +1951,10 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     auto id = info[0]->ToString();
     if (id.empty()) {
         LOGE("JsGeometryTransition: id is empty.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("GeometryTransition not completed");
         return;
     }
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -3872,6 +3876,10 @@ std::pair<Dimension, Dimension> JSViewAbstract::ParseSize(const JSCallbackInfo& 
 
 void JSViewAbstract::JsUseAlign(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGD("UseAlign is deprecated.");
+        return;
+    }
     if (info.Length() < 2) {
         LOGE("The arg is wrong, it is supposed to have atleast 2 arguments");
         return;
@@ -5115,6 +5123,10 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGD("Deprecated in new pipe");
+        return;
+    }
     if (args[0]->IsFunction()) {
         RefPtr<JsFocusFunction> jsOnFocusMove = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
         auto onFocusMove = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocusMove)](int info) {
@@ -5327,6 +5339,10 @@ void JSViewAbstract::JsId(const std::string& id)
 
 void JSViewAbstract::JsRestoreId(int32_t restoreId)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("RestoreId not completed in new pipe.");
+        return;
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     if (component) {
         component->SetRestoreId(restoreId);
@@ -5933,6 +5949,10 @@ void JSViewAbstract::SetBlurRadius(const RefPtr<Decoration>& decoration, float r
 
 void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGD("Not completed in new pipe.");
+        return;
+    }
     auto decoration = GetBackDecoration();
     if (decoration) {
         decoration->SetWindowBlurProgress(progress);
@@ -6387,6 +6407,10 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
 
     if (!info[0]->IsArray() || !info[1]->IsFunction()) {
         LOGE("JsOnVisibleAreaChange: The param type is invalid.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("OnVisibleAreaChange not completed");
         return;
     }
 
