@@ -33,7 +33,7 @@ public:
     static void SetRange(const RefPtr<TextPickerPattern>& textPickerPattern, const std::vector<std::string>& value);
     static void SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogTextEvent&& onChange);
     static void SetDefaultPickerItemHeight(const Dimension& value = Dimension(0));
-    static void SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogTextEvent onChange);
+    static void SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogTextEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
     std::map<std::string, NG::DailogTextEvent> dialogEvent,
     std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);

@@ -35,7 +35,7 @@ public:
     static void SetSelectedDate(const RefPtr<DatePickerPattern>& datePickerPattern, const PickerDate& value);
     static void SetShowLunar(bool lunar = false);
     static void SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogEvent&& onChange);
-    static void SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent onChange);
+    static void SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
         std::map<std::string, NG::DailogEvent> dialogEvent,
         std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
