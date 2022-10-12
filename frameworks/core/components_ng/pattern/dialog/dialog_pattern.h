@@ -20,6 +20,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/dialog//dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
@@ -31,7 +33,9 @@ class DialogPattern : public Pattern {
     DECLARE_ACE_TYPE(DialogPattern, Pattern);
 
 public:
-    DialogPattern() = default;
+    DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
+        : dialogTheme_(dialogTheme), customNode_(customNode)
+    {}
     ~DialogPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -64,6 +68,8 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    void BuildChild(const DialogProperties& dialogProperties);
+
 private:
     void OnModifyDone() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -71,7 +77,22 @@ private:
     void HandleTouchUp(const Offset& clickPosition);
     void PopDialog();
 
-    RefPtr<TouchEventImpl> touchEvent_;
+    // set render context properties of content frame
+    void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const RefPtr<DialogTheme>& theme);
+
+    RefPtr<FrameNode> BuildTitle(std::string& data, const DialogProperties& dialogProperties);
+    RefPtr<FrameNode> BuildContent(std::string& data, const DialogProperties& dialogProperties);
+
+    RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons);
+    RefPtr<UINode> CreateButton(const ButtonInfo& params);
+    // to close dialog when button is clicked
+    void BindCloseCallBack(const RefPtr<GestureEventHub>& hub);
+    // build ActionSheet items
+    RefPtr<FrameNode> BuildSheet(const std::vector<ActionSheetInfo>& sheets);
+    RefPtr<FrameNode> BuildSheetItem(const ActionSheetInfo& item);
+
+    RefPtr<DialogTheme> dialogTheme_;
+    RefPtr<UINode> customNode_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };
