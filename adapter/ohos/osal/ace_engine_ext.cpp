@@ -15,7 +15,7 @@
 
 #include "core/common/ace_engine_ext.h"
 
-#include <dlfen.h>
+#include <dlfcn.h>
 
 #include "base/log/log.h"
 
