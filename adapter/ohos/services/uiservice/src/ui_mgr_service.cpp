@@ -191,7 +191,6 @@ int32_t UIMgrService::ReturnRequest(
     const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
 {
     HILOG_INFO("UIMgrService::ReturnRequest called start");
-    std::lock_guard<std::mutex> lock(uiMutex_);
     for (auto iter = callbackMap_.begin(); iter != callbackMap_.end(); ++iter) {
         sptr<IUIService> uiService = iter->second;
         if (uiService == nullptr) {
@@ -246,7 +245,6 @@ std::string UIMgrService::GetCallBackKeyStr(const AAFwk::Want& want)
 bool UIMgrService::CheckCallBackFromMap(const std::string& key)
 {
     HILOG_INFO("UIMgrService::CheckCallBackFromMap called start");
-    std::lock_guard<std::mutex> lock(uiMutex_);
     auto it = callbackMap_.find(key);
     if (it == callbackMap_.end()) {
         return false;
