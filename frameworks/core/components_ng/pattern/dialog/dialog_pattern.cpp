@@ -318,16 +318,15 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
     RefPtr<FrameNode> container;
-    if (buttons.size() == 1) { // the button in dialog is one.
+    if (buttons.size() == 1) {
         container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    } else if (buttons.size() == 2) { // the button in dialog is two.
+    } else {
         container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
         layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
         layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    } else { // the button in dialog is more than two.
-        // TODO: use wrap pattern
     }
+
     CHECK_NULL_RETURN(container, nullptr);
     // set action's padding
     PaddingProperty actionPadding;
