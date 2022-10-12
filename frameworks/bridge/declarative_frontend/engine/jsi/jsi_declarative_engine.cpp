@@ -141,6 +141,9 @@ bool JsiDeclarativeEngineInstance::isModulePreloaded_ = false;
 bool JsiDeclarativeEngineInstance::isModuleInitialized_ = false;
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::globalRuntime_;
 
+// for async task callback executed after this instance has been destroied.
+thread_local shared_ptr<JsRuntime> localRuntime;
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
@@ -347,6 +350,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     isModulePreloaded_ = evalResult;
     globalRuntime_ = nullptr;
     LOGI("PreloadAceModule loaded:%{public}d", isModulePreloaded_);
+    localRuntime = arkRuntime;
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -618,12 +622,12 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
     auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
     if (!jsiEngine) {
         LOGE("jsiEngine is null");
-        return nullptr;
+        return localRuntime;
     }
     auto engineInstance = jsiEngine->GetEngineInstance();
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
-        return nullptr;
+        return localRuntime;
     }
     return engineInstance->GetJsRuntime();
 }
