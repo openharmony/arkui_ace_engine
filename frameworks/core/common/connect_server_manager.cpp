@@ -119,7 +119,7 @@ void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
         std::lock_guard<std::mutex> lock(mutex_);
         const auto result = instanceMap_.try_emplace(instanceId, instanceName);
         if (!result.second) {
-            LOGW("Already have instance name of this instance id: %{public}d", instanceId);
+            LOGD("Already have instance name of this instance id: %{public}d", instanceId);
             return;
         }
     }

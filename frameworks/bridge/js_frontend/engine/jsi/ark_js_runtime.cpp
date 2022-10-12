@@ -41,7 +41,6 @@ Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info)
 
 bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId)
 {
-    LOGI("Ark: create jsvm");
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
@@ -50,7 +49,7 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
     option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
     option.SetEnableAsmInterpreter(SystemProperties::GetAsmInterpreterEnabled());
     option.SetAsmOpcodeDisableRange(SystemProperties::GetAsmOpcodeDisableRange());
-    LOGI("ArkJSRuntime::Initialize ark properties = %{public}d", SystemProperties::GetArkProperties());
+    LOGI("Initialize ark properties = %{public}d", SystemProperties::GetArkProperties());
 #endif
     const int64_t poolSize = 0x10000000; // 256M
     option.SetGcPoolSize(poolSize);
