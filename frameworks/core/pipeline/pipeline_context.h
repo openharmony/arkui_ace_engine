@@ -837,12 +837,12 @@ public:
 
     void SetAppTitle(const std::string& title);
     void SetAppIcon(const RefPtr<PixelMap>& icon);
+    void FlushMessages() override;
 
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
-    void FlushMessages() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     void FlushReload() override;
     void FlushReloadTransition() override;

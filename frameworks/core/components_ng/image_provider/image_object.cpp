@@ -75,4 +75,9 @@ void ImageObject::ClearData()
     data_ = nullptr;
 }
 
+void ImageObject::ClearCanvasImage()
+{
+    canvasImage_ = nullptr;
+}
+
 } // namespace OHOS::Ace::NG
