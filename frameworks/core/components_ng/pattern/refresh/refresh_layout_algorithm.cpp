@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/refresh/refresh_layout_property.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
+#include "frameworks/base/utils/utils.h"
+#include "frameworks/core/components_ng/base/frame_node.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "frameworks/core/components_ng/property/measure_property.h"
+#include "frameworks/core/components_ng/property/measure_utils.h"
+#include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 

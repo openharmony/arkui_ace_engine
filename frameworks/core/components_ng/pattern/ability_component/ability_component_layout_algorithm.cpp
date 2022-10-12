@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/ability_component/ability_component_layout_algorithm.h"
+#include "frameworks/core/components_ng/pattern/ability_component/ability_component_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 

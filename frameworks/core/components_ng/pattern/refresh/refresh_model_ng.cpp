@@ -13,24 +13,30 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/refresh/refresh_view.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 #include <string>
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/i18n/localization.h"
-#include "base/utils/time_util.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-#include "core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/base/geometry/dimension.h"
+#include "frameworks/base/geometry/ng/offset_t.h"
+#include "frameworks/base/i18n/localization.h"
+#include "frameworks/base/utils/time_util.h"
+#include "frameworks/core/components_ng/base/frame_node.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
+#include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
+#include "frameworks/core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-void RefreshView::Create()
+namespace {
+
+constexpr int32_t CHILD_COUNT = 2;
+
+} // namespace
+
+void RefreshModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -40,11 +46,11 @@ void RefreshView::Create()
     stack->Push(frameNode);
 }
 
-void RefreshView::Pop()
+void RefreshModelNG::Pop()
 {
     auto refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(refreshNode);
-    if (refreshNode->TotalChildCount() >= 2) {
+    if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
         LOGI("%{public}s have %{public}d child", refreshNode->GetTag().c_str(), refreshNode->TotalChildCount());
         return;
     }
@@ -82,83 +88,84 @@ void RefreshView::Pop()
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue(Color::BLUE));
     progressLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
-void RefreshView::SetRefreshing(bool isRefreshing)
+void RefreshModelNG::SetRefreshing(bool isRefreshing)
 {
     ACE_UPDATE_PAINT_PROPERTY(RefreshRenderProperty, IsRefreshing, isRefreshing);
 }
 
-void RefreshView::SetRefreshDistance(const Dimension& refreshDistance)
+void RefreshModelNG::SetRefreshDistance(const Dimension& refreshDistance)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshDistance, refreshDistance);
 }
 
-void RefreshView::SetUseOffset(bool isUseOffset)
+void RefreshModelNG::SetUseOffset(bool isUseOffset)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsUseOffset, isUseOffset);
 }
 
-void RefreshView::SetIndicatorOffset(const Dimension& indicatorOffset)
+void RefreshModelNG::SetIndicatorOffset(const Dimension& indicatorOffset)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IndicatorOffset, indicatorOffset);
 }
 
-void RefreshView::SetFriction(int32_t friction)
+void RefreshModelNG::SetFriction(int32_t friction)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, friction);
 }
 
-void RefreshView::IsRefresh(bool isRefresh)
+void RefreshModelNG::IsRefresh(bool isRefresh)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefresh, isRefresh);
 }
 
-void RefreshView::SetLoadingDistance(const Dimension& loadingDistance)
+void RefreshModelNG::SetLoadingDistance(const Dimension& loadingDistance)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingDistance, loadingDistance);
 }
 
-void RefreshView::SetProgressDistance(const Dimension& progressDistance)
+void RefreshModelNG::SetProgressDistance(const Dimension& progressDistance)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressDistance, progressDistance);
 }
 
-void RefreshView::SetProgressDiameter(const Dimension& progressDiameter)
+void RefreshModelNG::SetProgressDiameter(const Dimension& progressDiameter)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressDiameter, progressDiameter);
 }
 
-void RefreshView::SetMaxDistance(const Dimension& maxDistance)
+void RefreshModelNG::SetMaxDistance(const Dimension& maxDistance)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxDistance, maxDistance);
 }
 
-void RefreshView::SetIsShowLastTime(bool isShowlastTime)
+void RefreshModelNG::SetIsShowLastTime(bool isShowlastTime)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsShowLastTime, isShowlastTime);
 }
 
-void RefreshView::SetShowTimeDistance(const Dimension& showTimeDistance)
+void RefreshModelNG::SetShowTimeDistance(const Dimension& showTimeDistance)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ShowTimeDistance, showTimeDistance);
 }
 
-void RefreshView::SetTextStyle(const TextStyle& textStyle)
+void RefreshModelNG::SetTextStyle(const TextStyle& textStyle)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, TextStyle, textStyle);
 }
 
-void RefreshView::SetProgressColor(const Color& progressColor)
+void RefreshModelNG::SetProgressColor(const Color& progressColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressColor, progressColor);
 }
 
-void RefreshView::SetProgressBackgroundColor(const Color& backgroundColor)
+void RefreshModelNG::SetProgressBackgroundColor(const Color& backgroundColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, BackgroundColor, backgroundColor);
 }
 
-void RefreshView::SetOnStateChange(StateChangeEvent&& stateChange)
+void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -167,7 +174,7 @@ void RefreshView::SetOnStateChange(StateChangeEvent&& stateChange)
     eventHub->SetOnStateChange(std::move(stateChange));
 }
 
-void RefreshView::SetOnRefreshing(RefreshingEvent&& refreshing)
+void RefreshModelNG::SetOnRefreshing(RefreshingEvent&& refreshing)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -176,7 +183,7 @@ void RefreshView::SetOnRefreshing(RefreshingEvent&& refreshing)
     eventHub->SetOnRefreshing(std::move(refreshing));
 }
 
-void RefreshView::SetChangeEvent(ChangeEvent&& changeEvent)
+void RefreshModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

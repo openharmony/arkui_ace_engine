@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ABILITY_COMPONENT_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ABILITY_COMPONENT_RENDER_PROPERTY_H
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paint_property.h"
+#include "frameworks/core/components/common/layout/constants.h"
+#include "frameworks/core/components_ng/layout/layout_property.h"
+#include "frameworks/core/components_ng/property/property.h"
+#include "frameworks/core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,6 +43,12 @@ public:
     {
         PaintProperty::Reset();
         ResetWant();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put("want", propWant_->c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Want, std::string, PROPERTY_UPDATE_RENDER);
