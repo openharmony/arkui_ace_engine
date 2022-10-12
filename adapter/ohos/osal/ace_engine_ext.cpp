@@ -17,7 +17,7 @@
 
 #include <dlfen.h>
 
-#include "base/log/loh.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 namespace {
