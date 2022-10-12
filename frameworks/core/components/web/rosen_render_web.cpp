@@ -96,6 +96,11 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
         }
     }
     SyncGeometryProperties();
+    Offset globalOffset = GetGlobalOffset();
+    if (globalOffset_ != globalOffset) {
+        OnGlobalPositionChanged();
+    }
+    globalOffset_ = globalOffset;
     RenderNode::Paint(context, offset);
 }
 

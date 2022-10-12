@@ -40,6 +40,7 @@ private:
     OHOS::sptr<OHOS::Surface> GetSurface();
 #endif
     bool needUpdateWeb_ = true;
+    Offset globalOffset_;
 };
 
 } // namespace OHOS::Ace
