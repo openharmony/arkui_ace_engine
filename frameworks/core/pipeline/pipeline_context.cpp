@@ -219,7 +219,7 @@ void PipelineContext::FlushBuild()
         return;
     }
     if (isFirstLoaded_) {
-        LOGI("PipelineContext::FlushBuild()");
+        LOGD("PipelineContext::FlushBuild()");
     }
     decltype(dirtyElements_) dirtyElements(std::move(dirtyElements_));
     for (const auto& elementWeak : dirtyElements) {
@@ -2229,7 +2229,7 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-    LOGI("OnSurfaceDensityChanged density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
+    LOGI("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
     isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {
