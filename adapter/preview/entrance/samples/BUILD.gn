@@ -129,8 +129,8 @@ if (is_standard_system) {
     # Add some resources
     # Add ohos fonts
     sources += [
+      "//base/global/system_resources/fonts",
       "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
-      "//utils/system_resources/fonts",
     ]
 
     # Add the dynamic library with the same name on the mac and windows system here.

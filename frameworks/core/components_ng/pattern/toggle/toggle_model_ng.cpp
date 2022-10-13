@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/toggle/toggle_view.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
-#include "core/components_ng/pattern/button/toggle_button_view.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_view.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
@@ -27,17 +27,32 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void ToggleView::Create(Ace::NG::ToggleType toggleType, bool isOn)
+void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwitchPattern>(); });
-    stack->Push(frameNode);
-    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
+    switch (toggleType) {
+        case NG::ToggleType::CHECKBOX:
+            NG::CheckBoxView::Create(std::nullopt, std::nullopt, V2::CHECKBOX_ETS_TAG);
+            NG::CheckBoxView::SetSelect(isOn);
+            break;
+        case NG::ToggleType::SWITCH: {
+            auto* stack = ViewStackProcessor::GetInstance();
+            int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+            auto frameNode = FrameNode::GetOrCreateFrameNode(
+                V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwitchPattern>(); });
+            stack->Push(frameNode);
+            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
+            break;
+        }
+        case NG::ToggleType::BUTTON:
+            NG::ToggleButtonModelNG::Create(V2::TOGGLE_ETS_TAG);
+            NG::ToggleButtonModelNG::SetIsOn(isOn);
+            break;
+        default:
+            break;
+    }
 }
 
-void ToggleView::SetSelectedColor(const Color& selectedColor)
+void ToggleModelNG::SetSelectedColor(const Color& selectedColor)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
@@ -48,18 +63,18 @@ void ToggleView::SetSelectedColor(const Color& selectedColor)
     }
     auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
     if (buttonPattern) {
-        ToggleButtonView::SetSelectedColor(selectedColor);
+        ToggleButtonModelNG::SetSelectedColor(selectedColor);
         return;
     }
 
     ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, selectedColor);
 }
 
-void ToggleView::SetSwitchPointColor(const Color& switchPointColor)
+void ToggleModelNG::SetSwitchPointColor(const Color& switchPointColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColor, switchPointColor);
 }
-void ToggleView::OnChange(ChangeEvent&& onChange)
+void ToggleModelNG::OnChange(ChangeEvent&& onChange)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
@@ -83,5 +98,21 @@ void ToggleView::OnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
+
+void ToggleModelNG::SetWidth(const Dimension& width) {}
+
+void ToggleModelNG::SetHeight(const Dimension& height) {}
+
+void ToggleModelNG::SetBackgroundColor(const Color& color)
+{
+    ToggleButtonModelNG::SetBackgroundColor(color);
+}
+
+bool ToggleModelNG::IsToggle()
+{
+    return false;
+}
+
+void ToggleModelNG::SetPadding(const NG::PaddingPropertyF& args) {}
 
 } // namespace OHOS::Ace::NG

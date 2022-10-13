@@ -49,6 +49,8 @@ namespace OHOS::Ace::Framework {
 // Classic:  cmpilerGenId, array, itemGenFunc, idGenFunction
 void JSForEach::Create(const JSCallbackInfo& info)
 {
+
+    ACE_SCOPED_TRACE("JSForEach::Create");
     if (Container::IsCurrentUseNewPipeline()) {
         ForEachModel::GetInstance()->Create();
         return;
@@ -104,26 +106,27 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
     }
 
     const auto elmtId = info[0]->ToNumber<int32_t>();
-    std::list<std::string> cppList =  ForEachModel::GetInstance()->GetCurrentIdList(elmtId);
-    
+    std::list<std::string> idList =  ForEachModel::GetInstance()->GetCurrentIdList(elmtId);
+
     size_t index = 0;
-    for (const auto& id : cppList) {
-        LOGD("  array id %{public}d - '%{public}s'", static_cast<int32_t>(index), id.c_str());
+    for (const auto& id : idList) {
         jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(id.c_str())));
     }
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(index > 0)));
 }
 
-// partial update / NG only
-// signature
-// nodeId/elmtId : number   // FIXME, not used!
-// idList : string[] 
+// Partial update / NG only
+// Gets idList as a input and stores it. Fill diffIndexArray with new indexes as an output.
+// nodeId/elmtId : number
+// idList : string[]
+// diffIndexArray : number[]
 // no return value
 void JSForEach::SetIdArray(const JSCallbackInfo& info)
 {
+
     ACE_SCOPED_TRACE("JSForEach::SetIdArray");
 
-    if ((info.Length() != 2) || !info[1]->IsArray() || info[0]->IsString()) {
+    if (info.Length() != 3 || !info[1]->IsArray() || !info[2]->IsArray() || !info[0]->IsNumber()) {
         LOGE("Invalid arguments for ForEach.SetIdArray");
         return;
     }
@@ -133,12 +136,26 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
 
     for (size_t i = 0; i < jsArr->Length(); i++) {
         JSRef<JSVal> strId = jsArr->GetValueAt(i);
-        std::string value = strId->ToString();
-        LOGD("JSForEach::SetIdArray %{public}d - value '%{public}s'", static_cast<int32_t>(i), value.c_str());
-        newIdArr.insert(newIdArr.end(), value);
+        newIdArr.emplace_back(strId->ToString());
     }
 
-        ForEachModel::GetInstance()->SetNewIds(std::move(newIdArr));
+    const auto elmtId = info[0]->ToNumber<int32_t>();
+    // Get old IDs. New ID are set in the end of this function.
+    std::list<std::string> previousIDList =  ForEachModel::GetInstance()->GetCurrentIdList(elmtId);
+    std::unordered_set<std::string> oldIdsSet(previousIDList.begin(), previousIDList.end());
+    // Get reference to output diff index array.
+    JSRef<JSArray> diffIndexArray = JSRef<JSArray>::Cast(info[2]);
+    size_t index = 0;
+
+    for (const auto& newId : newIdArr) {
+        if (oldIdsSet.find(newId) == oldIdsSet.end()) {
+            // Populate output diff array with this index that was not in old array.
+            diffIndexArray->SetValueAt(index, JSRef<JSVal>::Make(ToJSValue(index)));
+        }
+        index++;
+    }
+
+    ForEachModel::GetInstance()->SetNewIds(std::move(newIdArr));
 }
 
 // signature is
@@ -146,6 +163,7 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
 // parentView : JSView
 void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
 {
+    ACE_SCOPED_TRACE("JSForEach::CreateNewChildStart");
     if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
         LOGE("Invalid arguments for ForEach.CreateNewChildStart");
         return;
@@ -160,6 +178,7 @@ void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
 // parentView : JSView
 void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
 {
+    ACE_SCOPED_TRACE("JSForEach::CreateNewChildFinish");
     if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
         LOGE("Invalid arguments for ForEach.CreateNewChildFinish");
         return;

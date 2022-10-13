@@ -30,8 +30,7 @@ const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
     std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
-    std::map<std::string, NG::DailogEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    std::map<std::string, NG::DailogEvent> dialogEvent, std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -133,8 +132,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
 }
 
 RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>& frameNode,
-    std::map<std::string, NG::DailogEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    std::map<std::string, NG::DailogEvent> dialogEvent, std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
 {
     auto acceptEvent = dialogEvent["acceptId"];
     auto cancelEvent = dialogCancalEvent["cancelId"];
@@ -144,33 +142,36 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(buttonConfirmNode, nullptr);
     CHECK_NULL_RETURN(textConfirmNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent("confirm");
     textConfirmNode->MountToParent(buttonConfirmNode);
-    auto eventConfirHub = textConfirmNode->GetOrCreateGestureEventHub();
-
-    auto clickCallback = [frameNode, acceptEvent](const GestureEvent& /*info*/) {
-        SetDailogAcceptEvent(frameNode, acceptEvent);
+    auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventConfirmHub, nullptr);
+    SetDailogAcceptEvent(frameNode, std::move(acceptEvent));
+    auto clickCallback = [frameNode](const GestureEvent& /*info*/) {
         auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
         auto str = pickerPattern->GetSelectedObject(true);
         auto timePickerEventHub = pickerPattern->GetEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         timePickerEventHub->FireDailogAcceptEvent(str);
     };
-    eventConfirHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
+    eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
 
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(buttonCancelNode, nullptr);
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
     textCancelLayoutProperty->UpdateContent("cancel");
     textCancelNode->MountToParent(buttonCancelNode);
-    auto eventCancelHub = textCancelNode->GetOrCreateGestureEventHub();
+    auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
     buttonConfirmNode->MountToParent(contentRow);
@@ -197,7 +198,7 @@ void TimePickerDialogView::SetDailogChange(const RefPtr<FrameNode>& frameNode, D
     eventHub->SetDailogChange(std::move(onChange));
 }
 
-void TimePickerDialogView::SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent onChange)
+void TimePickerDialogView::SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();

@@ -375,6 +375,18 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
     return rect;
 }
 
+void RosenRenderContext::NotifyTransition(
+    const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto effect = GetRSTransitionWithoutType(transOptions);
+    AnimationUtils::Animate(option, [rsNode = rsNode_, isTransitionIn, effect]() {
+            if (rsNode) {
+                rsNode->NotifyTransition(effect, isTransitionIn);
+            }
+        }, option.GetOnFinishEvent());
+}
+
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -913,14 +925,12 @@ void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
     rsNode_->SetScale(scaleStart);
     Rosen::RSAnimationTimingProtocol protocol;
     protocol.SetDuration(themeDuration);
-    RSNode::Animate(
-        protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
+    RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
         [rsNode = rsNode_, scaleEnd]() {
             if (rsNode) {
                 rsNode->SetScale(scaleEnd);
             }
-        },
-        []() {});
+        });
     isHoveredScale_ = isHovered;
 }
 
@@ -949,14 +959,12 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
     rsNode_->SetBackgroundColor(highlightStart.GetValue());
     Rosen::RSAnimationTimingProtocol protocol;
     protocol.SetDuration(themeDuration);
-    RSNode::Animate(
-        protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
+    RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
         [rsNode = rsNode_, highlightEnd]() {
             if (rsNode) {
                 rsNode->SetBackgroundColor(highlightEnd.GetValue());
             }
-        },
-        []() {});
+        });
     hoveredColor_ = hoverColorTo;
     isHoveredBoard_ = isHovered;
 }

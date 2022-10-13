@@ -921,25 +921,14 @@ void RenderTextField::RegisterCallbacksToOverlay()
         }
     });
 
-    auto callback = [weakTextField = WeakClaim(this)](const std::string& data) {
+    textOverlay_->SetOnPaste([weakTextField = WeakClaim(this)] {
         auto textfield = weakTextField.Upgrade();
         if (textfield) {
-            auto textOverlay = textfield->textOverlay_;
-            if (textOverlay && !data.empty()) {
-                textOverlay->SetOnPaste([weakTextField] {
-                    auto textfield = weakTextField.Upgrade();
-                    if (textfield) {
-                        textfield->HandleOnPaste();
-                    }
-                });
-            }
-            textfield->PushTextOverlayToStack();
-            textfield->UpdateOverlay();
+            textfield->HandleOnPaste();
         }
-    };
-    if (clipboard_) {
-        clipboard_->GetData(callback);
-    }
+    });
+    PushTextOverlayToStack();
+    UpdateOverlay();
 
     auto onFocusChange = [weak = WeakClaim(this)](bool isFocus, bool needCloseKeyboard) {
         auto textField = weak.Upgrade();

@@ -22,7 +22,7 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ToggleButtonView {
+class ACE_EXPORT ToggleButtonModelNG {
 public:
     static void Create(const std::string& tagName);
     static void SetSelectedColor(const Color& selectedColor);

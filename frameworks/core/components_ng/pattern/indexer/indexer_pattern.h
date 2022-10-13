@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_PATTERN_H
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_algorithm.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
@@ -73,11 +74,17 @@ private:
 
     void OnTouchDown(const TouchEventInfo& info);
 
+    void MoveIndexByOffset(const Offset& offset, bool isRepeatCalled = true);
+    bool MoveIndexByStep(int32_t step);
+    bool MoveIndexBySearch(const std::string& searchStr);
+    void ApplyIndexChanged();
+
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
-    bool MoveStep(int32_t step);
 
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<PanEvent> panEvent_;
     bool isInitialized_ = false;
     bool isTouch_ = false;
 
