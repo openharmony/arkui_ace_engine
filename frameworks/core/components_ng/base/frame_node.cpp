@@ -140,10 +140,8 @@ void FrameNode::DumpInfo()
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
                                                    : "NA"));
-    DumpLog::GetInstance().AddDesc(
-        std::string("top: ").append(std::to_string(GetOffsetRelativeToWindow().GetY())));
-    DumpLog::GetInstance().AddDesc(
-        std::string("left: ").append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+    DumpLog::GetInstance().AddDesc(std::string("top: ").append(std::to_string(GetOffsetRelativeToWindow().GetY())));
+    DumpLog::GetInstance().AddDesc(std::string("left: ").append(std::to_string(GetOffsetRelativeToWindow().GetX())));
     DumpLog::GetInstance().AddDesc(
         std::string("width: ").append(std::to_string(geometryNode_->GetFrameRect().Width())));
     DumpLog::GetInstance().AddDesc(
@@ -201,8 +199,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     ACE_FUNCTION_TRACE();
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
-    // update new layoutConstrain.
-    layoutProperty_->UpdateLayoutConstraint(dirty->GetLayoutProperty());
 
     // active change flag judge.
     bool activeChanged = false;
@@ -308,6 +304,9 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
+    if (!layoutWrapper) {
+        return std::nullopt;
+    }
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
@@ -343,6 +342,9 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
     auto wrapper = CreatePaintWrapper();
+    if (!wrapper) {
+        return std::nullopt;
+    }
     auto task = [wrapper, paintProperty = paintProperty_]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
@@ -381,7 +383,11 @@ OffsetF FrameNode::GetParentGlobalOffset() const
 
 void FrameNode::UpdateLayoutPropertyFlag()
 {
-    if (!CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag())) {
+    auto selfFlag = layoutProperty_->GetPropertyChangeFlag();
+    if (!CheckUpdateByChildRequest(selfFlag)) {
+        return;
+    }
+    if (CheckForceParentMeasureFlag(selfFlag)) {
         return;
     }
     auto flag = PROPERTY_UPDATE_NORMAL;
@@ -389,8 +395,11 @@ void FrameNode::UpdateLayoutPropertyFlag()
     for (const auto& child : children) {
         child->UpdateLayoutPropertyFlag();
         child->AdjustParentLayoutFlag(flag);
+        if (CheckForceParentMeasureFlag(selfFlag)) {
+            break;
+        }
     }
-    if ((flag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
+    if (CheckForceParentMeasureFlag(flag)) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -411,11 +420,14 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     }
 
     pattern_->BeforeCreateLayoutWrapper();
-    if (!isActive_) {
+    if (!isActive_ || forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
+    if (forceLayout) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    }
     auto flag = layoutProperty_->GetPropertyChangeFlag();
-    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_);
     LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
         forceLayout);
     do {
@@ -461,9 +473,13 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
 {
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
-    auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
-    paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());
-    return paintWrapper;
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    if (paintMethod) {
+        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_);
+        paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());
+        return paintWrapper;
+    }
+    return nullptr;
 }
 
 void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType)
