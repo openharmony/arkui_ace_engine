@@ -58,6 +58,8 @@ bool CheckNeedLayout(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
+bool CheckForceParentMeasureFlag(PropertyChangeFlag propertyChangeFlag);
+
 bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag);
@@ -240,7 +242,7 @@ public:                                                          \
         return prop##name##_.reset();                            \
     }                                                            \
                                                                  \
-protected:                                                         \
+protected:                                                       \
     std::optional<type> prop##name##_;
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(name, type, changeFlag) \

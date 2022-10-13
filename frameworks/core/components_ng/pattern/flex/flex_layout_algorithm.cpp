@@ -180,8 +180,6 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     mainAxisSize_ = 0.0f;
     crossAxisSize_ = 0.0f;
     allocatedSize_ = 0.0f;
-    totalFlexWeight_ = 0.0f;
-    maxDisplayPriority_ = 0;
     selfIdealCrossAxisSize_ = -1.0f;
     validSizeCount_ = 0;
     realSize_.Reset();
@@ -196,9 +194,6 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     crossAxisAlign_ =
         layoutProperty->GetCrossAxisAlignValue(isLinearLayoutFeature_ ? FlexAlign::CENTER : FlexAlign::FLEX_START);
     baselineProperties_.Reset();
-    magicNodes_.clear();
-    magicNodeWeights_.clear();
-    outOfLayoutChildren_.clear();
     textDir_ = layoutProperty->GetLayoutDirection();
     if (textDir_ == TextDirection::AUTO) {
         textDir_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
@@ -209,6 +204,15 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
 
 void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
 {
+    if (!magicNodes_.empty()) {
+        LOGD("second measure feature");
+        return;
+    }
+    maxDisplayPriority_ = 0;
+    totalFlexWeight_ = 0.0f;
+    outOfLayoutChildren_.clear();
+    magicNodes_.clear();
+    magicNodeWeights_.clear();
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     const auto& childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -270,6 +274,7 @@ void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrappe
 void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties)
 {
     if (GreatNotEqual(totalFlexWeight_, 0.0f) && !isInfiniteLayout_) {
+        auto newTotalFlexWeight = totalFlexWeight_;
         /**
          * The child elements with layoutWeight=0 are measured first.
          * Then, measure the sub elements of layoutWeight>1 based on the remaining space.
@@ -325,7 +330,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
             }
         }
         auto remainedMainAxisSize = mainAxisSize_ - allocatedSize_;
-        auto spacePerWeight = remainedMainAxisSize / totalFlexWeight_;
+        auto spacePerWeight = remainedMainAxisSize / newTotalFlexWeight;
         auto secondIterLoop = magicNodes_.rbegin();
         while (secondIterLoop != firstLoopIter) {
             auto& childList = secondIterLoop->second;
@@ -359,9 +364,9 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                     child.layoutWrapper->SetActive(false);
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                 }
-                totalFlexWeight_ -= magicNodeWeights_[magicNodes_.begin()->first];
+                newTotalFlexWeight -= magicNodeWeights_[magicNodes_.begin()->first];
                 remainedMainAxisSize = mainAxisSize_ - allocatedSize_;
-                spacePerWeight = remainedMainAxisSize / totalFlexWeight_;
+                spacePerWeight = remainedMainAxisSize / newTotalFlexWeight;
                 isExceed = false;
                 magicNodes_.erase(magicNodes_.begin());
                 secondIterLoop = magicNodes_.rbegin();
