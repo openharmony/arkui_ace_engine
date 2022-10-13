@@ -182,6 +182,7 @@ public:
     virtual void OnWindowShow() {}
 
     virtual void OnWindowHide() {}
+    virtual void Build();
 
     virtual void OnWindowFocused() {}
 

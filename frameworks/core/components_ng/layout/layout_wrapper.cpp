@@ -51,6 +51,12 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
     return wrapper;
 }
 
+void LayoutWrapper::SetCacheCount(int32_t cacheCount)
+{
+    CHECK_NULL_VOID(layoutWrapperBuilder_);
+    layoutWrapperBuilder_->SetCacheCount(cacheCount);
+}
+
 const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
 {
     if (!cachedList_.empty()) {

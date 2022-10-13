@@ -204,6 +204,8 @@ public:
 
     bool CheckChildNeedForceMeasureAndLayout();
 
+    void SetCacheCount(int32_t cacheCount = 0);
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;
