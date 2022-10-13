@@ -130,6 +130,9 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     LayoutWholeWrap(layoutWrapper);
+    for (const auto& child : children) {
+        child->Layout();
+    }
     contentList_.clear();
 }
 
