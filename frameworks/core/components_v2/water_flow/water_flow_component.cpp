@@ -130,6 +130,6 @@ void WaterFlowComponent::SetMaxHeight(const Dimension& maxHeight)
 
 void WaterFlowComponent::SetFooterComponent(RefPtr<Component> component)
 {
-    footerComponent_ = component;
+    footerComponent_ = std::move(component);
 }
 } // namespace OHOS::Ace::V2

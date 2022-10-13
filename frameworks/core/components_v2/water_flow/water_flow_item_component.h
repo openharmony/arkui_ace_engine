@@ -31,6 +31,9 @@ public:
 
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(WaterFlowItemComponent);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_ITEM_COMPONENT_H

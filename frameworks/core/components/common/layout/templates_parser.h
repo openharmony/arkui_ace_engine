@@ -24,7 +24,7 @@ namespace OHOS::Ace {
 class TemplatesParser final : public NonCopyable {
 public:
     TemplatesParser() = default;
-    ~TemplatesParser() = default;
+    ~TemplatesParser() override = default;
     explicit TemplatesParser(const WeakPtr<RenderNode>& renderNode) : renderNode_(renderNode) {}
 
     std::vector<double> ParseArgs(const WeakPtr<RenderNode>& node, const std::string& args, double size, double gap);
@@ -36,30 +36,30 @@ private:
         AUTO_FILL,
     };
 
-    typedef struct {
+    using Value = struct {
         std::string str;
         bool isRepeat = false;
-    } Value;
+    };
 
-    void RTrim(std::string& str);
-    std::string TrimTemplate(std::string& str);
-    std::string GetRepeat(const std::string& str);
+    static void RTrim(std::string& str);
+    static std::string TrimTemplate(std::string& str);
+    static std::string GetRepeat(const std::string& str);
     double ParseUnit(const Value& val, double size);
 
-    std::string PreParseArgs(const std::string& args);
-    void ConvertRepeatArgs(std::string& handledArg);
-    std::vector<double> ParseArgs(const std::string& args, double size, double gap);
-    std::vector<double> ParseAutoFill(const std::vector<std::string>& strs, double size, double gap);
+    static void ConvertRepeatArgs(std::string& handledArg);
+    static std::vector<double> ParseArgs(const std::string& args, double size, double gap);
+    static std::vector<double> ParseAutoFill(const std::vector<std::string>& strs, double size, double gap);
 
     double ConvertVirtualSize(const std::string& val, const DimensionUnit& unit, double size);
-    bool SplitTemplate(const std::string& str, std::vector<Value>& vec, bool isRepeat = false);
+    static bool SplitTemplate(const std::string& str, std::vector<Value>& vec, bool isRepeat = false);
     std::vector<double> ParseArgsWithAutoFill(const std::string& args, double size, double gap);
-    bool CheckRepeatAndSplitString(
+    static bool CheckRepeatAndSplitString(
         std::vector<std::string>& vec, std::string& repeat, std::vector<Value>& resultvec);
-    bool CheckAutoFillParameter(
+    static bool CheckAutoFillParameter(
         const std::string& args, double size, std::vector<double>& out,  std::vector<Value>& resultvec);
 
     WeakPtr<RenderNode> renderNode_;
+    ACE_DISALLOW_COPY_AND_MOVE(TemplatesParser);
 };
 } // namespace OHOS::Ace
 

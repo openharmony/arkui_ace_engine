@@ -26,22 +26,21 @@ namespace OHOS::Ace {
 namespace {
 constexpr double FULL_PERCENT = 100.0;
 constexpr uint32_t REPEAT_MIN_SIZE = 6;
-const char UNIT_VP[] = "vp";
-const char UNIT_PIXEL[] = "px";
-const char UNIT_RATIO[] = "fr";
-const char UNIT_AUTO[] = "auto";
-const char UNIT_PERCENT[] = "%";
-const char REPEAT_PREFIX[] = "repeat";
-const char UNIT_AUTO_FILL[] = "auto-fill";
-const char TRIM_TEMPLATE[] = "$1$2";
-const char INVALID_PATTERN[] = "((repeat)\\(\\s{0,}(auto-fill)\\s{0,},)";
-const char SIZE_PATTERN[] = "\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}";
-const char PREFIX_PATTERN[] = "\\S{1,}(repeat)|(px|%|vp)\\d{1,}|\\)\\d{1,}";
+const std::string UNIT_VP = "vp";
+const std::string UNIT_PIXEL = "px";
+const std::string UNIT_RATIO = "fr";
+const std::string UNIT_PERCENT = "%";
+const std::string REPEAT_PREFIX = "repeat";
+const std::string UNIT_AUTO_FILL = "auto-fill";
+const std::string TRIM_TEMPLATE = "$1$2";
+const std::string INVALID_PATTERN = R"(((repeat)\(\s{0,}(auto-fill)\s{0,},))";
+const std::string SIZE_PATTERN = "\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}";
+const std::string PREFIX_PATTERN = R"(\S{1,}(repeat)|(px|%|vp)\d{1,}|\)\d{1,})";
 const std::regex AUTO_REGEX(R"(^repeat\((.+),(.+)\))", std::regex::icase);        // regex for "repeat(auto-fill, 10px)"
 const std::regex REPEAT_NUM_REGEX(R"(^repeat\((\d+),(.+)\))", std::regex::icase); // regex for "repeat(2, 100px)"
 const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)", std::regex::icase);
-const char REPEAT_WITH_AUTOFILL[] =
-    "((repeat)\\(\\s{0,}(auto-fill)\\s{0,},(\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\\s{0,}\\))";
+const std::string REPEAT_WITH_AUTOFILL =
+    R"(((repeat)\(\s{0,}(auto-fill)\s{0,},(\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\s{0,}\)))";
 } // namespace
 
 std::string TemplatesParser::TrimTemplate(std::string& str)
@@ -90,15 +89,14 @@ std::string TemplatesParser::GetRepeat(const std::string& str)
     }
     if (count == 1) {
         return regexResult;
-    } else {
-        return std::string("");
     }
+    return {""};
 }
 
 bool TemplatesParser::CheckRepeatAndSplitString(
     std::vector<std::string>& vec, std::string& repeat, std::vector<Value>& resultvec)
 {
-    if (repeat.length() == 0 && vec.size() == 0) {
+    if (repeat.length() == 0 && vec.empty()) {
         return false;
     }
     std::string regexResult;
@@ -185,7 +183,7 @@ bool TemplatesParser::CheckAutoFillParameter(
 
     std::string repeat = GetRepeat(args);
     bool invalidRepeatAutoFill = CheckRepeatAndSplitString(vec, repeat, resultvec);
-    if (!invalidRepeatAutoFill && out.size() == 0) {
+    if (!invalidRepeatAutoFill && out.empty()) {
         out.push_back(size);
     }
     return invalidRepeatAutoFill;
@@ -198,7 +196,7 @@ std::vector<double> TemplatesParser::ParseArgsWithAutoFill(const std::string& ar
     if (!CheckAutoFillParameter(args, size, lens, retTemplates)) {
         return lens;
     }
-    int countNonRepeat = 0;
+    size_t countNonRepeat = 0;
     int countRepeat = 0;
     double sizeRepeat = 0.0;
     double sizeNonRepeat = 0.0;
@@ -206,7 +204,7 @@ std::vector<double> TemplatesParser::ParseArgsWithAutoFill(const std::string& ar
     std::vector<double> prefixLens;
     std::vector<double> repeatLens;
     std::vector<double> suffixLens;
-    for (auto ret : retTemplates) {
+    for (const auto& ret : retTemplates) {
         double sizeItem = ParseUnit(ret, size);
         if (ret.isRepeat) {
             invalidRepeatAutoFill = true;
@@ -225,16 +223,16 @@ std::vector<double> TemplatesParser::ParseArgsWithAutoFill(const std::string& ar
     }
     double sizeNonRepeatGap = GreatNotEqual(countNonRepeat, 0) ? (countNonRepeat - 1) * gap : 0;
     double sizeLeft = size - sizeNonRepeatGap - sizeNonRepeat;
-    int count = 0;
+    double count = 0;
     if (!NearZero(sizeRepeat)) {
         count = (sizeLeft + gap) / (sizeRepeat + (countRepeat)*gap);
         count = LessOrEqual(count, 1) ? 1 : floor(count);
     } else {
-        int children = 0;
+        size_t children = 0;
         if (!renderNode_.Upgrade()) {
             children = renderNode_.Upgrade()->GetChildren().size();
         }
-        if (children >= countNonRepeat && retTemplates.size() > 0) {
+        if (children >= countNonRepeat && !retTemplates.empty()) {
             count = ceil((size - countNonRepeat) * 1.0 / (retTemplates.size() - countNonRepeat));
         }
     }
@@ -256,9 +254,8 @@ std::vector<double> TemplatesParser::ParseArgs(
 
     if (args.find(REPEAT_PREFIX) != std::string::npos && args.find(UNIT_AUTO_FILL) != std::string::npos) {
         return ParseArgsWithAutoFill(args, size, gap);
-    } else {
-        return ParseArgs(args, size, gap);
     }
+    return ParseArgs(args, size, gap);
 }
 
 std::vector<double> TemplatesParser::ParseArgs(const std::string& args, double size, double gap)
@@ -278,7 +275,7 @@ std::vector<double> TemplatesParser::ParseArgs(const std::string& args, double s
         return ParseAutoFill(strs, size, gap);
     }
     // first loop calculate all type sums.
-    for (auto str : strs) {
+    for (const auto& str : strs) {
         if (str.find(UNIT_PIXEL) != std::string::npos) {
             pxSum += StringUtils::StringToDouble(str);
         } else if (str.find(UNIT_PERCENT) != std::string::npos) {
@@ -321,7 +318,7 @@ void TemplatesParser::ConvertRepeatArgs(std::string& handledArg)
     if (handledArg.find(REPEAT_PREFIX) == std::string::npos) {
         return;
     }
-    handledArg.erase(0, handledArg.find_first_not_of(" ")); // trim the input str
+    handledArg.erase(0, handledArg.find_first_not_of(' ')); // trim the input str
     std::smatch matches;
     if (handledArg.find(UNIT_AUTO_FILL) != std::string::npos) {
         if (handledArg.size() > REPEAT_MIN_SIZE && std::regex_match(handledArg, matches, AUTO_REGEX)) {
@@ -372,39 +369,18 @@ std::vector<double> TemplatesParser::ParseAutoFill(const std::vector<std::string
         return lens;
     }
     pxSum += lens.size() * gap;
-    int32_t repeatCount = allocatedSize / pxSum;
+    auto repeatCount = static_cast<int32_t>(allocatedSize / pxSum);
     for (int32_t i = 0; i < repeatCount + 1; i++) {
         newLens.insert(newLens.end(), lens.begin(), lens.end());
     }
     allocatedSize -= pxSum * repeatCount;
-    for (auto lenIter = lens.begin(); lenIter != lens.end(); lenIter++) {
-        allocatedSize -= *lenIter + gap;
+    for (double & len : lens) {
+        allocatedSize -= len + gap;
         if (LessNotEqual(allocatedSize, 0.0)) {
             break;
         }
-        newLens.emplace_back(*lenIter);
+        newLens.emplace_back(len);
     }
     return newLens;
-}
-
-std::string TemplatesParser::PreParseArgs(const std::string& args)
-{
-    if (args.empty() || args.find(UNIT_AUTO) == std::string::npos) {
-        return args;
-    }
-    std::string rowsArgs;
-    std::vector<std::string> strs;
-    StringUtils::StringSplitter(args, ' ', strs);
-    std::string current;
-    int32_t rowArgSize = strs.size();
-    for (int32_t i = 0; i < rowArgSize; ++i) {
-        current = strs[i];
-        // "auto" means 1fr in waterflow
-        if (strs[i] == std::string(UNIT_AUTO)) {
-            current = "1fr";
-        }
-        rowsArgs += ' ' + current;
-    }
-    return rowsArgs;
 }
 } // namespace OHOS::Ace

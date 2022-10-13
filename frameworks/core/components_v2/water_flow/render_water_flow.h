@@ -44,19 +44,19 @@ enum class WaterFlowEvents : uint32_t {
     REACH_END,
 };
 
-typedef struct {
+using FlowStyle = struct {
     double mainPos = 0.0;   // position of main side
     double crossPos = 0.0;  // position of cross side
     double mainSize = 0.0;  // size of main side
     double crossSize = 0.0; // size of corss side
-} FlowStyle;
+};
 
-typedef struct {
+using ItemConstraintSize = struct {
     double minCrossSize = 0.0; // min cross Size
     double maxCrossSize = 0.0; // max cross Size
     double minMainSize = 0.0;  // min main Size
     double maxMainSize = 0.0;  // max cross Size
-} ItemConstraintSize;
+};
 
 class RenderWaterFlow : public RenderNode {
     DECLARE_ACE_TYPE(RenderWaterFlow, RenderNode);
@@ -90,8 +90,8 @@ public:
         getTotalCount_ = std::move(func);
     }
 
-    void AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode);
-    inline void RemoveChildByIndex(int32_t index)
+    void AddChildByIndex(size_t index, const RefPtr<RenderNode>& renderNode);
+    inline void RemoveChildByIndex(size_t index)
     {
         auto item = items_.find(index);
         if (item != items_.end()) {
@@ -99,9 +99,9 @@ public:
             items_.erase(item);
         }
     }
-    void ClearLayout(int32_t index = -1);
-    void ClearItems(int32_t index = 0);
-    void OnDataSourceUpdated(int32_t index);
+    void ClearLayout(size_t index, bool clearAll = false);
+    void ClearItems(size_t index = 0);
+    void OnDataSourceUpdated(size_t index);
 
     inline void SetTotalCount(size_t totalCount)
     {
@@ -130,13 +130,50 @@ public:
     WeakPtr<RenderNode> CheckAxisNode() override;
     void OnChildAdded(const RefPtr<RenderNode>& renderNode) override;
     bool IsUseOnly() override;
-    RefPtr<RenderNode> RequestWaterFlowFooter();
+    void RequestWaterFlowFooter();
     inline void RegisterItemGenerator(WeakPtr<WaterFlowItemGenerator>&& waterFlowItemGenerator)
     {
         itemGenerator_ = std::move(waterFlowItemGenerator);
     }
 
+    const std::string& GetColumnsArgs() const
+    {
+        return colsArgs_;
+    }
+
+    const std::string& GetRowsArgs() const
+    {
+        return rowsArgs_;
+    }
+
+    const Dimension& GetColumnsGap() const
+    {
+        return userColGap_;
+    }
+
+    const Dimension& GetRowsGap() const
+    {
+        return userRowGap_;
+    }
+
+    FlexDirection GetlayoutDirection() const
+    {
+        return direction_;
+    }
+
+    ItemConstraintSize GetItemConstraintSize() const
+    {
+        return itemConstraintSize_;
+    }
+
 protected:
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
+    RefPtr<ScrollBar> scrollBar_;
+    int32_t scrollBarOpacity_ = 0;
+    SCROLLABLE useScrollable_ = SCROLLABLE::NO_SCROLL;
+    double lastOffset_ = 0.0;
+
+private:
     void HandleScrollEvent();
     LayoutParam MakeInnerLayoutParam(size_t itemIndex) const;
 
@@ -163,13 +200,13 @@ protected:
     Offset GetLastMainBlankPos();
     size_t GetLastMainBlankCross();
     Offset GetLastMainPos();
-    void ClearFlowMatrix(int32_t index = -1);
-    void ClearItemsByCrossIndex(int32_t index = -1);
+    void ClearFlowMatrix(size_t index, bool clearAll = false);
+    void ClearItemsByCrossIndex(size_t index, bool clearAll = false);
     void InitMainSideEndPos();
     void UpdateMainSideEndPos();
     double GetCrossEndPos(size_t crossIndex);
     FlowStyle ConstraintItemSize(FlowStyle item, size_t crossIndex);
-    RefPtr<RenderWaterFlowItem> GetFlowItemByChild(const RefPtr<RenderNode>& child) const;
+    static RefPtr<RenderWaterFlowItem> GetFlowItemByChild(const RefPtr<RenderNode>& child);
     double GetMainSize(const RefPtr<RenderNode>& item) const;
     double GetCrossSize(const RefPtr<RenderNode>& item) const;
     bool CheckReachHead();
@@ -177,7 +214,7 @@ protected:
     void AdjustViewPort();
     double GetTailPos();
     double GetTargetPos();
-    double GetCacheTargetPos();
+    double GetCacheTargetPos() const;
     void SetTargetPos(double targetPos);
     void DealCache();
     void DeleteItems(size_t index);
@@ -190,8 +227,8 @@ protected:
     void OutputMatrix();
     void RemoveAllChild();
     bool NeedPredictLayout();
+    static std::string PreParseArgs(const std::string& args);
 
-    SCROLLABLE useScrollable_ = SCROLLABLE::NO_SCROLL;
     std::unordered_map<size_t, RefPtr<RenderNode>> items_;
     std::set<size_t> cacheItems_;
 
@@ -200,7 +237,6 @@ protected:
     bool reachTail_ = false;
     int32_t targetIndex_ = -1; // target item index of supply items (for scrollToIndex)
     double viewportStartPos_ = 0.0;
-    double lastOffset_ = 0.0;
     bool lastReachHead_ = false;
     bool lastReachTail_ = false;
     double mainSize_ = 0.0;  // size ot main side
@@ -214,11 +250,8 @@ protected:
     // used for scrollbar
     double scrollBarExtent_ = 0.0;
     double mainScrollExtent_ = 0.0;
-    int32_t scrollBarOpacity_ = 0;
     double estimateHeight_ = 0.0;
 
-    RefPtr<ScrollBarProxy> scrollBarProxy_;
-    RefPtr<ScrollBar> scrollBar_;
     RefPtr<Animator> animator_;
     RefPtr<V2::WaterFlowComponent> component_;
     WeakPtr<WaterFlowItemGenerator> itemGenerator_;
@@ -250,6 +283,8 @@ protected:
     std::map<WaterFlowEvents, bool> waterflowEventFlags_;
     RefPtr<RenderNode> footer_;
     Size footerMaxSize_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(RenderWaterFlow);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_RENDER_WATER_FLOW_H

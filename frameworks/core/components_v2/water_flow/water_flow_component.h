@@ -28,7 +28,7 @@ class ACE_EXPORT WaterFlowComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(WaterFlowComponent, ComponentGroup);
 
 public:
-    WaterFlowComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {}
+    explicit WaterFlowComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {}
 
     ~WaterFlowComponent() override = default;
 
@@ -117,7 +117,7 @@ public:
         return maxHeight_;
     }
 
-    const RefPtr<Component> GetFooterComponent(void) const
+    RefPtr<Component> GetFooterComponent() const
     {
         return footerComponent_;
     }
@@ -142,6 +142,7 @@ private:
     RefPtr<ScrollBarProxy> scrollBarProxy_;
     EventMarker scrolledEvent_;
     RefPtr<Component> footerComponent_;
+    ACE_DISALLOW_COPY_AND_MOVE(WaterFlowComponent);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_COMPONENT_H

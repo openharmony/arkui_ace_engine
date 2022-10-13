@@ -56,7 +56,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
         }
         auto scroller = obj->GetProperty("scroller");
         if (scroller->IsObject()) {
-            auto jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
+            auto *jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
             CHECK_NULL_VOID(jsScroller);
             auto positionController = AceType::MakeRefPtr<V2::WaterFlowPositionController>();
             jsScroller->SetController(positionController);
@@ -83,13 +83,19 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("columnsGap", &JSWaterFlow::SetColumnsGap, opt);
     JSClass<JSWaterFlow>::StaticMethod("rowsGap", &JSWaterFlow::SetRowsGap, opt);
     JSClass<JSWaterFlow>::StaticMethod("layoutDirection", &JSWaterFlow::SetLayoutDirection, opt);
-    JSClass<JSWaterFlow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
-    JSClass<JSWaterFlow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlow>::StaticMethod("columnsTemplate", &JSWaterFlow::SetColumnsTemplate, opt);
     JSClass<JSWaterFlow>::StaticMethod("itemConstraintSize", &JSWaterFlow::SetItemConstraintSize, opt);
     JSClass<JSWaterFlow>::StaticMethod("rowsTemplate", &JSWaterFlow::SetRowsTemplate, opt);
     JSClass<JSWaterFlow>::StaticMethod("onReachStart", &JSWaterFlow::ReachStartCallback);
     JSClass<JSWaterFlow>::StaticMethod("onReachEnd", &JSWaterFlow::ReachEndCallback);
+    JSClass<JSWaterFlow>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSWaterFlow>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSWaterFlow>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSWaterFlow>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSWaterFlow>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSWaterFlow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSWaterFlow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSWaterFlow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSWaterFlow>::Inherit<JSContainerBase>();
     JSClass<JSWaterFlow>::Inherit<JSViewAbstract>();

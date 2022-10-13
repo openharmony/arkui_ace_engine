@@ -55,7 +55,7 @@ RefPtr<RenderNode> WaterFlowElement::CreateRenderNode()
         renderWaterFlow->SetGetTotalCount([weak = WeakClaim(this)]() {
             auto element = weak.Upgrade();
             if (!element) {
-                return (size_t)(0);
+                return static_cast<size_t>(0);
             }
             return element->TotalCount();
         });
@@ -72,7 +72,7 @@ void WaterFlowElement::PerformBuild()
     footerElement_ = UpdateChild(footerElement_, component->GetFooterComponent());
 }
 
-RefPtr<RenderNode> WaterFlowElement::RequestWaterFlowFooter(void)
+RefPtr<RenderNode> WaterFlowElement::RequestWaterFlowFooter()
 {
     return footerElement_ ? AceType::DynamicCast<RenderNode>(footerElement_->GetRenderNode()) : nullptr;
 }
@@ -138,7 +138,7 @@ void WaterFlowElement::OnDataSourceUpdated(size_t startIndex)
 
     RefPtr<RenderWaterFlow> render = AceType::DynamicCast<RenderWaterFlow>(renderNode_);
     if (render) {
-        render->OnDataSourceUpdated(static_cast<int32_t>(startIndex));
+        render->OnDataSourceUpdated(startIndex);
         render->SetTotalCount(ElementProxyHost::TotalCount());
     }
 }
