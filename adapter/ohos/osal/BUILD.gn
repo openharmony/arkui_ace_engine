@@ -46,6 +46,7 @@ template("ace_osal_ohos_source_set") {
     ]
 
     sources = [
+      "ace_engine_ext.cpp",
       "ace_trace.cpp",
       "anr_thread.cpp",
       "event_report.cpp",

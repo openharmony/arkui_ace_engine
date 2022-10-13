@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine_ext.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/image/image_component.h"
@@ -965,6 +966,9 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
             auto image = initRenderNode->GetSkImage();
             dragWindow_->DrawImage(image);
         }
+        if (dragWindow_) {
+            AceEngineExt::GetInstance().DragStartExt();
+        }
         return;
     }
 
@@ -982,6 +986,9 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
                 dragItemInfo.pixelMap->GetHeight());
             dragWindow_->SetOffset(rect.Left(), rect.Top());
             dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
+        }
+        if (dragWindow_) {
+            AceEngineExt::GetInstance().DragStartExt();
         }
         return;
     }

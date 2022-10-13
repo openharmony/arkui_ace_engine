@@ -16,6 +16,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -28,10 +29,11 @@ const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 
 RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogProperties, uint32_t selected,
     const Dimension& height, const std::vector<std::string>& getRangeVector,
-    std::map<std::string, NG::DailogTextChangeEvent> dialogEvent)
+    std::map<std::string, NG::DailogTextEvent> dialogEvent,
+    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
 {
-    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, nullptr);
-    auto dialogNodeChild = AccessibilityManager::DynamicCast<FrameNode>(dialogNode->GetChildren().front());
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
 
     auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
@@ -65,11 +67,62 @@ RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogPrope
     SetDefaultPickerItemHeight(height);
     auto changeEvent = dialogEvent["changeId"];
     SetDailogChange(textPickerNode, std::move(changeEvent));
+    auto contentRow = CreateButtonNode(textPickerNode, dialogEvent, std::move(dialogCancalEvent));
     ViewStackProcessor::GetInstance()->Finish();
-    auto childSize = dialogNode->GetChildren().size();
-    textPickerNode->MountToParent(dialogNodeChild, static_cast<int32_t>(childSize) - 2); // place textPickerNode in front of the button
+
+    textPickerNode->MountToParent(contentColumn);
+    contentRow->MountToParent(contentColumn);
+    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>& frameNode,
+    std::map<std::string, NG::DailogTextEvent> dialogEvent,
+    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+{
+    auto acceptEvent = dialogEvent["acceptId"];
+    auto cancelEvent = dialogCancalEvent["cancelId"];
+    auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(buttonConfirmNode, nullptr);
+    CHECK_NULL_RETURN(textConfirmNode, nullptr);
+    auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent("confirm");
+    textConfirmNode->MountToParent(buttonConfirmNode);
+    auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventConfirmHub, nullptr);
+    SetDailogAcceptEvent(frameNode, std::move(acceptEvent));
+    auto clickCallback = [frameNode](const GestureEvent& /*info*/) {
+        auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+        auto str = pickerPattern->GetSelectedObject(false);
+        auto timePickerEventHub = pickerPattern->GetEventHub<TextPickerEventHub>();
+        CHECK_NULL_VOID(timePickerEventHub);
+        timePickerEventHub->FireDailogAcceptEvent(str);
+    };
+    eventConfirmHub->AddClickEvent(AccessibilityManager::MakeRefPtr<NG::ClickEvent>(clickCallback));
+
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto textCancelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textCancelNode, nullptr);
+    auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
+    textCancelLayoutProperty->UpdateContent("cancel");
+    textCancelNode->MountToParent(buttonCancelNode);
+    auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventCancelHub, nullptr);
+    eventCancelHub->AddClickEvent(AccessibilityManager::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
+
+    buttonConfirmNode->MountToParent(contentRow);
+    buttonCancelNode->MountToParent(contentRow);
+    return contentRow;
 }
 
 void TextPickerDialogView::SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value)
@@ -83,7 +136,7 @@ void TextPickerDialogView::SetRange(
     textPickerPattern->SetRange(value);
 }
 
-void TextPickerDialogView::SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogTextChangeEvent&& onChange)
+void TextPickerDialogView::SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogTextEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
@@ -94,6 +147,14 @@ void TextPickerDialogView::SetDailogChange(const RefPtr<FrameNode>& frameNode, D
 void TextPickerDialogView::SetDefaultPickerItemHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value);
+}
+
+void TextPickerDialogView::SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogTextEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDailogAcceptEvent(std::move(onChange));
 }
 
 } // namespace OHOS::Ace::NG

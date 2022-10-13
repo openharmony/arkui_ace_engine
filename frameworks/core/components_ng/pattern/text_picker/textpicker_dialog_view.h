@@ -27,11 +27,16 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, uint32_t selected, const Dimension& height,
-        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextChangeEvent> dialogEvent);
+        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextEvent> dialogEvent,
+        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
     static void SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value = 0);
     static void SetRange(const RefPtr<TextPickerPattern>& textPickerPattern, const std::vector<std::string>& value);
-    static void SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogTextChangeEvent&& onChange);
+    static void SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogTextEvent&& onChange);
     static void SetDefaultPickerItemHeight(const Dimension& value = Dimension(0));
+    static void SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogTextEvent&& onChange);
+    static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
+    std::map<std::string, NG::DailogTextEvent> dialogEvent,
+    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
 };
 } // namespace OHOS::Ace::NG
 

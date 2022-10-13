@@ -75,7 +75,6 @@ void DragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) con
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(BAR_COLOR));
     canvas.AttachPen(pen);
-    // Offset totalOffset = Offset(xOffset, yOffset) + iconOffset_ + dragOffset_;
     OffsetF totalOffset = OffsetF(xOffset, yOffset) + iconOffset_ + dragOffset_;
 
     RSPath path;

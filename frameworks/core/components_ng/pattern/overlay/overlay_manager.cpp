@@ -15,11 +15,14 @@
 
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
+#include <utility>
+
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -88,32 +91,35 @@ void OverlayManager::PopToast(int32_t toastId)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popup)
+void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo)
 {
-    popupMap_[targetId] = popup;
+    popupMap_[targetId] = popupInfo;
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    if (!popup.markNeedUpdate || !popup.popupNode) {
+    if (!popupInfo.markNeedUpdate || !popupInfo.popupNode) {
         return;
     }
     popupMap_[targetId].markNeedUpdate = false;
     auto rootChildren = rootNode->GetChildren();
-    auto iter = std::find(rootChildren.begin(), rootChildren.end(), popup.popupNode);
+    auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
     if (iter != rootChildren.end()) {
-        if (!popup.isCurrentOnShow) {
+        // Pop popup
+        if (!popupInfo.isCurrentOnShow) {
             return;
         }
         LOGI("begin pop");
-        rootNode->RemoveChild(popup.popupNode);
+        popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        rootNode->RemoveChild(popupInfo.popupNode);
     } else {
         // Push popup
-        if (popup.isCurrentOnShow) {
+        if (popupInfo.isCurrentOnShow) {
             return;
         }
         LOGE("begin push");
+        popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         popupMap_[targetId].popupNode->MountToParent(rootNode);
     }
-    popupMap_[targetId].isCurrentOnShow = !popup.isCurrentOnShow;
+    popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -175,10 +181,11 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
     std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
-    std::map<std::string, NG::DailogChangeEvent> dialogEvent)
+    std::map<std::string, NG::DailogEvent> dialogEvent,
+    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
 {
-    auto dialogNode =
-        DatePickerDialogView::Show(dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent));
+    auto dialogNode = DatePickerDialogView::Show(
+        dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancalEvent));
     CHECK_NULL_VOID(dialogNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -188,10 +195,11 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
     std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
-    std::map<std::string, NG::DailogChangeEvent> dialogEvent)
+    std::map<std::string, NG::DailogEvent> dialogEvent,
+    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
 {
-    auto dialogNode = TimePickerDialogView::Show(
-        dialogProps, std::move(timePickerProperty), isUseMilitaryTime, std::move(dialogEvent));
+    auto dialogNode = TimePickerDialogView::Show(dialogProps, std::move(timePickerProperty), isUseMilitaryTime,
+        std::move(dialogEvent), std::move(dialogCancalEvent));
     CHECK_NULL_VOID(dialogNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -200,9 +208,11 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-    const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextChangeEvent> dialogEvent)
+    const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextEvent> dialogEvent,
+    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
 {
-    auto dialogNode = TextPickerDialogView::Show(dialogProps, selected, height, getRangeVector, std::move(dialogEvent));
+    auto dialogNode = TextPickerDialogView::Show(
+        dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancalEvent));
     CHECK_NULL_VOID(dialogNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);

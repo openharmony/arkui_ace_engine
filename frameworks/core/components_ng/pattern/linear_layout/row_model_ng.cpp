@@ -30,6 +30,8 @@ void RowModelNG::Create(const std::optional<Dimension>& space, AlignDeclaration*
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, FlexDirection, FlexDirection::ROW);
+
     if (!space) {
         return;
     }

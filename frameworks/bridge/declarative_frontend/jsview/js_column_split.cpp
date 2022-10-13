@@ -15,31 +15,20 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
 
-#include "base/log/ace_trace.h"
-#include "core/components/split_container/column_split_component.h"
+#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_linear_split.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSColumnSplit::Create()
 {
-    std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-    auto columnSplit = AceType::MakeRefPtr<ColumnSplitComponent>(componentChildren);
-    ViewStackProcessor::GetInstance()->ClaimElementId(columnSplit);
-    ViewStackProcessor::GetInstance()->Push(columnSplit);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetBoxClipFlag(true);
+    LinearSplitModel::GetInstance()->Create(NG::SplitType::COLUMN_SPLIT);
 }
 
 void JSColumnSplit::JsResizeable(bool resizeable)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto columnSplit = AceType::DynamicCast<ColumnSplitComponent>(stack->GetMainComponent());
-    if (columnSplit == nullptr) {
-        LOGE("Get ColumnSplitComponent failed");
-        return;
-    }
-    columnSplit->SetResizeable(resizeable);
+    LinearSplitModel::GetInstance()->SetResizeable(NG::SplitType::COLUMN_SPLIT, resizeable);
 }
 
 void JSColumnSplit::JSBind(BindingTarget globalObj)

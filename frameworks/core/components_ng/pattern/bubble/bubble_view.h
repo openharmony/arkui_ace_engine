@@ -33,10 +33,14 @@ class ACE_EXPORT BubbleView {
 public:
     static RefPtr<FrameNode> CreateBubbleNode(
         const std::string& tag, int32_t targetId, const RefPtr<PopupParam>& param);
-    static RefPtr<FrameNode> CreateMessage(const std::string& message);
-    static RefPtr<FrameNode> CreateCombinedChild(const RefPtr<PopupParam>& param);
-    static RefPtr<FrameNode> CreateButtons(const RefPtr<PopupParam>& param);
-    static RefPtr<FrameNode> CreateButton(ButtonProperties& param);
+    static RefPtr<FrameNode> CreateCustomBubbleNode(const std::string& targetTag, int32_t targetId,
+        const RefPtr<UINode>& customNode, const RefPtr<PopupParam>& param);
+    static RefPtr<FrameNode> CreateMessage(const std::string& message, bool isUseCustom);
+    static RefPtr<FrameNode> CreateCombinedChild(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId);
+    static RefPtr<FrameNode> CreateButtons(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId);
+    static RefPtr<FrameNode> CreateButton(
+        ButtonProperties& buttonParam, int32_t popupId, int32_t targetId, const RefPtr<PopupParam>& param);
+    static void UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
 };
 } // namespace OHOS::Ace::NG
 

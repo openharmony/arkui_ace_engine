@@ -14,8 +14,13 @@
  */
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 
+#include <utility>
+
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
@@ -29,15 +34,14 @@ const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 
 RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogProperties,
     std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
-    std::map<std::string, NG::DailogChangeEvent> dialogEvent)
+    std::map<std::string, NG::DailogEvent> dialogEvent, std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
 {
-    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, nullptr);
-
-    auto dialogNodeChild = AccessibilityManager::DynamicCast<FrameNode>(dialogNode->GetChildren().front());
-
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dateNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, dateNodeId, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    CHECK_NULL_RETURN(dateNode, nullptr);
     ViewStackProcessor::GetInstance()->Push(dateNode);
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(datePickerPattern, nullptr);
@@ -119,6 +123,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     PickerDate parseStartDate;
     PickerDate parseEndDate;
     PickerDate parseSelectedDate;
+    SetShowLunar(isLunar);
     if (datePickerProperty.find("start") != datePickerProperty.end()) {
         parseStartDate = datePickerProperty["start"];
         SetStartDate(datePickerPattern, parseStartDate);
@@ -132,14 +137,87 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         SetSelectedDate(datePickerPattern, parseSelectedDate);
     }
 
-    SetShowLunar(isLunar);
     auto changeEvent = dialogEvent["changeId"];
     SetDailogChange(dateNode, std::move(changeEvent));
+    auto contentRow = CreateButtonNode(dateNode, dialogEvent, std::move(dialogCancalEvent));
+    CHECK_NULL_RETURN(contentRow, nullptr);
+    auto buttonTitleNode = CreateTitleButtonNode(dateNode);
+    CHECK_NULL_RETURN(buttonTitleNode, nullptr);
     ViewStackProcessor::GetInstance()->Finish();
-    auto childSize = dialogNode->GetChildren().size();
-    dateNode->MountToParent(dialogNodeChild, static_cast<int32_t>(childSize) - 2); // place dateNode in front of the button
+    buttonTitleNode->MountToParent(contentColumn);
+    dateNode->MountToParent(contentColumn);
+    contentRow->MountToParent(contentColumn);
+    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
+    CHECK_NULL_RETURN(dialogNode, nullptr);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode)
+{
+    auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, nullptr);
+    auto buttonTitleNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, pickerPattern->GetButtonTitleId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto textTitleNodeId = pickerPattern->GetTitleId();
+    auto textTitleNode =
+        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textTitleNodeId, AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textTitleNode, nullptr);
+    auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent("");
+    textTitleNode->MountToParent(buttonTitleNode);
+
+    return buttonTitleNode;
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>& dateNode,
+    std::map<std::string, NG::DailogEvent> dialogEvent, std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+{
+    auto acceptEvent = dialogEvent["acceptId"];
+    auto cancelEvent = dialogCancalEvent["cancelId"];
+    auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(buttonConfirmNode, nullptr);
+    CHECK_NULL_RETURN(textConfirmNode, nullptr);
+    auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent("confirm");
+    textConfirmNode->MountToParent(buttonConfirmNode);
+    auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventConfirmHub, nullptr);
+    SetDailogAcceptEvent(dateNode, std::move(acceptEvent));
+    auto clickCallback = [dateNode](const GestureEvent& /*info*/) {
+        auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
+        auto str = pickerPattern->GetSelectedObject(true);
+        CHECK_NULL_VOID(pickerPattern);
+        auto datePickerEventHub = pickerPattern->GetEventHub<DatePickerEventHub>();
+        CHECK_NULL_VOID(datePickerEventHub);
+        datePickerEventHub->FireDailogAcceptEvent(str);
+    };
+    eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
+
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_RETURN(buttonCancelNode, nullptr);
+    auto textCancelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textCancelNode, nullptr);
+    auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
+    textCancelLayoutProperty->UpdateContent("cancel");
+    textCancelNode->MountToParent(buttonCancelNode);
+    auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventCancelHub, nullptr);
+    eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
+
+    buttonConfirmNode->MountToParent(contentRow);
+    buttonCancelNode->MountToParent(contentRow);
+    return contentRow;
 }
 
 void DatePickerDialogView::SetStartDate(const RefPtr<DatePickerPattern>& datePickerPattern, const PickerDate& value)
@@ -165,11 +243,19 @@ void DatePickerDialogView::SetShowLunar(bool lunar)
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Lunar, lunar);
 }
 
-void DatePickerDialogView::SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogChangeEvent&& onChange)
+void DatePickerDialogView::SetDailogChange(const RefPtr<FrameNode>& frameNode, DailogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDailogChange(std::move(onChange));
+}
+
+void DatePickerDialogView::SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDailogAcceptEvent(std::move(onChange));
 }
 } // namespace OHOS::Ace::NG

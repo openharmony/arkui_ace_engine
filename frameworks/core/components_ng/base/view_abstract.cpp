@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -504,12 +505,9 @@ void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
     ACE_UPDATE_RENDER_CONTEXT(TransformMatrix, matrix);
 }
 
-void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
+void ViewAbstract::BindPopup(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode)
 {
-    auto msg = param->GetMessage();
-    auto isShow = param->IsShow();
-    LOGI("ViewAbstract::BindPopup, msg is %{public}s", msg.c_str());
-    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
@@ -522,6 +520,8 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    auto isShow = param->IsShow();
+    auto isUseCustom = param->IsUseCustom();
     if (popupInfo.isCurrentOnShow == isShow) {
         LOGI("No need to change popup show flag.");
         return;
@@ -531,11 +531,21 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
     auto popupNode = popupInfo.popupNode;
     // Create new popup.
     if (popupInfo.popupId == -1 || !popupNode) {
-        popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
+        if (!isUseCustom) {
+            popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
+        } else if (isUseCustom) {
+            CHECK_NULL_VOID(customNode);
+            popupNode = BubbleView::CreateCustomBubbleNode(targetTag, targetId, customNode, param);
+        } else {
+            LOGE("useCustom is invalid");
+        }
         popupId = popupNode->GetId();
     } else {
-        // TODO: update is not completed.
-        LOGI("Update pop node.");
+        // use param to update PopupParm
+        if (!isUseCustom) {
+            BubbleView::UpdatePopupParam(popupId, param, targetNode);
+            LOGI("Update pop node.");
+        }
     }
     // update PopupInfo props
     popupInfo.popupId = popupId;

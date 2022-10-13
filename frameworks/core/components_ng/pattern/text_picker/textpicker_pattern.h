@@ -71,7 +71,7 @@ public:
 
     uint32_t GetShowOptionCount() const;
 
-    std::string GetSelectedObject(bool isColumnChange, int32_t status) const;
+    std::string GetSelectedObject(bool isColumnChange, int32_t status = 0) const;
 
     void SetSelected(uint32_t value)
     {
