@@ -25,6 +25,8 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/select/select_view.h"
 
 namespace OHOS::Ace::Framework {
 void JSSelect::Create(const JSCallbackInfo& info)
@@ -39,6 +41,33 @@ void JSSelect::Create(const JSCallbackInfo& info)
 
     auto tipText = AceType::MakeRefPtr<TextComponent>("");
     selectComponent->SetTipText(tipText);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsArray()) {
+            auto paramArray = JSRef<JSArray>::Cast(info[0]);
+            size_t size = paramArray->Length();
+            std::vector<NG::SelectParam> params(size);
+            for (size_t i = 0; i < size; i++) {
+                std::string value;
+                std::string icon;
+
+                auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+                auto selectValue = indexObject->GetProperty("value");
+                auto selectIcon = indexObject->GetProperty("icon");
+                if (!ParseJsString(selectValue, value)) {
+                    LOGE("selectValue is null");
+                    return;
+                }
+                if (!ParseJsMedia(selectIcon, icon)) {
+                    LOGE("selectValue is null");
+                }
+
+                params[i] = {value, icon};
+            }
+            NG::SelectView::Create(params);
+        }
+        return;
+    }
 
     if (info[0]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
@@ -139,6 +168,11 @@ void JSSelect::Selected(int value)
         value = 0;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetSelected(value);
+        return;
+    }
+
     auto tipText = selectComponent->GetTipText();
     auto optionComponent = selectComponent->GetSelectOption(value);
     optionComponent->SetSelected(true);
@@ -152,6 +186,10 @@ void JSSelect::Selected(int value)
 
 void JSSelect::Value(const std::string& value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetValue(value);
+        return;
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
     if (!selectComponent) {
@@ -167,7 +205,42 @@ void JSSelect::Font(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
+
     auto param = JSRef<JSObject>::Cast(info[0]);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto size = param->GetProperty("size");
+        if (!size->IsNull()) {
+            Dimension fontSize;
+            if (ParseJsDimensionFp(size, fontSize)) {
+                NG::SelectView::SetFontSize(fontSize);
+            }
+        }
+        std::string weight;
+        auto fontWeight = param->GetProperty("weight");
+        if (!fontWeight->IsNull()) {
+            if (fontWeight->IsNumber()) {
+                weight = std::to_string(fontWeight->ToNumber<int32_t>());
+            } else {
+                ParseJsString(fontWeight, weight);
+            }
+            NG::SelectView::SetFontWeight(ConvertStrToFontWeight(weight));
+        }
+
+        auto family = param->GetProperty("family");
+        if (!family->IsNull() && family->IsString()) {
+            auto familyVal = family->ToString();
+            NG::SelectView::SetFontFamily(ConvertStrToFontFamilies(familyVal));
+        }
+
+        auto style = param->GetProperty("style");
+        if (!style->IsNull() && style->IsNumber()) {
+            auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+            NG::SelectView::SetItalicFontStyle(styleVal);
+        }
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
     if (!selectComponent) {
@@ -227,6 +300,12 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], textColor)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetFontColor(textColor);
+        return;
+    }
+
     auto textStyle = selectComponent->GetSelectStyle();
     textStyle.SetTextColor(textColor);
     selectComponent->SetSelectStyle(std::move(textStyle));
@@ -239,6 +318,15 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
         return;
     }
     Color bgColor;
+    if (!ParseJsColor(info[0], bgColor)) {
+        return;
+    }
+    
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetSelectedOptionBgColor(bgColor);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
     if (!selectComponent) {
@@ -251,9 +339,6 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
         return;
     }
     auto option = popup->GetSelectOptions();
-    if (!ParseJsColor(info[0], bgColor)) {
-        return;
-    }
     for (auto& optionItem : option) {
         if (optionItem) {
             optionItem->SetSelectedBackgroundColor(bgColor);
@@ -267,6 +352,41 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto size = param->GetProperty("size");
+        if (!size->IsNull()) {
+            Dimension fontSize;
+            if (ParseJsDimensionFp(size, fontSize)) {
+                NG::SelectView::SetSelectedOptionFontSize(fontSize);
+            }
+        }
+        std::string weight;
+        auto fontWeight = param->GetProperty("weight");
+        if (!fontWeight->IsNull()) {
+            if (fontWeight->IsNumber()) {
+                weight = std::to_string(fontWeight->ToNumber<int32_t>());
+            } else {
+                ParseJsString(fontWeight, weight);
+            }
+            NG::SelectView::SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
+        }
+
+        auto family = param->GetProperty("family");
+        if (!family->IsNull() && family->IsString()) {
+            auto familyVal = family->ToString();
+            NG::SelectView::SetSelectedOptionFontFamily(ConvertStrToFontFamilies(familyVal));
+        }
+
+        auto style = param->GetProperty("style");
+        if (!style->IsNull() && style->IsNumber()) {
+            auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+            NG::SelectView::SetSelectedOptionItalicFontStyle(styleVal);
+        }
+        return;
+    }
+
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
     if (!selectComponent) {
@@ -328,6 +448,15 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
         return;
     }
     Color textColor;
+    if (!ParseJsColor(info[0], textColor)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetSelectedOptionFontColor(textColor);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
     if (!selectComponent) {
@@ -340,9 +469,6 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
         return;
     }
     auto option = popup->GetSelectOptions();
-    if (!ParseJsColor(info[0], textColor)) {
-        return;
-    }
     for (auto& optionItem : option) {
         if (optionItem) {
             TextStyle textStyle = optionItem->GetSelectedTextStyle();
@@ -359,6 +485,15 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
         return;
     }
     Color bgColor;
+    if (!ParseJsColor(info[0], bgColor)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetOptionBgColor(bgColor);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
     if (!selectComponent) {
@@ -371,9 +506,6 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
         return;
     }
     auto option = popup->GetSelectOptions();
-    if (!ParseJsColor(info[0], bgColor)) {
-        return;
-    }
     for (auto& optionItem : option) {
         if (optionItem) {
             optionItem->SetBackgroundColor(bgColor);
@@ -387,6 +519,40 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto size = param->GetProperty("size");
+        if (!size->IsNull()) {
+            Dimension fontSize;
+            if (ParseJsDimensionFp(size, fontSize)) {
+                NG::SelectView::SetOptionFontSize(fontSize);
+            }
+        }
+        std::string weight;
+        auto fontWeight = param->GetProperty("weight");
+        if (!fontWeight->IsNull()) {
+            if (fontWeight->IsNumber()) {
+                weight = std::to_string(fontWeight->ToNumber<int32_t>());
+            } else {
+                ParseJsString(fontWeight, weight);
+            }
+            NG::SelectView::SetOptionFontWeight(ConvertStrToFontWeight(weight));
+        }
+
+        auto family = param->GetProperty("family");
+        if (!family->IsNull() && family->IsString()) {
+            auto familyVal = family->ToString();
+            NG::SelectView::SetOptionFontFamily(ConvertStrToFontFamilies(familyVal));
+        }
+
+        auto style = param->GetProperty("style");
+        if (!style->IsNull() && style->IsNumber()) {
+            auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+            NG::SelectView::SetOptionItalicFontStyle(styleVal);
+        }
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
     if (!selectComponent) {
@@ -447,6 +613,15 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
         return;
     }
     Color textColor;
+    if (!ParseJsColor(info[0], textColor)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetOptionFontColor(textColor);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
     if (!selectComponent) {
@@ -459,9 +634,6 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
         return;
     }
     auto option = popup->GetSelectOptions();
-    if (!ParseJsColor(info[0], textColor)) {
-        return;
-    }
     for (auto& optionItem : option) {
         if (optionItem) {
             TextStyle textStyle = optionItem->GetTextStyle();

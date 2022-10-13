@@ -36,7 +36,6 @@ RefPtr<FrameNode> OptionView::Create(
     eventHub->SetOnClick(onClickFunc);
 
     auto paintProps = node->GetPaintProperty<OptionPaintProperty>();
-    // TODO: replace by theme
     paintProps->UpdateBackgroundColor(Color(DEFAULT_BACKGROUND_COLOR));
     paintProps->UpdateSelectedBackgroundColor(Color(DEFAULT_HOVER_BACKGROUND_COLOR));
 

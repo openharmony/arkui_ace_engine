@@ -87,4 +87,9 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, const std::
     return wrapperNode;
 }
 
+RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, const std::string& targetTag, int32_t targetId)
+{
+    
+}
+
 } // namespace OHOS::Ace::NG
