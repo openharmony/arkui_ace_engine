@@ -221,6 +221,15 @@ inline uint64_t GetNanoseconds()
     return nanoseconds.count();
 }
 
+inline float CalculateFriction(float gamma)
+{
+    constexpr float SCROLL_RATIO = 0.72f;
+    if (GreatOrEqual(gamma, 1.0)) {
+        gamma = 1.0;
+    }
+    return SCROLL_RATIO * static_cast<float>(std::pow(1.0 - gamma, 2));
+}
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H

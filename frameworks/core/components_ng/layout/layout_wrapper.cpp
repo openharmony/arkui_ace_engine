@@ -15,6 +15,8 @@
 
 #include "core/components_ng/layout/layout_wrapper.h"
 
+#include <algorithm>
+
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -149,6 +151,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     }
     layoutProperty_->UpdateContentConstraint();
     geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
+    geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
 
     isContraintNoChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
     if (!isContraintNoChanged_) {
@@ -160,15 +163,8 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
     if (isContraintNoChanged_ && !skipMeasureContent_) {
-        // need check descendant flag.
-        descendantFlag_ = descendantFlag_ ? descendantFlag_ : GetFlagWithDescendant();
-        // Need to remove layout flag when measure and layout make independent in each pattern layoutAlgorithm like
-        // flex.
-        if (!(CheckNeedMeasure(descendantFlag_.value()) || CheckNeedLayout(descendantFlag_.value()))) {
-            LOGD("%{public}s (depth: %{public}d) skip measure content, constrain flag: %{public}d, measure flag: "
-                 "%{public}d",
-                host->GetTag().c_str(), host->GetDepth(), isContraintNoChanged_,
-                layoutProperty_->GetPropertyChangeFlag() | descendantFlag_.value());
+        if (!CheckNeedForceMeasureAndLayout()) {
+            LOGD("%{public}s (depth: %{public}d) skip measure content", host->GetTag().c_str(), host->GetDepth());
             skipMeasureContent_ = true;
         }
     }
@@ -219,10 +215,8 @@ void LayoutWrapper::Layout()
     LOGD("On Layout begin: type: %{public}s, depth: %{public}d", host->GetTag().c_str(), host->GetDepth());
 
     if ((skipMeasureContent_ == true)) {
-        LOGD("%{public}s (depth: %{public}d) skip measure content and layout flag is %{public}d, descendant flag "
-             "is %{public}d skip layout process",
-            host->GetTag().c_str(), host->GetDepth(), layoutProperty_->GetPropertyChangeFlag(),
-            descendantFlag_.value());
+        LOGD(
+            "%{public}s (depth: %{public}d) skip measure content and layout", host->GetTag().c_str(), host->GetDepth());
         LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
             host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
         return;
@@ -253,29 +247,29 @@ bool LayoutWrapper::SkipMeasureContent() const
     return (skipMeasureContent_ == true) || layoutAlgorithm_->SkipMeasure();
 }
 
-PropertyChangeFlag LayoutWrapper::GetFlagWithDescendant()
+bool LayoutWrapper::CheckNeedForceMeasureAndLayout()
 {
-    if (descendantFlag_) {
-        return descendantFlag_.value();
+    if (needForceMeasureAndLayout_) {
+        return needForceMeasureAndLayout_.value();
     }
     PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
-    for (const auto& child : children_) {
-        if (!child) {
-            continue;
-        }
-        flag = child->GetFlagWithDescendant() | flag;
+    // Need to remove layout flag when measure and layout make independent in each pattern layoutAlgorithm like
+    // flex.
+    bool needForceMeasureAndLayout = CheckNeedMeasure(flag) || CheckNeedLayout(flag);
+    if (needForceMeasureAndLayout) {
+        needForceMeasureAndLayout_ = true;
+        return true;
     }
-    if (layoutWrapperBuilder_) {
-        const auto& children = layoutWrapperBuilder_->GetCachedChildLayoutWrapper();
-        for (const auto& child : children) {
-            if (!child) {
-                continue;
-            }
-            flag = child->GetFlagWithDescendant() | flag;
-        }
-    }
-    descendantFlag_ = flag;
-    return descendantFlag_.value();
+    // check child flag.
+    needForceMeasureAndLayout_ = std::any_of(
+        children_.begin(), children_.end(), [](const auto& item) { return item->CheckNeedForceMeasureAndLayout(); });
+    return needForceMeasureAndLayout_.value();
+}
+
+bool LayoutWrapper::CheckChildNeedForceMeasureAndLayout()
+{
+    return std::any_of(
+        children_.begin(), children_.end(), [](const auto& item) { return item->CheckNeedForceMeasureAndLayout(); });
 }
 
 void LayoutWrapper::MountToHostOnMainThread()

@@ -199,8 +199,11 @@ public:
         outOfLayout_ = outOfLayout;
     }
 
-    // Gets the flag attribute with descendant node
-    PropertyChangeFlag GetFlagWithDescendant();
+    // Check the flag attribute with descendant node
+    bool CheckNeedForceMeasureAndLayout();
+
+    bool CheckChildNeedForceMeasureAndLayout();
+
     void SetCacheCount(int32_t cacheCount = 0);
 
 private:
@@ -225,7 +228,7 @@ private:
     bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;
     std::optional<bool> skipMeasureContent_;
-    std::optional<PropertyChangeFlag> descendantFlag_;
+    std::optional<bool> needForceMeasureAndLayout_;
 
     // When the location property is set, it departs from the layout flow.
     bool outOfLayout_ = false;

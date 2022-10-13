@@ -35,11 +35,14 @@ public:
     static void SetPlaceholderColor(const Color& color);
     static void SetPlaceholderFont(const Font& font);
     static void SetTextFont(const Font& font);
+    static void SetCopyOption(const CopyOptions& copyOptions);
 
-    // TODO: add text overlay.
-    static void SetOnCopy(std::function<void(const std::string&)>&& func) {}
+    static void SetOnSubmit(ChangeAndSubmitEvent&& onSubmit);
+    static void SetOnChange(ChangeAndSubmitEvent&& onChange);
 
-    static void SetOnChangeAndSubmit(ChangeAndSubmitEvent&& onChange);
+    static void SetOnCopy(std::function<void(const std::string&)>&& func);
+    static void SetOnCut(std::function<void(const std::string&)>&& func);
+    static void SetOnPaste(std::function<void(const std::string&)>&& func);
 
 private:
     static RefPtr<FrameNode> CreateTextField(const RefPtr<SearchNode>& parentNode,

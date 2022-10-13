@@ -2781,12 +2781,11 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
         return;
     }
     auto controller = JSRef<JSObject>::Cast(controllerObj);
-    auto setWebIdFunction = controller->GetProperty("setWebId");
-    auto registerJsProxyFunction = controller->GetProperty("registerJavaScriptProxy");
-    if (setWebIdFunction->IsFunction()) {
+    auto jsProxyFunction = controller->GetProperty("jsProxy");
+    if (jsProxyFunction->IsFunction()) {
         LOGI("The controller is WebviewController.");
         auto jsProxyCallback = [webviewController = controller,
-            func = JSRef<JSFunc>::Cast(registerJsProxyFunction),
+            func = JSRef<JSFunc>::Cast(jsProxyFunction),
             object, name, methodList]() {
             JSRef<JSVal> argv[] = {object, name, methodList};
             func->Call(webviewController, 3, argv);

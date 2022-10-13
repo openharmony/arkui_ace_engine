@@ -47,6 +47,16 @@ public:
         return itemPosition_;
     }
 
+    void SetItemsPosition(const PositionMap& itemPosition)
+    {
+        itemPosition_ = itemPosition;
+    }
+
+    void SetOverScrollFeature()
+    {
+        overScrollFeature_ = true;
+    }
+
     void SetIndex(int32_t index)
     {
         jumpIndex_ = index;
@@ -72,9 +82,9 @@ public:
         return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
     }
 
-    std::optional<int32_t> GetMaxListItemIndex() const
+    int32_t GetMaxListItemIndex() const
     {
-        return maxListItemIndex_;
+        return totalItemCount_ - 1;
     }
 
     void SetSpaceWidth(float spaceWidth)
@@ -107,24 +117,19 @@ public:
         return lanes_;
     }
 
-    bool Scrollable() const
-    {
-        return scrollable_;
-    }
-
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        Axis axis, int32_t startIndex, float startPos);
-    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        Axis axis, int32_t endIndex, float endPos);
+    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t startIndex, float startPos);
+    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t endIndex, float endPos);
 
 private:
     void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
 
-    void LayoutList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
@@ -138,12 +143,10 @@ private:
     void CalculateLanes(const LayoutConstraintF& layoutConstraint, Axis axis);
     void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
-    int LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        Axis axis, int& currentIndex, float& mainLen);
-    int LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        Axis axis, int& currentIndex, float& mainLen);
-
-    void ResetScrollable();
+    int LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int& currentIndex, float& mainLen);
+    int LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int& currentIndex, float& mainLen);
 
     std::optional<int32_t> jumpIndex_;
 
@@ -154,12 +157,11 @@ private:
     int32_t preStartIndex_ = -1;
     int32_t preEndIndex_ = -1;
 
-    std::optional<int32_t> maxListItemIndex_;
     float spaceWidth_ = 0.0f;
     bool isInitialized_ = false;
-    int32_t cachedCount_ = 0;
-    int32_t startCachedCount_ = 0;
-    int32_t endCachedCount_ = 0;
+    bool overScrollFeature_ = false;
+
+    int32_t totalItemCount_ = 0;
 
     std::optional<int32_t> lanes_;
     std::optional<float> minLaneLength_;
@@ -170,9 +172,6 @@ private:
     float contentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
-
-    // List is scrollable when content size is greater than list size in main axis.
-    bool scrollable_ = true;
 };
 } // namespace OHOS::Ace::NG
 
