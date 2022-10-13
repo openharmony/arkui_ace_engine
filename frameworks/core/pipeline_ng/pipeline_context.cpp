@@ -476,7 +476,14 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-multimodal") {
 #endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
-        rootNode_->DumpTree(0);
+        if (params.size() > 1 && params[1] == "-lastpage") {
+            auto lastPage = stageManager_->GetLastPage();
+            if (lastPage) {
+                lastPage->DumpTree(0);
+            }
+        } else {
+            rootNode_->DumpTree(0);
+        }
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {
