@@ -33,6 +33,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMinFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LetterSpacing, Dimension);
 };
 
 struct TextLineStyle {
@@ -43,7 +44,6 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAlign, TextAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLength, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(LetterSpacing, Dimension);
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
