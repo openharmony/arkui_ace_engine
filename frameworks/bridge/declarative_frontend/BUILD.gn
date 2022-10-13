@@ -267,6 +267,7 @@ template("declarative_js_engine") {
       "jsview/models/tabs_model_impl.cpp",
       "jsview/models/text_field_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
+      "jsview/models/toggle_model_impl.cpp",
       "jsview/models/video_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
     ]

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/button/toggle_button_view.h"
+#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ToggleButtonView::Create(const std::string& tagName)
+void ToggleButtonModelNG::Create(const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -31,17 +31,17 @@ void ToggleButtonView::Create(const std::string& tagName)
     stack->Push(frameNode);
 }
 
-void ToggleButtonView::SetSelectedColor(const Color& selectedColor)
+void ToggleButtonModelNG::SetSelectedColor(const Color& selectedColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor);
 }
 
-void ToggleButtonView::SetIsOn(bool isOn)
+void ToggleButtonModelNG::SetIsOn(bool isOn)
 {
     ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, IsOn, isOn);
 }
 
-void ToggleButtonView::SetBackgroundColor(const Color& backgroundColor)
+void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
