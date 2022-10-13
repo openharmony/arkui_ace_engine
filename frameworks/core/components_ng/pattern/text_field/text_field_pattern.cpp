@@ -29,6 +29,7 @@
 #include "core/common/ime/text_input_formatter.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
@@ -432,7 +433,19 @@ void TextFieldPattern::HandleOnCopy()
         LOGI("Copy value is %{private}s", value.c_str());
         clipboard_->SetData(value, copyOption_);
     }
-    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the parent node is a Search, the Search callback is executed.
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnCopy(value);
+        return;
+    }
+
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCopy(value);
 }
@@ -471,12 +484,26 @@ void TextFieldPattern::HandleOnPaste()
         textfield->textEditingValue_ = value;
         textfield->SetEditingValueToProperty(value.text);
         textfield->SetInSelectMode(SelectionMode::NONE);
+        textfield->operationRecords_.emplace_back(value);
+
+        auto host = textfield->GetHost();
+        CHECK_NULL_VOID(host);
+        // If the parent node is a Search, the Search callback is executed.
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+        if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+            auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireOnPaste(data);
+            textfield->FireEventHubOnChange(data);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+
         auto eventHub = textfield->GetHost()->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnPaste(data);
         textfield->FireEventHubOnChange(data);
-        textfield->operationRecords_.emplace_back(value);
-        textfield->GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     clipboard_->GetData(pasteCallback);
 }
@@ -505,12 +532,26 @@ void TextFieldPattern::HandleOnCut()
     textEditingValue_.CursorMoveToPosition(textSelector_.GetStart());
     SetEditingValueToProperty(textEditingValue_.text);
     selectionMode_ = SelectionMode::NONE;
-    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+    operationRecords_.emplace_back(textEditingValue_);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the parent node is a Search, the Search callback is executed.
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnCut(selectedText);
+        FireEventHubOnChange(selectedText);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCut(selectedText);
     FireEventHubOnChange(selectedText);
-    operationRecords_.emplace_back(textEditingValue_);
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::UpdateSelection(int32_t both)
@@ -525,7 +566,18 @@ void TextFieldPattern::UpdateSelection(int32_t start, int32_t end)
 
 void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 {
-    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the parent node is a Search, the Search callback is executed.
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->UpdateChangeEvent(text);
+        return;
+    }
+
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnChange(text);
 }
@@ -737,7 +789,19 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     SetEditingValueToProperty(textEditingValue_.text);
     operationRecords_.emplace_back(textEditingValue_);
     caretUpdateType_ = CaretUpdateType::INPUT;
-    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the parent node is a Search, the Search callback is executed.
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->UpdateChangeEvent(textEditingValue_.text);
+        return;
+    }
+
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnChange(textEditingValue_.text);
 }
@@ -913,7 +977,18 @@ void TextFieldPattern::ClearEditingValue()
 void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
     LOGD("PerformAction  %{public}d", static_cast<int32_t>(action));
-    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the parent node is a Search, the Search callback is executed.
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->UpdateSubmitEvent(textEditingValue_.text);
+        return;
+    }
+
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnSubmit(static_cast<int32_t>(action));
 }
 
