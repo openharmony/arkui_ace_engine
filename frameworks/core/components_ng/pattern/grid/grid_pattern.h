@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -81,6 +82,16 @@ public:
                     nextFocusNode = grid->GetNextFocusNode(step, currFocusNode);
                 }
             });
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<GridEventHub>();
+    }
+
+    GridLayoutInfo GetGridLayoutInfo() const
+    {
+        return gridLayoutInfo_;
     }
 
 private:

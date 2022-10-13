@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -133,6 +134,12 @@ void GridView::SetOnItemDragStart(ItemDragStartFunc&& value)
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragStart(std::move(value));
+
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    eventHub->InitItemDragEvent(gestureEventHub);
+
+    AddDragFrameNodeToManager();
 }
 
 void GridView::SetOnItemDragEnter(ItemDragEnterFunc&& value)
@@ -142,6 +149,8 @@ void GridView::SetOnItemDragEnter(ItemDragEnterFunc&& value)
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragEnter(std::move(value));
+
+    AddDragFrameNodeToManager();
 }
 
 void GridView::SetOnItemDragMove(ItemDragMoveFunc&& value)
@@ -151,6 +160,8 @@ void GridView::SetOnItemDragMove(ItemDragMoveFunc&& value)
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragMove(std::move(value));
+
+    AddDragFrameNodeToManager();
 }
 
 void GridView::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
@@ -160,6 +171,8 @@ void GridView::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragLeave(std::move(value));
+
+    AddDragFrameNodeToManager();
 }
 
 void GridView::SetOnItemDrop(ItemDropFunc&& value)
@@ -169,6 +182,20 @@ void GridView::SetOnItemDrop(ItemDropFunc&& value)
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDrop(std::move(value));
+
+    AddDragFrameNodeToManager();
+}
+
+void GridView::AddDragFrameNodeToManager()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    dragDropManager->AddGridDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 } // namespace OHOS::Ace::NG
