@@ -376,7 +376,7 @@ void RosenRenderBubble::PaintDefaultBubble(SkCanvas* skCanvas, const SkPaint& pa
     rrect_ = MakeRRect();
     RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect_), ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawRRect(rrect_, paint);
-    skCanvas->clipRRect(rrect_, SkClipOp::kIntersect);
+    skCanvas->clipRRect(rrect_, SkClipOp::kIntersect, true);
 }
 
 void RosenRenderBubble::PaintBorder(RenderContext& context)
