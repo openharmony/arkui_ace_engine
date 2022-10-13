@@ -493,6 +493,10 @@ struct KeyEvent final {
     {
         return (KeyCode::KEY_A <= code && code <= KeyCode::KEY_Z);
     }
+    bool IsCombinationKey() const
+    {
+        return pressedCodes.size() > 1;
+    }
     std::string ConvertCodeToString() const
     {
         if (KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) {

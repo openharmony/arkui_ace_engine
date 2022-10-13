@@ -69,6 +69,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
     touchPoints_[event.id] = event;
+    inputEventType_ = InputEventType::TOUCH_SCREEN;
 
     if (state_ == DetectState::READY) {
         AddToReferee(event.id, AceType::Claim(this));
@@ -97,6 +98,8 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     inputEventType_ = InputEventType::AXIS;
 
     if (state_ == DetectState::READY) {
+        AddToReferee(0, AceType::Claim(this));
+        velocityTracker_.Reset();
         state_ = DetectState::DETECTING;
     }
 }
@@ -155,14 +158,36 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
 
-    if (state_ != DetectState::DETECTED) {
+    if (state_ == DetectState::READY) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        state_ = DetectState::READY;
         return;
     }
 
-    SendCallbackMsg(onActionEnd_, false);
-    Reset();
+    if (state_ == DetectState::DETECTING) {
+        size_t inRefereeNum = refereePointers_.size();
+        bool inReferee = IsInReferee(0);
+        if (inReferee) {
+            inRefereeNum--;
+        }
+
+        if (inRefereeNum < 1) {
+            LOGD("this gesture is not pan, try to reject it");
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return;
+        }
+
+        if (inReferee) {
+            DelFromReferee(0, AceType::Claim(this));
+        }
+        return;
+    }
+
+    if (refereeState_ == RefereeState::SUCCEED) {
+        SendCallbackMsg(onActionEnd_);
+        Reset();
+    } else {
+        pendingEnd_ = true;
+    }
 }
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -256,17 +281,18 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             state_ = DetectState::DETECTED;
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         } else if (result == GestureAcceptResult::REJECT) {
+            LOGW("pan recognizer reject");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
-    }
-    if (state_ == DetectState::DETECTED) {
+    } else if (state_ == DetectState::DETECTED && refereeState_ == RefereeState::SUCCEED) {
         if ((direction_.type & PanDirection::VERTICAL) == 0) {
             averageDistance_.SetY(0.0);
         } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
             averageDistance_.SetX(0.0);
         }
 
-        SendCallbackMsg(onActionUpdate_, false);
+        LOGD("pan recognizer detected successful");
+        SendCallbackMsg(onActionUpdate_);
     }
 }
 
@@ -289,10 +315,19 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    if (fingers_ != AXIS_PAN_FINGERS) {
+    LOGD("pan recognizer receives touch cancel event");
+    if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
+        LOGD("cancel pan gesture detect, try to reject it");
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
-    return HandleTouchCancelEvent(TouchEvent {});
+
+    if (refereeState_ == RefereeState::SUCCEED) {
+        SendCancelMsg();
+        Reset();
+    } else {
+        pendingCancel_ = true;
+    }
 }
 
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
@@ -347,7 +382,7 @@ void PanRecognizer::Reset()
     pendingCancel_ = false;
 }
 
-void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isTouchEvent)
+void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
     if (callback && *callback) {
         GestureEvent info;
@@ -363,12 +398,12 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetSourceDevice(deviceType_);
         info.SetDelta(delta_);
         info.SetMainDelta(mainDelta_);
-        if (isTouchEvent) {
-            info.SetVelocity(velocityTracker_.GetVelocity());
-            info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
-        } else {
+        if (inputEventType_ == InputEventType::AXIS) {
             info.SetVelocity(Velocity());
             info.SetMainVelocity(0.0);
+        } else {
+            info.SetVelocity(velocityTracker_.GetVelocity());
+            info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetInputEventType(inputEventType_);
