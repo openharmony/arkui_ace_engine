@@ -107,19 +107,11 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextTimer>::StaticMethod("create", &JSTextTimer::Create, opt);
     JSClass<JSTextTimer>::StaticMethod("format", &JSTextTimer::SetFormat);
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSClass<JSTextTimer>::StaticMethod("fontColor", &JSText::SetTextColor, opt);
-        JSClass<JSTextTimer>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
-        JSClass<JSTextTimer>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
-        JSClass<JSTextTimer>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
-        JSClass<JSTextTimer>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
-    } else {
-        JSClass<JSTextTimer>::StaticMethod("fontColor", &JSTextTimer::SetTextColor);
-        JSClass<JSTextTimer>::StaticMethod("fontSize", &JSTextTimer::SetFontSize);
-        JSClass<JSTextTimer>::StaticMethod("fontWeight", &JSTextTimer::SetFontWeight, opt);
-        JSClass<JSTextTimer>::StaticMethod("fontStyle", &JSTextTimer::SetFontStyle, opt);
-        JSClass<JSTextTimer>::StaticMethod("fontFamily", &JSTextTimer::SetFontFamily, opt);
-    }
+    JSClass<JSTextTimer>::StaticMethod("fontColor", &JSTextTimer::SetTextColor);
+    JSClass<JSTextTimer>::StaticMethod("fontSize", &JSTextTimer::SetFontSize);
+    JSClass<JSTextTimer>::StaticMethod("fontWeight", &JSTextTimer::SetFontWeight, opt);
+    JSClass<JSTextTimer>::StaticMethod("fontStyle", &JSTextTimer::SetFontStyle, opt);
+    JSClass<JSTextTimer>::StaticMethod("fontFamily", &JSTextTimer::SetFontFamily, opt);
     JSClass<JSTextTimer>::StaticMethod("onTimer", &JSTextTimer::OnTimer);
     JSClass<JSTextTimer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -182,6 +174,11 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextTimerView::SetFontSize(fontSize);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto timerComponent = AceType::DynamicCast<OHOS::Ace::TextTimerComponent>(stack->GetMainComponent());
     if (!timerComponent) {
@@ -205,6 +202,11 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextTimerView::SetTextColor(textColor);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto timerComponent = AceType::DynamicCast<OHOS::Ace::TextTimerComponent>(stack->GetMainComponent());
     if (!timerComponent) {
@@ -219,6 +221,11 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
 
 void JSTextTimer::SetFontWeight(const std::string& value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextTimerView::SetFontWeight(ConvertStrToFontWeight(value));
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto timerComponent = AceType::DynamicCast<OHOS::Ace::TextTimerComponent>(stack->GetMainComponent());
     if (!timerComponent) {
@@ -233,6 +240,15 @@ void JSTextTimer::SetFontWeight(const std::string& value)
 
 void JSTextTimer::SetFontStyle(int32_t value)
 {
+    if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
+        LOGE("TextTimer fontStyle(%{public}d) illegal value", value);
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextTimerView::SetItalicFontStyle(FONT_STYLES[value]);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto timerComponent = AceType::DynamicCast<OHOS::Ace::TextTimerComponent>(stack->GetMainComponent());
     if (!timerComponent) {
@@ -258,6 +274,11 @@ void JSTextTimer::SetFontFamily(const JSCallbackInfo& info)
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
         LOGE("Parse FontFamilies failed");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextTimerView::SetFontFamily(fontFamilies);
         return;
     }
 

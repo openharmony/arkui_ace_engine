@@ -425,7 +425,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                          OffsetF(size.Width() / lanes_.value() * laneIndex, 0) + OffsetF(laneCrossOffset, 0);
             } else {
                 offset = offset + OffsetF(pos.second.first, 0) +
-                         OffsetF(0, size.Width() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset);
+                         OffsetF(0, size.Height() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset);
             }
         } else {
             lanes_ = 1;

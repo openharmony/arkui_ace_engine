@@ -269,7 +269,7 @@ void JSSwiper::SetDuration(int32_t duration)
         NG::SwiperView::SetDuration(duration);
         return;
     }
-    
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
@@ -505,22 +505,10 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](int32_t index) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Swiper.onChange");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(index));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::SwiperView::SetOnChange(std::move(onChange));
-        return;
-    }
-
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
-    auto onChange = EventMarker([executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
-                                    const BaseEventInfo* info) {
+    auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
+                        const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
@@ -529,11 +517,18 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& info)
         }
         ACE_SCORING_EVENT("Swiper.OnChange");
         func->Execute(*swiperInfo);
-    });
+    };
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SwiperView::SetOnChange(std::move(onChange));
+        return;
+    }
+
+    auto onChangeEvent = EventMarker(std::move(onChange));
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
-        swiper->SetChangeEventId(onChange);
+        swiper->SetChangeEventId(onChangeEvent);
     }
 }
 

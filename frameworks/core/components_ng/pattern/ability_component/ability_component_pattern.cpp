@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/ability_component/ability_component_pattern.h"
+#include "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.h"
 
-#include "base/geometry/rect.h"
-#include "base/utils/utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
+#include "frameworks/base/geometry/rect.h"
+#include "frameworks/base/utils/utils.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 

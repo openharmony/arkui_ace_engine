@@ -18,17 +18,17 @@
 
 #include <string>
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/referenced.h"
-#include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/refresh/refresh_event_hub.h"
-#include "core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
-#include "core/components_ng/pattern/refresh/refresh_layout_property.h"
-#include "core/components_ng/pattern/refresh/refresh_render_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/property.h"
+#include "frameworks/base/geometry/dimension.h"
+#include "frameworks/base/geometry/ng/offset_t.h"
+#include "frameworks/base/memory/referenced.h"
+#include "frameworks/base/utils/noncopyable.h"
+#include "frameworks/core/components_ng/pattern/pattern.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_render_property.h"
+#include "frameworks/core/components_ng/pattern/text/text_layout_property.h"
+#include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 

@@ -489,6 +489,10 @@ struct KeyEvent final {
         return ((KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) ||
                 (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9));
     }
+    bool IsDirectionalKey() const
+    {
+        return KeyCode::KEY_DPAD_UP <= code && code <= KeyCode::KEY_DPAD_RIGHT;
+    }
     bool IsLetterKey() const
     {
         return (KeyCode::KEY_A <= code && code <= KeyCode::KEY_Z);

@@ -113,12 +113,12 @@ void ListPattern::OnModifyDone()
     initScrollable_ = true;
     
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    if (edgeEffect == EdgeEffect::SPRING) {
+    if (edgeEffect == EdgeEffect::SPRING && !scrollEffect_) {
         auto scrollEdgeEffect = AceType::MakeRefPtr<NG::ScrollSpringEffect>();
         SetScrollEdgeEffect(scrollEdgeEffect);
+        gestureHub->AddScrollEdgeEffect(GetDirection(), scrollEffect_);
     }
-    gestureHub->AddScrollEdgeEffect(GetDirection(), scrollEffect_);
-
+    
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
@@ -194,6 +194,7 @@ void ListPattern::ResetScrollableEvent(bool scrollable)
     CHECK_NULL_VOID(gestureHub);
 
     if (scrollable && !initScrollable_) {
+        CHECK_NULL_VOID(scrollableEvent_);
         gestureHub->AddScrollableEvent(scrollableEvent_);
         initScrollable_ = true;
         return;

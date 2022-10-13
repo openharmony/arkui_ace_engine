@@ -84,6 +84,7 @@ public:
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetCaretColor(const Color& value) = 0;
     virtual void SetMaxLength(uint32_t value) = 0;
+    virtual void SetMaxLines(uint32_t value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetTextColor(const Color& value) = 0;

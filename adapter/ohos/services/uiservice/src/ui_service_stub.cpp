@@ -29,7 +29,7 @@ UIServiceStub::~UIServiceStub()
     requestFuncMap_.clear();
 }
 
-int UIServiceStub::OnRemoteRequest(
+int32_t UIServiceStub::OnRemoteRequest(
     uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     HILOG_DEBUG("UIServiceStub::%{public}s, cmd = %{public}d, flags= %{public}d, code=%{public}d",
@@ -52,7 +52,7 @@ int UIServiceStub::OnRemoteRequest(
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int UIServiceStub::OnPushCallBackInner(MessageParcel& data, MessageParcel& reply)
+int32_t UIServiceStub::OnPushCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -67,7 +67,7 @@ int UIServiceStub::OnPushCallBackInner(MessageParcel& data, MessageParcel& reply
     return ERR_NONE;
 }
 
-int UIServiceStub::OnReturnRequestInner(MessageParcel& data, MessageParcel& reply)
+int32_t UIServiceStub::OnReturnRequestInner(MessageParcel& data, MessageParcel& reply)
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -81,7 +81,7 @@ int UIServiceStub::OnReturnRequestInner(MessageParcel& data, MessageParcel& repl
     return ERR_NONE;
 }
 
-int UIServiceStub::OnRequestCallBackInner(MessageParcel& data, MessageParcel& reply)
+int32_t UIServiceStub::OnRequestCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -103,10 +103,8 @@ void UIServiceCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
     }
 }
 
-UIServiceCallbackRecipient::UIServiceCallbackRecipient(RemoteDiedHandler handler) : handler_(handler)
-{}
+UIServiceCallbackRecipient::UIServiceCallbackRecipient(RemoteDiedHandler handler) : handler_(handler) {}
 
-UIServiceCallbackRecipient::~UIServiceCallbackRecipient()
-{}
+UIServiceCallbackRecipient::~UIServiceCallbackRecipient() = default;
 }  // namespace Ace
 }  // namespace OHOS

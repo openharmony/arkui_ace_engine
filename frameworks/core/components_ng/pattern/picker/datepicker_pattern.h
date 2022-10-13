@@ -355,6 +355,32 @@ public:
         return dayId_.value();
     }
 
+    bool HasTitleNode() const
+    {
+        return titleId_.has_value();
+    }
+
+    int32_t GetTitleId()
+    {
+        if (!titleId_.has_value()) {
+            titleId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return titleId_.value();
+    }
+
+    bool HasButtonTitleNode() const
+    {
+        return ButtonTitleId_.has_value();
+    }
+
+    int32_t GetButtonTitleId()
+    {
+        if (!ButtonTitleId_.has_value()) {
+            ButtonTitleId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return ButtonTitleId_.value();
+    }
+
     static const std::string& GetYear(uint32_t year);
 
     static const std::string& GetSolarMonth(uint32_t month);
@@ -374,6 +400,7 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     static void Init();
+    RefPtr<ClickEvent> clickEventListener_;
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -387,6 +414,8 @@ private:
     std::optional<int32_t> monthId_;
     std::optional<int32_t> dayId_;
     std::optional<int32_t> dateNodeId_;
+    std::optional<int32_t> titleId_;
+    std::optional<int32_t> ButtonTitleId_;
 
     EventMarker OnDialogAccept_;
     EventMarker OnDialogCancel_;

@@ -77,6 +77,15 @@ void TimePickerRowPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+    if (HasTitleNode()) {
+        auto textTitleNode = FrameNode::GetOrCreateFrameNode(
+            V2::TEXT_ETS_TAG, GetTitleId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        auto str = PickerDate::Current();
+        CHECK_NULL_VOID(textTitleNode);
+        auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(str.ToString(false));
+    }
 }
 
 void TimePickerRowPattern::SetEventCallback(EventCallback&& value)

@@ -127,7 +127,6 @@ void RosenRenderBubble::PaintNonCustomPopup(SkCanvas* skCanvas, const SkPaint& p
     }
 }
 
-
 void RosenRenderBubble::PaintBubbleWithArrow(SkCanvas* skCanvas, const SkPaint& paint)
 {
     if (skCanvas == nullptr) {
@@ -285,27 +284,23 @@ void RosenRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint)
         arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
         arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
         arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
-    path_.lineTo(childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()),
-        childOffsetY + childHeight);
+    path_.lineTo(
+        childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()), childOffsetY + childHeight);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
-        childOffsetX + childWidth,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction, childOffsetX + childWidth,
         childOffsetY + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
     path_.lineTo(childOffsetX + childWidth, childOffsetY + NormalizeToPx(border_.TopRightRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
         SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
-        childOffsetX + childWidth - NormalizeToPx(border_.TopRightRadius().GetX()),
-        childOffsetY);
+        childOffsetX + childWidth - NormalizeToPx(border_.TopRightRadius().GetX()), childOffsetY);
     path_.lineTo(childOffsetX + NormalizeToPx(border_.TopLeftRadius().GetX()), childOffsetY);
     path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
-        childOffsetX,
+        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction, childOffsetX,
         childOffsetY + NormalizeToPx(border_.TopLeftRadius().GetY()));
     path_.lineTo(childOffsetX, childOffsetY + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
         0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
-        childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()),
-        childOffsetY + childHeight);
+        childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()), childOffsetY + childHeight);
     path_.lineTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
         arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
     path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
@@ -313,8 +308,7 @@ void RosenRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint)
         arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
         arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
     path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
-        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset,
-        arrowPositionY);
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset, arrowPositionY);
     path_.close();
     RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawPath(path_, paint);
@@ -351,15 +345,13 @@ void RosenRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& pai
         childOffsetX + childWidth, childOffsetY + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
         0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
-        childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()),
-        childOffsetY + childHeight);
+        childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()), childOffsetY + childHeight);
     path_.lineTo(childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()), childOffsetY + childHeight);
     path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
         0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction, childOffsetX,
         childOffsetY + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
     path_.lineTo(childOffsetX, childOffsetY + NormalizeToPx(border_.TopLeftRadius().GetY()));
-    path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()),
-        NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
+    path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
         SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
         childOffsetX + NormalizeToPx(border_.TopLeftRadius().GetX()), childOffsetY);
     path_.lineTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
@@ -369,8 +361,7 @@ void RosenRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& pai
         arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
         arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
     path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
-        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset,
-        arrowPositionY);
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset, arrowPositionY);
     path_.close();
     RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawPath(path_, paint);
@@ -385,7 +376,7 @@ void RosenRenderBubble::PaintDefaultBubble(SkCanvas* skCanvas, const SkPaint& pa
     rrect_ = MakeRRect();
     RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect_), ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawRRect(rrect_, paint);
-    skCanvas->clipRRect(rrect_, SkClipOp::kIntersect);
+    skCanvas->clipRRect(rrect_, SkClipOp::kIntersect, true);
 }
 
 void RosenRenderBubble::PaintBorder(RenderContext& context)

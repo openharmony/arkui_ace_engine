@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/component.h"
@@ -51,6 +52,7 @@ struct ActionSheetInfo {
     std::string icon;        // icon of ActionSheet, not necessary.
     EventMarker callbackId;  // called when ActionSheet is clicked.
     RefPtr<Gesture> gesture; // called when ActionSheet is clicked.
+    RefPtr<NG::ClickEvent> action; // NG sheet item click action
 
     // Whether sheetInfo is valid, valid if title if not empty.
     bool IsValid() const
@@ -65,7 +67,7 @@ struct ButtonInfo {
     std::string textColor; // style of text in button.
     bool isBgColorSetted = false;
     Color bgColor; // background color of button.
-    RefPtr<NG::ClickEvent> action; // button click action
+    RefPtr<NG::ClickEvent> action; // NG button click action
 
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const

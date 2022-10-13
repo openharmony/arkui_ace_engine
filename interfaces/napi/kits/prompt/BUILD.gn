@@ -36,6 +36,8 @@ template("napi_prompt_static") {
       deps += [ config.libace_target ]
     }
 
+    deps += [ "../utils:napi_utils_static_${platform}" ]
+
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
   }
@@ -47,6 +49,7 @@ foreach(item, ace_platforms) {
     cflags_cc = []
     config = {
     }
+    platform = item.name
 
     if (defined(item.config)) {
       config = item.config

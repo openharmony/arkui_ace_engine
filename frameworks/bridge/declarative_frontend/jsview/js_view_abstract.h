@@ -32,13 +32,14 @@
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/core/gestures/tap_gesture.h"
-#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -255,6 +256,9 @@ public:
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
+    static void JsBindPopupNG(const JSCallbackInfo& info);
+    static void CreateCustomPopup(
+        RefPtr<JsFunction>& builder, const RefPtr<NG::FrameNode>& targetNode, const RefPtr<PopupParam>& popupParam);
 #endif
 
     /**

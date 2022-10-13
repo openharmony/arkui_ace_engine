@@ -31,7 +31,7 @@ public:
     ViewMeasureLayout() = default;
     ~ViewMeasureLayout() override
     {
-        LOGD("Destroy: ViewFunctions");
+        LOGD("Destroy: ViewMeasureLayout");
     }
 
 #ifdef USE_ARK_ENGINE

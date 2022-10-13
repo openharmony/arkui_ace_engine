@@ -173,6 +173,7 @@ public:
     JSRef<JSObject> GetChildById(const std::string& viewId);
 
     void FindChildById(const JSCallbackInfo& info);
+    void FindChildByIdForPreview(const JSCallbackInfo& info);
 
     void ExecuteUpdateWithValueParams(const std::string& jsonData) override
     {

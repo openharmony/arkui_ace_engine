@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_ROW_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_ROW_VIEW_H
 
+#include <functional>
+
 #include "base/utils/macros.h"
 #include "frameworks/core/components_v2/grid_layout/grid_container_util_class.h"
 
@@ -25,8 +27,7 @@ public:
     static void Create();
     static void Create(const RefPtr<V2::GridContainerSize>& col, const RefPtr<V2::Gutter>& gutter,
         const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction);
-    // TODO onBreakPoint changed
-    // TODO height
+    static void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange);
 };
 } // namespace OHOS::Ace::NG
 

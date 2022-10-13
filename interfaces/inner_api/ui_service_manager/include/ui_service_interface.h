@@ -18,9 +18,11 @@
 #include <iremote_broker.h>
 #include "want.h"
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
-class IUIService : public OHOS::IRemoteBroker {
+class ACE_FORCE_EXPORT IUIService : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ace.UIService");
 
@@ -31,8 +33,8 @@ public:
     };
 
     IUIService() = default;
-    virtual ~IUIService() = default;
-    
+    ~IUIService() override = default;
+
     /**
      * @brief Called back to OnPush
      *

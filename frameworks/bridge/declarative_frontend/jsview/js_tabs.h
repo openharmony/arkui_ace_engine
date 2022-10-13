@@ -28,7 +28,7 @@ public:
 
 protected:
     static void CreateForNG(const JSCallbackInfo& info);
-    static void SetIndex(int32_t number);
+    static void SetIndex(int32_t index);
     static void SetVertical(const std::string& value);
     static void SetBarPosition(const JSCallbackInfo& info);
     static void SetScrollable(const std::string& value);

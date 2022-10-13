@@ -32,6 +32,8 @@ void ColumnModelNG::Create(const std::optional<Dimension>& space, AlignDeclarati
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, FlexDirection, FlexDirection::COLUMN);
+    
     if (!space) {
         return;
     }

@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <functional>
-#include <cstdint>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -33,11 +32,10 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/clip_path.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/transition_property.h"
-#include "core/components_ng/property/gradient_property.h"
-#include "core/components_ng/property/clip_path.h"
 
 namespace OHOS::Ace::NG {
 
@@ -168,7 +166,8 @@ public:
     static void SetDisplayIndex(int32_t value);
 
     // Bind properties
-    static void BindPopup(const RefPtr<PopupParam>& param);
+    static void BindPopup(
+        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
     static void BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode);
     static void ShowMenu(int32_t targetId);

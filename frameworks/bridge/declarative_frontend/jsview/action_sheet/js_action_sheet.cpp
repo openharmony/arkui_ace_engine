@@ -20,6 +20,7 @@
 
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_component.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -27,11 +28,10 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const DimensionOffset ACTION_SHEET_OFFSET_DEFAULT = DimensionOffset(0.0_vp, -40.0_vp);
-const std::vector<DialogAlignment> DIALOG_ALIGNMENT = {
-    DialogAlignment::TOP, DialogAlignment::CENTER, DialogAlignment::BOTTOM, DialogAlignment::DEFAULT,
-    DialogAlignment::TOP_START, DialogAlignment::TOP_END, DialogAlignment::CENTER_START,
-    DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START, DialogAlignment::BOTTOM_END
-};
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
+    DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
+    DialogAlignment::BOTTOM_END };
 } // namespace
 
 ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
@@ -58,6 +58,18 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
     auto actionValue = obj->GetProperty("action");
     if (actionValue->IsFunction()) {
         auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto callback = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)](
+                                const GestureEvent& /*info*/) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("SheetInfo.action");
+                func->ExecuteJS();
+            };
+            sheetInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(callback);
+            return sheetInfo;
+        }
+
         RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
         tapGesture->SetOnActionId(
             [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)](const GestureEvent& info) {
@@ -141,10 +153,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         JSRef<JSVal> value = confirmObj->GetProperty("value");
         std::string buttonValue;
         if (ParseJsString(value, buttonValue)) {
-            ButtonInfo buttonInfo = {
-                .text = buttonValue,
-                .textColor = ""
-            };
+            ButtonInfo buttonInfo = { .text = buttonValue, .textColor = "" };
             properties.buttons.emplace_back(buttonInfo);
             JSRef<JSVal> actionValue = confirmObj->GetProperty("action");
             if (actionValue->IsFunction()) {
@@ -196,6 +205,21 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     auto gridCountValue = obj->GetProperty("gridCount");
     if (gridCountValue->IsNumber()) {
         properties.gridCount = gridCountValue->ToNumber<int32_t>();
+    }
+
+    // NG
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_VOID(context);
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->ShowDialog(properties, nullptr, false);
+        args.SetReturnValue(args.This());
+        return;
     }
 
     // Show ActionSheet.

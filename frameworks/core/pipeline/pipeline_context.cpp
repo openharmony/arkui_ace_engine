@@ -219,7 +219,7 @@ void PipelineContext::FlushBuild()
         return;
     }
     if (isFirstLoaded_) {
-        LOGI("PipelineContext::FlushBuild()");
+        LOGD("PipelineContext::FlushBuild()");
     }
     decltype(dirtyElements_) dirtyElements(std::move(dirtyElements_));
     for (const auto& elementWeak : dirtyElements) {
@@ -246,6 +246,9 @@ void PipelineContext::FlushBuild()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
+#if !defined(PREVIEW)
+    LayoutInspector::SupportInspector();
+#endif
 }
 
 void PipelineContext::FlushPredictLayout(int64_t deadline)
@@ -1446,9 +1449,6 @@ void PipelineContext::AddDirtyElement(const RefPtr<Element>& dirtyElement)
     dirtyElements_.emplace(dirtyElement);
     hasIdleTasks_ = true;
     window_->RequestFrame();
-#if !defined(PREVIEW)
-    LayoutInspector::SupportInspector();
-#endif
 }
 
 void PipelineContext::AddNeedRebuildFocusElement(const RefPtr<Element>& focusElement)
@@ -2016,7 +2016,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     FlushPageUpdateTasks();
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(double keyboardHeight)
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
 {
     CHECK_RUN_ON(UI);
     double positionY = 0;
@@ -2229,7 +2229,7 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-    LOGI("OnSurfaceDensityChanged density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
+    LOGI("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
     isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {

@@ -22,6 +22,8 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/click_event.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -66,6 +68,15 @@ void DatePickerPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
+    }
+    if (HasTitleNode()) {
+        auto textTitleNode = FrameNode::GetOrCreateFrameNode(
+            V2::TEXT_ETS_TAG, GetTitleId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        auto dateStr = GetCurrentDate();
+        CHECK_NULL_VOID(textTitleNode);
+        auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(dateStr.ToString(false));
     }
 }
 
@@ -680,7 +691,6 @@ PickerDate DatePickerPattern::GetCurrentDate() const
         LOGE("year or month or day column is null.");
         return currentDate;
     }
-
     auto yearDatePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
     auto dayDatePickerColumnPattern = dayColumn->GetPattern<DatePickerColumnPattern>();
@@ -689,7 +699,6 @@ PickerDate DatePickerPattern::GetCurrentDate() const
         LOGE("year or month or day pattern is null.");
         return currentDate;
     }
-
     if (!IsShowLunar()) {
         currentDate.SetYear(startDateSolar_.GetYear() + yearDatePickerColumnPattern->GetCurrentIndex());
         currentDate.SetMonth(

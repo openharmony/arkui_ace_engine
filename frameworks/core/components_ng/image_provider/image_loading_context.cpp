@@ -65,9 +65,24 @@ EnterStateTask ImageLoadingContext::CreateOnUnloadedTask()
     auto task = [weakCtx = WeakClaim(this)]() {
         auto imageLoadingContext = weakCtx.Upgrade();
         CHECK_NULL_VOID(imageLoadingContext);
-        LOGD("Enter State: Unloaded");
+        LOGI("Enter State: Unloaded");
+        imageLoadingContext->RestoreLoadingParams();
     };
     return task;
+}
+
+void ImageLoadingContext::RestoreLoadingParams()
+{
+    LOGI("ImageLoadingContext: restore loading params");
+    if (imageObj_) {
+        imageObj_->ClearData();
+        imageObj_->ClearCanvasImage();
+    }
+    imageObj_ = nullptr;
+    srcRect_ = RectF();
+    dstRect_ = RectF();
+    dstSize_ = SizeF();
+    sourceInfo_.Reset();
 }
 
 EnterStateTask ImageLoadingContext::CreateOnDataLoadingTask()
@@ -128,8 +143,8 @@ EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
             imageLoadingContext->srcRect_, imageLoadingContext->dstRect_);
 
         // step4: [MakeCanvasImage] according to [resizeTarget]
-        imageLoadingContext->imageObj_->MakeCanvasImage(imageLoadingContext->loadCallbacks_, resizeTarget,
-            imageLoadingContext->GetSourceSize().has_value());
+        imageLoadingContext->imageObj_->MakeCanvasImage(
+            imageLoadingContext->loadCallbacks_, resizeTarget, imageLoadingContext->GetSourceSize().has_value());
     };
     return task;
 }
@@ -323,8 +338,7 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
     if (sourceSizePtr_ == nullptr) {
         return std::nullopt;
     }
-    return std::optional<SizeF>(SizeF(
-        static_cast<float>(sourceSizePtr_->first.ConvertToPx()),
+    return std::optional<SizeF>(SizeF(static_cast<float>(sourceSizePtr_->first.ConvertToPx()),
         static_cast<float>(sourceSizePtr_->second.ConvertToPx())));
 }
 
@@ -343,6 +357,16 @@ void ImageLoadingContext::SetSvgFillColor(const std::optional<Color>& svgFillCol
     if (sourceInfo_.IsSvg() && svgFillColorOpt) {
         svgFillColorOpt_ = svgFillColorOpt;
     }
+}
+
+void ImageLoadingContext::ResetLoading()
+{
+    stateManager_->HandleCommand(ImageLoadingCommand::RESET_STATE);
+}
+
+void ImageLoadingContext::ResumeLoading()
+{
+    stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
 }
 
 } // namespace OHOS::Ace::NG

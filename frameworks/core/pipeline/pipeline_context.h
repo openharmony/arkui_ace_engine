@@ -227,7 +227,7 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void OnVirtualKeyboardHeightChange(double keyboardHeight) override;
+    void OnVirtualKeyboardHeightChange(float keyboardHeight) override;
 
     // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
@@ -837,12 +837,12 @@ public:
 
     void SetAppTitle(const std::string& title);
     void SetAppIcon(const RefPtr<PixelMap>& icon);
+    void FlushMessages() override;
 
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
-    void FlushMessages() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     void FlushReload() override;
     void FlushReloadTransition() override;

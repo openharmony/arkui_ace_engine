@@ -92,16 +92,16 @@ private:
     };
 
     void InitTargetSizeAndPosition();
-
-    OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp);
+    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
-
     void InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition, OffsetF& topPosition,
         OffsetF& bottomPosition, const SizeF& childSize);
+
+    OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp);
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition,
         const OffsetF& topArrowPosition, const OffsetF& bottomArrowPosition);
-    ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
+    ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
 
     void UpdateCustomChildPosition(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void UpdateTouchRegion();
@@ -118,6 +118,7 @@ private:
     RectF touchRegion_;
 
     Edge padding_;
+    Edge margin_;
     Border border_;
     Placement arrowPlacement_ = Placement::BOTTOM;
     Placement placement_ = Placement::BOTTOM;

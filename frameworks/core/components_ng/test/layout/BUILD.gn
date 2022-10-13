@@ -13,5 +13,5 @@
 
 group("layout_unittest") {
   testonly = true
-  deps = []
+  deps = [ "relative_container:relative_container_layout_test_ng" ]
 }

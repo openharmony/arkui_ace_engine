@@ -27,7 +27,7 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    if (frameNode && AceType::InstanceOf<NavDestinationGroupNode>(frameNode)) {
+    if (frameNode) {
         return AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     }
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
