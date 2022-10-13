@@ -38,7 +38,7 @@ public:
 
     bool IsAtomicNode() const override
     {
-        return false;
+        return true;
     }
 
     bool UseExternalRSNode() const override
