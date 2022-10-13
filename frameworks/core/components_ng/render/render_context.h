@@ -27,6 +27,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
@@ -139,6 +140,9 @@ public:
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     virtual void ClearDrawCommands() {}
+
+    virtual void NotifyTransition(
+        const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) {}
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);

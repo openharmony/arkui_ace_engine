@@ -152,6 +152,9 @@ public:
 
     void ClearDrawCommands() override;
 
+    void NotifyTransition(
+        const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;

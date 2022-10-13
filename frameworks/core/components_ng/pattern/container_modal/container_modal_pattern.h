@@ -48,6 +48,8 @@ public:
         pipeline->AddWindowFocusChangedCallback(host->GetId());
     }
 
+    void InitContainerEvent();
+
     void OnActive() override {}
 
     void OnInActive() override {}
@@ -55,11 +57,19 @@ public:
     void OnWindowShow() override {}
     void OnWindowHide() override {}
 
-    void OnWindowFocused() override {}
-    void OnWindowUnfocused() override {}
+    void OnWindowFocused() override;
+    void OnWindowUnfocused() override;
 
 private:
     void OnModifyDone() override;
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    void ShowTitle(bool isShow);
+
+    void ChangeFloatingTitleIcon(const RefPtr<FrameNode>& floatingNode);
+
+    WindowMode windowMode_;
 };
 
 } // namespace OHOS::Ace::NG
