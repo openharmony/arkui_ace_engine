@@ -148,7 +148,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
-        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->ShowToast(messageString, duration, bottomString);
@@ -354,7 +354,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
                 napi_value msg = nullptr;
-                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
+                    + "UI execution context not found.";
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
                 napi_value error = nullptr;
                 napi_create_error(env, code, msg, &error);
@@ -557,7 +558,8 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
                 napi_value msg = nullptr;
-                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
+                    + "UI execution context not found.";
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
                 napi_value error = nullptr;
                 napi_create_error(env, code, msg, &error);
