@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
+inline constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
 inline bool IsPlayingAnimation(const RefPtr<Animator>& animatorController_)
 {
     return (animatorController_->GetStatus() == Animator::Status::RUNNING);
@@ -315,15 +315,15 @@ void MarqueePattern::FireFinishEvent() const
 double MarqueePattern::GetScrollAmount() const
 {
     auto marqueeProperty = GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_RETURN(marqueeProperty, 0.0);
-    return marqueeProperty->GetScrollAmount().value_or(0.0);
+    CHECK_NULL_RETURN(marqueeProperty, DEFAULT_MARQUEE_SCROLL_AMOUNT);
+    return marqueeProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT);
 }
 
 int32_t MarqueePattern::GetLoop() const
 {
     auto marqueeProperty = GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_RETURN(marqueeProperty, 0);
-    return marqueeProperty->GetLoop().value_or(0);
+    CHECK_NULL_RETURN(marqueeProperty, DEFAULT_MARQUEE_LOOP);
+    return marqueeProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
 }
 
 bool MarqueePattern::GetPlayerStatus() const

@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text_clock/text_clock_view.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 
-#include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<TextClockController> TextClockView::Create()
+RefPtr<TextClockController> TextClockModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -33,17 +31,17 @@ RefPtr<TextClockController> TextClockView::Create()
     return pattern ? pattern->GetTextClockController() : nullptr;
 }
 
-void TextClockView::SetFormat(const std::string& format)
+void TextClockModelNG::SetFormat(const std::string& format)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format);
 }
 
-void TextClockView::SetHoursWest(const int32_t& hoursWest)
+void TextClockModelNG::SetHoursWest(const int32_t& hoursWest)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, hoursWest);
 }
 
-void TextClockView::SetOnDateChange(ChangeEvent&& onChange)
+void TextClockModelNG::SetOnDateChange(std::function<void(const std::string)>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

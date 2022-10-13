@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_CLOCK_LAYOUT_PROPERTY_H
 
 #include <string>
+#include <sys/time.h>
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -46,6 +48,20 @@ public:
         TextLayoutProperty::Reset();
         ResetFormat();
         ResetHoursWest();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        const std::string DEFAULT_FORMAT = "hms";
+        json->Put("format", propFormat_.value_or(DEFAULT_FORMAT).c_str());
+
+        constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
+        struct timeval currentTime {};
+        struct timezone timeZone {};
+        gettimeofday(&currentTime, &timeZone);
+        int32_t hoursWest = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
+        json->Put("timeZoneOffset", std::to_string(propHoursWest_.value_or(hoursWest)).c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Format, std::string, PROPERTY_UPDATE_MEASURE);
