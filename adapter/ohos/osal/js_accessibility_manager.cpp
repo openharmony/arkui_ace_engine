@@ -532,11 +532,13 @@ void JsAccessibilityManager::InitializeCallback()
     if (!client) {
         return;
     }
-    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(client->IsEnabled());
+    bool isEnabled = false;
+    client->IsEnabled(isEnabled);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
 
     SubscribeToastObserver();
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
-    if (client->IsEnabled()) {
+    if (isEnabled) {
         RegisterInteractionOperation(windowId_);
     }
 }
@@ -551,7 +553,10 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent
     if (!client) {
         return false;
     }
-    if (!client->IsEnabled()) {
+
+    bool isEnabled = false;
+    client->IsEnabled(isEnabled);
+    if (!isEnabled) {
         return false;
     }
 
@@ -1236,7 +1241,8 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     Register(false);
     currentFocusNodeId_ = -1;
     LOGI("DeregisterInteractionOperation windowId:%{public}d", windowId);
-    return instance->DeregisterElementOperator(windowId);
+    instance->DeregisterElementOperator(windowId);
+    return;
 }
 
 void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const bool state)
