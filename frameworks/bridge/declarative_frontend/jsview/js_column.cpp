@@ -66,6 +66,8 @@ void JSColumn::Create(const JSCallbackInfo& info)
         }
     }
     ColumnModel::GetInstance()->Create(space, declaration, inspectorTag_);
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(true);
 }
 
 void JSColumn::CreateWithWrap(const JSCallbackInfo& info)
