@@ -48,17 +48,11 @@ public:
         pipeline->AddWindowFocusChangedCallback(host->GetId());
     }
 
-    void InitContainerEvent();
-
-    void OnActive() override {}
-
-    void OnInActive() override {}
-
-    void OnWindowShow() override {}
-    void OnWindowHide() override {}
-
     void OnWindowFocused() override;
+
     void OnWindowUnfocused() override;
+
+    void InitContainerEvent();
 
 private:
     void OnModifyDone() override;
@@ -67,7 +61,14 @@ private:
 
     void ShowTitle(bool isShow);
 
-    void ChangeFloatingTitleIcon(const RefPtr<FrameNode>& floatingNode);
+    void WindowFocus(bool isFocus);
+
+    void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus = true);
+
+    static void ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus = true);
+
+    static void ChangeTitleButtonIcon(
+        const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus = true);
 
     WindowMode windowMode_;
 };

@@ -16,11 +16,17 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 
+constexpr int32_t TITLE_LABEL_INDEX = 1;
+constexpr int32_t LEFT_SPLIT_BUTTON_INDEX = 2;
+constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 3;
+constexpr int32_t MINIMIZE_BUTTON_INDEX = 4;
+constexpr int32_t CLOSE_BUTTON_INDEX = 5;
 constexpr int32_t TITLE_POPUP_DURATION = 200;
 constexpr double TITLE_POPUP_DISTANCE = 37.0; // 37vp height of title
 
@@ -43,6 +49,7 @@ bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, false);
     if (!config.frameSizeChange || windowMode_ == windowManager->FireWindowGetModeCallBack()) {
+        LOGI("container modal node no need to render");
         return false;
     }
 
@@ -106,7 +113,7 @@ void ContainerModalPattern::ShowTitle(bool isShow)
 
     auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);
-    ChangeFloatingTitleIcon(floatingTitleNode);
+    ChangeFloatingTitle(floatingTitleNode);
     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
 }
 
@@ -140,7 +147,6 @@ void ContainerModalPattern::InitContainerEvent()
     touchEventHub->SetTouchEvent([floatingLayoutProperty, context, windowManager, option, transOptions,
                                      titlePopupDistance](TouchEventInfo& info) {
         auto windowMode = windowManager->FireWindowGetModeCallBack();
-
         if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= titlePopupDistance) {
             if (info.GetChangedTouches().begin()->GetTouchType() != TouchType::MOVE) {
                 return;
@@ -169,31 +175,134 @@ void ContainerModalPattern::InitContainerEvent()
     });
 }
 
-void ContainerModalPattern::ChangeFloatingTitleIcon(const RefPtr<FrameNode>& floatingNode)
-{
-    auto maxRecoverButton = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(3));
-    CHECK_NULL_VOID(maxRecoverButton);
-    auto iconImage = AceType::DynamicCast<FrameNode>(maxRecoverButton->GetChildren().front());
-    CHECK_NULL_VOID(iconImage);
-
-    auto imageLayoutProperty = iconImage->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    ImageSourceInfo imageSourceInfo;
-    auto maxRecoverIcon = windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
-                              ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
-                              : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
-    imageSourceInfo.SetResourceId(maxRecoverIcon);
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    iconImage->MarkModifyDone();
-}
-
 void ContainerModalPattern::OnWindowFocused()
 {
-    LOGE("ContainerModalPattern::OnWindowFocused()");
+    WindowFocus(true);
 }
+
 void ContainerModalPattern::OnWindowUnfocused()
 {
-    LOGE("ContainerModalPattern::OnWindowUnfocused()");
+    WindowFocus(false);
+}
+void ContainerModalPattern::WindowFocus(bool isFocus)
+{
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+
+    // update container modal background
+    auto renderContext = containerNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(isFocus ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(isFocus ? CONTAINER_BORDER_COLOR : CONTAINER_BORDER_COLOR_LOST_FOCUS);
+    renderContext->UpdateBorderColor(borderColor);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+
+    // update normal title
+    if (windowManager->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+        CHECK_NULL_VOID(columnNode);
+        auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+        CHECK_NULL_VOID(titleNode);
+        ChangeTitle(titleNode, isFocus);
+        return;
+    }
+
+    // update floating title
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    CHECK_NULL_VOID(floatingTitleNode);
+    ChangeFloatingTitle(floatingTitleNode, isFocus);
+}
+
+void ContainerModalPattern::ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus)
+{
+    CHECK_NULL_VOID(titleNode);
+    // update title label
+    auto titleLabel = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(TITLE_LABEL_INDEX));
+    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
+
+    // update leftSplit button
+    auto leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
+    ChangeTitleButtonIcon(leftSplitButton,
+        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
+                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT, isFocus);
+
+    // update maximize button
+    auto maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
+    ChangeTitleButtonIcon(maximizeButton,
+        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE
+                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE, isFocus);
+
+    // update minimize button
+    auto minimizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
+    ChangeTitleButtonIcon(minimizeButton,
+        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE
+                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE, isFocus);
+
+    // update close button
+    auto closeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(CLOSE_BUTTON_INDEX));
+    ChangeTitleButtonIcon(closeButton,
+        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
+                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, isFocus);
+}
+
+void ContainerModalPattern::ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus)
+{
+    CHECK_NULL_VOID(floatingNode);
+
+    // update title label
+    auto titleLabel = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(TITLE_LABEL_INDEX));
+    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
+
+    // update leftSplit button
+    auto leftSplitButton = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
+    ChangeTitleButtonIcon(leftSplitButton,
+        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
+                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT, isFocus);
+
+    // update maxRecover button
+    auto maxRecoverIconFocused = windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
+                                     ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
+                                     : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
+    auto maxRecoverIconUnfocused = windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
+                                       ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER
+                                       : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
+    auto maxRecover = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
+    ChangeTitleButtonIcon(maxRecover, isFocus ? maxRecoverIconFocused : maxRecoverIconUnfocused, isFocus);
+
+    // update minimize button
+    auto minimizeButton = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
+    ChangeTitleButtonIcon(minimizeButton,
+        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE
+                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE, isFocus);
+
+    // update close button
+    auto closeButton = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(CLOSE_BUTTON_INDEX));
+    ChangeTitleButtonIcon(closeButton,
+        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
+                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, isFocus);
+}
+
+void ContainerModalPattern::ChangeTitleButtonIcon(
+    const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus)
+{
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(
+        isFocus ? TITLE_BUTTON_BACKGROUND_COLOR : TITLE_BUTTON_BACKGROUND_COLOR_LOST_FOCUS);
+    auto buttonIcon = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
+    CHECK_NULL_VOID(buttonIcon);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(icon);
+    auto imageLayoutProperty = buttonIcon->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    buttonIcon->MarkModifyDone();
 }
 
 } // namespace OHOS::Ace::NG

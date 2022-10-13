@@ -263,18 +263,14 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {
-            renderContext_->UpdateBorderColor(
-                BorderColorProperty { renderContext_->GetBorderColor()->leftColor.value_or(Color::BLACK),
-                    renderContext_->GetBorderColor()->topColor.value_or(Color::BLACK),
-                    renderContext_->GetBorderColor()->rightColor.value_or(Color::BLACK),
-                    renderContext_->GetBorderColor()->bottomColor.value_or(Color::BLACK) });
+            BorderColorProperty borderColorProperty;
+            borderColorProperty.SetColor(Color::BLACK);
+            renderContext_->UpdateBorderColor(borderColorProperty);
         }
         if (!renderContext_->HasBorderStyle()) {
-            renderContext_->UpdateBorderStyle(
-                BorderStyleProperty { renderContext_->GetBorderStyle()->styleLeft.value_or(BorderStyle::SOLID),
-                    renderContext_->GetBorderStyle()->styleTop.value_or(BorderStyle::SOLID),
-                    renderContext_->GetBorderStyle()->styleRight.value_or(BorderStyle::SOLID),
-                    renderContext_->GetBorderStyle()->styleBottom.value_or(BorderStyle::SOLID) });
+            BorderStyleProperty borderStyleProperty;
+            borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
+            renderContext_->UpdateBorderStyle(borderStyleProperty);
         }
         if (layoutProperty_->GetLayoutConstraint().has_value()) {
             renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
