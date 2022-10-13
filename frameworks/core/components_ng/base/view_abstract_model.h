@@ -129,8 +129,8 @@ public:
     virtual void SetRadialGradient(const NG::Gradient& gradient) = 0;
 
     // clip
-    virtual void SetClipPath(const RefPtr<BasicShape>& shape) = 0;
-    virtual void SetEdgeClip(bool isClip) = 0;
+    virtual void SetClipShape(const RefPtr<BasicShape>& shape) = 0;
+    virtual void SetClipEdge(bool isClip) = 0;
 
     // effects
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;

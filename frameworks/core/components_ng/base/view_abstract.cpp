@@ -668,14 +668,19 @@ void ViewAbstract::SetTransition(const TransitionOptions& options)
     ACE_UPDATE_RENDER_CONTEXT(Transition, options);
 }
 
-void ViewAbstract::SetClipPath(const ClipPathNG& clipPath)
+void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
 {
-    ACE_UPDATE_RENDER_CONTEXT(ClipShape, clipPath);
+    ACE_UPDATE_RENDER_CONTEXT(ClipShape, basicShape);
 }
 
-void ViewAbstract::SetEdgeClip(bool isClip)
+void ViewAbstract::SetClipEdge(bool isClip)
 {
     ACE_UPDATE_RENDER_CONTEXT(ClipEdge, isClip);
+}
+
+void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
+{
+    ACE_UPDATE_RENDER_CONTEXT(ClipMask, basicShape);
 }
 
 void ViewAbstract::SetBrightness(const Dimension& brightness)
@@ -752,6 +757,16 @@ void ViewAbstract::SetHasBorderImageRepeat(bool tag)
 void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
 {
     ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
+}
+
+void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
+{
+    ACE_UPDATE_RENDER_CONTEXT(OverlayText, overlay);
+}
+
+void ViewAbstract::SetMotionPath(const MotionPathOption& motionPath)
+{
+    ACE_UPDATE_RENDER_CONTEXT(MotionPath, motionPath);
 }
 
 } // namespace OHOS::Ace::NG

@@ -24,8 +24,8 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/clip_path.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/overlay_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
@@ -285,7 +285,18 @@ public:
 
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override
-    {}
+    {
+        NG::OverlayOptions overlay;
+        overlay.content = text;
+        overlay.align = align.value_or(Alignment::TOP_LEFT);
+        if (offsetX.has_value()) {
+            overlay.x = offsetX.value();
+        }
+        if (offsetY.has_value()) {
+            overlay.y = offsetY.value();
+        }
+        ViewAbstract::SetOverlay(overlay);
+    }
 
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override
     {
@@ -296,7 +307,10 @@ public:
 
     void SetGeometryTransition(const std::string& id) override {}
 
-    void SetMotionPath(const MotionPathOption& option) override {}
+    void SetMotionPath(const MotionPathOption& option) override
+    {
+        ViewAbstract::SetMotionPath(option);
+    }
 
     void SetFlexBasis(const Dimension& value) override
     {
@@ -338,19 +352,20 @@ public:
         ViewAbstract::SetRadialGradient(gradient);
     }
 
-    void SetClipPath(const RefPtr<BasicShape>& shape) override
+    void SetClipShape(const RefPtr<BasicShape>& basicShape) override
     {
-        ClipPathNG clipPath;
-        clipPath.SetBasicShape(shape);
-        ViewAbstract::SetClipPath(clipPath);
+        ViewAbstract::SetClipShape(basicShape);
     }
 
-    void SetEdgeClip(bool isClip) override
+    void SetClipEdge(bool isClip) override
     {
-        ViewAbstract::SetEdgeClip(isClip);
+        ViewAbstract::SetClipEdge(isClip);
     }
 
-    void SetMask(const RefPtr<BasicShape>& shape) override {}
+    void SetMask(const RefPtr<BasicShape>& shape) override
+    {
+        ViewAbstract::SetMask(shape);
+    }
 
     void SetBackdropBlur(const Dimension& radius) override
     {

@@ -17,14 +17,17 @@
 
 #include <memory>
 
+#include "render_service_client/core/modifier/rs_extended_modifier.h"
+#include "render_service_client/core/modifier/rs_property.h"
+
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/adapter/rosen_foreground_modifier.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
-#include "render_service_client/core/modifier/rs_property.h"
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
 
 namespace OHOS::Ace::NG {
+
+using RSDrawingContext = Rosen::RSDrawingContext;
 
 class GrayScaleModifier : public RSForegroundStyleModifier {
 public:
@@ -201,7 +204,7 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> property_;
 };
 
-class ColorBlend : public RSAnimatableArithmetic<ColorBlend> {
+class ColorBlend : public Rosen::RSAnimatableArithmetic<ColorBlend> {
 public:
     ColorBlend() = default;
     explicit ColorBlend(const Color& color) : colorBlend_(color) {}

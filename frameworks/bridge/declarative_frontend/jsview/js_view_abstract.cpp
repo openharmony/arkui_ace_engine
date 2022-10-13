@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <optional>
+#include <memory>
 #include <regex>
 #include <vector>
 
@@ -71,7 +72,7 @@
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
-#include "core/components_ng/property/clip_path.h"
+#include "core/components_ng/property/overlay_property.h"
 #include "core/components_v2/extensions/events/on_area_change_extension.h"
 #include "core/gestures/long_press_gesture.h"
 
@@ -4079,9 +4080,9 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
             LOGE("clipShape is null");
             return;
         }
-        ViewAbstractModel::GetInstance()->SetClipPath(clipShape->GetBasicShape());
+        ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
     } else if (info[0]->IsBoolean()) {
-        ViewAbstractModel::GetInstance()->SetEdgeClip(info[0]->ToBoolean());
+        ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
     }
 }
 

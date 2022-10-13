@@ -638,9 +638,7 @@ void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optio
     auto coverageComponent = ViewStackProcessor::GetInstance()->GetCoverageComponent();
     coverageComponent->SetTextVal(text);
     coverageComponent->SetIsOverLay(true);
-    if (align.has_value()) {
-        coverageComponent->SetAlignment(align.value());
-    }
+    coverageComponent->SetAlignment(align.value_or(Alignment::TOP_LEFT));
     if (offsetX.has_value()) {
         coverageComponent->SetX(offsetX.value());
     }
@@ -794,7 +792,7 @@ void ViewAbstractModelImpl::SetRadialGradient(const NG::Gradient& gradient)
     }
 }
 
-void ViewAbstractModelImpl::SetClipPath(const RefPtr<BasicShape>& shape)
+void ViewAbstractModelImpl::SetClipShape(const RefPtr<BasicShape>& shape)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto clipPath = AceType::MakeRefPtr<ClipPath>();
@@ -802,7 +800,7 @@ void ViewAbstractModelImpl::SetClipPath(const RefPtr<BasicShape>& shape)
     box->SetClipPath(clipPath);
 }
 
-void ViewAbstractModelImpl::SetEdgeClip(bool isClip)
+void ViewAbstractModelImpl::SetClipEdge(bool isClip)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetBoxClipFlag(isClip);
