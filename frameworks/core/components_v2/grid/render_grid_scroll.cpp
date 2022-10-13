@@ -175,19 +175,33 @@ bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
         return false;
     }
 
-    if (offset > 0.0) {
-        if (reachHead_) {
-            return false;
+    if (rightToLeft_ && useScrollable_ == SCROLLABLE::HORIZONTAL) {
+        if (offset < 0.0) {
+            if (reachHead_) {
+                return false;
+            }
+            reachTail_ = false;
+        } else {
+            if (reachTail_) {
+                return false;
+            }
+            reachHead_ = false;
         }
-        reachTail_ = false;
+        currentOffset_ -= offset;
     } else {
-        if (reachTail_) {
-            return false;
+        if (offset > 0.0) {
+            if (reachHead_) {
+                return false;
+            }
+            reachTail_ = false;
+        } else {
+            if (reachTail_) {
+                return false;
+            }
+            reachHead_ = false;
         }
-        reachHead_ = false;
+        currentOffset_ += offset;
     }
-
-    currentOffset_ += offset;
     MarkNeedLayout(true);
     return true;
 }
@@ -253,6 +267,8 @@ void RenderGridScroll::SetChildPosition(
     if (rightToLeft_) {
         if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
             positionCross = colSize_ - positionCross - crossLen;
+        } else {
+            positionMain = colSize_ - positionMain - mainLen;
         }
     }
 
@@ -263,7 +279,11 @@ void RenderGridScroll::SetChildPosition(
     if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
         offset = Offset(positionCross + crossOffset, positionMain + mainOffset - firstItemOffset_);
     } else {
-        offset = Offset(positionMain + mainOffset - firstItemOffset_, positionCross + crossOffset);
+        if (rightToLeft_) {
+            offset = Offset(positionMain + mainOffset + firstItemOffset_, positionCross + crossOffset);
+        } else {
+            offset = Offset(positionMain + mainOffset - firstItemOffset_, positionCross + crossOffset);
+        }
     }
 
     child->SetPosition(offset);
@@ -826,7 +846,6 @@ void RenderGridScroll::PerformLayout()
     if (RenderGridLayout::GetChildren().empty() && !buildChildByIndex_) {
         return;
     }
-    lastOffset_ = startMainPos_ + firstItemOffset_ - currentOffset_;
     InitialGridProp();
     CalculateViewPort();
     showItem_.clear();
@@ -872,6 +891,12 @@ void RenderGridScroll::PerformLayout()
     endIndex_ = main;
     MarkNeedPredictLayout();
     CalculateWholeSize(drawLength);
+
+    if (rightToLeft_ && useScrollable_ == SCROLLABLE::HORIZONTAL) {
+        lastOffset_ = scrollBarExtent_ - viewPort_.Width() - (startMainPos_ + firstItemOffset_ - currentOffset_);
+    } else {
+        lastOffset_ = startMainPos_ + firstItemOffset_ - currentOffset_;
+    }
 
     int32_t firstIndex = GetIndexByPosition(0);
     if (lastFirstIndex_ != firstIndex) {
@@ -1162,6 +1187,10 @@ void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
     }
     if (!isVertical_) {
         scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    } else {
+        if (rightToLeft_) {
+            scrollBar_->SetPositionMode(PositionMode::LEFT);
+        }
     }
     scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
     SetScrollBarCallback();

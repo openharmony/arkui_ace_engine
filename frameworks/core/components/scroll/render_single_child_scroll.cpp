@@ -32,6 +32,7 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
         return;
     }
 
+    rightToLeft_ = scroll->GetTextDirection() == TextDirection::RTL;
     enable_ = scroll->GetEnable();
     onScrollBegin_ = scroll->GetOnScrollBegin();
 
@@ -40,6 +41,7 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
         axis_ = axis;
         ResetScrollable();
         InitScrollBarProxy();
+        initial_ = true;
     }
     padding_ = scroll->GetPadding();
     scrollPage_ = scroll->GetScrollPage();
@@ -234,10 +236,21 @@ void RenderSingleChildScroll::PerformLayout()
     // Get main direction scrollable extent.
     bool isScrollable = CalculateMainScrollExtent(itemSize);
     scrollBarExtent_ = mainScrollExtent_;
+
+    if (initial_ && IsRowReverse()) {
+        currentOffset_.SetX(mainScrollExtent_ - viewPort_.Width());
+        lastOffset_ = currentOffset_;
+        initial_ = false;
+    }
+
     if (isScrollable) {
         ValidateOffset(SCROLL_FROM_NONE);
     } else {
         currentOffset_ = Offset::Zero();
+        if (IsRowReverse()) {
+            currentOffset_.SetX(mainScrollExtent_ - viewPort_.Width());
+            lastOffset_ = currentOffset_;
+        }
     }
     child->SetPosition(Offset::Zero() - currentOffset_ + paddingOffset);
     LOGD("child position:%{public}s", child->GetPosition().ToString().c_str());
