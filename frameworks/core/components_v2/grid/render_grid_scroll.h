@@ -59,6 +59,7 @@ public:
     using BuildChildByIndex = std::function<bool(int32_t)>;
     using GetChildSpanByIndex = std::function<bool(int32_t, bool, int32_t&, int32_t&, int32_t&, int32_t&)>;
     using DeleteChildByIndex = std::function<void(int32_t)>;
+    using GetItemTotalCountFunc = std::function<int32_t(void)>;
     using OnScrolledFunc = std::function<void(std::shared_ptr<GridEventInfo>&)>;
 
     RenderGridScroll() = default;
@@ -88,6 +89,19 @@ public:
     void SetGetChildSpanByIndex(GetChildSpanByIndex func)
     {
         getChildSpanByIndex_ = std::move(func);
+    }
+
+    void SetGetItemTotalCount(GetItemTotalCountFunc func)
+    {
+        getItemTotalCount_ = std::move(func);
+    }
+
+    int32_t GetItemTotalCount()
+    {
+        if (getItemTotalCount_) {
+            return getItemTotalCount_();
+        }
+        return 0;
     }
 
     void AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode);
@@ -168,6 +182,7 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     bool UpdateScrollPosition(double offset, int32_t source);
+    void CheckJumpToIndex(double offset);
     void RecordLocation();
 
     void InitialGridProp() override;
@@ -201,7 +216,7 @@ protected:
 
     double GetCurrentOffset() const
     {
-        return startMainPos_ + currentOffset_ - firstItemOffset_;
+        return estimatePos_ + startMainPos_ + currentOffset_ + firstItemOffset_;
     }
 
     void SetScrollBarCallback();
@@ -255,10 +270,10 @@ protected:
     double* mainGap_ = &rowGap_;
 
     // used for scrollbar
-    double scrollBarExtent_ = 0.0;
-    double mainScrollExtent_ = 0.0;
     int32_t scrollBarOpacity_ = 0;
     double estimateHeight_ = 0.0;
+    double estimatePos_ = 0.0;
+    double estimateAverageHight_ = 0.0;
     bool totalCountFlag_ = false;
     bool animatorJumpFlag_ = false;
     Color scrollBarColor_;
@@ -270,6 +285,7 @@ protected:
     BuildChildByIndex buildChildByIndex_;
     DeleteChildByIndex deleteChildByIndex_;
     GetChildSpanByIndex getChildSpanByIndex_;
+    GetItemTotalCountFunc getItemTotalCount_;
     OnScrolledFunc scrolledEventFun_;
 
     int32_t lastFirstIndex_ = -1;
