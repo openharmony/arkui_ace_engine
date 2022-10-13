@@ -30,6 +30,11 @@ public:
     static void SetOnTimer(ChangeEvent&& onChange);
     static void SetIsCountDown(bool isCountDown);
     static void SetInputCount(double count);
+    static void SetFontSize(const Dimension& value);
+    static void SetTextColor(const Color& value);
+    static void SetItalicFontStyle(Ace::FontStyle value);
+    static void SetFontWeight(FontWeight value);
+    static void SetFontFamily(const std::vector<std::string>& value);
 };
 } // namespace OHOS::Ace::NG
 

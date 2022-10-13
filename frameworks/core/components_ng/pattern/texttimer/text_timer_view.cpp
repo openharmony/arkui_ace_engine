@@ -52,6 +52,31 @@ void TextTimerView::SetInputCount(double count)
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count);
 }
 
+void TextTimerView::SetFontSize(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
+}
+
+void TextTimerView::SetTextColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
+}
+
+void TextTimerView::SetItalicFontStyle(Ace::FontStyle value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value);
+}
+
+void TextTimerView::SetFontWeight(FontWeight value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
+}
+
+void TextTimerView::SetFontFamily(const std::vector<std::string>& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
+}
+
 void TextTimerView::SetOnTimer(ChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
