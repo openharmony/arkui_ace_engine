@@ -35,7 +35,7 @@ public:
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& dateNode,
         std::map<std::string, NG::DailogEvent> dialogEvent,
         std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
-    static void SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent onChange);
+    static void SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent&& onChange);
     static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
 };
 } // namespace OHOS::Ace::NG

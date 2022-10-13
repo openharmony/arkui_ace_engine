@@ -89,16 +89,16 @@ RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(buttonConfirmNode, nullptr);
     CHECK_NULL_RETURN(textConfirmNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent("confirm");
     textConfirmNode->MountToParent(buttonConfirmNode);
-    auto eventConfirmHub = textConfirmNode->GetOrCreateGestureEventHub();
+    auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
-
-    auto clickCallback = [frameNode, acceptEvent](const GestureEvent& /*info*/) {
-        SetDailogAcceptEvent(frameNode, acceptEvent);
+    SetDailogAcceptEvent(frameNode, std::move(acceptEvent));
+    auto clickCallback = [frameNode](const GestureEvent& /*info*/) {
         auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
         auto str = pickerPattern->GetSelectedObject(false);
         auto timePickerEventHub = pickerPattern->GetEventHub<TextPickerEventHub>();
@@ -116,7 +116,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
     textCancelLayoutProperty->UpdateContent("cancel");
     textCancelNode->MountToParent(buttonCancelNode);
-    auto eventCancelHub = textCancelNode->GetOrCreateGestureEventHub();
+    auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AccessibilityManager::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
@@ -149,7 +149,7 @@ void TextPickerDialogView::SetDefaultPickerItemHeight(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value);
 }
 
-void TextPickerDialogView::SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogTextEvent onChange)
+void TextPickerDialogView::SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogTextEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();

@@ -34,8 +34,7 @@ const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 
 RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogProperties,
     std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
-    std::map<std::string, NG::DailogEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    std::map<std::string, NG::DailogEvent> dialogEvent, std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -173,8 +172,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>& dateNode,
-    std::map<std::string, NG::DailogEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    std::map<std::string, NG::DailogEvent> dialogEvent, std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
 {
     auto acceptEvent = dialogEvent["acceptId"];
     auto cancelEvent = dialogCancalEvent["cancelId"];
@@ -184,15 +182,16 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(buttonConfirmNode, nullptr);
     CHECK_NULL_RETURN(textConfirmNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent("confirm");
     textConfirmNode->MountToParent(buttonConfirmNode);
-    auto eventConfirHub = textConfirmNode->GetOrCreateGestureEventHub();
-
-    auto clickCallback = [dateNode, acceptEvent](const GestureEvent& /*info*/) {
-        SetDailogAcceptEvent(dateNode, acceptEvent);
+    auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventConfirmHub, nullptr);
+    SetDailogAcceptEvent(dateNode, std::move(acceptEvent));
+    auto clickCallback = [dateNode](const GestureEvent& /*info*/) {
         auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
         auto str = pickerPattern->GetSelectedObject(true);
         CHECK_NULL_VOID(pickerPattern);
@@ -200,10 +199,11 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
         CHECK_NULL_VOID(datePickerEventHub);
         datePickerEventHub->FireDailogAcceptEvent(str);
     };
-    eventConfirHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
+    eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
 
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_RETURN(buttonCancelNode, nullptr);
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textCancelNode, nullptr);
@@ -211,7 +211,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
     textCancelLayoutProperty->UpdateContent("cancel");
     textCancelNode->MountToParent(buttonCancelNode);
-    auto eventCancelHub = textCancelNode->GetOrCreateGestureEventHub();
+    auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
     buttonConfirmNode->MountToParent(contentRow);
@@ -250,7 +251,7 @@ void DatePickerDialogView::SetDailogChange(const RefPtr<FrameNode>& frameNode, D
     eventHub->SetDailogChange(std::move(onChange));
 }
 
-void DatePickerDialogView::SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent onChange)
+void DatePickerDialogView::SetDailogAcceptEvent(const RefPtr<FrameNode>& frameNode, DailogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
