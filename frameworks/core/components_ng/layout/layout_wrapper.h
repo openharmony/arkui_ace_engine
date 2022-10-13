@@ -201,6 +201,7 @@ public:
 
     // Gets the flag attribute with descendant node
     PropertyChangeFlag GetFlagWithDescendant();
+    void SetCacheCount(int32_t cacheCount = 0);
 
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].

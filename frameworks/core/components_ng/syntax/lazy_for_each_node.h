@@ -64,6 +64,8 @@ public:
     void OnDataChanged(size_t index) override;
     void OnDataMoved(size_t from, size_t to) override;
 
+    void PostIdleTask(std::list<int32_t>&& items);
+
 private:
     void OnAttachToMainTree() override
     {
@@ -81,6 +83,8 @@ private:
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     std::list<std::optional<std::string>> ids_;
+    std::list<int32_t> predictItems_;
+    bool needPredict = false;
 
     RefPtr<LazyForEachBuilder> builder_;
 

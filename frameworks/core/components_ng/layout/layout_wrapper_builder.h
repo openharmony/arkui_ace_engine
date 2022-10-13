@@ -54,6 +54,11 @@ public:
         return startIndex_;
     }
 
+    void SetCacheCount(int32_t cacheCount)
+    {
+        cacheCount_ = cacheCount;
+    }
+
     virtual void SwapDirtyAndUpdateBuildCache() {}
 
 protected:
@@ -64,6 +69,7 @@ protected:
     std::unordered_map<int32_t, RefPtr<LayoutWrapper>> wrapperMap_;
 
     int32_t startIndex_ = 0;
+    int32_t cacheCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapperBuilder);
 };

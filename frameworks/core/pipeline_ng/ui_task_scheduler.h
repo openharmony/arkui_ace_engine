@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <list>
 #include <memory>
 #include <mutex>
 #include <set>
@@ -68,16 +69,19 @@ private:
 
 class ACE_EXPORT UITaskScheduler final {
 public:
+    using PredictTask = std::function<void(int64_t)>;
     UITaskScheduler() = default;
     ~UITaskScheduler() = default;
 
     // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
+    void AddPredictTask(PredictTask&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
+    void FlushPredictTask(int64_t deadline);
 
     void UpdateCurrentPageId(uint32_t id)
     {
@@ -115,6 +119,7 @@ private:
 
     RootDirtyMap dirtyLayoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
+    std::list<PredictTask> predictTask_;
 
     uint32_t currentPageId_ = 0;
 

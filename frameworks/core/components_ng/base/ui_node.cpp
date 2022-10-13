@@ -44,7 +44,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d", 
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d",
             (*it)->GetId(), child->GetId());
         return;
     }
@@ -402,6 +402,13 @@ RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceL
 
     auto frameChild = DynamicCast<FrameNode>(child);
     return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
+}
+
+void UINode::Build()
+{
+    for (const auto& child : children_) {
+        child->Build();
+    }
 }
 
 } // namespace OHOS::Ace::NG

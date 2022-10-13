@@ -38,6 +38,7 @@ class ACE_EXPORT PipelineContext final : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
+    using PredictTask = std::function<void(int64_t)>;
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
@@ -93,7 +94,7 @@ public:
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
 
     // Called by view when idle event.
-    void OnIdle(int64_t deadline) override {}
+    void OnIdle(int64_t deadline) override;
 
     void OnActionEvent(const std::string& action) override {}
 
@@ -148,6 +149,8 @@ public:
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
+
+    void AddPredictTask(PredictTask&& task);
 
     void FlushDirtyNodeUpdate();
 

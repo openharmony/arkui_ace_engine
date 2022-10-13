@@ -43,8 +43,12 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     CHECK_NULL_VOID(host);
     // check front active flag.
     auto item = childWrappers_.front();
+    decltype(nodeIds_) frontNodeIds;
+    decltype(nodeIds_) backNodeIds;
+
     while (item && !item->IsActive()) {
         childWrappers_.pop_front();
+        frontNodeIds.push_front(nodeIds_.front());
         nodeIds_.pop_front();
         startIndex_ = startIndex_.value() + 1;
         item = childWrappers_.empty() ? nullptr : childWrappers_.front();
@@ -52,6 +56,7 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     // check end active flag.
     item = childWrappers_.empty() ? nullptr : childWrappers_.back();
     while (item && !item->IsActive()) {
+        backNodeIds.push_front(nodeIds_.back());
         nodeIds_.pop_back();
         childWrappers_.pop_back();
         endIndex_ = endIndex_.value() - 1;
@@ -61,8 +66,33 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     for (const auto& wrapper : childWrappers_) {
         wrapper->SwapDirtyLayoutWrapperOnMainThread();
     }
+    int32_t frontCount = 0;
+    int32_t backCount = 0;
+    auto totalCount = OnGetTotalCount();
+    std::list<int32_t> cacheItems;
+    for (int32_t i = 0; i < cacheCount_; i++) {
+        if (frontNodeIds.empty()) {
+            if (startIndex_.value() - i > 0) {
+                cacheItems.push_back(startIndex_.value() - 1 - i);
+            }
+        } else {
+            nodeIds_.push_front(frontNodeIds.front());
+            frontNodeIds.pop_front();
+            frontCount++;
+        }
 
-    host->UpdateCachedItems(startIndex_.value(), endIndex_.value(), std::move(nodeIds_));
+        if (backNodeIds.empty()) {
+            if (endIndex_.value() + i < totalCount) {
+                cacheItems.push_back(endIndex_.value() + 1 + i);
+            }
+        } else {
+            nodeIds_.push_back(backNodeIds.front());
+            backNodeIds.pop_front();
+            backCount++;
+        }
+    }
+    host->UpdateCachedItems(startIndex_.value() - frontCount, endIndex_.value() + backCount, std::move(nodeIds_));
+    host->PostIdleTask(std::move(cacheItems));
 }
 
 int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()

@@ -43,7 +43,7 @@ public:
     std::pair<std::string, RefPtr<UINode>> CreateChildByIndex(int32_t index)
     {
         {
-            ACE_SCOPED_TRACE("Builder:BuildLazyItem");
+            ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             auto itemInfo = OnGetChildByIndex(index, generatedItem_);
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             auto result = generatedItem_.try_emplace(itemInfo.first, itemInfo.second);
