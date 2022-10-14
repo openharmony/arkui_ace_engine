@@ -282,7 +282,6 @@ template("declarative_js_engine") {
         "jsview/js_camera.cpp",
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
-        "jsview/js_remote_window.cpp",
         "jsview/js_video.cpp",
         "jsview/js_video_controller.cpp",
       ]
@@ -317,6 +316,10 @@ template("declarative_js_engine") {
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       sources += [ "jsview/js_form.cpp" ]
+    }
+
+    if (defined(config.remote_window_support) && config.remote_window_support) {
+      sources += [ "jsview/js_remote_window.cpp" ]
     }
 
     if (defined(config.plugin_components_support) &&

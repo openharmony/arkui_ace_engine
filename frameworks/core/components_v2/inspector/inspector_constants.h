@@ -462,6 +462,10 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[];
 // Popup
 ACE_EXPORT extern const char POPUP_ETS_TAG[];
+
+// remote window
+ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[];
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

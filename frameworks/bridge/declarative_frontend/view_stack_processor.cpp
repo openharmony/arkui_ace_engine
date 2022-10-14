@@ -673,7 +673,7 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
         // mark head component, it should use external RSNode stored in tail component.
         components.emplace_back(mainComponent);
         Component::MergeRSNode(components);
-        components.front()->MarkUseExternalRSNode();
+        components.front()->MarkUseExternalRSNode(true);
     } else {
         // by default, mainComponent is placed after other components, they should share the same RSNode.
         //  (head)      (tail)

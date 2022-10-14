@@ -74,7 +74,7 @@ private:
     }
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void updateWindowRect();
+    void UpdateWindowRect();
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;
     RefPtr<WindowExtensionConnectionAdapter> adapter_;

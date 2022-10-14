@@ -25,11 +25,11 @@
 
 #if !defined(PREVIEW)
 namespace OHOS::Rosen {
-class RSProxyNode;
+class RSNode;
 }
 namespace OHOS::Ace::Framework {
     RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
-    const std::shared_ptr<Rosen::RSProxyNode> CreateRSProxyNodeFromNapiValue(JSRef<JSVal> obj);
+    const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj);
 } // namespace OHOS::Ace::Framework
 #endif
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H
