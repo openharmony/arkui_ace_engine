@@ -13,21 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_VIEW_H
+#include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 
-#include <string>
-
-#include "base/memory/referenced.h"
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT DialogView {
-public:
-    static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode);
-};
-} // namespace OHOS::Ace::NG
+void DialogEventHub::FireCancelEvent() const
+{
+    if (onCancel_) {
+        onCancel_();
+    }
+}
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_VIEW_H
+void DialogEventHub::FireSuccessEvent(int32_t buttonIdx)
+{
+    if (onSuccess_) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [onSuccess = onSuccess_, buttonIdx] { onSuccess(0, buttonIdx); }, TaskExecutor::TaskType::JS);
+    }
+}
+
+} // namespace OHOS::Ace::NG

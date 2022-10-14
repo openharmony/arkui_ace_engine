@@ -65,7 +65,7 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("SheetInfo.action");
                 func->ExecuteJS();
-                LOGI("action triggered");
+                LOGD("action triggered");
             };
             sheetInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(callback);
             return sheetInfo;
@@ -145,7 +145,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("ActionSheet.cancel");
                 func->ExecuteJS();
-                LOGI("cancel triggered");
+                LOGD("actionSheet cancel triggered");
             };
         } else {
             EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
@@ -175,7 +175,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
                                         GestureEvent& /*info*/) {
                         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                         ACE_SCORING_EVENT("ActionSheet.confirm.action");
-                        LOGI("confirm triggered");
+                        LOGD("actionSheet confirm triggered");
                         func->ExecuteJS();
                     };
                     buttonInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(callback));

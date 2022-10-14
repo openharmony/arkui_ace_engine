@@ -31,20 +31,24 @@ public:
     DialogEventHub() = default;
     ~DialogEventHub() override = default;
 
-    void SetOnCancel(DialogOnCancelEvent&& event)
+    void SetOnCancel(const DialogOnCancelEvent& event)
     {
-        onCancel_ = std::move(event);
+        onCancel_ = event;
     }
 
-    void FireChangeEvent() const
+    void FireCancelEvent() const;
+
+    void SetOnSuccess(const std::function<void(int32_t, int32_t)>& event)
     {
-        if (onCancel_) {
-            onCancel_();
-        }
+        onSuccess_ = event;
     }
+
+    void FireSuccessEvent(int32_t buttonIdx);
 
 private:
     DialogOnCancelEvent onCancel_;
+    // used in Prompt to return promise
+    std::function<void(int32_t, int32_t)> onSuccess_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FrameNode> DialogView::CreateDialogNode(DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+RefPtr<FrameNode> DialogView::CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -74,7 +74,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(DialogProperties& param, const Re
     // set onCancel callback
     auto hub = dialog->GetEventHub<DialogEventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
-    hub->SetOnCancel(std::move(param.onCancel));
+    hub->SetOnCancel(param.onCancel);
+    hub->SetOnSuccess(param.onSuccess);
 
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);

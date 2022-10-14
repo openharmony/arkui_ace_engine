@@ -1328,6 +1328,22 @@ void FrontendDelegateDeclarative::SetToastStopListenerCallback(std::function<voi
 void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProperties,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Dialog IsCurrentUseNewPipeline.");
+        dialogProperties.onSuccess = std::move(callback);
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
+        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+        taskExecutor_->PostTask(
+            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ShowDialog(
+                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            },
+            TaskExecutor::TaskType::UI);
+        return;
+    }
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     if (callbacks.find(COMMON_SUCCESS) != callbacks.end()) {
         auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
@@ -1359,21 +1375,6 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);
     }
     dialogProperties.callbacks = std::move(callbackMarkers);
-    auto pipelineContext = pipelineContextHolder_.Get();
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("Dialog IsCurrentUseNewPipeline.");
-        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
-        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-        taskExecutor_->PostTask(
-            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->ShowDialog(
-                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
-            },
-            TaskExecutor::TaskType::UI);
-        return;
-    }
     auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(context);
     context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
@@ -1409,6 +1410,24 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
+    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
+    dialogProperties.buttons.emplace_back(buttonInfo);
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Dialog IsCurrentUseNewPipeline.");
+        dialogProperties.onSuccess = std::move(callback);
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+        taskExecutor_->PostTask(
+            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ShowDialog(
+                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            },
+            TaskExecutor::TaskType::UI);
+        return;
+    }
+
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
     BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
@@ -1434,15 +1453,13 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
         });
     callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
     dialogProperties.callbacks = std::move(callbackMarkers);
-    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
-    dialogProperties.buttons.emplace_back(buttonInfo);
     auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(context);
     context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
-void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
-    std::function<void(int32_t, int32_t)>&& callback)
+void FrontendDelegateDeclarative::ShowActionMenu(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     DialogProperties dialogProperties = {
         .title = title,

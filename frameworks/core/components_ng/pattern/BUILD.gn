@@ -65,6 +65,7 @@ build_component_ng("pattern_ng") {
     "data_panel/data_panel_paint_method.cpp",
     "data_panel/data_panel_pattern.cpp",
     "data_panel/data_panel_view.cpp",
+    "dialog/dialog_event_hub.cpp",
     "dialog/dialog_layout_algorithm.cpp",
     "dialog/dialog_pattern.cpp",
     "dialog/dialog_view.cpp",
