@@ -29,7 +29,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
-
 #include "core/animation/page_transition_common.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -43,8 +42,8 @@
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/render/graphics_modifier_painter.h"
+#include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
 
@@ -380,11 +379,14 @@ void RosenRenderContext::NotifyTransition(
 {
     CHECK_NULL_VOID(rsNode_);
     auto effect = GetRSTransitionWithoutType(transOptions);
-    AnimationUtils::Animate(option, [rsNode = rsNode_, isTransitionIn, effect]() {
+    AnimationUtils::Animate(
+        option,
+        [rsNode = rsNode_, isTransitionIn, effect]() {
             if (rsNode) {
                 rsNode->NotifyTransition(effect, isTransitionIn);
             }
-        }, option.GetOnFinishEvent());
+        },
+        option.GetOnFinishEvent());
 }
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
@@ -1300,7 +1302,7 @@ void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
     RequestNextFrame();
 }
 
-bool RosenRenderContext::TriggerPageTransition(PageTransitionType type) const
+bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
 {
     CHECK_NULL_RETURN(rsNode_, false);
     const int32_t PAGE_TRANSITION_DURATION = 300;
@@ -1334,7 +1336,8 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type) const
             return false;
     }
     AnimationUtils::Animate(
-        option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); });
+        option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
+        onFinish);
     return true;
 }
 

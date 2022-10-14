@@ -254,6 +254,11 @@ public:
         return onMainTree_;
     }
 
+    void SetActive(bool active)
+    {
+        isActive_ = active;
+    }
+
 private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
