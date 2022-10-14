@@ -1060,6 +1060,7 @@ void UIContentImpl::NotifyMemoryLevel(int32_t level)
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
+    ContainerScope scope(instanceId_);
     pipelineContext->NotifyMemoryLevel(level);
 }
 
