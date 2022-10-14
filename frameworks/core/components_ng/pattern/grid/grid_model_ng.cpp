@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/grid_view.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -26,7 +28,8 @@
 
 namespace OHOS::Ace::NG {
 
-void GridView::Create()
+void GridModelNG::Create(
+    const RefPtr<V2::GridPositionController>& /*positionController*/, const RefPtr<ScrollBarProxy>& /*scrollBarProxy*/)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -35,72 +38,84 @@ void GridView::Create()
     stack->Push(frameNode);
 }
 
-void GridView::SetColumnsTemplate(const std::string& value)
+void GridModelNG::Pop()
+{
+    NG::ViewStackProcessor::GetInstance()->PopContainer();
+}
+
+void GridModelNG::SetColumnsTemplate(const std::string& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, value);
 }
 
-void GridView::SetRowsTemplate(const std::string& value)
+void GridModelNG::SetRowsTemplate(const std::string& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, value);
 }
 
-void GridView::SetColumnsGap(const Dimension& value)
+void GridModelNG::SetColumnsGap(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, value);
 }
 
-void GridView::SetRowsGap(const Dimension& value)
+void GridModelNG::SetRowsGap(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, value);
 }
 
-void GridView::SetScrollBarMode(DisplayMode value)
+void GridModelNG::SetGridHeight(const Dimension& value)
+{
+    ViewAbstract::SetHeight(NG::CalcLength(value));
+}
+
+void GridModelNG::SetScrollBarMode(DisplayMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollBarMode, value);
 }
 
-void GridView::SetScrollBarColor(const Color& value)
+void GridModelNG::SetScrollBarColor(const std::string& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollBarColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollBarColor, Color::FromString(value));
 }
 
-void GridView::SetScrollBarWidth(const Dimension& value)
+void GridModelNG::SetScrollBarWidth(const std::string& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollBarWidth, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
 }
 
-void GridView::SetCachedCount(int32_t value)
+void GridModelNG::SetCachedCount(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, value);
 }
 
-void GridView::SetEditable(bool value)
+void GridModelNG::SetEditable(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, value);
 }
 
-void GridView::SetLayoutDirection(FlexDirection value)
+void GridModelNG::SetIsRTL(bool rightToLeft) {}
+
+void GridModelNG::SetLayoutDirection(FlexDirection value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutDirection, value);
 }
 
-void GridView::SetMaxCount(int32_t value)
+void GridModelNG::SetMaxCount(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, MaxCount, value);
 }
 
-void GridView::SetMinCount(int32_t value)
+void GridModelNG::SetMinCount(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, MinCount, value);
 }
 
-void GridView::SetCellLength(int32_t value)
+void GridModelNG::SetCellLength(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CellLength, value);
 }
 
-void GridView::SetMultiSelectable(bool value)
+void GridModelNG::SetMultiSelectable(bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -109,7 +124,7 @@ void GridView::SetMultiSelectable(bool value)
     pattern->SetMultiSelectable(value);
 }
 
-void GridView::SetSupportAnimation(bool value)
+void GridModelNG::SetSupportAnimation(bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -118,7 +133,11 @@ void GridView::SetSupportAnimation(bool value)
     pattern->SetSupportAnimation(value);
 }
 
-void GridView::SetOnScrollToIndex(ScrollToIndexFunc&& value)
+void GridModelNG::SetSupportDragAnimation(bool value) {}
+
+void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect) {}
+
+void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -127,13 +146,20 @@ void GridView::SetOnScrollToIndex(ScrollToIndexFunc&& value)
     eventHub->SetOnScrollToIndex(std::move(value));
 }
 
-void GridView::SetOnItemDragStart(ItemDragStartFunc&& value)
+void GridModelNG::SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnItemDragStart(std::move(value));
+    auto onDragStart = [func = std::move(value)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<UINode> {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        {
+            func(dragInfo, index);
+        }
+        return ViewStackProcessor::GetInstance()->Finish();
+    };
+    eventHub->SetOnItemDragStart(std::move(onDragStart));
 
     auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -142,7 +168,7 @@ void GridView::SetOnItemDragStart(ItemDragStartFunc&& value)
     AddDragFrameNodeToManager();
 }
 
-void GridView::SetOnItemDragEnter(ItemDragEnterFunc&& value)
+void GridModelNG::SetOnItemDragEnter(ItemDragEnterFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -153,7 +179,7 @@ void GridView::SetOnItemDragEnter(ItemDragEnterFunc&& value)
     AddDragFrameNodeToManager();
 }
 
-void GridView::SetOnItemDragMove(ItemDragMoveFunc&& value)
+void GridModelNG::SetOnItemDragMove(ItemDragMoveFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -164,7 +190,7 @@ void GridView::SetOnItemDragMove(ItemDragMoveFunc&& value)
     AddDragFrameNodeToManager();
 }
 
-void GridView::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
+void GridModelNG::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -175,7 +201,7 @@ void GridView::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
     AddDragFrameNodeToManager();
 }
 
-void GridView::SetOnItemDrop(ItemDropFunc&& value)
+void GridModelNG::SetOnItemDrop(ItemDropFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -186,7 +212,7 @@ void GridView::SetOnItemDrop(ItemDropFunc&& value)
     AddDragFrameNodeToManager();
 }
 
-void GridView::AddDragFrameNodeToManager()
+void GridModelNG::AddDragFrameNodeToManager() const
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

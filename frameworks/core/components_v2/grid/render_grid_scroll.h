@@ -29,28 +29,10 @@
 #include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_v2/grid/grid_event.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
-
-class GridEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(GridEventInfo, BaseEventInfo, EventToJSONStringAdapter);
-
-public:
-    explicit GridEventInfo(int32_t scrollIndex) : BaseEventInfo("grid"), scrollIndex_(scrollIndex) {}
-
-    ~GridEventInfo() = default;
-
-    std::string ToJSONString() const override;
-
-    int32_t GetScrollIndex() const
-    {
-        return scrollIndex_;
-    }
-
-private:
-    int32_t scrollIndex_ = 0;
-};
 
 class RenderGridScroll : public RenderGridLayout, public RenderRefreshTarget {
     DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout, RenderRefreshTarget);

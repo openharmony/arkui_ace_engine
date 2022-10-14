@@ -19,6 +19,7 @@
 #include <functional>
 #include <optional>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_scoring_log.h"
@@ -325,7 +326,9 @@ public:
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
     static RefPtr<ThemeConstants> GetThemeConstants(const JSRef<JSObject>& jsObj = JSRef<JSObject>());
     static bool JsWidth(const JSRef<JSVal>& jsValue);
+    static bool JsWidth(const Dimension& value);
     static bool JsHeight(const JSRef<JSVal>& jsValue);
+    static bool JsHeight(const Dimension& value);
     static void SetDefaultTransition(TransitionType transitionType);
     static bool ParseAndSetOpacityTransition(
         const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);

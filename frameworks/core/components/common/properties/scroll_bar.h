@@ -36,51 +36,6 @@ constexpr double DEFAULT_MINANGLE = 10.0;
 constexpr double STRAIGHT_ANGLE = 180.0;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 
-enum class ShapeMode {
-    /*
-     * unspecified, follow theme.
-     */
-    DEFAULT = 0,
-    /*
-     * rect scrollbar.
-     */
-    RECT,
-    /*
-     * round scrollbar.
-     */
-    ROUND,
-};
-
-enum class DisplayMode {
-    /*
-     * do not display scrollbar.
-     */
-    OFF = 0,
-    /*
-     * display scrollbar on demand.
-     */
-    AUTO,
-    /*
-     * always display scrollbar.
-     */
-    ON,
-};
-
-enum class PositionMode {
-    /*
-     * display scrollbar on right.
-     */
-    RIGHT = 0,
-    /*
-     * display scrollbar on left.
-     */
-    LEFT,
-    /*
-     * display scrollbar on bottom.
-     */
-    BOTTOM,
-};
-
 class ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
 
