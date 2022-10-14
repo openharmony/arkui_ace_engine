@@ -18,17 +18,37 @@
 #include <regex>
 
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/text_timer_model_impl.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/texttimer/texttimer_component.h"
-#include "core/components_ng/pattern/texttimer/text_timer_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "core/components_ng/pattern/texttimer/text_timer_model.h"
+#include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<TextTimerModel> TextTimerModel::instance_ = nullptr;
+
+TextTimerModel* TextTimerModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::TextTimerModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::TextTimerModelNG());
+        } else {
+            instance_.reset(new Framework::TextTimerModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
 const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 constexpr double MAX_COUNT_DOWN = 86400000.0;
 } // namespace
@@ -39,66 +59,32 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
         LOGE("TextTimer create error, info is non-valid");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto controller = NG::TextTimerView::Create();
-        auto paramObject = JSRef<JSObject>::Cast(info[0]);
-        auto tempIsCountDown = paramObject->GetProperty("isCountDown");
-        if (tempIsCountDown->IsBoolean()) {
-            bool isCountDown = tempIsCountDown->ToBoolean();
-            NG::TextTimerView::SetIsCountDown(isCountDown);
-            if (isCountDown) {
-                auto count = paramObject->GetProperty("count");
-                if (count->IsNumber()) {
-                    auto inputCount = count->ToNumber<double>();
-                    if (inputCount > 0 && inputCount < MAX_COUNT_DOWN) {
-                        NG::TextTimerView::SetInputCount(inputCount);
-                    } else {
-                        LOGE("Parameter out of range, use default value.");
-                    }
-                }
-            }
-        }
-
-        auto controllerObj = paramObject->GetProperty("controller");
-        if (controllerObj->IsObject()) {
-            auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextTimerController>();
-            if (jsController) {
-                jsController->SetController(controller);
-            }
-        }
-        return;
-    }
-
-    auto timerComponent = AceType::MakeRefPtr<TextTimerComponent>();
-    if (!timerComponent) {
-        LOGE("timerComponent is nullptr");
-        return;
-    }
-
+    auto controller = TextTimerModel::GetInstance()->Create();
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto tempIsCountDown = paramObject->GetProperty("isCountDown");
-    bool isCountDown = tempIsCountDown->ToBoolean();
-    timerComponent->SetIsCountDown(isCountDown);
-
-    if (isCountDown) {
-        auto count = paramObject->GetProperty("count");
-        if (count->IsNumber()) {
-            double inputCount = count->ToNumber<double>();
-            if (inputCount > 0) {
-                timerComponent->SetInputCount(inputCount);
+    if (tempIsCountDown->IsBoolean()) {
+        bool isCountDown = tempIsCountDown->ToBoolean();
+        TextTimerModel::GetInstance()->SetIsCountDown(isCountDown);
+        if (isCountDown) {
+            auto count = paramObject->GetProperty("count");
+            if (count->IsNumber()) {
+                auto inputCount = count->ToNumber<double>();
+                if (inputCount > 0 && inputCount < MAX_COUNT_DOWN) {
+                    TextTimerModel::GetInstance()->SetInputCount(inputCount);
+                } else {
+                    LOGE("Parameter out of range, use default value.");
+                }
             }
         }
     }
 
     auto controllerObj = paramObject->GetProperty("controller");
     if (controllerObj->IsObject()) {
-        JSTextTimerController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextTimerController>();
+        auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextTimerController>();
         if (jsController) {
-            jsController->SetController(timerComponent->GetTextTimerController());
+            jsController->SetController(controller);
         }
     }
-
-    ViewStackProcessor::GetInstance()->Push(timerComponent);
 }
 
 void JSTextTimer::JSBind(BindingTarget globalObj)
@@ -145,22 +131,7 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
         format.replace(pos, sizeof("hh") - 1, "HH");
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextTimerView::SetFormat(format);
-        return;
-    }
-
-    pos = format.find("ms");
-    if (pos != std::string::npos) {
-        format.replace(pos, sizeof("ms") - 1, "SS");
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto timerComponent = AceType::DynamicCast<TextTimerComponent>(component);
-    if (!timerComponent) {
-        LOGE("TextTimer Component is null");
-        return;
-    }
-    timerComponent->SetFormat(format);
+    TextTimerModel::GetInstance()->SetFormat(format);
 }
 
 void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
@@ -174,21 +145,7 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextTimerView::SetFontSize(fontSize);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto timerComponent = AceType::DynamicCast<OHOS::Ace::TextTimerComponent>(stack->GetMainComponent());
-    if (!timerComponent) {
-        LOGE("JSTextTimer::SetFontSize timerComponent is not valid");
-        return;
-    }
-
-    auto textStyle = timerComponent->GetTextStyle();
-    textStyle.SetFontSize(fontSize);
-    timerComponent->SetTextStyle(textStyle);
+    TextTimerModel::GetInstance()->SetFontSize(fontSize);
 }
 
 void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
@@ -202,40 +159,12 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextTimerView::SetTextColor(textColor);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto timerComponent = AceType::DynamicCast<OHOS::Ace::TextTimerComponent>(stack->GetMainComponent());
-    if (!timerComponent) {
-        LOGE("JSTextTimer::SetTextColor timerComponent is not valid");
-        return;
-    }
-
-    auto textStyle = timerComponent->GetTextStyle();
-    textStyle.SetTextColor(textColor);
-    timerComponent->SetTextStyle(textStyle);
+    TextTimerModel::GetInstance()->SetTextColor(textColor);
 }
 
 void JSTextTimer::SetFontWeight(const std::string& value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextTimerView::SetFontWeight(ConvertStrToFontWeight(value));
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto timerComponent = AceType::DynamicCast<OHOS::Ace::TextTimerComponent>(stack->GetMainComponent());
-    if (!timerComponent) {
-        LOGE("JSTextTimer::SetFontWeight timerComponent is not valid");
-        return;
-    }
-
-    auto textStyle = timerComponent->GetTextStyle();
-    textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    timerComponent->SetTextStyle(std::move(textStyle));
+    TextTimerModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
 void JSTextTimer::SetFontStyle(int32_t value)
@@ -244,25 +173,7 @@ void JSTextTimer::SetFontStyle(int32_t value)
         LOGE("TextTimer fontStyle(%{public}d) illegal value", value);
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextTimerView::SetItalicFontStyle(FONT_STYLES[value]);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto timerComponent = AceType::DynamicCast<OHOS::Ace::TextTimerComponent>(stack->GetMainComponent());
-    if (!timerComponent) {
-        LOGE("JSTextTimer::SetFontStyle timerComponent is not valid");
-        return;
-    }
-
-    if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-        auto textStyle = timerComponent->GetTextStyle();
-        textStyle.SetFontStyle(FONT_STYLES[value]);
-        timerComponent->SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("Text fontStyle(%d) illegal value", value);
-    }
+    TextTimerModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
 }
 
 void JSTextTimer::SetFontFamily(const JSCallbackInfo& info)
@@ -276,49 +187,23 @@ void JSTextTimer::SetFontFamily(const JSCallbackInfo& info)
         LOGE("Parse FontFamilies failed");
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextTimerView::SetFontFamily(fontFamilies);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto timerComponent = AceType::DynamicCast<OHOS::Ace::TextTimerComponent>(stack->GetMainComponent());
-    if (!timerComponent) {
-        LOGE("JSTextTimer::SetFontFamily timerComponent is not valid");
-        return;
-    }
-
-    auto textStyle = timerComponent->GetTextStyle();
-    textStyle.SetFontFamilies(fontFamilies);
-    timerComponent->SetTextStyle(std::move(textStyle));
+    TextTimerModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
 void JSTextTimer::OnTimer(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                            const std::string& utc, const std::string& elapsedTime) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("TextTimer.onTimer");
-            JSRef<JSVal> newJSVal[2];
-            newJSVal[0] = JSRef<JSVal>::Make(ToJSValue(utc));
-            newJSVal[1] = JSRef<JSVal>::Make(ToJSValue(elapsedTime));
-            func->ExecuteJS(2, newJSVal);
-        };
-        NG::TextTimerView::SetOnTimer(std::move(onChange));
-        return;
-    }
-
-    if (!JSViewBindEvent(&TextTimerComponent::SetOnTimer, info)) {
-        LOGW("Failed(OnTimer) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                        const std::string& utc, const std::string& elapsedTime) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("TextTimer.onTimer");
+        JSRef<JSVal> newJSVal[2];
+        newJSVal[0] = JSRef<JSVal>::Make(ToJSValue(utc));
+        newJSVal[1] = JSRef<JSVal>::Make(ToJSValue(elapsedTime));
+        func->ExecuteJS(2, newJSVal);
+    };
+    TextTimerModel::GetInstance()->SetOnTimer(std::move(onChange));
 }
 
 void JSTextTimerController::JSBind(BindingTarget globalObj)

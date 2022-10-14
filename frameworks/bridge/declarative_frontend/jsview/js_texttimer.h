@@ -42,7 +42,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
     static void Constructor(const JSCallbackInfo& info);
-    static void Destructor(JSTextTimerController* scroller);
+    static void Destructor(JSTextTimerController* timerController);
 
     void Start(const JSCallbackInfo& info);
     void Pause(const JSCallbackInfo& info);
