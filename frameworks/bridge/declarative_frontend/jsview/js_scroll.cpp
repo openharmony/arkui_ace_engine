@@ -18,74 +18,62 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/scroll_model_impl.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scroll_component.h"
-#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_position_controller.h"
-#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
-#include "core/components_ng/pattern/scroll/scroll_view.h"
+#include "core/components_ng/pattern/scroll/scroll_model.h"
+#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ScrollModel> ScrollModel::instance_ = nullptr;
+
+ScrollModel* ScrollModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ScrollModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ScrollModelNG());
+        } else {
+            instance_.reset(new Framework::ScrollModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE };
-
-void NGSetScrollControllerAndProxy(RefPtr<NG::ScrollPattern>& pattern, const JSCallbackInfo& info)
-{
-    CHECK_NULL_VOID(pattern);
-    auto positionController = AceType::MakeRefPtr<NG::ScrollPositionController>();
-    if (info.Length() > 0 && info[0]->IsObject()) {
-        JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
-        if (jsScroller) {
-            jsScroller->SetController(positionController);
-            // TODO: Init scroll bar proxy.
-        }
-    }
-    pattern->SetScrollPositionController(positionController);
-    positionController->SetScrollPattern(pattern);
-}
 } // namespace
 
 void JSScroll::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto frameNode = NG::ScrollView::Create();
-        auto pattern = AceType::DynamicCast<NG::ScrollPattern>(frameNode->GetPattern());
-        NGSetScrollControllerAndProxy(pattern, info);
-        return;
-    }
-
-    RefPtr<Component> child;
-    auto scrollComponent = AceType::MakeRefPtr<OHOS::Ace::ScrollComponent>(child);
-    ViewStackProcessor::GetInstance()->ClaimElementId(scrollComponent);
+    ScrollModel::GetInstance()->Create();
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
         if (jsScroller) {
-            auto positionController = AceType::MakeRefPtr<ScrollPositionController>();
+            auto positionController = ScrollModel::GetInstance()->GetOrCreateController();
             jsScroller->SetController(positionController);
-            scrollComponent->SetScrollPositionController(positionController);
-
             // Init scroll bar proxy.
             auto proxy = jsScroller->GetScrollBarProxy();
             if (!proxy) {
                 proxy = AceType::MakeRefPtr<ScrollBarProxy>();
                 jsScroller->SetScrollBarProxy(proxy);
             }
-            scrollComponent->SetScrollBarProxy(proxy);
+            ScrollModel::GetInstance()->SetScrollBarProxy(proxy);
         }
-    } else {
-        auto positionController = AceType::MakeRefPtr<ScrollPositionController>();
-        scrollComponent->SetScrollPositionController(positionController);
     }
     // init scroll bar
     std::pair<bool, Color> barColor;
     barColor.first = false;
     std::pair<bool, Dimension> barWidth;
     barWidth.first = false;
-    scrollComponent->InitScrollBar(GetTheme<ScrollBarTheme>(), barColor, barWidth, EdgeEffect::NONE);
-    ViewStackProcessor::GetInstance()->Push(scrollComponent);
+    ScrollModel::GetInstance()->InitScrollBar(GetTheme<ScrollBarTheme>(), barColor, barWidth, EdgeEffect::NONE);
 }
 
 void JSScroll::SetScrollable(int32_t value)
@@ -94,17 +82,7 @@ void JSScroll::SetScrollable(int32_t value)
         LOGE("value is not valid: %{public}d", value);
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ScrollView::SetAxis(AXIS[value]);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto scrollComponent = AceType::DynamicCast<ScrollComponent>(component);
-    if (scrollComponent) {
-        scrollComponent->SetAxisDirection(AXIS[value]);
-    }
+    ScrollModel::GetInstance()->SetAxis(AXIS[value]);
 }
 
 void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
@@ -137,56 +115,21 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
             }
             return scrollInfo;
         };
-
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ScrollView::SetOnScrollBegin(std::move(onScrollBegin));
-            return;
-        }
-
-        auto scrollComponent =
-            AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (scrollComponent) {
-            if (!scrollComponent->GetScrollPositionController()) {
-                scrollComponent->SetScrollPositionController(AceType::MakeRefPtr<ScrollPositionController>());
-            }
-            scrollComponent->SetOnScrollBegin(onScrollBegin);
-        }
+        ScrollModel::GetInstance()->SetOnScrollBegin(std::move(onScrollBegin));
     }
+    args.SetReturnValue(args.This());
 }
 
 void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        // NG
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                const Dimension& xOffset, const Dimension& yOffset) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto params = ConvertToJSValues(xOffset, yOffset);
-                func->Call(JSRef<JSObject>(), params.size(), params.data());
-            };
-            NG::ScrollView::SetOnScroll(std::move(onScroll));
-            return;
-        }
-
-        auto onScroll = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto eventInfo = TypeInfoHelper::DynamicCast<ScrollEventInfo>(info);
-                if (!eventInfo) {
-                    return;
-                }
-                auto params = ConvertToJSValues(eventInfo->GetScrollX(), eventInfo->GetScrollY());
-                func->Call(JSRef<JSObject>(), params.size(), params.data());
-            });
-        auto scrollComponent =
-            AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (scrollComponent) {
-            if (!scrollComponent->GetScrollPositionController()) {
-                scrollComponent->SetScrollPositionController(AceType::MakeRefPtr<ScrollPositionController>());
-            }
-            scrollComponent->SetOnScroll(onScroll);
-        }
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const Dimension& xOffset, const Dimension& yOffset) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(xOffset, yOffset);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        ScrollModel::GetInstance()->SetOnScroll(std::move(onScroll));
     }
     args.SetReturnValue(args.This());
 }
@@ -194,45 +137,13 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        // NG
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto scrollEdge = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                  const NG::ScrollEdge& side) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto params = ConvertToJSValues(side);
-                func->Call(JSRef<JSObject>(), 1, params.data());
-            };
-            NG::ScrollView::SetOnScrollEdge(std::move(scrollEdge));
-            return;
-        }
-
-        auto onScroll = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto eventInfo = TypeInfoHelper::DynamicCast<ScrollEventInfo>(info);
-                if (!eventInfo) {
-                    return;
-                }
-                int32_t eventType = -1;
-                if (eventInfo->GetType() == ScrollEvent::SCROLL_TOP) {
-                    eventType = 0; // 0 means Edge.Top
-                } else if (eventInfo->GetType() == ScrollEvent::SCROLL_BOTTOM) {
-                    eventType = 2; // 2 means Edge.Bottom
-                } else {
-                    LOGE("EventType is not support: %{public}d", static_cast<int32_t>(eventInfo->GetType()));
-                    return;
-                }
-                auto param = ConvertToJSValue(eventType);
-                func->Call(JSRef<JSObject>(), 1, &param);
-            });
-        auto scrollComponent =
-            AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (scrollComponent) {
-            if (!scrollComponent->GetScrollPositionController()) {
-                scrollComponent->SetScrollPositionController(AceType::MakeRefPtr<ScrollPositionController>());
-            }
-            scrollComponent->SetOnScrollEdge(onScroll);
-        }
+        auto scrollEdge = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                              const NG::ScrollEdge& side) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(side);
+            func->Call(JSRef<JSObject>(), 1, params.data());
+        };
+        ScrollModel::GetInstance()->SetOnScrollEdge(std::move(scrollEdge));
     }
     args.SetReturnValue(args.This());
 }
@@ -240,29 +151,11 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        // NG
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto scrollEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                func->Call(JSRef<JSObject>(), 0, nullptr);
-            };
-            NG::ScrollView::SetOnScrollEnd(std::move(scrollEnd));
-            return;
-        }
-
-        auto onScrollStop = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                func->Call(JSRef<JSObject>(), 0, nullptr);
-            });
-        auto scrollComponent =
-            AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (scrollComponent) {
-            if (!scrollComponent->GetScrollPositionController()) {
-                scrollComponent->SetScrollPositionController(AceType::MakeRefPtr<ScrollPositionController>());
-            }
-            scrollComponent->SetOnScrollEnd(onScrollStop);
-        }
+        auto scrollEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Call(JSRef<JSObject>(), 0, nullptr);
+        };
+        ScrollModel::GetInstance()->SetOnScrollEnd(std::move(scrollEnd));
     }
     args.SetReturnValue(args.This());
 }
@@ -296,16 +189,8 @@ void JSScroll::JSBind(BindingTarget globalObj)
 
 void JSScroll::SetScrollBar(int displayMode)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("ScrollBar is not supported");
-        return;
-    }
-    auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!scrollComponent) {
-        return;
-    }
     if (displayMode >= 0 && displayMode < static_cast<int32_t>(DISPLAY_MODE.size())) {
-        scrollComponent->SetDisplayMode(DISPLAY_MODE[displayMode]);
+        ScrollModel::GetInstance()->SetDisplayMode(DISPLAY_MODE[displayMode]);
     }
 }
 
@@ -314,17 +199,7 @@ void JSScroll::SetScrollBarWidth(const std::string& scrollBarWidth)
     if (scrollBarWidth.empty()) {
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ScrollView::SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
-        return;
-    }
-
-    auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!scrollComponent) {
-        return;
-    }
-    scrollComponent->SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
+    ScrollModel::GetInstance()->SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
 }
 
 void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
@@ -332,49 +207,12 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
     if (scrollBarColor.empty()) {
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ScrollView::SetScrollBarColor(Color::FromString(scrollBarColor));
-        return;
-    }
-
-    auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!scrollComponent) {
-        return;
-    }
-    scrollComponent->SetScrollBarColor(Color::FromString(scrollBarColor));
+    ScrollModel::GetInstance()->SetScrollBarColor(Color::FromString(scrollBarColor));
 }
 
 void JSScroll::SetEdgeEffect(int edgeEffect)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto effect = static_cast<EdgeEffect>(edgeEffect);
-        RefPtr<NG::ScrollEdgeEffect> scrollEdgeEffect;
-        if (effect == EdgeEffect::SPRING) {
-            scrollEdgeEffect = AceType::MakeRefPtr<NG::ScrollSpringEffect>();
-        } else if (effect == EdgeEffect::NONE || effect == EdgeEffect::FADE) {
-            // TODO: not consider FADE
-            scrollEdgeEffect = AceType::MakeRefPtr<NG::ScrollEdgeEffect>(effect);
-        } else {
-            LOGW("edge effect type %{public}d is not support", edgeEffect);
-            return;
-        }
-        NG::ScrollView::SetScrollEdgeEffect(scrollEdgeEffect);
-        return;
-    }
-    auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!scrollComponent) {
-        return;
-    }
-    RefPtr<ScrollEdgeEffect> scrollEdgeEffect;
-    if (edgeEffect == 0) {
-        scrollEdgeEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
-    } else if (edgeEffect == 1) {
-        scrollEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
-    } else {
-        scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
-    }
-    scrollComponent->SetScrollEffect(scrollEdgeEffect);
+    ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
 }
 
 } // namespace OHOS::Ace::Framework
