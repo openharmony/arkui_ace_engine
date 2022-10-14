@@ -178,9 +178,14 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pagePattern->OnHide();
     if (transitionType != PageTransitionType::NONE) {
-        pagePattern->TriggerPageTransition(transitionType);
+        pagePattern->TriggerPageTransition(transitionType, [weak = WeakPtr<PagePattern>(pagePattern)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnHide();
+        });
+    } else {
+        pagePattern->OnHide();
     }
 
     auto pageFocusHub = pageNode->GetFocusHub();
@@ -201,7 +206,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pagePattern);
     pagePattern->OnShow();
     if (transitionType != PageTransitionType::NONE) {
-        pagePattern->TriggerPageTransition(transitionType);
+        pagePattern->TriggerPageTransition(transitionType, nullptr);
     }
 
     auto pageFocusHub = pageNode->GetFocusHub();

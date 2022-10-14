@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 
+#include <functional>
+
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
@@ -80,7 +82,7 @@ public:
         return MakeRefPtr<PageEventHub>();
     }
 
-    bool TriggerPageTransition(PageTransitionType type) const;
+    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -90,6 +92,11 @@ public:
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
+
+    // Mark current page node inactive state to show in render tree.
+    void ProcessHideState();
+    // Mark current page node active state to show in render tree.
+    void ProcessShowState();
 
     RefPtr<PageInfo> pageInfo_;
 

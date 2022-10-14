@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
+#include <functional>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/rect_t.h"
@@ -116,7 +118,7 @@ public:
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
     virtual void UpdateTransition(const TransitionOptions& options) {}
-    virtual bool TriggerPageTransition(PageTransitionType type) const
+    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
     {
         return false;
     }
@@ -147,7 +149,8 @@ public:
     virtual void ClearDrawCommands() {}
 
     virtual void NotifyTransition(
-        const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) {}
+        const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
+    {}
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
