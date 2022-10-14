@@ -21,19 +21,22 @@
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/pattern/checkbox/checkbox_view.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
 void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
 {
     switch (toggleType) {
-        case NG::ToggleType::CHECKBOX:
-            NG::CheckBoxView::Create(std::nullopt, std::nullopt, V2::CHECKBOX_ETS_TAG);
-            NG::CheckBoxView::SetSelect(isOn);
+        case NG::ToggleType::CHECKBOX: {
+            CheckBoxModelNG checkBoxModelNG;
+            checkBoxModelNG.Create(std::nullopt, std::nullopt, V2::CHECKBOX_ETS_TAG);
+            checkBoxModelNG.SetSelect(isOn);
             break;
+        }
         case NG::ToggleType::SWITCH: {
             auto* stack = ViewStackProcessor::GetInstance();
             int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
@@ -58,7 +61,8 @@ void ToggleModelNG::SetSelectedColor(const Color& selectedColor)
     CHECK_NULL_VOID(stack);
     auto checkboxPattern = stack->GetMainFrameNodePattern<CheckBoxPattern>();
     if (checkboxPattern) {
-        CheckBoxView::SetSelectedColor(selectedColor);
+        CheckBoxModelNG checkBoxModelNG;
+        checkBoxModelNG.SetSelectedColor(selectedColor);
         return;
     }
     auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
