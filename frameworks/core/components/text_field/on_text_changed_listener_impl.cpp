@@ -186,13 +186,8 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
         LOGE("task is empty");
         return;
     }
-    auto renderTextField = field_.Upgrade();
-    if (!renderTextField) {
-        LOGE("text field is null");
-        return;
-    }
 
-    auto context = renderTextField->GetContext().Upgrade();
+    auto context = context_.Upgrade();
     if (!context) {
         LOGE("context is null");
         return;
