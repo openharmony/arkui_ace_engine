@@ -586,8 +586,10 @@ RectF RosenRenderContext::AdjustPaintRect()
                                                                : PipelineContext::GetCurrentRootHeight();
 
     auto anchor = GetAnchorValue({});
-    auto anchorX = ConvertToPx(anchor.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
-    auto anchorY = ConvertToPx(anchor.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
+    auto anchorWidthReference = rect.Width();
+    auto anchorHeightReference = rect.Height();
+    auto anchorX = ConvertToPx(anchor.GetX(), ScaleProperty::CreateScaleProperty(), anchorWidthReference);
+    auto anchorY = ConvertToPx(anchor.GetY(), ScaleProperty::CreateScaleProperty(), anchorHeightReference);
     // Position properties take precedence over offset locations.
     if (HasPosition()) {
         auto position = GetPositionValue({});
