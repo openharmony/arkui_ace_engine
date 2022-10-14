@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/slider/slider_view.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -23,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void SliderView::Create(float value, float step, float min, float max)
+void SliderModelNG::Create(float value, float step, float min, float max)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -36,52 +35,52 @@ void SliderView::Create(float value, float step, float min, float max)
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Min, min);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Max, max);
 }
-void SliderView::SetSliderMode(const SliderMode& value)
+void SliderModelNG::SetSliderMode(const SliderMode& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, SliderMode, value);
 }
-void SliderView::SetDirection(Axis value)
+void SliderModelNG::SetDirection(Axis value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Direction, value);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Direction, value);
 }
-void SliderView::SetReverse(bool value)
+void SliderModelNG::SetReverse(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Reverse, value);
 }
-void SliderView::SetBlockColor(const Color& value)
+void SliderModelNG::SetBlockColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value);
 }
-void SliderView::SetTrackBackgroundColor(const Color& value)
+void SliderModelNG::SetTrackBackgroundColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value);
 }
-void SliderView::SetSelectColor(const Color& value)
+void SliderModelNG::SetSelectColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value);
 }
-void SliderView::SetMinLabel(float value)
+void SliderModelNG::SetMinLabel(float value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Min, value);
 }
-void SliderView::SetMaxLabel(float value)
+void SliderModelNG::SetMaxLabel(float value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Max, value);
 }
-void SliderView::SetShowSteps(bool value)
+void SliderModelNG::SetShowSteps(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowSteps, value);
 }
-void SliderView::SetShowTips(bool value)
+void SliderModelNG::SetShowTips(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowTips, value);
 }
-void SliderView::SetThickness(const Dimension& value)
+void SliderModelNG::SetThickness(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value);
 }
-void SliderView::SetOnChange(SliderOnChangeEvent&& eventOnChange)
+void SliderModelNG::SetOnChange(SliderOnChangeEvent&& eventOnChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -91,7 +90,7 @@ void SliderView::SetOnChange(SliderOnChangeEvent&& eventOnChange)
 }
 
 // TODO: When used, it is obtained from the theme, and cannot be saved in the object set by the developer.
-void SliderView::LoadTheme(const RefPtr<FrameNode>& frameNode)
+void SliderModelNG::LoadTheme(const RefPtr<FrameNode>& frameNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

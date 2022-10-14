@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_LAYOUT_ALGORITHM_H
 
-#include "core/components/slider/slider_element.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
