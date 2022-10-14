@@ -367,6 +367,11 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
         containerModal->ShowTitle(isShow);
+#ifdef ENABLE_ROSEN_BACKEND
+        if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+            rsUIDirector_->SetContainerWindow(isShow); // set container window show state to render service
+        }
+#endif
     }
 }
 
