@@ -68,7 +68,7 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    void BuildChild(const DialogProperties& dialogProperties);
+    void BuildChild(DialogProperties& dialogProperties);
 
 private:
     void OnModifyDone() override;

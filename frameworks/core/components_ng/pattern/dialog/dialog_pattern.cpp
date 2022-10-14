@@ -84,7 +84,6 @@ void DialogPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void DialogPattern::HandleTouchUp(const Offset& clickPosition)
 {
-    // TODO: need to check click position
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto dialogRenderProp = host->GetPaintProperty<DialogRenderProperty>();
@@ -130,7 +129,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     contentRenderContext->UpdateBorderRadius(radius);
 }
 
-void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
+void DialogPattern::BuildChild(DialogProperties& dialogProperties)
 {
     LOGI("build dialog child");
     // append customNode
@@ -147,8 +146,6 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     }
 
     std::string data;
-    // TODO: need to check if Focusable is need in DialogView
-    // TODO: need to check if FocusCollaboration is need in DialogView
     // Make dialog Content Column
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -171,8 +168,6 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     } else {
         columnProp->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     }
-    // TODO: Content box need animation
-    // TODO: need to check TextDirection.
 
     // build ActionSheet child
     if (dialogProperties.type == DialogType::ACTION_SHEET) {
@@ -187,9 +182,12 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
         // TODO: make menu node
         LOGD("Menu is not Completed");
     } else {
-        auto buttonContainer = BuildButtons(dialogProperties.buttons);
-        CHECK_NULL_VOID(buttonContainer);
-        buttonContainer->MountToParent(contentColumn);
+        // build buttons
+        if (!dialogProperties.buttons.empty()) {
+            auto buttonContainer = BuildButtons(dialogProperties.buttons);
+            CHECK_NULL_VOID(buttonContainer);
+            buttonContainer->MountToParent(contentColumn);
+        }
     }
 
     auto dialog = GetHost();
@@ -272,16 +270,8 @@ void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub)
     auto host = GetHost();
     auto closeCallback = [weak = WeakClaim(RawPtr(host))](GestureEvent& /*info*/) {
         auto dialog = weak.Upgrade();
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-
-        overlayManager->CloseDialog(dialog);
+        CHECK_NULL_VOID(dialog);
+        dialog->GetPattern<DialogPattern>()->PopDialog();
     };
 
     hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(closeCallback));

@@ -31,8 +31,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FrameNode> DialogView::CreateDialogNode(
-    const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+RefPtr<FrameNode> DialogView::CreateDialogNode(DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -42,11 +41,11 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     std::string tag;
     switch (param.type) {
         case DialogType::ALERT_DIALOG: {
-            tag = V2::ALERTDIALOG_ETS_TAG;
+            tag = V2::ALERT_DIALOG_ETS_TAG;
             break;
         }
         case DialogType::ACTION_SHEET: {
-            tag = V2::ACTIONSHEETDIALOG_ETS_TAG;
+            tag = V2::ACTION_SHEET_DIALOG_ETS_TAG;
             break;
         }
         default:
@@ -72,12 +71,15 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     CHECK_NULL_RETURN(dialogContext, dialog);
     dialogContext->UpdateBackgroundColor(dialogTheme->GetMaskColorEnd());
 
+    // set onCancel callback
+    auto hub = dialog->GetEventHub<DialogEventHub>();
+    CHECK_NULL_RETURN(hub, nullptr);
+    hub->SetOnCancel(std::move(param.onCancel));
+
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->BuildChild(param);
     dialog->MarkModifyDone();
-    // TODO: build animation.
-    // TODO: menu event not completed.
     return dialog;
 }
 
