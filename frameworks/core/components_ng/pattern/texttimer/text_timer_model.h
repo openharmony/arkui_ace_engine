@@ -18,8 +18,8 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/texttimer/texttimer_controller.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/texttimer/texttimer_controller.h"
 
 namespace OHOS::Ace {
 class TextTimerModel {

@@ -18,7 +18,6 @@
 #include <regex>
 
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_timer_model_impl.h"
 #include "core/components/common/layout/constants.h"
