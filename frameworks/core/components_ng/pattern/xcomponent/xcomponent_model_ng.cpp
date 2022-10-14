@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/xcomponent/xcomponent_view.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
@@ -22,7 +22,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void XComponentView::Create(const std::string& id, const std::string& type, const std::string& libraryname,
+void XComponentModelNG::Create(const std::string& id, const std::string& type, const std::string& libraryname,
     const RefPtr<XComponentController>& xcomponentController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -35,7 +35,7 @@ void XComponentView::Create(const std::string& id, const std::string& type, cons
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, xcomponentType);
 }
-void XComponentView::SetOnLoad(LoadEvent&& onLoad)
+void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -47,7 +47,7 @@ void XComponentView::SetOnLoad(LoadEvent&& onLoad)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
 }
-void XComponentView::SetOnDestroy(DestroyEvent&& onDestroy)
+void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -59,7 +59,7 @@ void XComponentView::SetOnDestroy(DestroyEvent&& onDestroy)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestroy(std::move(onDestroy));
 }
-void XComponentView::SetOnSurfaceDestroyEvent(DestroyEvent&& onSurfaceDestroyEvent)
+void XComponentModelNG::SetOnSurfaceDestroyEvent(DestroyEvent&& onSurfaceDestroyEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -71,4 +71,5 @@ void XComponentView::SetOnSurfaceDestroyEvent(DestroyEvent&& onSurfaceDestroyEve
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSurfaceDestroyEvent(std::move(onSurfaceDestroyEvent));
 }
+
 } // namespace OHOS::Ace::NG

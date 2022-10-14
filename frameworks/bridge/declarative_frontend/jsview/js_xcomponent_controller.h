@@ -18,7 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
-#include "core/components/xcomponent/xcomponent_component.h"
+#include "core/components/xcomponent/xcomponent_controller.h"
 
 namespace OHOS::Ace::Framework {
 class JSXComponentController : public Referenced {

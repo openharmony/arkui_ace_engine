@@ -17,6 +17,7 @@
 
 #include <optional>
 #include <unistd.h>
+#include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
 #endif
@@ -55,6 +56,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
 
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
@@ -1263,6 +1265,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
             return;
         }
         auto xcPattern = DynamicCast<NG::XComponentPattern>(xcFrameNode->GetPattern());
+        CHECK_NULL_VOID(xcPattern);
 
         void* nativeWindow = nullptr;
 
@@ -1329,7 +1332,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         return;
     }
     if (isDestroy) {
-        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
+        XComponentComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteFromJsValMapById(componentId);
@@ -1337,7 +1340,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     }
     InitXComponent(componentId);
     RefPtr<XComponentComponent> xcomponent =
-        XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId);
+        XComponentComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;
