@@ -825,7 +825,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             selectInfo.isSingleHandle = true;
             selectInfo.firstHandle.isShow = IsTouchHandleShow(insertHandle_);
             selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
-            selectInfo.menuInfo.menuDisable = false;
+            selectInfo.menuInfo.menuDisable = true;
             selectInfo.menuInfo.menuIsShow = false;
             selectInfo.onHandleMoveDone = [weak = AceType::WeakClaim(this)](const RectF& rectF, bool isFirst) {
                 auto webPattern = weak.Upgrade();
@@ -859,6 +859,7 @@ void WebPattern::UpdateTouchHandleForOverlay()
     if (overlayType == INSERT_OVERLAY) {
         firstHandleInfo.isShow = IsTouchHandleShow(insertHandle_);
         firstHandleInfo.paintRect = ComputeTouchHandleRect(insertHandle_);
+        menuInfo.menuDisable = true;
         menuInfo.menuIsShow = false;
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSelectMenuInfo(menuInfo);
