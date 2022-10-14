@@ -31,7 +31,8 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FrameNode> DialogView::CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+RefPtr<FrameNode> DialogView::CreateDialogNode(
+    const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);

@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_view.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -157,6 +158,7 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     // Make dialog Content Column
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(contentColumn);
 
     auto title = BuildTitle(data, dialogProperties);
     CHECK_NULL_VOID(title);
@@ -178,7 +180,7 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     }
 
     // build ActionSheet child
-    if (dialogProperties.type == DialogType::ACTION_SHEET) {
+    if (dialogProperties.type == DialogType::ACTION_SHEET && !dialogProperties.sheetsInfo.empty()) {
         auto sheetContainer = BuildSheet(dialogProperties.sheetsInfo);
         CHECK_NULL_VOID(sheetContainer);
         sheetContainer->MountToParent(contentColumn);
@@ -188,6 +190,7 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     // Make Menu node if hasMenu
     if (dialogProperties.isMenu) {
         auto menu = BuildMenu(dialogProperties.buttons);
+        CHECK_NULL_VOID(menu);
         menu->MountToParent(contentColumn);
     } else {
         // build buttons
@@ -434,12 +437,17 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
 {
     auto menu = FrameNode::CreateFrameNode(
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
+    // column -> button
     for (size_t i = 0; i < buttons.size(); ++i) {
         auto button = CreateButton(buttons[i], i);
         CHECK_NULL_RETURN(button, nullptr);
+        auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
+        props->UpdateFlexGrow(1);
+        props->UpdateFlexShrink(1);
+    
         button->MountToParent(menu);
     }
-    return nullptr;
+    return menu;
 }
 
 } // namespace OHOS::Ace::NG

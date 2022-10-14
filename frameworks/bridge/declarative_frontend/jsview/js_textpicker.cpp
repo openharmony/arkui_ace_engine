@@ -196,9 +196,9 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
     if (Container::IsCurrentUseNewPipeline()) {
-        auto dailogEvent = DialogEvent(info);
-        auto dialogCancalEvent = DialogCancalEvent(info);
-        TextPickerDialogShow(paramObject, dailogEvent, dialogCancalEvent);
+        auto dialogEvent = DialogEvent(info);
+        auto dialogCancelEvent = DialogCancelEvent(info);
+        TextPickerDialogShow(paramObject, dialogEvent, dialogCancelEvent);
         return;
     }
 
@@ -218,8 +218,8 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
 }
 
 void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
-    const std::map<std::string, NG::DailogTextEvent>& dailogEvent,
-    const std::map<std::string, NG::DailogGestureEvent>& dialogCancalEvent)
+    const std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
     auto container = Container::Current();
     if (!container) {
@@ -271,22 +271,22 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, selected, getRangeVector, dailogEvent, height, dialogCancalEvent,
+        [properties, selected, getRangeVector, dialogEvent, height, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTextDialog(
-                properties, selected, height, getRangeVector, dailogEvent, dialogCancalEvent);
+                properties, selected, height, getRangeVector, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
 }
 
-std::map<std::string, NG::DailogTextEvent> JSTextPickerDialog::DialogEvent(const JSCallbackInfo& info)
+std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const JSCallbackInfo& info)
 {
-    std::map<std::string, NG::DailogTextEvent> dailogEvent;
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("TextPicker AddEvent error, info is non-valid");
-        return dailogEvent;
+        return dialogEvent;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onAccept = paramObject->GetProperty("onAccept");
@@ -298,7 +298,7 @@ std::map<std::string, NG::DailogTextEvent> JSTextPickerDialog::DialogEvent(const
             ACE_SCORING_EVENT("TextPickerDialog.onAccept");
             func->Execute(keys, info);
         };
-        dailogEvent["acceptId"] = acceptId;
+        dialogEvent["acceptId"] = acceptId;
     }
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
@@ -309,17 +309,17 @@ std::map<std::string, NG::DailogTextEvent> JSTextPickerDialog::DialogEvent(const
             ACE_SCORING_EVENT("TextPickerDialog.onChange");
             func->Execute(keys, info);
         };
-        dailogEvent["changeId"] = changeId;
+        dialogEvent["changeId"] = changeId;
     }
-    return dailogEvent;
+    return dialogEvent;
 }
 
-std::map<std::string, NG::DailogGestureEvent> JSTextPickerDialog::DialogCancalEvent(const JSCallbackInfo& info)
+std::map<std::string, NG::DialogGestureEvent> JSTextPickerDialog::DialogCancelEvent(const JSCallbackInfo& info)
 {
-    std::map<std::string, NG::DailogGestureEvent> dailogCancalEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("TextPicker AddEvent error, info is non-valid");
-        return dailogCancalEvent;
+        return dialogCancelEvent;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onCancel = paramObject->GetProperty("onCancel");
@@ -330,9 +330,9 @@ std::map<std::string, NG::DailogGestureEvent> JSTextPickerDialog::DialogCancalEv
             ACE_SCORING_EVENT("TextPickerDialog.onCancel");
             func->Execute();
         };
-        dailogCancalEvent["cancelId"] = cancelId;
+        dialogCancelEvent["cancelId"] = cancelId;
     }
-    return dailogCancalEvent;
+    return dialogCancelEvent;
 }
 
 void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSCallbackInfo& info)
