@@ -115,7 +115,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         if (popupInfo.isCurrentOnShow) {
             return;
         }
-        LOGE("begin push");
+        LOGI("begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         popupMap_[targetId].popupNode->MountToParent(rootNode);
     }

@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -42,13 +43,33 @@ public:
     {
         auto paintProperty = MakeRefPtr<DragBarPaintProperty>();
         paintProperty->PaintProperty::UpdatePaintProperty(AceType::DynamicCast<PaintProperty>(this));
+        paintProperty->propPanelMode_ = ClonePanelMode();
+        paintProperty->propBarLeftPoint_ = CloneBarLeftPoint();
+        paintProperty->propBarCenterPoint_ = CloneBarCenterPoint();
+        paintProperty->propBarRightPoint_ = CloneBarRightPoint();
+        paintProperty->propDragOffset_ = CloneDragOffset();
+        paintProperty->propOpacity_ = CloneOpacity();
         return paintProperty;
     }
 
     void Reset() override
     {
         PaintProperty::Reset();
+        ResetPanelMode();
+        ResetBarLeftPoint();
+        ResetBarCenterPoint();
+        ResetBarRightPoint();
+        ResetDragOffset();
+        ResetOpacity();
     }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PanelMode, PanelMode, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarLeftPoint, OffsetT<Dimension>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarCenterPoint, OffsetT<Dimension>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarRightPoint, OffsetT<Dimension>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DragOffset, OffsetF, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Opacity, float, PROPERTY_UPDATE_RENDER);
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DragBarPaintProperty);
 };
