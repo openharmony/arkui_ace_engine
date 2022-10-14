@@ -17,10 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_NAVIGATOR_EVENT_HUB_H
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/components/navigator/navigator_component.h"
 
 namespace OHOS::Ace::NG {
-
-enum class NavigatorType { DEFAULT = 0, PUSH, REPLACE, BACK };
 
 class NavigatorEventHub : public EventHub {
     DECLARE_ACE_TYPE(NavigatorEventHub, EventHub)
