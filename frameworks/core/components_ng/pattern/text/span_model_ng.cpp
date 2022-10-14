@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/span_view.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/alignment.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 #define ACE_UPDATE_SPAN_PROPERTY(name, value)                                                                    \
     do {                                                                                                         \
@@ -28,7 +31,36 @@
     } while (false)
 
 namespace OHOS::Ace::NG {
-void SpanView::Create(const std::string& content)
+namespace {
+FontWeight ConvertFontWeight(FontWeight fontWeight)
+{
+    FontWeight convertValue = fontWeight;
+    switch (fontWeight) {
+        case FontWeight::LIGHTER:
+            convertValue = FontWeight::W100;
+            break;
+        case FontWeight::NORMAL:
+        case FontWeight::REGULAR:
+            convertValue = FontWeight::W400;
+            break;
+        case FontWeight::MEDIUM:
+            convertValue = FontWeight::W500;
+            break;
+        case FontWeight::BOLD:
+            convertValue = FontWeight::W700;
+            break;
+        case FontWeight::BOLDER:
+            convertValue = FontWeight::W900;
+            break;
+        default:
+            convertValue = fontWeight;
+            break;
+    }
+    return convertValue;
+}
+} // namespace
+
+void SpanModelNG::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -38,48 +70,54 @@ void SpanView::Create(const std::string& content)
     ACE_UPDATE_SPAN_PROPERTY(Content, content);
 }
 
-void SpanView::SetFontSize(const Dimension& value)
+void SpanModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(FontSize, value);
 }
 
-void SpanView::SetTextColor(const Color& value)
+void SpanModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(TextColor, value);
 }
 
-void SpanView::SetItalicFontStyle(const Ace::FontStyle& value)
+void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
 {
     ACE_UPDATE_SPAN_PROPERTY(ItalicFontStyle, value);
 }
 
-void SpanView::SetFontWeight(const Ace::FontWeight& value)
+void SpanModelNG::SetFontWeight(Ace::FontWeight value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(FontWeight, value);
+    ACE_UPDATE_SPAN_PROPERTY(FontWeight, ConvertFontWeight(value));
 }
 
-void SpanView::SetFontFamily(const std::vector<std::string>& value)
+void SpanModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(FontFamily, value);
 }
 
-void SpanView::SetTextDecoration(const Ace::TextDecoration& value)
+void SpanModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
     ACE_UPDATE_SPAN_PROPERTY(TextDecoration, value);
 }
 
-void SpanView::SetTextDecorationColor(const Color& value)
+void SpanModelNG::SetTextDecorationColor(const Color& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value);
 }
 
-void SpanView::SetTextCase(const Ace::TextCase& value)
+void SpanModelNG::SetTextCase(Ace::TextCase value)
 {
     ACE_UPDATE_SPAN_PROPERTY(TextCase, value);
 }
 
-void SpanView::SetOnClick(GestureEventFunc&& onClick)
+void SpanModelNG::SetLetterSpacing(const Dimension& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(onClick));
+    ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value);
 }
+
+void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
+{
+    LOGE("no support OnClick");
+}
+
 } // namespace OHOS::Ace::NG
