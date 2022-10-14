@@ -40,7 +40,8 @@ public:
 
     RefPtr<XComponentComponent> GetXComponentFromXcomponentsMap(const std::string& xcomponentId)
     {
-        auto iter = xcomponentsMap_.find(xcomponentId);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        auto iter = xcomponentsMap_.find(idWithContainerId);
         if (iter == xcomponentsMap_.end()) {
             LOGE("xcomponent: %s not exists", xcomponentId.c_str());
             return nullptr;
@@ -50,7 +51,8 @@ public:
 
     RefPtr<JSXComponentController> GetControllerFromJSXComponentControllersMap(const std::string& xcomponentId)
     {
-        auto iter = jsXComponentControllersMap_.find(xcomponentId);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        auto iter = jsXComponentControllersMap_.find(idWithContainerId);
         if (iter == jsXComponentControllersMap_.end()) {
             return nullptr;
         }
@@ -60,20 +62,22 @@ public:
     std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, OH_NativeXComponent*> GetNativeXComponentFromXcomponentsMap(
         const std::string& xcomponentId)
     {
-        auto it = nativeXcomponentsMap_.find(xcomponentId);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        auto it = nativeXcomponentsMap_.find(idWithContainerId);
         if (it != nativeXcomponentsMap_.end()) {
             return it->second;
         } else {
             auto nativeXComponentImpl = AceType::MakeRefPtr<NativeXComponentImpl>();
             auto nativeXComponent = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl));
-            nativeXcomponentsMap_[xcomponentId] = std::make_pair(nativeXComponentImpl, nativeXComponent);
-            return nativeXcomponentsMap_[xcomponentId];
+            nativeXcomponentsMap_[idWithContainerId] = std::make_pair(nativeXComponentImpl, nativeXComponent);
+            return nativeXcomponentsMap_[idWithContainerId];
         }
     }
 
     void AddXComponentToXcomponentsMap(const std::string& xcomponentId, const RefPtr<XComponentComponent>& component)
     {
-        auto result = xcomponentsMap_.try_emplace(xcomponentId, component);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        auto result = xcomponentsMap_.try_emplace(idWithContainerId, component);
         if (!result.second) {
             auto oldXcomponent = result.first->second.Upgrade();
             if (oldXcomponent) {
@@ -83,15 +87,16 @@ public:
         }
     }
 
-    void AddControllerToJSXComponentControllersMap(const std::string& xcomponentId,
-        JSXComponentController*& controller)
+    void AddControllerToJSXComponentControllersMap(const std::string& xcomponentId, JSXComponentController*& controller)
     {
-        jsXComponentControllersMap_[xcomponentId] = controller;
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        jsXComponentControllersMap_[idWithContainerId] = controller;
     }
 
     void DeleteFromXcomponentsMapById(const std::string& xcomponentId)
     {
-        auto it = xcomponentsMap_.find(xcomponentId);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        auto it = xcomponentsMap_.find(idWithContainerId);
         if (it == xcomponentsMap_.end()) {
             return;
         }
@@ -104,12 +109,14 @@ public:
 
     void DeleteControllerFromJSXComponentControllersMap(const std::string& xcomponentId)
     {
-        jsXComponentControllersMap_.erase(xcomponentId);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        jsXComponentControllersMap_.erase(idWithContainerId);
     }
 
     void DeleteFromNativeXcomponentsMapById(const std::string& xcomponentId)
     {
-        auto it = nativeXcomponentsMap_.find(xcomponentId);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        auto it = nativeXcomponentsMap_.find(idWithContainerId);
         if (it == nativeXcomponentsMap_.end()) {
             return;
         }
@@ -122,7 +129,8 @@ public:
 
     void AddJsValToJsValMap(const std::string& xcomponentId, const JSRef<JSVal>& jsVal)
     {
-        auto result = jsValMap_.try_emplace(xcomponentId, jsVal);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        auto result = jsValMap_.try_emplace(idWithContainerId, jsVal);
         if (!result.second) {
             result.first->second = jsVal;
         }
@@ -130,7 +138,8 @@ public:
 
     void DeleteFromJsValMapById(const std::string& xcomponentId)
     {
-        auto it = jsValMap_.find(xcomponentId);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        auto it = jsValMap_.find(idWithContainerId);
         if (it == jsValMap_.end()) {
             return;
         }
@@ -139,7 +148,8 @@ public:
 
     bool GetJSVal(const std::string& xcomponentId, JSRef<JSVal>& jsVal)
     {
-        auto iter = jsValMap_.find(xcomponentId);
+        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
+        auto iter = jsValMap_.find(idWithContainerId);
         if (iter != jsValMap_.end()) {
             jsVal = iter->second;
             jsValMap_.erase(iter);
