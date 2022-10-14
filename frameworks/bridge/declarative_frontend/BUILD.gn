@@ -265,6 +265,7 @@ template("declarative_js_engine") {
       "jsview/models/navigator_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
+      "jsview/models/scroll_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
       "jsview/models/tab_content_model_impl.cpp",
