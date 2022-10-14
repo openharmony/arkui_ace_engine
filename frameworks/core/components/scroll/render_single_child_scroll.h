@@ -42,6 +42,7 @@ private:
 
     bool isEffectSetted_ = false;
     double childLastMainSize_ = -std::numeric_limits<double>::max();
+    bool initial_ = true;
 };
 
 } // namespace OHOS::Ace

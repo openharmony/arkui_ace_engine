@@ -301,6 +301,10 @@ void RenderList::InitScrollBar()
     scrollBar_->SetTouchWidth(theme->GetTouchWidth());
     if (!vertical_) {
         scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    } else {
+        if (isRightToLeft_) {
+            scrollBar_->SetPositionMode(PositionMode::LEFT);
+        }
     }
     scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
     SetScrollBarCallback();
