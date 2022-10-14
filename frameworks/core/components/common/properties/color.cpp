@@ -251,8 +251,9 @@ Color Color::operator+(const Color& color) const
     ConvertGammaToLinear(color, secondLinearRed, secondLinearGreen, secondLinearBlue);
 
     // get linear result and convert to gamma
-    return ConvertLinearToGamma(GetAlpha() + color.GetAlpha(), firstLinearRed + secondLinearRed,
-        firstLinearGreen + secondLinearGreen, firstLinearBlue + secondLinearBlue);
+    // return ConvertLinearToGamma(GetAlpha() + color.GetAlpha(), firstLinearRed + secondLinearRed,
+    //     firstLinearGreen + secondLinearGreen, firstLinearBlue + secondLinearBlue);
+    return FromARGB(GetAlpha() + color.GetAlpha(), GetRed() + color.GetRed(), GetGreen() + color.GetGreen(), GetBlue() + color.GetBlue());
 }
 
 Color Color::operator-(const Color& color) const
@@ -270,8 +271,9 @@ Color Color::operator-(const Color& color) const
     ConvertGammaToLinear(color, secondLinearRed, secondLinearGreen, secondLinearBlue);
 
     // get linear result and convert to gamma
-    return ConvertLinearToGamma(GetAlpha() - color.GetAlpha(), firstLinearRed - secondLinearRed,
-        firstLinearGreen - secondLinearGreen, firstLinearBlue - secondLinearBlue);
+    // return ConvertLinearToGamma(GetAlpha() - color.GetAlpha(), firstLinearRed - secondLinearRed,
+    //     firstLinearGreen - secondLinearGreen, firstLinearBlue - secondLinearBlue);
+    return FromARGB(GetAlpha() - color.GetAlpha(), GetRed() - color.GetRed(), GetGreen() - color.GetGreen(), GetBlue() - color.GetBlue());
 }
 
 Color Color::operator*(double value) const
@@ -283,7 +285,8 @@ Color Color::operator*(double value) const
     ConvertGammaToLinear(*this, linearRed, linearGreen, linearBlue);
 
     // get linear result and convert to gamma
-    return ConvertLinearToGamma(GetAlpha() * value, linearRed * value, linearGreen * value, linearBlue * value);
+    // return ConvertLinearToGamma(GetAlpha() * value, linearRed * value, linearGreen * value, linearBlue * value);
+    return FromARGB(GetAlpha() * value, GetRed() * value, GetGreen() * value, GetBlue() * value);
 }
 
 Color Color::operator/(double value) const
@@ -298,7 +301,8 @@ Color Color::operator/(double value) const
     ConvertGammaToLinear(*this, linearRed, linearGreen, LinearBlue);
 
     // get linear result and convert to gamma
-    return ConvertLinearToGamma(GetAlpha() / value, linearRed / value, linearGreen / value, LinearBlue / value);
+    // return ConvertLinearToGamma(GetAlpha() / value, linearRed / value, linearGreen / value, LinearBlue / value);
+    return FromARGB(GetAlpha() / value, GetRed() / value, GetGreen() / value, GetBlue() / value);
 }
 
 double Color::ConvertGammaToLinear(uint8_t value)

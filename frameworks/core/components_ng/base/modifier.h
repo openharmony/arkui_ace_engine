@@ -79,53 +79,49 @@ class AnimatableProp : public AnimatablePropBase {
     DECLARE_ACE_TYPE(AnimatableProp, AnimatablePropBase);
 
 public:
-    AnimatableProp(const T& value) : initValue_(value) {}
+    AnimatableProp(const T& value) : value_(value) {}
     ~AnimatableProp() override = default;
 
-    void SetUpCallbacks(std::function<const T&()>&& getValueFunc, std::function<void(const T&)>&& updateValueFunc,
-        std::function<void(const AnimateConfig& config, const T&)> updateWithAnimationFunc)
+    void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc,
+        std::function<void(const AnimateConfig&, const T&)> setWithAnimationFunc)
     {
-        getValueFunc_ = getValueFunc;
-        updateValueFunc_ = updateValueFunc;
-        updateValueWithAnimationFunc_ = updateWithAnimationFunc;
+        getFunc_ = getFunc;
+        setFunc_ = setFunc;
+        setWithAnimationFunc_ = setWithAnimationFunc;
     }
 
-    void UpdateProp(const T& value)
+    T Get()
     {
-        if (updateValueFunc_) {
-            updateValueFunc_(value);
+        if (getFunc_) {
+            return getFunc_();
         } else {
-            initValue_ = value;
+            return value_;
         }
     }
 
-    void UpdatePropWithAnimation(const AnimateConfig& config, const T& value)
+    void Set(const T& value)
     {
-        if (updateValueWithAnimationFunc_) {
-            updateValueWithAnimationFunc_(config, value);
+        if (setFunc_) {
+            setFunc_(value);
         } else {
-            initValue_ = value;
+            value_ = value;
         }
     }
 
-    const T& GetValue()
+    void SetWithAnimation(const AnimateConfig& config, const T& value)
     {
-        if (getValueFunc_) {
-            return getValueFunc_();
+        if (setWithAnimationFunc_) {
+            setWithAnimationFunc_(config, value);
+        } else {
+            value_ = value;
         }
-        return initValue_;
-    }
-
-    const T& GetInitValue()
-    {
-        return initValue_;
     }
 
 private:
-    std::function<const T&()> getValueFunc_;
-    std::function<void(const T&)> updateValueFunc_;
-    std::function<void(const AnimateConfig& config, const T&)> updateValueWithAnimationFunc_;
-    T initValue_;
+    T value_;
+    std::function<T()> getFunc_;
+    std::function<void(const T&)> setFunc_;
+    std::function<void(const AnimateConfig&, const T&)> setWithAnimationFunc_;
     ACE_DISALLOW_COPY_AND_MOVE(AnimatableProp);
 };
 

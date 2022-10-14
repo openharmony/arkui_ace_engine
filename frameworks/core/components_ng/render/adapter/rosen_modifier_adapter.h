@@ -47,52 +47,19 @@ using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;
 using RSDrawingContext = Rosen::RSDrawingContext;
 using RSPropertyBase = Rosen::RSPropertyBase;
 
-template<typename T>
-void UpdateRSPropWithAnimation(
-    const std::shared_ptr<RSAnimatableProperty<T>>& rsProp, const AnimateConfig& config, const T& value)
-{
-    RSAnimationTimingProtocol protocol;
-    protocol.SetSpeed(config.speed);
-    protocol.SetAutoReverse(config.autoReverse);
-    protocol.SetRepeatCount(config.repeatTimes);
-    RSNode::Animate(
-        protocol, RSAnimationTimingCurve::LINEAR, [rsProp, value]() { rsProp->Set(value); }, []() {});
-}
-
-#define CONVERT_PROPS(prop, srcType, propType)                                                    \
-    if (AceType::InstanceOf<srcType>(prop)) {                                                     \
-        auto castProp = AceType::DynamicCast<srcType>(prop);                                      \
-        auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->GetInitValue()); \
-        castProp->SetUpCallbacks([rsProp]() -> const propType& { return rsProp->Get(); },         \
-            [rsProp](const propType& value) { rsProp->Set(value); },                              \
-            [rsProp](const AnimateConfig& config, const propType& value) {                        \
-                UpdateRSPropWithAnimation(rsProp, config, value);                                 \
-            });                                                                                   \
-        return rsProp;                                                                            \
-    }
-
-inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<AnimatablePropBase> prop)
-{
-    // should manually add convert type here
-    CONVERT_PROPS(prop, AnimatablePropFloat, float);
-    return nullptr;
-}
-
 class ContentModifierAdapter : public RSContentStyleModifier {
 public:
     ContentModifierAdapter() = default;
     explicit ContentModifierAdapter(const RefPtr<Modifier>& modifier)
         : modifier_(AceType::DynamicCast<ContentModifier>(modifier))
-    {
-        ConvertProperties();
-    }
+    {}
     ~ContentModifierAdapter() override = default;
 
     void Draw(RSDrawingContext& context) const override;
 
-private:
-    void ConvertProperties();
+    void AttachProperties();
 
+private:
     RefPtr<ContentModifier> modifier_;
     std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
 

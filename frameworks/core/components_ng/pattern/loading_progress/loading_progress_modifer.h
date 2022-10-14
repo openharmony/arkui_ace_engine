@@ -42,7 +42,7 @@ public:
     void onDraw(DrawingContext& context) override
     {
         float scale_ = 1.0;
-        float date = dateProp_->GetValue();
+        float date = date_->Get();
         scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + COMET_WIDTH.ConvertToPx())),
                      (context.height /
                         (RING_RADIUS.ConvertToPx() * (1 + RING_MOVEMENT) + RING_WIDTH.ConvertToPx() * HALF))) *
@@ -58,22 +58,25 @@ public:
 
     void DrawRing(DrawingContext& canvas, float date, float scale_) const;
     void DrawOrbit(DrawingContext& canvas, float date, float scale_) const;
-    void SetColor(Color color)
-    {
-        color_ = color;
-    };
 
-    void SetDateProp(float value)
+    void SetDate(float date)
     {
         constexpr float speedOfModifier = 0.1f;
-        if (dateProp_) {
-            dateProp_->UpdatePropWithAnimation({ .speed = speedOfModifier, .repeatTimes = -1, .autoReverse = false }, value);
+        if (date_) {
+            date_->SetWithAnimation({ .speed = speedOfModifier, .repeatTimes = -1, .autoReverse = false }, date);
+        }
+    }
+
+    void SetColor(Color color)
+    {
+        if (color_) {
+            color_->Set(color);
         }
     }
 
 private:
-    RefPtr<AnimatablePropFloat> dateProp_;
-    Color color_ = Color::BLUE;
+    RefPtr<AnimatablePropFloat> date_;
+    RefPtr<AnimatableProp<Color>> color_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };

@@ -55,14 +55,58 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
     }
 }
 
-void ContentModifierAdapter::ConvertProperties()
+template<typename T>
+void UpdateRSPropWithAnimation(
+    const std::shared_ptr<RSAnimatableProperty<T>>& rsProp, const AnimateConfig& config, const T& value)
 {
-    if (modifier_) {
-        for (const auto& prop : modifier_->GetAttachedProps()) {
-            const auto& rsProp = ConvertToRSProperty(prop);
-            AttachProperty(rsProp);
-            attachedProperties_.push_back(rsProp);
-        }
+    RSAnimationTimingProtocol protocol;
+    protocol.SetSpeed(config.speed);
+    protocol.SetAutoReverse(config.autoReverse);
+    protocol.SetRepeatCount(config.repeatTimes);
+    RSNode::Animate(
+        protocol, RSAnimationTimingCurve::LINEAR, [rsProp, value]() { 
+            rsProp->Set(value);
+        });
+}
+
+#define CONVERT_PROPS(prop, srcType, propType)                                                    \
+    if (AceType::InstanceOf<srcType>(prop)) {                                                     \
+        auto castProp = AceType::DynamicCast<srcType>(prop);                                      \
+        auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get());          \
+        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },                \
+            [rsProp](const propType& value) { rsProp->Set(value); },                              \
+            [rsProp](const AnimateConfig& config, const propType& value) {                        \
+                UpdateRSPropWithAnimation(rsProp, config, value);                                 \
+            });                                                                                   \
+        return rsProp;                                                                            \
+    }
+
+inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<AnimatablePropBase>& prop)
+{
+    // should manually add convert type here
+    CONVERT_PROPS(prop, AnimatablePropFloat, float);
+    return nullptr;
+}
+
+inline std::shared_ptr<RSPropertyBase> ConvertToRSPropertyColor(const RefPtr<AnimatablePropBase>& prop)
+{
+    // should manually add convert type here
+    CONVERT_PROPS(prop, AnimatableProp<Color>, Color);
+    return nullptr;
+}
+
+void ContentModifierAdapter::AttachProperties()
+{
+    if (!attachedProperties_.size() && modifier_) {
+        auto propFloat = modifier_->GetAttachedProps()[0];
+        auto rsPropFloat = ConvertToRSProperty(propFloat);
+        AttachProperty(rsPropFloat);
+        attachedProperties_.emplace_back(rsPropFloat);
+
+        auto propColor = modifier_->GetAttachedProps()[1];
+        auto rsPropColor = ConvertToRSPropertyColor(propColor);
+        AttachProperty(rsPropColor);
+        attachedProperties_.emplace_back(rsPropColor);
     }
 }
 
