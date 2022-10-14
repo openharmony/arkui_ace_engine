@@ -32,6 +32,8 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
     if (args[0]->IsNumber() && args[1]->IsNumber()) {
         JSViewAbstract::ParseJsInteger(args[0], width);
         JSViewAbstract::ParseJsInteger(args[1], height);
+        width = SystemProperties::Vp2Px(width);
+        height = SystemProperties::Vp2Px(height);
         jsCanvasImageData->width_ = width;
         jsCanvasImageData->height_ = height;
     }
