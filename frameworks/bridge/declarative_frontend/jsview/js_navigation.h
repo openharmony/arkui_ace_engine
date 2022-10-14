@@ -35,6 +35,10 @@ public:
     static void SetMenuCount(int32_t menuCount);
     static void SetOnTitleModeChanged(const JSCallbackInfo& info);
     static void SetNavigationMode(int32_t value);
+    static void SetNavBarWidth(const JSCallbackInfo& info);
+    static void SetNavBarPosition(int32_t value);
+    static void SetHideNavBar(bool hide);
+    static void SetBackButtonIcon(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

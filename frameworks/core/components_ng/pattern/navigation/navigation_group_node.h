@@ -63,11 +63,22 @@ public:
         return contentNode_;
     }
 
+    void SetDividerNode(const RefPtr<UINode>& dividerNode)
+    {
+        dividerNode_ = dividerNode;
+    }
+
+    const RefPtr<UINode>& GetDividerNode() const
+    {
+        return dividerNode_;
+    }
+
 private:
     void AddNavDestinationToNavigation(const RefPtr<UINode>& child);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
+    RefPtr<UINode> dividerNode_;
 };
 
 } // namespace OHOS::Ace::NG
