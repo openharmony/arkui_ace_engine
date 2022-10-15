@@ -672,6 +672,7 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
         return;
     }
     allocatedSize_ = 0.0f;
+    allocatedSize_ += space_ * (children.size() - 1);
     for (const auto& child : children) {
         if (child->IsOutOfLayout()) {
             continue;
@@ -716,9 +717,6 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void FlexLayoutAlgorithm::CalculateSpace(float remainSpace, float& frontSpace, float& betweenSpace) const
 {
-    if (NearZero(remainSpace) && mainAxisAlign_ != FlexAlign::SPACE_CUSTOMIZATION) {
-        return;
-    }
     switch (mainAxisAlign_) {
         case FlexAlign::FLEX_START:
             frontSpace = 0.0f;
@@ -743,10 +741,6 @@ void FlexLayoutAlgorithm::CalculateSpace(float remainSpace, float& frontSpace, f
         case FlexAlign::SPACE_EVENLY:
             betweenSpace = validSizeCount_ > 0 ? remainSpace / static_cast<float>(validSizeCount_ + 1) : 0.0f;
             frontSpace = betweenSpace;
-            break;
-        case FlexAlign::SPACE_CUSTOMIZATION:
-            betweenSpace = space_;
-            frontSpace = 0.0f;
             break;
         default:
             break;

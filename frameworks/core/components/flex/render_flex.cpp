@@ -667,9 +667,6 @@ void RenderFlex::DetermineItemsPosition(const BaselineProperties& baselineProper
 
 void RenderFlex::CalculateSpace(double remainSpace, double& frontSpace, double& betweenSpace) const
 {
-    if (NearZero(remainSpace) && mainAxisAlign_ != FlexAlign::SPACE_CUSTOMIZATION) {
-        return;
-    }
     switch (mainAxisAlign_) {
         case FlexAlign::FLEX_START:
             frontSpace = 0.0;
