@@ -580,7 +580,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     }
     layoutProperty_->CleanDirty();
 
-    // If has dirtyLayoutBox, need to mark dirty after layout done.
+    // If it has dirtyLayoutBox, need to mark dirty after layout done.
     if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
         return;
     }

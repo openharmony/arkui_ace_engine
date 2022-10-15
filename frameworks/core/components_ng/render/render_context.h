@@ -111,6 +111,8 @@ public:
     // clip node with padding
     virtual void SetClipToBounds(bool useClip) {}
 
+    virtual void SetVisible(bool visible) {}
+
     virtual RefPtr<Canvas> GetCanvas() = 0;
 
     virtual void Restore() = 0;
