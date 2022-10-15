@@ -102,6 +102,12 @@ public:
         rsNode_->SetClipToBounds(useClip);
     }
 
+    void SetVisible(bool visible) override
+    {
+        CHECK_NULL_VOID(rsNode_);
+        rsNode_->SetVisible(visible);
+    }
+
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 
     void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
