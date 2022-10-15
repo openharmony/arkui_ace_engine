@@ -79,6 +79,7 @@ enum class HitTestResult {
 };
 
 struct DragDropInfo {
+    RefPtr<UINode> customNode;
     RefPtr<PixelMap> pixelMap;
     std::string extraInfo;
 };
