@@ -19,6 +19,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr float HALF = 0.5;
+}
+
 void SliderPattern::OnModifyDone()
 {
     auto host = GetHost();
