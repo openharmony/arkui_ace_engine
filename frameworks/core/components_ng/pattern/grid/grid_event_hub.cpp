@@ -140,13 +140,12 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     OHOS::Ace::ItemDragInfo itemDragInfo;
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
-    auto dragDropInfo = FireOnItemDragStart(itemDragInfo, draggedIndex_);
-    CHECK_NULL_VOID(dragDropInfo);
+    auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
+    CHECK_NULL_VOID(customNode);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
 
-    auto rootNode = manager->CreateDragRootNode(dragDropInfo);
-    dragDropProxy_ = manager->CreateAndShowDragWindow(rootNode, info);
+    dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info);
 }

@@ -344,6 +344,25 @@ NG::OffsetT<Dimension> ParseNGLocation(const JSCallbackInfo& info)
     return { dimenX, dimenY };
 }
 
+RefPtr<JsFunction> ParseDragStartBuilderFunc(const JSRef<JSVal>& info)
+{
+    JSRef<JSVal> builder;
+    if (info->IsObject()) {
+        auto builderObj = JSRef<JSObject>::Cast(info);
+        builder = builderObj->GetProperty("builder");
+    } else if (info->IsFunction()) {
+        builder = info;
+    } else {
+        return nullptr;
+    }
+
+    if (!builder->IsFunction()) {
+        return nullptr;
+    }
+
+    return AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+}
+
 #ifndef WEARABLE_PRODUCT
 const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Placement::TOP, Placement::BOTTOM,
     Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT, Placement::LEFT_TOP,
@@ -4110,6 +4129,13 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
                 return dragDropInfo;
             }
 
+            auto customNode = ParseDragCustomUINode(ret);
+            if (customNode) {
+                LOGI("use custom builder param.");
+                dragDropInfo.customNode = customNode;
+                return dragDropInfo;
+            }
+
             auto builderObj = JSRef<JSObject>::Cast(ret);
 #if !defined(PREVIEW)
             auto pixmap = builderObj->GetProperty("pixelMap");
@@ -4168,19 +4194,7 @@ bool JSViewAbstract::ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragIt
 
 RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& info)
 {
-    JSRef<JSVal> builder;
-    if (info->IsObject()) {
-        auto builderObj = JSRef<JSObject>::Cast(info);
-        builder = builderObj->GetProperty("builder");
-    } else if (info->IsFunction()) {
-        builder = info;
-    } else {
-        return nullptr;
-    }
-    if (!builder->IsFunction()) {
-        return nullptr;
-    }
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    auto builderFunc = ParseDragStartBuilderFunc(info);
     if (!builderFunc) {
         return nullptr;
     }
@@ -4195,6 +4209,22 @@ RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& inf
         LOGE("Custom component is null.");
     }
     return component;
+}
+
+RefPtr<NG::UINode> JSViewAbstract::ParseDragCustomUINode(const JSRef<JSVal>& info)
+{
+    auto builderFunc = ParseDragStartBuilderFunc(info);
+    if (!builderFunc) {
+        return nullptr;
+    }
+    // use another VSP instance while executing the builder function
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    {
+        ACE_SCORING_EVENT("onDragStart.builder");
+        builderFunc->Execute();
+    }
+
+    return NG::ViewStackProcessor::GetInstance()->Finish();
 }
 
 void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
