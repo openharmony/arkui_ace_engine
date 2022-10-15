@@ -241,7 +241,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->UpdateChangeEvent(groupResult);
+    eventHub->UpdateChangeEvent(&groupResult);
 }
 
 void CheckBoxPattern::CheckBoxGroupIsTrue()
