@@ -249,14 +249,11 @@ public:
 
     OffsetF GetOffsetRelativeToWindow() const;
 
-    bool IsOnMainTree() const
-    {
-        return onMainTree_;
-    }
+    void SetActive(bool active) override;
 
-    void SetActive(bool active)
+    bool IsActive() const
     {
-        isActive_ = active;
+        return isActive_;
     }
 
 private:

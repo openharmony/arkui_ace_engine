@@ -86,7 +86,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
     if (!frameNode) {
         return nullptr;
     }
-    if (frameNode->tag_ != tag) {
+    if (frameNode->GetTag() != tag) {
         LOGE("the tag is changed");
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
         auto parent = frameNode->GetParent();
@@ -114,7 +114,7 @@ void FrameNode::InitializePatternAndContext()
     renderContext_->SetRequestFrame([weak = WeakClaim(this)] {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        if (frameNode->onMainTree_) {
+        if (frameNode->IsOnMainTree()) {
             auto context = frameNode->GetContext();
             CHECK_NULL_VOID(context);
             context->RequestFrame();
@@ -151,6 +151,8 @@ void FrameNode::DumpInfo()
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
                                                    ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
                                                    : "NA"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
     if (pattern_) {
         pattern_->DumpInfo();
     }
@@ -201,23 +203,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(dirty);
 
     // active change flag judge.
-    bool activeChanged = false;
-    if (dirty->IsActive() && !isActive_) {
-        pattern_->OnActive();
-        isActive_ = true;
-        activeChanged = true;
-    }
-    if (!dirty->IsActive() && isActive_) {
-        pattern_->OnInActive();
-        isActive_ = false;
-        activeChanged = true;
-    }
-    if (activeChanged && !dirty->IsRootMeasureNode()) {
-        auto parent = GetAncestorNodeOfFrame();
-        if (parent) {
-            parent->MarkNeedSyncRenderTree();
-        }
-    }
+    SetActive(dirty->IsActive());
     if (!isActive_) {
         LOGD("current node is inactive, don't need to render");
         return;
@@ -284,6 +270,27 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     // rebuild child render node.
     RebuildRenderContextTree();
+}
+
+void FrameNode::SetActive(bool active)
+{
+    bool activeChanged = false;
+    if (active && !isActive_) {
+        pattern_->OnActive();
+        isActive_ = true;
+        activeChanged = true;
+    }
+    if (!active && isActive_) {
+        pattern_->OnInActive();
+        isActive_ = false;
+        activeChanged = true;
+    }
+    if (activeChanged) {
+        auto parent = GetAncestorNodeOfFrame();
+        if (parent) {
+            parent->MarkNeedSyncRenderTree();
+        }
+    }
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -446,7 +453,6 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutWrapper->SetOutOfLayout(true);
     }
     layoutWrapper->SetActive(isActive_);
-
     return layoutWrapper;
 }
 
@@ -582,6 +588,8 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 
     // If has dirtyLayoutBox, need to mark dirty after layout done.
     if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
+        LOGD("this node has already mark dirty, %{public}s, %{public}d, %{public}d", GetTag().c_str(),
+            isRenderDirtyMarked_, isLayoutDirtyMarked_);
         return;
     }
     isRenderDirtyMarked_ = true;
@@ -658,7 +666,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect);
     if (SystemProperties::GetDebugEnabled()) {
-        LOGD("TouchTest: point is %{public}s in %{public}s", parentLocalPoint.ToString().c_str(), GetTag().c_str());
+        LOGD("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
+            GetTag().c_str(), GetDepth());
         for (const auto& rect : responseRegionList) {
             LOGD("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
                 parentLocalPoint.ToString().c_str());

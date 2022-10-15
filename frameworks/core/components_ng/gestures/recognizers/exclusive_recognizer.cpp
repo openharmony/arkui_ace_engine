@@ -190,19 +190,22 @@ void ExclusiveRecognizer::BatchAdjudicate(
 {
     // any sub recognizer accept itself will drive to detected state
     if (state_ == DetectState::DETECTED) {
-        LOGD("exclusive gesture recognizer is in detected state, do not process disposal");
+        LOGW("exclusive gesture recognizer is in detected state, do not process disposal");
         return;
     }
 
     if (disposal == GestureDisposal::ACCEPT) {
+        LOGD("exclusive gesture recognizer is in ACCEPT state");
         AcceptSubGesture(recognizer);
         return;
     }
 
     if (disposal == GestureDisposal::PENDING) {
         if (CheckNeedBlocked(recognizer)) {
+            LOGW("exclusive gesture recognizer is in BLOCKED state");
             recognizer->SetRefereeState(RefereeState::BLOCKED);
         } else {
+            LOGD("exclusive gesture recognizer is in PENDING state");
             recognizer->SetRefereeState(RefereeState::PENDING);
             MultiFingersRecognizer::Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
         }
@@ -266,6 +269,7 @@ void ExclusiveRecognizer::AcceptSubGesture(const RefPtr<GestureRecognizer>& reco
 {
     LOGD("sub gesture recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
     if (CheckNeedBlocked(recognizer)) {
+        LOGW("sub gesture recognizer %{public}s ask for accept, BLOCKED", AceType::TypeName(recognizer));
         recognizer->SetRefereeState(RefereeState::BLOCKED);
         return;
     }

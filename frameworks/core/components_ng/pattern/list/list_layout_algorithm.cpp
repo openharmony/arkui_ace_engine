@@ -165,6 +165,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AddPaddingToSize(padding, contentIdealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
 
+    // set list cache info.
+    layoutWrapper->SetCacheCount(listLayoutProperty->GetCachedCountValue(1) * lanes_.value_or(1));
+
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f, mainSize is %{public}f",
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
 }

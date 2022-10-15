@@ -124,8 +124,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     }
 
     decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
-    for (const auto& weakNode : dirtyNodes) {
-        auto node = weakNode.Upgrade();
+    for (const auto& node : dirtyNodes) {
         if (AceType::InstanceOf<NG::CustomNode>(node)) {
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
             customNode->Update();
