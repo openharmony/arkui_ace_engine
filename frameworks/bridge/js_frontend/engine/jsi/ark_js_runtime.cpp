@@ -102,7 +102,7 @@ bool ArkJSRuntime::StartDebugger()
     bool ret = false;
 #if !defined(PREVIEW)
     if (!libPath_.empty()) {
-#if !defined(ANDROID_PLATFORM)
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ConnectServerManager::Get().AddInstance(instanceId_);
 #endif
 #if !defined(IOS_PLATFORM)
