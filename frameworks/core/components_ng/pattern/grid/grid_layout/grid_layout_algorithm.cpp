@@ -196,6 +196,10 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(
 
 void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    if (firstLayout_) {
+        gridLayoutInfo_.gridMatrix_.clear();
+        firstLayout_ = false;
+    }
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     Axis axis = gridLayoutInfo_.axis_;

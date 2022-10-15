@@ -57,8 +57,9 @@ void LazyForEachNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& paren
     parent->SetLayoutWrapperBuilder(lazyLayoutWrapperBuilder);
 }
 
-void LazyForEachNode::UpdateCachedItems(
-    int32_t newStartIndex, int32_t newEndIndex, std::list<std::optional<std::string>>&& nodeIds)
+void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newEndIndex,
+    std::list<std::optional<std::string>>&& nodeIds,
+    std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems)
 {
     ACE_SCOPED_TRACE("lazyforeach update cache [%d -%d]", newStartIndex, newEndIndex);
     CHECK_NULL_VOID(builder_);
@@ -90,7 +91,7 @@ void LazyForEachNode::UpdateCachedItems(
     }
 
     // delete useless items.
-    builder_->UpdateCachedItems(newIds);
+    builder_->UpdateCachedItems(newIds, std::move(cachedItems));
 
     startIndex_ = newStartIndex;
     endIndex_ = newEndIndex;
@@ -109,9 +110,7 @@ void LazyForEachNode::PostIdleTask(std::list<int32_t>&& items)
     needPredict = true;
     context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline) {
         auto node = weak.Upgrade();
-        if (!node || node->predictItems_.empty()) {
-            return;
-        }
+        CHECK_NULL_VOID(node);
         node->needPredict = false;
         ACE_SCOPED_TRACE("LazyForEach predict size[%zu]", node->predictItems_.size());
         decltype(node->predictItems_) items(std::move(node->predictItems_));
@@ -125,6 +124,7 @@ void LazyForEachNode::PostIdleTask(std::list<int32_t>&& items)
             }
 
             auto itemInfo = node->builder_->CreateChildByIndex(*item);
+            node->builder_->SetCacheItemInfo(*item, itemInfo.first);
             auto uiNode = itemInfo.second;
             if (uiNode) {
                 uiNode->Build();

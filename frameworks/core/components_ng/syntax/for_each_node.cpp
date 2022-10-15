@@ -50,12 +50,18 @@ RefPtr<ForEachNode> ForEachNode::GetOrCreateForEachNode(int32_t nodeId)
     return node;
 }
 
+void ForEachNode::CreateTempItems()
+{
+    std::swap(ids_, tempIds_);
+    std::swap(ModifyChildren(), tempChildren_);
+}
+
 // same as foundation/arkui/ace_engine/frameworks/core/components_part_upd/foreach/foreach_element.cpp.
 void ForEachNode::CompareAndUpdateChildren()
 {
     ACE_SCOPED_TRACE("ForEachNode::CompareAndUpdateChildren");
 
-    LOGD("Local update for ForEachNode nodeId: %{public}d ....", nodeId_);
+    LOGD("Local update for ForEachNode nodeId: %{public}d ....", GetId());
 
     // result of id gen function of most re-recent render
     // create a map for quicker find/search
@@ -69,7 +75,8 @@ void ForEachNode::CompareAndUpdateChildren()
     // it does not include children of array items that were rendered on a previous
     // render
     std::list<RefPtr<UINode>> additionalChildComps;
-    std::swap(additionalChildComps, children_);
+    auto& children = ModifyChildren();
+    std::swap(additionalChildComps, children);
 
     // create map id -> Node
     // old children
@@ -88,7 +95,7 @@ void ForEachNode::CompareAndUpdateChildren()
         } else {
             auto iter = oldNodeByIdMap.find(newId);
             // the ID was used before, only need to update the child position.
-            children_.emplace_back(iter->second);
+            children.emplace_back(iter->second);
         }
     }
     tempChildren_.clear();
