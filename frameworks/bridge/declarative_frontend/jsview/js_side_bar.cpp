@@ -101,11 +101,6 @@ void JSSideBar::Create(const JSCallbackInfo& info)
         return;
     }
 
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     SideBarContainerType style = SideBarContainerType::EMBED;
     if (!info[0]->IsNull()) {
         if (info[0]->IsBoolean()) {
@@ -132,11 +127,6 @@ void JSSideBar::Create(const JSCallbackInfo& info)
 
 void JSSideBar::CreateForNG(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("JSSideBar::CreateForNG The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     NG::SideBarContainerView::Create();
 
     SideBarContainerType style = SideBarContainerType::EMBED;
@@ -146,7 +136,7 @@ void JSSideBar::CreateForNG(const JSCallbackInfo& info)
         } else if (info[0]->IsNumber()) {
             style = static_cast<SideBarContainerType>(info[0]->ToNumber<int>());
         } else {
-            LOGE("JSSideBar::CreateForNG The arg is wrong");
+            LOGE("JSSideBar::CreateForNG The SideBarContainerType arg is wrong");
             return;
         }
     }
