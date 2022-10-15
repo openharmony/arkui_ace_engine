@@ -61,6 +61,7 @@ sk_use_hilog = true
 rich_components_support = true
 advance_components_support = false
 form_components_support = true
+remote_window_support = true
 plugin_components_support = true
 xcomponent_components_support = true
 pixel_map_support = true
@@ -114,6 +115,10 @@ if (disable_gpu) {
 
 if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
+}
+
+if (form_components_support) {
+  defines += [ "REMOTE_WINDOW_SUPPORTED" ]
 }
 
 if (xcomponent_components_support) {

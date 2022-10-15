@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/marquee/marquee_view.h"
+#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
-#include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void MarqueeView::Create()
+void MarqueeModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -45,7 +43,7 @@ void MarqueeView::Create()
     stack->Push(frameNode);
 }
 
-void MarqueeView::SetValue(const std::string& value)
+void MarqueeModelNG::SetValue(const std::string& value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
@@ -58,32 +56,32 @@ void MarqueeView::SetValue(const std::string& value)
     textLayoutProperty->UpdateContent(value);
 }
 
-void MarqueeView::SetPlayerStatus(bool playerStatus)
+void MarqueeModelNG::SetPlayerStatus(bool playerStatus)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, PlayerStatus, playerStatus);
 }
 
-void MarqueeView::SetScrollAmount(double scrollAmount)
+void MarqueeModelNG::SetScrollAmount(double scrollAmount)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, ScrollAmount, scrollAmount);
 }
 
-void MarqueeView::SetLoop(int32_t loop)
+void MarqueeModelNG::SetLoop(int32_t loop)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Loop, loop);
 }
 
-void MarqueeView::SetDirection(MarqueeDirection direction)
+void MarqueeModelNG::SetDirection(MarqueeDirection direction)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Direction, direction);
 }
 
-void MarqueeView::SetAllowScale(bool allowScale)
+void MarqueeModelNG::SetAllowScale(bool allowScale)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, AllowScale, allowScale);
 }
 
-void MarqueeView::SetTextColor(const Color& textColor)
+void MarqueeModelNG::SetTextColor(const Color& textColor)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
@@ -96,7 +94,7 @@ void MarqueeView::SetTextColor(const Color& textColor)
     textLayoutProperty->UpdateTextColor(textColor);
 }
 
-void MarqueeView::SetFontSize(const Dimension& fontSize)
+void MarqueeModelNG::SetFontSize(const Dimension& fontSize)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
@@ -109,7 +107,7 @@ void MarqueeView::SetFontSize(const Dimension& fontSize)
     textLayoutProperty->UpdateFontSize(fontSize);
 }
 
-void MarqueeView::SetFontWeight(const FontWeight& fontWeight)
+void MarqueeModelNG::SetFontWeight(const FontWeight& fontWeight)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
@@ -122,7 +120,7 @@ void MarqueeView::SetFontWeight(const FontWeight& fontWeight)
     textLayoutProperty->UpdateFontWeight(fontWeight);
 }
 
-void MarqueeView::SetFontFamily(const std::vector<std::string>& fontFamilies)
+void MarqueeModelNG::SetFontFamily(const std::vector<std::string>& fontFamilies)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     if (frameNode->GetChildren().empty()) {
@@ -135,7 +133,7 @@ void MarqueeView::SetFontFamily(const std::vector<std::string>& fontFamilies)
     textLayoutProperty->UpdateFontFamily(fontFamilies);
 }
 
-void MarqueeView::SetOnStart(ChangeEvent&& onChange)
+void MarqueeModelNG::SetOnStart(std::function<void()>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -144,7 +142,7 @@ void MarqueeView::SetOnStart(ChangeEvent&& onChange)
     eventHub->SetOnStart(std::move(onChange));
 }
 
-void MarqueeView::SetOnBounce(ChangeEvent&& onChange)
+void MarqueeModelNG::SetOnBounce(std::function<void()>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -153,7 +151,7 @@ void MarqueeView::SetOnBounce(ChangeEvent&& onChange)
     eventHub->SetOnBounce(std::move(onChange));
 }
 
-void MarqueeView::SetOnFinish(ChangeEvent&& onChange)
+void MarqueeModelNG::SetOnFinish(std::function<void()>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

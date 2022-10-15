@@ -39,7 +39,7 @@ public:
     ~DragDropManager() override = default;
 
     RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<PixelMap>& pixelMap, const GestureEvent& info);
-    RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
+    RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<UINode>& customNode, const GestureEvent& info);
 
     void AddDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
     {
@@ -64,7 +64,6 @@ public:
     void GetExtraInfoFromClipboard(std::string& extraInfo);
     void RestoreClipboardData();
     void DestroyDragWindow();
-    RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
@@ -73,6 +72,7 @@ private:
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, const OHOS::Ace::ItemDragInfo& itemDragInfo,
         DragEventType type, int32_t draggedIndex, int32_t insertIndex = 0);
     void CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height);
+    RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
 
     std::set<WeakPtr<FrameNode>> dragFrameNodes_;
     std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;

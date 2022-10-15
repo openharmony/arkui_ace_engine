@@ -15,16 +15,6 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/components/test/unittest/image/image_test_utils.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
@@ -36,6 +26,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -53,6 +44,23 @@ void CheckBoxPattern::OnModifyDone()
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+
+    if (!layoutProperty->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+        layoutProperty->UpdateMargin(margin);
+    }
 
     if (clickListener_) {
         return;

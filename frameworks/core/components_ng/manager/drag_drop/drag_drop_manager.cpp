@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     const RefPtr<PixelMap>& pixelMap, const GestureEvent& info)
 {
+    CHECK_NULL_RETURN(pixelMap, nullptr);
 #if !defined(PREVIEW)
     if (dragWindow_) {
         LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
@@ -38,20 +39,22 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 }
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
-    const RefPtr<FrameNode>& frameNode, const GestureEvent& info)
+    const RefPtr<UINode>& customNode, const GestureEvent& info)
 {
+    auto rootNode = CreateDragRootNode(customNode);
+    CHECK_NULL_RETURN(rootNode, nullptr);
 #if !defined(PREVIEW)
     if (dragWindow_) {
         LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
         return nullptr;
     }
 
-    auto geometryNode = frameNode->GetGeometryNode();
+    auto geometryNode = rootNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
 
     auto frameRect = geometryNode->GetFrameSize();
     CreateDragWindow(info, static_cast<uint32_t>(frameRect.Width()), static_cast<uint32_t>(frameRect.Height()));
-    dragWindow_->DrawFrameNode(frameNode);
+    dragWindow_->DrawFrameNode(rootNode);
 #endif
 
     auto proxy = MakeRefPtr<DragDropProxy>();

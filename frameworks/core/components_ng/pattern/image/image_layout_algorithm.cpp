@@ -94,7 +94,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     bool incomingNeedResize = imageLayoutProperty->GetAutoResize().value_or(true);
     ImageFit incomingImageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
-    const std::optional<std::pair<Dimension, Dimension>>& sourceSize = imageLayoutProperty->GetSourceSize();
+    const std::optional<SizeF>& sourceSize = imageLayoutProperty->GetSourceSize();
     ImageLoadingContext::MakeCanvasImageIfNeed(loadingCtx_, dstSize, incomingNeedResize, incomingImageFit, sourceSize);
     if (altLoadingCtx_) {
         ImageLoadingContext::MakeCanvasImageIfNeed(altLoadingCtx_, dstSize, true, incomingImageFit, sourceSize);

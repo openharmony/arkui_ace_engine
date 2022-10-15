@@ -59,6 +59,11 @@ public:
         return std::nullopt;
     }
 
+    virtual bool UseExternalRSNode() const
+    {
+        return false;
+    }
+
     void DetachFromFrameNode(FrameNode* frameNode)
     {
         OnDetachFromFrameNode(frameNode);

@@ -13,12 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/checkbox/checkbox_view.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
-#include <string>
-
-#include "core/components/common/properties/color.h"
-#include "core/components/picker/picker_value_element.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
@@ -26,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void CheckBoxView::Create(
+void CheckBoxModelNG::Create(
     const std::optional<std::string>& name, const std::optional<std::string>& groupName, const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -45,17 +41,17 @@ void CheckBoxView::Create(
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CheckBoxView::SetSelect(bool isSelected)
+void CheckBoxModelNG::SetSelect(bool isSelected)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected);
 }
 
-void CheckBoxView::SetSelectedColor(Color color)
+void CheckBoxModelNG::SetSelectedColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color);
 }
 
-void CheckBoxView::SetOnChange(ChangeEvent&& onChange)
+void CheckBoxModelNG::SetOnChange(ChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -63,5 +59,11 @@ void CheckBoxView::SetOnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
+
+void CheckBoxModelNG::SetWidth(const Dimension& width) {}
+
+void CheckBoxModelNG::SetHeight(const Dimension& height) {}
+
+void CheckBoxModelNG::SetPadding(const NG::PaddingPropertyF& args) {}
 
 } // namespace OHOS::Ace::NG

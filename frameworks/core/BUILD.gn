@@ -421,10 +421,23 @@ template("ace_core_source_set") {
       }
     }
 
+    if (defined(config.remote_window_support) && config.remote_window_support) {
+      if (!use_mingw_win && !use_mac && !use_linux) {
+        deps += [
+          "$ace_root/frameworks/core/components/remote_window:ace_core_components_remote_window_$platform",
+          "$ace_root/frameworks/core/components_ng/pattern/remote_window:ace_core_components_remote_window_pattern_ng_$platform",
+        ]
+      }
+    }
+
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      deps += [ "$ace_napi:ace_container_scope" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        deps += [ "$ace_napi:ace_container_scope_static" ]
+      } else {
+        deps += [ "$ace_napi:ace_container_scope" ]
+      }
     }
 
     if (defined(config.plugin_components_support) &&
@@ -445,7 +458,6 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/piece:ace_core_components_piece_$platform",
         "$ace_root/frameworks/core/components/popup:ace_core_components_popup_$platform",
         "$ace_root/frameworks/core/components/rating:ace_core_components_rating_$platform",
-        "$ace_root/frameworks/core/components/remote_window:ace_core_components_remote_window_$platform",
         "$ace_root/frameworks/core/components/select:ace_core_components_select_$platform",
         "$ace_root/frameworks/core/components/tool_bar:ace_core_components_tool_bar_$platform",
         "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform",

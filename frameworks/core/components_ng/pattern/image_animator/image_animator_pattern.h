@@ -70,7 +70,27 @@ public:
 
     void SetDuration(int32_t duration)
     {
-        animator_->SetDuration(durationTotal_ > 0 ? durationTotal_ : duration);
+        if (durationTotal_ > 0) {
+            animator_->SetDuration(durationTotal_);
+            return;
+        }
+        if (!isSetDuration_) {
+            animator_->SetDuration(duration);
+            isSetDuration_ = true;
+            return;
+        }
+        animator_->RemoveRepeatListener(repeatCallbackId_);
+        repeatCallbackId_ = animator_->AddRepeatListener([weak = WeakClaim(this), duration]() {
+            auto imageAnimator = weak.Upgrade();
+            CHECK_NULL_VOID(imageAnimator);
+            imageAnimator->animator_->SetDuration(duration);
+        });
+        animator_->RemoveStopListener(stopCallbackId_);
+        stopCallbackId_ = animator_->AddStopListener([weak = WeakClaim(this)]() {
+            auto imageAnimator = weak.Upgrade();
+            CHECK_NULL_VOID(imageAnimator);
+            imageAnimator->isSetDuration_ = false;
+        });
     }
 
     void SetIteration(int32_t iteration)
@@ -117,11 +137,14 @@ private:
     std::vector<ImageProperties> images_;
     Animator::Status status_ = Animator::Status::IDLE;
     int32_t durationTotal_ = 0;
+    uint64_t repeatCallbackId_ = 0;
+    uint64_t stopCallbackId_ = 0;
     bool isReverse_ = false;
     bool fixedSize_ = true;
 
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
+    bool isSetDuration_ = false;
 };
 
 } // namespace OHOS::Ace::NG

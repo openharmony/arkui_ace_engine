@@ -658,11 +658,13 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Web", JSWeb::JSBind},
     {"WebController", JSWebController::JSBind},
 #endif
+#ifdef REMOTE_WINDOW_SUPPORTED
+    {"RemoteWindow", JSRemoteWindow::JSBind },
+#endif
 #ifndef WEARABLE_PRODUCT
     {"Camera", JSCamera::JSBind},
     {"Piece", JSPiece::JSBind},
     {"Rating", JSRating::JSBind},
-    {"RemoteWindow", JSRemoteWindow::JSBind },
     {"Video", JSVideo::JSBind},
 #endif
 #if defined(XCOMPONENT_SUPPORTED)

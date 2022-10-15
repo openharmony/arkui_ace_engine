@@ -37,7 +37,7 @@ void AbilityComponentPattern::OnModifyDone()
 void AbilityComponentPattern::FireConnect()
 {
     hasConnectionToAbility_ = true;
-    updateWindowRect();
+    UpdateWindowRect();
 
     auto abilityComponentEventHub = GetEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(abilityComponentEventHub);
@@ -56,12 +56,12 @@ bool AbilityComponentPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& config)
 {
     if (config.frameSizeChange || config.frameOffsetChange) {
-        updateWindowRect();
+        UpdateWindowRect();
     }
     return false;
 }
 
-void AbilityComponentPattern::updateWindowRect()
+void AbilityComponentPattern::UpdateWindowRect()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

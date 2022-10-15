@@ -50,6 +50,16 @@ public:
         ResetInputCount();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        constexpr double DEFAULT_COUNT = 60000.0;
+        const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
+        json->Put("format", propFormat_.value_or(DEFAULT_FORMAT).c_str());
+        json->Put("isCountDown", propIsCountDown_.value_or(false) ? "true" : "false");
+        json->Put("count", std::to_string(propInputCount_.value_or(DEFAULT_COUNT)).c_str());
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Format, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCountDown, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputCount, double, PROPERTY_UPDATE_MEASURE);

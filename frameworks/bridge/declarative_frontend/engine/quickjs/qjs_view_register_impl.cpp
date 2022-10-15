@@ -389,11 +389,13 @@ void JsBindViews(BindingTarget globalObj)
     JSPolygon::JSBind(globalObj);
     JSPolyline::JSBind(globalObj);
     JSEllipse::JSBind(globalObj);
+#ifdef REMOTE_WINDOW_SUPPORTED
+    JSRemoteWindow::JSBind(globalObj);
+#endif
 #ifndef WEARABLE_PRODUCT
     JSPiece::JSBind(globalObj);
     JSRating::JSBind(globalObj);
     JSRefresh::JSBind(globalObj);
-    JSRemoteWindow::JSBind(globalObj);
     JSCamera::JSBind(globalObj);
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);

@@ -38,15 +38,14 @@ public:
 
     static SizeF CalculateResizeTarget(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
     static void MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
-        bool incomingNeedResize, ImageFit incommingImageFit,
-        const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
+        bool incomingNeedResize, ImageFit incommingImageFit, const std::optional<SizeF>& sourceSize = std::nullopt);
 
     void RegisterStateChangeCallbacks();
 
     /* interfaces to drive image loading */
     void LoadImageData();
     void MakeCanvasImage(const SizeF& dstSize, bool needResize, ImageFit imageFit = ImageFit::COVER,
-        const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
+        const std::optional<SizeF>& sourceSize = std::nullopt);
     void ResetLoading();
     void ResumeLoading();
 
@@ -66,7 +65,7 @@ public:
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
     void SetNeedResize(bool needResize);
-    void SetSourceSize(const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
+    void SetSourceSize(const std::optional<SizeF>& sourceSize = std::nullopt);
     void SetSvgFillColor(const std::optional<Color>& svgFillColorOpt);
 
 private:
@@ -117,7 +116,7 @@ private:
     bool needResize_ = true;
     ImageFit imageFit_ = ImageFit::COVER;
     std::optional<Color> svgFillColorOpt_;
-    std::unique_ptr<std::pair<Dimension, Dimension>> sourceSizePtr_ = nullptr;
+    std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;
     bool needAlt_ = true;
     std::function<void()> updateParamsCallback_ = nullptr;
 };

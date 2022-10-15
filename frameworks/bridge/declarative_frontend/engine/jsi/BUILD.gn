@@ -64,7 +64,7 @@ gen_obj("abc_proxyclass") {
 
 gen_obj("abc_enum_style") {
   input = base_output_path + "/jsEnumStyle.abc"
-  if (use_mac || use_mingw_win || use_linux) {
+  if (use_mac || use_mingw_win || use_linux || use_ios) {
     abcenumstyle_obj_path = base_output_path + "/jsEnumStyle.c"
   }
   output = abcenumstyle_obj_path
@@ -114,12 +114,16 @@ template("declarative_js_engine_ark") {
       "modules/jsi_timer_module.cpp",
     ]
 
-    deps = [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+    if (!use_ios) {
+      deps = [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+    } else {
+      deps = [ "//arkcompiler/ets_runtime:libark_jsruntime_static" ]
+    }
 
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
       sources += [ "utils/jsi_module_searcher.cpp" ]
-    } else if (defined(config.build_for_android) && config.build_for_android) {
+    } else if ((defined(config.build_for_android) && config.build_for_android) || (defined(config.build_for_ios) && config.build_for_ios)) {
       sources += [ "jsi_declarative_utils.cpp" ]
     } else {
       sources += [

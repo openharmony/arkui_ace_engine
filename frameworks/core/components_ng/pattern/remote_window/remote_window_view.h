@@ -13,28 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_VIEW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_VIEW_H
 
-#include "base/geometry/axis.h"
+#include <memory>
+#include <string>
+
 #include "base/geometry/dimension.h"
-#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/scroll_bar.h"
-#include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
+#include "core/components_ng/pattern/remote_window/remote_window_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT CheckBoxView {
+class ACE_EXPORT RemoteWindowView {
 public:
-    static void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
-        const std::string& tagName);
-    static void SetSelect(bool isSelected);
-    static void SetSelectedColor(Color color);
-    static void SetOnChange(ChangeEvent&& onChange);
+    static void Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsNode);
 };
-
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_VIEW_H

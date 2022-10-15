@@ -367,6 +367,11 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
         containerModal->ShowTitle(isShow);
+#ifdef ENABLE_ROSEN_BACKEND
+        if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+            rsUIDirector_->SetContainerWindow(isShow); // set container window show state to render service
+        }
+#endif
     }
 }
 
@@ -560,7 +565,6 @@ void PipelineContext::TryCallNextFrameLayoutCallback()
         isForegroundCalled_ = false;
         nextFrameLayoutCallback_();
         LOGI("nextFrameLayoutCallback called");
-        nextFrameLayoutCallback_ = nullptr;
     }
 }
 
@@ -2154,6 +2158,10 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
+    if (width_ == width && height_ == height && type == WindowSizeChangeReason::CUSTOM_ANIMATION) {
+        TryCallNextFrameLayoutCallback();
+        return;
+    }
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(PREVIEW)
     if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_START &&

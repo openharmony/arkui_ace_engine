@@ -206,6 +206,7 @@ public:
     static void JsOnDragStart(const JSCallbackInfo& info);
     static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragItemInfo& dragInfo);
     static RefPtr<Component> ParseDragItemComponent(const JSRef<JSVal>& info);
+    static RefPtr<NG::UINode> ParseDragCustomUINode(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);

@@ -22,10 +22,9 @@
 
 namespace OHOS::Ace::NG {
 class ImagePattern;
-using DimensionPair = std::pair<Dimension, Dimension>;
 struct ImageSizeStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoResize, bool);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SourceSize, DimensionPair);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SourceSize, SizeF);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FitOriginalSize, bool);
 };
 
@@ -62,7 +61,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Alt, ImageSourceInfo, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_GROUP(ImageSizeStyle, ImageSizeStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, AutoResize, bool, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, SourceSize, DimensionPair, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, SourceSize, SizeF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, FitOriginalSize, bool, PROPERTY_UPDATE_LAYOUT);
 
 private:
