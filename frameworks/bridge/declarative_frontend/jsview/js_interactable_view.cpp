@@ -22,7 +22,6 @@
 #include "core/common/plugin_manager.h"
 #endif
 #include "core/components/gesture_listener/gesture_listener_component.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/pipeline/base/single_child.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -31,30 +30,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-
-namespace OHOS::Ace {
-
-std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
-
-ViewAbstractModel* ViewAbstractModel::GetInstance()
-{
-    if (!instance_) {
-#ifdef NG_BUILD
-        instance_.reset(new NG::ViewAbstractModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
-            instance_.reset(new NG::ViewAbstractModelNG());
-        } else {
-            instance_.reset(new Framework::ViewAbstractModelImpl());
-        }
-#endif
-    }
-    return instance_.get();
-}
-
-} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 

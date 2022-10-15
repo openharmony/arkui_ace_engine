@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 
+#include "base/geometry/animatable_dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/event/ace_event_handler.h"
@@ -22,6 +23,241 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+
+void ViewAbstractModelImpl::SetWidth(const Dimension& width)
+{
+    bool isPercentSize = (width.Unit() == DimensionUnit::PERCENT);
+    if (isPercentSize) {
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
+        if (renderComponent) {
+            renderComponent->SetIsPercentSize(isPercentSize);
+        }
+    }
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    auto option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        box->SetWidth(width, option);
+    } else {
+        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+            BoxStateAttribute::WIDTH, AnimatableDimension(width, option), stack->GetVisualState());
+        if (!box->GetStateAttributes()->HasAttribute(BoxStateAttribute::WIDTH, VisualState::NORMAL)) {
+            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+                BoxStateAttribute::WIDTH, AnimatableDimension(box->GetWidth(), option), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetHeight(const Dimension& height)
+{
+    bool isPercentSize = (height.Unit() == DimensionUnit::PERCENT);
+    if (isPercentSize) {
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
+        if (renderComponent) {
+            renderComponent->SetIsPercentSize(isPercentSize);
+        }
+    }
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    auto option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        box->SetHeight(height, option);
+    } else {
+        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+            BoxStateAttribute::HEIGHT, AnimatableDimension(height, option), stack->GetVisualState());
+        if (!box->GetStateAttributes()->HasAttribute(BoxStateAttribute::HEIGHT, VisualState::NORMAL)) {
+            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+                BoxStateAttribute::HEIGHT, AnimatableDimension(box->GetHeight(), option), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetMinWidth(const Dimension& minWidth)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    box->SetMinWidth(minWidth);
+    flexItem->SetMinWidth(minWidth);
+}
+
+void ViewAbstractModelImpl::SetMinHeight(const Dimension& minHeight)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    box->SetMinHeight(minHeight);
+    flexItem->SetMinHeight(minHeight);
+}
+
+void ViewAbstractModelImpl::SetMaxWidth(const Dimension& maxWidth)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    box->SetMaxWidth(maxWidth);
+    flexItem->SetMaxWidth(maxWidth);
+}
+
+void ViewAbstractModelImpl::SetMaxHeight(const Dimension& maxHeight)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    box->SetMaxHeight(maxHeight);
+    flexItem->SetMaxHeight(maxHeight);
+}
+
+void ViewAbstractModelImpl::SetLayoutPriority(int32_t priority)
+{
+    auto flex = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flex->SetDisplayIndex(priority);
+}
+
+void ViewAbstractModelImpl::SetLayoutWeight(int32_t value)
+{
+    auto flex = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flex->SetFlexWeight(value);
+}
+
+void ViewAbstractModelImpl::SetAspectRatio(float ratio)
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    boxComponent->SetAspectRatio(ratio, option);
+}
+
+void ViewAbstractModelImpl::SetAlign(const Alignment& alignment)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetAlignment(alignment);
+}
+
+AnimatableDimension ToAnimatableDimension(const Dimension& dimension)
+{
+    AnimatableDimension result(dimension);
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    result.SetAnimationOption(option);
+    return result;
+}
+
+void ViewAbstractModelImpl::SetPosition(const Dimension& x, const Dimension& y)
+{
+    auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItemComponent->SetLeft(ToAnimatableDimension(x));
+    flexItemComponent->SetTop(ToAnimatableDimension(y));
+    flexItemComponent->SetPositionType(PositionType::PTABSOLUTE);
+}
+
+void ViewAbstractModelImpl::SetOffset(const Dimension& x, const Dimension& y)
+{
+    auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItemComponent->SetLeft(ToAnimatableDimension(x));
+    flexItemComponent->SetTop(ToAnimatableDimension(y));
+    flexItemComponent->SetPositionType(PositionType::PTOFFSET);
+}
+
+void ViewAbstractModelImpl::MarkAnchor(const Dimension& x, const Dimension& y)
+{
+    auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItemComponent->SetAnchorX(ToAnimatableDimension(x));
+    flexItemComponent->SetAnchorY(ToAnimatableDimension(y));
+}
+
+void ViewAbstractModelImpl::SetScale(float x, float y, float z)
+{
+    RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    transform->Scale(x, y, z, option);
+}
+
+void ViewAbstractModelImpl::SetPivot(const Dimension& x, const Dimension& y)
+{
+    RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+    transform->SetOriginDimension(DimensionOffset(x, y));
+}
+
+void ViewAbstractModelImpl::SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z)
+{
+    RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    transform->Translate(x, y, z, option);
+}
+
+void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle)
+{
+    RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    transform->Rotate(x, y, z, angle, option);
+}
+
+void ViewAbstractModelImpl::SetTransformMatrix(const std::vector<float>& matrix)
+{
+    RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    transform->Matrix3d(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6], matrix[7],
+        matrix[8], matrix[9], matrix[10], matrix[11], matrix[12], matrix[13], matrix[14], matrix[15], option);
+}
+
+void ViewAbstractModelImpl::SetOpacity(double opacity)
+{
+    auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        display->SetOpacity(opacity, option);
+    } else {
+        display->GetStateAttributes()->AddAttribute<AnimatableDouble>(
+            DisplayStateAttribute::OPACITY, AnimatableDouble(opacity, option), stack->GetVisualState());
+        if (!display->GetStateAttributes()->HasAttribute(DisplayStateAttribute::OPACITY, VisualState::NORMAL)) {
+            display->GetStateAttributes()->AddAttribute<AnimatableDouble>(
+                DisplayStateAttribute::OPACITY, AnimatableDouble(display->GetOpacity(), option), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitionOptions)
+{
+    if (transitionOptions.HasOpacity()) {
+        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+        display->SetTransition(transitionOptions.Type, transitionOptions.GetOpacityValue());
+    }
+    if (transitionOptions.HasTranslate()) {
+        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+        const auto& value = transitionOptions.GetTranslateValue();
+        transform->SetTranslateTransition(transitionOptions.Type, value.x, value.y, value.z);
+    }
+    if (transitionOptions.HasScale()) {
+        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+        const auto& value = transitionOptions.GetScaleValue();
+        transform->SetScaleTransition(transitionOptions.Type, value.xScale, value.yScale, value.zScale);
+        transform->SetOriginDimension(DimensionOffset(value.centerX, value.centerY));
+    }
+    if (transitionOptions.HasRotate()) {
+        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+        const auto& value = transitionOptions.GetRotateValue();
+        transform->SetRotateTransition(
+            transitionOptions.Type, value.xDirection, value.yDirection, value.zDirection, value.angle);
+        transform->SetOriginDimension(DimensionOffset(value.centerX, value.centerY));
+    }
+}
+
+void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optional<Alignment>& align,
+    const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY)
+{
+    auto coverageComponent = ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    coverageComponent->SetTextVal(text);
+    coverageComponent->SetIsOverLay(true);
+    if (align.has_value()) {
+        coverageComponent->SetAlignment(align.value());
+    }
+    if (offsetX.has_value()) {
+        coverageComponent->SetX(offsetX.value());
+    }
+    if (offsetY.has_value()) {
+        coverageComponent->SetX(offsetY.value());
+    }
+}
 
 void ViewAbstractModelImpl::SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
 {
@@ -131,6 +367,42 @@ void ViewAbstractModelImpl::SetOnRemoteMessage(RemoteCallback&& onRemoteCallback
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetRemoteMessageEvent(EventMarker(std::move(onRemoteCallback)));
+}
+
+void ViewAbstractModelImpl::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
+    if (renderComponent) {
+        renderComponent->SetResponseRegion(responseRegion);
+        renderComponent->MarkResponseRegion(true);
+    }
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetResponseRegion(responseRegion);
+    box->MarkResponseRegion(true);
+    if (ViewStackProcessor::GetInstance()->HasClickGestureListenerComponent()) {
+        auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
+        click->SetResponseRegion(responseRegion);
+        click->MarkResponseRegion(true);
+    }
+    if (ViewStackProcessor::GetInstance()->HasTouchListenerComponent()) {
+        auto touch = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
+        touch->SetResponseRegion(responseRegion);
+        touch->MarkResponseRegion(true);
+    }
+}
+
+void ViewAbstractModelImpl::SetEnabled(bool enabled)
+{
+    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
+    if (mainComponent) {
+        mainComponent->SetDisabledStatus(!enabled);
+    }
+
+    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(!enabled);
+    if (focusComponent) {
+        focusComponent->SetEnabled(enabled);
+    }
 }
 
 void ViewAbstractModelImpl::SetTouchable(bool touchable)

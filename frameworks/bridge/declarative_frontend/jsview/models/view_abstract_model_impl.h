@@ -25,6 +25,33 @@ class ViewAbstractModelImpl : public ViewAbstractModel {
 public:
     ~ViewAbstractModelImpl() override = default;
 
+    void SetWidth(const Dimension& width) override;
+    void SetHeight(const Dimension& height) override;
+    void SetMinWidth(const Dimension& minWidth) override;
+    void SetMinHeight(const Dimension& minHeight) override;
+    void SetMaxWidth(const Dimension& maxWidth) override;
+    void SetMaxHeight(const Dimension& maxHeight) override;
+
+    void SetLayoutPriority(int32_t priority) override;
+    void SetLayoutWeight(int32_t value) override;
+    void SetAspectRatio(float ratio) override;
+    void SetAlign(const Alignment& alignment) override;
+
+    void SetPosition(const Dimension& x, const Dimension& y) override;
+    void SetOffset(const Dimension& x, const Dimension& y) override;
+    void MarkAnchor(const Dimension& x, const Dimension& y) override;
+
+    void SetScale(float x, float y, float z) override;
+    void SetPivot(const Dimension& x, const Dimension& y) override;
+    void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
+    void SetRotate(float x, float y, float z, float angle) override;
+    void SetTransformMatrix(const std::vector<float>& matrix) override;
+
+    void SetOpacity(double opacity) override;
+    void SetTransition(const NG::TransitionOptions& transitionOptions) override;
+    void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
+        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override;
+
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
@@ -35,6 +62,9 @@ public:
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;
     void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) override;
     void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) override;
+
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void SetEnabled(bool enabled) override;
     void SetTouchable(bool touchable) override;
     void SetFocusable(bool focusable) override;
     void SetFocusNode(bool focus) override;
