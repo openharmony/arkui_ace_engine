@@ -16,6 +16,7 @@
 #include "core/components_ng/event/click_event.h"
 
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
@@ -41,18 +42,7 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     if (!clickRecognizer_) {
         clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
     }
-    auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto actuator = weak.Upgrade();
-        for (const auto& callback : actuator->clickEvents_) {
-            if (callback) {
-                (*callback)(info);
-            }
-        }
-        if (actuator->userCallback_) {
-            (*actuator->userCallback_)(info);
-        }
-    };
-    clickRecognizer_->SetOnAction(callback);
+    clickRecognizer_->SetOnAction(GetClickEvent());
     clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(clickRecognizer_);
@@ -69,6 +59,9 @@ GestureEventFunc ClickEventActuator::GetClickEvent()
         }
         if (actuator->userCallback_) {
             (*actuator->userCallback_)(info);
+        }
+        if (actuator->onAccessibilityEventFunc_) {
+            actuator->onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
         }
     };
     return callback;

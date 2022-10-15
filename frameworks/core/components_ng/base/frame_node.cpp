@@ -15,8 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 
-#include <list>
-
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -26,6 +24,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -47,6 +46,7 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
+    accessibilityProperty_ = pattern->CreateAccessibilityProperty();
     // first create make layout property dirty.
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
@@ -924,6 +924,16 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
+}
+
+void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = GetId();
+        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+    }
 }
 
 } // namespace OHOS::Ace::NG

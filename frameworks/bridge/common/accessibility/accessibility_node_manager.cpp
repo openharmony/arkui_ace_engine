@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
+#include <cstddef>
 
 #include "base/geometry/dimension_offset.h"
 #include "base/log/dump_log.h"
@@ -188,6 +189,14 @@ int32_t ConvertToNodeId(int32_t cardAccessibilityId)
 }
 
 } // namespace
+
+const size_t AccessibilityNodeManager::EVENT_DUMP_PARAM_LENGTH_UPPER = 4;
+const size_t AccessibilityNodeManager::EVENT_DUMP_PARAM_LENGTH_LOWER = 3;
+const size_t AccessibilityNodeManager::PROPERTY_DUMP_PARAM_LENGTH = 2;
+const int32_t AccessibilityNodeManager::EVENT_DUMP_ORDER_INDEX = 0;
+const int32_t AccessibilityNodeManager::EVENT_DUMP_ID_INDEX = 1;
+const int32_t AccessibilityNodeManager::EVENT_DUMP_ACTION_INDEX = 2;
+const int32_t AccessibilityNodeManager::EVENT_DUMP_ACTION_PARAM_INDEX = 3;
 
 AccessibilityNodeManager::~AccessibilityNodeManager()
 {
@@ -656,6 +665,17 @@ void AccessibilityNodeManager::TrySaveTargetAndIdNode(
 
     if (!target.empty()) {
         AddNodeWithTarget(target, node);
+    }
+}
+
+void AccessibilityNodeManager::OnDumpInfo(const std::vector<std::string>& params)
+{
+    if (params.size() == 1) {
+        DumpTree(0, 0);
+    } else if (params.size() == PROPERTY_DUMP_PARAM_LENGTH) {
+        DumpProperty(params);
+    } else if (params.size() == EVENT_DUMP_PARAM_LENGTH_LOWER || params.size() == EVENT_DUMP_PARAM_LENGTH_UPPER) {
+        DumpHandleEvent(params);
     }
 }
 

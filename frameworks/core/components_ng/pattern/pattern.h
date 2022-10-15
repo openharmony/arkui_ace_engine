@@ -79,6 +79,11 @@ public:
         OnAttachToFrameNode();
     }
 
+    virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
+    {
+        return MakeRefPtr<AccessibilityProperty>();
+    }
+
     virtual RefPtr<PaintProperty> CreatePaintProperty()
     {
         return MakeRefPtr<PaintProperty>();

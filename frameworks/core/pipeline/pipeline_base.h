@@ -127,7 +127,7 @@ public:
 
     virtual void FlushAnimation(uint64_t nanoTimestamp) = 0;
 
-    virtual void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) = 0;
+    virtual void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent);
 
     virtual void SaveExplicitAnimationOption(const AnimationOption& option) = 0;
 
@@ -206,10 +206,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const
-    {
-        return nullptr;
-    }
+    virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
     void SetRootSize(double density, int32_t width, int32_t height);
 

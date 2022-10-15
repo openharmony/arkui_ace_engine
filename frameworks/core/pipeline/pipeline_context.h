@@ -356,10 +356,6 @@ public:
     bool RequestFocus(const std::string& targetNodeId) override;
     bool RequestDefaultFocus();
 
-    RefPtr<AccessibilityManager> GetAccessibilityManager() const override;
-
-    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) override;
-
     BaseId::IdType AddPageTransitionListener(const PageTransitionListenable::CallbackFuncType& funcObject);
 
     const RefPtr<OverlayElement> GetOverlayElement() const;
