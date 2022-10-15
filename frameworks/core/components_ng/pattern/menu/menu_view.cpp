@@ -57,7 +57,7 @@ RefPtr<FrameNode> MenuView::Create(
     auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::Create(params[i].first, params[i].second, targetId, i);
+        auto optionNode = OptionView::CreateMenuOption(params[i].first, params[i].second, targetId, i);
         // first node never paints divider
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
@@ -87,9 +87,21 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, const std::
     return wrapperNode;
 }
 
-RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, const std::string& targetTag, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(
+    const std::vector<SelectParam>& params, const std::string& targetTag, int32_t targetId)
 {
-    
+    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
+    for (size_t i = 0; i < params.size(); ++i) {
+        auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, targetId, i);
+        // first node never paints divider
+        if (i == 0) {
+            auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
+            props->UpdateNeedDivider(false);
+        }
+        optionNode->MountToParent(menuNode);
+        optionNode->MarkModifyDone();
+    }
+    return wrapperNode;
 }
 
 } // namespace OHOS::Ace::NG

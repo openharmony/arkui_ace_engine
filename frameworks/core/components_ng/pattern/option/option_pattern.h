@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OPTION_OPTION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OPTION_OPTION_PATTERN_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_paint_method.h"
@@ -57,9 +58,22 @@ public:
         return false;
     }
 
-    void OnModifyDone() override;
+    void SetTextNode(const RefPtr<FrameNode>& text)
+    {
+        text_ = text;
+    }
+
+    // set props
+    void SetBgColor(const Color& color);
+    void SetFontSize(const Dimension& value);
+    void SetItalicFontStyle(const Ace::FontStyle& value);
+    void SetFontWeight(const FontWeight& value);
+    void SetFontFamily(const std::vector<std::string>& value);
+    void SetFontColor(const Color& color);
 
 private:
+    void OnModifyDone() override;
+    
     void UpdateNextNodeDivider(bool needDivider);
 
     // register option's JS callback
@@ -67,6 +81,7 @@ private:
     // change option background color
     void RegisterOnHover(const RefPtr<GestureEventHub>& hub);
     
+    RefPtr<FrameNode> text_ = nullptr;
     // to hide menu through OverlayManager when option is clicked
     int32_t targetId_ = -1;
     // this option node's index in the menu

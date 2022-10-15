@@ -16,13 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_SELECT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_SELECT_PATTERN_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
-#include "core/components_ng/pattern/select/select_layout_algorithm.h"
-#include "core/components_ng/pattern/select/select_layout_property.h"
-#include "core/components_ng/pattern/select/select_paint_method.h"
-#include "core/components_ng/pattern/select/select_paint_property.h"
+#include "core/components_ng/pattern/option/option_paint_method.h"
+#include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/select/select_view.h"
 
 namespace OHOS::Ace::NG {
@@ -36,27 +35,7 @@ public:
 
     bool IsAtomicNode() const override
     {
-        return true;
-    }
-
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<SelectPaintProperty>();
-    }
-
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<SelectLayoutProperty>();
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<SelectLayoutAlgorithm>();
-    }
-
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        return MakeRefPtr<SelectPaintMethod>();
+        return false;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -64,8 +43,50 @@ public:
         return MakeRefPtr<SelectEventHub>();
     }
 
-private:
     void BuildChild();
+
+    void SetMenuNode(const RefPtr<FrameNode>& menu)
+    {
+        menu_ = menu;
+    }
+
+    void AddOptionNode(const RefPtr<FrameNode>& option)
+    {
+        CHECK_NULL_VOID(option);
+        options_.push_back(option);
+    }
+
+    // set properties of text node
+    void SetValue(const std::string& value);
+    void SetFontSize(const Dimension& value);
+    void SetItalicFontStyle(const Ace::FontStyle& value);
+    void SetFontWeight(const FontWeight& value);
+    void SetFontFamily(const std::vector<std::string>& value);
+    void SetFontColor(const Color& color);
+    
+    // set props of option nodes
+    void SetOptionBgColor(const Color& color);
+    void SetOptionFontSize(const Dimension& value);
+    void SetOptionItalicFontStyle(const Ace::FontStyle& value);
+    void SetOptionFontWeight(const FontWeight& value);
+    void SetOptionFontFamily(const std::vector<std::string>& value);
+    void SetOptionFontColor(const Color& color);
+
+private:
+    void OnModifyDone() override;
+
+    // change background color when hovered
+    void RegisterOnHover();
+    // add click event to show menu
+    void RegisterOnClick();
+
+    std::vector<RefPtr<FrameNode>> options_;
+    RefPtr<FrameNode> menu_ = nullptr;
+    RefPtr<FrameNode> text_ = nullptr;
+    bool disabled_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
+
 };
 
 } // namespace OHOS::Ace::NG

@@ -68,8 +68,6 @@ void OptionPaintMethod::PaintBackground(RSCanvas& canvas, PaintWrapper* paintWra
         RSRRect(offset.GetX(), offset.GetY(), size.Width() + offset.GetX(), size.Height() + offset.GetY()), radius,
         radius);
     canvas.DrawRoundRect(rSRoundRect);
-    // TODO: NEED: paint.setColor(GetEventEffectColor().GetValue());
-    // TODO: NEED: canvas->drawPath(path, paint);
 }
 
 void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper)

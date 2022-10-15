@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -101,6 +102,41 @@ void OptionPattern::UpdateNextNodeDivider(bool needDivider)
         props->UpdateNeedDivider(needDivider);
         nextNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void OptionPattern::SetFontSize(const Dimension& value) {
+    CHECK_NULL_VOID(text_);
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateFontSize(value);
+}
+
+void OptionPattern::SetItalicFontStyle(const Ace::FontStyle& value) {
+    CHECK_NULL_VOID(text_);
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateItalicFontStyle(value);
+}
+
+void OptionPattern::SetFontWeight(const FontWeight& value) {
+    CHECK_NULL_VOID(text_);
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateFontWeight(value);
+}
+
+void OptionPattern::SetFontFamily(const std::vector<std::string>& value) {
+    CHECK_NULL_VOID(text_);
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateFontFamily(value);
+}
+
+void OptionPattern::SetFontColor(const Color& color) {
+    CHECK_NULL_VOID(text_);
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateTextColor(color);
 }
 
 } // namespace OHOS::Ace::NG

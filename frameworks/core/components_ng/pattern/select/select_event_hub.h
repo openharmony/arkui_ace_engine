@@ -32,32 +32,7 @@ public:
 
     ~SelectEventHub() override = default;
 
-    const std::vector<std::string>& GetValues()
-    {
-        return values_;
-    }
-
-    const std::vector<std::string>& GetIcons()
-    {
-        return icons_;
-    }
-
-    void SetValues(const std::vector<std::string>& values)
-    {
-        values_ = values;
-    }
-
-    void SetIcons(const std::vector<std::string>& icons)
-    {
-        icons_ = icons;
-    }
-
-
-
 private:
-    std::vector<std::string> values_;
-    std::vector<std::string> icons_;
-    std::size_t selected_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectEventHub);
 };

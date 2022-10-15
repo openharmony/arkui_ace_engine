@@ -21,8 +21,6 @@
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/pattern/select/select_layout_property.h"
-#include "core/components_ng/pattern/select/select_paint_property.h"
 
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_VIEW_H
@@ -30,6 +28,7 @@
 
 namespace OHOS::Ace::NG {
     
+// pair<value, icon>
 using SelectParam = std::pair<std::string, std::string>;
 
 class ACE_EXPORT SelectView {
