@@ -3983,7 +3983,7 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsGridSpan", info, checkList)) {
         return;
     }
-    auto span = info[0]->ToNumber<uint32_t>();
+    auto span = info[0]->ToNumber<int32_t>();
 
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetGrid(span, std::nullopt);

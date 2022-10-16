@@ -449,7 +449,9 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
     } while (false);
     // check position flag.
-    if (renderContext_->HasPosition()) {
+    const auto& gridProperty = layoutWrapper->GetLayoutProperty()->GetGridProperty(Claim(this));
+    bool hasGridOffset = gridProperty ? (gridProperty->GetOffset() != UNDEFINED_DIMENSION) : false;
+    if (renderContext_->HasPosition() || hasGridOffset) {
         layoutWrapper->SetOutOfLayout(true);
     }
     layoutWrapper->SetActive(isActive_);
