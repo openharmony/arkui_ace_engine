@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/clip_path.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
@@ -193,6 +194,11 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
+    void SetLayoutDirection(TextDirection value) override
+    {
+        ViewAbstract::SetLayoutDirection(value);
+    }
+
     void SetAspectRatio(float ratio) override
     {
         ViewAbstract::SetAspectRatio(ratio);
@@ -201,6 +207,11 @@ public:
     void SetAlign(const Alignment& alignment) override
     {
         ViewAbstract::SetAlign(alignment);
+    }
+
+    void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override
+    {
+        ViewAbstract::SetAlignRules(alignRules);
     }
 
     void SetUseAlign(
@@ -216,21 +227,6 @@ public:
     void SetZIndex(int32_t value) override
     {
         ViewAbstract::SetZIndex(value);
-    }
-
-    void SetLinearGradient(const NG::Gradient& gradient) override
-    {
-        ViewAbstract::SetLinearGradient(gradient);
-    }
-
-    void SetSweepGradient(const NG::Gradient& gradient) override
-    {
-        ViewAbstract::SetSweepGradient(gradient);
-    }
-
-    void SetRadialGradient(const NG::Gradient& gradient) override
-    {
-        ViewAbstract::SetRadialGradient(gradient);
     }
 
     void SetPosition(const Dimension& x, const Dimension& y) override
@@ -277,12 +273,12 @@ public:
                 matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]));
     }
 
-    void SetOpacity(double opacity) override
+    void SetOpacity(double opacity, bool passThrough = false) override
     {
         ViewAbstract::SetOpacity(opacity);
     }
 
-    void SetTransition(const NG::TransitionOptions& transitionOptions) override
+    void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override
     {
         ViewAbstract::SetTransition(transitionOptions);
     }
@@ -299,6 +295,8 @@ public:
     void SetSharedTransition(const SharedTransitionOption& option) override {}
 
     void SetGeometryTransition(const std::string& id) override {}
+
+    void SetMotionPath(const MotionPathOption& option) override {}
 
     void SetFlexBasis(const Dimension& value) override
     {
@@ -325,6 +323,35 @@ public:
         ViewAbstract::SetDisplayIndex(value);
     }
 
+    void SetLinearGradient(const NG::Gradient& gradient) override
+    {
+        ViewAbstract::SetLinearGradient(gradient);
+    }
+
+    void SetSweepGradient(const NG::Gradient& gradient) override
+    {
+        ViewAbstract::SetSweepGradient(gradient);
+    }
+
+    void SetRadialGradient(const NG::Gradient& gradient) override
+    {
+        ViewAbstract::SetRadialGradient(gradient);
+    }
+
+    void SetClipPath(const RefPtr<BasicShape>& shape) override
+    {
+        ClipPathNG clipPath;
+        clipPath.SetBasicShape(shape);
+        ViewAbstract::SetClipPath(clipPath);
+    }
+
+    void SetEdgeClip(bool isClip) override
+    {
+        ViewAbstract::SetEdgeClip(isClip);
+    }
+
+    void SetMask(const RefPtr<BasicShape>& shape) override {}
+
     void SetBackdropBlur(const Dimension& radius) override
     {
         ViewAbstract::SetBackdropBlur(radius);
@@ -348,6 +375,41 @@ public:
     }
 
     void SetWindowBlur(float progress, WindowBlurStyle blurStyle) override {}
+
+    void SetBrightness(const Dimension& value) override
+    {
+        ViewAbstract::SetBrightness(value);
+    }
+
+    void SetGrayScale(const Dimension& value) override
+    {
+        ViewAbstract::SetGrayScale(value);
+    }
+
+    void SetContrast(const Dimension& value) override
+    {
+        ViewAbstract::SetContrast(value);
+    }
+
+    void SetSaturate(const Dimension& value) override
+    {
+        ViewAbstract::SetSaturate(value);
+    }
+
+    void SetSepia(const Dimension& value) override
+    {
+        ViewAbstract::SetSepia(value);
+    }
+
+    void SetInvert(const Dimension& value) override
+    {
+        ViewAbstract::SetInvert(value);
+    }
+
+    void SetHueRotate(float value) override
+    {
+        ViewAbstract::SetHueRotate(value);
+    }
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
     {
@@ -390,6 +452,18 @@ public:
 
     void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) override {}
 
+    void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override {}
+
+    void SetOnFocus(OnFocusFunc&& onFocusCallback) override
+    {
+        ViewAbstract::SetOnFocus(std::move(onFocusCallback));
+    }
+
+    void SetOnBlur(OnBlurFunc&& onBlurCallback) override
+    {
+        ViewAbstract::SetOnBlur(std::move(onBlurCallback));
+    }
+
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override
     {
         ViewAbstract::SetResponseRegion(responseRegion);
@@ -411,6 +485,50 @@ public:
     }
 
     void SetFocusNode(bool focus) override {}
+
+    void SetTabIndex(int32_t index) override
+    {
+        ViewAbstract::SetTabIndex(index);
+    }
+
+    void SetFocusOnTouch(bool isSet) override
+    {
+        ViewAbstract::SetFocusOnTouch(isSet);
+    }
+
+    void SetDefaultFocus(bool isSet) override
+    {
+        ViewAbstract::SetDefaultFocus(isSet);
+    }
+
+    void SetGroupDefaultFocus(bool isSet) override
+    {
+        ViewAbstract::SetGroupDefaultFocus(isSet);
+    }
+
+    void SetInspectorId(const std::string& inspectorId) override
+    {
+        ViewAbstract::SetInspectorId(inspectorId);
+    }
+
+    void SetRestoreId(int32_t restoreId) override {}
+
+    void SetDebugLine(const std::string& line) override {}
+
+    void SetHoverEffect(HoverEffectType hoverEffect) override
+    {
+        ViewAbstract::SetHoverEffect(hoverEffect);
+    }
+
+    void SetHitTestMode(NG::HitTestMode hitTestMode) override
+    {
+        ViewAbstract::SetHitTestMode(hitTestMode);
+    }
+
+    void SetAccessibilityGroup(bool accessible) override {}
+    void SetAccessibilityText(const std::string& text) override {}
+    void SetAccessibilityDescription(const std::string& description) override {}
+    void SetAccessibilityImportance(const std::string& importance) override {}
 };
 } // namespace OHOS::Ace::NG
 

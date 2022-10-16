@@ -58,6 +58,81 @@ AnimatableDimension ToAnimatableDimension(const Dimension& dimension)
     return result;
 }
 
+Gradient ToGradient(const NG::Gradient& gradient)
+{
+    Gradient retGradient;
+    retGradient.SetType(static_cast<GradientType>(gradient.GetType()));
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    if (retGradient.GetType() == GradientType::LINEAR) {
+        auto angle = gradient.GetLinearGradient()->angle;
+        if (angle.has_value()) {
+            retGradient.GetLinearGradient().angle = ToAnimatableDimension(angle.value());
+        }
+        auto linearX = gradient.GetLinearGradient()->linearX;
+        if (linearX.has_value()) {
+            retGradient.GetLinearGradient().linearX = static_cast<GradientDirection>(linearX.value());
+        }
+        auto linearY = gradient.GetLinearGradient()->linearY;
+        if (linearY.has_value()) {
+            retGradient.GetLinearGradient().linearY = static_cast<GradientDirection>(linearY.value());
+        }
+    }
+
+    if (retGradient.GetType() == GradientType::RADIAL) {
+        auto radialCenterX = gradient.GetRadialGradient()->radialCenterX;
+        if (radialCenterX.has_value()) {
+            retGradient.GetRadialGradient().radialCenterX = ToAnimatableDimension(radialCenterX.value());
+        }
+        auto radialCenterY = gradient.GetRadialGradient()->radialCenterY;
+        if (radialCenterY.has_value()) {
+            retGradient.GetRadialGradient().radialCenterY = ToAnimatableDimension(radialCenterY.value());
+        }
+        auto radialVerticalSize = gradient.GetRadialGradient()->radialVerticalSize;
+        if (radialVerticalSize.has_value()) {
+            retGradient.GetRadialGradient().radialVerticalSize = ToAnimatableDimension(radialVerticalSize.value());
+        }
+        auto radialHorizontalSize = gradient.GetRadialGradient()->radialHorizontalSize;
+        if (radialVerticalSize.has_value()) {
+            retGradient.GetRadialGradient().radialHorizontalSize = ToAnimatableDimension(radialHorizontalSize.value());
+        }
+    }
+
+    if (retGradient.GetType() == GradientType::SWEEP) {
+        auto centerX = gradient.GetSweepGradient()->centerX;
+        if (centerX.has_value()) {
+            retGradient.GetSweepGradient().centerX = ToAnimatableDimension(centerX.value());
+        }
+        auto centerY = gradient.GetSweepGradient()->centerY;
+        if (centerY.has_value()) {
+            retGradient.GetSweepGradient().centerY = ToAnimatableDimension(centerY.value());
+        }
+        auto startAngle = gradient.GetSweepGradient()->startAngle;
+        if (startAngle.has_value()) {
+            retGradient.GetSweepGradient().startAngle = ToAnimatableDimension(startAngle.value());
+        }
+        auto endAngle = gradient.GetSweepGradient()->endAngle;
+        if (endAngle.has_value()) {
+            retGradient.GetSweepGradient().endAngle = ToAnimatableDimension(endAngle.value());
+        }
+        auto rotation = gradient.GetSweepGradient()->rotation;
+        if (rotation.has_value()) {
+            retGradient.GetSweepGradient().rotation = ToAnimatableDimension(rotation.value());
+        }
+    }
+
+    retGradient.SetRepeat(gradient.GetRepeat());
+    const auto& colorStops = gradient.GetColors();
+
+    for (const auto& item : colorStops) {
+        GradientColor gradientColor;
+        gradientColor.SetColor(item.GetColor());
+        gradientColor.SetHasValue(item.GetHasValue());
+        gradientColor.SetDimension(item.GetDimension());
+        retGradient.AddColor(gradientColor);
+    }
+    return retGradient;
+}
+
 void ViewAbstractModelImpl::SetWidth(const Dimension& width)
 {
     bool isPercentSize = (width.Unit() == DimensionUnit::PERCENT);
@@ -384,6 +459,17 @@ void ViewAbstractModelImpl::SetLayoutWeight(int32_t value)
     flex->SetFlexWeight(value);
 }
 
+void ViewAbstractModelImpl::SetLayoutDirection(TextDirection value)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetTextDirection(value);
+    box->SetInspectorDirection(value);
+    if (value == TextDirection::AUTO) {
+        box->SetTextDirection(
+            AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    }
+}
+
 void ViewAbstractModelImpl::SetAspectRatio(float ratio)
 {
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -395,6 +481,12 @@ void ViewAbstractModelImpl::SetAlign(const Alignment& alignment)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetAlignment(alignment);
+}
+
+void ViewAbstractModelImpl::SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetAlignRules(alignRules);
 }
 
 void ViewAbstractModelImpl::SetUseAlign(
@@ -427,150 +519,6 @@ void ViewAbstractModelImpl::SetGrid(std::optional<uint32_t> span, std::optional<
             } else {
                 builder->SetOffset(offset.value(), type);
             }
-        }
-    }
-}
-
-void ViewAbstractModelImpl::SetZIndex(int32_t value)
-{
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-    if (renderComponent) {
-        renderComponent->SetZIndex(value);
-    }
-}
-
-Gradient ToGradient(const NG::Gradient& gradient)
-{
-    Gradient retGradient;
-    retGradient.SetType(static_cast<GradientType>(gradient.GetType()));
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    if (retGradient.GetType() == GradientType::LINEAR) {
-        auto angle = gradient.GetLinearGradient()->angle;
-        if (angle.has_value()) {
-            retGradient.GetLinearGradient().angle = ToAnimatableDimension(angle.value());
-        }
-        auto linearX = gradient.GetLinearGradient()->linearX;
-        if (linearX.has_value()) {
-            retGradient.GetLinearGradient().linearX = static_cast<GradientDirection>(linearX.value());
-        }
-        auto linearY = gradient.GetLinearGradient()->linearY;
-        if (linearY.has_value()) {
-            retGradient.GetLinearGradient().linearY = static_cast<GradientDirection>(linearY.value());
-        }
-    }
-
-    if (retGradient.GetType() == GradientType::RADIAL) {
-        auto radialCenterX = gradient.GetRadialGradient()->radialCenterX;
-        if (radialCenterX.has_value()) {
-            retGradient.GetRadialGradient().radialCenterX = ToAnimatableDimension(radialCenterX.value());
-        }
-        auto radialCenterY = gradient.GetRadialGradient()->radialCenterY;
-        if (radialCenterY.has_value()) {
-            retGradient.GetRadialGradient().radialCenterY = ToAnimatableDimension(radialCenterY.value());
-        }
-        auto radialVerticalSize = gradient.GetRadialGradient()->radialVerticalSize;
-        if (radialVerticalSize.has_value()) {
-            retGradient.GetRadialGradient().radialVerticalSize = ToAnimatableDimension(radialVerticalSize.value());
-        }
-        auto radialHorizontalSize = gradient.GetRadialGradient()->radialHorizontalSize;
-        if (radialVerticalSize.has_value()) {
-            retGradient.GetRadialGradient().radialHorizontalSize = ToAnimatableDimension(radialHorizontalSize.value());
-        }
-    }
-
-    if (retGradient.GetType() == GradientType::SWEEP) {
-        auto centerX = gradient.GetSweepGradient()->centerX;
-        if (centerX.has_value()) {
-            retGradient.GetSweepGradient().centerX = ToAnimatableDimension(centerX.value());
-        }
-        auto centerY = gradient.GetSweepGradient()->centerY;
-        if (centerY.has_value()) {
-            retGradient.GetSweepGradient().centerY = ToAnimatableDimension(centerY.value());
-        }
-        auto startAngle = gradient.GetSweepGradient()->startAngle;
-        if (startAngle.has_value()) {
-            retGradient.GetSweepGradient().startAngle = ToAnimatableDimension(startAngle.value());
-        }
-        auto endAngle = gradient.GetSweepGradient()->endAngle;
-        if (endAngle.has_value()) {
-            retGradient.GetSweepGradient().endAngle = ToAnimatableDimension(endAngle.value());
-        }
-        auto rotation = gradient.GetSweepGradient()->rotation;
-        if (rotation.has_value()) {
-            retGradient.GetSweepGradient().rotation = ToAnimatableDimension(rotation.value());
-        }
-    }
-
-    retGradient.SetRepeat(gradient.GetRepeat());
-    const auto& colorStops = gradient.GetColors();
-
-    for (auto item : colorStops) {
-        GradientColor gradientColor;
-        gradientColor.SetColor(item.GetColor());
-        gradientColor.SetHasValue(item.GetHasValue());
-        gradientColor.SetDimension(item.GetDimension());
-        retGradient.AddColor(gradientColor);
-    }
-    return retGradient;
-}
-
-void ViewAbstractModelImpl::SetLinearGradient(const NG::Gradient& gradient)
-{
-    auto lineGradient = ToGradient(gradient);
-    auto* stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        auto decoration = GetBackDecoration();
-        if (decoration) {
-            decoration->SetGradient(lineGradient);
-        }
-    } else {
-        auto boxComponent = stack->GetBoxComponent();
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-            BoxStateAttribute::GRADIENT, lineGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
-        }
-    }
-}
-
-void ViewAbstractModelImpl::SetSweepGradient(const NG::Gradient& gradient)
-{
-    auto sweepGradient = ToGradient(gradient);
-    auto* stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        auto decoration = GetBackDecoration();
-        if (decoration) {
-            decoration->SetGradient(sweepGradient);
-        }
-    } else {
-        auto boxComponent = stack->GetBoxComponent();
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-            BoxStateAttribute::GRADIENT, sweepGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
-        }
-    }
-}
-
-void ViewAbstractModelImpl::SetRadialGradient(const NG::Gradient& gradient)
-{
-    auto radialGradient = ToGradient(gradient);
-    auto* stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        auto decoration = GetBackDecoration();
-        if (decoration) {
-            decoration->SetGradient(radialGradient);
-        }
-    } else {
-        auto boxComponent = stack->GetBoxComponent();
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-            BoxStateAttribute::GRADIENT, radialGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
         }
     }
 }
@@ -633,7 +581,7 @@ void ViewAbstractModelImpl::SetTransformMatrix(const std::vector<float>& matrix)
         matrix[8], matrix[9], matrix[10], matrix[11], matrix[12], matrix[13], matrix[14], matrix[15], option);
 }
 
-void ViewAbstractModelImpl::SetOpacity(double opacity)
+void ViewAbstractModelImpl::SetOpacity(double opacity, bool passThrough)
 {
     auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
     auto stack = ViewStackProcessor::GetInstance();
@@ -648,9 +596,13 @@ void ViewAbstractModelImpl::SetOpacity(double opacity)
                 DisplayStateAttribute::OPACITY, AnimatableDouble(display->GetOpacity(), option), VisualState::NORMAL);
         }
     }
+    if (passThrough && ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
+        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+        display->DisableLayer(true);
+    }
 }
 
-void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitionOptions)
+void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough)
 {
     if (transitionOptions.HasOpacity()) {
         auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
@@ -673,6 +625,10 @@ void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitio
         transform->SetRotateTransition(
             transitionOptions.Type, value.xDirection, value.yDirection, value.zDirection, value.angle);
         transform->SetOriginDimension(DimensionOffset(value.centerX, value.centerY));
+    }
+    if (passThrough && ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
+        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+        display->DisableLayer(true);
     }
 }
 
@@ -730,6 +686,15 @@ void ViewAbstractModelImpl::SetGeometryTransition(const std::string& id)
     boxComponent->SetGeometryTransitionId(id);
 }
 
+void ViewAbstractModelImpl::SetMotionPath(const MotionPathOption& option)
+{
+    if (option.GetRotate()) {
+        ViewStackProcessor::GetInstance()->GetTransformComponent();
+    }
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetMotionPathOption(option);
+}
+
 void ViewAbstractModelImpl::SetFlexBasis(const Dimension& value)
 {
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -758,6 +723,97 @@ void ViewAbstractModelImpl::SetDisplayIndex(int32_t value)
 {
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     flexItem->SetDisplayIndex(value);
+}
+
+void ViewAbstractModelImpl::SetZIndex(int32_t value)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
+    if (renderComponent) {
+        renderComponent->SetZIndex(value);
+    }
+}
+
+void ViewAbstractModelImpl::SetLinearGradient(const NG::Gradient& gradient)
+{
+    auto lineGradient = ToGradient(gradient);
+    auto* stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        auto decoration = GetBackDecoration();
+        if (decoration) {
+            decoration->SetGradient(lineGradient);
+        }
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+            BoxStateAttribute::GRADIENT, lineGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetSweepGradient(const NG::Gradient& gradient)
+{
+    auto sweepGradient = ToGradient(gradient);
+    auto* stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        auto decoration = GetBackDecoration();
+        if (decoration) {
+            decoration->SetGradient(sweepGradient);
+        }
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+            BoxStateAttribute::GRADIENT, sweepGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetRadialGradient(const NG::Gradient& gradient)
+{
+    auto radialGradient = ToGradient(gradient);
+    auto* stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        auto decoration = GetBackDecoration();
+        if (decoration) {
+            decoration->SetGradient(radialGradient);
+        }
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+            BoxStateAttribute::GRADIENT, radialGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetClipPath(const RefPtr<BasicShape>& shape)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto clipPath = AceType::MakeRefPtr<ClipPath>();
+    clipPath->SetBasicShape(shape);
+    box->SetClipPath(clipPath);
+}
+
+void ViewAbstractModelImpl::SetEdgeClip(bool isClip)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetBoxClipFlag(isClip);
+}
+
+void ViewAbstractModelImpl::SetMask(const RefPtr<BasicShape>& shape)
+{
+    auto maskPath = AceType::MakeRefPtr<MaskPath>();
+    maskPath->SetBasicShape(shape);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetMask(maskPath);
 }
 
 void ViewAbstractModelImpl::SetBackdropBlur(const Dimension& radius)
@@ -789,6 +845,48 @@ void ViewAbstractModelImpl::SetWindowBlur(float progress, WindowBlurStyle blurSt
     auto decoration = GetBackDecoration();
     decoration->SetWindowBlurProgress(progress);
     decoration->SetWindowBlurStyle(blurStyle);
+}
+
+void ViewAbstractModelImpl::SetBrightness(const Dimension& value)
+{
+    auto frontDecoration = GetFrontDecoration();
+    frontDecoration->SetBrightness(value);
+}
+
+void ViewAbstractModelImpl::SetGrayScale(const Dimension& value)
+{
+    auto frontDecoration = GetFrontDecoration();
+    frontDecoration->SetGrayScale(value);
+}
+
+void ViewAbstractModelImpl::SetContrast(const Dimension& value)
+{
+    auto frontDecoration = GetFrontDecoration();
+    frontDecoration->SetContrast(value);
+}
+
+void ViewAbstractModelImpl::SetSaturate(const Dimension& value)
+{
+    auto frontDecoration = GetFrontDecoration();
+    frontDecoration->SetSaturate(value);
+}
+
+void ViewAbstractModelImpl::SetSepia(const Dimension& value)
+{
+    auto frontDecoration = GetFrontDecoration();
+    frontDecoration->SetSepia(value);
+}
+
+void ViewAbstractModelImpl::SetInvert(const Dimension& value)
+{
+    auto frontDecoration = GetFrontDecoration();
+    frontDecoration->SetInvert(value);
+}
+
+void ViewAbstractModelImpl::SetHueRotate(float value)
+{
+    auto frontDecoration = GetFrontDecoration();
+    frontDecoration->SetHueRotate(value);
 }
 
 void ViewAbstractModelImpl::SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
@@ -901,6 +999,30 @@ void ViewAbstractModelImpl::SetOnRemoteMessage(RemoteCallback&& onRemoteCallback
     box->SetRemoteMessageEvent(EventMarker(std::move(onRemoteCallback)));
 }
 
+void ViewAbstractModelImpl::SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+    if (focusableComponent) {
+        focusableComponent->SetOnFocusMove(onFocusMoveCallback);
+    }
+}
+
+void ViewAbstractModelImpl::SetOnFocus(OnFocusFunc&& onFocusCallback)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (focusableComponent) {
+        focusableComponent->SetOnFocus(onFocusCallback);
+    }
+}
+
+void ViewAbstractModelImpl::SetOnBlur(OnBlurFunc&& onBlurCallback)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (focusableComponent) {
+        focusableComponent->SetOnBlur(onBlurCallback);
+    }
+}
+
 void ViewAbstractModelImpl::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -958,6 +1080,155 @@ void ViewAbstractModelImpl::SetFocusNode(bool focus)
     if (focusableComponent) {
         focusableComponent->SetFocusNode(!focus);
     }
+}
+
+void ViewAbstractModelImpl::SetTabIndex(int32_t index)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (focusableComponent) {
+        focusableComponent->SetFocusable(true);
+        focusableComponent->SetTabIndex(index);
+    }
+}
+
+void ViewAbstractModelImpl::SetFocusOnTouch(bool isSet)
+{
+    auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
+    if (!touchComponent) {
+        LOGE("Touch listener component get failed!");
+        return;
+    }
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (!focusableComponent) {
+        LOGE("focusable component get failed!");
+        return;
+    }
+    focusableComponent->SetIsFocusOnTouch(isSet);
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    if (!component) {
+        LOGE("main component get failed!");
+        return;
+    }
+    component->SetIsFocusOnTouch(isSet);
+}
+
+void ViewAbstractModelImpl::SetDefaultFocus(bool isSet)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (!focusableComponent) {
+        LOGE("focusable component get failed!");
+        return;
+    }
+    focusableComponent->SetIsDefaultFocus(isSet);
+}
+
+void ViewAbstractModelImpl::SetGroupDefaultFocus(bool isSet)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (!focusableComponent) {
+        LOGE("focusable component get failed!");
+        return;
+    }
+    focusableComponent->SetIsDefaultGroupFocus(isSet);
+}
+
+void ViewAbstractModelImpl::SetInspectorId(const std::string& inspectorId)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (component) {
+        component->SetInspectorKey(inspectorId);
+    }
+
+    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
+        auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+        if (flexItem) {
+            flexItem->SetInspectorKey(inspectorId);
+        }
+    }
+
+    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        if (focusableComponent) {
+            focusableComponent->SetInspectorKey(inspectorId);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetRestoreId(int32_t restoreId)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    if (component) {
+        component->SetRestoreId(restoreId);
+    }
+}
+
+void ViewAbstractModelImpl::SetDebugLine(const std::string& line)
+{
+#if defined(PREVIEW)
+    auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (component) {
+        component->SetDebugLine(line);
+    }
+#endif
+}
+
+void ViewAbstractModelImpl::SetHoverEffect(HoverEffectType hoverEffect)
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
+    boxComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(hoverEffect));
+}
+
+void ViewAbstractModelImpl::SetHitTestMode(NG::HitTestMode hitTestMode)
+{
+    auto mode = static_cast<HitTestMode>(hitTestMode);
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    if (component) {
+        component->SetHitTestMode(mode);
+    }
+}
+
+void ViewAbstractModelImpl::SetAccessibilityGroup(bool accessible)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not have inspector");
+        return;
+    }
+    inspector->SetAccessibilityGroup(accessible);
+}
+
+void ViewAbstractModelImpl::SetAccessibilityText(const std::string& text)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not have inspector");
+        return;
+    }
+    inspector->SetAccessibilitytext(text);
+}
+
+void ViewAbstractModelImpl::SetAccessibilityDescription(const std::string& description)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not have inspector");
+        return;
+    }
+    inspector->SetAccessibilityDescription(description);
+}
+
+void ViewAbstractModelImpl::SetAccessibilityImportance(const std::string& importance)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not have inspector");
+        return;
+    }
+    inspector->SetAccessibilityImportance(importance);
 }
 
 } // namespace OHOS::Ace::Framework

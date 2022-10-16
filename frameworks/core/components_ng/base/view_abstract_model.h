@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -25,6 +26,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_events.h"
@@ -82,8 +84,10 @@ public:
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(int32_t value) = 0;
+    virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
+    virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
     virtual void SetUseAlign(
         AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) = 0;
     virtual void SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset,
@@ -103,13 +107,14 @@ public:
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
 
     // display props
-    virtual void SetOpacity(double opacity) = 0;
-    virtual void SetTransition(const NG::TransitionOptions& transitionOptions) = 0;
+    virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
+    virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
     virtual void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) = 0;
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(const SharedTransitionOption& option) = 0;
     virtual void SetGeometryTransition(const std::string& id) = 0;
+    virtual void SetMotionPath(const MotionPathOption& option) = 0;
 
     // flex props
     virtual void SetFlexBasis(const Dimension& value) = 0;
@@ -123,12 +128,24 @@ public:
     virtual void SetSweepGradient(const NG::Gradient& gradient) = 0;
     virtual void SetRadialGradient(const NG::Gradient& gradient) = 0;
 
+    // clip
+    virtual void SetClipPath(const RefPtr<BasicShape>& shape) = 0;
+    virtual void SetEdgeClip(bool isClip) = 0;
+
     // effects
+    virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
     virtual void SetBackdropBlur(const Dimension& radius) = 0;
     virtual void SetFrontBlur(const Dimension& radius) = 0;
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
     virtual void SetWindowBlur(float progress, WindowBlurStyle blurStyle) = 0;
+    virtual void SetBrightness(const Dimension& value) = 0;
+    virtual void SetGrayScale(const Dimension& value) = 0;
+    virtual void SetContrast(const Dimension& value) = 0;
+    virtual void SetSaturate(const Dimension& value) = 0;
+    virtual void SetSepia(const Dimension& value) = 0;
+    virtual void SetInvert(const Dimension& value) = 0;
+    virtual void SetHueRotate(float value) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
@@ -141,6 +158,9 @@ public:
     virtual void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) = 0;
     virtual void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) = 0;
     virtual void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) = 0;
+    virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
+    virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
+    virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
@@ -148,6 +168,21 @@ public:
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
     virtual void SetFocusNode(bool focus) = 0;
+    virtual void SetTabIndex(int32_t index) = 0;
+    virtual void SetFocusOnTouch(bool isSet) = 0;
+    virtual void SetDefaultFocus(bool isSet) = 0;
+    virtual void SetGroupDefaultFocus(bool isSet) = 0;
+    virtual void SetInspectorId(const std::string& inspectorId) = 0;
+    virtual void SetRestoreId(int32_t restoreId) = 0;
+    virtual void SetDebugLine(const std::string& line) = 0;
+    virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
+    virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
+
+    // accessibility
+    virtual void SetAccessibilityGroup(bool accessible) = 0;
+    virtual void SetAccessibilityText(const std::string& text) = 0;
+    virtual void SetAccessibilityDescription(const std::string& description) = 0;
+    virtual void SetAccessibilityImportance(const std::string& importance) = 0;
 
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;

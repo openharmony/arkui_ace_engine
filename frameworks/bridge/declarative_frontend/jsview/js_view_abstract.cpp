@@ -3896,11 +3896,7 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
     MotionPathOption motionPathOption;
     if (ParseMotionPath(argsPtrItem, motionPathOption)) {
-        if (motionPathOption.GetRotate()) {
-            ViewStackProcessor::GetInstance()->GetTransformComponent();
-        }
-        auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-        flexItem->SetMotionPathOption(motionPathOption);
+        ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
     } else {
         LOGE("parse motionPath failed. %{public}s", info[0]->ToString().c_str());
     }
@@ -3961,13 +3957,7 @@ void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
         value.SetValue(1.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetGrayScale(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetGrayScale(value);
+    ViewAbstractModel::GetInstance()->SetGrayScale(value);
 }
 
 void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
@@ -3982,13 +3972,7 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBrightness(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetBrightness(value);
+    ViewAbstractModel::GetInstance()->SetBrightness(value);
 }
 
 void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
@@ -4007,13 +3991,7 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetContrast(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetContrast(value);
+    ViewAbstractModel::GetInstance()->SetContrast(value);
 }
 
 void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
@@ -4031,13 +4009,7 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetSaturate(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetSaturate(value);
+    ViewAbstractModel::GetInstance()->SetSaturate(value);
 }
 
 void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
@@ -4056,13 +4028,7 @@ void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetSepia(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetSepia(value);
+    ViewAbstractModel::GetInstance()->SetSepia(value);
 }
 
 void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
@@ -4079,13 +4045,7 @@ void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetInvert(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetInvert(value);
+    ViewAbstractModel::GetInstance()->SetInvert(value);
 }
 
 void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
@@ -4111,65 +4071,31 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
     if (deg < 0.0f) {
         deg += ROUND_UNIT;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHueRotate(deg);
-        return;
-    }
-    auto decoration = GetFrontDecoration();
-    if (decoration) {
-        decoration->SetHueRotate(deg);
-    }
+    ViewAbstractModel::GetInstance()->SetHueRotate(deg);
 }
 
 void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsObject()) {
-            JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
-            if (clipShape == nullptr) {
-                LOGE("clipShape is null");
-                return;
-            }
-            NG::ClipPathNG clipPath;
-            clipPath.SetBasicShape(clipShape->GetBasicShape());
-            NG::ViewAbstract::SetClipPath(clipPath);
-        } else if (info[0]->IsBoolean()) {
-            NG::ViewAbstract::SetEdgeClip(info[0]->ToBoolean());
+    if (info[0]->IsObject()) {
+        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            LOGE("clipShape is null");
+            return;
         }
-        return;
-    }
-    if (info.Length() > 0) {
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        if (info[0]->IsObject()) {
-            JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
-            if (clipShape == nullptr) {
-                LOGE("clipShape is null.");
-                return;
-            }
-            auto clipPath = AceType::MakeRefPtr<ClipPath>();
-            clipPath->SetBasicShape(clipShape->GetBasicShape());
-            box->SetClipPath(clipPath);
-        } else if (info[0]->IsBoolean()) {
-            box->SetBoxClipFlag(info[0]->ToBoolean());
-        }
+        ViewAbstractModel::GetInstance()->SetClipPath(clipShape->GetBasicShape());
+    } else if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetEdgeClip(info[0]->ToBoolean());
     }
 }
 
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("Mask is not supported");
-        return;
-    }
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {
             return;
-        }
-        auto maskPath = AceType::MakeRefPtr<MaskPath>();
-        maskPath->SetBasicShape(maskShape->GetBasicShape());
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        box->SetMask(maskPath);
+        };
+        ViewAbstractModel::GetInstance()->SetMask(maskShape->GetBasicShape());
     }
 }
 
@@ -4179,19 +4105,7 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to be an boolean");
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetFocusable(info[0]->ToBoolean());
-        return;
-    }
-
-    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-    if (!focusComponent) {
-        LOGE("The focusComponent is null");
-        return;
-    } else {
-        focusComponent->SetFocusable(info[0]->ToBoolean());
-    }
+    ViewAbstractModel::GetInstance()->SetFocusable(info[0]->ToBoolean());
 }
 
 void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
@@ -4207,10 +4121,7 @@ void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("onFocusMove");
             func->Execute(info);
         };
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
-        if (focusableComponent) {
-            focusableComponent->SetOnFocusMove(onFocusMove);
-        }
+        ViewAbstractModel::GetInstance()->SetOnFocusMove(std::move(onFocusMove));
     }
 }
 
@@ -4220,30 +4131,13 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
         LOGE("OnKeyEvent args need a function.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-        auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent)](KeyEventInfo& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onKey");
-            func->Execute(info);
-        };
-        NG::ViewAbstract::SetOnKeyEvent(std::move(onKeyEvent));
-        return;
-    }
-
-    RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto onKeyId = EventMarker(
-        [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
-            ACE_SCORING_EVENT("onKey");
-            func->Execute(*keyInfo);
-        },
-        "onKey", 0);
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (focusableComponent) {
-        focusableComponent->SetOnKeyId(onKeyId);
-    }
+    RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent)](KeyEventInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onKey");
+        func->Execute(info);
+    };
+    ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
@@ -4259,15 +4153,7 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
         func->Execute();
     };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetOnFocus(std::move(onFocus));
-        return;
-    }
-
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (focusableComponent) {
-        focusableComponent->SetOnFocus(onFocus);
-    }
+    ViewAbstractModel::GetInstance()->SetOnFocus(std::move(onFocus));
 }
 
 void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
@@ -4283,14 +4169,7 @@ void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
         func->Execute();
     };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetOnBlur(std::move(onBlur));
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (focusableComponent) {
-        focusableComponent->SetOnBlur(onBlur);
-    }
+    ViewAbstractModel::GetInstance()->SetOnBlur(std::move(onBlur));
 }
 
 void JSViewAbstract::JsTabIndex(const JSCallbackInfo& info)
@@ -4299,15 +4178,7 @@ void JSViewAbstract::JsTabIndex(const JSCallbackInfo& info)
         LOGE("Param is wrong, it is supposed to be a number");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetTabIndex(info[0]->ToNumber<int32_t>());
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (focusableComponent) {
-        focusableComponent->SetFocusable(true);
-        focusableComponent->SetTabIndex(info[0]->ToNumber<int32_t>());
-    }
+    ViewAbstractModel::GetInstance()->SetTabIndex(info[0]->ToNumber<int32_t>());
 }
 
 void JSViewAbstract::JsFocusOnTouch(const JSCallbackInfo& info)
@@ -4317,27 +4188,7 @@ void JSViewAbstract::JsFocusOnTouch(const JSCallbackInfo& info)
         return;
     }
     auto isFocusOnTouch = info[0]->ToBoolean();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetFocusOnTouch(isFocusOnTouch);
-        return;
-    }
-    auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
-    if (!touchComponent) {
-        LOGE("Touch listener component get failed!");
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (!focusableComponent) {
-        LOGE("focusable component get failed!");
-        return;
-    }
-    focusableComponent->SetIsFocusOnTouch(isFocusOnTouch);
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
-        LOGE("main component get failed!");
-        return;
-    }
-    component->SetIsFocusOnTouch(isFocusOnTouch);
+    ViewAbstractModel::GetInstance()->SetFocusOnTouch(isFocusOnTouch);
 }
 
 void JSViewAbstract::JsDefaultFocus(const JSCallbackInfo& info)
@@ -4347,16 +4198,7 @@ void JSViewAbstract::JsDefaultFocus(const JSCallbackInfo& info)
         return;
     }
     auto isDefaultFocus = info[0]->ToBoolean();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetDefaultFocus(isDefaultFocus);
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (!focusableComponent) {
-        LOGE("focusable component get failed!");
-        return;
-    }
-    focusableComponent->SetIsDefaultFocus(isDefaultFocus);
+    ViewAbstractModel::GetInstance()->SetDefaultFocus(isDefaultFocus);
 }
 
 void JSViewAbstract::JsGroupDefaultFocus(const JSCallbackInfo& info)
@@ -4366,43 +4208,12 @@ void JSViewAbstract::JsGroupDefaultFocus(const JSCallbackInfo& info)
         return;
     }
     auto isGroupDefaultFocus = info[0]->ToBoolean();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetGroupDefaultFocus(isGroupDefaultFocus);
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (!focusableComponent) {
-        LOGE("focusable component get failed!");
-        return;
-    }
-    focusableComponent->SetIsDefaultGroupFocus(isGroupDefaultFocus);
+    ViewAbstractModel::GetInstance()->SetGroupDefaultFocus(isGroupDefaultFocus);
 }
 
 void JSViewAbstract::JsKey(const std::string& key)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetInspectorId(key);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (component) {
-        component->SetInspectorKey(key);
-    }
-
-    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
-        auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-        if (flexItem) {
-            flexItem->SetInspectorKey(key);
-        }
-    }
-
-    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        if (focusableComponent) {
-            focusableComponent->SetInspectorKey(key);
-        }
-    }
+    ViewAbstractModel::GetInstance()->SetInspectorId(key);
 }
 
 void JSViewAbstract::JsId(const std::string& id)
@@ -4412,14 +4223,7 @@ void JSViewAbstract::JsId(const std::string& id)
 
 void JSViewAbstract::JsRestoreId(int32_t restoreId)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("RestoreId not completed in new pipe.");
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (component) {
-        component->SetRestoreId(restoreId);
-    }
+    ViewAbstractModel::GetInstance()->SetRestoreId(restoreId);
 }
 
 #if defined(PREVIEW)
@@ -4430,75 +4234,68 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
         return;
     }
 
-    auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (component) {
-        component->SetDebugLine(info[0]->ToString());
-    }
+    ViewAbstractModel::GetInstance()->SetDebugLine(info[0]->ToString());
 }
 #endif
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsOpacity(info);
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
-        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-        display->DisableLayer(true);
+
+    double opacity = 0.0;
+    if (!ParseJsDouble(info[0], opacity)) {
+        return;
     }
+
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        opacity = 1.0;
+    }
+
+    ViewAbstractModel::GetInstance()->SetOpacity(opacity, true);
 }
 
 void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsTransition(info);
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (info.Length() > 1) {
+        LOGE("Too many arguments");
         return;
     }
-    if (ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
-        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-        display->DisableLayer(true);
+    if (info.Length() == 0) {
+        ViewAbstractModel::GetInstance()->SetTransition(
+            NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
+        return;
     }
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not Object.");
+        return;
+    }
+    auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
+    auto options = ParseTransition(transitionArgs);
+    ViewAbstractModel::GetInstance()->SetTransition(options, true);
 }
 
 void JSViewAbstract::JsAccessibilityGroup(bool accessible)
 {
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("this component does not have inspector");
-        return;
-    }
-    inspector->SetAccessibilityGroup(accessible);
+    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(accessible);
 }
 
 void JSViewAbstract::JsAccessibilityText(const std::string& text)
 {
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("this component does not have inspector");
-        return;
-    }
-    inspector->SetAccessibilitytext(text);
+    ViewAbstractModel::GetInstance()->SetAccessibilityText(text);
 }
 
 void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
 {
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("this component does not have inspector");
-        return;
-    }
-    inspector->SetAccessibilityDescription(description);
+    ViewAbstractModel::GetInstance()->SetAccessibilityDescription(description);
 }
 
 void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
 {
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("this component does not have inspector");
-        return;
-    }
-    inspector->SetAccessibilityImportance(importance);
+    ViewAbstractModel::GetInstance()->SetAccessibilityImportance(importance);
 }
 
 void JsBindContextMenuNG(RefPtr<JsFunction>& builder, int32_t responseType)
@@ -4785,41 +4582,7 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
         }
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetAlignRules(alignRules);
-        return;
-    }
-
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flexItem->SetAlignRules(alignRules);
-}
-
-RefPtr<Decoration> JSViewAbstract::GetFrontDecoration()
-{
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto decoration = box->GetFrontDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-        box->SetFrontDecoration(decoration);
-    }
-
-    return decoration;
-}
-
-RefPtr<Decoration> JSViewAbstract::GetBackDecoration()
-{
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto decoration = box->GetBackDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-        box->SetBackDecoration(decoration);
-    }
-    return decoration;
-}
-
-void JSViewAbstract::SetBorderRadius(const Dimension& value, const AnimationOption& option)
-{
-    BoxComponentHelper::SetBorderRadius(GetBackDecoration(), value, option);
+    ViewAbstractModel::GetInstance()->SetAlignRules(alignRules);
 }
 
 void JSViewAbstract::SetMarginTop(const JSCallbackInfo& info)
@@ -5199,18 +4962,7 @@ void JSViewAbstract::SetDirection(const std::string& dir)
     } else if (dir == "Auto") {
         direction = TextDirection::AUTO;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetLayoutDirection(direction);
-        return;
-    }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    CHECK_NULL_VOID(box);
-    box->SetTextDirection(direction);
-    box->SetInspectorDirection(direction);
-    if (direction == TextDirection::AUTO) {
-        box->SetTextDirection(
-            AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
-    }
+    ViewAbstractModel::GetInstance()->SetLayoutDirection(direction);
 }
 
 RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& jsObj)
@@ -5287,16 +5039,7 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
         LOGE("info[0] is not a number");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
-        return;
-    }
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!boxComponent) {
-        LOGE("boxComponent is null");
-        return;
-    }
-    boxComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
+    ViewAbstractModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
 }
 
 RefPtr<Gesture> JSViewAbstract::GetTapGesture(const JSCallbackInfo& info, int32_t countNum, int32_t fingerNum)
@@ -5507,22 +5250,9 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::HitTestMode hitTestModeNG = NG::HitTestMode::HTMDEFAULT;
-        hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
-        NG::ViewAbstract::SetHitTestMode(hitTestModeNG);
-        return;
-    }
-
-    HitTestMode hitTestMode = HitTestMode::HTMDEFAULT;
-    if (info[0]->IsNumber()) {
-        hitTestMode = static_cast<HitTestMode>(info[0]->ToNumber<int32_t>());
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (component) {
-        component->SetHitTestMode(hitTestMode);
-    }
+    NG::HitTestMode hitTestModeNG = NG::HitTestMode::HTMDEFAULT;
+    hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
+    ViewAbstractModel::GetInstance()->SetHitTestMode(hitTestModeNG);
 }
 
 } // namespace OHOS::Ace::Framework

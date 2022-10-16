@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/pattern/image/image_model.h"
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
@@ -104,9 +105,9 @@ void JSImage::SetFitOriginalSize(bool value)
 
 void JSImage::SetBorder(const Border& border)
 {
-    GetFrontDecoration()->SetBorder(border);
     ImageModel::GetInstance()->SetBorder(border);
 }
+
 void JSImage::OnComplete(const JSCallbackInfo& args)
 {
     LOGD("JSImage V8OnComplete");
@@ -183,17 +184,13 @@ void JSImage::Create(const JSCallbackInfo& info)
 void JSImage::JsBorder(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorder(info);
-    if (!Container::IsCurrentUseNewPipeline()) {
-        SetBorder(GetBackDecoration()->GetBorder());
-    }
+    ImageModel::GetInstance()->SetBackBorder();
 }
 
 void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderRadius(info);
-    if (!Container::IsCurrentUseNewPipeline()) {
-        SetBorder(GetBackDecoration()->GetBorder());
-    }
+    ImageModel::GetInstance()->SetBackBorder();
 }
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)

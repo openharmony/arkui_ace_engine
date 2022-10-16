@@ -59,17 +59,15 @@ public:
 
     void SetLayoutPriority(int32_t priority) override;
     void SetLayoutWeight(int32_t value) override;
+    void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
     void SetAlign(const Alignment& alignment) override;
+    void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
     void SetUseAlign(
         AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) override;
     void SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, const RefPtr<GridContainerInfo>& info,
         GridSizeType type = GridSizeType::UNDEFINED) override;
     void SetZIndex(int32_t value) override;
-
-    void SetLinearGradient(const NG::Gradient& gradient) override;
-    void SetSweepGradient(const NG::Gradient& gradient) override;
-    void SetRadialGradient(const NG::Gradient& gradient) override;
 
     void SetPosition(const Dimension& x, const Dimension& y) override;
     void SetOffset(const Dimension& x, const Dimension& y) override;
@@ -81,13 +79,14 @@ public:
     void SetRotate(float x, float y, float z, float angle) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
 
-    void SetOpacity(double opacity) override;
-    void SetTransition(const NG::TransitionOptions& transitionOptions) override;
+    void SetOpacity(double opacity, bool passThrough = false) override;
+    void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override;
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override;
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
     void SetSharedTransition(const SharedTransitionOption& option) override;
     void SetGeometryTransition(const std::string& id) override;
+    void SetMotionPath(const MotionPathOption& option) override;
 
     void SetFlexBasis(const Dimension& value) override;
     void SetAlignSelf(FlexAlign value) override;
@@ -95,11 +94,26 @@ public:
     void SetFlexGrow(float value) override;
     void SetDisplayIndex(int32_t value) override;
 
+    void SetLinearGradient(const NG::Gradient& gradient) override;
+    void SetSweepGradient(const NG::Gradient& gradient) override;
+    void SetRadialGradient(const NG::Gradient& gradient) override;
+
+    void SetClipPath(const RefPtr<BasicShape>& shape) override;
+    void SetEdgeClip(bool isClip) override;
+    void SetMask(const RefPtr<BasicShape>& shape) override;
+
     void SetBackdropBlur(const Dimension& radius) override;
     void SetFrontBlur(const Dimension& radius) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetColorBlend(const Color& value) override;
     void SetWindowBlur(float progress, WindowBlurStyle blurStyle) override;
+    void SetBrightness(const Dimension& value) override;
+    void SetGrayScale(const Dimension& value) override;
+    void SetContrast(const Dimension& value) override;
+    void SetSaturate(const Dimension& value) override;
+    void SetSepia(const Dimension& value) override;
+    void SetInvert(const Dimension& value) override;
+    void SetHueRotate(float value) override;
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
@@ -111,12 +125,29 @@ public:
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;
     void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) override;
     void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) override;
+    void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
+    void SetOnFocus(OnFocusFunc&& onFocusCallback) override;
+    void SetOnBlur(OnBlurFunc&& onBlurCallback) override;
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;
     void SetTouchable(bool touchable) override;
     void SetFocusable(bool focusable) override;
     void SetFocusNode(bool focus) override;
+    void SetTabIndex(int32_t index) override;
+    void SetFocusOnTouch(bool isSet) override;
+    void SetDefaultFocus(bool isSet) override;
+    void SetGroupDefaultFocus(bool isSet) override;
+    void SetInspectorId(const std::string& inspectorId) override;
+    void SetRestoreId(int32_t restoreId) override;
+    void SetDebugLine(const std::string& line) override;
+    void SetHoverEffect(HoverEffectType hoverEffect) override;
+    void SetHitTestMode(NG::HitTestMode hitTestMode) override;
+
+    void SetAccessibilityGroup(bool accessible) override;
+    void SetAccessibilityText(const std::string& text) override;
+    void SetAccessibilityDescription(const std::string& description) override;
+    void SetAccessibilityImportance(const std::string& importance) override;
 };
 
 } // namespace OHOS::Ace::Framework
