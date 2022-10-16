@@ -66,11 +66,11 @@
 #include "core/components/text/text_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
-#include "core/components_ng/pattern/container_model.h"
 #include "core/components_ng/property/clip_path.h"
 #include "core/components_v2/extensions/events/on_area_change_extension.h"
 #include "core/gestures/long_press_gesture.h"
@@ -273,7 +273,7 @@ bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOp
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
     BackgroundImagePosition& bgImgPosition)
 {
-    AnimationOption option = ContainerModel::GetInstance()->GetImplicitAnimationOption();
+    AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
     bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
     bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
 }
@@ -3155,10 +3155,6 @@ std::pair<Dimension, Dimension> JSViewAbstract::ParseSize(const JSCallbackInfo& 
 
 void JSViewAbstract::JsUseAlign(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGD("UseAlign is deprecated.");
-        return;
-    }
     if (info.Length() < 2) {
         LOGE("The arg is wrong, it is supposed to have atleast 2 arguments");
         return;
@@ -3199,13 +3195,14 @@ void JSViewAbstract::JsUseAlign(const JSCallbackInfo& info)
             return;
         }
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetAlignDeclarationPtr(declaration);
-    box->SetUseAlignSide(static_cast<AlignDeclaration::Edge>(sideValue));
+
+    std::optional<Dimension> optOffset;
     Dimension offsetDimension;
     if (ParseJsDimensionVp(offset, offsetDimension)) {
-        box->SetUseAlignOffset(offsetDimension);
+        optOffset = offsetDimension;
     }
+    ViewAbstractModel::GetInstance()->SetUseAlign(
+        declaration, static_cast<AlignDeclaration::Edge>(sideValue), optOffset);
 }
 
 void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
@@ -3221,11 +3218,7 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
         return;
     }
     auto gridContainerInfo = JSGridContainer::GetContainer();
-    if (gridContainerInfo != nullptr) {
-        auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
-        builder->SetParent(gridContainerInfo);
-        builder->SetColumns(span);
-    }
+    ViewAbstractModel::GetInstance()->SetGrid(span, std::nullopt, gridContainerInfo);
 }
 
 void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
@@ -3235,17 +3228,8 @@ void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
         return;
     }
     auto offset = info[0]->ToNumber<int32_t>();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetGrid(std::nullopt, offset);
-        return;
-    }
-
     auto gridContainerInfo = JSGridContainer::GetContainer();
-    if (gridContainerInfo != nullptr) {
-        auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
-        builder->SetParent(gridContainerInfo);
-        builder->SetOffset(offset);
-    }
+    ViewAbstractModel::GetInstance()->SetGrid(std::nullopt, offset, gridContainerInfo);
 }
 
 static bool ParseSpanAndOffset(const JSRef<JSVal>& val, uint32_t& span, int32_t& offset)
@@ -3278,28 +3262,7 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
     // keys order must be strictly refer to GridSizeType
     const char* keys[] = { "", "xs", "sm", "md", "lg" };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
-            JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
-            if (val->IsNull() || val->IsEmpty()) {
-                continue;
-            }
-            uint32_t span = 0;
-            int32_t offset = 0;
-            if (ParseSpanAndOffset(val, span, offset)) {
-                NG::ViewAbstract::SetGrid(span, offset, static_cast<GridSizeType>(i));
-            }
-        }
-        return;
-    }
-
     auto gridContainerInfo = JSGridContainer::GetContainer();
-    if (gridContainerInfo == nullptr) {
-        LOGE("No valid grid container.");
-        return;
-    }
-    auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
-    builder->SetParent(gridContainerInfo);
     for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
         JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
         if (val->IsNull() || val->IsEmpty()) {
@@ -3308,8 +3271,7 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
         uint32_t span = 0;
         int32_t offset = 0;
         if (ParseSpanAndOffset(val, span, offset)) {
-            builder->SetSizeColumn(static_cast<GridSizeType>(i), span);
-            builder->SetOffset(offset, static_cast<GridSizeType>(i));
+            ViewAbstractModel::GetInstance()->SetGrid(span, offset, gridContainerInfo, static_cast<GridSizeType>(i));
         }
     }
 }
@@ -3326,25 +3288,12 @@ void JSViewAbstract::JsZIndex(const JSCallbackInfo& info)
         zIndex = info[0]->ToNumber<int>();
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetZIndex(zIndex);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-    if (renderComponent) {
-        renderComponent->SetZIndex(zIndex);
-    }
+    ViewAbstractModel::GetInstance()->SetZIndex(zIndex);
 }
 
 void JSViewAbstract::Pop()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewStackProcessor::GetInstance()->Pop();
-        return;
-    }
-    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackModel::GetInstance()->Pop();
 }
 
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
@@ -3749,85 +3698,9 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        // new pipeline
-        NG::Gradient newGradient;
-        NewJsLinearGradient(info, newGradient);
-        NG::ViewAbstract::SetLinearGradient(newGradient);
-        return;
-    }
-    Gradient lineGradient;
-    lineGradient.SetType(GradientType::LINEAR);
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    // angle
-    std::optional<float> degree;
-    GetAngle("angle", argsPtrItem, degree);
-    if (degree) {
-        lineGradient.GetLinearGradient().angle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
-        degree.reset();
-    }
-    // direction
-    auto direction =
-        static_cast<GradientDirection>(argsPtrItem->GetInt("direction", static_cast<int32_t>(GradientDirection::NONE)));
-    switch (direction) {
-        case GradientDirection::LEFT:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
-            break;
-        case GradientDirection::RIGHT:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
-            break;
-        case GradientDirection::TOP:
-            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
-            break;
-        case GradientDirection::BOTTOM:
-            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
-            break;
-        case GradientDirection::LEFT_TOP:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
-            break;
-        case GradientDirection::LEFT_BOTTOM:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
-            break;
-        case GradientDirection::RIGHT_TOP:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
-            break;
-        case GradientDirection::RIGHT_BOTTOM:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
-            break;
-        case GradientDirection::NONE:
-        case GradientDirection::START_TO_END:
-        case GradientDirection::END_TO_START:
-        default:
-            break;
-    }
-    // repeating
-    auto repeating = argsPtrItem->GetBool("repeating", false);
-    lineGradient.SetRepeat(repeating);
-    // color stops
-    GetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
-    auto stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        auto decoration = GetBackDecoration();
-        if (decoration) {
-            decoration->SetGradient(lineGradient);
-        }
-    } else {
-        auto boxComponent = stack->GetBoxComponent();
-        if (!boxComponent) {
-            LOGE("boxComponent is null");
-            return;
-        }
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-            BoxStateAttribute::GRADIENT, lineGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
-        }
-    }
+    NG::Gradient newGradient;
+    NewJsLinearGradient(info, newGradient);
+    ViewAbstractModel::GetInstance()->SetLinearGradient(newGradient);
 }
 
 void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
@@ -3897,67 +3770,9 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::Gradient newGradient;
-        NewJsRadialGradient(info, newGradient);
-        NG::ViewAbstract::SetRadialGradient(newGradient);
-        return;
-    }
-    Gradient radialGradient;
-    radialGradient.SetType(GradientType::RADIAL);
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    // center
-    auto center = argsPtrItem->GetValue("center");
-    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
-        Dimension value;
-        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
-            radialGradient.GetRadialGradient().radialCenterX = AnimatableDimension(value, option);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                radialGradient.GetRadialGradient().radialCenterX =
-                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
-            }
-        }
-        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
-            radialGradient.GetRadialGradient().radialCenterY = AnimatableDimension(value, option);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                radialGradient.GetRadialGradient().radialCenterY =
-                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
-            }
-        }
-    }
-    // radius
-    Dimension radius;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius)) {
-        radialGradient.GetRadialGradient().radialVerticalSize = AnimatableDimension(radius, option);
-        radialGradient.GetRadialGradient().radialHorizontalSize = AnimatableDimension(radius, option);
-    }
-    // repeating
-    auto repeating = argsPtrItem->GetBool("repeating", false);
-    radialGradient.SetRepeat(repeating);
-    // color stops
-    GetGradientColorStops(radialGradient, argsPtrItem->GetValue("colors"));
-
-    auto stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        auto decoration = GetBackDecoration();
-        if (decoration) {
-            decoration->SetGradient(radialGradient);
-        }
-    } else {
-        auto boxComponent = stack->GetBoxComponent();
-        if (!boxComponent) {
-            LOGE("boxComponent is null");
-            return;
-        }
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-            BoxStateAttribute::GRADIENT, radialGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
-        }
-    }
+    NG::Gradient newGradient;
+    NewJsRadialGradient(info, newGradient);
+    ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
 }
 
 void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
@@ -4018,74 +3833,9 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
         NG::ViewAbstract::SetSweepGradient(newGradient);
         return;
     }
-    Gradient sweepGradient;
-    sweepGradient.SetType(GradientType::SWEEP);
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    // center
-    auto center = argsPtrItem->GetValue("center");
-    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
-        Dimension value;
-        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
-            sweepGradient.GetSweepGradient().centerX = AnimatableDimension(value, option);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                sweepGradient.GetSweepGradient().centerX =
-                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
-            }
-        }
-        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
-            sweepGradient.GetSweepGradient().centerY = AnimatableDimension(value, option);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                sweepGradient.GetSweepGradient().centerY =
-                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
-            }
-        }
-    }
-    std::optional<float> degree;
-    // start
-    GetAngle("start", argsPtrItem, degree);
-    if (degree) {
-        sweepGradient.GetSweepGradient().startAngle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
-        degree.reset();
-    }
-    // end
-    GetAngle("end", argsPtrItem, degree);
-    if (degree) {
-        sweepGradient.GetSweepGradient().endAngle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
-        degree.reset();
-    }
-    // rotation
-    GetAngle("rotation", argsPtrItem, degree);
-    if (degree) {
-        sweepGradient.GetSweepGradient().rotation = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
-        degree.reset();
-    }
-    // repeating
-    auto repeating = argsPtrItem->GetBool("repeating", false);
-    sweepGradient.SetRepeat(repeating);
-    // color stops
-    GetGradientColorStops(sweepGradient, argsPtrItem->GetValue("colors"));
-
-    auto stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        auto decoration = GetBackDecoration();
-        if (decoration) {
-            decoration->SetGradient(sweepGradient);
-        }
-    } else {
-        auto boxComponent = stack->GetBoxComponent();
-        if (!boxComponent) {
-            LOGE("boxComponent is null");
-            return;
-        }
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-            BoxStateAttribute::GRADIENT, sweepGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
-        }
-    }
+    NG::Gradient newGradient;
+    NewJsSweepGradient(info, newGradient);
+    ViewAbstractModel::GetInstance()->SetSweepGradient(newGradient);
 }
 
 void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
@@ -4188,12 +3938,7 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
         shadows.begin()->SetColor(color);
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBackShadow(shadows[0]);
-        return;
-    }
-    auto backDecoration = GetBackDecoration();
-    backDecoration->SetShadows(shadows);
+    ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
 }
 
 void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
@@ -5235,57 +4980,24 @@ void JSViewAbstract::SetMargin(const Dimension& value)
 
 void JSViewAbstract::SetBlur(float radius)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        Dimension dimensionRadius(radius, DimensionUnit::PX);
-        NG::ViewAbstract::SetFrontBlur(dimensionRadius);
-        return;
-    }
-    auto decoration = GetFrontDecoration();
-    SetBlurRadius(decoration, radius);
+    Dimension dimensionRadius(radius, DimensionUnit::PX);
+    ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius);
 }
 
 void JSViewAbstract::SetColorBlend(Color color)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetColorBlend(color);
-        return;
-    }
-    auto decoration = GetFrontDecoration();
-    if (decoration) {
-        decoration->SetColorBlend(color);
-    }
+    ViewAbstractModel::GetInstance()->SetColorBlend(color);
 }
 
 void JSViewAbstract::SetBackdropBlur(float radius)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        Dimension dimensionRadius(radius, DimensionUnit::PX);
-        NG::ViewAbstract::SetBackdropBlur(dimensionRadius);
-        return;
-    }
-    auto decoration = GetBackDecoration();
-    SetBlurRadius(decoration, radius);
-}
-
-void JSViewAbstract::SetBlurRadius(const RefPtr<Decoration>& decoration, float radius)
-{
-    if (decoration) {
-        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        decoration->SetBlurRadius(AnimatableDimension(radius, DimensionUnit::PX, option));
-    }
+    Dimension dimensionRadius(radius, DimensionUnit::PX);
+    ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
 }
 
 void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGD("Not completed in new pipe.");
-        return;
-    }
-    auto decoration = GetBackDecoration();
-    if (decoration) {
-        decoration->SetWindowBlurProgress(progress);
-        decoration->SetWindowBlurStyle(blurStyle);
-    }
+    ViewAbstractModel::GetInstance()->SetWindowBlur(progress, blurStyle);
 }
 
 bool JSViewAbstract::ParseJsonDimension(

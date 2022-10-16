@@ -21,6 +21,8 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/box/box_component_helper.h"
+#include "core/components/common/layout/grid_layout_info.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
@@ -34,6 +36,26 @@ RefPtr<Decoration> GetBackDecoration()
         box->SetBackDecoration(decoration);
     }
     return decoration;
+}
+
+RefPtr<Decoration> GetFrontDecoration()
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto decoration = box->GetFrontDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+        box->SetFrontDecoration(decoration);
+    }
+
+    return decoration;
+}
+
+AnimatableDimension ToAnimatableDimension(const Dimension& dimension)
+{
+    AnimatableDimension result(dimension);
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    result.SetAnimationOption(option);
+    return result;
 }
 
 void ViewAbstractModelImpl::SetWidth(const Dimension& width)
@@ -140,7 +162,6 @@ void ViewAbstractModelImpl::SetBackgroundColor(const Color& color)
 void ViewAbstractModelImpl::SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant)
 {
     auto decoration = GetBackDecoration();
-    CHECK_NULL_VOID(decoration);
     auto image = decoration->GetImage();
     if (!image) {
         image = AceType::MakeRefPtr<BackgroundImage>();
@@ -158,7 +179,6 @@ void ViewAbstractModelImpl::SetBackgroundImage(const std::string& src, RefPtr<Th
 void ViewAbstractModelImpl::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
 {
     auto decoration = GetBackDecoration();
-    CHECK_NULL_VOID(decoration);
     auto image = decoration->GetImage();
     if (!image) {
         image = AceType::MakeRefPtr<BackgroundImage>();
@@ -170,7 +190,6 @@ void ViewAbstractModelImpl::SetBackgroundImageRepeat(const ImageRepeat& imageRep
 void ViewAbstractModelImpl::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
 {
     auto decoration = GetBackDecoration();
-    CHECK_NULL_VOID(decoration);
     auto image = decoration->GetImage();
     if (!image) {
         image = AceType::MakeRefPtr<BackgroundImage>();
@@ -182,7 +201,6 @@ void ViewAbstractModelImpl::SetBackgroundImageSize(const BackgroundImageSize& bg
 void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
 {
     auto decoration = GetBackDecoration();
-    CHECK_NULL_VOID(decoration);
     auto image = decoration->GetImage();
     if (!image) {
         image = AceType::MakeRefPtr<BackgroundImage>();
@@ -194,7 +212,6 @@ void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosi
 void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle)
 {
     auto decoration = GetBackDecoration();
-    CHECK_NULL_VOID(decoration);
     decoration->SetBlurStyle(bgBlurStyle);
 }
 
@@ -242,7 +259,6 @@ void ViewAbstractModelImpl::SetBorderRadius(const std::optional<Dimension>& radi
     const std::optional<Dimension>& radiusBottomRight)
 {
     auto decoration = GetBackDecoration();
-    CHECK_NULL_VOID(decoration);
     Dimension topLeft = radiusTopLeft.has_value() ? radiusTopLeft.value()
                                                   : BoxComponentHelper::GetBorderRadiusTopLeft(decoration).GetX();
     Dimension topRight = radiusTopRight.has_value() ? radiusTopRight.value()
@@ -278,7 +294,6 @@ void ViewAbstractModelImpl::SetBorderColor(const std::optional<Color>& colorLeft
     const std::optional<Color>& colorBottom)
 {
     auto decoration = GetBackDecoration();
-    CHECK_NULL_VOID(decoration);
     Color leftColor = colorLeft.has_value() ? colorLeft.value() : BoxComponentHelper::GetBorderColorTop(decoration);
     Color rightColor =
         colorRight.has_value() ? colorRight.value() : BoxComponentHelper::GetBorderColorBottom(decoration);
@@ -309,7 +324,6 @@ void ViewAbstractModelImpl::SetBorderWidth(const std::optional<Dimension>& left,
     const std::optional<Dimension>& top, const std::optional<Dimension>& bottom)
 {
     auto decoration = GetBackDecoration();
-    CHECK_NULL_VOID(decoration);
     Dimension leftDimen = left.has_value() ? left.value() : BoxComponentHelper::GetBorderLeftWidth(decoration);
     Dimension rightDimen = right.has_value() ? right.value() : BoxComponentHelper::GetBorderRightWidth(decoration);
     Dimension topDimen = top.has_value() ? top.value() : BoxComponentHelper::GetBorderTopWidth(decoration);
@@ -339,7 +353,6 @@ void ViewAbstractModelImpl::SetBorderStyle(const std::optional<BorderStyle>& sty
     const std::optional<BorderStyle>& styleBottom)
 {
     auto decoration = GetBackDecoration();
-    CHECK_NULL_VOID(decoration);
     BorderStyle left = styleLeft ? styleLeft.value() : BoxComponentHelper::GetBorderStyleLeft(decoration);
     BorderStyle right = styleRight ? styleRight.value() : BoxComponentHelper::GetBorderStyleRight(decoration);
     BorderStyle top = styleTop ? styleTop.value() : BoxComponentHelper::GetBorderStyleTop(decoration);
@@ -384,12 +397,182 @@ void ViewAbstractModelImpl::SetAlign(const Alignment& alignment)
     box->SetAlignment(alignment);
 }
 
-AnimatableDimension ToAnimatableDimension(const Dimension& dimension)
+void ViewAbstractModelImpl::SetUseAlign(
+    AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset)
 {
-    AnimatableDimension result(dimension);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetAlignDeclarationPtr(declaration);
+    box->SetUseAlignSide(edge);
+    if (offset.has_value()) {
+        box->SetUseAlignOffset(offset.value());
+    }
+}
+
+void ViewAbstractModelImpl::SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset,
+    const RefPtr<GridContainerInfo>& info, GridSizeType type)
+{
+    if (info != nullptr) {
+        auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
+        builder->SetParent(info);
+        if (span.has_value()) {
+            if (type == GridSizeType::UNDEFINED) {
+                builder->SetColumns(span.value());
+            } else {
+                builder->SetSizeColumn(type, span.value());
+            }
+        }
+        if (offset.has_value()) {
+            if (type == GridSizeType::UNDEFINED) {
+                builder->SetOffset(offset.value());
+            } else {
+                builder->SetOffset(offset.value(), type);
+            }
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetZIndex(int32_t value)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
+    if (renderComponent) {
+        renderComponent->SetZIndex(value);
+    }
+}
+
+Gradient ToGradient(const NG::Gradient& gradient)
+{
+    Gradient retGradient;
+    retGradient.SetType(static_cast<GradientType>(gradient.GetType()));
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    result.SetAnimationOption(option);
-    return result;
+    if (retGradient.GetType() == GradientType::LINEAR) {
+        auto angle = gradient.GetLinearGradient()->angle;
+        if (angle.has_value()) {
+            retGradient.GetLinearGradient().angle = ToAnimatableDimension(angle.value());
+        }
+        auto linearX = gradient.GetLinearGradient()->linearX;
+        if (linearX.has_value()) {
+            retGradient.GetLinearGradient().linearX = static_cast<GradientDirection>(linearX.value());
+        }
+        auto linearY = gradient.GetLinearGradient()->linearY;
+        if (linearY.has_value()) {
+            retGradient.GetLinearGradient().linearY = static_cast<GradientDirection>(linearY.value());
+        }
+    }
+
+    if (retGradient.GetType() == GradientType::RADIAL) {
+        auto radialCenterX = gradient.GetRadialGradient()->radialCenterX;
+        if (radialCenterX.has_value()) {
+            retGradient.GetRadialGradient().radialCenterX = ToAnimatableDimension(radialCenterX.value());
+        }
+        auto radialCenterY = gradient.GetRadialGradient()->radialCenterY;
+        if (radialCenterY.has_value()) {
+            retGradient.GetRadialGradient().radialCenterY = ToAnimatableDimension(radialCenterY.value());
+        }
+        auto radialVerticalSize = gradient.GetRadialGradient()->radialVerticalSize;
+        if (radialVerticalSize.has_value()) {
+            retGradient.GetRadialGradient().radialVerticalSize = ToAnimatableDimension(radialVerticalSize.value());
+        }
+        auto radialHorizontalSize = gradient.GetRadialGradient()->radialHorizontalSize;
+        if (radialVerticalSize.has_value()) {
+            retGradient.GetRadialGradient().radialHorizontalSize = ToAnimatableDimension(radialHorizontalSize.value());
+        }
+    }
+
+    if (retGradient.GetType() == GradientType::SWEEP) {
+        auto centerX = gradient.GetSweepGradient()->centerX;
+        if (centerX.has_value()) {
+            retGradient.GetSweepGradient().centerX = ToAnimatableDimension(centerX.value());
+        }
+        auto centerY = gradient.GetSweepGradient()->centerY;
+        if (centerY.has_value()) {
+            retGradient.GetSweepGradient().centerY = ToAnimatableDimension(centerY.value());
+        }
+        auto startAngle = gradient.GetSweepGradient()->startAngle;
+        if (startAngle.has_value()) {
+            retGradient.GetSweepGradient().startAngle = ToAnimatableDimension(startAngle.value());
+        }
+        auto endAngle = gradient.GetSweepGradient()->endAngle;
+        if (endAngle.has_value()) {
+            retGradient.GetSweepGradient().endAngle = ToAnimatableDimension(endAngle.value());
+        }
+        auto rotation = gradient.GetSweepGradient()->rotation;
+        if (rotation.has_value()) {
+            retGradient.GetSweepGradient().rotation = ToAnimatableDimension(rotation.value());
+        }
+    }
+
+    retGradient.SetRepeat(gradient.GetRepeat());
+    const auto& colorStops = gradient.GetColors();
+
+    for (auto item : colorStops) {
+        GradientColor gradientColor;
+        gradientColor.SetColor(item.GetColor());
+        gradientColor.SetHasValue(item.GetHasValue());
+        gradientColor.SetDimension(item.GetDimension());
+        retGradient.AddColor(gradientColor);
+    }
+    return retGradient;
+}
+
+void ViewAbstractModelImpl::SetLinearGradient(const NG::Gradient& gradient)
+{
+    auto lineGradient = ToGradient(gradient);
+    auto* stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        auto decoration = GetBackDecoration();
+        if (decoration) {
+            decoration->SetGradient(lineGradient);
+        }
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+            BoxStateAttribute::GRADIENT, lineGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetSweepGradient(const NG::Gradient& gradient)
+{
+    auto sweepGradient = ToGradient(gradient);
+    auto* stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        auto decoration = GetBackDecoration();
+        if (decoration) {
+            decoration->SetGradient(sweepGradient);
+        }
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+            BoxStateAttribute::GRADIENT, sweepGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetRadialGradient(const NG::Gradient& gradient)
+{
+    auto radialGradient = ToGradient(gradient);
+    auto* stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        auto decoration = GetBackDecoration();
+        if (decoration) {
+            decoration->SetGradient(radialGradient);
+        }
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+            BoxStateAttribute::GRADIENT, radialGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        }
+    }
 }
 
 void ViewAbstractModelImpl::SetPosition(const Dimension& x, const Dimension& y)
@@ -575,6 +758,37 @@ void ViewAbstractModelImpl::SetDisplayIndex(int32_t value)
 {
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     flexItem->SetDisplayIndex(value);
+}
+
+void ViewAbstractModelImpl::SetBackdropBlur(const Dimension& radius)
+{
+    auto decoration = GetBackDecoration();
+    decoration->SetBlurRadius(ToAnimatableDimension(radius));
+}
+
+void ViewAbstractModelImpl::SetFrontBlur(const Dimension& radius)
+{
+    auto decoration = GetFrontDecoration();
+    decoration->SetBlurRadius(ToAnimatableDimension(radius));
+}
+
+void ViewAbstractModelImpl::SetBackShadow(const std::vector<Shadow>& shadows)
+{
+    auto backDecoration = GetBackDecoration();
+    backDecoration->SetShadows(shadows);
+}
+
+void ViewAbstractModelImpl::SetColorBlend(const Color& value)
+{
+    auto decoration = GetFrontDecoration();
+    decoration->SetColorBlend(value);
+}
+
+void ViewAbstractModelImpl::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
+{
+    auto decoration = GetBackDecoration();
+    decoration->SetWindowBlurProgress(progress);
+    decoration->SetWindowBlurStyle(blurStyle);
 }
 
 void ViewAbstractModelImpl::SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)

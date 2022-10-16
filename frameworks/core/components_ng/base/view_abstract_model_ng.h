@@ -203,6 +203,36 @@ public:
         ViewAbstract::SetAlign(alignment);
     }
 
+    void SetUseAlign(
+        AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) override
+    {}
+
+    void SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, const RefPtr<GridContainerInfo>& info,
+        GridSizeType type = GridSizeType::UNDEFINED) override
+    {
+        ViewAbstract::SetGrid(span, offset, type);
+    }
+
+    void SetZIndex(int32_t value) override
+    {
+        ViewAbstract::SetZIndex(value);
+    }
+
+    void SetLinearGradient(const NG::Gradient& gradient) override
+    {
+        ViewAbstract::SetLinearGradient(gradient);
+    }
+
+    void SetSweepGradient(const NG::Gradient& gradient) override
+    {
+        ViewAbstract::SetSweepGradient(gradient);
+    }
+
+    void SetRadialGradient(const NG::Gradient& gradient) override
+    {
+        ViewAbstract::SetRadialGradient(gradient);
+    }
+
     void SetPosition(const Dimension& x, const Dimension& y) override
     {
         ViewAbstract::SetPosition({ x, y });
@@ -294,6 +324,30 @@ public:
     {
         ViewAbstract::SetDisplayIndex(value);
     }
+
+    void SetBackdropBlur(const Dimension& radius) override
+    {
+        ViewAbstract::SetBackdropBlur(radius);
+    }
+
+    void SetFrontBlur(const Dimension& radius) override
+    {
+        ViewAbstract::SetFrontBlur(radius);
+    }
+
+    void SetBackShadow(const std::vector<Shadow>& shadows) override
+    {
+        if (!shadows.empty()) {
+            ViewAbstract::SetBackShadow(shadows[0]);
+        }
+    }
+
+    void SetColorBlend(const Color& value) override
+    {
+        ViewAbstract::SetColorBlend(value);
+    }
+
+    void SetWindowBlur(float progress, WindowBlurStyle blurStyle) override {}
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
     {

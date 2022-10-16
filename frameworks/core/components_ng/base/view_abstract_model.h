@@ -25,6 +25,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
@@ -83,6 +84,11 @@ public:
     virtual void SetLayoutWeight(int32_t value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
+    virtual void SetUseAlign(
+        AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) = 0;
+    virtual void SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset,
+        const RefPtr<GridContainerInfo>& info, GridSizeType type = GridSizeType::UNDEFINED) = 0;
+    virtual void SetZIndex(int32_t value) = 0;
 
     // position
     virtual void SetPosition(const Dimension& x, const Dimension& y) = 0;
@@ -111,6 +117,18 @@ public:
     virtual void SetFlexShrink(float value) = 0;
     virtual void SetFlexGrow(float value) = 0;
     virtual void SetDisplayIndex(int32_t value) = 0;
+
+    // gradient
+    virtual void SetLinearGradient(const NG::Gradient& gradient) = 0;
+    virtual void SetSweepGradient(const NG::Gradient& gradient) = 0;
+    virtual void SetRadialGradient(const NG::Gradient& gradient) = 0;
+
+    // effects
+    virtual void SetBackdropBlur(const Dimension& radius) = 0;
+    virtual void SetFrontBlur(const Dimension& radius) = 0;
+    virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
+    virtual void SetColorBlend(const Color& value) = 0;
+    virtual void SetWindowBlur(float progress, WindowBlurStyle blurStyle) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;

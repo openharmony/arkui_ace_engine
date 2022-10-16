@@ -21,7 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
-#include "core/components_ng/pattern/container_model.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
@@ -304,12 +304,12 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
             return nullptr;
         }
         // use another VSP instance while executing the builder function
-        ContainerModel::GetInstance()->NewScope();
+        ViewStackModel::GetInstance()->NewScope();
         {
             ACE_SCORING_EVENT("List.onItemDragStart.builder");
             builderFunc->Execute();
         }
-        return ContainerModel::GetInstance()->Finish();
+        return ViewStackModel::GetInstance()->Finish();
     };
     ListModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
 }

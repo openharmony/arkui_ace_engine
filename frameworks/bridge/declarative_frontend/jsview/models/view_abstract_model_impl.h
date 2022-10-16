@@ -61,6 +61,15 @@ public:
     void SetLayoutWeight(int32_t value) override;
     void SetAspectRatio(float ratio) override;
     void SetAlign(const Alignment& alignment) override;
+    void SetUseAlign(
+        AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) override;
+    void SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, const RefPtr<GridContainerInfo>& info,
+        GridSizeType type = GridSizeType::UNDEFINED) override;
+    void SetZIndex(int32_t value) override;
+
+    void SetLinearGradient(const NG::Gradient& gradient) override;
+    void SetSweepGradient(const NG::Gradient& gradient) override;
+    void SetRadialGradient(const NG::Gradient& gradient) override;
 
     void SetPosition(const Dimension& x, const Dimension& y) override;
     void SetOffset(const Dimension& x, const Dimension& y) override;
@@ -85,6 +94,12 @@ public:
     void SetFlexShrink(float value) override;
     void SetFlexGrow(float value) override;
     void SetDisplayIndex(int32_t value) override;
+
+    void SetBackdropBlur(const Dimension& radius) override;
+    void SetFrontBlur(const Dimension& radius) override;
+    void SetBackShadow(const std::vector<Shadow>& shadows) override;
+    void SetColorBlend(const Color& value) override;
+    void SetWindowBlur(float progress, WindowBlurStyle blurStyle) override;
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
