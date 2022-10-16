@@ -28,7 +28,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
-#include "core/components_ng/pattern/swiper/swiper_view.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -95,8 +95,9 @@ public:
  */
 HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest001, TestSize.Level1)
 {
-    SwiperView::Create();
-    SwiperView::SetIndex(INDEX_DEFAULT);
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetIndex(INDEX_DEFAULT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
     auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -112,8 +113,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest001, TestSize.Level1)
 HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest002, TestSize.Level1)
 {
     for (int32_t i = 0; i < SWIPER_LAYOUT_PROPERTY_INDEX.size(); ++i) {
-        SwiperView::Create();
-        SwiperView::SetIndex(SWIPER_LAYOUT_PROPERTY_INDEX[i]);
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetIndex(SWIPER_LAYOUT_PROPERTY_INDEX[i]);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -129,8 +131,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest002, TestSize.Level1)
  */
 HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest003, TestSize.Level1)
 {
-    SwiperView::Create();
-    SwiperView::SetAutoPlay(SWIPER_PAINT_PROPERTY_AUTOPLAY);
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetAutoPlay(SWIPER_PAINT_PROPERTY_AUTOPLAY);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(frameNode == nullptr, false);
     auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
@@ -146,8 +149,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest003, TestSize.Level1)
 HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest004, TestSize.Level1)
 {
     for (const auto& interval : SWIPER_PAINT_PROPERTY_INTERVAL) {
-        SwiperView::Create();
-        SwiperView::SetAutoPlayInterval(interval);
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetAutoPlayInterval(interval);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
@@ -164,8 +168,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest004, TestSize.Level1)
  */
 HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest005, TestSize.Level1)
 {
-    SwiperView::Create();
-    SwiperView::SetShowIndicator(SWIPER_LAYOUT_PROPERTY_SHOW_INDICATOR);
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetShowIndicator(SWIPER_LAYOUT_PROPERTY_SHOW_INDICATOR);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(frameNode == nullptr, false);
     auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -180,8 +185,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest005, TestSize.Level1)
  */
 HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest006, TestSize.Level1)
 {
-    SwiperView::Create();
-    SwiperView::SetLoop(SWIPER_PAINT_PROPERTY_LOOP);
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetLoop(SWIPER_PAINT_PROPERTY_LOOP);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(frameNode == nullptr, false);
     auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
@@ -196,8 +202,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest006, TestSize.Level1)
  */
 HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest007, TestSize.Level1)
 {
-    SwiperView::Create();
-    SwiperView::SetDisplayMode(SWIPER_LAYOUT_PROPERTY_DISPLAY_MODE);
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetDisplayMode(SWIPER_LAYOUT_PROPERTY_DISPLAY_MODE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
     auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -214,8 +221,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest007, TestSize.Level1)
 HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest008, TestSize.Level1)
 {
     for (const auto& effectMode : SWIPER_PAINT_PROPERTY_EDGE_EFFECT) {
-        SwiperView::Create();
-        SwiperView::SetEdgeEffect(effectMode);
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetEdgeEffect(effectMode);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_FALSE(frameNode == nullptr);
         auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
@@ -232,8 +240,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest008, TestSize.Level1)
 HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest009, TestSize.Level1)
 {
     for (int32_t i = 0; i < static_cast<int32_t>(SWIPER_PAINT_PROPERTY_CURVE.size()); ++i) {
-        SwiperView::Create();
-        SwiperView::SetCurve(SWIPER_PAINT_PROPERTY_CURVE[i]);
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetCurve(SWIPER_PAINT_PROPERTY_CURVE[i]);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
@@ -250,8 +259,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest009, TestSize.Level1)
 HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest0010, TestSize.Level1)
 {
     for (const auto& duration : SWIPER_PAINT_PROPERTY_DURATION) {
-        SwiperView::Create();
-        SwiperView::SetDuration(duration);
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetDuration(duration);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
@@ -268,8 +278,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest0010, TestSize.Level1)
 HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest0011, TestSize.Level1)
 {
     for (const auto& itemSpace : SWIPER_PAINT_PROPERTY_ITEM_SPACE) {
-        SwiperView::Create();
-        SwiperView::SetItemSpace(itemSpace);
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetItemSpace(itemSpace);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -287,8 +298,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest0011, TestSize.Level1)
 HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest0012, TestSize.Level1)
 {
     for (int32_t i = 0; i < SWIPER_PAINT_PROPERTY_CACHED_COUNT.size(); ++i) {
-        SwiperView::Create();
-        SwiperView::SetCachedCount(SWIPER_PAINT_PROPERTY_CACHED_COUNT[i]);
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetCachedCount(SWIPER_PAINT_PROPERTY_CACHED_COUNT[i]);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -305,8 +317,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest0012, TestSize.Level1)
 HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest0013, TestSize.Level1)
 {
     for (int32_t i = 0; i < SWIPER_PAINT_PROPERTY_DISPLAY_COUNT.size(); ++i) {
-        SwiperView::Create();
-        SwiperView::SetDisplayCount(SWIPER_PAINT_PROPERTY_DISPLAY_COUNT[i]);
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetDisplayCount(SWIPER_PAINT_PROPERTY_DISPLAY_COUNT[i]);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -322,8 +335,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperLayoutPropertyTest0013, TestSize.Level1)
  */
 HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest0014, TestSize.Level1)
 {
-    SwiperView::Create();
-    SwiperView::SetDisableSwipe(SWIPER_LAYOUT_PROPERTY_SHOW_DISABLE_SWIPE);
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetDisableSwipe(SWIPER_LAYOUT_PROPERTY_SHOW_DISABLE_SWIPE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(frameNode == nullptr, false);
     auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
@@ -339,8 +353,9 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest0014, TestSize.Level1)
 HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest0015, TestSize.Level1)
 {
     for (const auto& direction : SWIPER_PAINT_PROPERTY_DIRECTION) {
-        SwiperView::Create();
-        SwiperView::SetDirection(direction);
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetDirection(direction);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_FALSE(frameNode == nullptr);
         auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -356,7 +371,8 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest0015, TestSize.Level1)
  */
 HWTEST_F(SwiperPropertyTestNg, SwiperPropertyTest0016, TestSize.Level1)
 {
-    SwiperView::Create();
+    SwiperModelNG swiper;
+    swiper.Create();
     ViewAbstract::SetInspectorId(V2::SWIPER_ETS_TAG);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
