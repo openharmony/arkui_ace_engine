@@ -134,6 +134,40 @@ public:
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override
     {}
 
+    void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override
+    {
+        ViewAbstract::SetVisibility(visible);
+    }
+
+    void SetSharedTransition(const SharedTransitionOption& option) override {}
+
+    void SetGeometryTransition(const std::string& id) override {}
+
+    void SetFlexBasis(const Dimension& value) override
+    {
+        ViewAbstract::SetFlexBasis(value);
+    }
+
+    void SetAlignSelf(FlexAlign value) override
+    {
+        ViewAbstract::SetAlignSelf(value);
+    }
+
+    void SetFlexShrink(float value) override
+    {
+        ViewAbstract::SetFlexShrink(value);
+    }
+
+    void SetFlexGrow(float value) override
+    {
+        ViewAbstract::SetFlexGrow(value);
+    }
+
+    void SetDisplayIndex(int32_t value) override
+    {
+        ViewAbstract::SetDisplayIndex(value);
+    }
+
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
     {
         ViewAbstract::SetOnClick(std::move(tapEventFunc));

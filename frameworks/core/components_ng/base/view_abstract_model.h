@@ -24,6 +24,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
@@ -72,6 +73,16 @@ public:
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions) = 0;
     virtual void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) = 0;
+    virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
+    virtual void SetSharedTransition(const SharedTransitionOption& option) = 0;
+    virtual void SetGeometryTransition(const std::string& id) = 0;
+
+    // flex props
+    virtual void SetFlexBasis(const Dimension& value) = 0;
+    virtual void SetAlignSelf(FlexAlign value) = 0;
+    virtual void SetFlexShrink(float value) = 0;
+    virtual void SetFlexGrow(float value) = 0;
+    virtual void SetDisplayIndex(int32_t value) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;

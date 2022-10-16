@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <regex>
 #include <vector>
 
@@ -43,6 +44,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -1399,29 +1401,22 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetVisibility(VisibleType(info[0]->ToNumber<int32_t>()));
-        return;
-    }
-
-    auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-    display->SetVisible(VisibleType(info[0]->ToNumber<int32_t>()));
+    int32_t visible = info[0]->ToNumber<int32_t>();
 
     if (info.Length() > 1 && info[1]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
 
-        auto eventMarker =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("onVisibilityChange");
+        auto onVisibilityChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](int32_t visible) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onVisibilityChange");
 
-                auto param = info->GetType();
-                int32_t newValue = StringToInt(param);
-                JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
-                func->ExecuteJS(1, &newJSVal);
-            });
-
-        display->SetVisibleChangeEvent(eventMarker);
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(visible));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ViewAbstractModel::GetInstance()->SetVisibility(
+            static_cast<VisibleType>(visible), std::move(onVisibilityChange));
+    } else {
+        ViewAbstractModel::GetInstance()->SetVisibility(static_cast<VisibleType>(visible), [](int32_t visible) {});
     }
 }
 
@@ -1435,12 +1430,7 @@ void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetFlexBasis(value);
-        return;
-    }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flexItem->SetFlexBasis(value);
+    ViewAbstractModel::GetInstance()->SetFlexBasis(value);
 }
 
 void JSViewAbstract::JsFlexGrow(const JSCallbackInfo& info)
@@ -1453,12 +1443,7 @@ void JSViewAbstract::JsFlexGrow(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetFlexGrow(static_cast<float>(value));
-        return;
-    }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flexItem->SetFlexGrow(value);
+    ViewAbstractModel::GetInstance()->SetFlexGrow(static_cast<float>(value));
 }
 
 void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
@@ -1471,12 +1456,7 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetFlexShrink(static_cast<float>(value));
-        return;
-    }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flexItem->SetFlexShrink(value);
+    ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
 }
 
 void JSViewAbstract::JsDisplayPriority(const JSCallbackInfo& info)
@@ -1489,12 +1469,7 @@ void JSViewAbstract::JsDisplayPriority(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetDisplayIndex(static_cast<int32_t>(value));
-        return;
-    }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flexItem->SetDisplayIndex(value);
+    ViewAbstractModel::GetInstance()->SetDisplayIndex(static_cast<int32_t>(value));
 }
 
 void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
@@ -1509,12 +1484,8 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         LOGE("JsSharedTransition: id is empty.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGE("new framework does not implement sharedTransition now");
-        return;
-    }
-    auto sharedTransitionComponent = ViewStackProcessor::GetInstance()->GetSharedTransitionComponent();
-    sharedTransitionComponent->SetShareId(id);
+    SharedTransitionOption option;
+    option.id = id;
 
     // options
     if (info.Length() > 1 && info[1]->IsObject()) {
@@ -1528,11 +1499,13 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
                 duration = DEFAULT_DURATION;
             }
         }
+        option.duration = duration;
         // default: delay: 0
         auto delay = optionsArgs->GetInt("delay", 0);
         if (delay < 0) {
             delay = 0;
         }
+        option.delay = delay;
         // default: LinearCurve
         RefPtr<Curve> curve;
         auto curveArgs = optionsArgs->GetValue("curve");
@@ -1547,16 +1520,12 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         } else {
             curve = AceType::MakeRefPtr<LinearCurve>();
         }
-        TweenOption tweenOption;
-        tweenOption.SetCurve(curve);
-        tweenOption.SetDuration(static_cast<int32_t>(duration));
-        tweenOption.SetDelay(static_cast<int32_t>(delay));
+        option.curve = curve;
         // motionPath
-
         if (optionsArgs->Contains("motionPath")) {
             MotionPathOption motionPathOption;
             if (ParseMotionPath(optionsArgs->GetValue("motionPath"), motionPathOption)) {
-                tweenOption.SetMotionPathOption(motionPathOption);
+                option.motionPathOption = motionPathOption;
             }
         }
         // zIndex
@@ -1564,21 +1533,16 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         if (optionsArgs->Contains("zIndex")) {
             zIndex = optionsArgs->GetInt("zIndex", 0);
         }
+        option.zIndex = zIndex;
         // type
         SharedTransitionEffectType type = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
         if (optionsArgs->Contains("type")) {
             type = static_cast<SharedTransitionEffectType>(
                 optionsArgs->GetInt("type", static_cast<int32_t>(SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE)));
         }
-        // effect: exchange
-        auto sharedTransitionEffect =
-            SharedTransitionEffect::GetSharedTransitionEffect(type, sharedTransitionComponent->GetShareId());
-        sharedTransitionComponent->SetEffect(sharedTransitionEffect);
-        sharedTransitionComponent->SetOption(tweenOption);
-        if (zIndex != 0) {
-            sharedTransitionComponent->SetZIndex(zIndex);
-        }
+        option.type = type;
     }
+    ViewAbstractModel::GetInstance()->SetSharedTransition(option);
 }
 
 void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
@@ -1593,16 +1557,7 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
         LOGE("JsGeometryTransition: id is empty.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("GeometryTransition not completed");
-        return;
-    }
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!boxComponent) {
-        LOGE("boxComponent is null");
-        return;
-    }
-    boxComponent->SetGeometryTransitionId(id);
+    ViewAbstractModel::GetInstance()->SetGeometryTransition(id);
 }
 
 void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
@@ -1612,14 +1567,9 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
         return;
     }
     auto alignVal = info[0]->ToNumber<int32_t>();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetAlignSelf(alignVal);
-        return;
-    }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
 
     if (alignVal >= 0 && alignVal <= MAX_ALIGN_VALUE) {
-        flexItem->SetAlignSelf((FlexAlign)alignVal);
+        ViewAbstractModel::GetInstance()->SetAlignSelf(static_cast<FlexAlign>(alignVal));
     }
 }
 

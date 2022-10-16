@@ -51,6 +51,15 @@ public:
     void SetTransition(const NG::TransitionOptions& transitionOptions) override;
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override;
+    void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
+    void SetSharedTransition(const SharedTransitionOption& option) override;
+    void SetGeometryTransition(const std::string& id) override;
+
+    void SetFlexBasis(const Dimension& value) override;
+    void SetAlignSelf(FlexAlign value) override;
+    void SetFlexShrink(float value) override;
+    void SetFlexGrow(float value) override;
+    void SetDisplayIndex(int32_t value) override;
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;

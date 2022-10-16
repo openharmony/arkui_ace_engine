@@ -259,6 +259,73 @@ void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optio
     }
 }
 
+void ViewAbstractModelImpl::SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc)
+{
+    auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+    display->SetVisible(visible);
+    auto eventMarker = EventMarker([func = std::move(changeEventFunc)](const BaseEventInfo* info) {
+        const auto& param = info->GetType();
+        int32_t newValue = StringToInt(param);
+        func(newValue);
+    });
+
+    display->SetVisibleChangeEvent(eventMarker);
+}
+
+void ViewAbstractModelImpl::SetSharedTransition(const SharedTransitionOption& option)
+{
+    auto sharedTransitionComponent = ViewStackProcessor::GetInstance()->GetSharedTransitionComponent();
+    sharedTransitionComponent->SetShareId(option.id);
+    TweenOption tweenOption;
+    tweenOption.SetCurve(option.curve);
+    tweenOption.SetDuration(option.duration);
+    tweenOption.SetDelay(option.delay);
+    tweenOption.SetMotionPathOption(option.motionPathOption);
+    auto sharedTransitionEffect =
+        SharedTransitionEffect::GetSharedTransitionEffect(option.type, sharedTransitionComponent->GetShareId());
+    sharedTransitionComponent->SetEffect(sharedTransitionEffect);
+    sharedTransitionComponent->SetOption(tweenOption);
+    if (option.zIndex != 0) {
+        sharedTransitionComponent->SetZIndex(option.zIndex);
+    }
+}
+
+void ViewAbstractModelImpl::SetGeometryTransition(const std::string& id)
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetGeometryTransitionId(id);
+}
+
+void ViewAbstractModelImpl::SetFlexBasis(const Dimension& value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetFlexBasis(value);
+}
+
+void ViewAbstractModelImpl::SetAlignSelf(FlexAlign value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetAlignSelf(value);
+}
+
+void ViewAbstractModelImpl::SetFlexShrink(float value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetFlexShrink(value);
+}
+
+void ViewAbstractModelImpl::SetFlexGrow(float value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetFlexGrow(value);
+}
+
+void ViewAbstractModelImpl::SetDisplayIndex(int32_t value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetDisplayIndex(value);
+}
+
 void ViewAbstractModelImpl::SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
