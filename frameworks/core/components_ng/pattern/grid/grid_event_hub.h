@@ -19,12 +19,13 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_v2/grid/grid_event.h"
 
 namespace OHOS::Ace::NG {
 
-using ScrollToIndexFunc = std::function<void(int32_t)>;
+using ScrollToIndexFunc = std::function<void(const BaseEventInfo*)>;
 using ItemDragStartFunc = std::function<RefPtr<UINode>(const ItemDragInfo&, int32_t)>;
 using ItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
 using ItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
@@ -71,7 +72,7 @@ public:
     void FireOnScrollToIndex(int32_t param) const
     {
         if (onScrollToIndex_) {
-            onScrollToIndex_(param);
+            onScrollToIndex_(std::make_shared<V2::GridEventInfo>(param).get());
         }
     }
 

@@ -1288,8 +1288,12 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         NG::ViewAbstract::SetWidth(NG::CalcLength(value));
         return true;
     }
+    return JsWidth(value);
+}
 
-    bool isPercentSize = value.Unit() == DimensionUnit::PERCENT ? true : false;
+bool JSViewAbstract::JsWidth(const Dimension& value)
+{
+    bool isPercentSize = value.Unit() == DimensionUnit::PERCENT;
     if (isPercentSize) {
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
@@ -1298,7 +1302,7 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         }
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
     auto option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
@@ -1340,7 +1344,12 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         return true;
     }
 
-    bool isPercentSize = value.Unit() == DimensionUnit::PERCENT ? true : false;
+    return JsHeight(value);
+}
+
+bool JSViewAbstract::JsHeight(const Dimension& value)
+{
+    bool isPercentSize = value.Unit() == DimensionUnit::PERCENT;
     if (isPercentSize) {
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
@@ -1349,7 +1358,7 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         }
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
     auto option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {

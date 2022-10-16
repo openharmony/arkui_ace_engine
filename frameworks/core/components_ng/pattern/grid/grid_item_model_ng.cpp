@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/grid_item_view.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
@@ -22,8 +22,22 @@
 
 namespace OHOS::Ace::NG {
 
-void GridItemView::Create(std::function<void(int32_t)>&& deepRenderFunc)
+void GridItemModelNG::Create()
 {
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr); });
+    stack->Push(frameNode);
+}
+
+void GridItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, bool isLazy)
+{
+    if (!isLazy) {
+        Create();
+        return;
+    }
+
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
@@ -38,36 +52,27 @@ void GridItemView::Create(std::function<void(int32_t)>&& deepRenderFunc)
     stack->Push(frameNode);
 }
 
-void GridItemView::Create()
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr); });
-    stack->Push(frameNode);
-}
-
-void GridItemView::SetRowStart(int32_t value)
+void GridItemModelNG::SetRowStart(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowStart, value);
 }
 
-void GridItemView::SetRowEnd(int32_t value)
+void GridItemModelNG::SetRowEnd(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowEnd, value);
 }
 
-void GridItemView::SetColumnStart(int32_t value)
+void GridItemModelNG::SetColumnStart(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnStart, value);
 }
 
-void GridItemView::SetColumnEnd(int32_t value)
+void GridItemModelNG::SetColumnEnd(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnEnd, value);
 }
 
-void GridItemView::SetForceRebuild(bool value)
+void GridItemModelNG::SetForceRebuild(bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -76,7 +81,7 @@ void GridItemView::SetForceRebuild(bool value)
     pattern->SetForceRebuild(value);
 }
 
-void GridItemView::SetSelectable(bool value)
+void GridItemModelNG::SetSelectable(bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -85,7 +90,7 @@ void GridItemView::SetSelectable(bool value)
     pattern->SetSelectable(value);
 }
 
-void GridItemView::SetOnSelect(SelectFunc&& onSelect)
+void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
