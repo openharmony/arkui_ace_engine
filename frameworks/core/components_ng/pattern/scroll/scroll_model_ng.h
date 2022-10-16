@@ -35,7 +35,7 @@ public:
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& proxy) override;
     void InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
         const std::pair<bool, Dimension>& width, EdgeEffect effect) override;
-    void SetDisplayMode(DisplayMode displayMode) override;
+    void SetDisplayMode(int displayMode) override;
     void SetScrollBarWidth(const Dimension& dimension) override;
     void SetScrollBarColor(const Color& color) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;

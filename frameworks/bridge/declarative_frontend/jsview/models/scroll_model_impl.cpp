@@ -25,6 +25,9 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+} // namespace
 
 void ScrollModelImpl::Create()
 {
@@ -111,9 +114,11 @@ void ScrollModelImpl::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const s
     component->InitScrollBar(theme, color, width, effect);
 }
 
-void ScrollModelImpl::SetDisplayMode(DisplayMode displayMode)
+void ScrollModelImpl::SetDisplayMode(int displayMode)
 {
-    JSViewSetProperty(&ScrollComponent::SetDisplayMode, displayMode);
+    if (displayMode >= 0 && displayMode < static_cast<int32_t>(DISPLAY_MODE.size())) {
+        JSViewSetProperty(&ScrollComponent::SetDisplayMode, DISPLAY_MODE[displayMode]);
+    }
 }
 
 void ScrollModelImpl::SetScrollBarWidth(const Dimension& dimension)
