@@ -50,6 +50,34 @@ public:
     virtual void SetMaxWidth(const Dimension& maxWidth) = 0;
     virtual void SetMaxHeight(const Dimension& maxHeight) = 0;
 
+    // box props
+    virtual void SetBackgroundColor(const Color& color) = 0;
+    virtual void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) = 0;
+    virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
+    virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
+    virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
+    virtual void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) = 0;
+    virtual void SetPadding(const Dimension& value) = 0;
+    virtual void SetPaddings(
+        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) = 0;
+    virtual void SetMargin(const Dimension& value) = 0;
+    virtual void SetMargins(
+        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) = 0;
+    virtual void SetBorderRadius(const Dimension& value) = 0;
+    virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetBorderColor(const Color& value) = 0;
+    virtual void SetBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
+        const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
+    virtual void SetBorderWidth(const Dimension& value) = 0;
+    virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
+    virtual void SetBorderStyle(const BorderStyle& value) = 0;
+    virtual void SetBorderStyle(const std::optional<BorderStyle>& styleLeft,
+        const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
+        const std::optional<BorderStyle>& styleBottom) = 0;
+
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(int32_t value) = 0;

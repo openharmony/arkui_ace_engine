@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
 
@@ -34,6 +35,7 @@ public:
     virtual void NewScope() = 0;
     virtual RefPtr<AceType> Finish() = 0;
     virtual std::string ProcessViewId(const std::string& viewId) = 0;
+    virtual AnimationOption GetImplicitAnimationOption() = 0;
 
 private:
     static std::unique_ptr<ContainerModel> instance_;

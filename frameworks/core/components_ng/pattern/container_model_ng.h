@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/utils/macros.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_model.h"
 
@@ -46,6 +47,11 @@ public:
     std::string ProcessViewId(const std::string& viewId) override
     {
         return ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    }
+
+    AnimationOption GetImplicitAnimationOption() override
+    {
+        return {};
     }
 
 private:

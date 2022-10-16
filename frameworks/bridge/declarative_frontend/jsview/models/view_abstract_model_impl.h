@@ -32,6 +32,31 @@ public:
     void SetMaxWidth(const Dimension& maxWidth) override;
     void SetMaxHeight(const Dimension& maxHeight) override;
 
+    void SetBackgroundColor(const Color& color) override;
+    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override;
+    void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
+    void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
+    void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
+    void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) override;
+    void SetPadding(const Dimension& value) override;
+    void SetPaddings(
+        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override;
+    void SetMargin(const Dimension& value) override;
+    void SetMargins(
+        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override;
+    void SetBorderRadius(const Dimension& value) override;
+    void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
+        const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
+    void SetBorderColor(const Color& value) override;
+    void SetBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
+        const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) override;
+    void SetBorderWidth(const Dimension& value) override;
+    void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override;
+    void SetBorderStyle(const BorderStyle& value) override;
+    void SetBorderStyle(const std::optional<BorderStyle>& styleLeft, const std::optional<BorderStyle>& styleRight,
+        const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override;
+
     void SetLayoutPriority(int32_t priority) override;
     void SetLayoutWeight(int32_t value) override;
     void SetAspectRatio(float ratio) override;

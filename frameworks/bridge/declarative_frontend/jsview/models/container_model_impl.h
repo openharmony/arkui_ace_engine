@@ -47,6 +47,11 @@ public:
         return ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
     }
 
+    AnimationOption GetImplicitAnimationOption() override
+    {
+        return ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    }
+
 private:
     std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };
