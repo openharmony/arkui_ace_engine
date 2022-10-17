@@ -3657,13 +3657,6 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         }
         if (type->ToNumber<int32_t>() == static_cast<int>(ResourceType::MEDIA)) {
             result = themeConstants->GetMediaPath(resId->ToNumber<uint32_t>());
-            if (SystemProperties::GetUnZipHap()) {
-                return true;
-            }
-            auto pos = result.find_last_of('.');
-            if (pos != std::string::npos) {
-                result = "resource:///" + std::to_string(resId->ToNumber<uint32_t>()) + result.substr(pos);
-            }
             return true;
         }
         if (type->ToNumber<int32_t>() == static_cast<int>(ResourceType::RAWFILE)) {
