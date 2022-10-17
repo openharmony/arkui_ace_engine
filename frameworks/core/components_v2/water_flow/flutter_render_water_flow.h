@@ -32,6 +32,7 @@ public:
 
 private:
     RefPtr<Flutter::ClipLayer> layer_;
+    ACE_DISALLOW_COPY_AND_MOVE(FlutterRenderWaterFlow);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_FLUTTER_RENDER_WATER_FLOW_H

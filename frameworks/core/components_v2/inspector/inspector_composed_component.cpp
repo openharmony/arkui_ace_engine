@@ -91,6 +91,8 @@
 #include "core/components_v2/inspector/time_picker_composed_element.h"
 #include "core/components_v2/inspector/time_picker_dialog_composed_element.h"
 #include "core/components_v2/inspector/toggle_composed_element.h"
+#include "core/components_v2/inspector/water_flow_composed_element.h"
+#include "core/components_v2/inspector/water_flow_item_composed_element.h"
 #include "core/components_v2/inspector/wrap_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -121,6 +123,10 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { GRID_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::GridComposedElement>(id); } },
     { GRID_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::GridItemComposedElement>(id); } },
+    { WATERFLOW_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::WaterFlowComposedElement>(id); } },
+    { FLOW_ITEM_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::WaterFlowItemComposedElement>(id); } },
     { LIST_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ListComposedElement>(id); } },
     { LIST_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ListItemComposedElement>(id); } },
@@ -248,6 +254,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { WRAP_COMPONENT_TAG, WRAP_ETS_TAG },
     { GRID_COMPONENT_TAG, GRID_ETS_TAG },
     { GRID_ITEM_COMPONENT_TAG, GRID_ITEM_ETS_TAG },
+    { WATERFLOW_COMPONENT_TAG, WATERFLOW_ETS_TAG },
+    { FLOW_ITEM_COMPONENT_TAG, FLOW_ITEM_ETS_TAG },
     { LIST_COMPONENT_TAG, LIST_ETS_TAG },
     { LIST_ITEM_COMPONENT_TAG, LIST_ITEM_ETS_TAG },
     { LIST_ITEM_GROUP_COMPONENT_TAG, LIST_ITEM_GROUP_ETS_TAG },

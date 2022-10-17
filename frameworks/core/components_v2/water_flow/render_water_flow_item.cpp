@@ -15,8 +15,6 @@
 
 #include "core/components_v2/water_flow/render_water_flow_item.h"
 
-#include "base/utils/utils.h"
-#include "core/components_v2/water_flow/render_water_flow.h"
 #include "core/components_v2/water_flow/water_flow_item_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -31,11 +29,6 @@ void RenderWaterFlowItem::Update(const RefPtr<Component>& component)
     if (!flowItem) {
         return;
     }
-    SetColumnSpan(flowItem->GetColumnSpan());
-    SetRowSpan(flowItem->GetRowSpan());
-    SetForceRebuild(flowItem->ForceRebuild());
-    onSelectId_ = flowItem->GetOnSelectId();
-    selectable_ = flowItem->GetSelectable();
     MarkNeedLayout();
 }
 
@@ -45,40 +38,12 @@ void RenderWaterFlowItem::PerformLayout()
         LOGE("RenderWaterFlowItem: no child found in RenderWaterFlowItem!");
     } else {
         auto child = GetChildren().front();
+        if (!child) {
+            return;
+        }
         child->Layout(GetLayoutParam());
         child->SetPosition(Offset::Zero());
         SetLayoutSize(child->GetLayoutSize());
     }
-}
-
-void RenderWaterFlowItem::HandleOnFocus()
-{
-    auto parent = GetParent().Upgrade();
-    while (parent) {
-        auto waterFlow = AceType::DynamicCast<RenderWaterFlow>(parent);
-        if (waterFlow) {
-            waterFlow->UpdateFocusInfo(index_);
-            break;
-        }
-        parent = parent->GetParent().Upgrade();
-    }
-}
-
-void RenderWaterFlowItem::SetColumnSpan(int32_t columnSpan)
-{
-    if (columnSpan <= 0) {
-        LOGW("Invalid columnSpan %{public}d", columnSpan);
-        return;
-    }
-    columnSpan_ = columnSpan;
-}
-
-void RenderWaterFlowItem::SetRowSpan(int32_t rowSpan)
-{
-    if (rowSpan <= 0) {
-        LOGW("Invalid rowSpan %{public}d", rowSpan);
-        return;
-    }
-    rowSpan_ = rowSpan;
 }
 } // namespace OHOS::Ace::V2

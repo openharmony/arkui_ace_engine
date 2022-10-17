@@ -31,8 +31,10 @@ public:
 
 protected:
     bool UpdateScrollPosition(double offset, int32_t source) override;
-
     void ProcessScrollMotion(double position) override;
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(WaterFlowScrollController);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_SCROLL_CONTROLLER_H

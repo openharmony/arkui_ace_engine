@@ -15,47 +15,30 @@
 
 #include "core/components_v2/water_flow/render_water_flow.h"
 
-#include "base/log/ace_trace.h"
+#include <cinttypes>
+#include <cstdint>
+
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/utils/string_utils.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
-#include "core/components_v2/water_flow/render_water_flow_item.h"
-#include "core/components_v2/water_flow/water_flow_component.h"
+#include "core/components/common/layout/templates_parser.h"
 #include "core/components_v2/water_flow/water_flow_scroll_controller.h"
 #include "core/event/ace_event_helper.h"
+#include "core/pipeline/base/position_layout_utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
-constexpr int32_t TIME_THRESHOLD = 3 * 1000000; // milliseconds
+constexpr int64_t MICROSEC_TO_NANOSEC = 1000;
+constexpr int64_t MILLISEC_TO_NANOSEC = 1000000;
+constexpr int64_t TIME_THRESHOLD = 3 * MILLISEC_TO_NANOSEC; // milliseconds
+constexpr int32_t ANIMATE_DURATION = 800;                   // ms
+const RefPtr<CubicCurve> CURVE_SCROLL_TO_TOP = AceType::MakeRefPtr<CubicCurve>(0.0f, 0.3f, 0.2f, 1.0f);
 constexpr int32_t DEFAULT_DEPTH = 10;
-constexpr bool HORIZONTAL = false;
-constexpr bool VERTICAL = true;
-constexpr bool FORWARD = false;
-constexpr bool REVERSE = true;
-
-// first bool mean if vertical, second bool mean if reverse
-// false, false --> RIGHT
-// false, true --> LEFT
-// true, false --> DOWN
-// true, true ---> UP
-// This map will adapter the WaterFlow FlexDirection with Key Direction.
-const std::map<bool, std::map<bool, std::map<bool, KeyDirection>>> DIRECTION_MAP = {
-    { false, // RTL is false
-        { { HORIZONTAL, { { FORWARD, KeyDirection::RIGHT }, { REVERSE, KeyDirection::LEFT } } },
-            { VERTICAL, { { FORWARD, KeyDirection::DOWN }, { REVERSE, KeyDirection::UP } } } } },
-    { true, // RTL is true
-        { { HORIZONTAL, { { FORWARD, KeyDirection::LEFT }, { REVERSE, KeyDirection::RIGHT } } },
-            { VERTICAL, { { FORWARD, KeyDirection::DOWN }, { REVERSE, KeyDirection::UP } } } } }
-};
+constexpr double MAX_CONSTRAINT_SCALE = 3.0;
+constexpr double CENTER_POINT = 2.0;
+const std::string UNIT_AUTO = "auto";
 } // namespace
-
-std::string WaterFlowEventInfo::ToJSONString() const
-{
-    return std::string("\"waterflow\",{\"first\":").append(std::to_string(scrollIndex_)).append("},null");
-}
 
 RenderWaterFlow::~RenderWaterFlow()
 {
@@ -66,151 +49,14 @@ RenderWaterFlow::~RenderWaterFlow()
 
 void RenderWaterFlow::Update(const RefPtr<Component>& component)
 {
-    InitScrollBar(component);
-    if (!NeedUpdate(component)) {
-        return;
-    }
-
-    startRankItemIndex_ = 0;
-    currentItemIndex_ = 0;
-    const RefPtr<V2::WaterFlowComponent> flow = AceType::DynamicCast<V2::WaterFlowComponent>(component);
-    if (!flow) {
+    component_ = AceType::DynamicCast<V2::WaterFlowComponent>(component);
+    if (!component_) {
         LOGE("RenderWaterFlow update failed.");
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
 
-    isVertical_ = true;
-    updateFlag_ = true;
-    direction_ = flow->GetDirection();
-    userColGap_ = flow->GetColumnsGap();
-    userRowGap_ = flow->GetRowsGap();
-    userMainLength_ = flow->GetMainLength();
-    scrollBarProxy_ = flow->GetScrollBarProxy();
-    crossCount_ = flow->GetCrossSplice();
-    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
-        mainGap_ = NormalizePercentToPx(userRowGap_, true);
-        crossGap_ = NormalizePercentToPx(userColGap_, false);
-        useScrollable_ = SCROLLABLE::VERTICAL;
-    } else {
-        crossGap_ = NormalizePercentToPx(userRowGap_, true);
-        mainGap_ = NormalizePercentToPx(userColGap_, false);
-        useScrollable_ = SCROLLABLE::HORIZONTAL;
-    }
-
-    InitScrollBarProxy();
-    CreateScrollable();
-    MarkNeedLayout();
-    LOGD("%{public}s mainCount_:%{public}d crossCount_:%{public}d mainGap_:%{public}f "
-         "crossGap_:%{public}f",
-        __PRETTY_FUNCTION__, mainCount_, crossCount_, mainGap_, crossGap_);
-}
-
-void RenderWaterFlow::CalAndPosItems(double& drawLength, int32_t& main)
-{
-    for (; main < mainCount_; main++) {
-        for (int32_t cross = 0; cross < crossCount_; cross++) {
-            auto mainIter = flowMatrix_.find(main);
-            if (mainIter == flowMatrix_.end()) {
-                LOGD("PerformLayout. main: %{public}d. skip flowMatrix_", main);
-                continue;
-            }
-            auto crossIter = mainIter->second.find(cross);
-            if (crossIter == mainIter->second.end()) {
-                LOGD("PerformLayout. main: %{public}d, cross: %{public}d. skip flowMatrix_", main, cross);
-                continue;
-            }
-            if (buildChildByIndex_ && (inCache_.count(main) == 0 || !CheckMainFull(main))) {
-                bool vail = false;
-                SupplyItems(vail, main);
-            }
-            if (showItem_.count(crossIter->second) != 0) {
-                continue;
-            }
-
-            showItem_.insert(crossIter->second);
-            CheckAndInsertItems(main, crossIter->second);
-            auto item = items_.find(crossIter->second);
-            if (item != items_.end()) {
-                childrenInRect_.push_back(item->second);
-                int32_t itemMainSpan = GetItemSpan(item->second, useScrollable_ != SCROLLABLE::HORIZONTAL);
-                int32_t itemCrossSpan = GetItemSpan(item->second, useScrollable_ == SCROLLABLE::HORIZONTAL);
-                int32_t itemMain = GetItemMainIndex(crossIter->second);
-                LOGD("PerformLayout. matrix_ss itemInfo. itemindex:%{public}d, row:%{public}d, col:%{public}d, "
-                     "rowSpan:%{public}d,"
-                     "colSpan:%{public}d.",
-                    crossIter->second, itemMain, cross, itemMainSpan, itemCrossSpan);
-                SetChildPosition(item->second, itemMain, cross, itemMainSpan, itemCrossSpan);
-            }
-        }
-        if (main >= startIndex_) {
-            drawLength += GetSize(flowCells_) + mainGap_;
-        }
-        if (GreatOrEqual(drawLength, mainSize_)) {
-            break;
-        }
-    }
-}
-
-void RenderWaterFlow::PerformLayout()
-{
-    if (RenderNode::GetChildren().empty() && !buildChildByIndex_) {
-        return;
-    }
-
-    // calculate rowSize colSize mainLength
-    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
-        mainSize_ = GetLayoutParam().GetMaxSize().Height();
-        crossSize_ = GetLayoutParam().GetMaxSize().Width();
-        if (NearEqual(mainSize_, Size::INFINITE_SIZE)) {
-            mainSize_ = viewPort_.Height();
-        }
-        if (NearEqual(crossSize_, Size::INFINITE_SIZE)) {
-            crossSize_ = viewPort_.Width();
-        }
-    } else {
-        crossSize_ = GetLayoutParam().GetMaxSize().Height();
-        mainSize_ = GetLayoutParam().GetMaxSize().Width();
-        if (NearEqual(crossSize_, Size::INFINITE_SIZE)) {
-            crossSize_ = viewPort_.Height();
-        }
-        if (NearEqual(mainSize_, Size::INFINITE_SIZE)) {
-            mainSize_ = viewPort_.Width();
-        }
-    }
-    mainLength_ = NormalizePercentToPx(userMainLength_, true);
-    if (NearZero(mainLength_)) {
-        mainLength_ = ParseCrossLength(crossSize_, crossGap_).at(0);
-    }
-
-    InitialFlowProp();
-    CalculateViewPort();
-    showItem_.clear();
-    childrenInRect_.clear();
-    double drawLength = 0.0 - firstItemOffset_;
-    int32_t main = startIndex_ > 0 ? startIndex_ - 1 : startIndex_;
-    LOGD("PerformLayout. main: %{public}d. start", main);
-    CalAndPosItems(drawLength, main);
-    SetLayoutSize(GetLayoutParam().Constrain(Size(crossSize_, mainSize_)));
-    endIndex_ = main;
-    MarkNeedPredictLayout();
-    CalculateWholeSize(drawLength);
-    lastOffset_ = startMainPos_ + firstItemOffset_ - currentOffset_;
-    LOGD("PerformLayout. offset_ss lastOffset_:%{public}lf, startMainPos_:%{public}lf, firstItemOffset_:%{public}lf,"
-         "currentOffset_:%{public}lf",
-        lastOffset_, startMainPos_, firstItemOffset_, currentOffset_);
-    LOGD("PerformLayout. offset_ss mainCount_:%{public}d", mainCount_);
-}
-
-bool RenderWaterFlow::NeedUpdate(const RefPtr<Component>& component)
-{
-    const RefPtr<V2::WaterFlowComponent> flow = AceType::DynamicCast<V2::WaterFlowComponent>(component);
-    if (!flow) {
-        LOGE("RenderWaterFlow update failed.");
-        EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
-        return false;
-    }
-    auto controller = flow->GetController();
+    auto controller = component_->GetController();
     if (controller) {
         controller->SetScrollNode(WeakClaim(this));
     }
@@ -218,36 +64,82 @@ bool RenderWaterFlow::NeedUpdate(const RefPtr<Component>& component)
         animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
 
-    if (direction_ != flow->GetDirection() || crossAxisAlign_ != flow->GetFlexAlign() ||
-        userColGap_ != flow->GetColumnsGap() || userRowGap_ != flow->GetRowsGap() ||
-        rightToLeft_ != flow->GetRightToLeft()) {
-        return true;
-    };
-    return false;
+    updateFlag_ = true;
+    direction_ = component_->GetDirection();
+    userColGap_ = component_->GetColumnsGap();
+    userRowGap_ = component_->GetRowsGap();
+    colsArgs_ = component_->GetColumnsArgs();
+    rowsArgs_ = component_->GetRowsArgs();
+    scrollBarProxy_ = component_->GetScrollBarProxy();
+    InitScrollBar();
+    InitScrollBarProxy();
+    CreateScrollable();
+    MarkNeedLayout();
 }
 
-void RenderWaterFlow::AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode)
+void RenderWaterFlow::PerformLayout()
+{
+    if (RenderNode::GetChildren().empty() && !buildChildByIndex_) {
+        return;
+    }
+    InitialFlowProp();
+    // Adjust the view port out of items, caused by scrolling that may occur.
+    AdjustViewPort();
+    size_t itemIndex = GetNextSupplyedIndex();
+    double targetPos = GetTargetPos();
+    SupplyItems(itemIndex, targetPos);
+    // Adjust the view port out of items, caused by supply items that may occur.
+    // (view port at the tail and delete tail item continuously)
+    AdjustViewPort();
+    UpdateCacheItems();
+    LayoutItems(cacheItems_);
+    LayoutFooter();
+    // Check if reach the tail of waterFlow
+    reachTail_ = CheckReachTail();
+    // Check if reach the head of waterFlow
+    reachHead_ = CheckReachHead();
+    if (reachHead_) {
+        viewportStartPos_ = 0.0;
+    }
+
+    scrollBar_->SetScrollable(false);
+    if (scrollBar_ && (GetEstimatedHeight() > mainSize_)) {
+        scrollBar_->SetScrollable(true);
+    }
+
+    if (!lastReachHead_ && reachHead_) {
+        waterflowEventFlags_[WaterFlowEvents::REACH_START] = true;
+    }
+    if (!lastReachTail_ && reachTail_) {
+        waterflowEventFlags_[WaterFlowEvents::REACH_END] = true;
+    }
+
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
+        SetLayoutSize(GetLayoutParam().Constrain(Size(crossSize_, mainSize_)));
+    } else {
+        SetLayoutSize(GetLayoutParam().Constrain(Size(mainSize_, crossSize_)));
+    }
+    HandleScrollEvent();
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+        lastOffset_ = viewportStartPos_;
+    } else {
+        lastOffset_ = estimateHeight_ + viewportStartPos_ - mainSize_;
+    }
+    lastReachHead_ = reachHead_;
+    lastReachTail_ = reachTail_;
+    MarkNeedPredictLayout();
+}
+
+void RenderWaterFlow::AddChildByIndex(size_t index, const RefPtr<RenderNode>& renderNode)
 {
     auto iter = items_.find(index);
     if (iter != items_.end() && iter->second == nullptr) {
         items_.erase(index);
-        itemSpanCache_.erase(index);
     }
+
     auto itor = items_.try_emplace(index, renderNode);
     if (itor.second) {
         AddChild(renderNode);
-        SetItemCalSizeNeeded(renderNode, true);
-        RefPtr<RenderWaterFlowItem> node = AceType::DynamicCast<RenderWaterFlowItem>(renderNode);
-        if (!node) {
-            return;
-        }
-        node->SetBoundary();
-        node->SetIndex(index);
-        node->SetHidden(false);
-        Span span;
-        span.rowSpan = node->GetRowSpan();
-        span.colSpan = node->GetColumnSpan();
-        itemSpanCache_.emplace(std::make_pair(index, span));
     }
 }
 
@@ -302,19 +194,31 @@ bool RenderWaterFlow::UpdateScrollPosition(double offset, int32_t source)
     }
 
     if (offset > 0.0) {
-        if (reachHead_) {
-            return false;
+        // view port move up
+        if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+            if (reachHead_) {
+                return false;
+            }
+        } else {
+            if (reachTail_) {
+                return false;
+            }
         }
-        reachTail_ = false;
     } else {
-        if (reachTail_) {
-            return false;
+        // view port move down
+        if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+            if (reachTail_) {
+                return false;
+            }
+        } else {
+            if (reachHead_) {
+                return false;
+            }
         }
-        reachHead_ = false;
     }
-
-    currentOffset_ += Round(offset);
+    viewportStartPos_ -= offset;
     MarkNeedLayout(true);
+
     return true;
 }
 
@@ -343,110 +247,65 @@ bool RenderWaterFlow::IsChildrenTouchEnable()
     return ret;
 }
 
-void RenderWaterFlow::SetChildPosition(
-    const RefPtr<RenderNode>& child, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan)
+void RenderWaterFlow::SetChildPosition(const RefPtr<RenderNode>& child, size_t itemIndex)
 {
-    // Calculate the position for current child.
-    double positionMain = 0.0;
-    double positionCross = 0.0;
-    if (main < startIndex_) {
-        positionMain -= GetSize(flowCells_) * (startIndex_ - main);
-        positionMain += (main - startIndex_) * mainGap_;
-    } else {
-        positionMain += GetSize(flowCells_) * (main - startIndex_);
-        positionMain += (main - startIndex_) * mainGap_;
-    }
-
-    positionCross += GetSize(flowCells_, false) * cross;
-    positionCross += cross * crossGap_;
-
-    // Calculate the size for current child.
-    double mainLen = 0.0;
-    double crossLen = 0.0;
-    mainLen += GetSize(flowCells_) * mainSpan;
-    mainLen += (mainSpan - 1) * mainGap_;
-    crossLen += GetSize(flowCells_, false) * crossSpan;
-    crossLen += (crossSpan - 1) * crossGap_;
-
-    // If RTL, place the item from right.
-    if (rightToLeft_) {
-        if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
-            positionCross = crossSize_ - positionCross - crossLen;
-        }
-    }
-
-    double mainOffset = (mainLen - GetSize(child->GetLayoutSize())) / 2.0;
-    double crossOffset = (crossLen - GetSize(child->GetLayoutSize(), false)) / 2.0;
-
     Offset offset;
-    if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
-        offset = Offset(positionCross + crossOffset, positionMain + mainOffset - firstItemOffset_);
-    } else {
-        offset = Offset(positionMain + mainOffset - firstItemOffset_, positionCross + crossOffset);
+    double mainPos = 0.0;
+    double crossPos = 0.0;
+    double mainSize = 0.0;
+    auto iter = flowMatrix_.find(itemIndex);
+    if (iter != flowMatrix_.end()) {
+        mainPos = iter->second.mainPos;
+        crossPos = iter->second.crossPos;
+        mainSize = iter->second.mainSize;
     }
-
+    // need to support set position with Flex::Direction
+    switch (direction_) {
+        case FlexDirection::COLUMN:
+            // offset.y : item mainPos - viewPort offset
+            offset = Offset(crossPos, mainPos - viewportStartPos_);
+            break;
+        case FlexDirection::COLUMN_REVERSE:
+            // offset.y : [viewPort mainSize - (item mainSize + item mainPos)] - viewPort offse
+            offset = Offset(crossPos, (mainSize_ - (mainPos + mainSize)) - viewportStartPos_);
+            break;
+        case FlexDirection::ROW:
+            // offset.x : item mainPos - viewPort offset
+            offset = Offset(mainPos - viewportStartPos_, crossPos);
+            break;
+        case FlexDirection::ROW_REVERSE:
+            // offset.x : [viewPort mainSize - (item mainSize + item mainPos)] - viewPort offse
+            offset = Offset((mainSize_ - (mainPos + mainSize)) - viewportStartPos_, crossPos);
+            break;
+        default:
+            return;
+    }
     child->SetPosition(offset);
+    child->SetVisible(true);
 }
 
-double RenderWaterFlow::GetSize(const Size& src, bool isMain) const
+void RenderWaterFlow::GetFlowSize()
 {
-    if (useScrollable_ == SCROLLABLE::HORIZONTAL) {
-        return isMain ? src.Width() : src.Height();
-    }
-
-    return isMain ? src.Height() : src.Width();
-}
-
-bool RenderWaterFlow::GetFlowSize()
-{
-    double rowSize = ((flowHeight_ > 0.0) && (flowHeight_ < GetLayoutParam().GetMaxSize().Height()))
-                         ? flowHeight_
-                         : GetLayoutParam().GetMaxSize().Height();
-    double colSize = ((flowWidth_ > 0.0) && (flowWidth_ < GetLayoutParam().GetMaxSize().Width()))
-                         ? flowWidth_
-                         : GetLayoutParam().GetMaxSize().Width();
     if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
-        useScrollable_ = SCROLLABLE::VERTICAL;
+        mainSize_ = GetLayoutParam().GetMaxSize().Height();
+        crossSize_ = GetLayoutParam().GetMaxSize().Width();
         if (NearEqual(mainSize_, Size::INFINITE_SIZE)) {
             mainSize_ = viewPort_.Height();
         }
         if (NearEqual(crossSize_, Size::INFINITE_SIZE)) {
             crossSize_ = viewPort_.Width();
         }
-        LOGD("GetFlowSize %lf, %lf   [%lf- %lf]", rowSize, colSize, mainSize_, crossSize_);
-        if (rowSize != mainSize_ || colSize != crossSize_) {
-            mainSize_ = rowSize;
-            crossSize_ = colSize;
-            CreateScrollable();
-            return true;
-        }
     } else {
-        useScrollable_ = SCROLLABLE::HORIZONTAL;
-        if (NearEqual(mainSize_, Size::INFINITE_SIZE)) {
-            mainSize_ = viewPort_.Width();
-        }
+        crossSize_ = GetLayoutParam().GetMaxSize().Height();
+        mainSize_ = GetLayoutParam().GetMaxSize().Width();
         if (NearEqual(crossSize_, Size::INFINITE_SIZE)) {
             crossSize_ = viewPort_.Height();
         }
-        LOGD("GetFlowSize %lf, %lf   [%lf- %lf]", rowSize, colSize, mainSize_, crossSize_);
-        if (rowSize != crossSize_ || colSize != mainSize_) {
-            crossSize_ = rowSize;
-            mainSize_ = colSize;
-            CreateScrollable();
-            return true;
+        if (NearEqual(mainSize_, Size::INFINITE_SIZE)) {
+            mainSize_ = viewPort_.Width();
         }
     }
-    return false;
-}
-
-void RenderWaterFlow::BuildFlow(std::vector<double>& cross)
-{
-    cross = ParseCrossLength(crossSize_, crossGap_);
-    if (useScrollable_ == SCROLLABLE::VERTICAL) {
-        flowCells_ = Size(cross.at(0), mainLength_);
-    } else if (useScrollable_ == SCROLLABLE::HORIZONTAL) {
-        flowCells_ = Size(mainLength_, cross.at(0));
-    }
+    cacheSize_ = mainSize_;
 }
 
 void RenderWaterFlow::CallGap()
@@ -458,787 +317,385 @@ void RenderWaterFlow::CallGap()
         crossGap_ = NormalizePercentToPx(userRowGap_, true);
         mainGap_ = NormalizePercentToPx(userColGap_, false);
     }
+    if (GreatOrEqual(crossGap_, crossSize_)) {
+        crossGap_ = 0.0;
+    }
+}
+
+void RenderWaterFlow::CallItemConstraintSize()
+{
+    ItemConstraintSize size;
+    auto pipelineContext = GetContext().Upgrade();
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
+        size.maxCrossSize = std::max(NormalizePercentToPx(component_->GetMaxWidth(), false),
+            NormalizePercentToPx(component_->GetMinWidth(), false));
+        size.minCrossSize = std::min(NormalizePercentToPx(component_->GetMaxWidth(), false),
+            NormalizePercentToPx(component_->GetMinWidth(), false));
+        size.maxMainSize = std::max(NormalizePercentToPx(component_->GetMaxHeight(), true),
+            NormalizePercentToPx(component_->GetMinHeight(), true));
+        size.minMainSize = std::min(NormalizePercentToPx(component_->GetMaxHeight(), true),
+            NormalizePercentToPx(component_->GetMinHeight(), true));
+        mainMaxConstraintSize_ = MAX_CONSTRAINT_SCALE * pipelineContext->GetRootHeight();
+    } else {
+        size.maxCrossSize = std::max(NormalizePercentToPx(component_->GetMaxHeight(), true),
+            NormalizePercentToPx(component_->GetMinHeight(), true));
+        size.minCrossSize = std::min(NormalizePercentToPx(component_->GetMaxHeight(), true),
+            NormalizePercentToPx(component_->GetMinHeight(), true));
+        size.maxMainSize = std::max(NormalizePercentToPx(component_->GetMaxWidth(), false),
+            NormalizePercentToPx(component_->GetMinWidth(), false));
+        size.minMainSize = std::min(NormalizePercentToPx(component_->GetMaxWidth(), false),
+            NormalizePercentToPx(component_->GetMinWidth(), false));
+        mainMaxConstraintSize_ = MAX_CONSTRAINT_SCALE * pipelineContext->GetRootWidth();
+    }
+
+    // exchange and make sure the max is larger then the min.
+    itemConstraintSize_.maxCrossSize = std::max(size.maxCrossSize, size.minCrossSize);
+    itemConstraintSize_.minCrossSize = std::min(size.maxCrossSize, size.minCrossSize);
+    itemConstraintSize_.maxMainSize = std::max(size.maxMainSize, size.minMainSize);
+    itemConstraintSize_.minMainSize = std::min(size.maxMainSize, size.minMainSize);
+
+    // constraint with 3times of root.
+    if (GreatOrEqual(itemConstraintSize_.maxMainSize, mainMaxConstraintSize_)) {
+        itemConstraintSize_.maxMainSize = mainMaxConstraintSize_;
+    }
+    if (GreatOrEqual(itemConstraintSize_.minMainSize, mainMaxConstraintSize_)) {
+        itemConstraintSize_.minMainSize = 0.0;
+    }
+    // constraint with 0, and set with default.
+    if (LessOrEqual(itemConstraintSize_.maxMainSize, 0.0)) {
+        itemConstraintSize_.maxMainSize = mainMaxConstraintSize_;
+    }
+    if (LessOrEqual(itemConstraintSize_.minMainSize, 0.0)) {
+        itemConstraintSize_.minMainSize = 0.0;
+    }
 }
 
 void RenderWaterFlow::InitialFlowProp()
 {
     // Not first time layout after update, no need to initial.
-    if (!GetFlowSize() && !updateFlag_) {
+    if (!updateFlag_) {
         return;
     }
-    OnDataSourceUpdated(-1);
+
+    GetFlowSize();
     CallGap();
-    std::vector<double> cross;
-    BuildFlow(cross);
-    // Initialize the columnCount and rowCount, default is 1
-    crossCount_ = static_cast<int32_t>(cross.size());
-    if (crossCount_ < 0) {
-        return;
+    CallItemConstraintSize();
+    crossSideSize_.clear();
+    TemplatesParser parser;
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
+        crossSideSize_ = parser.ParseArgs(WeakClaim(this), PreParseArgs(colsArgs_), crossSize_, crossGap_);
+    } else {
+        crossSideSize_ = parser.ParseArgs(WeakClaim(this), PreParseArgs(rowsArgs_), crossSize_, crossGap_);
     }
-    UpdateAccessibilityAttr();
-
-    if (!buildChildByIndex_) {
-        LOGE("%{public}s. buildChildByIndex_ is null.", __PRETTY_FUNCTION__);
-        return;
+    if (crossSideSize_.empty()) {
+        crossSideSize_.push_back(crossSize_);
     }
-
-    int32_t endIndex = -1;
-    mainCount_ = GetItemMainIndex(startRankItemIndex_);
-    if (mainCount_ < 0) {
-        mainCount_ = 0;
+    // Initialize the crossCount, default is 1
+    crossCount_ = crossSideSize_.size();
+    InitMainSideEndPos();
+    viewportStartPos_ = 0.0;
+    RemoveAllChild();
+    ClearLayout(0, true);
+    if (footer_) {
+        RemoveChild(footer_);
+        footer_ = nullptr;
     }
-    while (endIndex < currentItemIndex_) {
-        Rank(mainCount_, startRankItemIndex_);
-        mainCount_++;
-        auto mainItor = flowMatrix_.find(mainCount_ - 1);
-        if (mainItor == flowMatrix_.end()) {
-            break;
-        }
-        for (int32_t crossIndex = crossCount_ - 1; crossIndex >= 0; crossIndex--) {
-            auto iter = mainItor->second.find(crossIndex);
-            if (iter != mainItor->second.end()) {
-                endIndex = iter->second;
-                break;
-            }
-        }
-    }
-    startRankItemIndex_ = 0;
-    currentItemIndex_ = 0;
-    bool vail = false;
-    SupplyItems(vail, ((mainCount_ > 0) ? (mainCount_ - 1) : 0));
-    startIndex_ = (mainCount_ > 0) ? (mainCount_ - 1) : 0;
-    if (NearZero(currentOffset_)) {
-        needCalculateViewPort_ = true;
-    }
-
+    RequestWaterFlowFooter();
     updateFlag_ = false;
-    if (firstLineToBottom_ && firstLineToBottom_.value()) {
-        // calculate the distance from the first line to the last line
-        currentOffset_ = mainSize_ - GetSize(flowCells_);
-        needCalculateViewPort_ = false;
-    }
-    firstLineToBottom_ = std::nullopt;
 }
 
-double RenderWaterFlow::BuildLazyFlowLayout(int32_t index, double sizeNeed)
-{
-    if (!buildChildByIndex_ || index < 0 || NearZero(sizeNeed)) {
-        return 0.0;
-    }
-    double size = 0.0;
-    int32_t startIndex = index;
-    while (ceil(size) < ceil(sizeNeed)) {
-        bool vail = false;
-        auto suppleSize = SupplyItems(vail, startIndex);
-        if (NearZero(suppleSize)) {
-            break;
-        }
-        mainCount_ = ++startIndex;
-        size += suppleSize + mainGap_;
-    }
-    return size;
-}
-
-void RenderWaterFlow::CalculateCrossSpan(
-    int32_t mainIndex, int32_t cross, int32_t crossSpan, int32_t& calculateCrossSpan)
-{
-    auto mainIter = flowMatrix_.find(mainIndex);
-    if (mainIter != flowMatrix_.end()) {
-        int32_t tempCrossSpan = 0;
-        for (int32_t j = 0; j < crossSpan; j++) {
-            if ((mainIter->second.find(j + cross) == mainIter->second.end()) && (crossCount_ > (j + cross))) {
-                tempCrossSpan = j + 1;
-            } else if (tempCrossSpan > 0) {
-                break;
-            }
-        }
-        if ((calculateCrossSpan == 0) || (calculateCrossSpan >= tempCrossSpan)) {
-            calculateCrossSpan = tempCrossSpan;
-        }
-    } else {
-        // check if the first flowitem's crossSpan of the row is large then crossCount_
-        if (crossCount_ < crossSpan && calculateCrossSpan == 0) {
-            calculateCrossSpan = crossCount_;
-        }
-    }
-}
-
-bool RenderWaterFlow::CheckFlowPlaced(int32_t index, int32_t main, int32_t cross, int32_t& mainSpan, int32_t& crossSpan)
-{
-    auto mainIter = flowMatrix_.find(main);
-    if (mainIter != flowMatrix_.end()) {
-        auto crossIter = mainIter->second.find(cross);
-        if (crossIter != mainIter->second.end()) {
-            return false;
-        }
-    }
-    int32_t calculateCrossSpan = 0;
-    for (int32_t i = 0; i < mainSpan; i++) {
-        CalculateCrossSpan(i + main, cross, crossSpan, calculateCrossSpan);
-    }
-    if ((calculateCrossSpan != 0) && (calculateCrossSpan != crossSpan)) {
-        auto iter = itemSpanCache_.find(index);
-        if (iter != itemSpanCache_.end()) {
-            itemSpanCache_.erase(index);
-        }
-        Span span;
-        span.rowSpan = mainSpan;
-        span.colSpan = calculateCrossSpan;
-        itemSpanCache_.emplace(std::make_pair(index, span));
-        crossSpan = calculateCrossSpan;
-    }
-
-    for (int32_t i = main; i < main + mainSpan; ++i) {
-        std::map<int32_t, int32_t> mainMap;
-        auto iter = flowMatrix_.find(i);
-        if (iter != flowMatrix_.end()) {
-            mainMap = iter->second;
-        }
-        for (int32_t j = cross; j < cross + crossSpan; ++j) {
-            mainMap.emplace(std::make_pair(j, index));
-        }
-        flowMatrix_[i] = mainMap;
-    }
-
-    std::map<int32_t, int32_t> flowMap;
-    auto iterFlow = flowMatrixByIndex_.find(index);
-    if (iterFlow != flowMatrixByIndex_.end()) {
-        flowMap = iterFlow->second;
-    }
-    for (int32_t i = main; i < main + mainSpan; ++i) {
-        for (int32_t j = cross; j < cross + crossSpan; ++j) {
-            flowMap.emplace(std::make_pair(i, j));
-        }
-    }
-    flowMatrixByIndex_[index] = flowMap;
-
-    LOGD("CheckFlowPlaced done %{public}d %{public}d %{public}d %{public}d %{public}d", index, main, cross, mainSpan,
-        crossSpan);
-    return true;
-}
-
-void RenderWaterFlow::LayoutChild(const RefPtr<RenderNode>& child, int32_t main, int32_t cross, int32_t mainSpan,
-    int32_t crossSpan, bool needPosition)
-{
-    child->Layout(MakeInnerLayoutParam(main, cross, mainSpan, crossSpan));
-    SetItemCalSizeNeeded(child, false);
-
-    if (!needPosition) {
-        return;
-    }
-    if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
-        child->SetPosition(Offset(0, mainSize_ + mainGap_));
-    } else {
-        child->SetPosition(Offset(mainSize_ + mainGap_, 0));
-    }
-}
-
-void RenderWaterFlow::GetNextFlow(int32_t& curMain, int32_t& curCross) const
-{
-    ++curCross;
-    if (curCross >= crossCount_) {
-        curCross = 0;
-        ++curMain;
-    }
-}
-
-void RenderWaterFlow::GetPreviousFlow(int32_t& curMain, int32_t& curCross)
-{
-    --curCross;
-    if (curCross < 0) {
-        curCross = crossCount_;
-        --curMain;
-    }
-}
-
-LayoutParam RenderWaterFlow::MakeInnerLayoutParam(
-    int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan) const
+LayoutParam RenderWaterFlow::MakeInnerLayoutParam(size_t itemIndex) const
 {
     LayoutParam innerLayout;
-    double mainLen = 0.0;
-    double crossLen = 0.0;
-    mainLen += GetSize(flowCells_) * mainSpan;
-    mainLen += (mainSpan - 1) * mainGap_;
-
-    crossLen += GetSize(flowCells_, false) * crossSpan;
-    crossLen += (crossSpan - 1) * crossGap_;
-
+    double mainSize = 0.0;
+    double crossSize = 0.0;
+    auto iter = flowMatrix_.find(itemIndex);
+    if (iter != flowMatrix_.end()) {
+        mainSize = iter->second.mainSize;
+        crossSize = iter->second.crossSize;
+    }
     Size size;
-    LOGD("mainLen: %{public}lf", mainLen);
-    if (useScrollable_ == SCROLLABLE::HORIZONTAL) {
-        size = Size(mainLen, crossLen);
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
+        size = Size(crossSize, mainSize);
     } else {
-        size = Size(crossLen, mainLen);
+        size = Size(mainSize, crossSize);
     }
-    if (crossAxisAlign_ == FlexAlign::STRETCH) {
-        innerLayout.SetMinSize(size);
-        innerLayout.SetMaxSize(size);
-    } else {
-        innerLayout.SetMaxSize(size);
-        innerLayout.SetMinSize(size);
-    }
+    innerLayout.SetMinSize(size);
+    innerLayout.SetMaxSize(size);
     return innerLayout;
 }
 
-void RenderWaterFlow::LoadForward()
+void RenderWaterFlow::SupplyItems(size_t startIndex, double targetPos)
 {
-    auto firstItem = 0;
-    decltype(flowMatrix_) flowMatrix(std::move(flowMatrix_));
-
-    int32_t count = 0;
-    int32_t endIndex = -1;
-    while (endIndex < startRankItemIndex_ - 1) {
-        if (!Rank(count, count == 0 ? firstItem : -1)) {
-            break;
-        }
-        count++;
-        auto mainItor = flowMatrix_.find(count - 1);
-        if (mainItor == flowMatrix_.end()) {
-            break;
-        }
-        for (int32_t cross = crossCount_ - 1; cross >= 0; cross--) {
-            auto iter = mainItor->second.find(cross);
-            if (iter != mainItor->second.end()) {
-                endIndex = iter->second;
+    size_t itemCrossIndex = 0;
+    FlowStyle itemFlowStyle;
+    while (LessNotEqual(GetLastMainBlankPos().GetY(), targetPos)) {
+        if (items_.find(startIndex) == items_.end()) {
+            if (!buildChildByIndex_(startIndex)) {
                 break;
             }
         }
-    }
-    startRankItemIndex_ = firstItem;
-    if (count == 0) {
-        return;
-    }
-    for (const auto& item : flowMatrix) {
-        flowMatrix_[item.first + count] = item.second;
-    }
 
-    decltype(inCache_) inCache(std::move(inCache_));
-    for (const auto& item : inCache) {
-        LOGD("LoadForward inCache_.insert mainIndex: %{public}d.", item + count);
-        inCache_.insert(item + count);
-    }
+        auto flowItem = GetFlowItemByChild(items_[startIndex]);
+        if (flowItem == nullptr) {
+            startIndex++;
+            continue;
+        }
+        flowItem->Layout(GetLayoutParam());
+        flowItem->SetVisible(false);
+        flowItem->SetNeedRender(false);
+        itemCrossIndex = GetLastMainBlankCross();
+        itemFlowStyle.mainPos = GetLastMainBlankPos().GetY();
+        itemFlowStyle.crossPos = GetLastMainBlankPos().GetX();
+        itemFlowStyle.mainSize = GetMainSize(flowItem);
+        itemFlowStyle = ConstraintItemSize(itemFlowStyle, itemCrossIndex);
+        flowMatrix_.emplace(std::make_pair(startIndex, itemFlowStyle));
+        if (itemsByCrossIndex_.size() > itemCrossIndex) {
+            itemsByCrossIndex_.at(itemCrossIndex).emplace_back(startIndex);
+        }
+        if (itemCrossIndex < mainSideEndPos_.size()) {
+            mainSideEndPos_[itemCrossIndex] +=
+                Positive(itemFlowStyle.mainSize) ? (itemFlowStyle.mainSize + mainGap_) : itemFlowStyle.mainSize;
+        }
 
-    mainCount_ += count;
-    startIndex_ += count;
+        // reach the valid target index
+        if (targetIndex_ >= 0 && static_cast<size_t>(targetIndex_) == startIndex) {
+            targetPos = itemFlowStyle.mainPos + mainSize_;
+        }
+        startIndex++;
+    }
+    targetIndex_ = -1;
 }
 
-void RenderWaterFlow::CalculateViewPortSceneOne()
+void RenderWaterFlow::LayoutItems(std::set<size_t>& items)
 {
-    // move to top/left of first row/column
-    if (!NearZero(firstItemOffset_)) {
-        if (inCache_.find(startIndex_ + 1) != inCache_.end()) {
-            currentOffset_ += GetSize(flowCells_) + mainGap_ - firstItemOffset_;
-            startIndex_++;
+    LayoutParam innerLayoutParam;
+    for (const auto& itemIndex : items) {
+        if (items_.find(itemIndex) == items_.end()) {
+            if (!buildChildByIndex_(itemIndex)) {
+                continue;
+            }
         }
-        firstItemOffset_ = 0.0;
+        innerLayoutParam = MakeInnerLayoutParam(itemIndex);
+        auto flowItem = GetFlowItemByChild(items_[itemIndex]);
+        if (flowItem == nullptr) {
+            continue;
+        }
+        flowItem->Layout(innerLayoutParam);
+        SetChildPosition(flowItem, itemIndex);
     }
-    // Move up
-    while (ceil(currentOffset_) > 0) {
-        if (startIndex_ > 0) {
-            currentOffset_ -= GetSize(flowCells_) + mainGap_;
-            startIndex_--;
-        }
-        if (startIndex_ == 0 && startRankItemIndex_ > 0 && currentOffset_ > 0) {
-            LoadForward();
-        }
-        if (startIndex_ == 0) {
-            break;
-        }
+}
+
+void RenderWaterFlow::GetFooterSize(double mainSize, double crossSize)
+{
+    if (!footer_ || NonPositive(mainSize) || NonPositive(crossSize)) {
+        LOGE("footer is null");
+        return;
     }
-    if (currentOffset_ < 0) {
-        firstItemOffset_ -= currentOffset_;
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
+        footerMaxSize_.SetWidth(std::min(crossSize, crossSize_));
+        footerMaxSize_.SetHeight(std::min(mainSize, mainSize_));
     } else {
-        if (startIndex_ == 0) {
-            reachHead_ = true;
-        }
-    }
-    currentOffset_ = 0.0;
-}
-
-bool RenderWaterFlow::CalculateViewPortSceneTwo(bool& NeedContinue)
-{
-    NeedContinue = false;
-    if (!NearZero(firstItemOffset_)) {
-        currentOffset_ -= firstItemOffset_;
-        firstItemOffset_ = 0.0;
-    }
-    // Move down
-    while (startIndex_ < mainCount_ && (ceil(currentOffset_) < 0 || needCalculateViewPort_)) {
-        currentOffset_ += GetSize(flowCells_) + mainGap_;
-        startIndex_++;
-    }
-    needCalculateViewPort_ = false;
-    if (currentOffset_ > 0) {
-        firstItemOffset_ = GetSize(flowCells_) + mainGap_ - currentOffset_;
-        currentOffset_ = 0.0;
-        startIndex_--;
-    } else if (!GreatOrEqual(0.0, BuildLazyFlowLayout(mainCount_, -currentOffset_))) {
-        NeedContinue = true;
-        return true;
-    }
-    currentOffset_ = 0.0;
-    auto blank = CalculateBlankOfEnd();
-    if (GreatOrEqual(0.0, blank)) {
-        return false;
-    }
-    // request new item.
-    blank -= BuildLazyFlowLayout(mainCount_, blank);
-    if (blank <= 0) {
-        return false;
-    }
-    blank = blank - firstItemOffset_;
-    firstItemOffset_ = 0;
-    // Move up
-    while (ceil(blank) > 0) {
-        if (startIndex_ == 0 && startRankItemIndex_ > 0) {
-            LoadForward();
-        }
-        if (startIndex_ == 0) {
-            break;
-        }
-        if (inCache_.find(startIndex_ - 1) == inCache_.end()) {
-            bool vail = false;
-            SupplyItems(vail, startIndex_ - 1);
-        }
-        blank -= GetSize(flowCells_) + mainGap_;
-        startIndex_--;
-    }
-    firstItemOffset_ -= blank;
-    if (firstItemOffset_ < 0) {
-        firstItemOffset_ = 0;
-    }
-    reachTail_ = true;
-    return true;
-}
-
-void RenderWaterFlow::CalculateViewPort()
-{
-    while (!NearZero(currentOffset_) || needCalculateViewPort_) {
-        if (currentOffset_ > 0) {
-            CalculateViewPortSceneOne();
-        } else {
-            bool needSkip = false;
-            if (!CalculateViewPortSceneTwo(needSkip)) {
-                return;
-            }
-            if (needSkip) {
-                continue;
-            }
-        }
+        footerMaxSize_.SetWidth(std::min(mainSize, mainSize_));
+        footerMaxSize_.SetHeight(std::min(crossSize, crossSize_));
     }
 }
 
-double RenderWaterFlow::CalculateBlankOfEnd()
+void RenderWaterFlow::LayoutFooter()
 {
-    double drawLength = 0.0 - firstItemOffset_;
-    for (int32_t main = startIndex_; main < mainCount_; main++) {
-        drawLength += GetSize(flowCells_) + mainGap_;
-        if (GreatOrEqual(drawLength, mainSize_)) {
-            break;
-        }
-    }
-    return mainSize_ - drawLength;
-}
-
-bool RenderWaterFlow::CheckMainFull(int32_t mainIndex)
-{
-    auto mainItor = flowMatrix_.find(mainIndex);
-    if (mainItor == flowMatrix_.end()) {
-        return false;
-    }
-
-    if (crossCount_ < 0 || (mainItor->second.size() < static_cast<size_t>(crossCount_))) {
-        return false;
-    }
-
-    return true;
-}
-
-double RenderWaterFlow::SupplyItems(
-    bool& vailSupplyItem, int32_t mainIndex, int32_t itemIndex, bool needPosition, bool needRank)
-{
-    LOGD("%{public}s called mainIndex: %{public}d.", __PRETTY_FUNCTION__, mainIndex);
-    loadingIndex_ = -1;
-    ACE_SCOPED_TRACE("SupplyItems %d", mainIndex);
-    auto mainItor = flowMatrix_.find(mainIndex);
-    if (mainItor != flowMatrix_.end()) {
-        if (crossCount_ < 0 || (mainItor->second.size() == static_cast<size_t>(crossCount_))) {
-            needRank = false;
-        }
-    }
-
-    if ((inCache_.find(mainIndex) == inCache_.end() || !CheckMainFull(mainIndex)) && (mainIndex != 0) && needRank) {
-        Rank(mainIndex, itemIndex);
-    }
-
-    vailSupplyItem = false;
-
-    auto iter = flowMatrix_.find(mainIndex);
-    if (iter != flowMatrix_.end()) {
-        int32_t frontIndex = -1;
-        for (const auto& item : iter->second) {
-            if (item.second == frontIndex) {
-                continue;
-            }
-            if (((items_.find(item.second) != items_.end() && items_[item.second] != nullptr) ||
-                    buildChildByIndex_(item.second)) &&
-                GetItemCalSizeNeeded(items_[item.second])) {
-                LOGD("SupplyItems resize() itemIndex: %{public}d", item.second);
-                int32_t itemRowSpan = GetItemSpan(items_[item.second], true);
-                int32_t itemColSpan = GetItemSpan(items_[item.second], false);
-                int32_t itemMain = -1;
-                int32_t itemCross = -1;
-                if (!GetItemMainCrossIndex(item.second, itemMain, itemCross)) {
-                    itemMain = mainIndex;
-                    itemCross = item.first;
-                }
-                if (useScrollable_ == SCROLLABLE::VERTICAL) {
-                    LayoutChild(items_[item.second], itemMain, itemCross, itemRowSpan, itemColSpan, needPosition);
-                } else {
-                    LayoutChild(items_[item.second], itemMain, itemCross, itemColSpan, itemRowSpan, needPosition);
-                }
-                vailSupplyItem = true;
-            }
-            frontIndex = item.second;
-        }
-        LOGD("SupplyItems inCache_.insert mainIndex: %{public}d.", mainIndex);
-        inCache_.insert(mainIndex);
-        return NearEqual(GetSize(flowCells_), Size::INFINITE_SIZE) ? 0.0 : GetSize(flowCells_);
-    }
-    return 0.0;
-}
-
-int32_t RenderWaterFlow::CalItemIndexInRank(int32_t mainIndex)
-{
-    int32_t itemIndex = -1;
-    for (int32_t i = 1; (mainIndex - i) >= 0; i++) {
-        auto mainItor = flowMatrix_.find(mainIndex - i);
-        if (mainItor == flowMatrix_.end()) {
-            continue;
-        }
-        for (int32_t cross = crossCount_ - 1; cross >= 0; cross--) {
-            auto iter = mainItor->second.find(cross);
-            if (iter == mainItor->second.end()) {
-                continue;
-            }
-            if (itemIndex == -1) {
-                // fine the first itemIndex
-                itemIndex = iter->second + 1;
-            } else if (itemIndex <= iter->second + 1) {
-                // fine the max ID of itemIndex in the last line
-                itemIndex = iter->second + 1;
-            }
-        }
-        if (static_cast<int32_t>(mainItor->second.size()) == (crossCount_ - 1)) {
-            // search to the end, then the row of flowMatrix_ is all layouted
-            break;
-        }
-    }
-    return itemIndex;
-}
-
-bool RenderWaterFlow::Rank(int32_t mainIndex, int32_t itemIndex)
-{
-    LOGD("%{public}s called. mainIndex:%{public}d itemIndex:%{public}d", __PRETTY_FUNCTION__, mainIndex, itemIndex);
-
-    if (inCache_.find(mainIndex) != inCache_.end() && CheckMainFull(mainIndex)) {
-        return true;
-    }
-    ACE_SCOPED_TRACE("Rank [%d]", mainIndex);
-
-    if (itemIndex == -1) {
-        itemIndex = CalItemIndexInRank(mainIndex);
-    }
-
-    if (itemIndex == -1) {
-        LOGE("failed, itemIndex = -1, mainIndex = %d", mainIndex);
-        return false;
-    }
-    bool isFilled = false;
-    int32_t index = mainIndex;
-    int32_t crossIndex = 0;
-    while (!isFilled) {
-        int32_t itemMainSpan = -1;
-        int32_t itemCrossSpan = -1;
-        if (flowMatrixByIndex_.find(itemIndex) != flowMatrixByIndex_.end()) {
-            itemIndex++;
-            continue;
-        }
-
-        if (!GetItemSpanFromCache(itemIndex, itemMainSpan, itemCrossSpan)) {
-            return false;
-        }
-        while (!CheckFlowPlaced(itemIndex, mainIndex, crossIndex, itemMainSpan, itemCrossSpan)) {
-            GetNextFlow(mainIndex, crossIndex); // crossIndex++
-            if (mainIndex > index) {
-                isFilled = true;
-                break;
-            }
-        }
-        itemIndex++;
-    }
-    return true;
-}
-
-void RenderWaterFlow::DealCache(int32_t start, int32_t end)
-{
-    if (loadingIndex_ != -1) {
+    if (!footer_) {
+        LOGE("footer is null");
         return;
     }
+    footer_->SetVisible(false);
+    LayoutParam innerLayoutParam;
+    innerLayoutParam.SetMaxSize(footerMaxSize_);
+    footer_->Layout(innerLayoutParam);
+    SetFooterPosition();
+}
 
-    std::set<int32_t> deleteItem;
-    for (const auto& item : inCache_) {
-        if (!(item < start - cacheCount_ || item > end + cacheCount_)) {
-            continue;
+void RenderWaterFlow::SetFooterPosition()
+{
+    if (!footer_) {
+        return;
+    }
+    Offset offset;
+    auto width = footerMaxSize_.Width();
+    auto height = footerMaxSize_.Height();
+    auto footerCurrentPos = GetTailPos();
+    switch (direction_) {
+        case FlexDirection::COLUMN:
+            offset = Offset((crossSize_ - width) / CENTER_POINT, footerCurrentPos - viewportStartPos_);
+            break;
+        case FlexDirection::COLUMN_REVERSE:
+            offset = Offset((crossSize_ - width) / CENTER_POINT, footerCurrentPos - viewportStartPos_ - height);
+            break;
+        case FlexDirection::ROW:
+            offset = Offset(footerCurrentPos - viewportStartPos_, (crossSize_ - height) / CENTER_POINT);
+            break;
+        case FlexDirection::ROW_REVERSE:
+            offset = Offset(footerCurrentPos - viewportStartPos_ - width, (crossSize_ - height) / CENTER_POINT);
+            break;
+        default:
+            return;
+    }
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
+        if (GreatOrEqual(offset.GetX(), crossSize_) || GreatOrEqual(offset.GetY(), mainSize_)) {
+            return;
         }
-        // check all item of inCache_ is in viewport, if in viewport the cacheCount_ can't be delete
-        bool deleteEnable = true;
+    } else {
+        if (GreatOrEqual(offset.GetX(), mainSize_) || GreatOrEqual(offset.GetY(), crossSize_)) {
+            return;
+        }
+    }
+    footer_->SetPosition(offset);
+    footer_->SetVisible(true);
+}
+
+void RenderWaterFlow::UpdateCacheItems()
+{
+    cacheItems_.clear();
+    double itemMainMinPos = 0.0;
+    double itemMainMaxPos = 0.0;
+    double viewportEndPos = viewportStartPos_ + mainSize_ + cacheSize_;
+    for (const auto& item : flowMatrix_) {
+        if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+            itemMainMinPos = item.second.mainPos;
+            itemMainMaxPos = item.second.mainPos + item.second.mainSize;
+        } else {
+            itemMainMinPos = (mainSize_ - (item.second.mainPos + item.second.mainSize));
+            itemMainMaxPos = (mainSize_ - (item.second.mainPos + item.second.mainSize)) + item.second.mainSize;
+        }
+        if (!(GreatNotEqual(itemMainMinPos, viewportEndPos) ||
+                LessNotEqual(itemMainMaxPos, viewportStartPos_ - cacheSize_))) {
+            cacheItems_.emplace(item.first);
+        }
+    }
+}
+
+std::set<size_t> RenderWaterFlow::GetShowItems()
+{
+    std::set<size_t> showItems;
+    showItems.clear();
+    double itemMainMinPos = 0.0;
+    double itemMainMaxPos = 0.0;
+    double viewportEndPos = viewportStartPos_ + mainSize_;
+    for (const auto& item : cacheItems_) {
         auto iter = flowMatrix_.find(item);
         if (iter != flowMatrix_.end()) {
-            for (const auto& eachItem : iter->second) {
-                auto eachItemStartMain = GetItemMainIndex(eachItem.second);
-                if (items_[eachItem.second] == nullptr) {
-                    continue;
-                }
-                auto eachItemEndMain =
-                    eachItemStartMain + GetItemSpan(items_[eachItem.second], useScrollable_ != SCROLLABLE::HORIZONTAL);
-                if (!(eachItemEndMain < (start - cacheCount_) || eachItemStartMain > (end + cacheCount_))) {
-                    deleteEnable = false;
-                    break;
-                }
+            if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+                itemMainMinPos = iter->second.mainPos;
+                itemMainMaxPos = iter->second.mainPos + iter->second.mainSize;
+            } else {
+                itemMainMinPos = (mainSize_ - (iter->second.mainPos + iter->second.mainSize));
+                itemMainMaxPos = (mainSize_ - (iter->second.mainPos + iter->second.mainSize)) + iter->second.mainSize;
+            }
+            if (!(GreatNotEqual(itemMainMinPos, viewportEndPos) || LessNotEqual(itemMainMaxPos, viewportStartPos_))) {
+                showItems.emplace(item);
             }
         }
+    }
+    return showItems;
+}
 
-        if (deleteEnable) {
-            deleteItem.insert(item);
+void RenderWaterFlow::DealCache()
+{
+    std::set<size_t> deleteItem;
+    double itemMainMinPos = 0.0;
+    double itemMainMaxPos = 0.0;
+    double cacheStartPos = viewportStartPos_ - cacheSize_;
+    double cacheEndPos = viewportStartPos_ + mainSize_ + cacheSize_;
+    for (const auto& item : items_) {
+        auto iter = flowMatrix_.find(item.first);
+        if (iter != flowMatrix_.end()) {
+            if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+                itemMainMinPos = iter->second.mainPos;
+                itemMainMaxPos = iter->second.mainPos + iter->second.mainSize;
+            } else {
+                itemMainMinPos = (mainSize_ - (iter->second.mainPos + iter->second.mainSize));
+                itemMainMaxPos = (mainSize_ - (iter->second.mainPos + iter->second.mainSize)) + iter->second.mainSize;
+            }
+            if (GreatNotEqual(itemMainMinPos, cacheEndPos) || LessNotEqual(itemMainMaxPos, cacheStartPos)) {
+                deleteItem.emplace(item.first);
+            }
         }
     }
 
     for (const auto& item : deleteItem) {
-        DeleteItems(item, false);
-    }
-    LOGD("DealCache end: %{public}d, start: %{public}d", end, start);
-    for (int32_t i = 1; i <= cacheCount_; i++) {
-        if (inCache_.count(i + end) == 0 || !CheckMainFull(i + end)) {
-            loadingIndex_ = i + end;
-            LOGD("DealCache loadingIndex_: %{public}d.", loadingIndex_);
-            break;
-        }
-        if (start >= i && ((inCache_.count(start - i) == 0) || !CheckMainFull(start - i))) {
-            loadingIndex_ = start - i;
-            break;
-        }
+        DeleteItems(item);
     }
 }
 
-void RenderWaterFlow::DeleteItems(int32_t index, bool isTail)
+void RenderWaterFlow::DeleteItems(size_t index)
 {
-    LOGD("%{public}s called. index: %{public}d", __PRETTY_FUNCTION__, index);
     if (!deleteChildByIndex_) {
         return;
     }
 
-    auto iter = flowMatrix_.find(index);
-    if (iter == flowMatrix_.end()) {
+    auto iter = items_.find(index);
+    if (iter == items_.end()) {
         return;
     }
-    for (const auto& item : iter->second) {
-        deleteChildByIndex_(item.second);
-        RemoveChildByIndex(item.second);
-    }
-
-    inCache_.erase(index);
+    deleteChildByIndex_(index);
+    RemoveChildByIndex(index);
 }
 
-void RenderWaterFlow::ClearLayout(int32_t index)
+void RenderWaterFlow::ClearLayout(size_t index, bool clearAll)
 {
-    currentOffset_ = 0.0;
-    showItem_.clear();
-    childrenInRect_.clear();
-    updateFlag_ = true;
+    cacheItems_.clear();
     reachHead_ = false;
     reachTail_ = false;
-    startMainPos_ = 0.0;
-    endMainPos_ = 0.0;
-    firstItemOffset_ = 0.0;
-    endIndex_ = -1;
-    mainScrollExtent_ = 0.0;
     lastOffset_ = 0.0;
-    estimateHeight_ = 0.0;
-    if (index > -1) {
-        int32_t main = GetItemMainIndex(index);
-        size_t rows = flowMatrix_.size();
-        DeleteItemsInMatrix(rows, index);
-        for (auto it = inCache_.begin(); it != inCache_.end();) {
-            if (*it >= main) {
-                inCache_.erase(it++);
-            } else {
-                it++;
-            }
+    ClearFlowMatrix(index, clearAll);
+    ClearItemsByCrossIndex(index, clearAll);
+    UpdateMainSideEndPos();
+}
+
+void RenderWaterFlow::ClearItems(size_t index)
+{
+    for (auto item = items_.begin(); item != items_.end();) {
+        if (index <= item->first) {
+            item->second->SetVisible(false);
+            item = items_.erase(item);
+        } else {
+            item++;
         }
-        auto itFirst1 = itemSpanCache_.find(index);
-        if (itFirst1 != itemSpanCache_.end()) {
-            itemSpanCache_.erase(itFirst1, itemSpanCache_.end());
-        }
-        auto itFirst3 = flowMatrixByIndex_.find(index);
-        if (itFirst3 != flowMatrixByIndex_.end()) {
-            flowMatrixByIndex_.erase(itFirst3, flowMatrixByIndex_.end());
-        }
-        if (main <= startIndex_) {
-            startIndex_ = main;
-        }
-    } else {
-        startIndex_ = 0;
-        inCache_.clear();
-        flowMatrix_.clear();
-        flowMatrixByIndex_.clear();
-        itemSpanCache_.clear();
     }
 }
 
-void RenderWaterFlow::ClearItems(int32_t index)
+void RenderWaterFlow::OnDataSourceUpdated(size_t index)
 {
-    decltype(items_) items(std::move(items_));
-    for (const auto& item : items) {
-        if (index <= item.first) {
-            deleteChildByIndex_(item.first);
-            RemoveChildByIndex(item.first);
-        }
-    }
-    loadingIndex_ = -1;
-}
-
-int32_t RenderWaterFlow::GetItemMainIndex(int32_t index) const
-{
-    auto iter = flowMatrixByIndex_.find(index);
-    if (iter != flowMatrixByIndex_.end()) {
-        return iter->second.begin()->first;
-    }
-    return -1;
-}
-
-bool RenderWaterFlow::GetItemMainCrossIndex(int32_t index, int32_t& mainIndex, int32_t& crossIndex)
-{
-    auto iter = flowMatrixByIndex_.find(index);
-    if (iter != flowMatrixByIndex_.end()) {
-        mainIndex = iter->second.begin()->first;
-        crossIndex = iter->second.begin()->second;
-        return true;
-    }
-    return false;
-}
-
-void RenderWaterFlow::OnDataSourceUpdated(int32_t index)
-{
-    LOGD("OnDataSourceUpdated called. index:%{public}d", index);
     if (items_.empty() && updateFlag_) {
         return;
     }
 
-    ACE_SCOPED_TRACE("OnDataSourceUpdated %d", index);
-    auto items = flowMatrix_.find(startIndex_);
-    if (items != flowMatrix_.end() && items->second.size() > 0) {
-        currentItemIndex_ = items->second.begin()->second;
-    }
-    if (index >= 0) {
-        startRankItemIndex_ = index;
-    } else {
-        startRankItemIndex_ = 0;
-    }
-    auto offset = firstItemOffset_;
-    ClearItems(index);
-    ClearLayout(index);
-    currentOffset_ = -offset;
-    MarkNeedLayout();
-}
-
-bool RenderWaterFlow::CheckEndShowItemPlace(int32_t index)
-{
-    int32_t main = 0;
-    int32_t cross = 0;
-    if (!GetItemMainCrossIndex(index, main, cross)) {
-        return false;
-    }
-    int32_t itemMainSpan = GetItemSpan(items_[index], useScrollable_ != SCROLLABLE::HORIZONTAL);
-    int32_t mainIndex = main;
-    for (; mainIndex < (main + itemMainSpan); mainIndex++) {
-        auto items = flowMatrix_.find(mainIndex);
-        if (items == flowMatrix_.end()) {
-            return false;
-        }
-        if (crossCount_ < 0 || (items->second.size() < static_cast<size_t>(crossCount_))) {
-            return true;
-        }
-    }
-    auto itemsNext = flowMatrix_.find(mainIndex);
-    if (itemsNext == flowMatrix_.end()) {
-        return true;
-    }
-    auto item = itemsNext->second.find(cross);
-    if (item == itemsNext->second.end()) {
-        return true;
-    }
-    return false;
-}
-
-void RenderWaterFlow::CalculateWholeSize(double drawLength)
-{
-    if (flowMatrix_.empty()) {
+    if (!getTotalCount_) {
         return;
     }
-    if (totalCountFlag_) {
-        int32_t lastRow = flowMatrix_.rbegin()->first;
-        int32_t totalRows = mainCount_;
-        lastRow++;
-        totalRows++;
-        if (lastRow > totalRows) {
-            totalRows = lastRow;
-        }
-        double drawLength2 = totalRows * mainLength_ + (totalRows - 1) * mainGap_;
-        if (lastRow <= totalRows && lastRow > 0) {
-            mainScrollExtent_ = (lastRow * drawLength2) / totalRows;
-        }
-        estimateHeight_ = mainScrollExtent_;
-        totalCountFlag_ = false;
-    }
-    bool isScrollable = false;
-    if (estimateHeight_ > mainSize_) {
-        isScrollable = true;
-    }
-    if (scrollBar_) {
-        scrollBar_->SetScrollable(isScrollable);
-    }
-    // get the start position in flow
-    LOGD("offset_ss startIndex_: %{public}d.", startIndex_);
-    startMainPos_ = GetSize(flowCells_) * (startIndex_) + mainGap_ * (startIndex_ - 1);
-    scrollBarExtent_ = GetSize(flowCells_) * (mainCount_) + mainGap_ * (mainCount_ - 1);
-    if (!isScrollable) {
-        currentOffset_ = 0.0;
-    }
+
+    totalCount_ = getTotalCount_();
+    ClearItems(index);
+    ClearLayout(index);
+    MarkNeedLayout();
 }
 
 double RenderWaterFlow::GetEstimatedHeight()
 {
-    if (reachTail_) {
-        // reach the end og flow, update the total scroll bar length
-        estimateHeight_ = scrollBarExtent_;
-    } else {
-        estimateHeight_ = std::max(estimateHeight_, scrollBarExtent_);
-    }
+    estimateHeight_ =
+        std::min(std::max(estimateHeight_, (std::abs(viewportStartPos_) + mainSize_)), GetLastMainPos().GetY());
     return estimateHeight_;
 }
 
-void RenderWaterFlow::InitScrollBar(const RefPtr<Component>& component)
+void RenderWaterFlow::InitScrollBar()
 {
-    const RefPtr<V2::WaterFlowComponent> flow = AceType::DynamicCast<V2::WaterFlowComponent>(component);
-    if (!flow) {
+    if (!component_) {
         LOGE("RenderWaterFlow update failed.");
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
 
-    if (!flow->GetController()) {
-        flow->SetScrollBarDisplayMode(DisplayMode::OFF);
+    if (!component_->GetController()) {
+        component_->SetScrollBarDisplayMode(DisplayMode::OFF);
     }
 
     const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
@@ -1249,34 +706,32 @@ void RenderWaterFlow::InitScrollBar(const RefPtr<Component>& component)
         scrollBar_->Reset();
     } else {
         RefPtr<WaterFlowScrollController> controller = AceType::MakeRefPtr<WaterFlowScrollController>();
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(flow->GetScrollBarDisplayMode(), theme->GetShapeMode());
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBarDisplayMode(), theme->GetShapeMode());
         scrollBar_->SetScrollBarController(controller);
     }
     // set the scroll bar style
-    scrollBar_->SetReservedHeight(theme->GetReservedHeight());
     scrollBar_->SetMinHeight(theme->GetMinHeight());
     scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
-    auto& scrollBarColor = flow->GetScrollBarColor();
-    if (!scrollBarColor.empty()) {
-        scrollBarColor_ = Color::FromString(scrollBarColor);
-    } else {
-        scrollBarColor_ = theme->GetForegroundColor();
-    }
-    scrollBar_->SetForegroundColor(scrollBarColor_);
+    scrollBar_->SetForegroundColor(theme->GetForegroundColor());
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
     scrollBar_->SetPadding(theme->GetPadding());
-    scrollBar_->SetScrollable(true);
-    if (!flow->GetScrollBarWidth().empty()) {
-        const auto& width = StringUtils::StringToDimension(flow->GetScrollBarWidth());
-        scrollBar_->SetInactiveWidth(width);
-        scrollBar_->SetNormalWidth(width);
-        scrollBar_->SetActiveWidth(width);
-        scrollBar_->SetTouchWidth(width);
-    } else {
-        scrollBar_->SetInactiveWidth(theme->GetNormalWidth());
-        scrollBar_->SetNormalWidth(theme->GetNormalWidth());
-        scrollBar_->SetActiveWidth(theme->GetActiveWidth());
-        scrollBar_->SetTouchWidth(theme->GetTouchWidth());
+    scrollBar_->SetInactiveWidth(theme->GetNormalWidth());
+    scrollBar_->SetNormalWidth(theme->GetNormalWidth());
+    scrollBar_->SetActiveWidth(theme->GetActiveWidth());
+    scrollBar_->SetTouchWidth(theme->GetTouchWidth());
+    switch (direction_) {
+        case FlexDirection::COLUMN:
+        case FlexDirection::COLUMN_REVERSE:
+            useScrollable_ = SCROLLABLE::VERTICAL;
+            scrollBar_->SetPositionMode(PositionMode::RIGHT);
+            break;
+        case FlexDirection::ROW:
+        case FlexDirection::ROW_REVERSE:
+            useScrollable_ = SCROLLABLE::HORIZONTAL;
+            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+            break;
+        default:
+            break;
     }
     scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
     SetScrollBarCallback();
@@ -1290,7 +745,6 @@ void RenderWaterFlow::InitScrollBarProxy()
     auto&& scrollCallback = [weakScroll = AceType::WeakClaim(this)](double value, int32_t source) {
         auto flow = weakScroll.Upgrade();
         if (!flow) {
-            LOGE("render flow is released");
             return false;
         }
         return flow->UpdateScrollPosition(value, source);
@@ -1307,7 +761,6 @@ void RenderWaterFlow::SetScrollBarCallback()
     auto&& barEndCallback = [weakFlow = AceType::WeakClaim(this)](int32_t value) {
         auto flow = weakFlow.Upgrade();
         if (!flow) {
-            LOGE("render flow is released");
             return;
         }
         flow->scrollBarOpacity_ = value;
@@ -1316,15 +769,12 @@ void RenderWaterFlow::SetScrollBarCallback()
     auto&& scrollEndCallback = [weakFlow = AceType::WeakClaim(this)]() {
         auto flow = weakFlow.Upgrade();
         if (!flow) {
-            LOGE("render flow is released");
             return;
         }
-        LOGD("trigger scroll end callback");
     };
     auto&& scrollCallback = [weakScroll = AceType::WeakClaim(this)](double value, int32_t source) {
         auto flow = weakScroll.Upgrade();
         if (!flow) {
-            LOGE("render flow is released");
             return false;
         }
         return flow->UpdateScrollPosition(value, source);
@@ -1338,8 +788,7 @@ bool RenderWaterFlow::AnimateTo(const Dimension& position, float duration, const
         animator_->Stop();
     }
     animator_->ClearInterpolators();
-    animateDelta_ = 0.0;
-    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(GetCurrentOffset(), NormalizeToPx(position), curve);
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(-viewportStartPos_, NormalizeToPx(position), curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](double value) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
@@ -1347,73 +796,65 @@ bool RenderWaterFlow::AnimateTo(const Dimension& position, float duration, const
         }
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(duration);
+    animator_->SetDuration(static_cast<int32_t>(duration));
     animator_->ClearStopListeners();
-    animator_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->animateDelta_ = 0.0;
-        }
-    });
     animator_->Play();
     return true;
 }
 
-Offset RenderWaterFlow::CurrentOffset()
+void RenderWaterFlow::ScrollToIndex(int32_t index, int32_t source)
 {
-    auto ctx = GetContext().Upgrade();
-    if (!ctx) {
-        return useScrollable_ == SCROLLABLE::HORIZONTAL ? Offset(GetCurrentOffset(), 0.0)
-                                                        : Offset(0.0, GetCurrentOffset());
+    if (source != SCROLL_FROM_JUMP) {
+        LOGW("Not from scroll jump.");
+        return;
     }
-    auto mainOffset = ctx->ConvertPxToVp(Dimension(GetCurrentOffset(), DimensionUnit::PX));
-    Offset currentOffset = useScrollable_ == SCROLLABLE::HORIZONTAL ? Offset(mainOffset, 0.0) : Offset(0.0, mainOffset);
-    return currentOffset;
-}
 
-void RenderWaterFlow::ScrollToEdge(OHOS::Ace::ScrollEdgeType edgeType, bool smooth)
-{
-    if (edgeType != ScrollEdgeType::SCROLL_TOP) {
-        LOGW("Not supported yet");
+    if (useScrollable_ == SCROLLABLE::NO_SCROLL || index < 0) {
+        LOGW("Not supported.");
         return;
     }
-    if (items_.empty() && updateFlag_) {
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("context is null");
         return;
     }
-    if (scrollable_ && !scrollable_->IsStopped()) {
-        scrollable_->StopScrollable();
+
+    auto showItems = GetShowItems();
+    if (showItems.find(index) != showItems.end()) {
+        LOGW("Item show in view port already, not do scrllToIndex.");
+        return;
     }
-    currentItemIndex_ = 0;
-    startRankItemIndex_ = 0;
-    ClearItems();
-    ClearLayout();
-    MarkNeedLayout();
+
+    auto iter = flowMatrix_.find(index);
+    if (iter == flowMatrix_.end()) {
+        targetIndex_ = index;
+        size_t itemIndex = GetNextSupplyedIndex();
+        SupplyItems(itemIndex, GetTargetPos());
+        iter = flowMatrix_.find(index);
+        if (iter == flowMatrix_.end()) {
+            LOGE("scrollToIndex[item:%{public}d] failed.", index);
+            return;
+        }
+    }
+
+    double scrollToPos = 0.0;
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+        scrollToPos = iter->second.mainPos;
+    } else {
+        scrollToPos = (mainSize_ - (iter->second.mainPos + iter->second.mainSize)) + iter->second.mainSize - mainSize_;
+    }
+    AnimateToPos(scrollToPos, ANIMATE_DURATION, CURVE_SCROLL_TO_TOP);
 }
 
 void RenderWaterFlow::DoJump(double position, int32_t source)
 {
-    double delta = position - animateDelta_;
-    UpdateScrollPosition(delta, source);
-    animateDelta_ = position;
-}
-
-void RenderWaterFlow::OnPaintFinish()
-{
-    RenderNode::OnPaintFinish();
-    if (showItem_.empty()) {
-        return;
-    }
-    auto currentStartItemCount = *showItem_.begin();
-    auto currentEndItemCount = *showItem_.rbegin();
-    if ((startShowItemIndex_ != currentStartItemCount) || (endShowItemIndex_ != currentEndItemCount)) {
-        startShowItemIndex_ = currentStartItemCount;
-        endShowItemIndex_ = currentEndItemCount;
-    }
+    UpdateScrollPosition(viewportStartPos_ - position, source);
 }
 
 void RenderWaterFlow::OnPredictLayout(int64_t deadline)
 {
-    if (updateFlag_) {
+    if (!NeedPredictLayout()) {
         return;
     }
     auto context = context_.Upgrade();
@@ -1421,59 +862,68 @@ void RenderWaterFlow::OnPredictLayout(int64_t deadline)
         return;
     }
     if (!context->IsTransitionStop()) {
-        LOGD("In page transition, skip predict.");
-        return;
-    }
-    if (loadingIndex_ == -1) {
-        DealCache(startIndex_, endIndex_);
-        if (loadingIndex_ == -1) {
-            if (startIndex_ == 0 && startRankItemIndex_ > 0) {
-                LoadForward();
-                MarkNeedPredictLayout();
-            }
-            return;
-        }
-    }
-    LOGD("OnPredictLayout loadingIndex_: %{public}d.", loadingIndex_);
-    ACE_SCOPED_TRACE("OnPredictLayout %d", loadingIndex_);
-    if (GetSysTimestamp() + TIME_THRESHOLD > deadline) {
         MarkNeedPredictLayout();
         return;
     }
-    bool vail = false;
-    SupplyItems(vail, loadingIndex_, -1);
-    if (vail) {
+
+    auto startTime = GetSysTimestamp(); // unit: ns
+    DealCache();
+    if (GetSysTimestamp() - startTime + TIME_THRESHOLD > deadline * MICROSEC_TO_NANOSEC) {
         MarkNeedPredictLayout();
-    } else {
-        loadingIndex_ = -1;
+        return;
     }
+
+    // just need supply forward the main side, backwards already supply and keep in flowMatrix.
+    size_t itemIndex = GetNextSupplyedIndex();
+    SupplyItems(itemIndex, GetCacheTargetPos());
+    UpdateCacheItems();
+    LayoutItems(cacheItems_);
+    dVPStartPosBackup_ = viewportStartPos_;
+    totalCountBack_ = getTotalCount_();
+    MarkNeedPredictLayout();
 }
 
 bool RenderWaterFlow::IsAxisScrollable(AxisDirection direction)
 {
-    if (isVertical_) {
-        if (direction == AxisDirection::UP && reachHead_) {
-            return false;
-        } else if (direction == AxisDirection::DOWN && reachTail_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    } else {
-        if (direction == AxisDirection::LEFT && reachHead_) {
-            return false;
-        } else if (direction == AxisDirection::RIGHT && reachTail_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
+    bool ret = true;
+    switch (direction_) {
+        case FlexDirection::COLUMN:
+            if ((direction == AxisDirection::UP && reachHead_) ||
+                (direction == AxisDirection::DOWN && reachTail_)) {
+                ret = false;
+            }
+            break;
+        case FlexDirection::ROW:
+            if ((direction == AxisDirection::LEFT && reachHead_) ||
+                (direction == AxisDirection::RIGHT && reachTail_)) {
+                ret = false;
+            }
+            break;
+        case FlexDirection::COLUMN_REVERSE:
+            if ((direction == AxisDirection::DOWN && reachHead_) ||
+                (direction == AxisDirection::UP && reachTail_)) {
+                ret = false;
+            }
+            break;
+        case FlexDirection::ROW_REVERSE:
+            if ((direction == AxisDirection::RIGHT && reachHead_) ||
+                (direction == AxisDirection::LEFT && reachTail_)) {
+                ret = false;
+            }
+            break;
+        default:
+            ret = false;
+            break;
     }
-    return true;
+    if (direction == AxisDirection::NONE) {
+        ret = false;
+    }
+    return ret;
 }
 
 void RenderWaterFlow::HandleAxisEvent(const AxisEvent& event)
 {
-    double degree = 0.0f;
+    double degree = 0.0;
     if (!NearZero(event.horizontalAxis)) {
         degree = event.horizontalAxis;
     } else if (!NearZero(event.verticalAxis)) {
@@ -1488,19 +938,31 @@ WeakPtr<RenderNode> RenderWaterFlow::CheckAxisNode()
     return AceType::WeakClaim<RenderNode>(this);
 }
 
-std::vector<double> RenderWaterFlow::ParseCrossLength(double size, double gap)
-{
-    std::vector<double> lens;
-    double crossLength = (size - (crossCount_ - 1) * gap) / crossCount_;
-    for (int32_t i = 0; i < crossCount_; i++) {
-        lens.push_back(crossLength);
-    }
-
-    return lens;
-}
-
 void RenderWaterFlow::OnChildAdded(const RefPtr<RenderNode>& renderNode)
 {
+    Offset offset;
+    switch (direction_) {
+        case FlexDirection::COLUMN:
+            offset.SetX(crossSize_ / CENTER_POINT);
+            offset.SetY(mainSize_ + cacheSize_);
+            break;
+        case FlexDirection::ROW:
+            offset.SetX(mainSize_ + cacheSize_);
+            offset.SetY(crossSize_ / CENTER_POINT);
+            break;
+        case FlexDirection::COLUMN_REVERSE:
+            offset.SetX(crossSize_ / CENTER_POINT);
+            offset.SetY(0.0 - cacheSize_);
+            break;
+        case FlexDirection::ROW_REVERSE:
+            offset.SetX(0.0 - cacheSize_);
+            offset.SetY(crossSize_ / CENTER_POINT);
+            break;
+        default:
+            break;
+    }
+    // set default position for animateTo(covering animation)
+    renderNode->SetPosition(offset);
     RenderNode::OnChildAdded(renderNode);
 }
 
@@ -1509,288 +971,456 @@ bool RenderWaterFlow::IsUseOnly()
     return true;
 }
 
-int32_t RenderWaterFlow::RequestNextFocus(bool vertical, bool reverse)
-{
-    KeyDirection key = DIRECTION_MAP.at(rightToLeft_).at(vertical).at(reverse);
-    int32_t index = focusMove(key);
-    if (index < 0) {
-        return index;
-    }
-    return focusIndex_;
-}
-
-void RenderWaterFlow::UpdateFocusInfo(int32_t focusIndex)
-{
-    if (focusIndex < 0) {
-        LOGW("Invalid focus index, update focus info failed.");
-        return;
-    }
-    if (focusIndex != focusIndex_) {
-        LOGD("Update focus index from %{public}d to %{public}d", focusIndex_, focusIndex);
-        focusIndex_ = focusIndex;
-        auto iter = flowMatrixByIndex_.find(focusIndex);
-        if (iter != flowMatrixByIndex_.end()) {
-            focusRow_ = iter->second.begin()->first;
-            focusCol_ = iter->second.begin()->second;
-        }
-    }
-}
-
-int32_t RenderWaterFlow::GetItemSpan(const RefPtr<RenderNode>& child, bool isRow) const
+RefPtr<RenderWaterFlowItem> RenderWaterFlow::GetFlowItemByChild(const RefPtr<RenderNode>& child)
 {
     int32_t depth = DEFAULT_DEPTH;
-    int32_t span = -1;
     auto item = child;
     auto flowItem = AceType::DynamicCast<RenderWaterFlowItem>(item);
     while (!flowItem && depth > 0) {
         if (!item || item->GetChildren().empty()) {
-            return span;
+            return nullptr;
         }
         item = item->GetChildren().front();
         flowItem = AceType::DynamicCast<RenderWaterFlowItem>(item);
         --depth;
     }
-    if (flowItem) {
-        if (isRow) {
-            span = flowItem->GetRowSpan();
-        } else {
-            auto crossItor = itemSpanCache_.find(GetIndexByNode(child));
-            if (crossItor != itemSpanCache_.end()) {
-                span = crossItor->second.colSpan;
-            } else {
-                span = flowItem->GetColumnSpan();
-            }
-        }
-    }
-    return span < 1 ? 1 : span;
+    return flowItem;
 }
 
-bool RenderWaterFlow::GetItemSpanFromCache(int32_t index, int32_t& rowSpan, int32_t& colSpan)
+void RenderWaterFlow::OutputMatrix()
 {
-    auto itor = itemSpanCache_.find(index);
-    if (itor != itemSpanCache_.end()) {
-        rowSpan = itor->second.rowSpan;
-        colSpan = itor->second.colSpan;
+    for (auto it = flowMatrix_.begin(); it != flowMatrix_.end();) {
+        LOGD("%{public}s: [%{public}zu] Pos[%{public}f, %{public}f] Size[%{public}f, %{public}f]", __PRETTY_FUNCTION__,
+            it->first, it->second.crossPos, it->second.mainPos, it->second.crossSize, it->second.mainSize);
+        it++;
+    }
+}
+
+void RenderWaterFlow::RequestWaterFlowFooter()
+{
+    auto generator = itemGenerator_.Upgrade();
+    footer_ = generator ? generator->RequestWaterFlowFooter() : RefPtr<RenderNode>();
+    if (footer_) {
+        AddChild(footer_);
+        footer_->Layout(GetLayoutParam());
+        footer_->SetVisible(false);
+        auto mainSize = GetMainSize(footer_);
+        auto crossSize = GetCrossSize(footer_);
+        if (NonPositive(mainSize) || NonPositive(crossSize)) {
+            RemoveChild(footer_);
+            footer_ = nullptr;
+        } else {
+            GetFooterSize(mainSize, crossSize);
+        }
+    }
+}
+
+size_t RenderWaterFlow::GetLastSupplyedIndex()
+{
+    return flowMatrix_.empty() ? 0 : (--flowMatrix_.end())->first;
+}
+
+size_t RenderWaterFlow::GetNextSupplyedIndex()
+{
+    size_t index = 0;
+    if (!flowMatrix_.empty()) {
+        index = (--flowMatrix_.end())->first;
+        index++;
+    }
+    return index;
+}
+
+double RenderWaterFlow::GetLastSupplyedMainSize()
+{
+    double result = 0.0;
+    if (flowMatrix_.empty()) {
+        return result;
+    }
+    size_t index = GetLastSupplyedIndex();
+    auto iter = flowMatrix_.find(index);
+    if (iter != flowMatrix_.end()) {
+        result = iter->second.mainSize + iter->second.mainPos;
+    }
+    return result;
+}
+
+Offset RenderWaterFlow::GetLastMainBlankPos()
+{
+    Offset pos;
+    size_t crossIndex = 0;
+    if (mainSideEndPos_.empty() || mainSideEndPos_.size() != crossSideSize_.size()) {
+        return pos;
+    }
+    pos.SetY(mainSideEndPos_.at(0));
+    for (size_t i = 0; i < mainSideEndPos_.size(); i++) {
+        if (LessNotEqual(mainSideEndPos_.at(i), pos.GetY())) {
+            pos.SetY(mainSideEndPos_.at(i));
+            crossIndex = i;
+        }
+    }
+    pos.SetX(GetCrossEndPos(crossIndex));
+    return pos;
+}
+
+size_t RenderWaterFlow::GetLastMainBlankCross()
+{
+    double pos = 0.0;
+    size_t crossIndex = 0;
+    if (mainSideEndPos_.empty()) {
+        return crossIndex;
+    }
+    pos = mainSideEndPos_.at(0);
+    for (size_t i = 0; i < mainSideEndPos_.size(); i++) {
+        if (LessNotEqual(mainSideEndPos_.at(i), pos)) {
+            pos = mainSideEndPos_.at(i);
+            crossIndex = i;
+        }
+    }
+    return crossIndex;
+}
+
+Offset RenderWaterFlow::GetLastMainPos()
+{
+    Offset pos(0.0, 0.0);
+    size_t crossIndex = 0;
+    if (mainSideEndPos_.empty() || mainSideEndPos_.size() != crossSideSize_.size()) {
+        return pos;
+    }
+    pos.SetY(mainSideEndPos_.at(0) - mainGap_);
+    for (size_t i = 0; i < mainSideEndPos_.size(); i++) {
+        if (GreatNotEqual(mainSideEndPos_.at(i), pos.GetY())) {
+            pos.SetY(mainSideEndPos_.at(i) - mainGap_);
+            crossIndex = i;
+        }
+    }
+    pos.SetX(GetCrossEndPos(crossIndex));
+    return pos;
+}
+
+double RenderWaterFlow::GetCrossEndPos(size_t crossIndex)
+{
+    double pos = 0.0;
+    if (crossIndex >= crossSideSize_.size()) {
+        return pos;
+    }
+    for (size_t i = 0; i < crossIndex; i++) {
+        pos += crossSideSize_[i];
+    }
+    if (crossIndex > 0) {
+        pos += crossIndex * crossGap_;
+    }
+
+    return pos;
+}
+
+double RenderWaterFlow::GetMainSize(const RefPtr<RenderNode>& item) const
+{
+    double size = 0.0;
+    if (!item) {
+        return size;
+    }
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
+        size = item->GetLayoutSize().Height();
     } else {
-        auto item = items_.find(index);
-        if (item != items_.end()) {
-            rowSpan = GetItemSpan(item->second, useScrollable_ != SCROLLABLE::HORIZONTAL);
-            colSpan = GetItemSpan(item->second, useScrollable_ == SCROLLABLE::HORIZONTAL);
-        } else {
-            if (!getChildSpanByIndex_(index, useScrollable_ == SCROLLABLE::HORIZONTAL, rowSpan, colSpan)) {
-                return false;
-            }
-        }
-        Span span;
-        span.rowSpan = rowSpan;
-        span.colSpan = colSpan;
-        itemSpanCache_.emplace(std::make_pair(index, span));
+        size = item->GetLayoutSize().Width();
     }
 
-    return true;
+    return size;
 }
 
-int32_t RenderWaterFlow::GetIndexByNode(const RefPtr<RenderNode>& child) const
+double RenderWaterFlow::GetCrossSize(const RefPtr<RenderNode>& item) const
 {
-    for (const auto& item : items_) {
-        if (item.second == child) {
-            return item.first;
-        }
+    double size = 0.0;
+    if (!item) {
+        return size;
     }
-    return -1;
-}
 
-int32_t RenderWaterFlow::GetIndexByFlow(int32_t row, int32_t column) const
-{
-    LOGD("%{public}s begin. row: %{public}d, column: %{public}d", __PRETTY_FUNCTION__, row, column);
-    auto rowIter = flowMatrix_.find(row);
-    if (rowIter != flowMatrix_.end()) {
-        auto colIter = rowIter->second.find(column);
-        if (colIter != rowIter->second.end()) {
-            return colIter->second;
-        }
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
+        size = item->GetLayoutSize().Width();
+    } else {
+        size = item->GetLayoutSize().Height();
     }
-    return -1;
+
+    return size;
 }
 
-// Handle direction key move
-int32_t RenderWaterFlow::focusMove(KeyDirection direction)
+FlowStyle RenderWaterFlow::ConstraintItemSize(FlowStyle item, size_t crossIndex)
 {
-    int32_t nextRow = focusRow_ < 0 ? 0 : focusRow_;
-    int32_t nextCol = focusCol_ < 0 ? 0 : focusCol_;
-    int32_t next = focusIndex_;
-    while (focusIndex_ == next || next < 0) {
-        switch (direction) {
-            case KeyDirection::UP:
-                --nextRow;
+    FlowStyle result = item;
+    if (GreatNotEqual(result.mainSize, itemConstraintSize_.maxMainSize)) {
+        result.mainSize = itemConstraintSize_.maxMainSize;
+    }
+    if (LessNotEqual(result.mainSize, itemConstraintSize_.minMainSize)) {
+        result.mainSize = itemConstraintSize_.minMainSize;
+    }
+    if (crossIndex < crossSideSize_.size()) {
+        result.crossSize = crossSideSize_[crossIndex];
+    }
+    return result;
+}
+
+bool RenderWaterFlow::CheckReachHead()
+{
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+        return LessOrEqual(viewportStartPos_, 0.0);
+    }
+    return LessOrEqual(0.0, viewportStartPos_);
+}
+
+bool RenderWaterFlow::CheckReachTail()
+{
+    double tailPos = GetTailPos();
+    double footerOffset = 0.0;
+    if (footer_) {
+        switch (direction_) {
+            case FlexDirection::COLUMN:
+            case FlexDirection::COLUMN_REVERSE:
+                footerOffset = footerMaxSize_.Height();
                 break;
-            case KeyDirection::DOWN:
-                ++nextRow;
-                break;
-            case KeyDirection::LEFT:
-                --nextCol;
-                break;
-            case KeyDirection::RIGHT:
-                ++nextCol;
+            case FlexDirection::ROW:
+            case FlexDirection::ROW_REVERSE:
+                footerOffset = footerMaxSize_.Width();
                 break;
             default:
-                return -1;
+                break;
         }
-        if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
-            if (nextRow < 0 || nextCol < 0 || nextRow >= mainCount_ || nextCol >= crossCount_) {
-                return -1;
-            }
-        } else {
-            if (nextRow < 0 || nextCol < 0 || nextRow >= crossCount_ || nextCol >= mainCount_) {
-                return -1;
-            }
-        }
-
-        next = GetIndexByFlow(nextRow, nextCol);
     }
-    LOGD("PreFocus:%{public}d CurrentFocus:%{public}d", focusIndex_, next);
-    focusRow_ = nextRow;
-    focusCol_ = nextCol;
-    focusIndex_ = next;
-    return next;
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+        return (GreatOrEqual((viewportStartPos_) + mainSize_, tailPos + footerOffset));
+    }
+    return (GreatOrEqual(tailPos - footerOffset, viewportStartPos_));
 }
 
-void RenderWaterFlow::UpdateAccessibilityAttr()
+void RenderWaterFlow::AdjustViewPort()
 {
-    auto refPtr = accessibilityNode_.Upgrade();
-    if (!refPtr) {
-        LOGD("accessibility node is not enabled.");
+    double tailPos = GetTailPos();
+    double footerOffset = 0.0;
+    if (footer_) {
+        switch (direction_) {
+            case FlexDirection::COLUMN:
+            case FlexDirection::COLUMN_REVERSE:
+                footerOffset = footerMaxSize_.Height();
+                break;
+            case FlexDirection::ROW:
+            case FlexDirection::ROW_REVERSE:
+                footerOffset = footerMaxSize_.Width();
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+        // Correct the position of view port to avoid oversize offset from scroller
+        viewportStartPos_ = std::max(viewportStartPos_, 0.0);
+        if (GreatOrEqual((viewportStartPos_) + mainSize_, tailPos + footerOffset)) {
+            viewportStartPos_ = std::max((tailPos + footerOffset - mainSize_), 0.0);
+        }
+    } else {
+        // Correct the position of view port to avoid oversize offset from scroller
+        viewportStartPos_ = std::min(viewportStartPos_, 0.0);
+        if (GreatOrEqual(tailPos - footerOffset, viewportStartPos_)) {
+            viewportStartPos_ = std::min(tailPos - footerOffset, 0.0);
+        }
+    }
+}
+
+double RenderWaterFlow::GetTailPos()
+{
+    double result = 0.0;
+    if (!getTotalCount_) {
+        return result;
+    }
+
+    if (flowMatrix_.empty()) {
+        if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+            return result;
+        }
+        return mainSize_;
+    }
+
+    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+        result = DBL_MAX;
+    } else {
+        result = -DBL_MAX;
+    }
+
+    totalCount_ = getTotalCount_();
+    auto iter = flowMatrix_.find(totalCount_ - 1);
+    if (iter != flowMatrix_.end()) {
+        if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+            result = GetLastMainPos().GetY();
+        } else {
+            result = mainSize_ - GetLastMainPos().GetY();
+        }
+    }
+    return result;
+}
+
+double RenderWaterFlow::GetTargetPos()
+{
+    double result = 0.0;
+    // valid targetIndex_
+    if (targetIndex_ >= 0) {
+        auto iter = flowMatrix_.find(targetIndex_);
+        if (iter != flowMatrix_.end()) {
+            result = iter->second.mainPos;
+        } else {
+            result = DBL_MAX;
+        }
+    } else {
+        if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::ROW) {
+            result = viewportStartPos_ + mainSize_;
+        } else {
+            result = -viewportStartPos_ + mainSize_;
+        }
+    }
+    return result;
+}
+
+double RenderWaterFlow::GetCacheTargetPos() const
+{
+    return viewportStartPos_ + mainSize_ + cacheSize_;
+}
+
+void RenderWaterFlow::AnimateToPos(const double& position, int32_t duration, const RefPtr<Curve>& curve)
+{
+    if (!animator_->IsStopped()) {
+        animator_->Stop();
+    }
+    animator_->ClearInterpolators();
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(viewportStartPos_, position, curve);
+    animation->AddListener([weakScroll = AceType::WeakClaim(this)](double value) {
+        auto scroll = weakScroll.Upgrade();
+        if (scroll) {
+            scroll->DoJump(value, SCROLL_FROM_ANIMATION);
+        }
+    });
+    animator_->AddInterpolator(animation);
+    animator_->SetDuration(duration);
+    animator_->ClearStopListeners();
+    animator_->Play();
+}
+
+void RenderWaterFlow::ClearFlowMatrix(size_t index, bool clearAll)
+{
+    if (!clearAll) {
+        for (auto it = flowMatrix_.begin(); it != flowMatrix_.end();) {
+            if (it->first >= index) {
+                flowMatrix_.erase(it++);
+            } else {
+                it++;
+            }
+        }
+    } else {
+        flowMatrix_.clear();
+    }
+}
+
+void RenderWaterFlow::ClearItemsByCrossIndex(size_t index, bool clearAll)
+{
+    if (!clearAll) {
+        for (auto& cross : itemsByCrossIndex_) {
+            for (auto item = cross.begin(); item != cross.end();) {
+                if (*item >= index) {
+                    item = cross.erase(item);
+                } else {
+                    item++;
+                }
+            }
+        }
+    } else {
+        itemsByCrossIndex_.clear();
+        std::vector<size_t> item;
+        for (size_t i = 0; i < crossCount_; i++) {
+            itemsByCrossIndex_.emplace_back(item);
+        }
+    }
+}
+
+void RenderWaterFlow::UpdateMainSideEndPos()
+{
+    if (mainSideEndPos_.size() != itemsByCrossIndex_.size()) {
         return;
     }
-    auto collectionInfo = refPtr->GetCollectionInfo();
-    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
-        collectionInfo.rows = mainCount_;
-        collectionInfo.columns = crossCount_;
-    } else {
-        collectionInfo.rows = crossCount_;
-        collectionInfo.columns = mainCount_;
-    }
 
-    refPtr->SetCollectionInfo(collectionInfo);
-}
-
-void RenderWaterFlow::SetItemCalSizeNeeded(const RefPtr<RenderNode>& child, bool need)
-{
-    int32_t depth = DEFAULT_DEPTH;
-    auto item = child;
-    auto flowItem = AceType::DynamicCast<RenderWaterFlowItem>(item);
-    while (!flowItem && depth > 0) {
-        item = item->GetChildren().front();
-        flowItem = AceType::DynamicCast<RenderWaterFlowItem>(item);
-        --depth;
-    }
-    if (flowItem) {
-        flowItem->SetCalSizeNeeded(need);
-    }
-}
-
-bool RenderWaterFlow::GetItemCalSizeNeeded(const RefPtr<RenderNode>& child) const
-{
-    int32_t depth = DEFAULT_DEPTH;
-    bool need = false;
-    auto item = child;
-    auto flowItem = AceType::DynamicCast<RenderWaterFlowItem>(item);
-    while (!flowItem && depth > 0) {
-        if (!item || item->GetChildren().empty()) {
-            return need;
+    for (size_t i = 0; i < mainSideEndPos_.size(); i++) {
+        int32_t maxIndex = -1;
+        for (size_t j : itemsByCrossIndex_[i]) {
+            maxIndex = std::max(maxIndex, static_cast<int32_t>(j));
         }
-        item = item->GetChildren().front();
-        flowItem = AceType::DynamicCast<RenderWaterFlowItem>(item);
-        --depth;
-    }
-    if (flowItem) {
-        need = flowItem->GetCalSizeNeeded();
-    }
-    return need;
-}
-
-void RenderWaterFlow::CheckAndInsertItems(int32_t mainIndex, int32_t itemIndex)
-{
-    auto item = items_.find(itemIndex);
-    if (((item != items_.end()) && (item->second == nullptr)) || (item == items_.end())) {
-        bool vail = false;
-        SupplyItems(vail, mainIndex, itemIndex);
-    }
-}
-
-void RenderWaterFlow::OutputMatrix(int32_t rows, bool before)
-{
-    if (before) {
-        LOGD("matrix_ss OutputMatrix before");
-    } else {
-        LOGD("matrix_ss OutputMatrix after");
-    }
-    int32_t cols[5];
-    for (int32_t i = 0; i < rows; i++) {
-        auto iterMain = flowMatrix_.find(i);
-        if (iterMain == flowMatrix_.end()) {
-            LOGD("matrix_ss matrix: %{public}d  %{public}d  %{public}d  %{public}d  %{public}d", -1, -1, -1, -1, -1);
-            continue;
-        }
-        std::map<int32_t, int32_t> crossMap = iterMain->second;
-        for (int32_t j = 0; j < crossCount_; j++) {
-            auto iterCell = crossMap.find(j);
-            if (iterCell != crossMap.end()) {
-                cols[j] = iterCell->second;
-            } else {
-                cols[j] = -1;
-            }
-        }
-    }
-}
-
-bool RenderWaterFlow::DeleteItemsInMatrix(size_t rows, int32_t itemIndex)
-{
-    bool deleteMainBeDelete = true;
-    int32_t main = -1;
-    int32_t cross = -1;
-    if (!GetItemMainCrossIndex(itemIndex, main, cross)) {
-        deleteMainBeDelete = false;
-        return deleteMainBeDelete;
-    }
-    for (size_t i = 0; i < rows; i++) {
-        auto iter5 = flowMatrix_.find(i);
-        if (iter5 == flowMatrix_.end()) {
-            continue;
-        }
-        std::map<int32_t, int32_t> mainMap2 = iter5->second;
-        for (int32_t j = 0; j < crossCount_; j++) {
-            auto iter6 = mainMap2.find(j);
-            if (iter6 == mainMap2.end()) {
-                continue;
-            }
-            if (iter6->second >= itemIndex) {
-                mainMap2.erase(j);
-            }
-        }
-        if (mainMap2.size() > 0) {
-            flowMatrix_[i] = mainMap2;
+        auto iter = flowMatrix_.find(maxIndex);
+        if (iter != flowMatrix_.end()) {
+            mainSideEndPos_.at(i) = iter->second.mainPos + iter->second.mainSize + mainGap_;
         } else {
-            flowMatrix_.erase(i);
+            mainSideEndPos_.at(i) = 0.0;
         }
     }
-    auto iter7 = flowMatrix_.find(main);
-    if (iter7 != flowMatrix_.end()) {
-        std::map<int32_t, int32_t> mainMap = iter7->second;
-        for (int32_t k = 0; k < cross; k++) {
-            auto iteminf = mainMap.find(k);
-            if (iteminf == mainMap.end()) {
-                continue;
-            }
+}
 
-            int32_t Index = iteminf->second;
-            int32_t mainIndex = GetItemMainIndex(Index);
-            if (mainIndex == main) {
-                deleteMainBeDelete = false;
+void RenderWaterFlow::InitMainSideEndPos()
+{
+    mainSideEndPos_.clear();
+    for (size_t i = 0; i < crossCount_; i++) {
+        mainSideEndPos_.emplace_back(0.0);
+    }
+}
+
+void RenderWaterFlow::RemoveAllChild()
+{
+    items_.clear();
+    ClearChildren();
+}
+
+bool RenderWaterFlow::NeedPredictLayout()
+{
+    return !(updateFlag_ || (NearEqual(dVPStartPosBackup_, viewportStartPos_) &&
+       (totalCountBack_ == getTotalCount_())));
+}
+
+std::string RenderWaterFlow::PreParseArgs(const std::string& args)
+{
+    if (args.empty() || args.find(UNIT_AUTO) == std::string::npos) {
+        return args;
+    }
+    std::string rowsArgs;
+    std::vector<std::string> strs;
+    StringUtils::StringSplitter(args, ' ', strs);
+    std::string current;
+    size_t rowArgSize = strs.size();
+    for (size_t i = 0; i < rowArgSize; ++i) {
+        current = strs[i];
+        // "auto" means 1fr in waterflow
+        if (strs[i] == std::string(UNIT_AUTO)) {
+            current = "1fr";
+        }
+        rowsArgs += ' ' + current;
+    }
+    return rowsArgs;
+}
+
+void RenderWaterFlow::HandleScrollEvent()
+{
+    for (auto& event : waterflowEventFlags_) {
+        switch (event.first) {
+            case WaterFlowEvents::REACH_START:
+                if (event.second) {
+                    ResumeEventCallback(component_, &WaterFlowComponent::GetOnReachStart);
+                    LOGD("waterflow event REACH_START triggered.");
+                    event.second = false;
+                }
                 break;
-            }
+            case WaterFlowEvents::REACH_END:
+                if (event.second) {
+                    ResumeEventCallback(component_, &WaterFlowComponent::GetOnReachEnd);
+                    LOGD("waterflow event REACH_END triggered.");
+                    event.second = false;
+                }
+                break;
+            default:
+                LOGW("This event does not handle in here, please check. event number: %{public}d", event.first);
+                break;
         }
     }
-    return deleteMainBeDelete;
 }
 } // namespace OHOS::Ace::V2

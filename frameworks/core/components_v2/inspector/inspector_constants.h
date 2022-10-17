@@ -153,6 +153,14 @@ ACE_EXPORT extern const char GRID_ETS_TAG[];
 ACE_EXPORT extern const char GRID_ITEM_COMPONENT_TAG[];
 ACE_EXPORT extern const char GRID_ITEM_ETS_TAG[];
 
+// waterFlow
+ACE_EXPORT extern const char WATERFLOW_COMPONENT_TAG[];
+ACE_EXPORT extern const char WATERFLOW_ETS_TAG[];
+
+// flow-item
+ACE_EXPORT extern const char FLOW_ITEM_COMPONENT_TAG[];
+ACE_EXPORT extern const char FLOW_ITEM_ETS_TAG[];
+
 // list
 ACE_EXPORT extern const char LIST_COMPONENT_TAG[];
 ACE_EXPORT extern const char LIST_ETS_TAG[];

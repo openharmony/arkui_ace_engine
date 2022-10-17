@@ -149,6 +149,14 @@ const char GRID_ETS_TAG[] = "Grid";
 const char GRID_ITEM_COMPONENT_TAG[] = "GridLayoutItemComponent";
 const char GRID_ITEM_ETS_TAG[] = "GridItem";
 
+// waterFlow
+const char WATERFLOW_COMPONENT_TAG[] = "WaterFlowComponent";
+const char WATERFLOW_ETS_TAG[] = "WaterFlow";
+
+// flow-item
+const char FLOW_ITEM_COMPONENT_TAG[] = "WaterFlowItemComponent";
+const char FLOW_ITEM_ETS_TAG[] = "FlowItem";
+
 // list
 const char LIST_COMPONENT_TAG[] = "V2::ListComponent";
 const char LIST_ETS_TAG[] = "List";

@@ -30,45 +30,37 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
 void JSWaterFlow::Create(const JSCallbackInfo& args)
 {
     LOGI("Create component: WaterFLow");
-    if (args.Length() < 1) {
-        LOGW("Arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
-    if (!args[0]->IsObject()) {
-        LOGW("Arg is not object");
-        return;
-    }
-
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    JSRef<JSVal> crossSplice = obj->GetProperty("crossSplice");
-    if (!crossSplice->IsNumber()) {
-        LOGW("Args is invalid");
+    if (args.Length() > 1) {
+        LOGW("Arg is wrong, it is supposed to have at most one argument");
         return;
     }
 
     // create waterflow component
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-    auto waterflowComponent =
-        AceType::MakeRefPtr<V2::WaterFlowComponent>(componentChildren, crossSplice->ToNumber<int32_t>());
+    auto waterflowComponent = AceType::MakeRefPtr<V2::WaterFlowComponent>(componentChildren);
+    CHECK_NULL_VOID(waterflowComponent);
 
-    // mainLength
-    JSRef<JSVal> jsMainLength = obj->GetProperty("mainLength");
-    Dimension mainLength;
-    if (ParseJsDimensionVp(jsMainLength, mainLength)) {
-        waterflowComponent->SetMainLength(mainLength);
-    } else {
-        LOGW("The parameter of mainLength not exists.");
-    }
-
-    // scroller
-    if (args.Length() > 1 && args[1]->IsObject()) {
-        JSScroller* jsScroller = JSRef<JSObject>::Cast(args[1])->Unwrap<JSScroller>();
-        if (jsScroller) {
+    if (args.Length() == 1) {
+        if (!args[0]->IsObject()) {
+            LOGE("The arg must be object");
+            return;
+        }
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        auto footerObject = obj->GetProperty("footer");
+        if (footerObject->IsFunction()) {
+            ScopedViewStackProcessor builderViewStackProcessor;
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
+            builderFunc->Execute();
+            RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
+            waterflowComponent->SetFooterComponent(customComponent);
+        }
+        auto scroller = obj->GetProperty("scroller");
+        if (scroller->IsObject()) {
+            auto *jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
+            CHECK_NULL_VOID(jsScroller);
             auto positionController = AceType::MakeRefPtr<V2::WaterFlowPositionController>();
             jsScroller->SetController(positionController);
             waterflowComponent->SetController(positionController);
-
             // Init scroll bar proxy.
             auto proxy = jsScroller->GetScrollBarProxy();
             if (!proxy) {
@@ -77,10 +69,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
             }
             waterflowComponent->SetScrollBarProxy(proxy);
         }
-    } else {
-        LOGW("The parameter of scroller not exists.");
     }
-
     ViewStackProcessor::GetInstance()->Push(waterflowComponent);
 }
 
@@ -94,8 +83,19 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("columnsGap", &JSWaterFlow::SetColumnsGap, opt);
     JSClass<JSWaterFlow>::StaticMethod("rowsGap", &JSWaterFlow::SetRowsGap, opt);
     JSClass<JSWaterFlow>::StaticMethod("layoutDirection", &JSWaterFlow::SetLayoutDirection, opt);
+    JSClass<JSWaterFlow>::StaticMethod("columnsTemplate", &JSWaterFlow::SetColumnsTemplate, opt);
+    JSClass<JSWaterFlow>::StaticMethod("itemConstraintSize", &JSWaterFlow::SetItemConstraintSize, opt);
+    JSClass<JSWaterFlow>::StaticMethod("rowsTemplate", &JSWaterFlow::SetRowsTemplate, opt);
+    JSClass<JSWaterFlow>::StaticMethod("onReachStart", &JSWaterFlow::ReachStartCallback);
+    JSClass<JSWaterFlow>::StaticMethod("onReachEnd", &JSWaterFlow::ReachEndCallback);
+    JSClass<JSWaterFlow>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSWaterFlow>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSWaterFlow>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSWaterFlow>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSWaterFlow>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSWaterFlow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSWaterFlow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSWaterFlow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSWaterFlow>::Inherit<JSContainerBase>();
     JSClass<JSWaterFlow>::Inherit<JSViewAbstract>();
@@ -142,9 +142,76 @@ void JSWaterFlow::SetLayoutDirection(int32_t value)
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto waterflow = AceType::DynamicCast<V2::WaterFlowComponent>(component);
         if (waterflow) {
-            // not support the other layoutDirection except default for now.
-            waterflow->SetLayoutDirection(FlexDirection::COLUMN);
+            waterflow->SetLayoutDirection(LAYOUT_DIRECTION[value]);
         }
     }
+}
+void JSWaterFlow::SetColumnsTemplate(const std::string& value)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto waterflow = AceType::DynamicCast<V2::WaterFlowComponent>(component);
+    if (waterflow) {
+        waterflow->SetColumnsArgs(value);
+    }
+}
+
+void JSWaterFlow::SetItemConstraintSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGI("waterflow create error, info is invalid");
+        return;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto waterflow = AceType::DynamicCast<V2::WaterFlowComponent>(component);
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+
+    JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
+    Dimension minWidth;
+    if (ParseJsDimensionVp(minWidthValue, minWidth)) {
+        waterflow->SetMinWidth(minWidth);
+    }
+
+    JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
+    Dimension maxWidth;
+    if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
+        waterflow->SetMaxWidth(maxWidth);
+    }
+
+    JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
+    Dimension minHeight;
+    if (ParseJsDimensionVp(minHeightValue, minHeight)) {
+        waterflow->SetMinHeight(minHeight);
+    }
+
+    JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
+    Dimension maxHeight;
+    if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
+        waterflow->SetMaxHeight(maxHeight);
+    }
+}
+
+void JSWaterFlow::SetRowsTemplate(const std::string& value)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto waterflow = AceType::DynamicCast<V2::WaterFlowComponent>(component);
+    if (waterflow) {
+        waterflow->SetRowsArgs(value);
+    }
+}
+
+void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)
+{
+    if (!JSViewBindEvent(&V2::WaterFlowComponent::SetOnReachStart, args)) {
+        LOGW("Failed to bind event");
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::ReachEndCallback(const JSCallbackInfo& args)
+{
+    if (!JSViewBindEvent(&V2::WaterFlowComponent::SetOnReachEnd, args)) {
+        LOGW("Failed to bind event");
+    }
+    args.ReturnSelf();
 }
 } // namespace OHOS::Ace::Framework

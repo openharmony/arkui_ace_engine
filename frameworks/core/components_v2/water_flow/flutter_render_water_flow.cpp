@@ -18,7 +18,8 @@
 #include "core/pipeline/base/flutter_render_context.h"
 
 namespace OHOS::Ace::V2 {
-using namespace Flutter;
+using Flutter::Clip;
+using Flutter::ClipLayer;
 RenderLayer FlutterRenderWaterFlow::GetRenderLayer()
 {
     if (!layer_) {
@@ -57,9 +58,9 @@ void FlutterRenderWaterFlow::Paint(RenderContext& context, const Offset& offset)
     if (!needPaint) {
         return;
     }
-    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    const auto& renderContext = AceType::DynamicCast<FlutterRenderContext>(&context);
     flutter::Canvas* canvas = renderContext->GetCanvas();
-    Offset lastOffset = isVertical_ ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
+    Offset lastOffset = (useScrollable_ == SCROLLABLE::VERTICAL) ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
     scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), lastOffset, GetEstimatedHeight());
     RefPtr<FlutterScrollBarPainter> scrollPainter = AceType::MakeRefPtr<FlutterScrollBarPainter>();
     scrollPainter->PaintBar(canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
