@@ -286,7 +286,7 @@ void JSGrid::SetEdgeEffect(int32_t value)
 
 void JSGrid::SetLayoutDirection(int32_t value)
 {
-    if (value < 0 && value >= static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
+    if (value < 0 || value >= static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
         LOGE("Param is not valid");
         return;
     }
