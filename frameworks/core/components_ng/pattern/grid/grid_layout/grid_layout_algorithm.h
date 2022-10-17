@@ -55,11 +55,10 @@ private:
     // Map structure: [rowIndex, [columnIndex - (width, height)]].
     std::map<int32_t, std::map<int32_t, SizeF>> gridCells_;
 
-    // Map structure: [rowIndex, [columnIndex, index]].
-    std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;
-
     // Map structure: [index, [positionX, positionY]], store position of each item.
     std::map<int32_t, OffsetF> itemsPosition_;
+
+    bool firstLayout_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutAlgorithm);
 };

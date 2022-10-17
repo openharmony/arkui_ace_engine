@@ -75,10 +75,14 @@ void BuildTitleBar(const RefPtr<NavDestinationGroupNode>& navDestinationNode, co
     }
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
-        titleBarLayoutProperty->UpdateHideTitleBar(navDestinationLayoutProperty->GetHideTitleBarValue());
-    }
     BuildTitleAndSubtitle(navDestinationNode, titleBarNode);
+    if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        titleBarNode->MarkModifyDone();
+    } else {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        titleBarNode->MarkModifyDone();
+    }
 }
 
 void MountTitleBar(const RefPtr<NavDestinationGroupNode>& hostNode)

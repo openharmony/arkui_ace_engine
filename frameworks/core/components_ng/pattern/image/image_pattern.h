@@ -34,16 +34,7 @@ class ACE_EXPORT ImagePattern : public Pattern {
 
 public:
     ImagePattern() = default;
-    ~ImagePattern() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto id = host->GetId();
-        pipeline->RemoveWindowStateChangedCallback(id);
-        pipeline->RemoveNodesToNotifyMemoryLevel(id);
-    }
+    ~ImagePattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -81,16 +72,16 @@ public:
     void OnWindowShow() override;
 
 private:
-    void OnModifyDone() override;
-    void OnActive() override
+    void OnDetachFromFrameNode(FrameNode* frameNode) override
     {
-        isActive_ = true;
+        auto id = frameNode->GetId();
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->RemoveWindowStateChangedCallback(id);
+        pipeline->RemoveNodesToNotifyMemoryLevel(id);
     }
 
-    void OnInActive() override
-    {
-        isActive_ = false;
-    }
+    void OnModifyDone() override;
 
     void PaintImage(RenderContext* renderContext, const OffsetF& offset);
 
@@ -115,7 +106,6 @@ private:
     RectF lastDstRect_;
     RectF lastSrcRect_;
 
-    bool isActive_ = false;
     bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     // clear alt data after [OnImageLoadSuccess] being called

@@ -100,6 +100,38 @@ public:
         frame_.rect_.SetSize(size);
     }
 
+    SizeF GetPaddingSize() const
+    {
+        auto size = frame_.rect_.GetSize();
+        if (padding_) {
+            MinusPaddingToSize(*padding_, size);
+        }
+        return size;
+    }
+
+    OffsetF GetPaddingOffset() const
+    {
+        auto offset = frame_.rect_.GetOffset();
+        if (padding_) {
+            offset += OffsetF(padding_->left.value_or(0), padding_->top.value_or(0));
+        }
+        return offset;
+    }
+
+    RectF GetPaddingRect() const
+    {
+        auto rect = frame_.rect_;
+        if (padding_) {
+            auto size = rect.GetSize();
+            MinusPaddingToSize(*padding_, size);
+            rect.SetSize(size);
+            auto offset = rect.GetOffset();
+            offset += OffsetF(padding_->left.value_or(0), padding_->top.value_or(0));
+            rect.SetOffset(offset);
+        }
+        return rect;
+    }
+
     void SetContentSize(const SizeF& size)
     {
         if (!content_) {
@@ -161,6 +193,26 @@ public:
         }
     }
 
+    void UpdatePaddingWithBorder(const PaddingPropertyF& padding)
+    {
+        if (!padding_) {
+            padding_ = std::make_unique<PaddingPropertyF>(padding);
+            return;
+        }
+        if (padding.left) {
+            padding_->left = padding.left;
+        }
+        if (padding.right) {
+            padding_->right = padding.right;
+        }
+        if (padding.top) {
+            padding_->top = padding.top;
+        }
+        if (padding.bottom) {
+            padding_->bottom = padding.bottom;
+        }
+    }
+
     const OffsetF& GetParentGlobalOffset() const
     {
         return parentGlobalOffset_;
@@ -213,8 +265,10 @@ private:
 
     // the frame size in parent local coordinate.
     GeometryProperty frame_;
-    // the size of margin rect in current node local coordinate.
+    // the size of margin property.
     std::unique_ptr<MarginPropertyF> margin_;
+    // the size of padding property.
+    std::unique_ptr<MarginPropertyF> padding_;
     // the size of content rect in current node local coordinate.
     std::unique_ptr<GeometryProperty> content_;
 

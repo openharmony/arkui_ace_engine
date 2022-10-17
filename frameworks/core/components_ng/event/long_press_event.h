@@ -73,6 +73,8 @@ public:
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
+    GestureEventFunc GetGestureEventFunc();
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;

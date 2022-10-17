@@ -79,6 +79,7 @@ enum class HitTestResult {
 };
 
 struct DragDropInfo {
+    RefPtr<UINode> customNode;
     RefPtr<PixelMap> pixelMap;
     std::string extraInfo;
 };
@@ -159,26 +160,17 @@ public:
 
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
 
+    bool IsClickable() const
+    {
+        return clickEventActuator_ != nullptr;
+    }
+
+    bool ActClick();
+
     // Set by user define, which will replace old one.
-    void SetClickEvent(GestureEventFunc&& clickEvent)
-    {
-        if (!clickEventActuator_) {
-            clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
-        }
-        clickEventActuator_->ReplaceClickEvent(std::move(clickEvent));
+    void SetClickEvent(GestureEventFunc&& clickEvent);
 
-        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
-    }
-
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
-    {
-        if (!clickEventActuator_) {
-            clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
-        }
-        clickEventActuator_->AddClickEvent(clickEvent);
-
-        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
-    }
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
@@ -188,10 +180,18 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
+    bool IsLongClickable() const
+    {
+        return longPressEventActuator_ != nullptr;
+    }
+
+    bool ActLongClick();
+
     void AddLongPressEvent(const RefPtr<LongPressEvent>& event)
     {
         if (!longPressEventActuator_) {
             longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
+            longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
         }
         longPressEventActuator_->AddLongPressEvent(event);
     }
@@ -320,6 +320,8 @@ private:
 
     // old path.
     void UpdateExternalGestureRecognizer();
+
+    OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

@@ -73,6 +73,7 @@ void TextFieldModelNG::CreateNode(
     auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
     pattern->SetBasicPadding(static_cast<float>(radius.GetX().ConvertToPx()));
+    pattern->SetCaretOffsetX(pattern->GetBasicPadding());
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
@@ -213,12 +214,26 @@ void TextFieldModelNG::SetOnChange(std::function<void(const std::string&)>&& fun
     eventHub->SetOnChange(std::move(func));
 }
 
-// TODO: add text overlay.
-void TextFieldModelNG::SetOnCopy(std::function<void(const std::string&)>&& func) {}
+void TextFieldModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
 
-void TextFieldModelNG::SetOnCut(std::function<void(const std::string&)>&& func) {}
+void TextFieldModelNG::SetOnCut(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCut(std::move(func));
+}
 
-void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func) {}
+void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPaste(std::move(func));
+}
 
 void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
 {

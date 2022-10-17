@@ -15,14 +15,32 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
 
-#include "bridge/declarative_frontend/jsview/js_text.h"
-#include "core/components/marquee/marquee_component.h"
-#include "core/components/marquee/marquee_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/marquee/marquee_view.h"
+#include "bridge/declarative_frontend/jsview/models/marquee_model_impl.h"
+#include "core/components_ng/pattern/marquee/marquee_model.h"
+#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<MarqueeModel> MarqueeModel::instance_ = nullptr;
+
+MarqueeModel* MarqueeModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::MarqueeModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::MarqueeModelNG());
+        } else {
+            instance_.reset(new Framework::MarqueeModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -32,72 +50,37 @@ void JSMarquee::Create(const JSCallbackInfo& info)
         LOGE("marquee create error, info is non-valid");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MarqueeView::Create();
-        auto paramObject = JSRef<JSObject>::Cast(info[0]);
-        auto src = paramObject->GetProperty("src");
-        if (!src->IsString()) {
-            LOGE("marquee create error, src is non-valid");
-            return;
-        }
-        NG::MarqueeView::SetValue(src->ToString());
 
-        auto getStart = paramObject->GetProperty("start");
-        bool start = getStart->IsBoolean() ? getStart->ToBoolean() : false;
-        NG::MarqueeView::SetPlayerStatus(start);
-
-        auto getStep = paramObject->GetProperty("step");
-        if (getStep->IsNumber()) {
-            NG::MarqueeView::SetScrollAmount(getStep->ToNumber<double>());
-        }
-
-        auto getLoop = paramObject->GetProperty("loop");
-        if (getLoop->IsNumber()) {
-            NG::MarqueeView::SetLoop(getLoop->ToNumber<int32_t>());
-        }
-
-        auto getFromStart = paramObject->GetProperty("fromStart");
-        bool fromStart = getFromStart->IsBoolean() ? getFromStart->ToBoolean() : true;
-        if (fromStart) {
-            NG::MarqueeView::SetDirection(MarqueeDirection::LEFT);
-        } else {
-            NG::MarqueeView::SetDirection(MarqueeDirection::RIGHT);
-        }
-    }
-
+    MarqueeModel::GetInstance()->Create();
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto marqueeComponent = AceType::MakeRefPtr<OHOS::Ace::MarqueeComponent>();
-
     auto src = paramObject->GetProperty("src");
     if (!src->IsString()) {
         LOGE("marquee create error, src is non-valid");
         return;
     }
-    marqueeComponent->SetValue(src->ToString());
+    MarqueeModel::GetInstance()->SetValue(src->ToString());
 
     auto getStart = paramObject->GetProperty("start");
     bool start = getStart->IsBoolean() ? getStart->ToBoolean() : false;
-    marqueeComponent->SetPlayerStatus(start);
+    MarqueeModel::GetInstance()->SetPlayerStatus(start);
 
     auto getStep = paramObject->GetProperty("step");
     if (getStep->IsNumber()) {
-        marqueeComponent->SetScrollAmount(getStep->ToNumber<double>());
+        MarqueeModel::GetInstance()->SetScrollAmount(getStep->ToNumber<double>());
     }
 
     auto getLoop = paramObject->GetProperty("loop");
     if (getLoop->IsNumber()) {
-        marqueeComponent->SetLoop(getLoop->ToNumber<int32_t>());
+        MarqueeModel::GetInstance()->SetLoop(getLoop->ToNumber<int32_t>());
     }
 
     auto getFromStart = paramObject->GetProperty("fromStart");
     bool fromStart = getFromStart->IsBoolean() ? getFromStart->ToBoolean() : true;
     if (fromStart) {
-        marqueeComponent->SetDirection(MarqueeDirection::LEFT);
+        MarqueeModel::GetInstance()->SetDirection(MarqueeDirection::LEFT);
     } else {
-        marqueeComponent->SetDirection(MarqueeDirection::RIGHT);
+        MarqueeModel::GetInstance()->SetDirection(MarqueeDirection::RIGHT);
     }
-    ViewStackProcessor::GetInstance()->ClaimElementId(marqueeComponent);
-    ViewStackProcessor::GetInstance()->Push(marqueeComponent);
 }
 
 void JSMarquee::JSBind(BindingTarget globalObj)
@@ -135,20 +118,7 @@ void JSMarquee::SetTextColor(const JSCallbackInfo& info)
         LOGE("the info[0] is null");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MarqueeView::SetTextColor(color);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The component(SetTextColor) is null");
-        return;
-    }
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetTextColor(color);
-    component->SetTextStyle(std::move(textStyle));
+    MarqueeModel::GetInstance()->SetTextColor(color);
 }
 
 void JSMarquee::SetFontSize(const JSCallbackInfo& info)
@@ -162,21 +132,7 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MarqueeView::SetFontSize(fontSize);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The component(SetFrontSize) is null");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontSize(fontSize);
-    component->SetTextStyle(std::move(textStyle));
+    MarqueeModel::GetInstance()->SetFontSize(fontSize);
 }
 
 void JSMarquee::SetAllowScale(const JSCallbackInfo& info)
@@ -185,38 +141,12 @@ void JSMarquee::SetAllowScale(const JSCallbackInfo& info)
         LOGE("SetAllowScale create error, info is non-valid");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MarqueeView::SetAllowScale(info[0]->ToBoolean());
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The component(SetAllowScale) is null");
-        return;
-    }
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetAllowScale(info[0]->ToBoolean());
-    component->SetTextStyle(std::move(textStyle));
+    MarqueeModel::GetInstance()->SetAllowScale(info[0]->ToBoolean());
 }
 
 void JSMarquee::SetFontWeight(const std::string& value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MarqueeView::SetFontWeight(ConvertStrToFontWeight(value));
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The component(SetFrontWeight) is null");
-        return;
-    }
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    component->SetTextStyle(std::move(textStyle));
+    MarqueeModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
 void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
@@ -231,21 +161,7 @@ void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
         LOGE("Parse FontFamilies failed");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MarqueeView::SetFontFamily(fontFamilies);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The component(SetFrontFamily) is null");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontFamilies(fontFamilies);
-    component->SetTextStyle(std::move(textStyle));
+    MarqueeModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
 void JSMarquee::OnStart(const JSCallbackInfo& info)
@@ -254,21 +170,13 @@ void JSMarquee::OnStart(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Marquee.onStart");
-            func->ExecuteJS();
-        };
-        NG::MarqueeView::SetOnStart(std::move(onChange));
-        return;
-    }
-
-    if (!JSViewBindEvent(&MarqueeComponent::SetOnStart, info)) {
-        LOGW("Failed to bind event");
-    }
-    info.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Marquee.onStart");
+        func->ExecuteJS();
+    };
+    MarqueeModel::GetInstance()->SetOnStart(std::move(onChange));
 }
 
 void JSMarquee::OnBounce(const JSCallbackInfo& info)
@@ -277,21 +185,13 @@ void JSMarquee::OnBounce(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Marquee.onBounce");
-            func->ExecuteJS();
-        };
-        NG::MarqueeView::SetOnBounce(std::move(onChange));
-        return;
-    }
-
-    if (!JSViewBindEvent(&MarqueeComponent::SetOnBounce, info)) {
-        LOGW("Failed to bind event");
-    }
-    info.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Marquee.onBounce");
+        func->ExecuteJS();
+    };
+    MarqueeModel::GetInstance()->SetOnBounce(std::move(onChange));
 }
 
 void JSMarquee::OnFinish(const JSCallbackInfo& info)
@@ -300,21 +200,13 @@ void JSMarquee::OnFinish(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Marquee.onFinish");
-            func->ExecuteJS();
-        };
-        NG::MarqueeView::SetOnFinish(std::move(onChange));
-        return;
-    }
-
-    if (!JSViewBindEvent(&MarqueeComponent::SetOnFinish, info)) {
-        LOGW("Failed to bind event");
-    }
-    info.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Marquee.onFinish");
+        func->ExecuteJS();
+    };
+    MarqueeModel::GetInstance()->SetOnFinish(std::move(onChange));
 }
 
 } // namespace OHOS::Ace::Framework

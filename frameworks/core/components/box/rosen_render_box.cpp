@@ -1173,8 +1173,7 @@ void RosenRenderBox::AnimateMouseHoverEnter()
                 if (rsNode) {
                     rsNode->SetScale(scaleEnd);
                 }
-            },
-            []() {});
+            });
         isHoveredScale_ = true;
     } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         ResetController(controllerExit_);
@@ -1218,8 +1217,7 @@ void RosenRenderBox::AnimateMouseHoverExit()
                 if (rsNode) {
                     rsNode->SetScale(scaleEnd);
                 }
-            },
-            []() {});
+            });
         isHoveredScale_ = false;
     }
     if (hoverAnimationType_ == HoverAnimationType::BOARD || isHoveredBoard_) {

@@ -64,6 +64,14 @@ RefPtr<RenderNode> GridElement::CreateRenderNode()
             }
             return element->GetItemSpanByIndex(index, isHorizontal, itemMain, itemCross, itemMainSpan, itemCrossSpan);
         });
+
+        renderGrid->SetGetItemTotalCount([weak = WeakClaim(this)]() {
+            auto element = weak.Upgrade();
+            if (!element) {
+                return 0;
+            }
+            return static_cast<int32_t>(element->TotalCount());
+        });
     }
 
     return render;

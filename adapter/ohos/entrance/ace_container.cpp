@@ -1324,30 +1324,25 @@ void AceContainer::InitWindowCallback()
         LOGE("AceContainer::InitWindowCallback failed, window is null.");
         return;
     }
+    auto& windowManager = pipelineContext_->GetWindowManager();
+    if (windowManager == nullptr) {
+        LOGE("AceContainer::InitWindowCallback failed, windowManager is null.");
+        return;
+    }
     std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility->GetAbilityInfo();
     if (info != nullptr) {
-        pipelineContext_->SetAppLabelId(info->labelId);
-        pipelineContext_->SetAppIconId(info->iconId);
+        windowManager->SetAppLabelId(info->labelId);
+        windowManager->SetAppIconId(info->iconId);
     }
-    pipelineContext_->SetWindowMinimizeCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Minimize()); });
-    pipelineContext_->SetWindowMaximizeCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Maximize()); });
-
-    pipelineContext_->SetWindowRecoverCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Recover()); });
-
-    pipelineContext_->SetWindowCloseCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Close()); });
-
-    pipelineContext_->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
-
-    pipelineContext_->SetWindowSplitCallBack([window]() -> bool {
-        return (
-            OHOS::Rosen::WMError::WM_OK == window->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
-    });
-
-    pipelineContext_->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
+    windowManager->SetWindowMinimizeCallBack([window]() { window->Minimize(); });
+    windowManager->SetWindowMaximizeCallBack([window]() { window->Maximize(); });
+    windowManager->SetWindowRecoverCallBack([window]() { window->Recover(); });
+    windowManager->SetWindowCloseCallBack([window]() { window->Close(); });
+    windowManager->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
+    windowManager->SetWindowSplitCallBack(
+        [window]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+    windowManager->SetWindowGetModeCallBack(
+        [window]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(

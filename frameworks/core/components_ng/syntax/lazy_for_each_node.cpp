@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "base/memory/referenced.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/for_each_node.h"
@@ -56,10 +57,11 @@ void LazyForEachNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& paren
     parent->SetLayoutWrapperBuilder(lazyLayoutWrapperBuilder);
 }
 
-void LazyForEachNode::UpdateCachedItems(
-    int32_t newStartIndex, int32_t newEndIndex, std::list<std::optional<std::string>>&& nodeIds)
+void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newEndIndex,
+    std::list<std::optional<std::string>>&& nodeIds,
+    std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems)
 {
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("lazyforeach update cache [%d -%d]", newStartIndex, newEndIndex);
     CHECK_NULL_VOID(builder_);
     std::list<std::optional<std::string>> newIds(std::move(nodeIds));
     // clean current children.
@@ -89,12 +91,47 @@ void LazyForEachNode::UpdateCachedItems(
     }
 
     // delete useless items.
-    builder_->UpdateCachedItems(newIds);
+    builder_->UpdateCachedItems(newIds, std::move(cachedItems));
 
     startIndex_ = newStartIndex;
     endIndex_ = newEndIndex;
     std::swap(ids_, newIds);
     LOGD("cachedItems size is %{public}d", static_cast<int32_t>(newIds.size()));
+}
+
+void LazyForEachNode::PostIdleTask(std::list<int32_t>&& items)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    predictItems_ = std::move(items);
+    if (needPredict) {
+        return;
+    }
+    needPredict = true;
+    context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        node->needPredict = false;
+        ACE_SCOPED_TRACE("LazyForEach predict size[%zu]", node->predictItems_.size());
+        decltype(node->predictItems_) items(std::move(node->predictItems_));
+        auto item = items.begin();
+        while (item != items.end()) {
+            if (GetSysTimestamp() > deadline) {
+                std::list<int32_t> predictItems;
+                predictItems.insert(predictItems.begin(), item, items.end());
+                node->PostIdleTask(std::move(predictItems));
+                return;
+            }
+
+            auto itemInfo = node->builder_->CreateChildByIndex(*item);
+            node->builder_->SetCacheItemInfo(*item, itemInfo.first);
+            auto uiNode = itemInfo.second;
+            if (uiNode) {
+                uiNode->Build();
+            }
+            item++;
+        }
+    });
 }
 
 void LazyForEachNode::OnDataReloaded()

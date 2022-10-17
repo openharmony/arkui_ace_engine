@@ -55,7 +55,7 @@ int64_t GetSysTimestamp()
 }
 
 
-TimeOfNow GetTimeOfNow(double hoursWest)
+TimeOfNow GetTimeOfNow(int32_t hoursWest)
 {
     struct timeval currentTime;
     struct timezone timeZone;
@@ -67,17 +67,17 @@ TimeOfNow GetTimeOfNow(double hoursWest)
         minutesWest = Round(TOTAL_MINUTE_OF_HOUR * timeOfNow.hoursWest_);
     } else {
         // when [hoursWest] is invalid, set current time zone to [hoursWest].
-        if (!NearEqual(timeOfNow.hoursWest_, DBL_MAX)) { // default value of hoursWest_ is DBL_MAX
-            LOGW("hoursWest [%{public}lf] is invalid, use current time zone.", timeOfNow.hoursWest_);
+        if (!NearEqual(timeOfNow.hoursWest_, INT_MAX)) { // default value of hoursWest_ is INT_MAX
+            LOGW("hoursWest [%{public}d] is invalid, use current time zone.", timeOfNow.hoursWest_);
         }
-        timeOfNow.hoursWest_ = static_cast<double>(timeZone.tz_minuteswest) / static_cast<double>(TOTAL_MINUTE_OF_HOUR);
+        timeOfNow.hoursWest_ = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
     }
     int secondsOfToday = currentTime.tv_sec % TOTAL_SECONDS_OF_DAY - minutesWest * TOTAL_SECONDS_OF_MINUTE;
     if (secondsOfToday < 0) {
         secondsOfToday += TOTAL_SECONDS_OF_DAY;
     }
     timeOfNow.minute_ = (secondsOfToday / TOTAL_SECONDS_OF_MINUTE) % TOTAL_MINUTE_OF_HOUR +
-                        static_cast<double>(secondsOfToday % TOTAL_SECONDS_OF_MINUTE) / TOTAL_SECONDS_OF_MINUTE;
+                        secondsOfToday % TOTAL_SECONDS_OF_MINUTE / TOTAL_SECONDS_OF_MINUTE;
     timeOfNow.hour24_ =
         (secondsOfToday / TOTAL_SECONDS_OF_HOUR) % TWENTY_FOUR_HOUR_BASE + timeOfNow.minute_ / TOTAL_MINUTE_OF_HOUR;
     timeOfNow.hour12_ =
@@ -87,7 +87,7 @@ TimeOfNow GetTimeOfNow(double hoursWest)
     return timeOfNow;
 }
 
-bool IsHoursWestValid(double& hoursWest)
+bool IsHoursWestValid(int32_t& hoursWest)
 {
     // valid hoursWest is within [-14, 12]
     bool isValid = GreatOrEqual(hoursWest, HOURS_WEST_LOWER_LIMIT) && LessOrEqual(hoursWest, HOURS_WEST_UPPER_LIMIT);

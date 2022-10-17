@@ -16,11 +16,12 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("unittest") {
   testonly = true
-  deps = [ "unittest/subwindow:unittest" ]
   if (!is_standard_system) {
-    deps += [
+    deps = [
       "unittest/json_util:unittest",
       "unittest/task_executor:unittest",
     ]
+  } else {
+    deps = [ "unittest/subwindow:unittest" ]
   }
 }

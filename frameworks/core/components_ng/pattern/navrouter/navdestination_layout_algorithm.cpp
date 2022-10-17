@@ -106,7 +106,8 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
-    auto navDestinationLayoutProperty = AceType::DynamicCast<NavDestinationLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto navDestinationLayoutProperty =
+        AceType::DynamicCast<NavDestinationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     const auto& constraint = navDestinationLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
@@ -123,7 +124,8 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
-    auto navDestinationLayoutProperty = AceType::DynamicCast<NavDestinationLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto navDestinationLayoutProperty =
+        AceType::DynamicCast<NavDestinationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty);
     LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, titlebarHeight);

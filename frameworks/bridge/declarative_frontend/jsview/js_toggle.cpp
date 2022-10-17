@@ -15,24 +15,37 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 
+#include <cstddef>
 #include <string>
-#include <utility>
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
 #include "core/common/container.h"
-#include "core/components/button/render_button.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/toggle/toggle_component.h"
-#include "core/components/toggle/toggle_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/button/toggle_button_view.h"
-#include "core/components_ng/pattern/checkbox/checkbox_view.h"
-#include "core/components_ng/pattern/toggle/switch_pattern.h"
-#include "core/components_ng/render/render_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ToggleModel> ToggleModel::instance_ = nullptr;
+
+ToggleModel* ToggleModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ToggleModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ToggleModelNG());
+        } else {
+            instance_.reset(new Framework::ToggleModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -79,90 +92,8 @@ void JSToggle::Create(const JSCallbackInfo& info)
     auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
 
     auto toggleTypeInt = static_cast<int32_t>(toggleType);
-    if (Container::IsCurrentUseNewPipeline()) {
-        switch (toggleTypeInt) {
-            case 0:
-                NG::CheckBoxView::Create(std::nullopt, std::nullopt, V2::CHECKBOX_ETS_TAG);
-                NG::CheckBoxView::SetSelect(isOn);
-                break;
-            case 1:
-                NG::ToggleView::Create(NG::ToggleType(toggleTypeInt), isOn);
-                break;
-            case 2:
-                NG::ToggleButtonView::Create(V2::TOGGLE_ETS_TAG);
-                NG::ToggleButtonView::SetIsOn(isOn);
-                break;
-            default:
-                break;
-        }
-        return;
-    }
 
-    RefPtr<Component> component;
-    if (toggleType == ToggleType::CHECKBOX) {
-        RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
-        if (!checkBoxTheme) {
-            return;
-        }
-        RefPtr<CheckboxComponent> checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
-        checkboxComponent->SetValue(isOn);
-        checkboxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
-        auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
-        auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
-        checkboxComponent->SetWidth(checkBoxTheme->GetWidth() - horizontalPadding * 2);
-        checkboxComponent->SetHeight(checkBoxTheme->GetHeight() - verticalPadding * 2);
-        component = checkboxComponent;
-    } else if (toggleType == ToggleType::SWITCH) {
-        RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
-        if (!switchTheme) {
-            return;
-        }
-        RefPtr<SwitchComponent> switchComponent = AceType::MakeRefPtr<OHOS::Ace::SwitchComponent>(switchTheme);
-        switchComponent->SetValue(isOn);
-        switchComponent->SetMouseAnimationType(HoverAnimationType::NONE);
-        auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding();
-        auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
-        switchComponent->SetWidth(switchTheme->GetWidth() - horizontalPadding * 2);
-        switchComponent->SetHeight(switchTheme->GetHeight() - verticalPadding * 2);
-        component = switchComponent;
-    } else {
-        RefPtr<ToggleTheme> toggleTheme = GetTheme<ToggleTheme>();
-        if (!toggleTheme) {
-            return;
-        }
-        RefPtr<ToggleComponent> toggleComponent = AceType::MakeRefPtr<ToggleComponent>();
-        toggleComponent->SetBackgroundColor(toggleTheme->GetBackgroundColor());
-        toggleComponent->SetCheckedColor(toggleTheme->GetCheckedColor());
-        toggleComponent->SetPressedBlendColor(toggleTheme->GetPressedBlendColor());
-        toggleComponent->SetCheckedState(isOn);
-        component = toggleComponent;
-    }
-
-    ViewStackProcessor::GetInstance()->ClaimElementId(component);
-    ViewStackProcessor::GetInstance()->Push(component);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetDeliverMinToChild(true);
-    if (toggleType == ToggleType::CHECKBOX) {
-        RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
-        if (!checkBoxTheme) {
-            return;
-        }
-        box->SetWidth(checkBoxTheme->GetWidth());
-        box->SetHeight(checkBoxTheme->GetHeight());
-    } else if (toggleType == ToggleType::SWITCH) {
-        RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
-        if (!switchTheme) {
-            return;
-        }
-        box->SetWidth(switchTheme->GetWidth());
-        box->SetHeight(switchTheme->GetHeight());
-    } else {
-        RefPtr<ToggleTheme> toggleTheme = GetTheme<ToggleTheme>();
-        if (!toggleTheme) {
-            return;
-        }
-        box->SetHeight(toggleTheme->GetHeight().Value(), toggleTheme->GetHeight().Unit());
-    }
+    ToggleModel::GetInstance()->Create(NG::ToggleType(toggleTypeInt), isOn);
 }
 
 void JSToggle::JsWidth(const JSCallbackInfo& info)
@@ -187,21 +118,7 @@ void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
         return;
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
-    Dimension padding;
-    auto box = stack->GetBoxComponent();
-    auto checkableComponent = AceType::DynamicCast<CheckableComponent>(stack->GetMainComponent());
-    if (checkableComponent) {
-        padding = checkableComponent->GetHotZoneHorizontalPadding();
-        checkableComponent->SetWidth(value);
-        box->SetWidth(value + padding * 2);
-    }
-
-    auto toggleComponent = AceType::DynamicCast<ToggleComponent>(stack->GetMainComponent());
-    if (toggleComponent) {
-        toggleComponent->SetWidth(value);
-        box->SetWidth(value);
-    }
+    ToggleModel::GetInstance()->SetWidth(value);
 }
 
 void JSToggle::JsHeight(const JSCallbackInfo& info)
@@ -225,22 +142,7 @@ void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
         JSViewAbstract::JsHeight(jsValue);
         return;
     }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    Dimension padding;
-    auto checkableComponent = AceType::DynamicCast<CheckableComponent>(stack->GetMainComponent());
-    if (checkableComponent) {
-        padding = checkableComponent->GetHotZoneVerticalPadding();
-        checkableComponent->SetHeight(value);
-        box->SetHeight(value + padding * 2);
-    }
-
-    auto toggleComponent = AceType::DynamicCast<ToggleComponent>(stack->GetMainComponent());
-    if (toggleComponent) {
-        toggleComponent->SetHeight(value);
-        box->SetHeight(value);
-    }
+    ToggleModel::GetInstance()->SetHeight(value);
 }
 
 void JSToggle::JsSize(const JSCallbackInfo& info)
@@ -262,23 +164,14 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
 
 void JSToggle::OnChange(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-        auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Toggle.onChange");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::ToggleView::OnChange(std::move(onChange));
-        return;
-    }
-    if (JSViewBindEvent(&ToggleComponent::SetOnChange, args) ||
-        JSViewBindEvent(&CheckableComponent::SetOnChange, args)) {
-    } else {
-        LOGW("Failed to bind event");
-    }
-
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Toggle.onChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    ToggleModel::GetInstance()->OnChange(std::move(onChange));
     args.ReturnSelf();
 }
 
@@ -293,22 +186,7 @@ void JSToggle::SelectedColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ToggleView::SetSelectedColor(selectedColor);
-        return;
-    }
-
-    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto toggle = AceType::DynamicCast<ToggleComponent>(mainComponent);
-    if (toggle) {
-        toggle->SetCheckedColor(selectedColor);
-        return;
-    }
-    auto checkable = AceType::DynamicCast<CheckableComponent>(mainComponent);
-    if (checkable) {
-        checkable->SetActiveColor(selectedColor);
-        return;
-    }
+    ToggleModel::GetInstance()->SetSelectedColor(selectedColor);
 }
 
 void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
@@ -321,19 +199,8 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], color)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ToggleView::SetSwitchPointColor(color);
-        return;
-    }
 
-    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto switchComponent = AceType::DynamicCast<SwitchComponent>(mainComponent);
-    if (!switchComponent) {
-        LOGE("pointstyle only support switch");
-        return;
-    }
-
-    switchComponent->SetPointColor(color);
+    ToggleModel::GetInstance()->SetSwitchPointColor(color);
 }
 
 void JSToggle::JsPadding(const JSCallbackInfo& info)
@@ -346,14 +213,11 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
         LOGE("arg is not a string, number or object.");
         return;
     }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto toggleComponent = AceType::DynamicCast<ToggleComponent>(stack->GetMainComponent());
-    auto box = stack->GetBoxComponent();
-    if (toggleComponent) {
+    if (Container::IsCurrentUseNewPipeline() || ToggleModel::GetInstance()->IsToggle()) {
         JSViewAbstract::JsPadding(info);
         return;
     }
+
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
@@ -379,35 +243,25 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
             if (leftDimen == 0.0_vp) {
                 leftDimen = topDimen;
             }
-            auto checkableComponent = AceType::DynamicCast<CheckableComponent>(stack->GetMainComponent());
-            if (checkableComponent) {
-                auto width = checkableComponent->GetWidth();
-                auto height = checkableComponent->GetHeight();
-                checkableComponent->SetHeight(height);
-                checkableComponent->SetWidth(width);
-                box->SetHeight(height + topDimen * 2);
-                box->SetWidth(width + leftDimen * 2);
-                checkableComponent->SetHotZoneVerticalPadding(topDimen);
-                checkableComponent->SetHorizontalPadding(leftDimen);
-            }
+            NG::PaddingPropertyF padding;
+            padding.left = leftDimen.ConvertToPx();
+            padding.right = rightDimen.ConvertToPx();
+            padding.top = topDimen.ConvertToPx();
+            padding.bottom = bottomDimen.ConvertToPx();
+            ToggleModel::GetInstance()->SetPadding(padding);
             return;
         }
     }
     Dimension length;
-    if (!ParseJsDimensionVp(info[0], length)) {
+    if (!JSViewAbstract::ParseJsDimensionVp(info[0], length)) {
         return;
     }
-    auto checkableComponent = AceType::DynamicCast<CheckableComponent>(stack->GetMainComponent());
-    if (checkableComponent) {
-        auto width = checkableComponent->GetWidth();
-        auto height = checkableComponent->GetHeight();
-        checkableComponent->SetHeight(height);
-        checkableComponent->SetWidth(width);
-        box->SetHeight(height + length * 2);
-        box->SetWidth(width + length * 2);
-        checkableComponent->SetHotZoneVerticalPadding(length);
-        checkableComponent->SetHorizontalPadding(length);
-    }
+    NG::PaddingPropertyF padding;
+    padding.left = length.ConvertToPx();
+    padding.right = length.ConvertToPx();
+    padding.top = length.ConvertToPx();
+    padding.bottom = length.ConvertToPx();
+    ToggleModel::GetInstance()->SetPadding(padding);
 }
 
 void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
@@ -421,11 +275,11 @@ void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ToggleButtonView::SetBackgroundColor(backgroundColor);
+    if (!Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsBackgroundColor(info);
         return;
     }
-    JSViewAbstract::JsBackgroundColor(info);
+    ToggleModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 } // namespace OHOS::Ace::Framework

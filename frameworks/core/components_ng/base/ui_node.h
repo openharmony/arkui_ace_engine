@@ -182,6 +182,7 @@ public:
     virtual void OnWindowShow() {}
 
     virtual void OnWindowHide() {}
+    virtual void Build();
 
     virtual void OnWindowFocused() {}
 
@@ -189,7 +190,19 @@ public:
 
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
+    virtual void SetActive(bool active);
+
+    bool IsOnMainTree() const
+    {
+        return onMainTree_;
+    }
+
 protected:
+    std::list<RefPtr<UINode>>& ModifyChildren()
+    {
+        return children_;
+    }
+
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {
         for (const auto& child : children_) {
@@ -204,6 +217,9 @@ protected:
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree();
     virtual void OnDetachFromMainTree();
+
+private:
+    void OnRemoveFromParent();
 
     std::list<RefPtr<UINode>> children_;
     WeakPtr<UINode> parent_;

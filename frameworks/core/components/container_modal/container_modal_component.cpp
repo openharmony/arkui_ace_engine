@@ -73,7 +73,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     titleBox->SetOnMouseId([contextWptr = context_](MouseInfo& info) {
         auto context = contextWptr.Upgrade();
         if (context && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
-            context->FireWindowStartMoveCallBack();
+            context->GetWindowManager()->FireWindowStartMoveCallBack();
         }
     });
 
@@ -81,7 +81,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     titleBox->SetOnTouchMoveId([contextWptr = context_](const TouchEventInfo&) {
         auto context = contextWptr.Upgrade();
         if (context) {
-            context->FireWindowStartMoveCallBack();
+            context->GetWindowManager()->FireWindowStartMoveCallBack();
         }
     });
     titleBox->SetChild(titleChildrenRow);
@@ -239,14 +239,13 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
         isFloating ? FLOATING_TITLE_ROW : TITLE_ROW);
 
     // title control button
-    auto contextWptr = context_;
+    auto windowManager = context_.Upgrade()->GetWindowManager();
     auto leftSplitButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
                                    : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT;
-    auto titleLeftSplitButton = BuildControlButton(leftSplitButton, [contextWptr]() {
-            LOGI("left split button clicked");
-            auto context = contextWptr.Upgrade();
-            if (context) {
-                context->FireWindowSplitCallBack();
+    auto titleLeftSplitButton = BuildControlButton(leftSplitButton, [windowManager]() {
+            if (windowManager) {
+                LOGI("left split button clicked");
+                windowManager->FireWindowSplitCallBack();
             }
         }, isFocus, isFloating);
     auto maxRecoverButton = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
@@ -255,35 +254,32 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
         maxRecoverButton = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER
                                       : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
     }
-    auto titleMaximizeRecoverButton = BuildControlButton(maxRecoverButton, [contextWptr]() {
-            auto context = contextWptr.Upgrade();
-            if (context) {
-                auto mode = context->FireWindowGetModeCallBack();
+    auto titleMaximizeRecoverButton = BuildControlButton(maxRecoverButton, [windowManager]() {
+            if (windowManager) {
+                auto mode = windowManager->FireWindowGetModeCallBack();
                 if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                     LOGI("recover button clicked");
-                    context->FireWindowRecoverCallBack();
+                    windowManager->FireWindowRecoverCallBack();
                 } else {
                     LOGI("maximize button clicked");
-                    context->FireWindowMaximizeCallBack();
+                    windowManager->FireWindowMaximizeCallBack();
                 }
             }
         }, isFocus, isFloating);
     auto minimizeButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE
                                   : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE;
-    auto titleMinimizeButton = BuildControlButton(minimizeButton, [contextWptr]() {
-            auto context = contextWptr.Upgrade();
-            if (context) {
+    auto titleMinimizeButton = BuildControlButton(minimizeButton, [windowManager]() {
+            if (windowManager) {
                 LOGI("minimize button clicked");
-                context->FireWindowMinimizeCallBack();
+                windowManager->FireWindowMinimizeCallBack();
             }
         }, isFocus, isFloating);
     auto closeButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
                                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE;
-    auto titleCloseButton = BuildControlButton(closeButton, [contextWptr]() {
-            auto context = contextWptr.Upgrade();
-            if (context) {
+    auto titleCloseButton = BuildControlButton(closeButton, [windowManager]() {
+            if (windowManager) {
                 LOGI("close button clicked");
-                context->FireWindowCloseCallBack();
+                windowManager->FireWindowCloseCallBack();
             }
         }, isFocus, isFloating);
     std::list<RefPtr<Component>> titleChildren;

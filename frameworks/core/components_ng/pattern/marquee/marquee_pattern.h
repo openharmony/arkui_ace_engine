@@ -16,14 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_PATTERN_H
 
-#include <functional>
-#include <string>
-
-#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/marquee/marquee_component.h"
 #include "core/components_ng/pattern/marquee/marquee_event_hub.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
@@ -34,6 +29,9 @@
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
+
+inline constexpr double DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0;
+inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 using TimeCallback = std::function<void()>;
 
 class MarqueePattern : public Pattern {
@@ -101,9 +99,9 @@ private:
     bool isActive_ = false;
     bool isNeedMarquee_ = true;
     bool flag_ = true;
-    double scrollAmount_ = 0.0;
-    float childOffset_{};
-    int32_t loop_ = ANIMATION_REPEAT_INFINITE;
+    double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT;
+    float childOffset_ {};
+    int32_t loop_ = DEFAULT_MARQUEE_LOOP;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
 
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);

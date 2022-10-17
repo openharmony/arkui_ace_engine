@@ -412,16 +412,16 @@ ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[];
 ACE_EXPORT extern const char CANVAS_ETS_TAG[];
 
 // ActionSheet
-ACE_EXPORT extern const char ACTIONSHEETDIALOG_COMPONENT_TAG[];
-ACE_EXPORT extern const char ACTIONSHEETDIALOG_ETS_TAG[];
+ACE_EXPORT extern const char ACTION_SHEET_DIALOG_COMPONENT_TAG[];
+ACE_EXPORT extern const char ACTION_SHEET_DIALOG_ETS_TAG[];
 
 // AlertDialog
-ACE_EXPORT extern const char ALERTDIALOG_COMPONENT_TAG[];
-ACE_EXPORT extern const char ALERTDIALOG_ETS_TAG[];
+ACE_EXPORT extern const char ALERT_DIALOG_COMPONENT_TAG[];
+ACE_EXPORT extern const char ALERT_DIALOG_ETS_TAG[];
 
 // CustomDialog
-ACE_EXPORT extern const char CUSTOMDIALOG_COMPONENT_TAG[];
-ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[];
+ACE_EXPORT extern const char CUSTOM_DIALOG_COMPONENT_TAG[];
+ACE_EXPORT extern const char CUSTOM_DIALOG_ETS_TAG[];
 
 // datePickerdialog
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[];
@@ -462,6 +462,10 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[];
 // Popup
 ACE_EXPORT extern const char POPUP_ETS_TAG[];
+
+// remote window
+ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[];
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

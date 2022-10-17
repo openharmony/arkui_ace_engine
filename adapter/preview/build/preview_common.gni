@@ -13,6 +13,7 @@
 
 xcomponent_components_support = false
 form_components_support = false
+remote_window_support = false
 use_curl_download = true
 accessibility_support = true
 rich_components_support = true
@@ -44,6 +45,10 @@ if (defined(xcomponent_components_support) && xcomponent_components_support) {
 
 if (defined(form_components_support) && form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
+}
+
+if (defined(remote_window_support) && remote_window_support) {
+  defines += [ "REMOTE_WINDOW_SUPPORTED" ]
 }
 
 if (defined(image_components_support) && image_components_support) {

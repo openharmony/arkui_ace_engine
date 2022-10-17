@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
+#include <functional>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/rect_t.h"
@@ -27,12 +29,16 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
 
-namespace OHOS::Rosen::Drawing {
+namespace OHOS::Rosen {
+class RSNode;
+namespace Drawing {
 class Canvas;
+}
 }
 namespace OHOS::Ace::NG {
 class GeometryNode;
@@ -40,6 +46,7 @@ class RenderPropertyNode;
 class FrameNode;
 class Modifier;
 
+using RSNode = Rosen::RSNode;
 using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
@@ -80,7 +87,8 @@ public:
 
     virtual void OnModifyDone() {}
 
-    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) {}
+    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
+    {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
@@ -103,6 +111,8 @@ public:
     // clip node with padding
     virtual void SetClipToBounds(bool useClip) {}
 
+    virtual void SetVisible(bool visible) {}
+
     virtual RefPtr<Canvas> GetCanvas() = 0;
 
     virtual void Restore() = 0;
@@ -110,7 +120,7 @@ public:
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
     virtual void UpdateTransition(const TransitionOptions& options) {}
-    virtual bool TriggerPageTransition(PageTransitionType type) const
+    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
     {
         return false;
     }
@@ -139,6 +149,10 @@ public:
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     virtual void ClearDrawCommands() {}
+
+    virtual void NotifyTransition(
+        const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
+    {}
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);

@@ -61,6 +61,10 @@ constexpr Dimension TOOLBAR_HEIGHT = 56.0_vp;
 constexpr Dimension ICON_PADDING = 10.0_vp;
 constexpr Dimension TEXT_TOP_PADDING = 2.0_vp;
 
+// divider
+constexpr Dimension DIVIDER_WIDTH = 1.0_vp;
+constexpr Color DIVIDER_COLOR = Color(0x08000000);
+
 struct BarItem {
     std::optional<std::string> text;
     std::optional<std::string> icon;
@@ -93,6 +97,11 @@ enum class NavigationMode {
     SPLIT,
     STACK,
     OVERLAY,
+};
+
+enum class NavBarPosition {
+    START = 0,
+    END,
 };
 
 enum class ChildNodeOperation {

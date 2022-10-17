@@ -26,6 +26,11 @@
 
 namespace OHOS::Ace::NG {
 
+enum class DragType {
+    COMMON,
+    GRID,
+};
+
 class ACE_EXPORT DragDropManager : public virtual AceType {
     DECLARE_ACE_TYPE(DragDropManager, AceType);
 
@@ -34,30 +39,46 @@ public:
     ~DragDropManager() override = default;
 
     RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<PixelMap>& pixelMap, const GestureEvent& info);
+    RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<UINode>& customNode, const GestureEvent& info);
 
     void AddDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
     {
         dragFrameNodes_.insert(dragFrameNode);
     }
 
+    void AddGridDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    {
+        gridDragFrameNodes_.insert(dragFrameNode);
+    }
+
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
-    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY);
     void OnDragStart(float globalX, float globalY);
     void OnDragMove(float globalX, float globalY, const std::string& extraInfo);
     void OnDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
+    void OnItemDragStart(float globalX, float globalY);
+    void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex);
+    void OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex);
+    void onItemDragCancel();
     void AddDataToClipboard(const std::string& extraInfo);
     void GetExtraInfoFromClipboard(std::string& extraInfo);
     void RestoreClipboardData();
     void DestroyDragWindow();
 
 private:
+    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
     void FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
         DragEventType type, const std::string& extraInfo);
+    void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, const OHOS::Ace::ItemDragInfo& itemDragInfo,
+        DragEventType type, int32_t draggedIndex, int32_t insertIndex = 0);
+    void CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height);
+    RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
 
     std::set<WeakPtr<FrameNode>> dragFrameNodes_;
+    std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<FrameNode> preTargetFrameNode_;
+    RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;

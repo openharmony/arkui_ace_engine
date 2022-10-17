@@ -41,6 +41,10 @@ public:
     void OnDragMove(const GestureEvent& info);
     void OnDragEnd(const GestureEvent& info);
     void onDragCancel();
+    void OnItemDragStart(const GestureEvent& info);
+    void OnItemDragMove(const GestureEvent& info, int32_t draggedIndex);
+    void OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex);
+    void onItemDragCancel();
     void DestroyDragWindow();
 
 private:

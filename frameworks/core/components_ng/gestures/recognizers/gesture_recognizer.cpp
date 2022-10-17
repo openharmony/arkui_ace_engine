@@ -120,7 +120,7 @@ void GestureRecognizer::BatchAdjudicate(
     std::set<size_t> copyIds = touchIds;
     auto referee = GetCurrentGestureReferee();
     if (!referee) {
-        LOGW("No GestureReferee in GestureRecoginer.");
+        LOGW("No GestureReferee in GestureRecognizer.");
         return;
     }
     for (auto pointerId : copyIds) {

@@ -921,25 +921,14 @@ void RenderTextField::RegisterCallbacksToOverlay()
         }
     });
 
-    auto callback = [weakTextField = WeakClaim(this)](const std::string& data) {
+    textOverlay_->SetOnPaste([weakTextField = WeakClaim(this)] {
         auto textfield = weakTextField.Upgrade();
         if (textfield) {
-            auto textOverlay = textfield->textOverlay_;
-            if (textOverlay && !data.empty()) {
-                textOverlay->SetOnPaste([weakTextField] {
-                    auto textfield = weakTextField.Upgrade();
-                    if (textfield) {
-                        textfield->HandleOnPaste();
-                    }
-                });
-            }
-            textfield->PushTextOverlayToStack();
-            textfield->UpdateOverlay();
+            textfield->HandleOnPaste();
         }
-    };
-    if (clipboard_) {
-        clipboard_->GetData(callback);
-    }
+    });
+    PushTextOverlayToStack();
+    UpdateOverlay();
 
     auto onFocusChange = [weak = WeakClaim(this)](bool isFocus, bool needCloseKeyboard) {
         auto textField = weak.Upgrade();
@@ -1032,7 +1021,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         LOGI("Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
         if (textChangeListener_ == nullptr) {
-            textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+            textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this), context_);
         }
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (!inputMethod) {

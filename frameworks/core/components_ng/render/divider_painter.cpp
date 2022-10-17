@@ -32,7 +32,7 @@ void DividerPainter::DrawLine(RSCanvas& canvas, const OffsetF& offset) const
     PointF start = PointF(startPointX, startPointY);
     PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_)
                            : PointF(startPointX + dividerLength_, startPointY);
-    canvas.DrawLine(ToRSPonit(start) , ToRSPonit(end));
+    canvas.DrawLine(ToRSPonit(start), ToRSPonit(end));
 }
 
 void DividerPainter::DrawListLines(RSCanvas& canvas, const int32_t startIndex, const int32_t endIndex,

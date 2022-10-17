@@ -45,40 +45,23 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
 
-    column->AddChild(BuildTitle());
-    BuildContent(content);
+    column->AddChild(BuildTitle(containerModalNode));
     column->AddChild(content);
     containerModalNode->AddChild(column);
-    containerModalNode->AddChild(BuildTitle(true));
+    containerModalNode->AddChild(BuildTitle(containerModalNode, true));
 
     CHECK_NULL_RETURN(column->GetLayoutProperty(), nullptr);
     column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
-    // update container modal padding and border
-    auto layoutProperty = containerModalNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    PaddingProperty padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-        CalcLength(CONTENT_PADDING) };
-    layoutProperty->UpdatePadding(padding);
-    BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(CONTAINER_BORDER_WIDTH);
-    layoutProperty->UpdateBorderWidth(borderWidth);
-
-    auto renderContext = containerModalNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(CONTAINER_BACKGROUND_COLOR);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(CONTAINER_OUTER_RADIUS);
-    renderContext->UpdateBorderRadius(borderRadius);
-    BorderColorProperty borderColor;
-    borderColor.SetColor(CONTAINER_BORDER_COLOR);
-    renderContext->UpdateBorderColor(borderColor);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, nullptr);
+    containerModalNode->MarkModifyDone();
+    containerPattern->InitContainerEvent();
 
     return containerModalNode;
 }
 
-RefPtr<FrameNode> ContainerModalView::BuildTitle(bool isFloatingTitle)
+RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)
 {
     auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -96,22 +79,25 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(bool isFloatingTitle)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, nullptr);
     if (!isFloatingTitle) {
         // touch the title to move the floating window
         auto touchEventHub = containerTitleRow->GetOrCreateGestureEventHub();
         CHECK_NULL_RETURN(touchEventHub, nullptr);
-        touchEventHub->SetTouchEvent([pipeline](TouchEventInfo& info) {
-            if (pipeline) {
-                pipeline->FireWindowStartMoveCallBack();
+        touchEventHub->SetTouchEvent([windowManager](TouchEventInfo& info) {
+            if (windowManager) {
+                windowManager->FireWindowStartMoveCallBack();
             }
         });
 
         // click the title to move the floating window with the mouse
         auto mouseEventHub = containerTitleRow->GetOrCreateInputEventHub();
         CHECK_NULL_RETURN(mouseEventHub, nullptr);
-        mouseEventHub->SetMouseEvent([pipeline](MouseInfo& info) {
-            if (pipeline && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
-                pipeline->FireWindowStartMoveCallBack();
+        mouseEventHub->SetMouseEvent([windowManager](MouseInfo& info) {
+            if (windowManager && info.GetButton() == MouseButton::LEFT_BUTTON &&
+                info.GetAction() == MouseAction::PRESS) {
+                windowManager->FireWindowStartMoveCallBack();
             }
         });
     }
@@ -123,9 +109,9 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(bool isFloatingTitle)
 
     // create title icon
     ImageSourceInfo imageSourceInfo;
-    auto titleIcon = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<ImagePattern>());
-    imageSourceInfo.SetSrc(themeConstants->GetMediaPath(pipeline->GetAppIconId()));
+    auto titleIcon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    imageSourceInfo.SetSrc(themeConstants->GetMediaPath(pipeline->GetWindowManager()->GetAppIconId()));
     auto imageLayoutProperty = titleIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
@@ -139,7 +125,8 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(bool isFloatingTitle)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetAppLabelId()));
+    textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetWindowManager()->GetAppLabelId()));
+    textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(TITLE_TEXT_COLOR);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -152,66 +139,53 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(bool isFloatingTitle)
     containerTitleRow->AddChild(titleLabel);
 
     // add leftSplit / maxRecover / minimize / close button
-    containerTitleRow->AddChild(BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, [pipeline](GestureEvent& info) {
-            if (pipeline) {
+    containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
+        [windowManager, containerNode](GestureEvent& info) {
+            if (windowManager && containerNode) {
                 LOGI("left split button clicked");
-                pipeline->FireWindowSplitCallBack();
+                windowManager->FireWindowSplitCallBack();
+                containerNode->MarkModifyDone();
             }
         }));
-    containerTitleRow->AddChild(BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER, [pipeline](GestureEvent& info) {
-            if (pipeline) {
-                auto mode = pipeline->FireWindowGetModeCallBack();
+    containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
+        [windowManager, containerNode](GestureEvent& info) {
+            if (windowManager && containerNode) {
+                auto mode = windowManager->FireWindowGetModeCallBack();
                 if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                     LOGI("recover button clicked");
-                    pipeline->FireWindowRecoverCallBack();
+                    windowManager->FireWindowRecoverCallBack();
                 } else {
                     LOGI("maximize button clicked");
-                    pipeline->FireWindowMaximizeCallBack();
+                    windowManager->FireWindowMaximizeCallBack();
                 }
+                containerNode->MarkModifyDone();
             }
         }));
     containerTitleRow->AddChild(BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [pipeline](GestureEvent& info) {
-            if (pipeline) {
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [windowManager](GestureEvent& info) {
+            if (windowManager) {
                 LOGI("minimize button clicked");
-                pipeline->FireWindowMinimizeCallBack();
+                windowManager->FireWindowMinimizeCallBack();
             }
         }));
-    containerTitleRow->AddChild(
-        BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, [pipeline](GestureEvent& info) {
-            if (pipeline) {
+    containerTitleRow->AddChild(BuildControlButton(
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, [windowManager](GestureEvent& info) {
+            if (windowManager) {
                 LOGI("close button clicked");
-                pipeline->FireWindowCloseCallBack();
+                windowManager->FireWindowCloseCallBack();
             }
-        }));
+        }, true));
 
     return containerTitleRow;
 }
 
-void ContainerModalView::BuildContent(RefPtr<FrameNode>& content)
-{
-    CHECK_NULL_VOID(content);
-    auto layoutProperty = content->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateLayoutWeight(1.0f);
-
-    auto renderContext = content->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(CONTAINER_INNER_RADIUS);
-    renderContext->UpdateBorderRadius(borderRadius);
-    renderContext->SetClipToBounds(true);
-}
-
 RefPtr<FrameNode> ContainerModalView::BuildControlButton(
-    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback)
+    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton)
 {
     // button image icon
     ImageSourceInfo imageSourceInfo;
-    auto imageIcon = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<ImagePattern>());
+    auto imageIcon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     imageSourceInfo.SetResourceId(icon);
     auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -237,7 +211,7 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
 
     MarginProperty margin;
-    margin.right = CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL);
+    margin.right = CalcLength(isCloseButton ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL);
     buttonLayoutProperty->UpdateMargin(margin);
 
     buttonNode->AddChild(imageIcon);

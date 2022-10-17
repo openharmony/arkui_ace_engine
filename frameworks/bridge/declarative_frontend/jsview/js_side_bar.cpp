@@ -26,6 +26,9 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
+constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+
 enum class WidthType : uint32_t {
     SIDEBAR_WIDTH = 0,
     MIN_SIDEBAR_WIDTH,
@@ -101,11 +104,6 @@ void JSSideBar::Create(const JSCallbackInfo& info)
         return;
     }
 
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     SideBarContainerType style = SideBarContainerType::EMBED;
     if (!info[0]->IsNull()) {
         if (info[0]->IsBoolean()) {
@@ -132,11 +130,6 @@ void JSSideBar::Create(const JSCallbackInfo& info)
 
 void JSSideBar::CreateForNG(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("JSSideBar::CreateForNG The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     NG::SideBarContainerView::Create();
 
     SideBarContainerType style = SideBarContainerType::EMBED;
@@ -146,7 +139,7 @@ void JSSideBar::CreateForNG(const JSCallbackInfo& info)
         } else if (info[0]->IsNumber()) {
             style = static_cast<SideBarContainerType>(info[0]->ToNumber<int>());
         } else {
-            LOGE("JSSideBar::CreateForNG The arg is wrong");
+            LOGE("JSSideBar::CreateForNG The SideBarContainerType arg is wrong");
             return;
         }
     }
@@ -312,11 +305,19 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
         JSRef<JSVal> icons = value->GetProperty("icons");
 
         if (!width->IsNull() && width->IsNumber()) {
-            component->SetButtonWidth(width->ToNumber<double>());
+            auto controlButtonWidth = width->ToNumber<double>();
+            if (LessNotEqual(controlButtonWidth, 0.0)) {
+                controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH.Value();
+            }
+            component->SetButtonWidth(controlButtonWidth);
         }
 
         if (!height->IsNull() && height->IsNumber()) {
-            component->SetButtonHeight(height->ToNumber<double>());
+            auto controlButtonHeight = height->ToNumber<double>();
+            if (LessNotEqual(controlButtonHeight, 0.0)) {
+                controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT.Value();
+            }
+            component->SetButtonHeight(controlButtonHeight);
         }
 
         if (!left->IsNull() && left->IsNumber()) {
@@ -364,11 +365,19 @@ void JSSideBar::JsControlButtonForNG(const JSCallbackInfo& info)
         JSRef<JSVal> icons = value->GetProperty("icons");
 
         if (!width->IsNull() && width->IsNumber()) {
-            NG::SideBarContainerView::SetControlButtonWidth(Dimension(width->ToNumber<double>(), DimensionUnit::VP));
+            auto controlButtonWidth = Dimension(width->ToNumber<double>(), DimensionUnit::VP);
+            if (LessNotEqual(controlButtonWidth.Value(), 0.0)) {
+                controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
+            }
+            NG::SideBarContainerView::SetControlButtonWidth(controlButtonWidth);
         }
 
         if (!height->IsNull() && height->IsNumber()) {
-            NG::SideBarContainerView::SetControlButtonHeight(Dimension(height->ToNumber<double>(), DimensionUnit::VP));
+            auto controlButtonHeight = Dimension(height->ToNumber<double>(), DimensionUnit::VP);
+            if (LessNotEqual(controlButtonHeight.Value(), 0.0)) {
+                controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
+            }
+            NG::SideBarContainerView::SetControlButtonHeight(controlButtonHeight);
         }
 
         if (!left->IsNull() && left->IsNumber()) {

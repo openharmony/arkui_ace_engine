@@ -42,7 +42,6 @@ void TextPattern::OnAttachToFrameNode()
         pattern->HandleLongPress(info);
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gestureEventHub->AddLongPressEvent(longPressEvent_);
 }
 
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)

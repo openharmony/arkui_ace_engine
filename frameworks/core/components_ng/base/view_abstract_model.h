@@ -18,8 +18,13 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
+#include <vector>
 
+#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
+#include "core/components/common/properties/alignment.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -36,6 +41,38 @@ public:
     static ViewAbstractModel* GetInstance();
     virtual ~ViewAbstractModel() = default;
 
+    // basic size
+    virtual void SetWidth(const Dimension& width) = 0;
+    virtual void SetHeight(const Dimension& height) = 0;
+    virtual void SetMinWidth(const Dimension& minWidth) = 0;
+    virtual void SetMinHeight(const Dimension& minHeight) = 0;
+    virtual void SetMaxWidth(const Dimension& maxWidth) = 0;
+    virtual void SetMaxHeight(const Dimension& maxHeight) = 0;
+
+    // layout
+    virtual void SetLayoutPriority(int32_t priority) = 0;
+    virtual void SetLayoutWeight(int32_t value) = 0;
+    virtual void SetAspectRatio(float ratio) = 0;
+    virtual void SetAlign(const Alignment& alignment) = 0;
+
+    // position
+    virtual void SetPosition(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetOffset(const Dimension& x, const Dimension& y) = 0;
+    virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
+
+    // transforms
+    virtual void SetScale(float x, float y, float z) = 0;
+    virtual void SetPivot(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
+    virtual void SetRotate(float x, float y, float z, float angle) = 0;
+    virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
+
+    // display props
+    virtual void SetOpacity(double opacity) = 0;
+    virtual void SetTransition(const NG::TransitionOptions& transitionOptions) = 0;
+    virtual void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
+        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) = 0;
+
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
@@ -47,6 +84,10 @@ public:
     virtual void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) = 0;
     virtual void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) = 0;
     virtual void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) = 0;
+
+    // interact
+    virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
+    virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
     virtual void SetFocusNode(bool focus) = 0;

@@ -648,7 +648,7 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     frameNode->UpdateInspectorId(inspectorId);
 }
 
-void ViewAbstract::SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type)
+void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

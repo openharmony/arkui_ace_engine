@@ -60,7 +60,7 @@ extern const char ACCESSIBILITY_TAG_CLOCK[];
 extern const char ACCESSIBILITY_TAG_DIALOG[];
 extern const char ACCESSIBILITY_TAG_SEARCH[];
 
-enum class AccessibilityEventType: size_t {
+enum class AccessibilityEventType : size_t {
     CLICK = 0x00000001,
     LONG_PRESS = 0x00000002,
     SELECTED = 0x00000004,
@@ -90,6 +90,8 @@ enum class AccessibilityEventType: size_t {
     TOUCH_END = 0x00000400,
     CHANGE = 0x00000800,
     SCROLL_END = 0x00001000,
+    TEXT_SELECTION_UPDATE = 0x000002000,
+    TEXT_MOVE_UNIT = 0x00020000,
     SCROLL_START = 0x01000000,
     UNKNOWN,
 };

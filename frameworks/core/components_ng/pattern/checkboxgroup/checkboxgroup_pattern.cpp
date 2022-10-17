@@ -74,6 +74,20 @@ void CheckBoxGroupPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+        layoutProperty->UpdateMargin(margin);
+    }
 
     if (clickListener_) {
         return;
@@ -129,7 +143,7 @@ void CheckBoxGroupPattern::UpdateState()
     auto group = eventHub->GetGroupName();
 
     if (!preGroup.has_value()) {
-        pageEventHub->AddCheckBoxGroupToGroup(group, host);
+        pageEventHub->AddCheckBoxGroupToGroup(group, host->GetId());
         auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         if (paintProperty->GetCheckBoxGroupSelectValue()) {
@@ -137,8 +151,8 @@ void CheckBoxGroupPattern::UpdateState()
         }
     } else {
         if (preGroup.value() != group) {
-            pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host);
-            pageEventHub->AddCheckBoxGroupToGroup(group, host);
+            pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
+            pageEventHub->AddCheckBoxGroupToGroup(group, host->GetId());
         } else {
             auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
@@ -211,7 +225,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
     }
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
-    eventHub->UpdateChangeEvent(groupResult);
+    eventHub->UpdateChangeEvent(&groupResult);
 
     for (auto&& item : list) {
         auto node = item.Upgrade();
@@ -263,7 +277,7 @@ void CheckBoxGroupPattern::UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& fr
 
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
-    eventHub->UpdateChangeEvent(groupResult);
+    eventHub->UpdateChangeEvent(&groupResult);
 }
 
 } // namespace OHOS::Ace::NG

@@ -142,7 +142,7 @@ Point DragDropEvent::UpdatePoint(const RefPtr<PipelineContext>& context, const P
     }
 
     auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        context->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+        context->GetWindowManager()->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
     Point newPoint;
     if (isContainerModal) {
         newPoint.SetX(prePoint.GetX() - CONTAINER_BORDER_WIDTH.ConvertToPx() - CONTENT_PADDING.ConvertToPx());

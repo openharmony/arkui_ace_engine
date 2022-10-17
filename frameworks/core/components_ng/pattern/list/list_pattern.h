@@ -61,16 +61,7 @@ public:
         return MakeRefPtr<ListEventHub>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        auto listLayoutAlgorithm = MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_);
-        if (jumpIndex_) {
-            listLayoutAlgorithm->SetIndex(jumpIndex_.value());
-        }
-        listLayoutAlgorithm->SetCurrentOffset(currentDelta_);
-        listLayoutAlgorithm->SetIsInitialized(isInitialized_);
-        return listLayoutAlgorithm;
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     void UpdateCurrentOffset(float offset);
 
@@ -125,17 +116,20 @@ public:
     {
         auto property = GetLayoutProperty<ListLayoutProperty>();
         if (!property) {
-            return ScopeFocusAlgorithm();
+            return {};
         }
         auto isVertical = property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
-        return ScopeFocusAlgorithm(isVertical, true, ScopeType::OTHERS);
+        return { isVertical, true, ScopeType::OTHERS };
     }
 
     const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
     {
         return itemPosition_;
     }
+
 private:
+    void ProcessScrollEnd();
+
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -144,12 +138,11 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
-    float MainSize() const;
-    void ResetScrollableEvent(bool scrollable);
+    float GetMainContentSize() const;
+    void CheckScrollable();
     bool IsOutOfBoundary();
     void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
-    void RemoveScrollEdgeEffect();
 
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
@@ -169,7 +162,6 @@ private:
     bool isScroll_ = false;
     bool scrollStop_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
-    bool initScrollable_ = false;
 };
 } // namespace OHOS::Ace::NG
 

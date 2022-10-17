@@ -59,6 +59,21 @@ RefPtr<PictureAnimation<int32_t>> ImageAnimatorPattern::CreatePictureAnimation(i
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(imageAnimator->images_[index].src));
         imageFrameNode->MarkModifyDone();
+
+        MarginProperty margin;
+        if (!imageAnimator->fixedSize_) {
+            margin.left = CalcLength(imageAnimator->images_[index].left);
+            margin.top = CalcLength(imageAnimator->images_[index].top);
+            imageLayoutProperty->UpdateMargin(margin);
+            CalcSize realSize = { CalcLength(imageAnimator->images_[index].width),
+                CalcLength(imageAnimator->images_[index].height) };
+            imageLayoutProperty->UpdateUserDefinedIdealSize(realSize);
+            imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+            return;
+        }
+        margin.SetEdges(CalcLength(0.0));
+        imageLayoutProperty->UpdateMargin(margin);
+        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     });
     return pictureAnimation;
 }

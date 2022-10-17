@@ -37,7 +37,6 @@ void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
     if (clickEvent_) {
         return;
     }
-
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto tabBar = weak.Upgrade();
         if (tabBar) {

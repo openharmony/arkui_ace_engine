@@ -21,6 +21,8 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/memory/referenced.h"
@@ -56,6 +58,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.SetHeight(std::max(GetTextFieldDefaultHeight(), contentHeight));
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+    frameRect_ =
+        RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
 }
 
 std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
@@ -70,6 +74,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
     TextStyle textStyle;
     std::string textContent;
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
@@ -92,7 +97,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(Infinity<float>());
     } else {
-        paragraph_->Layout(contentConstraint.maxSize.Width() - imageSize);
+        // for text area, max width is content width without password icon
+        paragraph_->Layout(contentConstraint.maxSize.Width() - pattern->GetBasicPadding() * 2.0f);
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
@@ -101,7 +107,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
     // check password image size.
     if (!showPasswordIcon) {
-        textRect_.SetSize(SizeF(contentConstraint.maxSize.Width(), height));
+        textRect_.SetSize(SizeF(std::max(static_cast<float>(paragraph_->GetLongestLine()),
+                                    contentConstraint.maxSize.Width() - pattern->GetBasicPadding() * 2.0f),
+            height));
         imageRect_.SetSize(SizeF());
         return SizeF(contentConstraint.maxSize.Width(), height);
     }
@@ -119,7 +127,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         return SizeF(contentConstraint.maxSize.Width(), imageHeight);
     }
     height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
-    textRect_.SetSize(SizeF(contentConstraint.maxSize.Width() - imageSize, static_cast<float>(height)));
+    textRect_.SetSize(
+        SizeF(std::max(static_cast<float>(paragraph_->GetLongestLine()), contentConstraint.maxSize.Width() - imageSize),
+            static_cast<float>(height)));
     imageRect_.SetSize(SizeF(imageSize, imageSize));
     return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, height));
 }
@@ -145,7 +155,12 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     content->SetOffset(contentOffset);
     // update text rect.
     auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
-    textRect_.SetOffset(textOffset);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    // adjust text rect to the basic padding first
+    textRect_.SetOffset(OffsetF(contentOffset.GetX() + pattern->GetBasicPadding(), textOffset.GetY()));
     // update image rect.
     if (!imageRect_.IsEmpty()) {
         auto imageOffset = Alignment::GetAlignPosition(contentSize, imageRect_.GetSize(), Alignment::CENTER_RIGHT);

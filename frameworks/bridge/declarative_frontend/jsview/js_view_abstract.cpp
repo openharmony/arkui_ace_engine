@@ -25,51 +25,72 @@
 #include "base/geometry/ng/vector.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
+#include "bridge/declarative_frontend/jsview/js_grid_container.h"
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "core/common/card_scope.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/long_press_event.h"
-
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/js_view_register.h"
+#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/ace_application_info.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components/display/display_component.h"
-#include "core/components/split_container/column_split_component.h"
-#include "core/components/split_container/row_split_component.h"
-#include "core/components/split_container/split_container_component.h"
-#include "core/components_v2/extensions/events/on_area_change_extension.h"
-#ifdef USE_V8_ENGINE
-#include "bridge/declarative_frontend/engine/v8/functions/v8_function.h"
-#endif
-#include "bridge/declarative_frontend/jsview/js_grid_container.h"
-#include "bridge/declarative_frontend/jsview/js_view_register.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/common/ace_application_info.h"
+#include "core/common/card_scope.h"
+#include "core/common/container.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/motion_path_option.h"
+#include "core/components/display/display_component.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/option/option_component.h"
+#include "core/components/split_container/column_split_component.h"
+#include "core/components/split_container/row_split_component.h"
+#include "core/components/split_container/split_container_component.h"
+#include "core/components/text/text_component.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/property/clip_path.h"
+#include "core/components_v2/extensions/events/on_area_change_extension.h"
 #include "core/gestures/long_press_gesture.h"
-#include "frameworks/base/memory/referenced.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
-#include "frameworks/core/components/text/text_component.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
+
+ViewAbstractModel* ViewAbstractModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ViewAbstractModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ViewAbstractModelNG());
+        } else {
+            instance_.reset(new Framework::ViewAbstractModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -310,7 +331,7 @@ void ReplaceHolder(std::string& originStr, JSRef<JSArray> params, int32_t contai
     }
 }
 
-bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, AnimatableDimension& y)
+bool ParseLocationProps(const JSCallbackInfo& info, Dimension& x, Dimension& y)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("ParseLocationProps", info, checkList)) {
@@ -319,29 +340,28 @@ bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, Anim
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> xVal = sizeObj->GetProperty("x");
     JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-    bool hasX = JSViewAbstract::ParseJsAnimatableDimensionVp(xVal, x);
-    bool hasY = JSViewAbstract::ParseJsAnimatableDimensionVp(yVal, y);
+    bool hasX = JSViewAbstract::ParseJsDimensionVp(xVal, x);
+    bool hasY = JSViewAbstract::ParseJsDimensionVp(yVal, y);
     return hasX || hasY;
 }
 
-NG::OffsetT<Dimension> ParseNGLocation(const JSCallbackInfo& info)
+RefPtr<JsFunction> ParseDragStartBuilderFunc(const JSRef<JSVal>& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("ParseLocationProps", info, checkList)) {
-        return {};
+    JSRef<JSVal> builder;
+    if (info->IsObject()) {
+        auto builderObj = JSRef<JSObject>::Cast(info);
+        builder = builderObj->GetProperty("builder");
+    } else if (info->IsFunction()) {
+        builder = info;
+    } else {
+        return nullptr;
     }
-    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> xVal = sizeObj->GetProperty("x");
-    JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-    Dimension dimenX;
-    if (!JSViewAbstract::ParseJsDimensionVp(xVal, dimenX)) {
-        LOGW("the x prop is illegal");
+
+    if (!builder->IsFunction()) {
+        return nullptr;
     }
-    Dimension dimenY;
-    if (!JSViewAbstract::ParseJsDimensionVp(yVal, dimenY)) {
-        LOGW("the y prop is illegal");
-    }
-    return { dimenX, dimenY };
+
+    return AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
 }
 
 #ifndef WEARABLE_PRODUCT
@@ -684,119 +704,6 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     return result;
 }
 
-void JSViewAbstract::SetDefaultTransition(TransitionType transitionType)
-{
-    auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-    if (!display) {
-        LOGE("display component is null.");
-        return;
-    }
-    LOGI("JsTransition with default");
-    display->SetTransition(transitionType, 0.0);
-}
-
-bool JSViewAbstract::ParseAndSetOpacityTransition(
-    const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
-{
-    if (transitionArgs->Contains("opacity")) {
-        double opacity = 0.0;
-        JSViewAbstract::ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
-        if (GreatNotEqual(opacity, 1.0) || opacity < 0) {
-            LOGW("set opacity in transition to %{public}f, over range, use default opacity 0", opacity);
-            opacity = 0.0;
-        }
-        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-        if (!display) {
-            LOGE("display component is null.");
-            return true;
-        }
-        LOGI("JsTransition with type: %{public}d, opacity: %{public}.2f", transitionType, opacity);
-        display->SetTransition(transitionType, opacity);
-        return true;
-    }
-    return false;
-}
-
-bool JSViewAbstract::ParseAndSetRotateTransition(
-    const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
-{
-    if (transitionArgs->Contains("rotate")) {
-        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-        if (!transform) {
-            LOGE("transform component is null.");
-            return true;
-        }
-        auto rotateArgs = transitionArgs->GetObject("rotate");
-        // default: dx, dy, dz (0.0, 0.0, 0.0)
-        float dx = 0.0f;
-        float dy = 0.0f;
-        float dz = 0.0f;
-        // default centerX, centerY 50% 50%;
-        Dimension centerX = 0.5_pct;
-        Dimension centerY = 0.5_pct;
-        std::optional<float> angle;
-        ParseJsRotate(rotateArgs, dx, dy, dz, centerX, centerY, angle);
-        if (angle) {
-            transform->SetRotateTransition(transitionType, dx, dy, dz, angle.value());
-            transform->SetOriginDimension(DimensionOffset(centerX, centerY));
-            LOGI("JsTransition with type: %{public}d. rotate: [%.2f, %.2f, %.2f] [%.2f, %.2f] %.2f", transitionType, dx,
-                dy, dz, centerX.Value(), centerY.Value(), angle.value());
-        }
-        return true;
-    }
-    return false;
-}
-
-bool JSViewAbstract::ParseAndSetScaleTransition(
-    const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
-{
-    if (transitionArgs->Contains("scale")) {
-        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-        if (!transform) {
-            LOGE("transform component is null.");
-            return true;
-        }
-        auto scaleArgs = transitionArgs->GetObject("scale");
-        // default: x, y, z (1.0, 1.0, 1.0)
-        auto scaleX = 1.0f;
-        auto scaleY = 1.0f;
-        auto scaleZ = 1.0f;
-        // default centerX, centerY 50% 50%;
-        Dimension centerX = 0.5_pct;
-        Dimension centerY = 0.5_pct;
-        ParseJsScale(scaleArgs, scaleX, scaleY, scaleZ, centerX, centerY);
-        transform->SetScaleTransition(transitionType, scaleX, scaleY, scaleZ);
-        transform->SetOriginDimension(DimensionOffset(centerX, centerY));
-        LOGI("JsTransition with type: %{public}d. scale: [%.2f, %.2f, %.2f] [%.2f, %.2f]", transitionType, scaleX,
-            scaleY, scaleZ, centerX.Value(), centerY.Value());
-        return true;
-    }
-    return false;
-}
-
-bool JSViewAbstract::ParseAndSetTranslateTransition(
-    const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
-{
-    if (transitionArgs->Contains("translate")) {
-        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-        if (!transform) {
-            LOGE("transform component is null.");
-            return true;
-        }
-        auto translateArgs = transitionArgs->GetObject("translate");
-        // default: x, y, z (0.0, 0.0, 0.0)
-        auto translateX = Dimension(0.0);
-        auto translateY = Dimension(0.0);
-        auto translateZ = Dimension(0.0);
-        ParseJsTranslate(translateArgs, translateX, translateY, translateZ);
-        transform->SetTranslateTransition(transitionType, translateX, translateY, translateZ);
-        LOGI("JsTransition with type: %{public}d. translate: [%.2f, %.2f, %.2f]", transitionType, translateX.Value(),
-            translateY.Value(), translateZ.Value());
-        return true;
-    }
-    return false;
-}
-
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
 {
     LOGD("JsScale");
@@ -805,11 +712,6 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
         return;
     }
 
-    RefPtr<TransformComponent> transform;
-    if (!Container::IsCurrentUseNewPipeline()) {
-        transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
@@ -825,25 +727,14 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
             Dimension centerX = 0.5_pct;
             Dimension centerY = 0.5_pct;
             ParseJsScale(argsPtrItem, scaleX, scaleY, scaleZ, centerX, centerY);
-            if (Container::IsCurrentUseNewPipeline()) {
-                // new pipeline
-                NG::ViewAbstract::SetScale(NG::VectorF(scaleX, scaleY));
-                NG::ViewAbstract::SetPivot(DimensionOffset(centerX, centerY));
-                return;
-            }
-            transform->Scale(scaleX, scaleY, scaleZ, option);
-            transform->SetOriginDimension(DimensionOffset(centerX, centerY));
+            ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
+            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY);
             return;
         }
     }
     double scale = 0.0;
     if (ParseJsDouble(info[0], scale)) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            // new pipeline
-            NG::ViewAbstract::SetScale(NG::VectorF(scale, scale));
-            return;
-        }
-        transform->Scale(scale, option);
+        ViewAbstractModel::GetInstance()->SetScale(scale, scale, 1.0f);
     }
 }
 
@@ -859,15 +750,7 @@ void JSViewAbstract::JsScaleX(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], scaleVal)) {
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        // new pipeline
-        NG::ViewAbstract::SetScale(NG::VectorF(scaleVal, 1.0f));
-        return;
-    }
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    transform->ScaleX(scaleVal, option);
+    ViewAbstractModel::GetInstance()->SetScale(scaleVal, 1.0f, 1.0f);
 }
 
 void JSViewAbstract::JsScaleY(const JSCallbackInfo& info)
@@ -882,15 +765,7 @@ void JSViewAbstract::JsScaleY(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], scaleVal)) {
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        // new pipeline
-        NG::ViewAbstract::SetScale(NG::VectorF(1.0f, scaleVal));
-        return;
-    }
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    transform->ScaleY(scaleVal, option);
+    ViewAbstractModel::GetInstance()->SetScale(1.0f, scaleVal, 1.0f);
 }
 
 void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
@@ -911,23 +786,7 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
         opacity = 1.0;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetOpacity(opacity);
-        return;
-    }
-    auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-    auto stack = ViewStackProcessor::GetInstance();
-    auto option = stack->GetImplicitAnimationOption();
-    if (!stack->IsVisualStateSet()) {
-        display->SetOpacity(opacity, option);
-    } else {
-        display->GetStateAttributes()->AddAttribute<AnimatableDouble>(
-            DisplayStateAttribute::OPACITY, AnimatableDouble(opacity, option), stack->GetVisualState());
-        if (!display->GetStateAttributes()->HasAttribute(DisplayStateAttribute::OPACITY, VisualState::NORMAL)) {
-            display->GetStateAttributes()->AddAttribute<AnimatableDouble>(
-                DisplayStateAttribute::OPACITY, AnimatableDouble(display->GetOpacity(), option), VisualState::NORMAL);
-        }
-    }
+    ViewAbstractModel::GetInstance()->SetOpacity(opacity);
 }
 
 void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
@@ -940,11 +799,7 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
     }
 
     Dimension value;
-    RefPtr<TransformComponent> transform;
-    if (!Container::IsCurrentUseNewPipeline()) {
-        transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
@@ -957,23 +812,12 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
             auto translateY = Dimension(0.0);
             auto translateZ = Dimension(0.0);
             ParseJsTranslate(argsPtrItem, translateX, translateY, translateZ);
-            if (Container::IsCurrentUseNewPipeline()) {
-                // new pipeline
-                NG::ViewAbstract::SetTranslate(
-                    NG::Vector3F(translateX.ConvertToPx(), translateY.ConvertToPx(), translateZ.ConvertToPx()));
-                return;
-            }
-            transform->Translate(translateX, translateY, translateZ, option);
+            ViewAbstractModel::GetInstance()->SetTranslate(translateX, translateY, translateZ);
             return;
         }
     }
     if (ParseJsDimensionVp(info[0], value)) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            // new pipeline
-            NG::ViewAbstract::SetTranslate(NG::Vector3F(value.ConvertToPx(), value.ConvertToPx(), value.ConvertToPx()));
-            return;
-        }
-        transform->Translate(value, value, option);
+        ViewAbstractModel::GetInstance()->SetTranslate(value, value, value);
     }
 }
 
@@ -988,14 +832,7 @@ void JSViewAbstract::JsTranslateX(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        // new pipeline
-        NG::ViewAbstract::SetTranslate(NG::Vector3F(value.ConvertToPx(), 0.0f, 0.0f));
-        return;
-    }
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    transform->TranslateX(value, option);
+    ViewAbstractModel::GetInstance()->SetTranslate(value, 0.0_px, 0.0_px);
 }
 
 void JSViewAbstract::JsTranslateY(const JSCallbackInfo& info)
@@ -1009,14 +846,7 @@ void JSViewAbstract::JsTranslateY(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        // new pipeline
-        NG::ViewAbstract::SetTranslate(NG::Vector3F(0.0f, value.ConvertToPx(), 0.0f));
-        return;
-    }
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    transform->TranslateY(value, option);
+    ViewAbstractModel::GetInstance()->SetTranslate(0.0_px, value, 0.0_px);
 }
 
 void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
@@ -1027,11 +857,6 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
         return;
     }
 
-    RefPtr<TransformComponent> transform;
-    if (!Container::IsCurrentUseNewPipeline()) {
-        transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
@@ -1047,14 +872,8 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
         std::optional<float> angle;
         ParseJsRotate(argsPtrItem, dx, dy, dz, centerX, centerY, angle);
         if (angle) {
-            if (Container::IsCurrentUseNewPipeline()) {
-                // new pipeline
-                NG::ViewAbstract::SetRotate(NG::Vector4F(dx, dy, dz, angle.value()));
-                NG::ViewAbstract::SetPivot(DimensionOffset(centerX, centerY));
-                return;
-            }
-            transform->Rotate(dx, dy, dz, angle.value(), option);
-            transform->SetOriginDimension(DimensionOffset(centerX, centerY));
+            ViewAbstractModel::GetInstance()->SetRotate(dx, dy, dz, angle.value());
+            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY);
         } else {
             LOGE("Js JsRotate failed, not specify angle");
         }
@@ -1062,12 +881,7 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
     }
     double rotateZ;
     if (ParseJsDouble(info[0], rotateZ)) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            // new pipeline
-            NG::ViewAbstract::SetRotate(NG::Vector4F(0.0f, 0.0f, 1.0f, rotateZ));
-            return;
-        }
-        transform->RotateZ(rotateZ, option);
+        ViewAbstractModel::GetInstance()->SetRotate(0.0f, 0.0f, 1.0f, rotateZ);
     }
 }
 
@@ -1083,15 +897,7 @@ void JSViewAbstract::JsRotateX(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], rotateVal)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        // new pipeline
-        NG::ViewAbstract::SetRotate(NG::Vector4F(1.0f, 0.0f, 0.0f, rotateVal));
-        return;
-    }
-
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    transform->RotateX(rotateVal, option);
+    ViewAbstractModel::GetInstance()->SetRotate(1.0f, 0.0f, 0.0f, rotateVal);
 }
 
 void JSViewAbstract::JsRotateY(const JSCallbackInfo& info)
@@ -1106,14 +912,7 @@ void JSViewAbstract::JsRotateY(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], rotateVal)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        // new pipeline
-        NG::ViewAbstract::SetRotate(NG::Vector4F(0.0f, 1.0f, 0.0f, rotateVal));
-        return;
-    }
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    transform->RotateY(rotateVal, option);
+    ViewAbstractModel::GetInstance()->SetRotate(0.0f, 1.0f, 0.0f, rotateVal);
 }
 
 void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
@@ -1140,16 +939,7 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
         ParseJsonDouble(array->GetArrayItem(i), value);
         matrix[i] = static_cast<float>(value);
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetTransformMatrix(
-            Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13], matrix[2],
-                matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]));
-        return;
-    }
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    transform->Matrix3d(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6], matrix[7],
-        matrix[8], matrix[9], matrix[10], matrix[11], matrix[12], matrix[13], matrix[14], matrix[15], option);
+    ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
 }
 
 NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>& transitionArgs)
@@ -1211,11 +1001,8 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
         return;
     }
     if (info.Length() == 0) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ViewAbstract::SetTransition(NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
-            return;
-        }
-        SetDefaultTransition(TransitionType::ALL);
+        ViewAbstractModel::GetInstance()->SetTransition(
+            NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
         return;
     }
     if (!info[0]->IsObject()) {
@@ -1223,25 +1010,8 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
         return;
     }
     auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto options = ParseTransition(transitionArgs);
-        NG::ViewAbstract::SetTransition(options);
-        return;
-    }
-    ParseAndSetTransitionOption(transitionArgs);
-}
-
-void JSViewAbstract::ParseAndSetTransitionOption(std::unique_ptr<JsonValue>& transitionArgs)
-{
-    TransitionType transitionType = ParseTransitionType(transitionArgs->GetString("type", "All"));
-    bool hasEffect = false;
-    hasEffect = ParseAndSetOpacityTransition(transitionArgs, transitionType) || hasEffect;
-    hasEffect = ParseAndSetTranslateTransition(transitionArgs, transitionType) || hasEffect;
-    hasEffect = ParseAndSetScaleTransition(transitionArgs, transitionType) || hasEffect;
-    hasEffect = ParseAndSetRotateTransition(transitionArgs, transitionType) || hasEffect;
-    if (!hasEffect) {
-        SetDefaultTransition(transitionType);
-    }
+    auto options = ParseTransition(transitionArgs);
+    ViewAbstractModel::GetInstance()->SetTransition(options);
 }
 
 void JSViewAbstract::JsWidth(const JSCallbackInfo& info)
@@ -1265,33 +1035,7 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetWidth(NG::CalcLength(value));
-        return true;
-    }
-
-    bool isPercentSize = value.Unit() == DimensionUnit::PERCENT ? true : false;
-    if (isPercentSize) {
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-        if (renderComponent) {
-            renderComponent->SetIsPercentSize(isPercentSize);
-        }
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    auto option = stack->GetImplicitAnimationOption();
-    if (!stack->IsVisualStateSet()) {
-        box->SetWidth(value, option);
-    } else {
-        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-            BoxStateAttribute::WIDTH, AnimatableDimension(value, option), stack->GetVisualState());
-        if (!box->GetStateAttributes()->HasAttribute(BoxStateAttribute::WIDTH, VisualState::NORMAL)) {
-            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-                BoxStateAttribute::WIDTH, AnimatableDimension(box->GetWidth(), option), VisualState::NORMAL);
-        }
-    }
+    ViewAbstractModel::GetInstance()->SetWidth(value);
     return true;
 }
 
@@ -1316,33 +1060,7 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHeight(NG::CalcLength(value));
-        return true;
-    }
-
-    bool isPercentSize = value.Unit() == DimensionUnit::PERCENT ? true : false;
-    if (isPercentSize) {
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-        if (renderComponent) {
-            renderComponent->SetIsPercentSize(isPercentSize);
-        }
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    auto option = stack->GetImplicitAnimationOption();
-    if (!stack->IsVisualStateSet()) {
-        box->SetHeight(value, option);
-    } else {
-        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-            BoxStateAttribute::HEIGHT, AnimatableDimension(value, option), stack->GetVisualState());
-        if (!box->GetStateAttributes()->HasAttribute(BoxStateAttribute::HEIGHT, VisualState::NORMAL)) {
-            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-                BoxStateAttribute::HEIGHT, AnimatableDimension(box->GetHeight(), option), VisualState::NORMAL);
-        }
-    }
+    ViewAbstractModel::GetInstance()->SetHeight(value);
     return true;
 }
 
@@ -1358,30 +1076,7 @@ void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetResponseRegion(result);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-    if (renderComponent) {
-        renderComponent->SetResponseRegion(result);
-        renderComponent->MarkResponseRegion(true);
-    }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetResponseRegion(result);
-    box->MarkResponseRegion(true);
-    if (ViewStackProcessor::GetInstance()->HasClickGestureListenerComponent()) {
-        auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
-        click->SetResponseRegion(result);
-        click->MarkResponseRegion(true);
-    }
-    if (ViewStackProcessor::GetInstance()->HasTouchListenerComponent()) {
-        auto touch = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
-        touch->SetResponseRegion(result);
-        touch->MarkResponseRegion(true);
-    }
+    ViewAbstractModel::GetInstance()->SetResponseRegion(result);
 }
 
 bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result)
@@ -1496,43 +1191,21 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
     Dimension minHeight;
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
     Dimension maxHeight;
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (ParseJsDimensionVp(minWidthValue, minWidth)) {
-            NG::ViewAbstract::SetMinWidth(NG::CalcLength(minWidth));
-        }
-        if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
-            NG::ViewAbstract::SetMaxWidth(NG::CalcLength(maxWidth));
-        }
-        if (ParseJsDimensionVp(minHeightValue, minHeight)) {
-            NG::ViewAbstract::SetMinHeight(NG::CalcLength(minHeight));
-        }
-        if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
-            NG::ViewAbstract::SetMaxHeight(NG::CalcLength(maxHeight));
-        }
-        return;
-    }
-
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
 
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
-        box->SetMinWidth(minWidth);
-        flexItem->SetMinWidth(minWidth);
+        ViewAbstractModel::GetInstance()->SetMinWidth(minWidth);
     }
 
     if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
-        box->SetMaxWidth(maxWidth);
-        flexItem->SetMaxWidth(maxWidth);
+        ViewAbstractModel::GetInstance()->SetMaxWidth(maxWidth);
     }
 
     if (ParseJsDimensionVp(minHeightValue, minHeight)) {
-        box->SetMinHeight(minHeight);
-        flexItem->SetMinHeight(minHeight);
+        ViewAbstractModel::GetInstance()->SetMinHeight(minHeight);
     }
 
     if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
-        box->SetMaxHeight(maxHeight);
-        flexItem->SetMaxHeight(maxHeight);
+        ViewAbstractModel::GetInstance()->SetMaxHeight(maxHeight);
     }
 }
 
@@ -1549,9 +1222,7 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
     } else {
         priority = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
     }
-
-    auto flex = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flex->SetDisplayIndex(priority);
+    ViewAbstractModel::GetInstance()->SetLayoutPriority(priority);
 }
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
@@ -1568,13 +1239,7 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
         value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetLayoutWeight(value);
-        return;
-    }
-
-    auto flex = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flex->SetFlexWeight(value);
+    ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
 }
 
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
@@ -1585,58 +1250,33 @@ void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
     }
     auto value = info[0]->ToNumber<int32_t>();
     Alignment alignment = ParseAlignment(value);
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetAlign(alignment);
-        return;
-    }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetAlignment(alignment);
+    ViewAbstractModel::GetInstance()->SetAlign(alignment);
 }
 
 void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetPosition(ParseNGLocation(info));
-        return;
-    }
-    AnimatableDimension x;
-    AnimatableDimension y;
+    Dimension x;
+    Dimension y;
     if (ParseLocationProps(info, x, y)) {
-        auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-        flexItemComponent->SetLeft(x);
-        flexItemComponent->SetTop(y);
-        flexItemComponent->SetPositionType(PositionType::PTABSOLUTE);
+        ViewAbstractModel::GetInstance()->SetPosition(x, y);
     }
 }
 
 void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::MarkAnchor(ParseNGLocation(info));
-        return;
-    }
-    AnimatableDimension x;
-    AnimatableDimension y;
+    Dimension x;
+    Dimension y;
     if (ParseLocationProps(info, x, y)) {
-        auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-        flexItemComponent->SetAnchorX(x);
-        flexItemComponent->SetAnchorY(y);
+        ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
     }
 }
 
 void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetOffset(ParseNGLocation(info));
-        return;
-    }
-    AnimatableDimension x;
-    AnimatableDimension y;
+    Dimension x;
+    Dimension y;
     if (ParseLocationProps(info, x, y)) {
-        auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-        flexItemComponent->SetLeft(x);
-        flexItemComponent->SetTop(y);
-        flexItemComponent->SetPositionType(PositionType::PTOFFSET);
+        ViewAbstractModel::GetInstance()->SetOffset(x, y);
     }
 }
 
@@ -1654,20 +1294,7 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
 
     bool enabled = info[0]->ToBoolean();
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetEnabled(enabled);
-        return;
-    }
-
-    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (mainComponent) {
-        mainComponent->SetDisabledStatus(!enabled);
-    }
-
-    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(!enabled);
-    if (focusComponent) {
-        focusComponent->SetEnabled(enabled);
-    }
+    ViewAbstractModel::GetInstance()->SetEnabled(enabled);
 }
 
 void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
@@ -1681,18 +1308,8 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetAspectRatio(static_cast<float>(value));
-        return;
-    }
 
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!boxComponent) {
-        LOGE("boxComponent is null");
-        return;
-    }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    boxComponent->SetAspectRatio(value, option);
+    ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));
 }
 
 void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
@@ -1702,17 +1319,17 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
         return;
     }
 
-    auto coverageComponent = ViewStackProcessor::GetInstance()->GetCoverageComponent();
     std::string text = info[0]->ToString();
-    coverageComponent->SetTextVal(text);
-    coverageComponent->SetIsOverLay(true);
+    std::optional<Alignment> align;
+    std::optional<Dimension> offsetX;
+    std::optional<Dimension> offsetY;
 
     if (info.Length() > 1 && !info[1]->IsNull()) {
         JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSVal> alignVal = optionObj->GetProperty("align");
         auto value = alignVal->ToNumber<int32_t>();
         Alignment alignment = ParseAlignment(value);
-        coverageComponent->SetAlignment(alignment);
+        align = alignment;
 
         JSRef<JSVal> val = optionObj->GetProperty("offset");
         if (val->IsObject()) {
@@ -1720,15 +1337,17 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
             JSRef<JSVal> xVal = offsetObj->GetProperty("x");
             Dimension x;
             if (ParseJsDimensionVp(xVal, x)) {
-                coverageComponent->SetX(x);
+                offsetX = x;
             }
             JSRef<JSVal> yVal = offsetObj->GetProperty("y");
             Dimension y;
             if (ParseJsDimensionVp(yVal, y)) {
-                coverageComponent->SetY(y);
+                offsetY = y;
             }
         }
     }
+
+    ViewAbstractModel::GetInstance()->SetOverlay(text, align, offsetX, offsetY);
 }
 
 Alignment JSViewAbstract::ParseAlignment(int32_t align)
@@ -3955,7 +3574,7 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsGridSpan", info, checkList)) {
         return;
     }
-    auto span = info[0]->ToNumber<uint32_t>();
+    auto span = info[0]->ToNumber<int32_t>();
 
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetGrid(span, std::nullopt);
@@ -4110,6 +3729,13 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
                 return dragDropInfo;
             }
 
+            auto customNode = ParseDragCustomUINode(ret);
+            if (customNode) {
+                LOGI("use custom builder param.");
+                dragDropInfo.customNode = customNode;
+                return dragDropInfo;
+            }
+
             auto builderObj = JSRef<JSObject>::Cast(ret);
 #if !defined(PREVIEW)
             auto pixmap = builderObj->GetProperty("pixelMap");
@@ -4168,19 +3794,7 @@ bool JSViewAbstract::ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragIt
 
 RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& info)
 {
-    JSRef<JSVal> builder;
-    if (info->IsObject()) {
-        auto builderObj = JSRef<JSObject>::Cast(info);
-        builder = builderObj->GetProperty("builder");
-    } else if (info->IsFunction()) {
-        builder = info;
-    } else {
-        return nullptr;
-    }
-    if (!builder->IsFunction()) {
-        return nullptr;
-    }
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    auto builderFunc = ParseDragStartBuilderFunc(info);
     if (!builderFunc) {
         return nullptr;
     }
@@ -4195,6 +3809,22 @@ RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& inf
         LOGE("Custom component is null.");
     }
     return component;
+}
+
+RefPtr<NG::UINode> JSViewAbstract::ParseDragCustomUINode(const JSRef<JSVal>& info)
+{
+    auto builderFunc = ParseDragStartBuilderFunc(info);
+    if (!builderFunc) {
+        return nullptr;
+    }
+    // use another VSP instance while executing the builder function
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    {
+        ACE_SCORING_EVENT("onDragStart.builder");
+        builderFunc->Execute();
+    }
+
+    return NG::ViewStackProcessor::GetInstance()->Finish();
 }
 
 void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
