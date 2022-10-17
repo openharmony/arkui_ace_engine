@@ -379,4 +379,68 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
     }
 }
 
+void GestureEventHub::SetClickEvent(GestureEventFunc&& clickEvent)
+{
+    if (!clickEventActuator_) {
+        clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
+        clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
+    }
+    clickEventActuator_->ReplaceClickEvent(std::move(clickEvent));
+
+    SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
+void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
+{
+    if (!clickEventActuator_) {
+        clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
+        clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
+    }
+    clickEventActuator_->AddClickEvent(clickEvent);
+
+    SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
+OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
+{
+    auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
+        auto gestureHub = weak.Upgrade();
+        if (!gestureHub) {
+            return;
+        }
+        auto node = gestureHub->GetFrameNode();
+        if (node) {
+            node->OnAccessibilityEvent(eventType);
+        }
+    };
+    return callback;
+}
+
+bool GestureEventHub::ActClick()
+{
+    if (!clickEventActuator_) {
+        return false;
+    }
+
+    auto click = clickEventActuator_->GetClickEvent();
+    if (click) {
+        GestureEvent info;
+        click(info);
+    }
+    return true;
+}
+
+bool GestureEventHub::ActLongClick()
+{
+    if (!longPressEventActuator_) {
+        return false;
+    }
+
+    auto click = longPressEventActuator_->GetGestureEventFunc();
+    if (click) {
+        GestureEvent info;
+        click(info);
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

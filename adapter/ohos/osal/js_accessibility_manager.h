@@ -40,8 +40,6 @@ public:
     // JsAccessibilityManager overrides functions.
     void InitializeCallback() override;
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
-    void DumpHandleEvent(const std::vector<std::string>& params) override;
-    void DumpProperty(const std::vector<std::string>& params) override;
     void SetCardViewParams(const std::string& key, bool focus) override;
     void HandleComponentPostBinding() override;
 
@@ -91,6 +89,11 @@ public:
     bool ClearCurrentFocus();
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
     void SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId);
+
+protected:
+    void DumpHandleEvent(const std::vector<std::string>& params) override;
+    void DumpProperty(const std::vector<std::string>& params) override;
+    void DumpTree(int32_t depth, NodeId nodeID) override;
 
 private:
     class JsInteractionOperation : public Accessibility::AccessibilityElementOperator {
@@ -174,6 +177,9 @@ private:
     double MajorAxisDistance(Rect nodeRect, Rect itemRect, const int direction);
     double MinorAxisDistance(Rect nodeRect, Rect itemRect, const int direction);
     double GetWeightedDistanceFor(double majorAxisDistance, double minorAxisDistance);
+
+    void SearchElementInfoByAccessibilityIdNG(
+        int32_t elementId, int32_t mode, std::list<Accessibility::AccessibilityElementInfo>& infos);
 
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);

@@ -100,8 +100,6 @@ public:
 
     void SetBuildAfterCallback(const std::function<void()>& callback) override {}
 
-    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) override {}
-
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 
     void CreateExplicitAnimator(const std::function<void()>& onFinishEvent) override {}

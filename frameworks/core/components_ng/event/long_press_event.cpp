@@ -41,6 +41,15 @@ void LongPressEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffse
     if (!longPressRecognizer_) {
         longPressRecognizer_ = MakeRefPtr<LongPressRecognizer>();
     }
+
+    longPressRecognizer_->SetOnAction(GetGestureEventFunc());
+    longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(longPressRecognizer_);
+}
+
+GestureEventFunc LongPressEventActuator::GetGestureEventFunc()
+{
     auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -49,11 +58,11 @@ void LongPressEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffse
                 (*callback)(info);
             }
         }
+        if (actuator->onAccessibilityEventFunc_) {
+            actuator->onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
+        }
     };
-    longPressRecognizer_->SetOnAction(callback);
-    longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-    longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-    result.emplace_back(longPressRecognizer_);
+    return callback;
 }
 
 } // namespace OHOS::Ace::NG
