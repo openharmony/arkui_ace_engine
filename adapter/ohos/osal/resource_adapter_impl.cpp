@@ -280,16 +280,24 @@ bool ResourceAdapterImpl::GetBoolean(uint32_t resId) const
 
 std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
 {
+    if (resourceManager_ == nullptr) {
+        return "";
+    }
     std::string mediaPath = "";
-    if (resourceManager_) {
-        auto state = resourceManager_->GetMediaById(resId, mediaPath);
-        if (state != Global::Resource::SUCCESS) {
-            LOGE("GetMediaPath error, id=%{public}u", resId);
-            return "";
-        }
+    auto state = resourceManager_->GetMediaById(resId, mediaPath);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("GetMediaById error, id=%{public}u, errorCode=%{public}u", resId, state);
+        return "";
+    }
+    if (SystemProperties::GetUnZipHap()) {
         return "file:///" + mediaPath;
     }
-    return "";
+    auto pos = mediaPath.find_last_of('.');
+    if (pos == std::string::npos) {
+        LOGE("GetMediaById error, return mediaPath[%{private}s] format error", mediaPath.c_str());
+        return "";
+    }
+    return "resource:///" + std::to_string(resId) + mediaPath.substr(pos);
 }
 
 std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
