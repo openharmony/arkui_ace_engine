@@ -51,7 +51,7 @@ private:
     ~BackgroundTaskExecutor();
 
     void StartNewThreads(size_t num = 1);
-    void ThreadLoop(uint32_t threadNo);
+    void ThreadLoop(uint32_t threadNo, bool handleLow);
 
     std::mutex mutex_;
     std::condition_variable condition_;

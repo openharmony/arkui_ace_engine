@@ -18,6 +18,7 @@
 #ifndef NG_BUILD
 #include "experimental/svg/model/SkSVGDOM.h"
 #endif
+#include "image_compressor.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/skia/include/core/SkStream.h"
 
@@ -28,7 +29,6 @@
 #include "core/event/ace_event_helper.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
-#include "image_compressor.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -219,7 +219,12 @@ void ImageProvider::FetchImageObject(
     if (onBackgroundTaskPostCallback) {
         onBackgroundTaskPostCallback(cancelableTask);
     }
-    BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
+    // load network image on low priority to avoid blocking
+    if (imageInfo.GetSrcType() == SrcType::NETWORK) {
+        BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask, BgTaskPriority::LOW);
+    } else {
+        BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
+    }
 }
 
 RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(
@@ -422,7 +427,7 @@ void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
             sk_sp<SkData> compressData;
             if (ImageCompressor::GetInstance()->CanCompress()) {
                 compressData = ImageCompressor::GetInstance()->GpuCompress(src, pixmap, width, height);
-                ImageCompressor::GetInstance()->WriteToFile(src, compressData, {width, height});
+                ImageCompressor::GetInstance()->WriteToFile(src, compressData, { width, height });
                 renderTaskHolder->ioTaskRunner->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
                     fml::TimeDelta::FromMilliseconds(ImageCompressor::releaseTimeMs));
             }
@@ -576,7 +581,7 @@ bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
     skcms_ICCProfile encodedProfile;
     if (!colorSpace)
         return false;
-    
+
     colorSpace->toProfile(&encodedProfile);
     if (!encodedProfile.has_toXYZD50) {
         LOGI("This profile's gamut can not be represented by a 3x3 transform to XYZD50");
