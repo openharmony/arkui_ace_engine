@@ -103,10 +103,25 @@ void SelectPattern::RegisterOnHover()
 
 void SelectPattern::CreateSelectedCallback()
 {
-    auto callback = [weak = WeakClaim(this)](int32_t index) {
-        auto pattern = weak.Upgrade();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(RawPtr(host))](int32_t index) {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern<SelectPattern>();
+        CHECK_NULL_VOID(pattern);
         pattern->SetSelected(index);
         pattern->UpdateText(index);
+
+        auto hub = host->GetEventHub<SelectEventHub>();
+        CHECK_NULL_VOID(hub);
+        auto onScroll = hub->GetSelectEvent();
+        // execute onScroll callback
+        if (onScroll) {
+            auto newSelected = pattern->options_[index]->GetPattern<OptionPattern>();
+            CHECK_NULL_VOID(newSelected);
+            onScroll(index, newSelected->GetText());
+        }
     };
     for (auto&& option : options_) {
         auto hub = option->GetEventHub<OptionEventHub>();
@@ -118,7 +133,6 @@ void SelectPattern::CreateSelectedCallback()
 
 void SelectPattern::SetSelected(int32_t index)
 {
-    LOGI("option index %d is selected", index);
     // if option is already selected, do nothing
     if (index == selected_) {
         return;
@@ -351,6 +365,7 @@ void SelectPattern::SetSelectedOptionFontColor(const Color& color)
     }
 }
 
+// update selected option props
 void SelectPattern::UpdateSelectedProps(int32_t index)
 {
     CHECK_NULL_VOID(options_[index]);
@@ -362,20 +377,11 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         auto lastSelected = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(lastSelected);
 
-        auto color = newSelected->GetFontColor();
-        lastSelected->SetFontColor(color);
-
-        auto fontFamily = newSelected->GetFontFamily();
-        lastSelected->SetFontFamily(fontFamily);
-
-        auto fontSize = newSelected->GetFontSize();
-        lastSelected->SetFontSize(fontSize);
-
-        auto fontStyle = newSelected->GetItalicFontStyle();
-        lastSelected->SetItalicFontStyle(fontStyle);
-
-        auto fontWeight = newSelected->GetFontWeight();
-        lastSelected->SetFontWeight(fontWeight);
+        lastSelected->SetFontColor(newSelected->GetFontColor());
+        lastSelected->SetFontFamily(newSelected->GetFontFamily());
+        lastSelected->SetFontSize(newSelected->GetFontSize());
+        lastSelected->SetItalicFontStyle(newSelected->GetItalicFontStyle());
+        lastSelected->SetFontWeight(newSelected->GetFontWeight());
 
         auto defaultPaintProps = options_[index]->GetPaintProperty<OptionPaintProperty>();
         CHECK_NULL_VOID(defaultPaintProps);

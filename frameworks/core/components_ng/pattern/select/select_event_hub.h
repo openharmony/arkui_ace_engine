@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-using SelectEvent = std::function<void(const int32_t, const std::string&)>;
+using SelectEvent = std::function<void(int32_t, const std::string&)>;
 
 class SelectEventHub : public EventHub {
     DECLARE_ACE_TYPE(SelectEventHub, EventHub)
@@ -32,7 +32,19 @@ public:
 
     ~SelectEventHub() override = default;
 
+    void SetSelectEvent(SelectEvent&& onSelect)
+    {
+        onSelect_ = std::move(onSelect);
+    }
+
+    const SelectEvent& GetSelectEvent()
+    {
+        return onSelect_;
+    }
+
 private:
+
+    SelectEvent onSelect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectEventHub);
 };

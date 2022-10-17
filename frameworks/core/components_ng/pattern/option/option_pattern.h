@@ -94,8 +94,10 @@ private:
 
     // register option's callback
     void RegisterOnClick();
-    // change option background color
-    void RegisterOnHover();
+
+    void RegisterOnTouch();
+    // change option paint props on hover
+    void OnHover(const TouchEventInfo& info);
 
     Color bgColor_ = Color(DEFAULT_BACKGROUND_COLOR);
 

@@ -37,17 +37,17 @@ public:
         menuOnClick_ = std::move(onClickFunc);
     }
 
-    std::function<void ()>&& GetJsCallback()
+    std::function<void()>&& GetJsCallback()
     {
         return std::move(menuOnClick_);
     }
 
-    void SetOnSelect(const std::function<void(int32_t)>& onSelect)
+    void SetOnSelect(const OnSelectEvent& onSelect)
     {
         onSelect_ = onSelect;
     }
 
-    std::function<void(int32_t)>&& GetOnSelect()
+    OnSelectEvent&& GetOnSelect()
     {
         return std::move(onSelect_);
     }

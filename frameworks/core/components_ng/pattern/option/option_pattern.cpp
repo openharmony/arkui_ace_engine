@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 void OptionPattern::OnModifyDone()
 {
     RegisterOnClick();
-    RegisterOnHover();
+    RegisterOnTouch();
     textTheme_ = PipelineContext::GetCurrentContext()->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme_);
 }
@@ -64,7 +64,7 @@ void OptionPattern::RegisterOnClick()
     gestureHub->AddClickEvent(clickEvent);
 }
 
-void OptionPattern::RegisterOnHover()
+void OptionPattern::RegisterOnTouch()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -74,33 +74,38 @@ void OptionPattern::RegisterOnHover()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto touchType = info.GetTouches().front().GetTouchType();
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto props = pattern->GetPaintProperty<OptionPaintProperty>();
-        CHECK_NULL_VOID(props);
-        // update hover status, change background color
-        if (touchType == TouchType::DOWN) {
-            LOGD("triggers option hover");
-            renderContext->UpdateBackgroundColor(Color(DEFAULT_HOVER_BACKGROUND_COLOR));
-            props->UpdateHover(true);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-            // disable next option node's divider
-            pattern->UpdateNextNodeDivider(false);
-        }
-        if (touchType == TouchType::UP) {
-            auto renderContext = host->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateBackgroundColor(pattern->bgColor_);
-            props->UpdateHover(false);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-            pattern->UpdateNextNodeDivider(true);
-        }
+        pattern->OnHover(info);
     };
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gestureHub->AddTouchEvent(touchEvent);
+}
+
+void OptionPattern::OnHover(const TouchEventInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto props = GetPaintProperty<OptionPaintProperty>();
+    CHECK_NULL_VOID(props);
+    auto touchType = info.GetTouches().front().GetTouchType();
+    // enter hover status
+    if (touchType == TouchType::DOWN) {
+        LOGD("triggers option hover");
+        // change background color, update hover status
+        renderContext->UpdateBackgroundColor(Color(DEFAULT_HOVER_BACKGROUND_COLOR));
+        props->UpdateHover(true);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        // disable next option node's divider
+        UpdateNextNodeDivider(false);
+    }
+    // leave hover status
+    else if (touchType == TouchType::UP) {
+        renderContext->UpdateBackgroundColor(bgColor_);
+        props->UpdateHover(false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        UpdateNextNodeDivider(true);
+    }
 }
 
 void OptionPattern::UpdateNextNodeDivider(bool needDivider)

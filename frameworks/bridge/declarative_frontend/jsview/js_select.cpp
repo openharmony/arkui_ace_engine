@@ -15,19 +15,19 @@
 
 #include "bridge/declarative_frontend/jsview/js_select.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/option/option_component.h"
 #include "core/components/select/select_component.h"
+#include "core/components_ng/pattern/select/select_view.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/select/select_view.h"
 
 namespace OHOS::Ace::Framework {
 void JSSelect::Create(const JSCallbackInfo& info)
@@ -63,7 +63,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
                     LOGE("selectValue is null");
                 }
 
-                params[i] = {value, icon};
+                params[i] = { value, icon };
             }
             NG::SelectView::Create(params);
         }
@@ -323,7 +323,7 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], bgColor)) {
         return;
     }
-    
+
     if (Container::IsCurrentUseNewPipeline()) {
         NG::SelectView::SetSelectedOptionBgColor(bgColor);
         return;
@@ -387,7 +387,6 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
         }
         return;
     }
-
 
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
@@ -647,7 +646,19 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
 
 void JSSelect::OnSelected(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&SelectComponent::SetOnSelected, info)) {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                            int32_t index, const std::string& value) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Select.onSelect");
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+            params[1] = JSRef<JSVal>::Make(ToJSValue(value));
+            func->ExecuteJS(2, params);
+        };
+        NG::SelectView::SetOnSelect(onSelect);
+    } else if (!JSViewBindEvent(&SelectComponent::SetOnSelected, info)) {
         LOGE("Failed to bind event");
     }
     info.ReturnSelf();
@@ -744,25 +755,25 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
             Dimension topDimen = Dimension(0.0, DimensionUnit::VP);
             if (ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen)) {
                 selectComponent->SetTopPadding(topDimen);
-            }  
+            }
         }
         if (argsPtrItem->Contains("left")) {
             Dimension leftDimen = Dimension(0.0, DimensionUnit::VP);
             if (ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen)) {
                 selectComponent->SetLeftPadding(leftDimen);
-            }  
+            }
         }
         if (argsPtrItem->Contains("right")) {
             Dimension rightDimen = Dimension(0.0, DimensionUnit::VP);
             if (ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen)) {
                 selectComponent->SetRightPadding(rightDimen);
-            }  
+            }
         }
         if (argsPtrItem->Contains("bottom")) {
             Dimension bottomDimen = Dimension(0.0, DimensionUnit::VP);
             if (ParseJsonDimensionVp(argsPtrItem->GetValue("bottom"), bottomDimen)) {
                 selectComponent->SetBottomPadding(bottomDimen);
-            }  
+            }
         }
     }
     Dimension length;

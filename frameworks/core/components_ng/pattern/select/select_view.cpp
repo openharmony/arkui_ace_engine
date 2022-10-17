@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 
 void SelectView::Create(const std::vector<SelectParam>& params)
 {
+    LOGI("creating select component");
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto select = FrameNode::GetOrCreateFrameNode(
@@ -184,6 +185,11 @@ void SelectView::SetOptionFontFamily(const std::vector<std::string>& value)
     pattern->SetOptionFontFamily(value);
 }
 
-void SelectView::SetOnSelect(SelectEvent&& onSelect) {}
+void SelectView::SetOnSelect(SelectEvent&& onSelect)
+{
+    auto hub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetSelectEvent(std::move(onSelect));
+}
 
 } // namespace OHOS::Ace::NG

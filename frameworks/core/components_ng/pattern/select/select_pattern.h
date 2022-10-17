@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <optional>
-#include <stdint.h>
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
