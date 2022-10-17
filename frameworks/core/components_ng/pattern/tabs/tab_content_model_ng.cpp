@@ -82,7 +82,7 @@ void TabContentModelNG::Pop()
 
 }
 
-RefPtr<TabsNode> TabContentView::FindTabsNode(const RefPtr<UINode>& tabContent)
+RefPtr<TabsNode> TabContentModelNG::FindTabsNode(const RefPtr<UINode>& tabContent)
 {
     CHECK_NULL_RETURN(tabContent, nullptr);
     RefPtr<UINode> parent = tabContent->GetParent();
@@ -96,7 +96,7 @@ RefPtr<TabsNode> TabContentView::FindTabsNode(const RefPtr<UINode>& tabContent)
     return nullptr;
 }
 
-void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position, bool update )
+void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position, bool update )
 {
     LOGD("position %{public}d", position);
     CHECK_NULL_VOID(tabContent);
@@ -105,13 +105,14 @@ void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t pos
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContent);
     CHECK_NULL_VOID(tabContentNode);
 
-    auto tabsNode = FindTabsNode(tabContent);
-    CHECK_NULL_VOID(tabsNode);
-
     if (update && !tabContentNode->HasTabBarItemId()) {
         LOGD("Update only, do nothing, tab bar item id  %{public}d", tabContentNode->GetTabBarItemId());
         return;
     }
+
+    auto tabsNode = FindTabsNode(tabContent);
+    CHECK_NULL_VOID(tabsNode);
+
 
     auto tabBarNode = tabsNode->GetTabBar();
     CHECK_NULL_VOID(tabBarNode);
@@ -193,7 +194,7 @@ void TabContentView::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t pos
     columnNode->MarkModifyDone();
 }
 
-void TabContentView::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)
+void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)
 {
     CHECK_NULL_VOID(tabContentNode);
     if (!tabContentNode->HasTabBarItemId()) {

@@ -16,13 +16,13 @@
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/tabs/tab_content_view.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
 void TabContentNode::OnAttachToMainTree()
 {
-    auto tabs = TabContentView::FindTabsNode(Referenced::Claim(this));
+    auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
     if (!tabs) {
         return;
     }
@@ -30,7 +30,7 @@ void TabContentNode::OnAttachToMainTree()
     auto swiper = tabs? tabs->GetTabs() : nullptr;
     auto myIndex = swiper ? swiper->GetShallowIndex<TabContentNode>(GetId()).second : 0;
 
-    TabContentView::AddTabBarItem(Referenced::Claim(this), myIndex);
+    TabContentModelNG::AddTabBarItem(Referenced::Claim(this), myIndex);
 }
 
 void TabContentNode::OnDetachFromMainTree()
@@ -38,7 +38,7 @@ void TabContentNode::OnDetachFromMainTree()
     // That is never called, because object in in the middle of distruction
     // virtual function is not working anymore
 
-    auto tabs = TabContentView::FindTabsNode(Referenced::Claim(this));
+    auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
 
     if (!tabs) {
         LOGE("Tabs  not found");
@@ -59,7 +59,7 @@ void TabContentNode::OnDetachFromMainTree()
         if (currentIdx == deletedIdx) {
             swiperPattern->GetSwiperController()->SwipeTo(0);
         }
-        TabContentView::RemoveTabBarItem(Referenced::Claim(this));
+        TabContentModelNG::RemoveTabBarItem(Referenced::Claim(this));
 
         // Removing tab before current, re-focus on the same tab with new index
         if (currentIdx > deletedIdx) {
