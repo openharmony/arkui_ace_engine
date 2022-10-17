@@ -215,6 +215,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::PickerTextDialogComposedElement>(id); } },
     { CANVAS_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { DIALOG_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { ACTION_SHEET_DIALOG_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ActionSheetDialogComposedElement>(id); } },
     { ALERT_DIALOG_COMPONENT_TAG,
