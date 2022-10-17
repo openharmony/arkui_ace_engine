@@ -355,7 +355,7 @@ void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY, bo
         case ImageFit::CONTAIN:
             ApplyContain(scaleX, scaleY);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             if (svgSize_ > layout_ || svgSize_ == layout_) {
                 ApplyContain(scaleX, scaleY);
             }

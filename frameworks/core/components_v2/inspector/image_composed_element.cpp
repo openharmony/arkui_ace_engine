@@ -113,7 +113,7 @@ std::string ImageComposedElement::GetObjectFit() const
         case ImageFit::NONE:
             result = "ImageFit.None";
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             result = "ImageFit.ScaleDown";
             break;
         default:

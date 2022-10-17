@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "frameworks/base/geometry/dimension.h"
+#include "frameworks/core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,6 +32,9 @@ constexpr uint32_t DEFAULT_HOVER_BACKGROUND_COLOR = 0x0C000000;
 
 constexpr Dimension VERTICAL_INTERVAL_PHONE = 14.4_vp;
 constexpr Dimension HORIZONTAL_INTERVAL_PHONE = 12.0_vp;
+
+const CalcLength ICON_SIDE_LENGTH(24.0_vp);
+const CalcLength ICON_RIGHT_PADDING(5.0_vp);
 
 } // namespace OHOS::Ace::NG
 

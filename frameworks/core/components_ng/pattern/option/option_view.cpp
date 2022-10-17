@@ -91,13 +91,23 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(
     row->MountToParent(option);
 
     // create icon node
-    auto iconNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    CHECK_NULL_RETURN(iconNode, nullptr);
-    auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    props->UpdateImageSourceInfo(ImageSourceInfo(icon));
-    iconNode->MountToParent(row);
-    iconNode->MarkModifyDone();
+    if (!icon.empty()) {
+        auto iconNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_RETURN(iconNode, nullptr);
+        auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+        props->UpdateImageSourceInfo(ImageSourceInfo(icon));
+        props->UpdateImageFit(ImageFit::SCALE_DOWN);
+        props->UpdateCalcMaxSize(CalcSize(ICON_SIDE_LENGTH, ICON_SIDE_LENGTH));
+        props->UpdateAlignment(Alignment::CENTER_LEFT);
+
+        PaddingProperty padding;
+        padding.right = CalcLength(ICON_RIGHT_PADDING);
+        props->UpdatePadding(padding);
+
+        iconNode->MountToParent(row);
+        iconNode->MarkModifyDone();
+    }
 
     auto text = CreateText(value, row);
     auto pattern = option->GetPattern<OptionPattern>();

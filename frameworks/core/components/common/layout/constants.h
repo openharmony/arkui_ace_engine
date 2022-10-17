@@ -237,7 +237,7 @@ enum class ImageFit {
     FITWIDTH,
     FITHEIGHT,
     NONE,
-    SCALEDOWN,
+    SCALE_DOWN,
 };
 
 enum class ImageRenderMode {

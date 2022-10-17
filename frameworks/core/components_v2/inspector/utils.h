@@ -219,7 +219,7 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
             { ImageFit::FITWIDTH, "ImageFit.FitWidth" },
             { ImageFit::FITHEIGHT, "ImageFit.FitHeight" },
             { ImageFit::NONE, "ImageFit.None" },
-            { ImageFit::SCALEDOWN, "ImageFit.ScaleDown" },
+            { ImageFit::SCALE_DOWN, "ImageFit.ScaleDown" },
         };
 
         auto index = BinarySearchFindIndex(imageFitTable, ArraySize(imageFitTable), imageFit);

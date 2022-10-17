@@ -508,7 +508,7 @@ void RenderImage::ApplyImageFit(Rect& srcRect, Rect& dstRect)
         case ImageFit::FITHEIGHT:
             ApplyFitHeight(srcRect, dstRect, rawPicSize, layoutSize);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             if (srcRect.GetSize() < dstRect.GetSize()) {
                 ApplyNone(srcRect, dstRect, rawPicSize, layoutSize);
             } else {

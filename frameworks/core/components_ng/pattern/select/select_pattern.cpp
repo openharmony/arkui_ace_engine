@@ -325,7 +325,7 @@ void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
     }
 }
 
-void SelectPattern::SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value)
+void SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     selectedFont_.FontStyle = value;
     if (selected_ != -1) {
