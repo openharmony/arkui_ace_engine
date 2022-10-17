@@ -41,20 +41,20 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     const RefPtr<UINode>& customNode, const GestureEvent& info)
 {
-    auto rootNode = CreateDragRootNode(customNode);
-    CHECK_NULL_RETURN(rootNode, nullptr);
+    dragWindowRootNode_ = CreateDragRootNode(customNode);
+    CHECK_NULL_RETURN(dragWindowRootNode_, nullptr);
 #if !defined(PREVIEW)
     if (dragWindow_) {
         LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
         return nullptr;
     }
 
-    auto geometryNode = rootNode->GetGeometryNode();
+    auto geometryNode = dragWindowRootNode_->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
 
     auto frameRect = geometryNode->GetFrameSize();
     CreateDragWindow(info, static_cast<uint32_t>(frameRect.Width()), static_cast<uint32_t>(frameRect.Height()));
-    dragWindow_->DrawFrameNode(rootNode);
+    dragWindow_->DrawFrameNode(dragWindowRootNode_);
 #endif
 
     auto proxy = MakeRefPtr<DragDropProxy>();
@@ -149,6 +149,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
 void DragDropManager::OnDragStart(float globalX, float globalY)
 {
     preTargetFrameNode_ = FindDragFrameNodeByPosition(globalX, globalY, DragType::COMMON);
+    draggedFrameNode_ = preTargetFrameNode_;
 }
 
 void DragDropManager::OnDragMove(float globalX, float globalY, const std::string& extraInfo)
@@ -198,7 +199,7 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    if (!eventHub->HasOnDrop()) {
+    if (!eventHub->HasOnDrop() || dragFrameNode == draggedFrameNode_) {
         return;
     }
 
@@ -210,11 +211,13 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
     event->SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
     eventHub->FireOnDrop(event, extraInfo);
+    draggedFrameNode_ = nullptr;
 }
 
 void DragDropManager::onDragCancel()
 {
     preTargetFrameNode_ = nullptr;
+    draggedFrameNode_ = nullptr;
 }
 
 void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
@@ -421,6 +424,9 @@ void DragDropManager::DestroyDragWindow()
     dragWindow_->Destroy();
     dragWindow_ = nullptr;
 #endif
+    if (dragWindowRootNode_) {
+        dragWindowRootNode_ = nullptr;
+    }
 }
 
 } // namespace OHOS::Ace::NG
