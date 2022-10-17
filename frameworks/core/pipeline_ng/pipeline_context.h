@@ -26,6 +26,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -173,6 +174,11 @@ public:
         return selectOverlayManager_;
     }
 
+    const RefPtr<SharedOverlayManager>& GetSharedOverlayManager()
+    {
+        return sharedTransitionManager_;
+    }
+
     const RefPtr<DragDropManager>& GetDragDropManager()
     {
         return dragDropManager_;
@@ -295,6 +301,7 @@ private:
     RefPtr<FullScreenManager> fullScreenManager_;
     RefPtr<SelectOverlayManager> selectOverlayManager_;
     RefPtr<DragDropManager> dragDropManager_;
+    RefPtr<SharedOverlayManager> sharedTransitionManager_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;

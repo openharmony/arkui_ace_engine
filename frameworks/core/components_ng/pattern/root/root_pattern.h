@@ -43,6 +43,13 @@ public:
         return false;
     }
 
+    void OnAttachToFrameNode() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    }
+
     void SetAppBgColor(const Color& color, bool isContainerModal)
     {
         auto rootNode = GetHost();

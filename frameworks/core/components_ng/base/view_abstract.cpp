@@ -769,4 +769,16 @@ void ViewAbstract::SetMotionPath(const MotionPathOption& motionPath)
     ACE_UPDATE_RENDER_CONTEXT(MotionPath, motionPath);
 }
 
+void ViewAbstract::SetSharedTransition(
+    const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->SetSharedTransitionOptions(option);
+        target->SetShareId(shareId);
+    }
+}
+
 } // namespace OHOS::Ace::NG

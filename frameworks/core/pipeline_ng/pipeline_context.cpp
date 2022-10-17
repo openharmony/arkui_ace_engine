@@ -302,6 +302,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
 
