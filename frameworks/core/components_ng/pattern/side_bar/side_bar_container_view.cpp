@@ -24,11 +24,6 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-} // namespace
-
 void SideBarContainerView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -78,12 +73,9 @@ void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& 
         }
     }
 
-    auto imgWidth = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
-    auto imgHeight = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
-    info.SetDimension(imgWidth, imgHeight);
-
     int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imgNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imgNodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imgNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
 
     auto imgHub = imgNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(imgHub);
@@ -100,10 +92,8 @@ void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& 
         imageLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
 
-    auto imgRenderContext = imgNode->GetRenderContext();
-    imgRenderContext->UpdateBackgroundColor(Color::RED);
-
     imgNode->MountToParent(parentNode);
+    imgNode->MarkModifyDone();
 }
 
 void SideBarContainerView::SetSideBarContainerType(SideBarContainerType type)
