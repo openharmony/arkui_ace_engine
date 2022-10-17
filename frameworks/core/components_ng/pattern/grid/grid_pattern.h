@@ -94,6 +94,11 @@ public:
         return gridLayoutInfo_;
     }
 
+    void ResetGridLayoutInfo()
+    {
+        gridLayoutInfo_ = GridLayoutInfo();
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

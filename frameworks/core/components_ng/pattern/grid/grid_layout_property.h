@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 
+#include "base/utils/utils.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -84,15 +85,51 @@ public:
         return verticalScrollable || horizontalScrollable;
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsTemplate, std::string, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowsTemplate, std::string, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsGap, Dimension, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowsGap, Dimension, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LayoutDirection, FlexDirection, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxCount, int32_t, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinCount, int32_t, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CellLength, int32_t, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ColumnsTemplate, std::string);
+    void OnColumnsTemplateUpdate(const std::string& /*columnsTemplate*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RowsTemplate, std::string);
+    void OnRowsTemplateUpdate(const std::string& /*rowsTemplate*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsGap, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowsGap, Dimension, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CachedCount, int32_t);
+    void OnCachedCountUpdate(int32_t /*cachedCount*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LayoutDirection, FlexDirection);
+    void OnLayoutDirectionUpdate(FlexDirection /*layoutDirection*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MaxCount, int32_t);
+    void OnMaxCountUpdate(int32_t /*maxCount*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MinCount, int32_t);
+    void OnMinCountUpdate(int32_t /*minCount*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CellLength, int32_t);
+    void OnCellLengthUpdate(int32_t /*cellLength*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
 
     ACE_DEFINE_PROPERTY_GROUP(ScrollBarProperty, ScrollBarProperty);
@@ -102,6 +139,8 @@ public:
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutProperty);
+
+    void ResetGridLayoutInfoAndMeasure() const;
 };
 } // namespace OHOS::Ace::NG
 
