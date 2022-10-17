@@ -65,6 +65,7 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("SheetInfo.action");
                 func->ExecuteJS();
+                LOGD("action triggered");
             };
             sheetInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(callback);
             return sheetInfo;
@@ -138,12 +139,22 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     auto cancelValue = obj->GetProperty("cancel");
     if (cancelValue->IsFunction()) {
         auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
-        EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("ActionSheet.cancel");
-            func->Execute();
-        });
-        properties.callbacks.try_emplace("cancel", cancelId);
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            properties.onCancel = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("ActionSheet.cancel");
+                func->ExecuteJS();
+                LOGD("actionSheet cancel triggered");
+            };
+        } else {
+            EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("ActionSheet.cancel");
+                func->Execute();
+            });
+            properties.callbacks.try_emplace("cancel", cancelId);
+        }
     }
 
     // Parse confirm.
@@ -154,17 +165,30 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         std::string buttonValue;
         if (ParseJsString(value, buttonValue)) {
             ButtonInfo buttonInfo = { .text = buttonValue, .textColor = "" };
-            properties.buttons.emplace_back(buttonInfo);
             JSRef<JSVal> actionValue = confirmObj->GetProperty("action");
+            // parse confirm action
             if (actionValue->IsFunction()) {
                 auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-                EventMarker actionId([execCtx = args.GetExecutionContext(), func = std::move(actionFunc)]() {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("ActionSheet.confirm.action");
-                    func->Execute();
-                });
-                properties.primaryId = actionId;
+                // NG
+                if (Container::IsCurrentUseNewPipeline()) {
+                    auto callback = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)](
+                                        GestureEvent& /*info*/) {
+                        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                        ACE_SCORING_EVENT("ActionSheet.confirm.action");
+                        LOGD("actionSheet confirm triggered");
+                        func->ExecuteJS();
+                    };
+                    buttonInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(callback));
+                } else {
+                    EventMarker actionId([execCtx = args.GetExecutionContext(), func = std::move(actionFunc)]() {
+                        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                        ACE_SCORING_EVENT("ActionSheet.confirm.action");
+                        func->Execute();
+                    });
+                    properties.primaryId = actionId;
+                }
             }
+            properties.buttons.emplace_back(buttonInfo);
         }
     }
 
