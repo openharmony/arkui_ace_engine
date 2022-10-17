@@ -1003,7 +1003,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         LOGI("Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
         if (textChangeListener_ == nullptr) {
-            textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+            textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this), context_);
         }
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (!inputMethod) {
