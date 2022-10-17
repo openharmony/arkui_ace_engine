@@ -31,6 +31,7 @@ using RSRect = Rosen::Drawing::RectF;
 
 struct ImagePaintConfig {
     ImagePaintConfig(const RectF& srcRect, const RectF& dstRect) : srcRect_(srcRect), dstRect_(dstRect) {}
+    ImagePaintConfig() = default;
     ~ImagePaintConfig() = default;
 
     RectF srcRect_;

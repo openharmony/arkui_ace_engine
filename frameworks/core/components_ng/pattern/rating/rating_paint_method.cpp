@@ -31,7 +31,6 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     CHECK_NULL_RETURN(secondaryImageCanvas_, nullptr);
     CHECK_NULL_RETURN(backgroundImageCanvas_, nullptr);
     auto offset = paintWrapper->GetContentOffset();
-    auto contentSize = paintWrapper->GetContentSize();
 
     ImagePainter foregroundImagePainter(foregroundImageCanvas_);
     ImagePainter secondaryImagePainter(secondaryImageCanvas_);
@@ -47,8 +46,7 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     double stepSize = ratingRenderProperty->GetStepSize().value_or(ratingTheme->GetStepSize());
     int32_t touchStar = ratingRenderProperty->GetTouchStar().value_or(0);
     return [foregroundImagePainter, secondaryImagePainter, backgroundPainter, drawScore, stepSize, touchStar,
-               starNum = starNum_, offset, contentSize,
-               ImagePaintConfig = singleStarImagePaintConfig_](RSCanvas& canvas) {
+               starNum = starNum_, offset, ImagePaintConfig = singleStarImagePaintConfig_](RSCanvas& canvas) {
         // step1: check if touch down any stars.
         float singleStarWidth = ImagePaintConfig.dstRect_.Width();
         float singleStarHeight = ImagePaintConfig.dstRect_.Height();
@@ -73,6 +71,7 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
         // step3: draw the foreground images.
         canvas.Save();
         auto offsetTemp = offset;
+        auto contentSize = SizeF(singleStarWidth, singleStarHeight);
         // step2.1: calculate the clip area in order to display the secondary image.
         auto clipRect1 = OHOS::Rosen::Drawing::RectF(offset.GetX(), offsetTemp.GetY(),
             static_cast<float>(offset.GetX() + singleStarWidth * drawScore), offset.GetY() + singleStarHeight);

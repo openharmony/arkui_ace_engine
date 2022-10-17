@@ -44,24 +44,23 @@ namespace OHOS::Ace::Framework {
 
 void JSRating::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("piece create error, info is non-valid");
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getRating = paramObject->GetProperty("rating");
-    auto getIndicator = paramObject->GetProperty("indicator");
     double rating = 0;
     bool indicator = false;
-    if (getRating->IsNumber()) {
-        rating = getRating->ToNumber<double>();
-    } else {
-        LOGE("create rating fail because the rating is not value");
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto getRating = paramObject->GetProperty("rating");
+        auto getIndicator = paramObject->GetProperty("indicator");
+        if (getRating->IsNumber()) {
+            rating = getRating->ToNumber<double>();
+        } else {
+            LOGE("create rating fail because the rating is not value");
+        }
+        if (getIndicator->IsBoolean()) {
+            indicator = getIndicator->ToBoolean();
+        } else {
+            LOGE("create rating fail because the indicator is not value");
+        }
     }
-    if (getIndicator->IsBoolean()) {
-        indicator = getIndicator->ToBoolean();
-    }
-
     RatingModel::GetInstance()->Create();
     RatingModel::GetInstance()->SetRatingScore(rating);
     RatingModel::GetInstance()->SetIndicator(indicator);
@@ -143,7 +142,7 @@ void JSRating::SetOnChange(const JSCallbackInfo& info)
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Rating.onChange");
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(stod(value)));
         func->ExecuteJS(1, &newJSVal);
     };
 
