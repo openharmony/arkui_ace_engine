@@ -1242,7 +1242,6 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     currentFocusNodeId_ = -1;
     LOGI("DeregisterInteractionOperation windowId:%{public}d", windowId);
     instance->DeregisterElementOperator(windowId);
-    return;
 }
 
 void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const bool state)
