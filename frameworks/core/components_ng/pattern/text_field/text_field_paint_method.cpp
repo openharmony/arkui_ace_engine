@@ -47,16 +47,13 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
     CHECK_NULL_RETURN(textFieldPattern, nullptr);
     CHECK_NULL_RETURN(textFieldPattern->GetParagraph(), nullptr);
     auto offset = paintWrapper->GetContentOffset();
-    auto paintOffset = offset - OffsetF(-static_cast<float>(textFieldPattern->GetBasicPadding()),
-                                    textFieldPattern->GetBaseLineOffset());
-    auto drawFunction = [paragraph = textFieldPattern->GetParagraph(), paintOffset, textFieldPattern,
+    auto drawFunction = [paragraph = textFieldPattern->GetParagraph(), offset, textFieldPattern,
                             contentSize = paintWrapper->GetContentSize(),
                             contentOffset = paintWrapper->GetContentOffset()](RSCanvas& canvas) {
-        RSRect clipInnerRect(paintOffset.GetX(), contentOffset.GetY(),
-            paintOffset.GetX() + contentSize.Width() - textFieldPattern->GetBasicPadding() * 2.0f,
+        RSRect clipInnerRect(offset.GetX(), contentOffset.GetY(), offset.GetX() + contentSize.Width(),
             contentOffset.GetY() + contentSize.Height());
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-        paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), paintOffset.GetY());
+        paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), offset.GetY());
     };
     return drawFunction;
 }
@@ -95,11 +92,9 @@ void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintW
         std::min(textFieldPattern->GetSelectionBaseOffsetX(), textFieldPattern->GetSelectionDestinationOffsetX());
     auto endOffset =
         std::max(textFieldPattern->GetSelectionBaseOffsetX(), textFieldPattern->GetSelectionDestinationOffsetX());
-    auto paintOffset =
-        paintWrapper->GetContentOffset() -
-        OffsetF(-static_cast<float>(textFieldPattern->GetBasicPadding()), textFieldPattern->GetBaseLineOffset());
+    auto paintOffset = paintWrapper->GetContentOffset() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
     RSRect clipInnerRect(paintOffset.GetX(), textFieldPattern->GetFrameRect().GetY(),
-        paintOffset.GetX() + paintWrapper->GetContentSize().Width() - textFieldPattern->GetBasicPadding() * 2.0f,
+        paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
         textFieldPattern->GetFrameRect().GetY() + textFieldPattern->GetFrameRect().Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
