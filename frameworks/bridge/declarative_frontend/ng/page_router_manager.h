@@ -85,6 +85,8 @@ public:
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
 
+    void ClearAlertCallback(const RefPtr<PageInfo>& pageInfo);
+
     void DisableAlertBeforeBackPage();
 
     // router operation
@@ -163,7 +165,7 @@ private:
 
     void LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, uint64_t cardId,
         bool isRestore = false, bool needHideLast = true);
-        
+
     RefPtr<Framework::ManifestParser> manifestParser_;
 
     bool inRouterOpt_ = false;
@@ -172,6 +174,8 @@ private:
     bool isCardRouter = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
+    RouterPageInfo ngBackUri_ = { "" };
+    std::string backParam_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PageRouterManager);
 };

@@ -1486,6 +1486,13 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
     const std::string& message, std::function<void(int32_t)>&& callback)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("EnableAlertBeforeBackPage IsCurrentUseNewPipeline.");
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->EnableAlertBeforeBackPage(message, std::move(callback));
+        return;
+    }
+
     if (!taskExecutor_) {
         LOGE("task executor is null.");
         return;
@@ -1533,6 +1540,13 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
 
 void FrontendDelegateDeclarative::DisableAlertBeforeBackPage()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("DisableAlertBeforeBackPage IsCurrentUseNewPipeline.");
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->DisableAlertBeforeBackPage();
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(mutex_);
     if (pageRouteStack_.empty()) {
         LOGE("page stack is null.");
