@@ -292,6 +292,7 @@ template("declarative_js_engine") {
         "jsview/js_rating.cpp",
         "jsview/js_video.cpp",
         "jsview/js_video_controller.cpp",
+        "jsview/models/rating_model_impl.cpp",
         "jsview/models/video_model_impl.cpp",
       ]
     }
