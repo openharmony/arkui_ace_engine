@@ -44,14 +44,24 @@ JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parent
     return constraint;
 }
 
-JSRef<JSObject> GenPadding(const std::unique_ptr<NG::PaddingProperty>& padding_)
+JSRef<JSObject> GenPadding(const std::unique_ptr<NG::PaddingProperty>& paddingNative)
 {
     JSRef<JSObject> padding = JSRef<JSObject>::New();
-    padding->SetProperty("top", padding_->top->ToString());
-    padding->SetProperty("right", padding_->right->ToString());
-    padding->SetProperty("bottom", padding_->bottom->ToString());
-    padding->SetProperty("left", padding_->left->ToString());
+    padding->SetProperty("top", paddingNative->top->ToString());
+    padding->SetProperty("right", paddingNative->right->ToString());
+    padding->SetProperty("bottom", paddingNative->bottom->ToString());
+    padding->SetProperty("left", paddingNative->left->ToString());
     return padding;
+}
+
+JSRef<JSObject> GenEdgeWidths(const std::unique_ptr<NG::BorderWidthProperty>& edgeWidthsNative)
+{
+    JSRef<JSObject> edgeWidths = JSRef<JSObject>::New();
+    edgeWidths->SetProperty("top", edgeWidthsNative->topDimen->ToString());
+    edgeWidths->SetProperty("right", edgeWidthsNative->rightDimen->ToString());
+    edgeWidths->SetProperty("bottom", edgeWidthsNative->bottomDimen->ToString());
+    edgeWidths->SetProperty("left", edgeWidthsNative->leftDimen->ToString());
+    return edgeWidths;
 }
 
 JSRef<JSObject> GenBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
@@ -63,11 +73,10 @@ JSRef<JSObject> GenBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
     }
 
     const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
-    if (layoutProperty->GetBorderWidthProperty()) {
-        borderInfo->SetProperty("borderWidth", layoutProperty->GetBorderWidthProperty()->leftDimen->ToString());
-    } else {
-        borderInfo->SetProperty("borderWidth", "0");
-    }
+    const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
+    borderInfo->SetPropertyObject("borderWidth",
+        GenEdgeWidths(
+            layoutProperty->GetBorderWidthProperty() ? layoutProperty->GetBorderWidthProperty() : defaultEdgeWidth));
 
     borderInfo->SetPropertyObject("margin",
         GenPadding(layoutProperty->GetMarginProperty() ? layoutProperty->GetMarginProperty() : defaultPadding));
@@ -98,7 +107,7 @@ void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapp
 JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
 {
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
-    JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSLayout);
+    JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<JSFunctionCallback>(ViewMeasureLayout::JSLayout);
     size_t index = 0;
 
     for (const auto& iter : children) {
@@ -114,7 +123,7 @@ JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children
 JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
 {
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
-    JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSMeasure);
+    JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<JSFunctionCallback>(ViewMeasureLayout::JSMeasure);
     size_t index = 0;
 
     for (const auto& iter : children) {
