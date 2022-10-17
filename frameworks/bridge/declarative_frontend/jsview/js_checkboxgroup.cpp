@@ -17,12 +17,35 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/checkboxgroup_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_view.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<CheckBoxGroupModel> CheckBoxGroupModel::instance_ = nullptr;
+
+CheckBoxGroupModel* CheckBoxGroupModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::CheckBoxGroupModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::CheckBoxGroupModelNG());
+        } else {
+            instance_.reset(new Framework::CheckBoxGroupModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -64,47 +87,16 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
 
 void JSCheckboxGroup::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        std::optional<std::string> checkboxGroup;
-        if ((info.Length() >= 1) && info[0]->IsObject()) {
-            auto paramObject = JSRef<JSObject>::Cast(info[0]);
-            auto group = paramObject->GetProperty("group");
-            if (group->IsString()) {
-                checkboxGroup = group->ToString();
-            }
-        }
-        NG::CheckBoxGroupView::Create(checkboxGroup);
-        return;
-    }
-
-    RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
-    auto checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
+    std::optional<std::string> checkboxGroupName;
     if ((info.Length() >= 1) && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto groupName = paramObject->GetProperty("group");
         if (groupName->IsString()) {
-            auto checkboxGroupName = groupName->ToString();
-            checkboxComponent->SetGroupName(checkboxGroupName);
-            auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupComponent();
-            auto item = checkboxGroupmap->find(checkboxGroupName);
-            if (item != checkboxGroupmap->end()) {
-                checkboxGroupmap->erase(checkboxGroupName);
-            }
-            checkboxGroupmap->emplace(checkboxGroupName, checkboxComponent);
+            checkboxGroupName = groupName->ToString();
         }
     }
-    checkboxComponent->SetInspectorTag("CheckboxGroupComponent");
-    checkboxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
-    ViewStackProcessor::GetInstance()->ClaimElementId(checkboxComponent);
-    ViewStackProcessor::GetInstance()->Push(checkboxComponent);
 
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
-    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
-    checkboxComponent->SetWidth(checkBoxTheme->GetWidth() - horizontalPadding * 2);
-    checkboxComponent->SetHeight(checkBoxTheme->GetHeight() - verticalPadding * 2);
-    box->SetWidth(checkBoxTheme->GetWidth());
-    box->SetHeight(checkBoxTheme->GetHeight());
+    CheckBoxGroupModel::GetInstance()->Create(checkboxGroupName);
 }
 
 void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
@@ -114,14 +106,7 @@ void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CheckBoxGroupView::SetSelectAll(info[0]->ToBoolean());
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
-    checkboxComponent->SetValue(info[0]->ToBoolean());
+    CheckBoxGroupModel::GetInstance()->SetSelectAll(info[0]->ToBoolean());
 }
 
 void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
@@ -130,28 +115,14 @@ void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
         LOGI("args not function");
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CheckboxGroupResult, 1>>(
-            JSRef<JSFunc>::Cast(args[0]), CheckboxGroupResultEventToJSValue);
-        auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const CheckboxGroupResult& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("CheckBoxGroup.onChange");
-            func->Execute(info);
-        };
-        NG::CheckBoxGroupView::SetOnChange(std::move(onChange));
-        return;
-    }
-
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CheckboxGroupResult, 1>>(
         JSRef<JSFunc>::Cast(args[0]), CheckboxGroupResultEventToJSValue);
-    auto checkbox = AceType::DynamicCast<CheckboxComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    checkbox->SetOnGroupChange(
-        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
-            func->Execute(*eventInfo);
-        }));
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        func->Execute(*eventInfo);
+    };
+    CheckBoxGroupModel::GetInstance()->SetOnChange(onChange);
 }
 
 void JSCheckboxGroup::JsWidth(const JSCallbackInfo& info)
@@ -170,21 +141,12 @@ void JSCheckboxGroup::JsWidth(const JSRef<JSVal>& jsValue)
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
-
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetWidth(NG::CalcLength(value));
         return;
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
-    Dimension padding;
-    auto box = stack->GetBoxComponent();
-    auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
-    if (checkboxComponent) {
-        padding = checkboxComponent->GetHotZoneHorizontalPadding();
-        checkboxComponent->SetWidth(value);
-        box->SetWidth(value + padding * 2);
-    }
+    CheckBoxGroupModel::GetInstance()->SetWidth(value);
 }
 
 void JSCheckboxGroup::JsHeight(const JSCallbackInfo& info)
@@ -205,19 +167,11 @@ void JSCheckboxGroup::JsHeight(const JSRef<JSVal>& jsValue)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetWidth(NG::CalcLength(value));
+        NG::ViewAbstract::SetHeight(NG::CalcLength(value));
         return;
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    Dimension padding;
-    auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
-    if (checkboxComponent) {
-        padding = checkboxComponent->GetHotZoneVerticalPadding();
-        checkboxComponent->SetHeight(value);
-        box->SetHeight(value + padding * 2);
-    }
+    CheckBoxGroupModel::GetInstance()->SetHeight(value);
 }
 
 void JSCheckboxGroup::JsSize(const JSCallbackInfo& info)
@@ -248,17 +202,7 @@ void JSCheckboxGroup::SelectedColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CheckBoxGroupView::SetSelectedColor(selectedColor);
-        return;
-    }
-
-    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto checkable = AceType::DynamicCast<CheckboxComponent>(mainComponent);
-    if (checkable) {
-        checkable->SetActiveColor(selectedColor);
-        return;
-    }
+    CheckBoxGroupModel::GetInstance()->SetSelectedColor(selectedColor);
 }
 
 void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
@@ -281,8 +225,6 @@ void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
         return;
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
@@ -308,17 +250,12 @@ void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
             if (leftDimen == 0.0_vp) {
                 leftDimen = topDimen;
             }
-            auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
-            if (checkboxComponent) {
-                auto width = checkboxComponent->GetWidth();
-                auto height = checkboxComponent->GetHeight();
-                checkboxComponent->SetHeight(height);
-                checkboxComponent->SetWidth(width);
-                box->SetHeight(height + topDimen * 2);
-                box->SetWidth(width + leftDimen * 2);
-                checkboxComponent->SetHotZoneVerticalPadding(topDimen);
-                checkboxComponent->SetHorizontalPadding(leftDimen);
-            }
+            NG::PaddingPropertyF padding;
+            padding.left = leftDimen.ConvertToPx();
+            padding.right = rightDimen.ConvertToPx();
+            padding.top = topDimen.ConvertToPx();
+            padding.bottom = bottomDimen.ConvertToPx();
+            CheckBoxGroupModel::GetInstance()->SetPadding(padding);
             return;
         }
     }
@@ -326,17 +263,12 @@ void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], length)) {
         return;
     }
-    auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
-    if (checkboxComponent) {
-        auto width = checkboxComponent->GetWidth();
-        auto height = checkboxComponent->GetHeight();
-        checkboxComponent->SetHeight(height);
-        checkboxComponent->SetWidth(width);
-        box->SetHeight(height + length * 2);
-        box->SetWidth(width + length * 2);
-        checkboxComponent->SetHotZoneVerticalPadding(length);
-        checkboxComponent->SetHorizontalPadding(length);
-    }
+    NG::PaddingPropertyF padding;
+    padding.left = length.ConvertToPx();
+    padding.right = length.ConvertToPx();
+    padding.top = length.ConvertToPx();
+    padding.bottom = length.ConvertToPx();
+    CheckBoxGroupModel::GetInstance()->SetPadding(padding);
 }
 
 } // namespace OHOS::Ace::Framework

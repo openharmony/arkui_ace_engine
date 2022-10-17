@@ -32,19 +32,73 @@ public:
 
     ~SearchEventHub() override = default;
 
-    void SetOnChangeAndSubmit(ChangeAndSubmitEvent&& changeAndSubmitEvent)
+    void SetOnSubmit(ChangeAndSubmitEvent&& submitEvent)
     {
-        changeAndSubmitEvent_ = std::move(changeAndSubmitEvent);
+        submitEvent_ = std::move(submitEvent);
     }
 
-    void UpdateChangeAndSubmitEvent(const std::string& value) const
+    void SetOnChange(ChangeAndSubmitEvent&& changeEvent)
     {
-        if (changeAndSubmitEvent_) {
-            changeAndSubmitEvent_(value);
+        changeEvent_ = std::move(changeEvent);
+    }
+
+    void UpdateSubmitEvent(const std::string& value) const
+    {
+        if (submitEvent_) {
+            submitEvent_(value);
         }
     }
+
+    void UpdateChangeEvent(const std::string& value) const
+    {
+        if (changeEvent_) {
+            changeEvent_(value);
+        }
+    }
+
+    void SetOnCopy(std::function<void(const std::string&)>&& func)
+    {
+        onCopy_ = std::move(func);
+    }
+
+    void FireOnCopy(const std::string& value)
+    {
+        if (onCopy_) {
+            onCopy_(value);
+        }
+    }
+
+    void SetOnCut(std::function<void(const std::string&)>&& func)
+    {
+        onCut_ = std::move(func);
+    }
+
+    void FireOnCut(const std::string& value)
+    {
+        if (onCut_) {
+            onCut_(value);
+        }
+    }
+
+    void SetOnPaste(std::function<void(const std::string&)>&& func)
+    {
+        onPaste_ = std::move(func);
+    }
+
+    void FireOnPaste(const std::string& value)
+    {
+        if (onPaste_) {
+            onPaste_(value);
+        }
+    }
+
 private:
-    ChangeAndSubmitEvent changeAndSubmitEvent_;
+    ChangeAndSubmitEvent submitEvent_;
+    ChangeAndSubmitEvent changeEvent_;
+
+    std::function<void(const std::string&)> onCopy_;
+    std::function<void(const std::string&)> onCut_;
+    std::function<void(const std::string&)> onPaste_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchEventHub);
 };

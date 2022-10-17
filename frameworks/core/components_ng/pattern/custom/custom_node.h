@@ -81,6 +81,8 @@ public:
     // called by pipeline in js thread of update.
     void Update();
 
+    void Build() override;
+
 private:
     std::function<void()> updateFunc_;
     std::function<void()> appearFunc_;
@@ -88,6 +90,7 @@ private:
     std::string viewKey_;
     bool needRebuild_ = false;
     RenderFunction renderFunction_;
+    RefPtr<UINode> child_;
 };
 } // namespace OHOS::Ace::NG
 

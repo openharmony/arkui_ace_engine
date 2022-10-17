@@ -660,7 +660,7 @@ double FlutterRenderTextField::MeasureParagraph(
         placeholderBuilder->PushStyle(*txtStyle);
         placeholderBuilder->AddText(StringUtils::Str8ToStr16(placeholder_));
         placeholderParagraph_ = placeholderBuilder->Build();
-        placeholderParagraph_->Layout(textAreaWidth - errorTextWidth);
+        placeholderParagraph_->Layout(limitWidth - errorTextWidth);
         if (textDirection_ == TextDirection::RTL &&
             LessOrEqual(placeholderParagraph_->GetLongestLine(), innerRect_.Width())) {
             placeholderParagraph_->Layout(limitWidth);
@@ -1090,10 +1090,6 @@ bool FlutterRenderTextField::ComputeOffsetForCaretCloserToClick(int32_t extent, 
 
 Offset FlutterRenderTextField::MakeEmptyOffset() const
 {
-    if (realTextDirection_ == TextDirection::RTL) {
-        return Offset(innerRect_.Width(), 0.0);
-    }
-
     switch (textAlign_) {
         case TextAlign::LEFT: {
             return Offset::Zero();
@@ -1106,7 +1102,7 @@ Offset FlutterRenderTextField::MakeEmptyOffset() const
             return Offset(innerRect_.Width() / 2.0, 0.0);
         }
         case TextAlign::END: {
-            switch (textDirection_) {
+            switch (realTextDirection_) {
                 case TextDirection::RTL: {
                     return Offset::Zero();
                 }
@@ -1119,7 +1115,7 @@ Offset FlutterRenderTextField::MakeEmptyOffset() const
         case TextAlign::START:
         default: {
             // Default to start.
-            switch (textDirection_) {
+            switch (realTextDirection_) {
                 case TextDirection::RTL: {
                     return Offset(innerRect_.Width(), 0.0);
                 }

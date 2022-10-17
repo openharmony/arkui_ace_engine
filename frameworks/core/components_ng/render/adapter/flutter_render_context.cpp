@@ -61,7 +61,7 @@ void FlutterRenderContext::StopRecordingIfNeeded()
     }
 }
 
-void FlutterRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName)
+void FlutterRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode)
 {
     LOGD("InitContext root:%d", isRoot);
     flutterNode_ = std::make_shared<FlutterNode>(isRoot);
@@ -140,6 +140,22 @@ void FlutterRenderContext::RebuildFrame(FrameNode* node, const std::list<RefPtr<
             flutterNode_->AddChild(flutterNode);
         }
     }
+}
+
+RectF FlutterRenderContext::GetPaintRectWithTransform()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(flutterNode_, rect);
+    // TODO: support transform
+    rect = GetPaintRectWithoutTransform();
+    return rect;
+}
+
+RectF FlutterRenderContext::GetPaintRectWithoutTransform()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(flutterNode_, rect);
+    return flutterNode_->FrameRect();
 }
 
 } // namespace OHOS::Ace::NG

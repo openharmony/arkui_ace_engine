@@ -42,10 +42,6 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, false);
     if (isOn_.value()) {
         currentOffset_ = GetSwitchWidth();
     }
@@ -60,9 +56,21 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+
+    if (!layoutProperty->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
+        margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
+        margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+        margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+        layoutProperty->UpdateMargin(margin);
+    }
     if (layoutProperty->GetPositionProperty()) {
         layoutProperty->UpdateAlignment(
             layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));

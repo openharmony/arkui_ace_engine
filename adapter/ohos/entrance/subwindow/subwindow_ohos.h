@@ -19,9 +19,9 @@
 #include "wm/window.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
-#include "base/thread/task_executor.h"
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/thread/task_executor.h"
 #include "core/common/ace_view.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -94,9 +94,9 @@ private:
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
 
-    sptr<OHOS::Rosen::Window> dialogWindow_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventRunner> eventLoop_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    sptr<OHOS::Rosen::Window> dialogWindow_;
+    std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
 
 } // namespace OHOS::Ace

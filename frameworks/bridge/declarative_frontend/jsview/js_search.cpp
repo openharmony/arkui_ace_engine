@@ -762,7 +762,7 @@ void JSSearch::OnSubmit(const JSCallbackInfo& info)
             auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
             func->ExecuteJS(1, &newJSVal);
         };
-        NG::SearchView::SetOnChangeAndSubmit(std::move(onSubmit));
+        NG::SearchView::SetOnSubmit(std::move(onSubmit));
         return;
     }
     if (!JSViewBindEvent(&SearchComponent::SetOnSubmit, info)) {
@@ -781,7 +781,7 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
             auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
             func->ExecuteJS(1, &newJSVal);
         };
-        NG::SearchView::SetOnChangeAndSubmit(std::move(onChange));
+        NG::SearchView::SetOnChange(std::move(onChange));
         return;
     }
 
@@ -833,6 +833,18 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
 
 void JSSearch::SetOnCopy(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onCopy = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](std::string value) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Search.onCopy");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::SearchView::SetOnCopy(std::move(onCopy));
+        return;
+    }
+
     if (!JSViewBindEvent(&TextFieldComponent::SetOnCopy, info)) {
         LOGW("Failed(OnCopy) to bind event");
     }
@@ -841,6 +853,18 @@ void JSSearch::SetOnCopy(const JSCallbackInfo& info)
 
 void JSSearch::SetOnCut(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onCut = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](std::string value) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Search.onCut");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::SearchView::SetOnCut(std::move(onCut));
+        return;
+    }
+
     if (!JSViewBindEvent(&TextFieldComponent::SetOnCut, info)) {
         LOGW("Failed(OnCut) to bind event");
     }
@@ -849,6 +873,18 @@ void JSSearch::SetOnCut(const JSCallbackInfo& info)
 
 void JSSearch::SetOnPaste(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](std::string value) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Search.onPaste");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::SearchView::SetOnPaste(std::move(onPaste));
+        return;
+    }
+
     if (!JSViewBindEvent(&TextFieldComponent::SetOnPaste, info)) {
         LOGW("Failed(OnPaste) to bind event");
     }
@@ -858,6 +894,15 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
 void JSSearch::SetCopyOption(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto copyOptions = CopyOptions::None;
+        if (info[0]->IsNumber()) {
+            auto emunNumber = info[0]->ToNumber<int>();
+            copyOptions = static_cast<CopyOptions>(emunNumber);
+        }
+        NG::SearchView::SetCopyOption(copyOptions);
         return;
     }
     auto copyOptions = CopyOptions::None;

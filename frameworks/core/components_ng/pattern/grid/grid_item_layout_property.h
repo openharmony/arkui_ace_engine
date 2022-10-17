@@ -47,15 +47,37 @@ public:
         ResetColumnEnd();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowStart, int32_t, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowEnd, int32_t, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnStart, int32_t, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnEnd, int32_t, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RowStart, int32_t);
+    void OnRowStartUpdate(int32_t /*rowStart*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RowEnd, int32_t);
+    void OnRowEndUpdate(int32_t /*rowEnd*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ColumnStart, int32_t);
+    void OnColumnStartUpdate(int32_t /*columnStart*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ColumnEnd, int32_t);
+    void OnColumnEndUpdate(int32_t /*columnEnd*/) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MainIndex, int32_t, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CrossIndex, int32_t, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridItemLayoutProperty);
+
+    void ResetGridLayoutInfoAndMeasure() const;
 };
 
 } // namespace OHOS::Ace::NG

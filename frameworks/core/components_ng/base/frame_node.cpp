@@ -43,7 +43,7 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName());
+    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
@@ -86,7 +86,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
     if (!frameNode) {
         return nullptr;
     }
-    if (frameNode->tag_ != tag) {
+    if (frameNode->GetTag() != tag) {
         LOGE("the tag is changed");
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
         auto parent = frameNode->GetParent();
@@ -114,7 +114,7 @@ void FrameNode::InitializePatternAndContext()
     renderContext_->SetRequestFrame([weak = WeakClaim(this)] {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        if (frameNode->onMainTree_) {
+        if (frameNode->IsOnMainTree()) {
             auto context = frameNode->GetContext();
             CHECK_NULL_VOID(context);
             context->RequestFrame();
@@ -140,10 +140,8 @@ void FrameNode::DumpInfo()
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
                                                    : "NA"));
-    DumpLog::GetInstance().AddDesc(
-        std::string("top: ").append(std::to_string(GetOffsetRelativeToWindow().GetY())));
-    DumpLog::GetInstance().AddDesc(
-        std::string("left: ").append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+    DumpLog::GetInstance().AddDesc(std::string("top: ").append(std::to_string(GetOffsetRelativeToWindow().GetY())));
+    DumpLog::GetInstance().AddDesc(std::string("left: ").append(std::to_string(GetOffsetRelativeToWindow().GetX())));
     DumpLog::GetInstance().AddDesc(
         std::string("width: ").append(std::to_string(geometryNode_->GetFrameRect().Width())));
     DumpLog::GetInstance().AddDesc(
@@ -153,6 +151,8 @@ void FrameNode::DumpInfo()
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
                                                    ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
                                                    : "NA"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
     if (pattern_) {
         pattern_->DumpInfo();
     }
@@ -201,27 +201,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     ACE_FUNCTION_TRACE();
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
-    // update new layoutConstrain.
-    layoutProperty_->UpdateLayoutConstraint(dirty->GetLayoutProperty());
 
     // active change flag judge.
-    bool activeChanged = false;
-    if (dirty->IsActive() && !isActive_) {
-        pattern_->OnActive();
-        isActive_ = true;
-        activeChanged = true;
-    }
-    if (!dirty->IsActive() && isActive_) {
-        pattern_->OnInActive();
-        isActive_ = false;
-        activeChanged = true;
-    }
-    if (activeChanged && !dirty->IsRootMeasureNode()) {
-        auto parent = GetAncestorNodeOfFrame();
-        if (parent) {
-            parent->MarkNeedSyncRenderTree();
-        }
-    }
+    SetActive(dirty->IsActive());
     if (!isActive_) {
         LOGD("current node is inactive, don't need to render");
         return;
@@ -267,18 +249,14 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {
-            renderContext_->UpdateBorderColor(
-                BorderColorProperty { renderContext_->GetBorderColor()->leftColor.value_or(Color::BLACK),
-                    renderContext_->GetBorderColor()->topColor.value_or(Color::BLACK),
-                    renderContext_->GetBorderColor()->rightColor.value_or(Color::BLACK),
-                    renderContext_->GetBorderColor()->bottomColor.value_or(Color::BLACK) });
+            BorderColorProperty borderColorProperty;
+            borderColorProperty.SetColor(Color::BLACK);
+            renderContext_->UpdateBorderColor(borderColorProperty);
         }
         if (!renderContext_->HasBorderStyle()) {
-            renderContext_->UpdateBorderStyle(
-                BorderStyleProperty { renderContext_->GetBorderStyle()->styleLeft.value_or(BorderStyle::SOLID),
-                    renderContext_->GetBorderStyle()->styleTop.value_or(BorderStyle::SOLID),
-                    renderContext_->GetBorderStyle()->styleRight.value_or(BorderStyle::SOLID),
-                    renderContext_->GetBorderStyle()->styleBottom.value_or(BorderStyle::SOLID) });
+            BorderStyleProperty borderStyleProperty;
+            borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
+            renderContext_->UpdateBorderStyle(borderStyleProperty);
         }
         if (layoutProperty_->GetLayoutConstraint().has_value()) {
             renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
@@ -292,6 +270,27 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     // rebuild child render node.
     RebuildRenderContextTree();
+}
+
+void FrameNode::SetActive(bool active)
+{
+    bool activeChanged = false;
+    if (active && !isActive_) {
+        pattern_->OnActive();
+        isActive_ = true;
+        activeChanged = true;
+    }
+    if (!active && isActive_) {
+        pattern_->OnInActive();
+        isActive_ = false;
+        activeChanged = true;
+    }
+    if (activeChanged) {
+        auto parent = GetAncestorNodeOfFrame();
+        if (parent) {
+            parent->MarkNeedSyncRenderTree();
+        }
+    }
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -308,6 +307,9 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
+    if (!layoutWrapper) {
+        return std::nullopt;
+    }
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
@@ -343,6 +345,9 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
     auto wrapper = CreatePaintWrapper();
+    if (!wrapper) {
+        return std::nullopt;
+    }
     auto task = [wrapper, paintProperty = paintProperty_]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
@@ -381,7 +386,11 @@ OffsetF FrameNode::GetParentGlobalOffset() const
 
 void FrameNode::UpdateLayoutPropertyFlag()
 {
-    if (!CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag())) {
+    auto selfFlag = layoutProperty_->GetPropertyChangeFlag();
+    if (!CheckUpdateByChildRequest(selfFlag)) {
+        return;
+    }
+    if (CheckForceParentMeasureFlag(selfFlag)) {
         return;
     }
     auto flag = PROPERTY_UPDATE_NORMAL;
@@ -389,8 +398,11 @@ void FrameNode::UpdateLayoutPropertyFlag()
     for (const auto& child : children) {
         child->UpdateLayoutPropertyFlag();
         child->AdjustParentLayoutFlag(flag);
+        if (CheckForceParentMeasureFlag(selfFlag)) {
+            break;
+        }
     }
-    if ((flag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
+    if (CheckForceParentMeasureFlag(flag)) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -411,11 +423,14 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     }
 
     pattern_->BeforeCreateLayoutWrapper();
-    if (!isActive_) {
+    if (!isActive_ || forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
+    if (forceLayout) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    }
     auto flag = layoutProperty_->GetPropertyChangeFlag();
-    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_);
     LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
         forceLayout);
     do {
@@ -438,7 +453,6 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutWrapper->SetOutOfLayout(true);
     }
     layoutWrapper->SetActive(isActive_);
-
     return layoutWrapper;
 }
 
@@ -461,9 +475,13 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
 {
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
-    auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
-    paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());
-    return paintWrapper;
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    if (paintMethod) {
+        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_);
+        paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());
+        return paintWrapper;
+    }
+    return nullptr;
 }
 
 void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType)
@@ -568,8 +586,10 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     }
     layoutProperty_->CleanDirty();
 
-    // If has dirtyLayoutBox, need to mark dirty after layout done.
+    // If it has dirtyLayoutBox, need to mark dirty after layout done.
     if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
+        LOGD("this node has already mark dirty, %{public}s, %{public}d, %{public}d", GetTag().c_str(),
+            isRenderDirtyMarked_, isLayoutDirtyMarked_);
         return;
     }
     isRenderDirtyMarked_ = true;
@@ -646,7 +666,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect);
     if (SystemProperties::GetDebugEnabled()) {
-        LOGD("TouchTest: point is %{public}s in %{public}s", parentLocalPoint.ToString().c_str(), GetTag().c_str());
+        LOGD("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
+            GetTag().c_str(), GetDepth());
         for (const auto& rect : responseRegionList) {
             LOGD("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
                 parentLocalPoint.ToString().c_str());

@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <ctime>
 #include <float.h>
+#include <limits.h>
 
 #include "base/utils/macros.h"
 
@@ -33,22 +34,22 @@ ACE_EXPORT int64_t GetMicroTickCount();
 int64_t GetSysTimestamp();
 
 struct TimeOfNow final {
-    explicit TimeOfNow(double hoursWest = DBL_MAX) : hoursWest_(hoursWest) {}
+    explicit TimeOfNow(double hoursWest = INT_MAX) : hoursWest_(hoursWest) {}
     ~TimeOfNow() = default;
 
     // hours west of Greenwich, for e.g., [hoursWest] is [-8] in  UTC+8.
     // Valid range of [hoursWest] is [-14, 12]. Set default value to DBL_MAX to use current time zone by default.
-    double hoursWest_ = DBL_MAX;
+    int32_t hoursWest_ = INT_MAX;
     int32_t second_ = 0;
-    double minute_ = 0.0;
-    double hour12_ = 0.0; // 12-hour clock
-    double hour24_ = 0.0; // 24-hour clock
+    int32_t minute_ = 0;
+    int32_t hour12_ = 0; // 12-hour clock
+    int32_t hour24_ = 0; // 24-hour clock
     int64_t timeUsec_ = 0L;   // microsecond. 1 second = 1000 millisecond = 1000000 microsecond
 };
 
-bool IsHoursWestValid(double& hoursWest);
+bool IsHoursWestValid(int32_t& hoursWest);
 
-TimeOfNow GetTimeOfNow(double hoursWest = DBL_MAX);
+TimeOfNow GetTimeOfNow(int32_t hoursWest = INT_MAX);
 
 bool IsDayTime(const TimeOfNow& timeOfNow);
 

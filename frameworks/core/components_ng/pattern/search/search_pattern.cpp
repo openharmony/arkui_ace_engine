@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -63,8 +64,12 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(host);
     auto searchEventHub = host->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(searchEventHub);
-    // TODO: get value from TextField
-    searchEventHub->UpdateChangeAndSubmitEvent("TODO: get value from TextField");
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto text = textFieldPattern->GetEditingValue();
+    searchEventHub->UpdateSubmitEvent(text.text);
 }
 
 } // namespace OHOS::Ace::NG

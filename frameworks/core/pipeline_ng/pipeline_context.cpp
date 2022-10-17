@@ -15,6 +15,8 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include <algorithm>
+#include <cinttypes>
 #include <cstdint>
 #include <memory>
 
@@ -35,18 +37,21 @@
 #include "core/common/window.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+
+namespace {
+constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
+}
 
 namespace OHOS::Ace::NG {
 
@@ -119,8 +124,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     }
 
     decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
-    for (const auto& weakNode : dirtyNodes) {
-        auto node = weakNode.Upgrade();
+    for (const auto& node : dirtyNodes) {
         if (AceType::InstanceOf<NG::CustomNode>(node)) {
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
             customNode->Update();
@@ -172,6 +176,9 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (scheduleTasks_.empty()) {
+        return;
+    }
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
@@ -200,6 +207,7 @@ void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
+    ACE_FUNCTION_TRACE();
     auto focusNode = dirtyFocusNode_.Upgrade();
     if (!focusNode || focusNode->GetFocusType() != FocusType::NODE) {
         dirtyFocusNode_.Reset();
@@ -283,8 +291,11 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    // TODO open container modal
-    stageNode->MountToParent(rootNode_);
+    if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+        rootNode_->AddChild(ContainerModalView::Create(stageNode));
+    } else {
+        rootNode_->AddChild(stageNode);
+    }
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
@@ -348,7 +359,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
     }
     auto rootSize = rootNode_->GetGeometryNode()->GetFrameSize();
     float offsetFix = (rootSize.Height() - positionY) > 100.0 ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
-                                                               : keyboardHeight;
+                                                              : keyboardHeight;
     LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
         (rootSize.Height() - keyboardHeight), offsetFix);
     if (NearZero(keyboardHeight)) {
@@ -476,7 +487,14 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-multimodal") {
 #endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
-        rootNode_->DumpTree(0);
+        if (params.size() > 1 && params[1] == "-lastpage") {
+            auto lastPage = stageManager_->GetLastPage();
+            if (lastPage) {
+                lastPage->DumpTree(0);
+            }
+        } else {
+            rootNode_->DumpTree(0);
+        }
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {
@@ -769,6 +787,21 @@ void PipelineContext::NotifyMemoryLevel(int32_t level)
         }
         ++iter;
     }
+}
+void PipelineContext::AddPredictTask(PredictTask&& task)
+{
+    taskScheduler_.AddPredictTask(std::move(task));
+    window_->RequestFrame();
+}
+
+void PipelineContext::OnIdle(int64_t deadline)
+{
+    if (deadline == 0) {
+        return;
+    }
+    CHECK_RUN_ON(UI);
+    ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
+    taskScheduler_.FlushPredictTask(deadline - TIME_THRESHOLD);
 }
 
 } // namespace OHOS::Ace::NG

@@ -18,8 +18,7 @@
 
 #include <cstdint>
 #include <functional>
-#include <memory>
-#include <mutex>
+#include <list>
 #include <set>
 #include <unordered_map>
 
@@ -68,53 +67,51 @@ private:
 
 class ACE_EXPORT UITaskScheduler final {
 public:
+    using PredictTask = std::function<void(int64_t)>;
     UITaskScheduler() = default;
-    ~UITaskScheduler() = default;
+    ~UITaskScheduler();
 
     // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
+    void AddPredictTask(PredictTask&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
+    void FlushPredictTask(int64_t deadline);
 
     void UpdateCurrentPageId(uint32_t id)
     {
         currentPageId_ = id;
     }
 
-    void CleanUp()
-    {
-        dirtyLayoutNodes_.clear();
-        dirtyRenderNodes_.clear();
-    }
+    void CleanUp();
 
 private:
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
-            auto left = nodeLeft.Upgrade();
-            auto right = nodeRight.Upgrade();
-            if (!left || !right) {
+            if (!nodeLeft || !nodeRight) {
                 return false;
             }
-            if (left->GetDepth() < right->GetDepth()) {
+            if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
             }
-            if (left->GetDepth() == right->GetDepth()) {
-                return left < right;
+            if (nodeLeft->GetDepth() == nodeRight->GetDepth()) {
+                return nodeLeft < nodeRight;
             }
             return false;
         }
     };
 
-    using PageDirtySet = std::set<WeakPtr<FrameNode>, NodeCompare<WeakPtr<FrameNode>>>;
+    using PageDirtySet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
     using RootDirtyMap = std::unordered_map<uint32_t, PageDirtySet>;
 
     RootDirtyMap dirtyLayoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
+    std::list<PredictTask> predictTask_;
 
     uint32_t currentPageId_ = 0;
 

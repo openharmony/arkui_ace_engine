@@ -44,7 +44,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d", 
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d",
             (*it)->GetId(), child->GetId());
         return;
     }
@@ -70,6 +70,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         LOGE("child is not exist.");
         return children_.end();
     }
+    (*iter)->OnRemoveFromParent();
     auto result = children_.erase(iter);
     MarkNeedSyncRenderTree();
     return result;
@@ -88,6 +89,7 @@ void UINode::RemoveChildAtIndex(int32_t index)
     }
     auto iter = children_.begin();
     std::advance(iter, index);
+    (*iter)->OnRemoveFromParent();
     children_.erase(iter);
     MarkNeedSyncRenderTree();
 }
@@ -126,6 +128,9 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 
 void UINode::Clean()
 {
+    for (const auto& child : children_) {
+        child->OnRemoveFromParent();
+    }
     children_.clear();
     MarkNeedSyncRenderTree();
 }
@@ -134,6 +139,12 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 {
     CHECK_NULL_VOID(parent);
     parent->AddChild(AceType::Claim(this), slot);
+}
+
+void UINode::OnRemoveFromParent()
+{
+    parent_.Reset();
+    depth_ = -1;
 }
 
 RefPtr<FrameNode> UINode::GetFocusParent() const
@@ -402,6 +413,20 @@ RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceL
 
     auto frameChild = DynamicCast<FrameNode>(child);
     return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
+}
+
+void UINode::Build()
+{
+    for (const auto& child : children_) {
+        child->Build();
+    }
+}
+
+void UINode::SetActive(bool active)
+{
+    for (const auto& child : children_) {
+        child->SetActive(active);
+    }
 }
 
 } // namespace OHOS::Ace::NG

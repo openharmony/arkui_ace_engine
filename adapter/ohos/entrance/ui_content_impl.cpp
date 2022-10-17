@@ -264,6 +264,15 @@ void UIContentImpl::DestroyUIDirector()
     rsUIDirector->Destroy();
 }
 
+void UIContentImpl::DestroyCallback() const
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetNextFrameLayoutCallback(nullptr);
+}
+
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
     if (window && StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
@@ -955,7 +964,7 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
         LOGE("InitWindowCallback failed, container(id=%{public}d) is null.", instanceId_);
         return;
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
         LOGE("InitWindowCallback failed, pipelineContext is null.");
         return;
@@ -965,31 +974,25 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
         LOGE("InitWindowCallback failed, window is null.");
         return;
     }
+    auto& windowManager = pipelineContext->GetWindowManager();
+    if (windowManager == nullptr) {
+        LOGE("InitWindowCallback failed, windowManager is null.");
+        return;
+    }
     if (info != nullptr) {
-        pipelineContext->SetAppLabelId(info->labelId);
-        pipelineContext->SetAppIconId(info->iconId);
+        windowManager->SetAppLabelId(info->labelId);
+        windowManager->SetAppIconId(info->iconId);
     }
 
-    pipelineContext->SetWindowMinimizeCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Minimize()); });
-
-    pipelineContext->SetWindowMaximizeCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Maximize()); });
-
-    pipelineContext->SetWindowRecoverCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Recover()); });
-
-    pipelineContext->SetWindowCloseCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Close()); });
-
-    pipelineContext->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
-
-    pipelineContext->SetWindowSplitCallBack([window]() -> bool {
-        return (
-            OHOS::Rosen::WMError::WM_OK == window->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
-    });
-
-    pipelineContext->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
+    windowManager->SetWindowMinimizeCallBack([window]() { window->Minimize(); });
+    windowManager->SetWindowMaximizeCallBack([window]() { window->Maximize(); });
+    windowManager->SetWindowRecoverCallBack([window]() { window->Recover(); });
+    windowManager->SetWindowCloseCallBack([window]() { window->Close(); });
+    windowManager->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
+    windowManager->SetWindowSplitCallBack(
+        [window]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+    windowManager->SetWindowGetModeCallBack(
+        [window]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
 
     pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
         Rect rect;
@@ -1066,6 +1069,7 @@ void UIContentImpl::NotifyMemoryLevel(int32_t level)
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
+    ContainerScope scope(instanceId_);
     pipelineContext->NotifyMemoryLevel(level);
 }
 

@@ -44,13 +44,35 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrappe
     return false;
 }
 
-bool PagePattern::TriggerPageTransition(PageTransitionType type) const
+bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    return renderContext->TriggerPageTransition(type);
+    return renderContext->TriggerPageTransition(type, onFinish);
+}
+
+void PagePattern::ProcessHideState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetActive(false);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
+}
+
+void PagePattern::ProcessShowState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetActive(true);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
 }
 
 void PagePattern::OnShow()
@@ -58,6 +80,7 @@ void PagePattern::OnShow()
     if (isOnShow_ || !isLoaded_) {
         return;
     }
+    ProcessShowState();
     isOnShow_ = true;
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -77,6 +100,7 @@ void PagePattern::OnHide()
     if (onPageHide_) {
         context->PostAsyncEvent([onPageHide = onPageHide_]() { onPageHide(); });
     }
+    ProcessHideState();
 }
 
 } // namespace OHOS::Ace::NG

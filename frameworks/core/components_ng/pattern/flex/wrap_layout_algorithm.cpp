@@ -130,6 +130,9 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     LayoutWholeWrap(layoutWrapper);
+    for (const auto& child : children) {
+        child->Layout();
+    }
     contentList_.clear();
 }
 
@@ -231,10 +234,15 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(LayoutWrapper* layoutWrapper)
 
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     // In content type, wrap is as large as children, no need to set alignment_.
-    if ((!isHorizontal && layoutProp->GetCalcLayoutConstraint()->selfIdealSize->Width()->IsValid()) ||
-        (isHorizontal && layoutProp->GetCalcLayoutConstraint()->selfIdealSize->Height()->IsValid())) {
-        startPosition = OffsetF();
-        betweenPosition = OffsetF();
+    if (layoutProp->GetCalcLayoutConstraint()) {
+        auto selfIdealSize = layoutProp->GetCalcLayoutConstraint()->selfIdealSize;
+        if (selfIdealSize.has_value()) {
+            if ((!isHorizontal && selfIdealSize->Width().value_or(CalcLength()).IsValid()) ||
+                (isHorizontal && selfIdealSize->Height().value_or(CalcLength()).IsValid())) {
+                startPosition = OffsetF();
+                betweenPosition = OffsetF();
+            }
+        }
     }
     TraverseContent(startPosition, betweenPosition);
 }
@@ -406,9 +414,8 @@ void WrapLayoutAlgorithm::HandleStartAlignment(
     // Decide content offset position
     auto spacing = spacing_.ConvertToPx();
     bool isHorizontal = direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE;
-    itemPositionOffset +=
-        OffsetF(isHorizontal ? item->GetFrameSize().Width() + betweenSpace + spacing : 0.0,
-            isHorizontal ? 0.0 : item->GetFrameSize().Height() + betweenSpace + spacing);
+    itemPositionOffset += OffsetF(isHorizontal ? item->GetFrameSize().Width() + betweenSpace + spacing : 0.0,
+        isHorizontal ? 0.0 : item->GetFrameSize().Height() + betweenSpace + spacing);
 }
 
 void WrapLayoutAlgorithm::HandleEndAlignment(float totalCrossSpace, const RefPtr<GeometryNode>& item,

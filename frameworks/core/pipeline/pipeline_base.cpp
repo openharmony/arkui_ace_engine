@@ -43,6 +43,7 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     CHECK_NULL_VOID(frontend);
     frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
+    windowManager_ = AceType::MakeRefPtr<WindowManager>();
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
@@ -62,11 +63,12 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId,
     RefPtr<PlatformResRegister> platformResRegister)
     : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
-      weakFrontend_(frontend), instanceId_(instanceId),platformResRegister_(platformResRegister)
+      weakFrontend_(frontend), instanceId_(instanceId),platformResRegister_(std::move(platformResRegister))
 {
     CHECK_NULL_VOID(frontend);
     frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
+    windowManager_ = AceType::MakeRefPtr<WindowManager>();
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();

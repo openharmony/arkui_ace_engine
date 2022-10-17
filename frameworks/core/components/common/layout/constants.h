@@ -152,29 +152,15 @@ enum class Overflow {
     FORCE_CLIP,
 };
 
-enum class MainStackSize {
-    MAX,
-    MIN,
-    NORMAL,
-    LAST_CHILD_HEIGHT,
-    MATCH_CHILDREN,
-    MAX_X,
-    MAX_Y
-};
+enum class MainStackSize { MAX, MIN, NORMAL, LAST_CHILD_HEIGHT, MATCH_CHILDREN, MAX_X, MAX_Y };
 
-enum class MainSwiperSize {
-    MAX,
-    MAX_X,
-    MAX_Y,
-    MIN,
-    AUTO
-};
+enum class MainSwiperSize { MAX, MAX_X, MAX_Y, MIN, AUTO };
 
 enum class PositionType {
     PTRELATIVE = 0,
     PTFIXED,
     PTABSOLUTE,
-    PTOFFSET, // percentage layout based on RELATIVE
+    PTOFFSET,        // percentage layout based on RELATIVE
     PTSEMI_RELATIVE, // absolute offset based on RELATIVE
 };
 
@@ -201,7 +187,6 @@ enum class TextAlign {
     */
     END,
 };
-
 
 enum class WhiteSpace {
     NORMAL,
@@ -424,16 +409,7 @@ enum class WindowBlurStyle {
     STYLE_BACKGROUND_XLARGE_DARK = 107,
 };
 
-enum class DisplayType {
-    NO_SETTING = 0,
-    FLEX,
-    GRID,
-    NONE,
-    BLOCK,
-    INLINE,
-    INLINE_BLOCK,
-    INLINE_FLEX
-};
+enum class DisplayType { NO_SETTING = 0, FLEX, GRID, NONE, BLOCK, INLINE, INLINE_BLOCK, INLINE_FLEX };
 
 enum class VisibilityType {
     NO_SETTING = 0,
@@ -481,15 +457,9 @@ enum class CalendarType {
     SIMPLE,
 };
 
-enum class SideBarContainerType {
-    EMBED,
-    OVERLAY
-};
+enum class SideBarContainerType { EMBED, OVERLAY };
 
-enum class SideBarPosition {
-    START,
-    END
-};
+enum class SideBarPosition { START, END };
 
 enum class SideBarStatus {
     SHOW,
@@ -535,6 +505,51 @@ enum class VisibleType {
     VISIBLE,
     INVISIBLE,
     GONE,
+};
+
+enum class ShapeMode {
+    /*
+     * unspecified, follow theme.
+     */
+    DEFAULT = 0,
+    /*
+     * rect scrollbar.
+     */
+    RECT,
+    /*
+     * round scrollbar.
+     */
+    ROUND,
+};
+
+enum class DisplayMode {
+    /*
+     * do not display scrollbar.
+     */
+    OFF = 0,
+    /*
+     * display scrollbar on demand.
+     */
+    AUTO,
+    /*
+     * always display scrollbar.
+     */
+    ON,
+};
+
+enum class PositionMode {
+    /*
+     * display scrollbar on right.
+     */
+    RIGHT = 0,
+    /*
+     * display scrollbar on left.
+     */
+    LEFT,
+    /*
+     * display scrollbar on bottom.
+     */
+    BOTTOM,
 };
 
 enum class XComponentType { SURFACE = 0, COMPONENT };

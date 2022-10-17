@@ -332,8 +332,8 @@ void RenderMultiChildScroll::Update(const RefPtr<Component>& component)
     }
 
     auto scrollBar = listComponent->GetScrollBar();
-    InitScrollBar(scrollBar);
     rightToLeft_ = listComponent->GetRightToLeft();
+    InitScrollBar(scrollBar);
 
     // This should be put after setting positionController_.
     RenderScroll::Update(component);

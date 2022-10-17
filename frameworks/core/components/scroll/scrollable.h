@@ -311,6 +311,7 @@ private:
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
+
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     DragEndForRefreshCallback dragEndCallback_;

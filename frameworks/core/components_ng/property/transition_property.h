@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <string>
+#include <sstream>
 
 #include "base/geometry/dimension.h"
 #include "core/animation/animation_pub.h"

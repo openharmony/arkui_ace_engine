@@ -38,6 +38,7 @@ class ACE_EXPORT PipelineContext final : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
+    using PredictTask = std::function<void(int64_t)>;
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
@@ -93,7 +94,7 @@ public:
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
 
     // Called by view when idle event.
-    void OnIdle(int64_t deadline) override {}
+    void OnIdle(int64_t deadline) override;
 
     void OnActionEvent(const std::string& action) override {}
 
@@ -149,6 +150,8 @@ public:
 
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
+    void AddPredictTask(PredictTask&& task);
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -182,7 +185,6 @@ public:
     void AddWindowFocusChangedCallback(int32_t nodeId);
 
     void RemoveWindowFocusChangedCallback(int32_t nodeId);
-
 
     bool GetIsFocusingByTab() const
     {
@@ -249,6 +251,9 @@ private:
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
+            if (!nodeLeft || !nodeRight) {
+                return false;
+            }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
             }
@@ -259,24 +264,10 @@ private:
         }
     };
 
-    template<typename T>
-    struct NodeCompareWeak {
-        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak) const
-        {
-            auto nodeLeft = nodeLeftWeak.Upgrade();
-            auto nodeRight = nodeRightWeak.Upgrade();
-            if (!nodeLeft || !nodeRight) {
-                return false;
-            }
-            auto compare = NodeCompare<decltype(nodeLeft)>();
-            return compare(nodeLeft, nodeRight);
-        }
-    };
-
     UITaskScheduler taskScheduler_;
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
-    std::set<WeakPtr<UINode>, NodeCompareWeak<WeakPtr<UINode>>> dirtyNodes_;
+    std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
 
     // window on show or on hide

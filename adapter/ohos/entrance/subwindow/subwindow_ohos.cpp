@@ -115,7 +115,7 @@ void SubwindowOhos::InitContainer()
     ViewportConfig config;
     // create ace_view
     auto flutterAceView =
-        Platform::FlutterAceView::CreateView(childContainerId_, true, container->GetSettings().usePlatformAsUIThread);
+        Platform::FlutterAceView::CreateView(childContainerId_, false, container->GetSettings().usePlatformAsUIThread);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
     int32_t width = static_cast<int32_t>(window_->GetRequestRect().width_);

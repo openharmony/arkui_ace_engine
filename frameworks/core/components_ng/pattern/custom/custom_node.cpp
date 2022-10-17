@@ -44,6 +44,18 @@ CustomNode::~CustomNode()
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
+    Build();
+    if (child_) {
+        child_->MountToParent(Claim(this));
+        child_->AdjustLayoutWrapperTree(parent, true, true);
+        child_.Reset();
+    } else {
+        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+    }
+}
+
+void CustomNode::Build()
+{
     if (renderFunction_) {
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
@@ -52,15 +64,11 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bo
         {
             ACE_SCOPED_TRACE("CustomNode:BuildItem");
             // first create child node and wrapper.
-            auto child = renderFunction_();
-            CHECK_NULL_VOID(child);
-            child->MountToParent(Claim(this));
-            child->AdjustLayoutWrapperTree(parent, true, true);
+            child_ = renderFunction_();
         }
         renderFunction_ = nullptr;
-    } else {
-        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
     }
+    UINode::Build();
 }
 
 void CustomNode::Update()

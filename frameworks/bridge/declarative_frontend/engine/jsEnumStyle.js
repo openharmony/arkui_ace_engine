@@ -701,6 +701,12 @@ var NavigationMode;
   NavigationMode[NavigationMode["Auto"] = 2] = "Auto";
 })(NavigationMode || (NavigationMode = {}));
 
+var NavBarPosition;
+(function (NavBarPosition) {
+  NavBarPosition[NavBarPosition["Start"] = 0] = "Start";
+  NavBarPosition[NavBarPosition["End"] = 1] = "End";
+})(NavBarPosition || (NavBarPosition = {}));
+
 var ResponseType;
 (function (ResponseType) {
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";

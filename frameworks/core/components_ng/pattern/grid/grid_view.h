@@ -49,6 +49,9 @@ public:
     static void SetOnItemDragMove(ItemDragMoveFunc&& value);
     static void SetOnItemDragLeave(ItemDragLeaveFunc&& value);
     static void SetOnItemDrop(ItemDropFunc&& value);
+
+private:
+    static void AddDragFrameNodeToManager();
 };
 } // namespace OHOS::Ace::NG
 

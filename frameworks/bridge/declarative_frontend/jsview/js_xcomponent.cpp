@@ -16,11 +16,34 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 
 #include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_view.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<XComponentModel> XComponentModel::instance_ = nullptr;
+
+XComponentModel* XComponentModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::XComponentModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::XComponentModelNG());
+        } else {
+            instance_.reset(new Framework::XComponentModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSXComponent::JSBind(BindingTarget globalObj)
@@ -65,80 +88,37 @@ void JSXComponent::Create(const JSCallbackInfo& info)
             xcomponentController = jsXComponentController->GetController();
         }
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::XComponentView::Create(id->ToString(), type->ToString(), libraryname->ToString(), xcomponentController);
-        auto surfaceDestroyCallback = [xcId = id->ToString()]() {
-            XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(xcId);
-            XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcId);
-        };
-        NG::XComponentView::SetOnSurfaceDestroyEvent(std::move(surfaceDestroyCallback));
-        return;
-    }
-
-    auto xcomponentComponent = AceType::MakeRefPtr<OHOS::Ace::XComponentComponent>("xcomponent");
-    xcomponentComponent->SetId(id->ToString());
-    xcomponentComponent->SetXComponentType(type->ToString());
-    xcomponentComponent->SetLibraryName(libraryname->ToString());
-    if (xcomponentController) {
-        xcomponentComponent->SetXComponentController(xcomponentController);
-    }
-
-    XComponentClient::GetInstance().AddXComponentToXcomponentsMap(xcomponentComponent->GetId(), xcomponentComponent);
-    auto deleteCallback = [xcId = id->ToString()]() {
-        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(xcId);
+    XComponentModel::GetInstance()->Create(
+        id->ToString(), type->ToString(), libraryname->ToString(), xcomponentController);
+    auto surfaceDestroyCallback = [xcId = id->ToString()]() {
+        XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(xcId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcId);
     };
-    xcomponentComponent->RegisterDeleteCallback(deleteCallback);
-    ViewStackProcessor::GetInstance()->Push(xcomponentComponent);
+    XComponentModel::GetInstance()->SetOnSurfaceDestroyEvent(std::move(surfaceDestroyCallback));
 }
 
 void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-        auto onLoad = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
-                          const std::string& xcomponentId) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("XComponent.onLoad");
-            std::vector<std::string> keys = { "load", xcomponentId };
-            func->ExecuteNew(keys, "");
-        };
-        NG::XComponentView::SetOnLoad(std::move(onLoad));
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto xcomponentComponent = AceType::DynamicCast<XComponentComponent>(stack->GetMainComponent());
-    if (!xcomponentComponent) {
-        LOGE("JSXComponent::JsOnLoad xcomponentComponent is null.");
-        return;
-    }
-    auto xcomponentId = xcomponentComponent->GetId();
-
-    std::vector<std::string> keys = { "load", xcomponentId };
-    xcomponentComponent->SetXComponentInitEventId(GetEventMarker(args, keys));
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    auto onLoad = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& xcomponentId) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("XComponent.onLoad");
+        std::vector<std::string> keys = { "load", xcomponentId };
+        func->ExecuteNew(keys, "");
+    };
+    XComponentModel::GetInstance()->SetOnLoad(std::move(onLoad));
 }
 
 void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-        auto onDestroy = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("XComponent.onDestroy");
-            std::vector<std::string> keys = {"destroy"};
-            func->Execute(keys, "");
-        };
-        NG::XComponentView::SetOnDestroy(std::move(onDestroy));
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto xcomponentComponent = AceType::DynamicCast<XComponentComponent>(stack->GetMainComponent());
-    if (!xcomponentComponent) {
-        LOGE("JSXComponent::JsOnDestroy xcomponentComponent is null.");
-        return;
-    }
-    std::vector<std::string> keys = {"destroy"};
-    xcomponentComponent->SetXComponentDestroyEventId(GetEventMarker(args, keys));
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    auto onDestroy = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("XComponent.onDestroy");
+        std::vector<std::string> keys = { "destroy" };
+        func->Execute(keys, "");
+    };
+    XComponentModel::GetInstance()->SetOnDestroy(std::move(onDestroy));
 }
 
 void JSXComponent::OmitEvent(const JSCallbackInfo& /*args*/)
@@ -146,27 +126,4 @@ void JSXComponent::OmitEvent(const JSCallbackInfo& /*args*/)
     LOGW("This event is omitted, please use apis of native_xcomponent instead");
 }
 
-EventMarker JSXComponent::GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys)
-{
-    if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
-        return EventMarker();
-    }
-
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto eventMarker =
-        EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::string::size_type posLoad = param.find("load");
-            // load callback method, need to return a napi instance
-            if (posLoad != std::string::npos) {
-                ACE_SCORING_EVENT("XComponent.onLoad");
-                func->ExecuteNew(keys, param);
-            } else {
-                ACE_SCORING_EVENT("XComponent.onDestroy");
-                func->Execute(keys, param);
-            }
-        });
-    return eventMarker;
-}
 } // namespace OHOS::Ace::Framework

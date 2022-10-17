@@ -60,7 +60,7 @@ protected:
     double inputCount_ = 0.0;
     bool isCountDown_ = false;
     std::string format_;
-    std::function<void(uint64_t, uint64_t)> onTimer_;
+    std::function<void(const std::string, const std::string)> onTimer_;
 
 private:
     void HandleStart();

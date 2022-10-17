@@ -27,13 +27,17 @@ ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEv
     : gestureEventHub_(gestureEventHub)
 {}
 
-void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& /*touchRestrict*/,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
     if (!initialized_) {
         InitializeScrollable();
     }
-    for (const auto& [axis, scrollable] : scrollables_) {
+    for (const auto& [axis, event] : scrollableEvents_) {
+        if (!event->GetEnable()) {
+            continue;
+        }
+        const auto& scrollable = event->GetScrollable();
         scrollable->SetGetEventTargetImpl(getEventTargetImpl);
         scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         result.emplace_back(scrollable);
@@ -42,7 +46,6 @@ void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
 
 void ScrollableActuator::InitializeScrollable()
 {
-    scrollables_.clear();
     if (scrollableEvents_.empty()) {
         return;
     }
@@ -59,7 +62,7 @@ void ScrollableActuator::InitializeScrollable()
             scrollEffect->InitialEdgeEffect();
         }
         scrollable->Initialize(host->GetContext());
-        scrollables_[axis] = scrollable;
+        event->SetScrollable(scrollable);
     }
     initialized_ = true;
 }
@@ -70,6 +73,7 @@ void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, const RefPtr<Scro
         return;
     }
     scrollEffects_[axis] = effect;
+    initialized_ = false;
 }
 
 bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect)
@@ -83,6 +87,7 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
             return true;
         }
     }
+    initialized_ = false;
     return false;
 }
 

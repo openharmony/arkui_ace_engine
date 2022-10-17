@@ -57,7 +57,7 @@
 #include "pixel_map_napi.h"
 #endif
 
-#if defined(PREVIEW) || defined(ANDROID_PLATFORM)
+#ifndef OHOS_PALTFORM
 extern const char _binary_strip_native_min_abc_start[];
 extern const char _binary_strip_native_min_abc_end[];
 #endif
@@ -2977,7 +2977,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     RegisterI18nPluralRulesModule();
 
     // load jsfwk
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
+#ifdef OHOS_PLATFORM
     if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
         return false;
@@ -3209,7 +3209,7 @@ void JsiEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+#ifdef OHOS_PLATFORM
         ConnectServerManager::Get().AddInstance(gettid());
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
@@ -3226,7 +3226,7 @@ void JsiEngine::RegisterInitWorkerFunc()
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+#ifdef OHOS_PLATFORM
 void JsiEngine::RegisterOffWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
@@ -3276,7 +3276,7 @@ void JsiEngine::RegisterAssetFunc()
 void JsiEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+#ifdef OHOS_PLATFORM
     RegisterOffWorkerFunc();
 #endif
     RegisterAssetFunc();
@@ -3344,7 +3344,7 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
         LOGD("GetAssetContent \"%{private}s\" failed.", fileName.c_str());
         return true;
     }
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
+#ifdef OHOS_PLATFORM
     const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
 #else
     const std::string& abcPath = fileName;

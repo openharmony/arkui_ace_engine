@@ -453,4 +453,8 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[] = "XComponent";
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
 // Popup
 ACE_EXPORT extern const char POPUP_ETS_TAG[] = "Popup";
+
+// remote window
+ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
+
 } // namespace OHOS::Ace::V2

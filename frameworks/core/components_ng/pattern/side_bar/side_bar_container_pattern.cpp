@@ -143,16 +143,15 @@ void SideBarContainerPattern::CreateAnimation()
 
 void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (controlButtonClickEvent_) {
+        return;
+    }
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->DoSideBarAnimation();
         }
     };
-
-    if (controlButtonClickEvent_) {
-        gestureHub->RemoveClickEvent(controlButtonClickEvent_);
-    }
     controlButtonClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));
     gestureHub->AddClickEvent(controlButtonClickEvent_);
 }

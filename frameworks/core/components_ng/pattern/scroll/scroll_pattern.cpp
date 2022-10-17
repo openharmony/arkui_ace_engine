@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include <utility>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
