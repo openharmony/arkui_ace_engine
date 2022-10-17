@@ -90,7 +90,9 @@ void IfElseNode::SetBranchId(int32_t value)
 
 void IfElseNode::FlushUpdateAndMarkDirty()
 {
-    if (!getProcessed_) {
+    // FIXME: Clean called twise
+    // breaks tabs with If test case
+    if (false && !getProcessed_) {
         // case when if true -> false.
         branchIdChanged_ = true;
         branchId_ = -1;
