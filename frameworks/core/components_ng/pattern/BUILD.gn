@@ -259,8 +259,8 @@ build_component_ng("pattern_ng") {
     "video/video_model_ng.cpp",
     "video/video_pattern.cpp",
     "xcomponent/xcomponent_layout_algorithm.cpp",
+    "xcomponent/xcomponent_model_ng.cpp",
     "xcomponent/xcomponent_pattern.cpp",
-    "xcomponent/xcomponent_view.cpp",
   ]
 
   # custom_paint should not deps on skia interfaces

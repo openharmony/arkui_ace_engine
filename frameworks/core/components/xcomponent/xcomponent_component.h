@@ -23,6 +23,7 @@
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/resource/native_texture.h"
+#include "core/components/xcomponent/xcomponent_controller.h"
 #include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
@@ -63,8 +64,7 @@ public:
 
     void SetRenderNode(const WeakPtr<RenderXComponent>& renderNode);
     void NativeXComponentInit(
-        OH_NativeXComponent* nativeXComponent,
-        WeakPtr<NativeXComponentImpl> nativeXComponentImpl);
+        OH_NativeXComponent* nativeXComponent, WeakPtr<NativeXComponentImpl> nativeXComponentImpl);
 
     WeakPtr<XComponentComponent> component_;
 
@@ -72,59 +72,6 @@ private:
     PushTaskFunction pushToRenderNodeFunc_;
     std::list<TaskFunction> tasks_;
     WeakPtr<RenderXComponent> renderNode_;
-};
-
-class XComponentController : public virtual AceType {
-    DECLARE_ACE_TYPE(XComponentController, AceType);
-
-public:
-    using ConfigSurfaceImpl = std::function<void(uint32_t, uint32_t)>;
-
-    std::string GetSurfaceId()
-    {
-        return surfaceId_;
-    }
-
-    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
-    {
-        if (ConfigSurfaceImpl_) {
-            ConfigSurfaceImpl_(surfaceWidth, surfaceHeight);
-        }
-    }
-
-    void SetConfigSurfaceImpl(ConfigSurfaceImpl&& ConfigSurfaceImpl)
-    {
-        ConfigSurfaceImpl_ = std::move(ConfigSurfaceImpl);
-    }
-
-public:
-    void AddXComponentController(const RefPtr<XComponentController>& xcomponentController)
-    {
-        auto it = std::find(controllers_.begin(), controllers_.end(), xcomponentController);
-        if (it != controllers_.end()) {
-            LOGW("Controller is already existed");
-            return;
-        }
-        controllers_.emplace_back(xcomponentController);
-    }
-
-    std::string surfaceId_ = "";
-
-    void RemoveXComponentController(const RefPtr<XComponentController>& xcomponentController)
-    {
-        if (xcomponentController) {
-            controllers_.remove(xcomponentController);
-        }
-    }
-
-    void Clear()
-    {
-        controllers_.clear();
-    }
-
-private:
-    std::list<RefPtr<XComponentController>> controllers_;
-    ConfigSurfaceImpl ConfigSurfaceImpl_;
 };
 
 // A component can show different native view.
