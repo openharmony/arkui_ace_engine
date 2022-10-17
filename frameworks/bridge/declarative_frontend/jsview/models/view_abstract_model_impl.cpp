@@ -18,11 +18,23 @@
 #include "base/geometry/animatable_dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/box/box_component_helper.h"
 #include "core/event/ace_event_handler.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+
+RefPtr<Decoration> GetBackDecoration()
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto decoration = box->GetBackDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+        box->SetBackDecoration(decoration);
+    }
+    return decoration;
+}
 
 void ViewAbstractModelImpl::SetWidth(const Dimension& width)
 {
@@ -106,6 +118,245 @@ void ViewAbstractModelImpl::SetMaxHeight(const Dimension& maxHeight)
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     box->SetMaxHeight(maxHeight);
     flexItem->SetMaxHeight(maxHeight);
+}
+
+void ViewAbstractModelImpl::SetBackgroundColor(const Color& color)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto boxComponent = stack->GetBoxComponent();
+    auto option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        boxComponent->SetColor(color, option);
+    } else {
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
+            BoxStateAttribute::COLOR, AnimatableColor(color, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::COLOR, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
+                BoxStateAttribute::COLOR, AnimatableColor(boxComponent->GetColor(), option), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant)
+{
+    auto decoration = GetBackDecoration();
+    CHECK_NULL_VOID(decoration);
+    auto image = decoration->GetImage();
+    if (!image) {
+        image = AceType::MakeRefPtr<BackgroundImage>();
+    }
+
+    if (themeConstant) {
+        image->SetSrc(src, themeConstant);
+    } else {
+        image->SetParsedSrc(src);
+    }
+
+    decoration->SetImage(image);
+}
+
+void ViewAbstractModelImpl::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
+{
+    auto decoration = GetBackDecoration();
+    CHECK_NULL_VOID(decoration);
+    auto image = decoration->GetImage();
+    if (!image) {
+        image = AceType::MakeRefPtr<BackgroundImage>();
+    }
+    image->SetImageRepeat(imageRepeat);
+    decoration->SetImage(image);
+}
+
+void ViewAbstractModelImpl::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
+{
+    auto decoration = GetBackDecoration();
+    CHECK_NULL_VOID(decoration);
+    auto image = decoration->GetImage();
+    if (!image) {
+        image = AceType::MakeRefPtr<BackgroundImage>();
+    }
+    image->SetImageSize(bgImgSize);
+    decoration->SetImage(image);
+}
+
+void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
+{
+    auto decoration = GetBackDecoration();
+    CHECK_NULL_VOID(decoration);
+    auto image = decoration->GetImage();
+    if (!image) {
+        image = AceType::MakeRefPtr<BackgroundImage>();
+    }
+    image->SetImagePosition(bgImgPosition);
+    decoration->SetImage(image);
+}
+
+void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle)
+{
+    auto decoration = GetBackDecoration();
+    CHECK_NULL_VOID(decoration);
+    decoration->SetBlurStyle(bgBlurStyle);
+}
+
+void ViewAbstractModelImpl::SetPadding(const Dimension& value)
+{
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    AnimatableDimension animValue(value);
+    animValue.SetAnimationOption(option);
+    SetPaddings(animValue, animValue, animValue, animValue);
+}
+
+void ViewAbstractModelImpl::SetPaddings(
+    const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    Edge padding(left, top, right, bottom, option);
+    box->SetPadding(padding);
+}
+
+void ViewAbstractModelImpl::SetMargin(const Dimension& value)
+{
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    AnimatableDimension animValue(value);
+    animValue.SetAnimationOption(option);
+    SetMargins(animValue, animValue, animValue, animValue);
+}
+
+void ViewAbstractModelImpl::SetMargins(
+    const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    Edge margin(left, top, right, bottom, option);
+    box->SetMargin(margin);
+}
+
+void ViewAbstractModelImpl::SetBorderRadius(const Dimension& value)
+{
+    SetBorderRadius(value, value, value, value);
+}
+
+void ViewAbstractModelImpl::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+    const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+    const std::optional<Dimension>& radiusBottomRight)
+{
+    auto decoration = GetBackDecoration();
+    CHECK_NULL_VOID(decoration);
+    Dimension topLeft = radiusTopLeft.has_value() ? radiusTopLeft.value()
+                                                  : BoxComponentHelper::GetBorderRadiusTopLeft(decoration).GetX();
+    Dimension topRight = radiusTopRight.has_value() ? radiusTopRight.value()
+                                                    : BoxComponentHelper::GetBorderRadiusTopRight(decoration).GetX();
+    Dimension bottomLeft = radiusBottomLeft.has_value()
+                               ? radiusBottomLeft.value()
+                               : BoxComponentHelper::GetBorderRadiusBottomLeft(decoration).GetX();
+    Dimension bottomRight = radiusBottomRight.has_value()
+                                ? radiusBottomRight.value()
+                                : BoxComponentHelper::GetBorderRadiusBottomRight(decoration).GetX();
+    auto* stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderRadius(decoration, topLeft, topRight, bottomLeft, bottomRight, option);
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+            BoxStateAttribute::BORDER_RADIUS, AnimatableDimension(topLeft, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_RADIUS, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+                BoxStateAttribute::BORDER_RADIUS, AnimatableDimension(topLeft, option), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetBorderColor(const Color& value)
+{
+    SetBorderColor(value, value, value, value);
+}
+
+void ViewAbstractModelImpl::SetBorderColor(const std::optional<Color>& colorLeft,
+    const std::optional<Color>& colorRight, const std::optional<Color>& colorTop,
+    const std::optional<Color>& colorBottom)
+{
+    auto decoration = GetBackDecoration();
+    CHECK_NULL_VOID(decoration);
+    Color leftColor = colorLeft.has_value() ? colorLeft.value() : BoxComponentHelper::GetBorderColorTop(decoration);
+    Color rightColor =
+        colorRight.has_value() ? colorRight.value() : BoxComponentHelper::GetBorderColorBottom(decoration);
+    Color topColor = colorTop.has_value() ? colorTop.value() : BoxComponentHelper::GetBorderColorLeft(decoration);
+    Color bottomColor =
+        colorBottom.has_value() ? colorBottom.value() : BoxComponentHelper::GetBorderColorRight(decoration);
+    auto* stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderColor(decoration, leftColor, rightColor, topColor, bottomColor, option);
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
+            BoxStateAttribute::BORDER_COLOR, AnimatableColor(leftColor, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_COLOR, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::BORDER_COLOR,
+                AnimatableColor(BoxComponentHelper::GetBorderColor(decoration), option), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetBorderWidth(const Dimension& value)
+{
+    SetBorderWidth(value, value, value, value);
+}
+
+void ViewAbstractModelImpl::SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+    const std::optional<Dimension>& top, const std::optional<Dimension>& bottom)
+{
+    auto decoration = GetBackDecoration();
+    CHECK_NULL_VOID(decoration);
+    Dimension leftDimen = left.has_value() ? left.value() : BoxComponentHelper::GetBorderLeftWidth(decoration);
+    Dimension rightDimen = right.has_value() ? right.value() : BoxComponentHelper::GetBorderRightWidth(decoration);
+    Dimension topDimen = top.has_value() ? top.value() : BoxComponentHelper::GetBorderTopWidth(decoration);
+    Dimension bottomDimen = bottom.has_value() ? bottom.value() : BoxComponentHelper::GetBorderBottomWidth(decoration);
+    auto* stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderWidth(decoration, leftDimen, rightDimen, topDimen, bottomDimen, option);
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+            BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(leftDimen, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_WIDTH, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_WIDTH,
+                AnimatableDimension(BoxComponentHelper::GetBorderWidth(decoration), option), VisualState::NORMAL);
+        }
+    }
+}
+
+void ViewAbstractModelImpl::SetBorderStyle(const BorderStyle& value)
+{
+    SetBorderStyle(value, value, value, value);
+}
+
+void ViewAbstractModelImpl::SetBorderStyle(const std::optional<BorderStyle>& styleLeft,
+    const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
+    const std::optional<BorderStyle>& styleBottom)
+{
+    auto decoration = GetBackDecoration();
+    CHECK_NULL_VOID(decoration);
+    BorderStyle left = styleLeft ? styleLeft.value() : BoxComponentHelper::GetBorderStyleLeft(decoration);
+    BorderStyle right = styleRight ? styleRight.value() : BoxComponentHelper::GetBorderStyleRight(decoration);
+    BorderStyle top = styleTop ? styleTop.value() : BoxComponentHelper::GetBorderStyleTop(decoration);
+    BorderStyle bottom = styleBottom ? styleBottom.value() : BoxComponentHelper::GetBorderStyleBottom(decoration);
+    auto* stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderStyle(decoration, left, right, top, bottom);
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>(
+            BoxStateAttribute::BORDER_STYLE, left, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_STYLE, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>(
+                BoxStateAttribute::BORDER_STYLE, BoxComponentHelper::GetBorderStyle(decoration), VisualState::NORMAL);
+        }
+    }
 }
 
 void ViewAbstractModelImpl::SetLayoutPriority(int32_t priority)
@@ -257,6 +508,73 @@ void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optio
     if (offsetY.has_value()) {
         coverageComponent->SetX(offsetY.value());
     }
+}
+
+void ViewAbstractModelImpl::SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc)
+{
+    auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+    display->SetVisible(visible);
+    auto eventMarker = EventMarker([func = std::move(changeEventFunc)](const BaseEventInfo* info) {
+        const auto& param = info->GetType();
+        int32_t newValue = StringToInt(param);
+        func(newValue);
+    });
+
+    display->SetVisibleChangeEvent(eventMarker);
+}
+
+void ViewAbstractModelImpl::SetSharedTransition(const SharedTransitionOption& option)
+{
+    auto sharedTransitionComponent = ViewStackProcessor::GetInstance()->GetSharedTransitionComponent();
+    sharedTransitionComponent->SetShareId(option.id);
+    TweenOption tweenOption;
+    tweenOption.SetCurve(option.curve);
+    tweenOption.SetDuration(option.duration);
+    tweenOption.SetDelay(option.delay);
+    tweenOption.SetMotionPathOption(option.motionPathOption);
+    auto sharedTransitionEffect =
+        SharedTransitionEffect::GetSharedTransitionEffect(option.type, sharedTransitionComponent->GetShareId());
+    sharedTransitionComponent->SetEffect(sharedTransitionEffect);
+    sharedTransitionComponent->SetOption(tweenOption);
+    if (option.zIndex != 0) {
+        sharedTransitionComponent->SetZIndex(option.zIndex);
+    }
+}
+
+void ViewAbstractModelImpl::SetGeometryTransition(const std::string& id)
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetGeometryTransitionId(id);
+}
+
+void ViewAbstractModelImpl::SetFlexBasis(const Dimension& value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetFlexBasis(value);
+}
+
+void ViewAbstractModelImpl::SetAlignSelf(FlexAlign value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetAlignSelf(value);
+}
+
+void ViewAbstractModelImpl::SetFlexShrink(float value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetFlexShrink(value);
+}
+
+void ViewAbstractModelImpl::SetFlexGrow(float value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetFlexGrow(value);
+}
+
+void ViewAbstractModelImpl::SetDisplayIndex(int32_t value)
+{
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItem->SetDisplayIndex(value);
 }
 
 void ViewAbstractModelImpl::SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)

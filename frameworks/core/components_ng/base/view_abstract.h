@@ -159,7 +159,7 @@ public:
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
 
     // flex properties
-    static void SetAlignSelf(int32_t value);
+    static void SetAlignSelf(FlexAlign value);
     static void SetFlexShrink(float value);
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);

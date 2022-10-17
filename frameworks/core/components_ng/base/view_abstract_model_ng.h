@@ -22,7 +22,9 @@
 #include "base/geometry/ng/vector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
@@ -57,6 +59,131 @@ public:
     void SetMaxHeight(const Dimension& maxHeight) override
     {
         ViewAbstract::SetMaxHeight(NG::CalcLength(maxHeight));
+    }
+
+    void SetBackgroundColor(const Color& color) override
+    {
+        ViewAbstract::SetBackgroundColor(color);
+    }
+
+    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override
+    {
+        ViewAbstract::SetBackgroundImage(src);
+    }
+
+    void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override
+    {
+        ViewAbstract::SetBackgroundImageRepeat(imageRepeat);
+    }
+
+    void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override
+    {
+        ViewAbstract::SetBackgroundImageSize(bgImgSize);
+    }
+
+    void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override
+    {
+        ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
+    }
+
+    void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) override
+    {
+        ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
+    }
+
+    void SetPadding(const Dimension& value) override
+    {
+        ViewAbstract::SetPadding(NG::CalcLength(value));
+    }
+
+    void SetPaddings(
+        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override
+    {
+        NG::PaddingProperty paddings;
+        paddings.top = NG::CalcLength(top);
+        paddings.bottom = NG::CalcLength(bottom);
+        paddings.left = NG::CalcLength(left);
+        paddings.right = NG::CalcLength(right);
+        ViewAbstract::SetPadding(paddings);
+    }
+
+    void SetMargin(const Dimension& value) override
+    {
+        ViewAbstract::SetMargin(NG::CalcLength(value));
+    }
+
+    void SetMargins(
+        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override
+    {
+        NG::MarginProperty margins;
+        margins.top = NG::CalcLength(top);
+        margins.bottom = NG::CalcLength(bottom);
+        margins.left = NG::CalcLength(left);
+        margins.right = NG::CalcLength(right);
+        ViewAbstract::SetMargin(margins);
+    }
+
+    void SetBorderRadius(const Dimension& value) override
+    {
+        ViewAbstract::SetBorderRadius(value);
+    }
+
+    void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
+        const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override
+    {
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.radiusTopLeft = radiusTopLeft;
+        borderRadius.radiusTopRight = radiusTopRight;
+        borderRadius.radiusBottomLeft = radiusBottomLeft;
+        borderRadius.radiusBottomRight = radiusBottomRight;
+        ViewAbstract::SetBorderRadius(borderRadius);
+    }
+
+    void SetBorderColor(const Color& value) override
+    {
+        ViewAbstract::SetBorderColor(value);
+    }
+    void SetBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
+        const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) override
+    {
+        NG::BorderColorProperty borderColors;
+        borderColors.leftColor = colorLeft;
+        borderColors.rightColor = colorRight;
+        borderColors.topColor = colorTop;
+        borderColors.bottomColor = colorBottom;
+        ViewAbstract::SetBorderColor(borderColors);
+    }
+
+    void SetBorderWidth(const Dimension& value) override
+    {
+        ViewAbstract::SetBorderWidth(value);
+    }
+
+    void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
+    {
+        NG::BorderWidthProperty borderWidth;
+        borderWidth.leftDimen = left;
+        borderWidth.rightDimen = right;
+        borderWidth.topDimen = top;
+        borderWidth.bottomDimen = bottom;
+        ViewAbstract::SetBorderWidth(borderWidth);
+    }
+
+    void SetBorderStyle(const BorderStyle& value) override
+    {
+        ViewAbstract::SetBorderStyle(value);
+    }
+
+    void SetBorderStyle(const std::optional<BorderStyle>& styleLeft, const std::optional<BorderStyle>& styleRight,
+        const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override
+    {
+        NG::BorderStyleProperty borderStyles;
+        borderStyles.styleLeft = styleLeft;
+        borderStyles.styleRight = styleRight;
+        borderStyles.styleTop = styleTop;
+        borderStyles.styleBottom = styleBottom;
+        ViewAbstract::SetBorderStyle(borderStyles);
     }
 
     void SetLayoutPriority(int32_t priority) override {}
@@ -133,6 +260,40 @@ public:
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override
     {}
+
+    void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override
+    {
+        ViewAbstract::SetVisibility(visible);
+    }
+
+    void SetSharedTransition(const SharedTransitionOption& option) override {}
+
+    void SetGeometryTransition(const std::string& id) override {}
+
+    void SetFlexBasis(const Dimension& value) override
+    {
+        ViewAbstract::SetFlexBasis(value);
+    }
+
+    void SetAlignSelf(FlexAlign value) override
+    {
+        ViewAbstract::SetAlignSelf(value);
+    }
+
+    void SetFlexShrink(float value) override
+    {
+        ViewAbstract::SetFlexShrink(value);
+    }
+
+    void SetFlexGrow(float value) override
+    {
+        ViewAbstract::SetFlexGrow(value);
+    }
+
+    void SetDisplayIndex(int32_t value) override
+    {
+        ViewAbstract::SetDisplayIndex(value);
+    }
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
     {

@@ -24,6 +24,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
@@ -49,6 +50,34 @@ public:
     virtual void SetMaxWidth(const Dimension& maxWidth) = 0;
     virtual void SetMaxHeight(const Dimension& maxHeight) = 0;
 
+    // box props
+    virtual void SetBackgroundColor(const Color& color) = 0;
+    virtual void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) = 0;
+    virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
+    virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
+    virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
+    virtual void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) = 0;
+    virtual void SetPadding(const Dimension& value) = 0;
+    virtual void SetPaddings(
+        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) = 0;
+    virtual void SetMargin(const Dimension& value) = 0;
+    virtual void SetMargins(
+        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) = 0;
+    virtual void SetBorderRadius(const Dimension& value) = 0;
+    virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetBorderColor(const Color& value) = 0;
+    virtual void SetBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
+        const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
+    virtual void SetBorderWidth(const Dimension& value) = 0;
+    virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
+    virtual void SetBorderStyle(const BorderStyle& value) = 0;
+    virtual void SetBorderStyle(const std::optional<BorderStyle>& styleLeft,
+        const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
+        const std::optional<BorderStyle>& styleBottom) = 0;
+
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(int32_t value) = 0;
@@ -72,6 +101,16 @@ public:
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions) = 0;
     virtual void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) = 0;
+    virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
+    virtual void SetSharedTransition(const SharedTransitionOption& option) = 0;
+    virtual void SetGeometryTransition(const std::string& id) = 0;
+
+    // flex props
+    virtual void SetFlexBasis(const Dimension& value) = 0;
+    virtual void SetAlignSelf(FlexAlign value) = 0;
+    virtual void SetFlexShrink(float value) = 0;
+    virtual void SetFlexGrow(float value) = 0;
+    virtual void SetDisplayIndex(int32_t value) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
