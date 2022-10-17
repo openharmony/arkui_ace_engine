@@ -77,8 +77,10 @@ private:
     std::set<WeakPtr<FrameNode>> dragFrameNodes_;
     std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;
     RefPtr<DragWindow> dragWindow_;
+    RefPtr<FrameNode> draggedFrameNode_;
     RefPtr<FrameNode> preTargetFrameNode_;
     RefPtr<FrameNode> preGridTargetFrameNode_;
+    RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
