@@ -117,9 +117,9 @@ void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CheckboxGroupResult, 1>>(
         JSRef<JSFunc>::Cast(args[0]), CheckboxGroupResultEventToJSValue);
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info){
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        const auto *eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
         func->Execute(*eventInfo);
     };
     CheckBoxGroupModel::GetInstance()->SetOnChange(onChange);

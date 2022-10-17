@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/swiper/swiper_view.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<SwiperController> SwiperView::Create()
+RefPtr<SwiperController> SwiperModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
@@ -34,82 +34,82 @@ RefPtr<SwiperController> SwiperView::Create()
     return pattern ? pattern->GetSwiperController() : nullptr;
 }
 
-void SwiperView::SetDirection(Axis axis)
+void SwiperModelNG::SetDirection(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, Direction, axis);
 }
 
-void SwiperView::SetIndex(uint32_t index)
+void SwiperModelNG::SetIndex(uint32_t index)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, Index, index);
 }
 
-void SwiperView::SetDisplayMode(SwiperDisplayMode displayMode)
+void SwiperModelNG::SetDisplayMode(SwiperDisplayMode displayMode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayMode, displayMode);
 }
 
-void SwiperView::SetDisplayCount(int32_t displayCount)
+void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount);
 }
 
-void SwiperView::SetShowIndicator(bool showIndicator)
+void SwiperModelNG::SetShowIndicator(bool showIndicator)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ShowIndicator, showIndicator);
 }
 
-void SwiperView::SetItemSpace(const Dimension& itemSpace)
+void SwiperModelNG::SetItemSpace(const Dimension& itemSpace)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ItemSpace, itemSpace);
 }
 
-void SwiperView::SetCachedCount(int32_t cachedCount)
+void SwiperModelNG::SetCachedCount(int32_t cachedCount)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount);
 }
 
-void SwiperView::SetAutoPlay(bool autoPlay)
+void SwiperModelNG::SetAutoPlay(bool autoPlay)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, AutoPlay, autoPlay);
 }
 
-void SwiperView::SetAutoPlayInterval(uint32_t interval)
+void SwiperModelNG::SetAutoPlayInterval(uint32_t interval)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, AutoPlayInterval, interval);
 }
 
-void SwiperView::SetDuration(uint32_t duration)
+void SwiperModelNG::SetDuration(uint32_t duration)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, Duration, duration);
 }
 
-void SwiperView::SetLoop(bool loop)
+void SwiperModelNG::SetLoop(bool loop)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, Loop, loop);
 }
 
-void SwiperView::SetEnabled(bool enabled)
+void SwiperModelNG::SetEnabled(bool enabled)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, Enabled, enabled);
 }
 
-void SwiperView::SetDisableSwipe(bool disableSwipe)
+void SwiperModelNG::SetDisableSwipe(bool disableSwipe)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, DisableSwipe, disableSwipe);
 }
 
-void SwiperView::SetEdgeEffect(EdgeEffect edgeEffect)
+void SwiperModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, EdgeEffect, edgeEffect);
 }
 
-void SwiperView::SetCurve(const RefPtr<Curve>& curve)
+void SwiperModelNG::SetCurve(const RefPtr<Curve>& curve)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, Curve, curve);
 }
 
-void SwiperView::SetOnChange(ChangeEvent&& onChange)
+void SwiperModelNG::SetOnChange(ChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
