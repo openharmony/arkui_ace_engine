@@ -48,7 +48,7 @@ double GridColumnInfo::GetWidth() const
         return 0.0;
     }
 
-    uint32_t columns = 0;
+    uint32_t columns = columns_;
     auto sizeType = parent_->GetSizeType();
     switch (sizeType) {
         case GridSizeType::XS:

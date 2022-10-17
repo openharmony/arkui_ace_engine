@@ -107,7 +107,7 @@ public:
     static void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules);
     static void SetVisibility(VisibleType visible);
     static void SetGrid(
-        std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
+        std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
 
     // position
     static void SetPosition(const OffsetT<Dimension>& value);

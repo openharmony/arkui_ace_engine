@@ -114,6 +114,7 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
+    UpdateGridConstraint();
     layoutConstraint_ = parentConstraint;
     if (margin_) {
         // TODO: add margin is negative case.
@@ -187,24 +188,41 @@ void LayoutProperty::CheckAspectRatio()
     // TODO: after measure done, need to check AspectRatio again.
 }
 
-void LayoutProperty::UpdateGridConstraint(const RefPtr<FrameNode>& host)
+const std::unique_ptr<GridProperty>& LayoutProperty::GetGridProperty(RefPtr<FrameNode> node)
 {
-    const auto& gridProperty = GetGridProperty();
-    if (!gridProperty) {
-        return;
+    if (gridProperty_ && !gridProperty_->HasContainer()) {
+        BuildGridProperty(node);
     }
-    bool gridflag = false;
+    return gridProperty_;
+}
+
+void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
+{
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
             auto containerLayout = AceType::DynamicCast<FrameNode>(parent)->GetLayoutProperty();
-            gridflag = gridProperty->UpdateContainer(containerLayout, host);
-            break;
+            gridProperty_->UpdateContainer(containerLayout, host);
+            SetHost(host);
+            return;
         }
         parent = parent->GetParent();
     }
-    if (gridflag) {
-        UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty->GetWidth()), std::nullopt));
+}
+
+void LayoutProperty::UpdateGridConstraint()
+{
+    if (gridProperty_ && gridProperty_->HasContainer()) {
+        UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty_->GetWidth()), std::nullopt));
+        auto optOffset = gridProperty_->GetOffset();
+        if (optOffset == UNDEFINED_DIMENSION) {
+            return;
+        }
+        OffsetT<Dimension> offset(optOffset, Dimension());
+        auto target = GetHost()->GetRenderContext();
+        if (target) {
+            target->UpdatePosition(offset);
+        }
     }
 }
 
