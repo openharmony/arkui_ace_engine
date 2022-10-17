@@ -16,18 +16,16 @@
 #include <optional>
 #include <string_view>
 
-
 #include "base/utils/macros.h"
-#include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_VIEW_H
 
 namespace OHOS::Ace::NG {
-    
+
 // pair<value, icon>
 using SelectParam = std::pair<std::string, std::string>;
 
@@ -43,7 +41,7 @@ public:
     static void SetFontFamily(const std::vector<std::string>& value);
     static void SetFontColor(const Color& color);
 
-    static void SetSelectedOptionBgColor(const Color& color);    
+    static void SetSelectedOptionBgColor(const Color& color);
     static void SetSelectedOptionFontSize(const Dimension& value);
     static void SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value);
     static void SetSelectedOptionFontWeight(const FontWeight& value);
@@ -58,7 +56,6 @@ public:
     static void SetOptionFontColor(const Color& color);
 
     static void SetOnSelect(SelectEvent&& onSelect);
-
 };
 
 } // namespace OHOS::Ace::NG

@@ -37,10 +37,6 @@ RefPtr<FrameNode> Create(int32_t targetId, int index)
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
     auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(targetId, index));
 
-    auto paintProps = node->GetPaintProperty<OptionPaintProperty>();
-    paintProps->UpdateBackgroundColor(Color(DEFAULT_BACKGROUND_COLOR));
-    paintProps->UpdateSelectedBackgroundColor(Color(DEFAULT_HOVER_BACKGROUND_COLOR));
-
     // set border radius
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
@@ -48,6 +44,9 @@ RefPtr<FrameNode> Create(int32_t targetId, int index)
     border.SetRadius(ROUND_RADIUS_PHONE);
     renderContext->UpdateBorderRadius(border);
 
+    auto props = node->GetPaintProperty<OptionPaintProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    props->UpdateHover(false);
     return node;
 }
 
@@ -70,14 +69,14 @@ RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& 
 } // namespace
 
 RefPtr<FrameNode> OptionView::CreateMenuOption(
-    const std::string& value, const std::function<void()>& onClickFunc, int32_t targetId, int index)
+    const std::string& value, std::function<void()>&& onClickFunc, int32_t targetId, int index)
 {
     auto option = Create(targetId, index);
     CreateText(value, option);
 
     auto eventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
-    eventHub->SetOnClick(onClickFunc);
+    eventHub->SetMenuOnClick(std::move(onClickFunc));
 
     return option;
 }
@@ -91,6 +90,7 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     row->MountToParent(option);
 
+    // create icon node
     auto iconNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(iconNode, nullptr);

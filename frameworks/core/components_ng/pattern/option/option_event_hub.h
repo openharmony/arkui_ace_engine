@@ -16,9 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OPTION_OPTION_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OPTION_OPTION_EVENT_HUB_H
 
+#include <cstdint>
+
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
+
+using MenuJSCallback = std::function<void()>;
+using OnSelectEvent = std::function<void(int32_t)>;
 
 class OptionEventHub : public EventHub {
     DECLARE_ACE_TYPE(OptionEventHub, EventHub)
@@ -27,18 +32,31 @@ public:
     OptionEventHub() = default;
     ~OptionEventHub() override = default;
 
-    void SetOnClick(const std::function<void ()> &onClickFunc)
+    void SetMenuOnClick(std::function<void()>&& onClickFunc)
     {
-        onClick_ = onClickFunc;
+        menuOnClick_ = std::move(onClickFunc);
     }
 
-    const std::function<void ()>& GetOnClick()
+    std::function<void ()>&& GetJsCallback()
     {
-        return onClick_;
+        return std::move(menuOnClick_);
+    }
+
+    void SetOnSelect(const std::function<void(int32_t)>& onSelect)
+    {
+        onSelect_ = onSelect;
+    }
+
+    std::function<void(int32_t)>&& GetOnSelect()
+    {
+        return std::move(onSelect_);
     }
 
 private:
-    std::function<void ()> onClick_;
+    MenuJSCallback menuOnClick_;
+
+    // callback of select component
+    OnSelectEvent onSelect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionEventHub);
 };

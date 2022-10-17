@@ -20,6 +20,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/option/option_component.h"
 #include "core/components/select/select_component.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -151,6 +152,12 @@ void JSSelect::JSBind(BindingTarget globalObj)
 
 void JSSelect::Selected(int value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("set selected");
+        NG::SelectView::SetSelected(value);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
     if (!selectComponent) {
@@ -166,11 +173,6 @@ void JSSelect::Selected(int value)
     if (value < 0 || value >= static_cast<int32_t>(option.size())) {
         LOGE("Input selected index error, use the default value");
         value = 0;
-    }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SelectView::SetSelected(value);
-        return;
     }
 
     auto tipText = selectComponent->GetTipText();
@@ -718,6 +720,11 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
 {
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
         LOGE("arg is not a string, number or object.");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsPadding(info);
         return;
     }
 

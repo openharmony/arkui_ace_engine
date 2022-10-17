@@ -15,12 +15,13 @@
 
 #include "core/components_ng/pattern/select/select_view.h"
 
+#include "base/utils/utils.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -39,7 +40,7 @@ void SelectView::Create(const std::vector<SelectParam>& params)
     // create menu node
     auto menu = MenuView::Create(params, V2::SELECT_ETS_TAG, nodeId);
     pattern->SetMenuNode(menu);
-    
+
     // store option pointers in select
     auto menuContainer = menu->GetChildAtIndex(0);
     CHECK_NULL_VOID(menuContainer);
@@ -52,6 +53,9 @@ void SelectView::Create(const std::vector<SelectParam>& params)
 
 void SelectView::SetSelected(int32_t idx)
 {
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(idx);
 }
 
 void SelectView::SetValue(const std::string& value)
@@ -98,21 +102,44 @@ void SelectView::SetFontFamily(const std::vector<std::string>& value)
 
 void SelectView::SetSelectedOptionBgColor(const Color& color)
 {
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionBgColor(color);
 }
+
 void SelectView::SetSelectedOptionFontSize(const Dimension& value)
 {
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionFontSize(value);
 }
+
 void SelectView::SetSelectedOptionFontColor(const Color& color)
 {
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionFontColor(color);
 }
+
 void SelectView::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value)
 {
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionItalicFontStyle(value);
 }
+
 void SelectView::SetSelectedOptionFontWeight(const FontWeight& value)
 {
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionFontWeight(value);
 }
+
 void SelectView::SetSelectedOptionFontFamily(const std::vector<std::string>& value)
 {
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionFontFamily(value);
 }
 
 void SelectView::SetOptionBgColor(const Color& color)
@@ -121,30 +148,35 @@ void SelectView::SetOptionBgColor(const Color& color)
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionBgColor(color);
 }
+
 void SelectView::SetOptionFontSize(const Dimension& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionFontSize(value);
 }
+
 void SelectView::SetOptionFontColor(const Color& color)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionBgColor(color);
 }
+
 void SelectView::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionItalicFontStyle(value);
 }
+
 void SelectView::SetOptionFontWeight(const FontWeight& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionFontWeight(value);
 }
+
 void SelectView::SetOptionFontFamily(const std::vector<std::string>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
@@ -152,6 +184,6 @@ void SelectView::SetOptionFontFamily(const std::vector<std::string>& value)
     pattern->SetOptionFontFamily(value);
 }
 
-void SelectView::SetOnSelect(SelectEvent&& onSelect){}
+void SelectView::SetOnSelect(SelectEvent&& onSelect) {}
 
 } // namespace OHOS::Ace::NG

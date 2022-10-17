@@ -30,44 +30,10 @@ CanvasDrawFunction OptionPaintMethod::GetOverlayDrawFunction(PaintWrapper* paint
     return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto option = weak.Upgrade();
         if (option) {
-            option->PaintBackground(canvas, paintWrapper);
             // don't paint divider when hovered
             option->PaintDivider(canvas, paintWrapper);
         }
     };
-}
-
-void OptionPaintMethod::PaintBackground(RSCanvas& canvas, PaintWrapper* paintWrapper)
-{
-    CHECK_NULL_VOID(paintWrapper);
-    auto props = DynamicCast<OptionPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(props);
-
-    // get background color
-    Color bgColor;
-    hover_ = props->GetHover().value_or(false);
-    if (hover_) {
-        bgColor = props->GetSelectedBackgroundColor().value_or(Color::WHITE);
-    } else {
-        bgColor = props->GetBackgroundColor().value_or(Color::WHITE);
-    }
-    RSBrush brush;
-    brush.SetARGB(bgColor.GetRed(), bgColor.GetGreen(), bgColor.GetBlue(), bgColor.GetAlpha());
-    canvas.AttachBrush(brush);
-
-    // initialize rRect radius
-    float radius = ROUND_RADIUS_PHONE.ConvertToPx();
-
-    // offset should be (0, 0)
-    auto size = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto offset = paintWrapper->GetContentOffset();
-    LOGD("paintWrapper offset = %{public}f, %{public}f, size = %{public}f, %{public}f", offset.GetX(), offset.GetY(),
-        size.Width(), size.Height());
-    // draw background rRect
-    RSRoundRect rSRoundRect(
-        RSRRect(offset.GetX(), offset.GetY(), size.Width() + offset.GetX(), size.Height() + offset.GetY()), radius,
-        radius);
-    canvas.DrawRoundRect(rSRoundRect);
 }
 
 void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper)
@@ -77,7 +43,8 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     CHECK_NULL_VOID(props);
 
     bool needDivider = props->GetNeedDivider().value_or(true);
-    if (!needDivider || hover_) {
+    bool hover = props->GetHover().value_or(false);
+    if (!needDivider || hover) {
         return;
     }
 

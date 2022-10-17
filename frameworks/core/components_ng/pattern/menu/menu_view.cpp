@@ -51,13 +51,12 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& ta
 }
 
 // create menu with menuItems
-RefPtr<FrameNode> MenuView::Create(
-    const std::vector<OptionParam>& params, const std::string& targetTag, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, const std::string& targetTag, int32_t targetId)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateMenuOption(params[i].first, params[i].second, targetId, i);
+        auto optionNode = OptionView::CreateMenuOption(params[i].first, std::move(params[i].second), targetId, i);
         // first node never paints divider
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
@@ -99,7 +98,6 @@ RefPtr<FrameNode> MenuView::Create(
             props->UpdateNeedDivider(false);
         }
         optionNode->MountToParent(menuNode);
-        optionNode->MarkModifyDone();
     }
     return wrapperNode;
 }

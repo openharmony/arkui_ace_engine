@@ -16,12 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_SELECT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_SELECT_PATTERN_H
 
+#include <cstdint>
+#include <optional>
+#include <stdint.h>
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/option/option_paint_method.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/select/select_view.h"
 
 namespace OHOS::Ace::NG {
@@ -56,6 +60,8 @@ public:
         options_.push_back(option);
     }
 
+    void SetSelected(int32_t index);
+
     // set properties of text node
     void SetValue(const std::string& value);
     void SetFontSize(const Dimension& value);
@@ -63,7 +69,7 @@ public:
     void SetFontWeight(const FontWeight& value);
     void SetFontFamily(const std::vector<std::string>& value);
     void SetFontColor(const Color& color);
-    
+
     // set props of option nodes
     void SetOptionBgColor(const Color& color);
     void SetOptionFontSize(const Dimension& value);
@@ -72,6 +78,14 @@ public:
     void SetOptionFontFamily(const std::vector<std::string>& value);
     void SetOptionFontColor(const Color& color);
 
+    // set props of option node when selected
+    void SetSelectedOptionBgColor(const Color& color);
+    void SetSelectedOptionFontSize(const Dimension& value);
+    void SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value);
+    void SetSelectedOptionFontWeight(const FontWeight& value);
+    void SetSelectedOptionFontFamily(const std::vector<std::string>& value);
+    void SetSelectedOptionFontColor(const Color& color);
+
 private:
     void OnModifyDone() override;
 
@@ -79,14 +93,33 @@ private:
     void RegisterOnHover();
     // add click event to show menu
     void RegisterOnClick();
+    // callback when an option is selected
+    void CreateSelectedCallback();
+
+    // update selected option props
+    void UpdateSelectedProps(int32_t index);
+    // update text to selected option's text
+    void UpdateText(int32_t index);
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menu_ = nullptr;
     RefPtr<FrameNode> text_ = nullptr;
-    bool disabled_ = false;
+
+    // index of selected option
+    int32_t selected_ = -1;
+    // props when selected
+    struct SelectedFont {
+        // text style when selected
+        std::optional<Dimension> FontSize;
+        std::optional<Ace::FontStyle> FontStyle;
+        std::optional<FontWeight> FontWeight;
+        std::optional<std::vector<std::string>> FontFamily;
+        std::optional<Color> FontColor;
+    };
+    SelectedFont selectedFont_;
+    std::optional<Color> selectedBgColor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
-
 };
 
 } // namespace OHOS::Ace::NG

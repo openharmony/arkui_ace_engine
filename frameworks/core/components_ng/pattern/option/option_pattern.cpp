@@ -16,9 +16,11 @@
 #include "core/components_ng/pattern/option/option_pattern.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -26,65 +28,79 @@ namespace OHOS::Ace::NG {
 
 void OptionPattern::OnModifyDone()
 {
+    RegisterOnClick();
+    RegisterOnHover();
+    textTheme_ = PipelineContext::GetCurrentContext()->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme_);
+}
+
+void OptionPattern::RegisterOnClick()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<OptionEventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
 
-    auto action = hub->GetOnClick();
-    RegisterOnClick(gestureHub, action);
-    RegisterOnHover(gestureHub);
-}
-
-void OptionPattern::RegisterOnClick(const RefPtr<GestureEventHub>& hub, const std::function<void()>& action)
-{
-    auto host = GetHost();
-    auto event = [host, action, targetId = targetId_](GestureEvent& /*info*/) {
-        if (action) {
-            LOGI("Option's JS callback executing");
-            action();
+    auto event = [JsAction = hub->GetJsCallback(), onSelect = hub->GetOnSelect(), targetId = targetId_, index = index_](
+                     GestureEvent& /*info*/) {
+        if (JsAction) {
+            LOGI("Option's callback executing");
+            JsAction();
+        }
+        if (onSelect) {
+            LOGI("selecting option %d", index);
+            onSelect(index);
         }
         // hide menu when option is clicked
-        auto pipeline = host->GetContext();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
         overlayManager->HideMenu(targetId);
     };
     auto clickEvent = MakeRefPtr<ClickEvent>(std::move(event));
-    hub->AddClickEvent(clickEvent);
+
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->AddClickEvent(clickEvent);
 }
 
-void OptionPattern::RegisterOnHover(const RefPtr<GestureEventHub>& hub)
+void OptionPattern::RegisterOnHover()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
 
-    auto touchCallback = [host, weak = WeakClaim(this)](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto touchType = info.GetTouches().front().GetTouchType();
-        // update hover status, repaint background color
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto props = pattern->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(props);
+        // update hover status, change background color
         if (touchType == TouchType::DOWN) {
             LOGD("triggers option hover");
-            auto paintProps = pattern->GetPaintProperty<OptionPaintProperty>();
-            paintProps->UpdateHover(true);
+            renderContext->UpdateBackgroundColor(Color(DEFAULT_HOVER_BACKGROUND_COLOR));
+            props->UpdateHover(true);
             host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-
             // disable next option node's divider
             pattern->UpdateNextNodeDivider(false);
         }
         if (touchType == TouchType::UP) {
-            auto paintProps = pattern->GetPaintProperty<OptionPaintProperty>();
-            paintProps->UpdateHover(false);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateBackgroundColor(pattern->bgColor_);
+            props->UpdateHover(false);
             host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-
             pattern->UpdateNextNodeDivider(true);
         }
     };
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    hub->AddTouchEvent(touchEvent);
+    gestureHub->AddTouchEvent(touchEvent);
 }
 
 void OptionPattern::UpdateNextNodeDivider(bool needDivider)
@@ -104,39 +120,105 @@ void OptionPattern::UpdateNextNodeDivider(bool needDivider)
     }
 }
 
-void OptionPattern::SetFontSize(const Dimension& value) {
+void OptionPattern::SetBgColor(const Color& color)
+{
+    auto renderContext = GetHost()->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(color);
+    bgColor_ = color;
+}
+
+void OptionPattern::SetFontSize(const Dimension& value)
+{
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontSize(value);
 }
 
-void OptionPattern::SetItalicFontStyle(const Ace::FontStyle& value) {
+void OptionPattern::SetItalicFontStyle(const Ace::FontStyle& value)
+{
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateItalicFontStyle(value);
 }
 
-void OptionPattern::SetFontWeight(const FontWeight& value) {
+void OptionPattern::SetFontWeight(const FontWeight& value)
+{
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontWeight(value);
 }
 
-void OptionPattern::SetFontFamily(const std::vector<std::string>& value) {
+void OptionPattern::SetFontFamily(const std::vector<std::string>& value)
+{
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontFamily(value);
 }
 
-void OptionPattern::SetFontColor(const Color& color) {
+void OptionPattern::SetFontColor(const Color& color)
+{
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateTextColor(color);
+}
+
+Dimension OptionPattern::GetFontSize()
+{
+    CHECK_NULL_RETURN(text_, Dimension());
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, Dimension());
+    auto defaultSize = textTheme_->GetTextStyle().GetFontSize();
+    return props->GetFontSizeValue(defaultSize);
+}
+
+Ace::FontStyle OptionPattern::GetItalicFontStyle()
+{
+    CHECK_NULL_RETURN(text_, Ace::FontStyle());
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, Ace::FontStyle());
+    auto defaultStyle = textTheme_->GetTextStyle().GetFontStyle();
+    return props->GetItalicFontStyleValue(defaultStyle);
+}
+
+FontWeight OptionPattern::GetFontWeight()
+{
+    CHECK_NULL_RETURN(text_, FontWeight());
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, FontWeight());
+    auto defaultWeight = textTheme_->GetTextStyle().GetFontWeight();
+    return props->GetFontWeightValue(defaultWeight);
+}
+
+std::vector<std::string> OptionPattern::GetFontFamily()
+{
+    CHECK_NULL_RETURN(text_, std::vector<std::string>());
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, std::vector<std::string>());
+    auto defaultFamily = textTheme_->GetTextStyle().GetFontFamilies();
+    return props->GetFontFamilyValue(defaultFamily);
+}
+
+Color OptionPattern::GetFontColor()
+{
+    CHECK_NULL_RETURN(text_, Color::TRANSPARENT);
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, Color::TRANSPARENT);
+    auto defaultColor = textTheme_->GetTextStyle().GetTextColor();
+    return props->GetTextColorValue(defaultColor);
+}
+
+const std::string& OptionPattern::GetText()
+{
+    CHECK_NULL_RETURN(text_, std::string());
+    auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textProps, std::string());
+    return textProps->GetContentValue();
 }
 
 } // namespace OHOS::Ace::NG

@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT OptionView {
 public:
     static RefPtr<FrameNode> CreateMenuOption(
-        const std::string& value, const std::function<void()>& onClickFunc, int32_t targetId, int index);
+        const std::string& value, std::function<void()>&& onClickFunc, int32_t targetId, int index);
 
     static RefPtr<FrameNode> CreateSelectOption(
         const std::string& value, const std::string& icon, int32_t targetId, int index);

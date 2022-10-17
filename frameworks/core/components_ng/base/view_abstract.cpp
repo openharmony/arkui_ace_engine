@@ -574,7 +574,7 @@ void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId)
     LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
 }
 
-void ViewAbstract::BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode)
+void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode)
 {
     CHECK_NULL_VOID(targetNode);
 
@@ -582,7 +582,7 @@ void ViewAbstract::BindMenuWithItems(const std::vector<OptionParam>& params, con
         LOGD("menu params is empty");
         return;
     }
-    auto menuNode = MenuView::Create(params, targetNode->GetTag(), targetNode->GetId());
+    auto menuNode = MenuView::Create(std::move(params), targetNode->GetTag(), targetNode->GetId());
     BindMenu(menuNode, targetNode->GetId());
 }
 

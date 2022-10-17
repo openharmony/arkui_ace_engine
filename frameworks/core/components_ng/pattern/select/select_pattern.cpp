@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/select/select_pattern.h"
 
+#include <cstdint>
+
 #include "base/json/json_util.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
@@ -28,6 +30,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -46,6 +49,7 @@ void SelectPattern::OnModifyDone()
 {
     RegisterOnClick();
     RegisterOnHover();
+    CreateSelectedCallback();
 }
 
 // add click event to show menu
@@ -55,7 +59,7 @@ void SelectPattern::RegisterOnClick()
     CHECK_NULL_VOID(host);
 
     auto callback = [id = host->GetId(), menu = menu_](GestureEvent& /*info*/) mutable {
-        LOGI("start executing callback %p", RawPtr(menu));
+        LOGD("start executing click callback %p", RawPtr(menu));
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto overlayManager = context->GetOverlayManager();
@@ -97,6 +101,36 @@ void SelectPattern::RegisterOnHover()
     gestureHub->AddTouchEvent(touchEvent);
 }
 
+void SelectPattern::CreateSelectedCallback()
+{
+    auto callback = [weak = WeakClaim(this)](int32_t index) {
+        auto pattern = weak.Upgrade();
+        pattern->SetSelected(index);
+        pattern->UpdateText(index);
+    };
+    for (auto&& option : options_) {
+        auto hub = option->GetEventHub<OptionEventHub>();
+        // no std::move, need to set multiple options
+        hub->SetOnSelect(callback);
+        option->MarkModifyDone();
+    }
+}
+
+void SelectPattern::SetSelected(int32_t index)
+{
+    LOGI("option index %d is selected", index);
+    // if option is already selected, do nothing
+    if (index == selected_) {
+        return;
+    }
+    if (index >= options_.size() || index < 0) {
+        LOGW("newly selected index invalid");
+        return;
+    }
+    UpdateSelectedProps(index);
+    selected_ = index;
+}
+
 void SelectPattern::BuildChild()
 {
     // get theme from SelectThemeManager
@@ -112,9 +146,6 @@ void SelectPattern::BuildChild()
     text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<TextPattern>());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
-    if (disabled_) {
-        textProps->UpdateTextColor(theme->GetDisabledColor());
-    }
 
     textProps->UpdateTextDecoration(theme->GetTextDecoration());
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -189,50 +220,205 @@ void SelectPattern::SetFontColor(const Color& color)
 
 void SelectPattern::SetOptionBgColor(const Color& color)
 {
-    for (auto&& option : options_) {
-        auto renderContext = option->GetRenderContext();
+    for (size_t i = 0; i < options_.size(); ++i) {
+        if (i == selected_ && selectedBgColor_.has_value()) {
+            continue;
+        }
+        auto renderContext = options_[i]->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(color);
     }
 }
 
 void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
-    for (auto&& option : options_) {
-        auto pattern = option->GetPattern<OptionPattern>();
+    for (size_t i = 0; i < options_.size(); ++i) {
+        if (i == selected_ && selectedFont_.FontSize.has_value()) {
+            continue;
+        }
+        auto pattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
         pattern->SetFontSize(value);
     }
 }
 
 void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
-    for (auto&& option : options_) {
-        auto pattern = option->GetPattern<OptionPattern>();
+    for (size_t i = 0; i < options_.size(); ++i) {
+        if (i == selected_ && selectedFont_.FontStyle.has_value()) {
+            continue;
+        }
+        auto pattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
         pattern->SetItalicFontStyle(value);
     }
 }
 
 void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 {
-    for (auto&& option : options_) {
-        auto pattern = option->GetPattern<OptionPattern>();
+    for (size_t i = 0; i < options_.size(); ++i) {
+        if (i == selected_ && selectedFont_.FontWeight.has_value()) {
+            continue;
+        }
+        auto pattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
         pattern->SetFontWeight(value);
     }
 }
 
 void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 {
-    for (auto&& option : options_) {
-        auto pattern = option->GetPattern<OptionPattern>();
+    for (size_t i = 0; i < options_.size(); ++i) {
+        if (i == selected_ && selectedFont_.FontFamily.has_value()) {
+            continue;
+        }
+        auto pattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
         pattern->SetFontFamily(value);
     }
 }
 
 void SelectPattern::SetOptionFontColor(const Color& color)
 {
-    for (auto&& option : options_) {
-        auto pattern = option->GetPattern<OptionPattern>();
+    for (size_t i = 0; i < options_.size(); ++i) {
+        if (i == selected_ && selectedFont_.FontColor.has_value()) {
+            continue;
+        }
+        auto pattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
         pattern->SetFontColor(color);
     }
+}
+
+// set props of option node when selected
+void SelectPattern::SetSelectedOptionBgColor(const Color& color)
+{
+    selectedBgColor_ = color;
+    if (selected_ != -1) {
+        auto pattern = options_[selected_]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetBgColor(color);
+    }
+}
+
+void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
+{
+    selectedFont_.FontSize = value;
+    if (selected_ != -1) {
+        auto pattern = options_[selected_]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetFontSize(value);
+    }
+}
+
+void SelectPattern::SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value)
+{
+    selectedFont_.FontStyle = value;
+    if (selected_ != -1) {
+        auto pattern = options_[selected_]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetItalicFontStyle(value);
+    }
+}
+
+void SelectPattern::SetSelectedOptionFontWeight(const FontWeight& value)
+{
+    selectedFont_.FontWeight = value;
+    if (selected_ != -1) {
+        auto pattern = options_[selected_]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetFontWeight(value);
+    }
+}
+
+void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& value)
+{
+    selectedFont_.FontFamily = value;
+    if (selected_ != -1) {
+        auto pattern = options_[selected_]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetFontFamily(value);
+    }
+}
+
+void SelectPattern::SetSelectedOptionFontColor(const Color& color)
+{
+    selectedFont_.FontColor = color;
+    if (selected_ != -1) {
+        auto pattern = options_[selected_]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetFontColor(color);
+    }
+}
+
+void SelectPattern::UpdateSelectedProps(int32_t index)
+{
+    CHECK_NULL_VOID(options_[index]);
+    auto newSelected = options_[index]->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(newSelected);
+    // set lastSelected option props back to default (unselected) values
+    if (selected_ > -1) {
+        CHECK_NULL_VOID(options_[selected_]);
+        auto lastSelected = options_[selected_]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(lastSelected);
+
+        auto color = newSelected->GetFontColor();
+        lastSelected->SetFontColor(color);
+
+        auto fontFamily = newSelected->GetFontFamily();
+        lastSelected->SetFontFamily(fontFamily);
+
+        auto fontSize = newSelected->GetFontSize();
+        lastSelected->SetFontSize(fontSize);
+
+        auto fontStyle = newSelected->GetItalicFontStyle();
+        lastSelected->SetItalicFontStyle(fontStyle);
+
+        auto fontWeight = newSelected->GetFontWeight();
+        lastSelected->SetFontWeight(fontWeight);
+
+        auto defaultPaintProps = options_[index]->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(defaultPaintProps);
+        lastSelected->SetBgColor(newSelected->GetBgColor());
+        options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+
+    // set newSelected props
+    if (selectedFont_.FontColor.has_value()) {
+        newSelected->SetFontColor(selectedFont_.FontColor.value());
+    }
+    if (selectedFont_.FontFamily.has_value()) {
+        newSelected->SetFontFamily(selectedFont_.FontFamily.value());
+    }
+    if (selectedFont_.FontSize.has_value()) {
+        newSelected->SetFontSize(selectedFont_.FontSize.value());
+    }
+    if (selectedFont_.FontStyle.has_value()) {
+        newSelected->SetItalicFontStyle(selectedFont_.FontStyle.value());
+    }
+    if (selectedFont_.FontWeight.has_value()) {
+        newSelected->SetFontWeight(selectedFont_.FontWeight.value());
+    }
+    if (selectedBgColor_.has_value()) {
+        newSelected->SetBgColor(selectedBgColor_.value());
+    }
+    options_[index]->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SelectPattern::UpdateText(int32_t index)
+{
+    // update text to selected option's text
+    CHECK_NULL_VOID(text_);
+    auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProps);
+    auto newSelected = options_[index]->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(newSelected);
+    textProps->UpdateContent(newSelected->GetText());
+
+    LOGD("new text = %s", newSelected->GetText().c_str());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 } // namespace OHOS::Ace::NG
