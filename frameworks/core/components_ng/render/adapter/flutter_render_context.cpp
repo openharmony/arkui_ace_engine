@@ -142,4 +142,20 @@ void FlutterRenderContext::RebuildFrame(FrameNode* node, const std::list<RefPtr<
     }
 }
 
+RectF FlutterRenderContext::GetPaintRectWithTransform()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(flutterNode_, rect);
+    // TODO: support transform
+    rect = GetPaintRectWithoutTransform();
+    return rect;
+}
+
+RectF FlutterRenderContext::GetPaintRectWithoutTransform()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(flutterNode_, rect);
+    return flutterNode_->FrameRect();
+}
+
 } // namespace OHOS::Ace::NG
