@@ -90,7 +90,6 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     } else if (status == CheckBoxGroupPaintProperty::SelectStatus::NONE) {
         pen.SetColor(ToRSColor(Color::GRAY));
         brush.SetColor(ToRSColor(Color::WHITE));
-        brush.SetAlpha(50);
         DrawUnselected(canvas, paintOffset, pen, brush, contentSize);
     } else {
         brush.SetColor(ToRSColor(color));
