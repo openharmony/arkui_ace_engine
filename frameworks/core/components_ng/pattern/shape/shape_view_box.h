@@ -46,22 +46,22 @@ public:
         return height_;
     }
 
-    void SetLeft(Dimension& left)
+    void SetLeft(const Dimension& left)
     {
         x_ = left;
     }
 
-    void SetTop(Dimension& top)
+    void SetTop(const Dimension& top)
     {
         y_ = top;
     }
 
-    void SetWidth(Dimension& width)
+    void SetWidth(const Dimension& width)
     {
         width_ = width;
     }
 
-    void SetHeight(Dimension& height)
+    void SetHeight(const Dimension& height)
     {
         height_ = height;
     }

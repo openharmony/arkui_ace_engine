@@ -13,21 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/ellipse_view.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_MODEL_NG_H
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/shape/ellipse_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "base/utils/macros.h"
+#include "core/components_ng/pattern/shape/polygon_model.h"
 
 namespace OHOS::Ace::NG {
 
-void EllipseView::Create()
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::ELLIPSE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<EllipsePattern>(); });
-    stack->Push(frameNode);
-}
+class ACE_EXPORT PolygonModelNG : public OHOS::Ace::PolygonModel {
+public:
+    void Create(bool isPolygon) override;
+    void SetPoints(const ShapePoints& points) override;
+};
+
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_MODEL_NG_H

@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/polygon_view.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_MODEL_NG_CPP
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_MODEL_NG_CPP
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/polygon_model_ng.h"
 #include "core/components_ng/pattern/shape/polygon_paint_property.h"
 #include "core/components_ng/pattern/shape/polygon_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-void PolygonView::Create(bool isPolygon)
+void PolygonModelNG::Create(bool isPolygon)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -32,9 +34,10 @@ void PolygonView::Create(bool isPolygon)
     stack->Push(frameNode);
 }
 
-void PolygonView::SetPoints(const ShapePoints& points)
+void PolygonModelNG::SetPoints(const ShapePoints& points)
 {
     ACE_UPDATE_PAINT_PROPERTY(PolygonPaintProperty, Points, points);
 }
 
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_MODEL_NG_CPP

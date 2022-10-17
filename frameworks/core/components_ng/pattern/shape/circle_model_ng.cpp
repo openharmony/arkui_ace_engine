@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/circle_view.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_MODEL_NG_CPP
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_MODEL_NG_CPP
+
+#include "core/components_ng/pattern/shape/circle_model_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -22,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
-void CircleView::Create()
+void CircleModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -30,4 +33,6 @@ void CircleView::Create()
         V2::CIRCLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CirclePattern>(); });
     stack->Push(frameNode);
 }
+
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_MODEL_NG_CPP

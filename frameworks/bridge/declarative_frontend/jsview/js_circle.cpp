@@ -14,25 +14,40 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
+#include <memory>
 
+#include "bridge/declarative_frontend/jsview/models/circle_model_impl.h"
 #include "core/common/container.h"
-#include "core/components/box/box_component.h"
-#include "core/components/shape/shape_component.h"
-#include "core/components_ng/pattern/shape/circle_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/circle_model.h"
+#include "core/components_ng/pattern/shape/circle_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<CircleModel> CircleModel::instance_ = nullptr;
+
+CircleModel* CircleModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::CircleModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::CircleModelNG());
+        } else {
+            instance_.reset(new Framework::CircleModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 void JSCircle::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CircleView::Create();
-        SetNgSize(info);
-        return;
-    }
-    RefPtr<Component> circleComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::CIRCLE);
-    ViewStackProcessor::GetInstance()->ClaimElementId(circleComponent);
-    ViewStackProcessor::GetInstance()->Push(circleComponent);
+    CircleModel::GetInstance()->Create();
     JSShapeAbstract::SetSize(info);
 }
 

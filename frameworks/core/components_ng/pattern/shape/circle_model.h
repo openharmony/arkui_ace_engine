@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CIRCLE_CIRCLE_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CIRCLE_CIRCLE_MODEL_H
 
-#include "base/utils/macros.h"
+#include <memory>
 
-namespace OHOS::Ace::NG {
-
-class ACE_EXPORT CircleView {
+namespace OHOS::Ace {
+class CircleModel {
 public:
-    static void Create();
+    static CircleModel* GetInstance();
+    virtual ~CircleModel() = default;
+
+    virtual void Create();
+
+private:
+    static std::unique_ptr<CircleModel> instance_;
 };
-
-} // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_VIEW_H
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CIRCLE_CIRCLE_MODEL_H

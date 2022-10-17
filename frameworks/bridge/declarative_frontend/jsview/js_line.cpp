@@ -15,11 +15,32 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 
+#include "bridge/declarative_frontend/jsview/models/line_model_impl.h"
 #include "core/components/shape/shape_component.h"
-#include "core/components_ng/pattern/shape/line_view.h"
-#include "frameworks/base/memory/referenced.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/line_model.h"
+#include "core/components_ng/pattern/shape/line_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<LineModel> LineModel::instance_ = nullptr;
+
+LineModel* LineModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::LineModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::LineModelNG());
+        } else {
+            instance_.reset(new Framework::LineModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -40,15 +61,7 @@ void JSLine::JSBind(BindingTarget globalObj)
 
 void JSLine::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::LineView::Create();
-        SetNgSize(info);
-        return;
-    }
-    RefPtr<ShapeComponent> lineComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::LINE);
-    ViewStackProcessor::GetInstance()->ClaimElementId(lineComponent);
-    lineComponent->SetStroke(Color::BLACK);
-    ViewStackProcessor::GetInstance()->Push(lineComponent);
+    LineModel::GetInstance()->Create();
     JSShapeAbstract::SetSize(info);
 }
 
@@ -61,16 +74,7 @@ void JSLine::SetStart(const JSCallbackInfo& info)
     JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
     ShapePoint startPoint;
     SetPoint(pointArray, startPoint);
-    if(Container::IsCurrentUseNewPipeline()){
-        NG::LineView::StartPoint(startPoint);
-        return;
-    }
-    auto line = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!line) {
-        LOGE("startPointComponent is null.");
-        return;
-    }
-    line->SetStart(startPoint);
+    LineModel::GetInstance()->StartPoint(startPoint);
 }
 
 void JSLine::SetEnd(const JSCallbackInfo& info)
@@ -82,16 +86,7 @@ void JSLine::SetEnd(const JSCallbackInfo& info)
     JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
     ShapePoint endPoint;
     SetPoint(pointArray, endPoint);
-    if(Container::IsCurrentUseNewPipeline()){
-        NG::LineView::EndPoint(endPoint);
-        return;
-    }
-    auto line = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!line) {
-        LOGE("startPointComponent is null.");
-        return;
-    }
-    line->SetEnd(endPoint);
+    LineModel::GetInstance()->StartPoint(endPoint);
 }
 
 void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)

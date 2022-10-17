@@ -13,25 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_LINE_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_LINE_VIEW_H
-
-#include <string>
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_MODEL_NG_H
 
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/shape/line_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_model.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT LineView {
+class ACE_EXPORT ShapeModelNG : public ShapeModel {
 public:
-    static void Create();
-    static void StartPoint(const ShapePoint& value);
-    static void EndPoint(const ShapePoint& value);
+    void Create() override;
+    void SetBitmapMesh(std::vector<double>& mesh, int32_t column, int32_t row) override;
+    void SetViewPort(const Dimension& dimLeft, const Dimension& dimTop, const Dimension& dimWidth,
+        const Dimension& dimHeight) override;
+    void InitBox(RefPtr<PixelMap>& pixMap) override {}
+    void SetWidth(Dimension& width) override;
+    void SetHeight(Dimension& height) override;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_LINE_VIEW_H
+#endif
