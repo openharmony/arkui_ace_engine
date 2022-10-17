@@ -38,15 +38,15 @@ constexpr float TITLE_WIDTH = 100.0f;
 constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 
 // title
-constexpr Dimension TITLE_FONT_SIZE = 24.0_vp;
-constexpr Color TITLE_COLOR = Color(0xE6000000);
-constexpr Dimension TITLE_HEIGHT = 30.0_vp;
+constexpr Dimension TITLE_FONT_SIZE = 30.0_vp; // ohos_id_text_size_headline6
+constexpr Color TITLE_COLOR = Color(0x66182431); // ohos_id_color_text_tertiary
+constexpr Dimension TITLE_HEIGHT = 56.0_vp;
 // subtitle
-constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp;
-constexpr Color SUBTITLE_COLOR = Color(0x99000000);
-constexpr Dimension SUBTITLE_HEIGHT = 14.0_vp;
+constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title3
+constexpr Color SUBTITLE_COLOR = Color(0x99000000); // ohos_id_alpha_content_secondary
+constexpr Dimension SUBTITLE_HEIGHT = 26.0_vp;
 // back button
-constexpr Dimension BACK_BUTTON_WIDTH = 48.0_vp;
+constexpr Dimension BACK_BUTTON_ICON_SIZE = 24.0_vp;
 // title bar
 constexpr Dimension TITLEBAR_HEIGHT_MINI = 56.0_vp;
 constexpr Dimension TITLEBAR_HEIGHT_WITH_SUBTITLE = 137.0_vp;
@@ -64,6 +64,21 @@ constexpr Dimension TEXT_TOP_PADDING = 2.0_vp;
 // divider
 constexpr Dimension DIVIDER_WIDTH = 1.0_vp;
 constexpr Color DIVIDER_COLOR = Color(0x08000000);
+
+// navigation content
+constexpr Dimension SINGLE_LINE_TITLEBAR_HEIGHT = 56.0_vp;
+constexpr Dimension DOUBLE_LINE_TITLEBAR_HEIGHT = 82.0_vp;
+constexpr Dimension MAX_PADDING_START = 24.0_vp;
+constexpr Dimension MAX_PADDING_END = 24.0_vp;
+constexpr Dimension TITLE_TEXT_SIZE = 24.0_vp;
+constexpr Color TITLE_TEXT_COLOR = Color(0x66182431); // Light mode
+
+// navBar
+constexpr Dimension FULL_SINGLE_LINE_TITLEBAR_HEIGHT = 112.0_vp;
+constexpr Dimension FULL_DOUBLE_LINE_TITLEBAR_HEIGHT = 138.0_vp;
+constexpr Dimension MENU_HEIGHT = 56.0_vp;
+constexpr Dimension HORIZONTAL_MARGIN = 16.0_vp; // ohos_id_elements_margin_horizontal_l
+constexpr Dimension HORIZONTAL_MARGIN_M = 8.0_vp; // ohos_id_elements_margin_horizontal_m
 
 struct BarItem {
     std::optional<std::string> text;
@@ -110,6 +125,21 @@ enum class ChildNodeOperation {
     REMOVE,
     REPLACE,
     NONE
+};
+
+enum class TitleHeight {
+    MAINONLY,
+    MAINWITHSUB
+};
+
+enum class TitleBarParentType {
+    NAVBAR,
+    NAVDESTINATION
+};
+
+enum class BarItemParentType {
+    TOOLBAR,
+    MENU
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H
