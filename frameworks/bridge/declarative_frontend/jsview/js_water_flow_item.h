@@ -23,7 +23,6 @@ class JSWaterFlowItem : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create();
-
 };
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WATER_FLOW_ITEM_H

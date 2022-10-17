@@ -28,7 +28,8 @@ const std::unordered_map<std::string, std::function<std::string(const WaterFlowC
     { "rowsTemplate", [](const WaterFlowComposedElement& inspector) { return inspector.GetRowsTemplate(); } },
     { "columnsGap", [](const WaterFlowComposedElement& inspector) { return inspector.GetColumnsGap(); } },
     { "rowsGap", [](const WaterFlowComposedElement& inspector) { return inspector.GetRowsGap(); } },
-    { "itemConstraintSize", [](const WaterFlowComposedElement& inspector) { return inspector.GetItemConstraintSize(); } },
+    { "itemConstraintSize",
+        [](const WaterFlowComposedElement& inspector) { return inspector.GetItemConstraintSize(); } },
 };
 
 } // namespace

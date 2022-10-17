@@ -374,7 +374,7 @@ std::vector<double> TemplatesParser::ParseAutoFill(const std::vector<std::string
         newLens.insert(newLens.end(), lens.begin(), lens.end());
     }
     allocatedSize -= pxSum * repeatCount;
-    for (double & len : lens) {
+    for (double& len : lens) {
         allocatedSize -= len + gap;
         if (LessNotEqual(allocatedSize, 0.0)) {
             break;

@@ -1320,7 +1320,7 @@ void RenderWaterFlow::ClearFlowMatrix(size_t index, bool clearAll)
 void RenderWaterFlow::ClearItemsByCrossIndex(size_t index, bool clearAll)
 {
     if (!clearAll) {
-        for (auto & cross : itemsByCrossIndex_) {
+        for (auto& cross : itemsByCrossIndex_) {
             for (auto item = cross.begin(); item != cross.end();) {
                 if (*item >= index) {
                     item = cross.erase(item);
@@ -1374,7 +1374,7 @@ void RenderWaterFlow::RemoveAllChild()
 
 bool RenderWaterFlow::NeedPredictLayout()
 {
-    return !(updateFlag_ || (NearEqual(dVPStartPosBackup_, viewportStartPos_) && 
+    return !(updateFlag_ || (NearEqual(dVPStartPosBackup_, viewportStartPos_) &&
        (totalCountBack_ == getTotalCount_())));
 }
 

@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 namespace {
 
-const std::unordered_map<std::string, 
+const std::unordered_map<std::string,
 std::function<std::string(const WaterFlowItemComposedElement&)>> CREATE_JSON_MAP {
 };
 
