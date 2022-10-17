@@ -193,7 +193,14 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
                 JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
                 ACE_SCORING_EVENT("Navigation.title.builder");
                 jsBuilderFunc.Execute();
-                navigationContainer->GetDeclaration()->customTitle = ViewStackProcessor::GetInstance()->Finish();
+                auto customTile = ViewStackProcessor::GetInstance()->Finish();
+#if defined(PREVIEW)
+                auto composedComponent = ViewStackProcessor::GetInstance()->CreateInspectorWrapper("NavigationTitle");
+                composedComponent->SetChild(customTile);
+                navigationContainer->GetDeclaration()->customTitle = composedComponent;
+#else
+                navigationContainer->GetDeclaration()->customTitle = customTile;
+#endif
             }
         }
     } else {
@@ -390,7 +397,14 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
                 JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
                 ACE_SCORING_EVENT("Navigation.menu.builder");
                 jsBuilderFunc.Execute();
-                navigationContainer->GetDeclaration()->customMenus = ViewStackProcessor::GetInstance()->Finish();
+                auto customMenus = ViewStackProcessor::GetInstance()->Finish();
+#if defined(PREVIEW)
+                auto composedComponent = ViewStackProcessor::GetInstance()->CreateInspectorWrapper("NavigationMenus");
+                composedComponent->SetChild(customMenus);
+                navigationContainer->GetDeclaration()->customMenus = composedComponent;
+#else
+                navigationContainer->GetDeclaration()->customMenus = customMenus;
+#endif
             }
         }
     } else {

@@ -123,6 +123,12 @@ const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestinationView";
 const char NAVDESTINATION_TITLE_BAR_ETS_TAG[] = "NavDestinationTitleBar";
 const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 
+// navigation title view
+const char NAVIGATION_TITLE_COMPONENT_TAG[] = "NavigationTitle";
+
+// navigation menus view
+const char NAVIGATION_MENUS_COMPONENT_TAG[] = "NavigationMenus";
+
 // row split
 const char ROW_SPLIT_COMPONENT_TAG[] = "RowSplitComponent";
 const char ROW_SPLIT_ETS_TAG[] = "RowSplit";
