@@ -157,6 +157,8 @@ private:
     float currentDelta_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<float> overScroll_;
+    bool scrollable_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool isScroll_ = false;
