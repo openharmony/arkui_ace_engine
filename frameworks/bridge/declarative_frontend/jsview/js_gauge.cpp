@@ -15,12 +15,33 @@
 
 #include "bridge/declarative_frontend/jsview/js_gauge.h"
 
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/chart/chart_component.h"
-#include "core/components/progress/progress_component.h"
-#include "core/components_ng/pattern/gauge/gauge_view.h"
+#include <string>
 
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/models/gauge_model_impl.h"
+#include "core/components_ng/pattern/gauge/gauge_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<GaugeModel> GaugeModel::instance_ = nullptr;
+
+GaugeModel* GaugeModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::DataPanelModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::GaugeModelNG());
+        } else {
+            instance_.reset(new Framework::GaugeModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 void JSGauge::JSBind(BindingTarget globalObj)
@@ -60,17 +81,7 @@ void JSGauge::Create(const JSCallbackInfo& info)
     double gaugeMin = min->IsNumber() ? min->ToNumber<double>() : 0;
     double gaugeMax = max->IsNumber() ? max->ToNumber<double>() : 100;
     double gaugeValue = value->IsNumber() ? value->ToNumber<double>() : 0;
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GaugeView::Create(gaugeValue, gaugeMin, gaugeMax);
-    }
-    auto progressChild =
-        AceType::MakeRefPtr<ProgressComponent>(gaugeMin, gaugeValue, gaugeMin, gaugeMax, ProgressType::GAUGE);
-    progressChild->SetIndicatorFlag(true);
-    progressChild->SetInspectorTag("Gauge");
-    ViewStackProcessor::GetInstance()->ClaimElementId(progressChild);
-    ViewStackProcessor::GetInstance()->Push(progressChild);
-    RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
-    progressChild->InitStyle(progressTheme);
+    GaugeModel::GetInstance()->Create(gaugeValue, gaugeMin, gaugeMax);
 }
 
 void JSGauge::SetValue(const JSCallbackInfo& info)
@@ -79,15 +90,7 @@ void JSGauge::SetValue(const JSCallbackInfo& info)
         LOGE("JSGauge::SetValue::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GaugeView::SetValue(info[0]->ToNumber<float>());
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
-    if (!gaugeComponent) {
-        return;
-    }
-    gaugeComponent->SetValue(info[0]->ToNumber<double>());
+    GaugeModel::GetInstance()->SetValue(info[0]->ToNumber<float>());
 }
 
 void JSGauge::SetStartAngle(const JSCallbackInfo& info)
@@ -96,15 +99,7 @@ void JSGauge::SetStartAngle(const JSCallbackInfo& info)
         LOGE("JSGauge::SetStartAngle::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GaugeView::SetStartAngle(info[0]->ToNumber<float>());
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
-    if (!gaugeComponent) {
-        return;
-    }
-    gaugeComponent->GetTrack()->GetTrackInfo()->SetStartDegree(info[0]->ToNumber<double>());
+    GaugeModel::GetInstance()->SetStartAngle(info[0]->ToNumber<float>());
 }
 
 void JSGauge::SetEndAngle(const JSCallbackInfo& info)
@@ -113,15 +108,7 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
         LOGE("JSGauge::SetEndAngle::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GaugeView::SetEndAngle(info[0]->ToNumber<float>());
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
-    if (!gaugeComponent) {
-        return;
-    }
-    gaugeComponent->GetTrack()->GetTrackInfo()->SetSweepDegree(info[0]->ToNumber<double>());
+    GaugeModel::GetInstance()->SetEndAngle(info[0]->ToNumber<float>());
 }
 
 void JSGauge::SetColors(const JSCallbackInfo& info)
@@ -150,15 +137,7 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
             weights.push_back(0.0f);
         }
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GaugeView::SetColors(colors, weights);
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
-    if (!gaugeComponent) {
-        return;
-    }
-    gaugeComponent->SetSectionsStyle(colors, values);
+    GaugeModel::GetInstance()->SetColors(colors, weights);
 }
 
 void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
@@ -171,15 +150,7 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GaugeView::SetStrokeWidth(strokeWidth);
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
-    if (!gaugeComponent) {
-        return;
-    }
-    gaugeComponent->SetTrackThickness(strokeWidth);
+    GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
 }
 
 void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
@@ -191,15 +162,13 @@ void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto labelText = paramObject->GetProperty("text");
     auto labelColor = paramObject->GetProperty("color");
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
-
-    if (labelText->IsString()) {
-        gaugeComponent->SetLabelMarkedText(labelText->ToString());
-    }
     Color currentColor;
+    ParseJsColor(labelColor, currentColor);
+    if (labelText->IsString()) {
+        GaugeModel::GetInstance()->SetLabelMarkedText(labelText->ToString());
+    }
     if (ParseJsColor(labelColor, currentColor)) {
-        gaugeComponent->SetMarkedTextColor(currentColor);
+        GaugeModel::GetInstance()->SetMarkedTextColor(currentColor);
     }
 }
 
