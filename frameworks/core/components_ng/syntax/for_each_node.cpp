@@ -96,7 +96,7 @@ void ForEachNode::CompareAndUpdateChildren()
         } else {
             auto iter = oldNodeByIdMap.find(newId);
             // the ID was used before, only need to update the child position.
-            children_.emplace_back(iter->second);
+            AddChild(iter->second, DEFAULT_NODE_SLOT, true);
             oldIdsSet.erase(oldIdIt);
         }
     }
@@ -110,7 +110,7 @@ void ForEachNode::CompareAndUpdateChildren()
             // OnDetachFromMainTree to be called while node
             // still part of the tree, we need to find
             // posiiton in the tab tab for the tab.
-            children_.emplace_back(iter->second);
+            AddChild(iter->second, DEFAULT_NODE_SLOT, true);
             // Remove and trigger all Detach callback.
             RemoveChild(iter->second);
         }
