@@ -33,7 +33,14 @@ CanvasDrawFunction RadioPaintMethod::GetContentDrawFunction(PaintWrapper* paintW
 
     auto paintProperty = DynamicCast<RadioPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(paintProperty, nullptr);
-    auto checked = paintProperty->GetRadioCheckValue();
+
+    bool checked = false;
+    if (paintProperty->HasRadioCheck()) {
+        checked = paintProperty->GetRadioCheckValue();
+    } else {
+        paintProperty->UpdateRadioCheck(false);
+    }
+
     auto contentSize = paintWrapper->GetContentSize();
     auto offset = paintWrapper->GetContentOffset();
 
@@ -96,7 +103,6 @@ void RadioPaintMethod::PaintRadio(RSCanvas& canvas, bool checked, const SizeF& c
         // draw inner circle
         RSPen pen = RSPen();
         RSBrush brush = RSBrush();
-        brush.SetAlpha(50);
         brush.SetColor(ToRSColor(Color::WHITE));
         brush.SetAntiAlias(true);
         canvas.AttachBrush(brush);

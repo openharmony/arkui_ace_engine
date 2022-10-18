@@ -13,46 +13,39 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/radio/radio_view.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 
-#include "base/utils/utils.h"
-#include "core/components/picker/picker_value_element.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-void RadioView::Create(const std::optional<std::string>& value, const std::optional<std::string>& group)
+void RadioModelNG::Create(const std::optional<std::string>& value, const std::optional<std::string>& group)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::RADIO_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
-
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (value.has_value()) {
         eventHub->SetValue(value.value());
     }
     if (group.has_value()) {
         eventHub->SetGroup(group.value());
     }
-
-    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, false);
 }
 
-void RadioView::SetChecked(bool isChecked)
+void RadioModelNG::SetChecked(bool isChecked)
 {
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked);
 }
 
-void RadioView::SetOnChange(ChangeEvent&& onChange)
+void RadioModelNG::SetOnChange(ChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -60,5 +53,11 @@ void RadioView::SetOnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
+
+void RadioModelNG::SetWidth(const Dimension& width) {}
+
+void RadioModelNG::SetHeight(const Dimension& height) {}
+
+void RadioModelNG::SetPadding(const NG::PaddingPropertyF& args) {}
 
 } // namespace OHOS::Ace::NG
