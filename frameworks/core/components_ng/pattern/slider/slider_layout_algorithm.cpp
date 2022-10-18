@@ -40,22 +40,26 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
         trackThickness_ = static_cast<float>(sliderLayoutProperty->GetThickness().value().ConvertToPx());
     } else {
         trackThickness_ = static_cast<float>(
-            sliderLayoutProperty->GetSliderMode().value_or(SliderMode::OUTSET) == SliderMode::OUTSET
+            sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+                    SliderModel::SliderMode::OUTSET
                 ? sliderLayoutProperty->GetOutsetTrackThickness().value_or(DEFAULT_SLIDER_HEIGHT_DP).ConvertToPx()
                 : sliderLayoutProperty->GetInsetTrackThickness().value_or(DEFAULT_SLIDER_HEIGHT_DP).ConvertToPx());
     }
     float blockHotSize = static_cast<float>(
-        sliderLayoutProperty->GetSliderMode().value_or(SliderMode::OUTSET) == SliderMode::OUTSET
+        sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+                SliderModel::SliderMode::OUTSET
             ? sliderLayoutProperty->GetOutsetBlockHotSize().value_or(DEFAULT_PRESS_DIAMETER).ConvertToPx()
             : sliderLayoutProperty->GetInsetBlockHotSize().value_or(DEFAULT_PRESS_DIAMETER).ConvertToPx());
     float blockSize = static_cast<float>(
-        sliderLayoutProperty->GetSliderMode().value_or(SliderMode::OUTSET) == SliderMode::OUTSET
+        sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+                SliderModel::SliderMode::OUTSET
             ? sliderLayoutProperty->GetOutsetBlockSize().value_or(DEFAULT_HOVER_DIAMETER).ConvertToPx()
             : sliderLayoutProperty->GetInsetBlockSize().value_or(DEFAULT_HOVER_DIAMETER).ConvertToPx());
 
     float sliderWidth = trackThickness_;
     float blockSizeRatio = blockHotSize / blockSize;
-    if (sliderLayoutProperty->GetSliderMode().value_or(SliderMode::OUTSET) == SliderMode::OUTSET) {
+    if (sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+        SliderModel::SliderMode::OUTSET) {
         blockSize = trackThickness_ * DEFAULT_THICKNESS_ENLARGES_BLOCKSIZE_RATIO;
         blockHotSize = blockSize * blockSizeRatio;
     } else {

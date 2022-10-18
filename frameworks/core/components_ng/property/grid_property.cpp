@@ -31,8 +31,12 @@ Dimension GridProperty::GetWidth()
 Dimension GridProperty::GetOffset()
 {
     // gridInfo_ must exist, because layout algorithm invoke UpdateContainer() first
+    auto offset = gridInfo_->GetOffset();
+    if (offset == UNDEFINED_DIMENSION) {
+        return UNDEFINED_DIMENSION;
+    }
     auto marginOffset = Dimension(gridInfo_->GetParent()->GetMarginLeft().ConvertToPx());
-    return gridInfo_->GetOffset() + marginOffset;
+    return offset + marginOffset;
 }
 
 bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefPtr<AceType>& host)
@@ -47,7 +51,7 @@ bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefP
 
     GridColumnInfo::Builder builder;
     auto containerInfo = MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoValue());
-    builder.SetParent(containerInfo);
+    builder.SetParent(Claim(&gridContainer->GetContainerInfoRef()));
 
     for (const auto& item : typedPropertySet_) {
         builder.SetSizeColumn(item.type_, item.span_);
@@ -59,9 +63,13 @@ bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefP
     return true;
 }
 
-bool GridProperty::UpdateSpan(uint32_t span, GridSizeType type)
+bool GridProperty::UpdateSpan(int32_t span, GridSizeType type)
 {
-    LOGD("Update grid span. (span=%u, type=%i)", span, type);
+    LOGD("Update grid span. (span=%i, type=%i)", span, type);
+    if (span < 0) {
+        LOGE("Span value is illegal.");
+        return false;
+    }
     if (!container_) {
         SetSpan(type, span);
         return true;
@@ -88,7 +96,7 @@ bool GridProperty::UpdateOffset(int32_t offset, GridSizeType type)
     return (currentProp->type_ == type || currentType == type) && SetOffset(type, offset);
 }
 
-bool GridProperty::SetSpan(GridSizeType type, uint32_t span)
+bool GridProperty::SetSpan(GridSizeType type, int32_t span)
 {
     auto item = std::find_if(typedPropertySet_.begin(), typedPropertySet_.end(),
         [type](const GridTypedProperty& p) { return p.type_ == type; });

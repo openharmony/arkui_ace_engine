@@ -179,7 +179,7 @@ bool PickerBaseComponent::HideDialog()
     return true;
 }
 
-void PickerBaseComponent::OpenDialog(DialogProperties& properties)
+void PickerBaseComponent::OpenDialog(const DialogProperties& properties)
 {
     if (!isCreateDialogComponent_) {
         return;

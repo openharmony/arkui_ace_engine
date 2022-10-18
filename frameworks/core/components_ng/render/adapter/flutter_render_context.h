@@ -32,7 +32,7 @@ public:
     FlutterRenderContext() = default;
     ~FlutterRenderContext() override;
 
-    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) override;
+    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
@@ -62,6 +62,10 @@ public:
     void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
 
     void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
+
+    RectF GetPaintRectWithTransform() override;
+
+    RectF GetPaintRectWithoutTransform() override;
 
     const std::shared_ptr<FlutterNode>& GetNode()
     {

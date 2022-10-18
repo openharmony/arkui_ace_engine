@@ -57,6 +57,9 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float crossSize = GetCrossAxisSize(idealSize, axis);
     FillGridViewportAndMeasureChildren(mainSize, crossSize, gridLayoutProperty, layoutWrapper);
     StripItemsOutOfViewport(layoutWrapper);
+
+    // update cache info.
+    layoutWrapper->SetCacheCount(static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_));
 }
 
 void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

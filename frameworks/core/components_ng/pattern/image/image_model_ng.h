@@ -28,6 +28,7 @@ public:
     void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) override;
     void SetAlt(const std::string& src) override;
     void SetBorder(const Border& border) override;
+    void SetBackBorder() override {}
     void SetBlur(double blur) override;
     void SetImageFit(int32_t value) override;
     void SetMatchTextDirection(bool value) override;

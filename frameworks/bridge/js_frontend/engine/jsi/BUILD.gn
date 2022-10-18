@@ -99,6 +99,13 @@ template("js_engine_ark") {
         ":gen_obj_src_abc_strip_native_min",
         "//third_party/jsframework:ark_build",
       ]
+    } else if (defined(config.build_for_ios) && config.build_for_ios) {
+      deps += [
+        ":gen_obj_src_abc_strip_native_min",
+        "//foundation/arkui/napi/native_engine/impl/ark:ace_napi_impl_ark",
+      ]
+      deps += [ "//third_party/jsframework:ark_build" ]
+      external_deps = [ "napi:ace_napi" ]
     } else {
       sources += [ "jsi_utils.cpp" ]
       deps += [ "//third_party/jsframework:ark_build" ]
@@ -113,10 +120,13 @@ template("js_engine_ark") {
     } else if (target_cpu == "arm") {
       defines += [ "APP_USE_ARM" ]
     }
-    deps += [
-      "//arkcompiler/ets_runtime:libark_jsruntime",
-      "//foundation/arkui/napi:ace_napi_ark",
-    ]
+    deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
+    if (defined(config.build_for_ios) && config.build_for_ios) {
+      # static library for ios platform
+      deps += [ "//arkcompiler/ets_runtime:libark_jsruntime_static" ]
+    } else {
+      deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+    }
   }
 }
 

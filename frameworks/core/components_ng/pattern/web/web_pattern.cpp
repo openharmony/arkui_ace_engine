@@ -46,8 +46,6 @@ void WebPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
-    InitEvent();
 }
 
 void WebPattern::InitEvent()
@@ -82,6 +80,10 @@ void WebPattern::InitEvent()
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (touchEvent_) {
+        return;
+    }
+
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -528,6 +530,9 @@ void WebPattern::OnModifyDone()
     if (renderContext->HasBackgroundColor()) {
         delegate_->UpdateBackgroundColor(static_cast<int32_t>(renderContext->GetBackgroundColor()->GetValue()));
     }
+
+    // Initialize events such as keyboard, focus, etc.
+    InitEvent();
 }
 
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
@@ -825,7 +830,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             selectInfo.isSingleHandle = true;
             selectInfo.firstHandle.isShow = IsTouchHandleShow(insertHandle_);
             selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
-            selectInfo.menuInfo.menuDisable = false;
+            selectInfo.menuInfo.menuDisable = true;
             selectInfo.menuInfo.menuIsShow = false;
             selectInfo.onHandleMoveDone = [weak = AceType::WeakClaim(this)](const RectF& rectF, bool isFirst) {
                 auto webPattern = weak.Upgrade();
@@ -859,6 +864,7 @@ void WebPattern::UpdateTouchHandleForOverlay()
     if (overlayType == INSERT_OVERLAY) {
         firstHandleInfo.isShow = IsTouchHandleShow(insertHandle_);
         firstHandleInfo.paintRect = ComputeTouchHandleRect(insertHandle_);
+        menuInfo.menuDisable = true;
         menuInfo.menuIsShow = false;
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSelectMenuInfo(menuInfo);

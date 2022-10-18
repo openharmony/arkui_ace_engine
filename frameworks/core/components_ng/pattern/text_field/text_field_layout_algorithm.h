@@ -63,6 +63,11 @@ public:
         return imageRect_;
     }
 
+    const RectF& GetFrameRect() const
+    {
+        return frameRect_;
+    }
+
     float GetCaretOffsetX() const
     {
         return caretOffsetX_;
@@ -94,6 +99,7 @@ private:
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
 
     std::shared_ptr<RSParagraph> paragraph_;
+    RectF frameRect_;
     RectF textRect_;
     RectF imageRect_;
 

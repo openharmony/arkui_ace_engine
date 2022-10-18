@@ -181,11 +181,10 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
     std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
-    std::map<std::string, NG::DailogEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto dialogNode = DatePickerDialogView::Show(
-        dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancalEvent));
+        dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancelEvent));
     CHECK_NULL_VOID(dialogNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -195,11 +194,10 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
     std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
-    std::map<std::string, NG::DailogEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto dialogNode = TimePickerDialogView::Show(dialogProps, std::move(timePickerProperty), isUseMilitaryTime,
-        std::move(dialogEvent), std::move(dialogCancalEvent));
+        std::move(dialogEvent), std::move(dialogCancelEvent));
     CHECK_NULL_VOID(dialogNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -208,11 +206,11 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-    const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto dialogNode = TextPickerDialogView::Show(
-        dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancalEvent));
+        dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancelEvent));
     CHECK_NULL_VOID(dialogNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -220,7 +218,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::CloseDialog(RefPtr<FrameNode> dialogNode)
+void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     LOGI("OverlayManager::CloseDialog");
     auto rootNode = rootNodeWeak_.Upgrade();

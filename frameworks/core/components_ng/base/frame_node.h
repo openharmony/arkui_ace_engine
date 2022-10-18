@@ -34,6 +34,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -123,6 +124,12 @@ public:
     RefPtr<T> GetPattern() const
     {
         return DynamicCast<T>(pattern_);
+    }
+
+    template<typename T>
+    RefPtr<T> GetAccessibilityProperty() const
+    {
+        return DynamicCast<T>(accessibilityProperty_);
     }
 
     template<typename T>
@@ -249,10 +256,24 @@ public:
 
     OffsetF GetOffsetRelativeToWindow() const;
 
-    bool IsOnMainTree() const
+    void SetActive(bool active) override;
+
+    bool IsActive() const
     {
-        return onMainTree_;
+        return isActive_;
     }
+
+    bool IsInternal() const
+    {
+        return isInternal_;
+    }
+
+    void SetInternal()
+    {
+        isInternal_ = true;
+    }
+
+    void OnAccessibilityEvent(AccessibilityEventType eventType) const;
 
 private:
     void UpdateLayoutPropertyFlag() override;
@@ -295,6 +316,7 @@ private:
     std::multiset<RefPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
+    RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
@@ -310,6 +332,10 @@ private:
 
     bool isActive_ = false;
     bool isResponseRegion_ = false;
+
+    // internal node such as Text in Button CreateWithLabel
+    // should not seen by preview inspector or accessibility
+    bool isInternal_ = false;
 
     std::string nodeName_;
 

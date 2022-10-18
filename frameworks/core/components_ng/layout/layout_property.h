@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_LAYOUT_PROPERTY_H
 
+#include <cstddef>
 #include <memory>
 #include <optional>
 
@@ -103,10 +104,7 @@ public:
         return flexItemProperty_;
     }
 
-    const std::unique_ptr<GridProperty>& GetGridProperty() const
-    {
-        return gridProperty_;
-    }
+    const std::unique_ptr<GridProperty>& GetGridProperty(RefPtr<FrameNode> node);
 
     TextDirection GetLayoutDirection() const
     {
@@ -302,7 +300,7 @@ public:
     }
 
     void UpdateGridProperty(
-        std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED)
+        std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED)
     {
         if (!gridProperty_) {
             gridProperty_ = std::make_unique<GridProperty>();
@@ -315,7 +313,9 @@ public:
         }
     }
 
-    void UpdateGridConstraint(const RefPtr<FrameNode>& host);
+    void UpdateGridConstraint();
+
+    void BuildGridProperty(const RefPtr<FrameNode>& host);
 
     void UpdateContentConstraint();
 
@@ -330,6 +330,8 @@ public:
 
     PaddingPropertyF CreatePaddingWithoutBorder();
     PaddingPropertyF CreatePaddingAndBorder();
+    PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
+        float borderHorizontalDefault, float borderVerticalDefault);
 
     MarginPropertyF CreateMargin();
 

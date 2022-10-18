@@ -30,7 +30,7 @@ bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<
 
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
-    LOGI("hapPath_:%{public}s", hapPath_.c_str());
+    LOGD("hapPath_:%{public}s", hapPath_.c_str());
     runtimeExtractor_ = AbilityRuntime::RuntimeExtractor::Create(hapPath_);
     return true;
 }
@@ -67,7 +67,7 @@ private:
 std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& assetName) const
 {
     ACE_SCOPED_TRACE("GetAsMapping");
-    LOGI("assert name is: %{public}s :: %{public}s", hapPath_.c_str(), assetName.c_str());
+    LOGD("assert name is: %{public}s :: %{public}s", hapPath_.c_str(), assetName.c_str());
     std::lock_guard<std::mutex> lock(mutex_);
 
     for (const auto& basePath : assetBasePaths_) {
@@ -83,7 +83,7 @@ std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& 
             LOGW("GetFileBuffer failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
             continue;
         }
-        LOGI("GetFileBuffer Success: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
+        LOGD("GetFileBuffer Success: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
         return std::make_unique<HapAssetMapping>(osstream);
     }
     LOGE("Cannot find base path of %{public}s", assetName.c_str());

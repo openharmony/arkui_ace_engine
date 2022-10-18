@@ -19,6 +19,7 @@
 #include <functional>
 #include <optional>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_scoring_log.h"
@@ -94,7 +95,6 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
-    static void ParseAndSetTransitionOption(std::unique_ptr<JsonValue>& transitionArgs);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
@@ -206,6 +206,7 @@ public:
     static void JsOnDragStart(const JSCallbackInfo& info);
     static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragItemInfo& dragInfo);
     static RefPtr<Component> ParseDragItemComponent(const JSRef<JSVal>& info);
+    static RefPtr<NG::UINode> ParseDragCustomUINode(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
@@ -302,8 +303,6 @@ public:
      */
     static RefPtr<Gesture> GetTapGesture(
         const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
-    static RefPtr<Decoration> GetFrontDecoration();
-    static RefPtr<Decoration> GetBackDecoration();
     static const Border& GetBorder();
     static void SetMarginTop(const JSCallbackInfo& info);
     static void SetMarginBottom(const JSCallbackInfo& info);
@@ -315,26 +314,15 @@ public:
     static void SetPaddingRight(const JSCallbackInfo& info);
     static void SetBorder(const Border& border);
     static void SetBorderStyle(int32_t style);
-    static void SetBorderRadius(const Dimension& value, const AnimationOption& option);
     static void SetBorderColor(const Color& color, const AnimationOption& option);
     static void SetBorderWidth(const Dimension& value, const AnimationOption& option);
     static void SetBlur(float radius);
     static void SetColorBlend(Color color);
     static void SetBackdropBlur(float radius);
-    static void SetBlurRadius(const RefPtr<Decoration>& decoration, float radius);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
     static RefPtr<ThemeConstants> GetThemeConstants(const JSRef<JSObject>& jsObj = JSRef<JSObject>());
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);
-    static void SetDefaultTransition(TransitionType transitionType);
-    static bool ParseAndSetOpacityTransition(
-        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
-    static bool ParseAndSetRotateTransition(
-        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
-    static bool ParseAndSetScaleTransition(
-        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
-    static bool ParseAndSetTranslateTransition(
-        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
 
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)

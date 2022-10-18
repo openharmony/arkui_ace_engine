@@ -48,6 +48,7 @@ void MultiFingersRecognizer::OnRejected(size_t touchId)
 void MultiFingersRecognizer::Adjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     if (refereePointers_.empty()) {
+        LOGW("refereePointers is empty");
         return;
     }
 

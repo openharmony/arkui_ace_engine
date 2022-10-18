@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -50,9 +51,12 @@ class OnTextChangedListener;
 
 namespace OHOS::Ace::NG {
 
+constexpr Dimension CURSOR_WIDTH = 1.5_vp;
+constexpr Dimension CURSOR_PADDING = 2.0_vp;
+
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
-enum class CaretUpdateType { CLICK, EVENT, INPUT, NONE };
+enum class CaretUpdateType { CLICK, DEL, EVENT, INPUT, NONE };
 
 class TextFieldPattern : public Pattern, public ValueChangeObserver {
     DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
@@ -96,10 +100,10 @@ public:
     void UpdateCaretPositionByTouchOffset();
     void UpdateSelectionOffset();
 
-    void CalcCursorOffsetXByPosition(int32_t position);
+    float CalcCursorOffsetXByPosition(int32_t position);
 
     bool ComputeOffsetForCaretDownstream(
-        const TextEditingValueNG& TextEditingValueNG, int32_t extent, CaretMetrics& result) const;
+        const TextEditingValueNG& TextEditingValueNG, int32_t extent, CaretMetrics& result);
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
 
@@ -130,7 +134,7 @@ public:
 
     void UpdatePositionOfParagraph(int32_t pos);
     void UpdateCaretPositionByTouch(const Offset& offset);
-    void UpdateCaretOffsetByKeyEvent();
+    void UpdateCaretOffsetByEvent();
 
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose);
@@ -195,19 +199,37 @@ public:
         return caretUpdateType_;
     }
 
-    void SetBasicPadding(float padding)
+    float AdjustTextRectOffsetX();
+    float AdjustTextAreaOffsetY();
+
+    void SetBasicPaddingLeft(float padding)
     {
-        basicPadding_ = padding;
+        basicPaddingLeft_ = padding;
     }
 
-    float GetBasicPadding() const
+    float GetPaddingLeft() const
     {
-        return basicPadding_;
+        return utilPadding_.left.value_or(basicPaddingLeft_);
+    }
+
+    const PaddingPropertyF& GetUtilPadding() const
+    {
+        return utilPadding_;
+    }
+
+    float GetHorizontalPaddingSum() const
+    {
+        return utilPadding_.left.value_or(basicPaddingLeft_) + utilPadding_.right.value_or(basicPaddingLeft_);
     }
 
     const RectF& GetTextRect()
     {
         return textRect_;
+    }
+
+    const RectF& GetFrameRect()
+    {
+        return frameRect_;
     }
 
     const TextSelector& GetTextSelector()
@@ -220,6 +242,11 @@ public:
         selectionMode_ = selectionMode;
     }
 
+    SelectionMode GetSelectMode() const
+    {
+        return selectionMode_;
+    }
+
     bool InSelectMode() const
     {
         return selectionMode_ != SelectionMode::NONE;
@@ -229,6 +256,13 @@ public:
     void CursorMoveRight();
     void CursorMoveUp();
     void CursorMoveDown();
+    void SetCaretPosition(int32_t position);
+
+    const std::vector<RSTypographyProperties::TextBox>& GetTextBoxes()
+    {
+        return textBoxes_;
+    }
+    void CaretMoveToLastNewLineChar();
 
 private:
     bool IsTextArea();
@@ -243,6 +277,8 @@ private:
     void HandleClickEvent(const GestureEvent& info);
     void InitFocusEvent();
     void InitTouchEvent();
+    void AddScrollEvent();
+    void OnTextAreaScroll(float dy);
     void CursorMoveOnClick(const Offset& offset);
 
     void HandleSelectionUp();
@@ -275,7 +311,11 @@ private:
     void FilterWithRegex(const std::string& filter, std::string& valueToUpdate);
     void EditingValueFilter(std::string& valueToUpdate);
     float PreferredLineHeight();
-
+    void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
+    bool CursorInContentRegion();
+    bool OffsetInContentRegion(const Offset& offset);
+    RectF frameRect_;
+    RectF contentRect_;
     RectF textRect_;
     RectF imageRect_;
     std::shared_ptr<RSParagraph> paragraph_;
@@ -291,6 +331,7 @@ private:
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<ScrollableEvent> scrollableEvent_;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
 
     // What the keyboard should appears.
@@ -300,12 +341,15 @@ private:
     TextDirection textDirection_ = TextDirection::LTR;
 
     Offset lastTouchOffset_;
-    float basicPadding_ = 0.0f;
+    float basicPaddingLeft_ = 0.0f;
+    PaddingPropertyF utilPadding_;
+
     float baselineOffset_ = 0.0f;
     float selectionBaseOffsetX_ = 0.0f;
     float selectionDestinationOffsetX_ = 0.0f;
     float caretOffsetX_ = 0.0f;
     float caretOffsetY_ = 0.0f;
+    float caretHeight_ = 0.0f;
     bool focusRequested_ = false;
     bool cursorVisible_ = false;
     bool focusEventInitialized_ = false;
@@ -316,8 +360,6 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
 
-    Offset lastClickOffset_;
-
     CancelableCallback<void()> cursorTwinklingTask_;
 
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
@@ -326,6 +368,7 @@ private:
     RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
     TextSelector textSelector_;
+    std::vector<RSTypographyProperties::TextBox> textBoxes_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
     CopyOptions copyOption_ = CopyOptions::Distributed;

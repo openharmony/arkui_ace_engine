@@ -22,9 +22,9 @@
 namespace OHOS::Ace::NG {
 
 using ChangeEvent = std::function<void(const BaseEventInfo* info)>;
-using DailogEvent = std::function<void(const std::string&)>;
-using DailogCancelEvent = std::function<void()>;
-using DailogGestureEvent = std::function<void(const GestureEvent& info)>;
+using DialogEvent = std::function<void(const std::string&)>;
+using DialogCancelEvent = std::function<void()>;
+using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
 
 class TimePickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TimePickerEventHub, EventHub)
@@ -45,34 +45,34 @@ public:
         }
     }
 
-    void SetDailogChange(DailogEvent&& onChange)
+    void SetDialogChange(DialogEvent&& onChange)
     {
-        dailogChangeEvent_ = std::move(onChange);
+        DialogChangeEvent_ = std::move(onChange);
     }
 
-    void FireDailogChangeEvent(const std::string& info) const
+    void FireDialogChangeEvent(const std::string& info) const
     {
-        if (dailogChangeEvent_) {
-            dailogChangeEvent_(info);
+        if (DialogChangeEvent_) {
+            DialogChangeEvent_(info);
         }
     }
 
-    void SetDailogAcceptEvent(DailogEvent&& onChange)
+    void SetDialogAcceptEvent(DialogEvent&& onChange)
     {
-        dailogAcceptEvent_ = std::move(onChange);
+        DialogAcceptEvent_ = std::move(onChange);
     }
 
-    void FireDailogAcceptEvent(const std::string& info) const
+    void FireDialogAcceptEvent(const std::string& info) const
     {
-        if (dailogAcceptEvent_) {
-            dailogAcceptEvent_(info);
+        if (DialogAcceptEvent_) {
+            DialogAcceptEvent_(info);
         }
     }
 
 private:
     ChangeEvent changeEvent_;
-    DailogEvent dailogChangeEvent_;
-    DailogEvent dailogAcceptEvent_;
+    DialogEvent DialogChangeEvent_;
+    DialogEvent DialogAcceptEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerEventHub);
 };

@@ -91,7 +91,9 @@ struct TextEditingValueNG {
             LOGE("Get selected boundary is invalid");
             return "";
         }
-        return text.substr(start, end);
+        auto min = std::min(start, end);
+        auto max = std::max(start, end);
+        return text.substr(min, max - min);
     }
 
     std::string ToString() const

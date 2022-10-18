@@ -32,7 +32,9 @@ std::shared_ptr<Rosen::RSNode> RosenRenderRemoteWindow::ExtractRSNode(const RefP
         return nullptr;
     }
 
-    auto proxyNode = remoteWindowComponent->GetRSProxyNode();
-    return std::static_pointer_cast<Rosen::RSNode>(proxyNode);
+    auto rsNode = remoteWindowComponent->GetExternalRSNode();
+    // reduce reference count
+    remoteWindowComponent->SetExternalRSNode(nullptr);
+    return rsNode;
 }
 } // namespace OHOS::Ace

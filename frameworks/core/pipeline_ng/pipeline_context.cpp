@@ -124,8 +124,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     }
 
     decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
-    for (const auto& weakNode : dirtyNodes) {
-        auto node = weakNode.Upgrade();
+    for (const auto& node : dirtyNodes) {
         if (AceType::InstanceOf<NG::CustomNode>(node)) {
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
             customNode->Update();
@@ -477,6 +476,14 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     ACE_DCHECK(!params.empty());
 
     if (params[0] == "-element") {
+        if (params.size() > 1 && params[1] == "-lastpage") {
+            auto lastPage = stageManager_->GetLastPage();
+            if (lastPage) {
+                lastPage->DumpTree(0);
+            }
+        } else {
+            rootNode_->DumpTree(0);
+        }
     } else if (params[0] == "-render") {
     } else if (params[0] == "-focus") {
         if (rootNode_->GetFocusHub()) {
@@ -488,7 +495,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-multimodal") {
 #endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
-        rootNode_->DumpTree(0);
+        auto accessibilityManager = GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->OnDumpInfo(params);
+        }
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {

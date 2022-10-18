@@ -33,7 +33,7 @@ constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
-const std::string DEFAULT_FORMAT = "hhmmss";
+const std::string DEFAULT_FORMAT = "hms";
 
 int32_t GetSystemTimeZone()
 {

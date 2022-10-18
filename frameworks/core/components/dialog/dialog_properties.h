@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H
 #define FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H
 
+#include <cstdint>
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/click_event.h"
@@ -86,6 +87,7 @@ struct DialogProperties {
     std::vector<ButtonInfo> buttons;
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
     std::function<void()> onCancel; // NG cancel callback
+    std::function<void(int32_t, int32_t)> onSuccess; // NG prompt success callback
     DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
     DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
     int32_t gridCount = 0;

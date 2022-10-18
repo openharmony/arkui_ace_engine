@@ -33,6 +33,7 @@ namespace {
 constexpr int32_t SCROLL_STATE_IDLE = 0;
 constexpr int32_t SCROLL_STATE_SCROLL = 1;
 constexpr int32_t SCROLL_STATE_FLING = 2;
+constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 } // namespace
 
 void ListPattern::OnAttachToFrameNode()
@@ -130,18 +131,18 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
-    isInitialized_ = listLayoutAlgorithm->GetIsInitialized();
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
+    if (jumpIndex_) {
+        estimateOffset_ = listLayoutAlgorithm->GetEstimateOffset();
+        if (!itemPosition_.empty()) {
+            currentOffset_ = itemPosition_.begin()->second.first;
+        }
+        jumpIndex_.reset();
+    }
     auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
-    auto adjustOffset = currentDelta_ - finalOffset;
-    totalOffset_ = totalOffset_ - adjustOffset;
-
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto listEventHub = host->GetEventHub<ListEventHub>();
-    CHECK_NULL_RETURN(listEventHub, false);
-    jumpIndex_.reset();
+    lastOffset_ = currentOffset_;
+    currentOffset_ = currentOffset_ - finalOffset;
     currentDelta_ = 0.0f;
     CheckScrollable();
 
@@ -149,31 +150,58 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
-    if (totalOffset_ != lastOffset_) {
-        if (indexChanged) {
-            auto onScrollIndex = listEventHub->GetOnScrollIndex();
-            if (onScrollIndex) {
-                onScrollIndex(startIndex_, endIndex_);
-            }
-        }
-        bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(totalOffset_, 0.0);
-        bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(totalOffset_, 0.0);
-        if ((startIndex_ == 0) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
-            auto onReachStart = listEventHub->GetOnReachStart();
-            if (onReachStart) {
-                onReachStart();
-            }
-        }
-        if ((endIndex_ == maxListItemIndex_) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
-            auto onReachEnd = listEventHub->GetOnReachEnd();
-            if (onReachEnd) {
-                onReachEnd();
-            }
+    if (currentOffset_ != lastOffset_) {
+        ProcessEvent(indexChanged, finalOffset);
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
+}
+
+void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listEventHub = host->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(listEventHub);
+
+    auto onScroll = listEventHub->GetOnScroll();
+    if (onScroll) {
+        auto source = GetScrollState();
+        auto offsetPX = Dimension(finalOffset);
+        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+        if (source == SCROLL_FROM_UPDATE) {
+            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_SCROLL));
+        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
+            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_FLING));
+        } else {
+            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_IDLE));
         }
     }
 
-    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
+    if (indexChanged) {
+        auto onScrollIndex = listEventHub->GetOnScrollIndex();
+        if (onScrollIndex) {
+            onScrollIndex(startIndex_, endIndex_);
+        }
+    }
+
+    bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+    if ((startIndex_ == 0) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
+        auto onReachStart = listEventHub->GetOnReachStart();
+        if (onReachStart) {
+            onReachStart();
+        }
+    }
+    if ((endIndex_ == maxListItemIndex_) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
+        auto onReachEnd = listEventHub->GetOnReachEnd();
+        if (onReachEnd) {
+            onReachEnd();
+        }
+    }
 }
 
 void ListPattern::CheckScrollable()
@@ -185,18 +213,19 @@ void ListPattern::CheckScrollable()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    bool scrollable = true;
     if (itemPosition_.empty()) {
-        scrollable = false;
+        scrollable_ = false;
     } else {
         if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_)) {
-            scrollable = LessOrEqual(
+            scrollable_ = GreatNotEqual(
                 (itemPosition_.rbegin()->second.second - itemPosition_.begin()->second.first), GetMainContentSize());
+        } else {
+            scrollable_ = true;
         }
     }
 
     if (scrollableEvent_) {
-        scrollableEvent_->SetEnabled(scrollable);
+        scrollableEvent_->SetEnabled(scrollable_);
     }
 }
 
@@ -207,54 +236,41 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
     }
     listLayoutAlgorithm->SetCurrentOffset(currentDelta_);
-    listLayoutAlgorithm->SetIsInitialized(isInitialized_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
-
-    // check overlay scroll.
-    std::optional<float> overlayScroll;
-    if (!itemPosition_.empty() && (!NearZero(currentDelta_) || (scrollState_ == SCROLL_FROM_ANIMATION_SPRING))) {
-        if ((itemPosition_.begin()->first == 0) && GreatOrEqual(itemPosition_.begin()->second.first, 0.0)) {
-            overlayScroll = itemPosition_.begin()->second.first - 0.0;
-        } else if ((itemPosition_.rbegin()->first == maxListItemIndex_) &&
-                   LessOrEqual(itemPosition_.rbegin()->second.second, GetMainContentSize())) {
-            overlayScroll = GetMainContentSize() - itemPosition_.rbegin()->second.second;
-        }
-    }
-    if (overlayScroll) {
-        if (scrollState_ == SCROLL_FROM_UPDATE) {
-            // adjust offset.
-            auto friction = CalculateFriction(std::abs(overlayScroll.value()) / GetMainContentSize());
-            listLayoutAlgorithm->SetCurrentOffset(currentDelta_ * friction);
-        }
+    if (overScroll_) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
-
     return listLayoutAlgorithm;
 }
 
 void ListPattern::UpdateCurrentOffset(float offset)
 {
     currentDelta_ = currentDelta_ - offset;
-    lastOffset_ = totalOffset_;
-    totalOffset_ = totalOffset_ - offset;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-    auto listEventHub = host->GetEventHub<ListEventHub>();
-    CHECK_NULL_VOID(listEventHub);
-    auto onScroll = listEventHub->GetOnScroll();
-    if (onScroll) {
-        auto source = GetScrollState();
-        auto offsetPX = Dimension(offset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (source == SCROLL_FROM_UPDATE) {
-            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_SCROLL));
-        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
-            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_FLING));
-        } else {
-            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_IDLE));
-        }
+    if (!IsOutOfBoundary() || !scrollable_) {
+        return;
+    }
+
+    // over scroll in drag update from normal to over scroll.
+    if (!overScroll_) {
+        return;
+    }
+
+    // over scroll in drag update during over scroll.
+    auto startPos = itemPosition_.begin()->second.first - currentDelta_;
+    if ((itemPosition_.begin()->first == 0) && Positive(startPos)) {
+        overScroll_ = startPos;
+    } else {
+        overScroll_ = GetMainContentSize() - (itemPosition_.rbegin()->second.second - currentDelta_);
+    }
+
+    if (scrollState_ == SCROLL_FROM_UPDATE) {
+        // adjust offset.
+        auto friction = CalculateFriction(std::abs(overScroll_.value()) / GetMainContentSize());
+        currentDelta_ = currentDelta_ * friction;
     }
 }
 
@@ -269,6 +285,7 @@ void ListPattern::ProcessScrollEnd()
         onScrollStop();
     }
     SetScrollStop(true);
+    overScroll_.reset();
 }
 
 float ListPattern::GetMainContentSize() const
@@ -292,9 +309,10 @@ bool ListPattern::IsOutOfBoundary()
     bool outOfStart = false;
     bool outOfEnd = false;
     if (!itemPosition_.empty()) {
-        outOfStart = (itemPosition_.begin()->first == 0) && (itemPosition_.begin()->second.first > 0);
-        outOfEnd = (itemPosition_.rbegin()->first == maxListItemIndex_) &&
-                   (itemPosition_.rbegin()->second.second < GetMainContentSize());
+        auto startPos = itemPosition_.begin()->second.first - currentDelta_;
+        auto endPos = itemPosition_.rbegin()->second.second - currentDelta_;
+        outOfStart = (itemPosition_.begin()->first == 0) && Positive(startPos);
+        outOfEnd = (itemPosition_.rbegin()->first == maxListItemIndex_) && LessNotEqual(endPos, GetMainContentSize());
     }
     return outOfStart || outOfEnd;
 }
@@ -380,5 +398,79 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
         return true;
     }
     return false;
+}
+
+void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration)
+{
+    LOGI("AnimateTo:%f, duration:%f", position, duration);
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+    }
+    if (!animator_->IsStopped()) {
+        animator_->Stop();
+    }
+    animator_->ClearInterpolators();
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
+    animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
+        auto list = weakScroll.Upgrade();
+        if (list) {
+            list->UpdateCurrentOffset(list->GetTotalOffset() - value);
+        }
+    });
+    animator_->AddInterpolator(animation);
+    animator_->SetDuration(static_cast<int32_t>(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration));
+    animator_->ClearStopListeners();
+    animator_->Play();
+}
+
+void ListPattern::ScrollTo(float position)
+{
+    LOGI("ScrollTo:%{public}f", position);
+    UpdateCurrentOffset(GetTotalOffset() - position);
+}
+
+void ListPattern::ScrollToIndex(int32_t index)
+{
+    LOGI("ScrollToIndex:%{public}d", index);
+    if (index >= 0 && index <= maxListItemIndex_) {
+        jumpIndex_ = index;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
+{
+    LOGI("ScrollToEdge:%{public}zu", scrollEdgeType);
+    if (((scrollEdgeType == ScrollEdgeType::SCROLL_TOP) && GetDirection() == Axis::VERTICAL) ||
+        ((scrollEdgeType == ScrollEdgeType::SCROLL_LEFT) && GetDirection() == Axis::HORIZONTAL)) {
+        jumpIndex_ = 0;
+    } else if (((scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) && GetDirection() == Axis::VERTICAL) ||
+        ((scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT) && GetDirection() == Axis::HORIZONTAL)) {
+        jumpIndex_ = maxListItemIndex_;
+    } else {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+bool ListPattern::ScrollPage(bool reverse)
+{
+    LOGI("ScrollPage:%{public}d", reverse);
+    float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
+    UpdateCurrentOffset(distance);
+    return true;
+}
+
+Offset ListPattern::GetCurrentOffset() const
+{
+    if (GetDirection() == Axis::HORIZONTAL) {
+        return {GetTotalOffset(), 0.0};
+    }
+    return {0.0, GetTotalOffset()};
 }
 } // namespace OHOS::Ace::NG

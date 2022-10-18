@@ -43,7 +43,7 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
 {
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+#ifdef OHOS_PLATFORM
     option.SetArkProperties(SystemProperties::GetArkProperties());
     option.SetGcThreadNum(SystemProperties::GetGcThreadNum());
     option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
@@ -76,7 +76,7 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(IOS_PLATFORM)
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
@@ -102,10 +102,12 @@ bool ArkJSRuntime::StartDebugger()
     bool ret = false;
 #if !defined(PREVIEW)
     if (!libPath_.empty()) {
-#if !defined(ANDROID_PLATFORM)
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ConnectServerManager::Get().AddInstance(instanceId_);
 #endif
+#if !defined(IOS_PLATFORM)
         ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
+#endif
     }
 #endif
     return ret;
@@ -260,7 +262,7 @@ void ArkJSRuntime::ExecutePendingJob()
     JSNApi::ExecutePendingJob(vm_);
 }
 
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(IOS_PLATFORM)
 void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 {
     if (vm_ == nullptr) {

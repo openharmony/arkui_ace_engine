@@ -264,6 +264,15 @@ void UIContentImpl::DestroyUIDirector()
     rsUIDirector->Destroy();
 }
 
+void UIContentImpl::DestroyCallback() const
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetNextFrameLayoutCallback(nullptr);
+}
+
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
     if (window && StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
@@ -1060,6 +1069,7 @@ void UIContentImpl::NotifyMemoryLevel(int32_t level)
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
+    ContainerScope scope(instanceId_);
     pipelineContext->NotifyMemoryLevel(level);
 }
 

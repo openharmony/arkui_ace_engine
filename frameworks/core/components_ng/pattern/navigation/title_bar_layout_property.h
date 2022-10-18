@@ -39,7 +39,6 @@ public:
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         copy->propTitleMode_ = CloneTitleMode();
         copy->propHideBackButton_ = CloneHideBackButton();
-        copy->propHideTitleBar_ = CloneHideTitleBar();
         return copy;
     }
 
@@ -48,13 +47,11 @@ public:
         LayoutProperty::Reset();
         ResetTitleMode();
         ResetHideBackButton();
-        ResetHideTitleBar();
     }
 
 private:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

@@ -35,6 +35,7 @@ public:
     virtual void SetAlt(const std::string& src) = 0;
     virtual void SetBlur(double blur) = 0;
     virtual void SetBorder(const Border& border) = 0;
+    virtual void SetBackBorder() = 0;
     virtual void SetImageFit(int32_t value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitMaxSize(bool value) = 0;

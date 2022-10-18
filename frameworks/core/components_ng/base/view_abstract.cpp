@@ -140,9 +140,9 @@ void ViewAbstract::SetAlignRules(const std::map<AlignDirection, AlignRule>& alig
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules);
 }
 
-void ViewAbstract::SetAlignSelf(int32_t value)
+void ViewAbstract::SetAlignSelf(FlexAlign value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, static_cast<FlexAlign>(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, value);
 }
 
 void ViewAbstract::SetFlexShrink(float value)
@@ -648,7 +648,7 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     frameNode->UpdateInspectorId(inspectorId);
 }
 
-void ViewAbstract::SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type)
+void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

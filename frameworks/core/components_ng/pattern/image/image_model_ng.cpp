@@ -96,7 +96,9 @@ void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
 
 void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& size)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, size);
+    SizeF sourceSize =
+        SizeF(static_cast<float>(size.first.ConvertToPx()), static_cast<float>(size.second.ConvertToPx()));
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize);
 }
 
 void ImageModelNG::SetImageFill(const Color& color)

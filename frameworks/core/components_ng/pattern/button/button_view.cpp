@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -36,11 +37,13 @@ void ButtonView::CreateWithLabel(const std::string& label)
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
-        auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(label);
+        textNode->SetInternal();
         frameNode->AddChild(textNode);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -49,6 +52,9 @@ void ButtonView::CreateWithLabel(const std::string& label)
         ACE_DCHECK(textLayoutProperty);
         textLayoutProperty->UpdateContent(label);
     }
+    auto buttonAccessibilityProperty = frameNode->GetAccessibilityProperty<ButtonAccessibilityProperty>();
+    CHECK_NULL_VOID(buttonAccessibilityProperty);
+    buttonAccessibilityProperty->SetText(label);
     stack->Push(frameNode);
 }
 

@@ -126,6 +126,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetWindowManager()->GetAppLabelId()));
+    textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(TITLE_TEXT_COLOR);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -173,13 +174,13 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
                 LOGI("close button clicked");
                 windowManager->FireWindowCloseCallBack();
             }
-        }));
+        }, true));
 
     return containerTitleRow;
 }
 
 RefPtr<FrameNode> ContainerModalView::BuildControlButton(
-    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback)
+    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton)
 {
     // button image icon
     ImageSourceInfo imageSourceInfo;
@@ -210,7 +211,7 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
 
     MarginProperty margin;
-    margin.right = CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL);
+    margin.right = CalcLength(isCloseButton ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL);
     buttonLayoutProperty->UpdateMargin(margin);
 
     buttonNode->AddChild(imageIcon);

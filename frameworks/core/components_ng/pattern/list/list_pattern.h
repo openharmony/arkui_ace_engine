@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
+#include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -127,6 +128,26 @@ public:
         return itemPosition_;
     }
 
+    void SetPositionController(RefPtr<ListPositionController> control)
+    {
+        positionController_ = control;
+        if (control) {
+            control->SetScrollPattern(AceType::WeakClaim<ListPattern>(this));
+        }
+    }
+
+    float GetTotalOffset() const
+    {
+        return estimateOffset_ - currentOffset_;
+    }
+
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true);
+    void ScrollTo(float position);
+    void ScrollToIndex(int32_t index);
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType);
+    bool ScrollPage(bool reverse);
+    Offset GetCurrentOffset() const;
+
 private:
     void ProcessScrollEnd();
 
@@ -139,24 +160,30 @@ private:
     bool HandleDirectionKey(KeyCode code);
 
     float GetMainContentSize() const;
+    void ProcessEvent(bool indexChanged, float finalOffset);
     void CheckScrollable();
     bool IsOutOfBoundary();
     void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
 
+    RefPtr<Animator> animator_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<Animator> springController_;
+    RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     bool isInitialized_ = false;
-    float totalOffset_ = 0.0f;
+    float estimateOffset_ = 0.0f;
+    float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
 
     float currentDelta_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<float> overScroll_;
+    bool scrollable_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool isScroll_ = false;

@@ -46,7 +46,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(SliderLayoutStyle, SliderLayoutStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, Direction, Axis, PROPERTY_UPDATE_MEASURE)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, Thickness, Dimension, PROPERTY_UPDATE_MEASURE)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, SliderMode, SliderMode, PROPERTY_UPDATE_MEASURE)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_MEASURE)
     ACE_DEFINE_PROPERTY_GROUP(SliderLayoutThemeStyle, SliderLayoutThemeStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutThemeStyle, OutsetBlockSize, Dimension, PROPERTY_UPDATE_MEASURE)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutThemeStyle, OutsetBlockHotSize, Dimension, PROPERTY_UPDATE_MEASURE)

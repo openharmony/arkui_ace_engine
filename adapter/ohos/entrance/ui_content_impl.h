@@ -41,6 +41,7 @@ public:
     ~UIContentImpl()
     {
         DestroyUIDirector();
+        DestroyCallback();
     }
 
     // UI content lifecycles
@@ -86,6 +87,7 @@ private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
+    void DestroyCallback() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;

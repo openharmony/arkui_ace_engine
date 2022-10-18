@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
+
 namespace OHOS::Ace::NG {
 
 } // namespace OHOS::Ace::NG

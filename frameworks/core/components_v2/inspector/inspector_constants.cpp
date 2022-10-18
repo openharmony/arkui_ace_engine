@@ -149,6 +149,14 @@ const char GRID_ETS_TAG[] = "Grid";
 const char GRID_ITEM_COMPONENT_TAG[] = "GridLayoutItemComponent";
 const char GRID_ITEM_ETS_TAG[] = "GridItem";
 
+// waterFlow
+const char WATERFLOW_COMPONENT_TAG[] = "WaterFlowComponent";
+const char WATERFLOW_ETS_TAG[] = "WaterFlow";
+
+// flow-item
+const char FLOW_ITEM_COMPONENT_TAG[] = "WaterFlowItemComponent";
+const char FLOW_ITEM_ETS_TAG[] = "FlowItem";
+
 // list
 const char LIST_COMPONENT_TAG[] = "V2::ListComponent";
 const char LIST_ETS_TAG[] = "List";
@@ -403,22 +411,23 @@ ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
 ACE_EXPORT extern const char CANVAS_ETS_TAG[] = "Canvas";
 
 // ActionSheet
-ACE_EXPORT extern const char ACTIONSHEETDIALOG_COMPONENT_TAG[] = "ActionSheet";
-ACE_EXPORT extern const char ACTIONSHEETDIALOG_ETS_TAG[] = "ActionSheet";
+ACE_EXPORT extern const char ACTION_SHEET_DIALOG_COMPONENT_TAG[] = "ActionSheet";
+ACE_EXPORT extern const char ACTION_SHEET_DIALOG_ETS_TAG[] = "ActionSheet";
 
 // AlertDialog
-ACE_EXPORT extern const char ALERTDIALOG_COMPONENT_TAG[] = "AlertDialog";
-ACE_EXPORT extern const char ALERTDIALOG_ETS_TAG[] = "AlertDialog";
+ACE_EXPORT extern const char ALERT_DIALOG_COMPONENT_TAG[] = "AlertDialog";
+ACE_EXPORT extern const char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
 
 // customdialog
-ACE_EXPORT extern const char CUSTOMDIALOG_COMPONENT_TAG[] = "CustomDialog";
-ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[] = "CustomDialog";
+ACE_EXPORT extern const char CUSTOM_DIALOG_COMPONENT_TAG[] = "CustomDialog";
+ACE_EXPORT extern const char CUSTOM_DIALOG_ETS_TAG[] = "CustomDialog";
 
 // datePickerdialog
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
 
 // Normal dialog
+ACE_EXPORT extern const char DIALOG_COMPONENT_TAG[] = "Dialog";
 ACE_EXPORT extern const char DIALOG_ETS_TAG[] = "Dialog";
 
 // sideBar
@@ -453,4 +462,8 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[] = "XComponent";
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
 // Popup
 ACE_EXPORT extern const char POPUP_ETS_TAG[] = "Popup";
+
+// remote window
+ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
+
 } // namespace OHOS::Ace::V2

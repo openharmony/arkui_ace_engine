@@ -82,7 +82,8 @@ void LayoutText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNod
     CHECK_NULL_VOID(textWrapper);
     auto geometryNode = textWrapper->GetGeometryNode();
     auto textOffsetY = ICON_SIZE + TEXT_TOP_PADDING;
-    auto offset = OffsetF(static_cast<float>(ICON_PADDING.ConvertToPx()), static_cast<float>(textOffsetY.ConvertToPx()));
+    auto offset = OffsetF(static_cast<float>(ICON_PADDING.ConvertToPx()),
+        static_cast<float>(textOffsetY.ConvertToPx()));
     geometryNode->SetMarginFrameOffset(offset);
     textWrapper->Layout();
 }

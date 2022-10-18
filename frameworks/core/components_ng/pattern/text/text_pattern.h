@@ -24,6 +24,7 @@
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
@@ -53,6 +54,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<TextLayoutAlgorithm>(spanItemChildren_);
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<TextAccessibilityProperty>();
     }
 
     bool IsAtomicNode() const override

@@ -100,8 +100,6 @@ public:
 
     void SetBuildAfterCallback(const std::function<void()>& callback) override {}
 
-    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) override {}
-
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 
     void CreateExplicitAnimator(const std::function<void()>& onFinishEvent) override {}
@@ -186,7 +184,6 @@ public:
 
     void RemoveWindowFocusChangedCallback(int32_t nodeId);
 
-
     bool GetIsFocusingByTab() const
     {
         return isFocusingByTab_;
@@ -252,6 +249,9 @@ private:
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
+            if (!nodeLeft || !nodeRight) {
+                return false;
+            }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
             }
@@ -262,24 +262,10 @@ private:
         }
     };
 
-    template<typename T>
-    struct NodeCompareWeak {
-        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak) const
-        {
-            auto nodeLeft = nodeLeftWeak.Upgrade();
-            auto nodeRight = nodeRightWeak.Upgrade();
-            if (!nodeLeft || !nodeRight) {
-                return false;
-            }
-            auto compare = NodeCompare<decltype(nodeLeft)>();
-            return compare(nodeLeft, nodeRight);
-        }
-    };
-
     UITaskScheduler taskScheduler_;
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
-    std::set<WeakPtr<UINode>, NodeCompareWeak<WeakPtr<UINode>>> dirtyNodes_;
+    std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
 
     // window on show or on hide

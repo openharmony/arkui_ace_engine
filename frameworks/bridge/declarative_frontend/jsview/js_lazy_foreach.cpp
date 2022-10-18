@@ -35,7 +35,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/components_ng/pattern/container_model.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 
@@ -158,7 +158,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         LOGE("Invalid arguments for LazyForEach");
         return;
     }
-    std::string viewId = ContainerModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
+    std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
 
     JSRef<JSObject> parentViewObj = JSRef<JSObject>::Cast(params[PARAM_PARENT_VIEW]);
     JSRef<JSObject> dataSourceObj = JSRef<JSObject>::Cast(params[PARAM_DATA_SOURCE]);
@@ -185,7 +185,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
 
 void JSLazyForEach::Pop()
 {
-    ContainerModel::GetInstance()->Pop();
+    ViewStackModel::GetInstance()->PopContainer();
 }
 
 } // namespace OHOS::Ace::Framework

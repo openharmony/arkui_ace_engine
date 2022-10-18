@@ -15,31 +15,32 @@
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+#include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
+UITaskScheduler::~UITaskScheduler() = default;
+
 void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
-    if (!dirty) {
-        LOGW("dirty is null");
-        return;
-    }
+    CHECK_NULL_VOID(dirty);
     dirtyLayoutNodes_[dirty->GetPageId()].emplace(dirty);
 }
 
 void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
-    if (!dirty) {
-        LOGW("dirty is null");
-        return;
+    CHECK_NULL_VOID(dirty);
+    auto result = dirtyRenderNodes_[dirty->GetPageId()].emplace(dirty);
+    if (!result.second) {
+        LOGW("fail to emplace %{public}s render node", dirty->GetTag().c_str());
     }
-    dirtyRenderNodes_[dirty->GetPageId()].emplace(dirty);
 }
 
 void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
@@ -49,8 +50,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     // Priority task creation
     for (auto&& pageNodes : dirtyLayoutNodes) {
-        for (auto&& weak : pageNodes.second) {
-            auto node = weak.Upgrade();
+        for (auto&& node : pageNodes.second) {
             if (!node) {
                 continue;
             }
@@ -73,8 +73,7 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
     for (auto&& pageNodes : dirtyRenderNodes) {
-        for (auto&& weak : pageNodes.second) {
-            auto node = weak.Upgrade();
+        for (auto&& node : pageNodes.second) {
             if (!node) {
                 continue;
             }
@@ -111,6 +110,12 @@ void UITaskScheduler::FlushPredictTask(int64_t deadline)
             task(deadline);
         }
     }
+}
+
+void UITaskScheduler::CleanUp()
+{
+    dirtyLayoutNodes_.clear();
+    dirtyRenderNodes_.clear();
 }
 
 } // namespace OHOS::Ace::NG

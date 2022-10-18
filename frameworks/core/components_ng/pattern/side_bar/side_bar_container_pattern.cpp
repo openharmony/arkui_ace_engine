@@ -260,7 +260,6 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
             } else {
                 imgSourceInfo.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
             }
-            imgRenderContext->UpdateBackgroundColor(Color::RED);
             break;
         case SideBarStatus::HIDDEN:
             if (layoutProperty->GetControlButtonHiddenIconStr().has_value()) {
@@ -268,7 +267,6 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
             } else {
                 imgSourceInfo.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
             }
-            imgRenderContext->UpdateBackgroundColor(Color::BLACK);
             break;
         case SideBarStatus::CHANGING:
             if (layoutProperty->GetControlButtonSwitchingIconStr().has_value()) {
@@ -276,13 +274,13 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
             } else {
                 imgSourceInfo.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
             }
-            imgRenderContext->UpdateBackgroundColor(Color::BLUE);
             break;
         default:
             break;
     }
 
     imageLayoutProperty->UpdateImageSourceInfo(imgSourceInfo);
+    imgFrameNode->MarkModifyDone();
 }
 
 bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(

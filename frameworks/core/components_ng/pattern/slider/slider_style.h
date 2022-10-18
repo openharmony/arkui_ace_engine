@@ -18,13 +18,13 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/slider/slider_theme.h"
-#include "core/components/track/track_component.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
 struct SliderLayoutStyle {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderMode, SliderMode)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderMode, SliderModel::SliderMode)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Direction, Axis)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Thickness, Dimension)
 };

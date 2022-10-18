@@ -41,11 +41,7 @@ public:
         return false;
     }
 
-    void CreateTempItems()
-    {
-        std::swap(ids_, tempIds_);
-        std::swap(children_, tempChildren_);
-    }
+    void CreateTempItems();
 
     void CompareAndUpdateChildren();
 

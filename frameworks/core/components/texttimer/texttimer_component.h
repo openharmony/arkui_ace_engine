@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXTTIMER_TEXTTIMER_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXTTIMER_TEXTTIMER_COMPONENT_H
 
+#include <string>
 #include "core/components_v2/common/common_def.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/texttimer/texttimer_controller.h"
@@ -47,7 +48,7 @@ public:
 
     RefPtr<TextTimerController> GetTextTimerController() const;
 
-    ACE_DEFINE_COMPONENT_EVENT(OnTimer, void(uint64_t, uint64_t));
+    ACE_DEFINE_COMPONENT_EVENT(OnTimer, void(const std::string, const std::string));
 
 private:
     RefPtr<TextTimerController> textTimerController_;
