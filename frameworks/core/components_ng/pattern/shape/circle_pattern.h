@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 class CirclePattern : public ShapePattern {
-    DECLARE_ACE_TYPE(CirclePattern, Pattern);
+    DECLARE_ACE_TYPE(CirclePattern, ShapePattern);
 
 public:
     CirclePattern() = default;
