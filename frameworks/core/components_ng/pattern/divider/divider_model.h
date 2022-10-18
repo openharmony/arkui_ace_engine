@@ -13,28 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_MODEL_H
 
-#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
 
-class ACE_EXPORT DividerView {
+class ACE_EXPORT DividerModel {
 public:
-    static void Create();
-    static void Vertical(bool value);
-    static void DividerColor(const Color& value);
-    static void StrokeWidth(const Dimension& value);
-    static void LineCap(const LineCap& value);
+    static DividerModel* GetInstance();
+    virtual ~DividerModel() = default;
+
+    virtual void Create() = 0;
+    virtual void Vertical(bool value) = 0;
+    virtual void DividerColor(const Color& value) = 0;
+    virtual void StrokeWidth(const Dimension& value) = 0;
+    virtual void LineCap(const LineCap& value) = 0;
+
 private:
-    static void LoadTheme(const RefPtr<FrameNode>& frameNode);
+    static std::unique_ptr<DividerModel> instance_;
 };
 
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_MODEL_H

@@ -18,7 +18,6 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/divider/divider_paragraph.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -32,18 +31,29 @@ public:
     {
         auto value = MakeRefPtr<DividerRenderProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
-        value->propDividerRenderParagraph_ = CloneDividerRenderParagraph();
+        value->propDividerColor_ = CloneDividerColor();
+        value->propLineCap_ = CloneLineCap();
         return value;
     }
 
     void Reset() override
     {
         PaintProperty::Reset();
-        ResetDividerRenderParagraph();
+        ResetDividerColor();
+        ResetLineCap();
     }
-    ACE_DEFINE_PROPERTY_GROUP(DividerRenderParagraph, DividerRenderParagraph);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerRenderParagraph, DividerColor, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerRenderParagraph, LineCap, LineCap, PROPERTY_UPDATE_RENDER);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put("dividerColor", propDividerColor_.value_or(Color::BLACK).ColorToString().c_str());
+        json->Put("lineCap", propLineCap_.value_or(LineCap::SQUARE) == LineCap::BUTT
+                                 ? "BUTT"
+                                 : (propLineCap_.value_or(LineCap::SQUARE) == LineCap::ROUND ? "ROUND" : "SQUARE"));
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LineCap, LineCap, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(DividerRenderProperty);
 };
 } // namespace OHOS::Ace::NG

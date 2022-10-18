@@ -254,6 +254,7 @@ template("declarative_js_engine") {
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/column_model_impl.cpp",
+      "jsview/models/divider_model_impl.cpp",
       "jsview/models/flex_model_impl.cpp",
       "jsview/models/for_each_model_impl.cpp",
       "jsview/models/gauge_model_impl.cpp",
