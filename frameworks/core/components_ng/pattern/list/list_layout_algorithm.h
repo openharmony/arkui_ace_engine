@@ -112,6 +112,28 @@ public:
         return estimateOffset_;
     }
 
+    float GetStartPosition() const
+    {
+        if (itemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetStartIndex() == 0) {
+            return itemPosition_.begin()->second.first;
+        }
+        return itemPosition_.begin()->second.first - spaceWidth_;
+    }
+
+    float GetEndPosition() const
+    {
+        if (itemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetEndIndex() == totalItemCount_ - 1) {
+            return itemPosition_.rbegin()->second.second;
+        }
+        return itemPosition_.rbegin()->second.second + spaceWidth_;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;

@@ -43,8 +43,9 @@ public:
         V2::ItemDivider itemDivider;
         auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+        auto lanes = listLayoutProperty->GetLanes().value_or(1);
         auto drawVertical = (axis == Axis::HORIZONTAL);
-        return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_, drawVertical, itemPosition_);
+        return MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes, itemPosition_);
     }
 
     bool IsAtomicNode() const override
@@ -174,6 +175,8 @@ private:
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    float startMainPos_;
+    float endMainPos_;
     bool isInitialized_ = false;
     float estimateOffset_ = 0.0f;
     float currentOffset_ = 0.0f;
@@ -182,7 +185,6 @@ private:
     float currentDelta_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
-    std::optional<float> overScroll_;
     bool scrollable_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
