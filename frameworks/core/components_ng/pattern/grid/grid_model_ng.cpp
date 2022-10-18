@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
+#include <regex>
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -45,11 +47,21 @@ void GridModelNG::Pop()
 
 void GridModelNG::SetColumnsTemplate(const std::string& value)
 {
+    if (!CheckTemplate(value)) {
+        LOGE("Columns Template [%{public}s] is not valid.", value.c_str());
+        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, "");
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, value);
 }
 
 void GridModelNG::SetRowsTemplate(const std::string& value)
 {
+    if (!CheckTemplate(value)) {
+        LOGE("Rows Template [%{public}s] is not valid.", value.c_str());
+        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, "");
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, value);
 }
 
@@ -222,6 +234,14 @@ void GridModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(frameNode);
 
     dragDropManager->AddGridDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+}
+
+bool GridModelNG::CheckTemplate(const std::string& value)
+{
+    std::vector<std::string> strs;
+    StringUtils::StringSplitter(value, ' ', strs);
+    std::regex reg("\\d+fr");
+    return std::all_of(strs.begin(), strs.end(), [reg](const std::string& str) { return std::regex_match(str, reg); });
 }
 
 } // namespace OHOS::Ace::NG
