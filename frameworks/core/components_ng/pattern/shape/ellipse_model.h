@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ELLIPSE_ELLIPSE_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ELLIPSE_ELLIPSE_MODEL_H
 
-#include <string>
+#include <memory>
 
-#include "base/utils/macros.h"
-
-namespace OHOS::Ace::NG {
-
-class ACE_EXPORT PathView {
+namespace OHOS::Ace {
+class EllipseModel {
 public:
-    static void Create();
-    static void SetCommands(const std::string& pathCmd);
+    static EllipseModel* GetInstance();
+    virtual ~EllipseModel() = default;
+
+    virtual void Create();
+
+private:
+    static std::unique_ptr<EllipseModel> instance_;
 };
-
-} // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_VIEW_H
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ELLIPSE_ELLIPSE_MODEL_H

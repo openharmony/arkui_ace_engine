@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RectPaintProperty : public ShapePaintProperty {
-    DECLARE_ACE_TYPE(RectPaintProperty, PaintProperty);
+    DECLARE_ACE_TYPE(RectPaintProperty, ShapePaintProperty);
 
 public:
     RectPaintProperty() = default;

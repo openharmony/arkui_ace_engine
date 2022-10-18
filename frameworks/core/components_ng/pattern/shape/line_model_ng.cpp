@@ -13,27 +13,35 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/shape/path_view.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_LINE_MODEL_NG_CPP
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_LINE_MODEL_NG_CPP
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/shape/path_pattern.h"
+#include "core/components_ng/pattern/shape/line_model_ng.h"
+#include "core/components_ng/pattern/shape/line_paint_property.h"
+#include "core/components_ng/pattern/shape/line_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-void PathView::Create()
+void LineModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::PATH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PathPattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::LINE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinePattern>(); });
     stack->Push(frameNode);
 }
 
-void PathView::SetCommands(const std::string& pathCmd)
+void LineModelNG::StartPoint(const ShapePoint& value)
 {
-    ACE_UPDATE_PAINT_PROPERTY(PathPaintProperty, Commands, pathCmd);
+    ACE_UPDATE_PAINT_PROPERTY(LinePaintProperty, StartPoint, value);
 }
 
+void LineModelNG::EndPoint(const ShapePoint& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(LinePaintProperty, EndPoint, value);
+}
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_LINE_MODEL_NG_CPP

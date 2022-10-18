@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_MODEL_NG_H
 
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/shape/ellipse_model.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT EllipseView {
+class ACE_EXPORT EllipseModelNG : public OHOS::Ace::EllipseModel {
 public:
-    static void Create();
+    void Create() override;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_MODEL_NG_H

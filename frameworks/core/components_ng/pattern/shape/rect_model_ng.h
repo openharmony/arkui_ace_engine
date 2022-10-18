@@ -13,33 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_MODEL_NG_H
 
-#include <string>
-
-#include "base/geometry/dimension.h"
 #include "base/geometry/ng/radius.h"
 #include "base/utils/macros.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/shape/rect_model.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT RectView {
+class ACE_EXPORT RectModelNG : public OHOS::Ace::RectModel {
 public:
-    static void Create();
-    static void SetRadiusWidth(const Dimension& value);
-    static void SetRadiusHeight(const Dimension& value);
+    void Create() override;
+    void SetRadiusWidth(const Dimension& value) override;
+    void SetRadiusHeight(const Dimension& value) override;
+    void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, int32_t index) override;
+    template<class T>
+    void SetCallbackRadius(
+        const RefPtr<T>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index);
+
+private:
     static void SetTopLeftRadius(const Radius& topLeftRadius);
     static void SetTopRightRadius(const Radius& topRightRadius);
     static void SetBottomRightRadius(const Radius& bottomRightRadius);
     static void SetBottomLeftRadius(const Radius& bottomLeftRadius);
-
-private:
     static void UpdateRadius(const Radius& radius);
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_MODEL_NG_H

@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_VIEW_H
-
-#include "base/utils/macros.h"
+#include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "bridge/declarative_frontend/jsview/models/ellipse_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/shape/shape_component.h"
 
-namespace OHOS::Ace::NG {
-
-class ACE_EXPORT PolygonView {
-public:
-    static void Create(bool isPolygon);
-    static void SetPoints(const ShapePoints& points);
-};
-
-} // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_VIEW_H
+namespace OHOS::Ace::Framework {
+void EllipseModelImpl::Create()
+{
+    RefPtr<Component> ellipseComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::ELLIPSE);
+    ViewStackProcessor::GetInstance()->ClaimElementId(ellipseComponent);
+    ViewStackProcessor::GetInstance()->Push(ellipseComponent);
+}
+} // namespace OHOS::Ace::Framework
