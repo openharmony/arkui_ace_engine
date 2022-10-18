@@ -121,9 +121,10 @@ void RenderListItemGroup::RecycleStartCacheItems()
 {
     double curMainPosForRecycle = startIndexOffset_;
     size_t curIndex = startIndex_;
+    size_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (auto it = items_.begin(); it != items_.end() && currStartCacheCount_ > startCacheCount_; curIndex += lanes_) {
         double rowSize = 0;
-        for (size_t i = 0; i < lanes_ && it != items_.end(); i++) {
+        for (size_t i = 0; i < lanes && it != items_.end(); i++) {
             const auto& child = *(it);
             double childSize = GetMainSize(child->GetLayoutSize());
             rowSize = std::max(childSize, rowSize);
@@ -133,7 +134,7 @@ void RenderListItemGroup::RecycleStartCacheItems()
         }
         curMainPosForRecycle += rowSize + spaceWidth_;
         startIndexOffset_ = curMainPosForRecycle;
-        startIndex_ = curIndex + lanes_;
+        startIndex_ = curIndex + lanes;
         currStartCacheCount_--;
     }
 }
@@ -169,9 +170,10 @@ double RenderListItemGroup::LayoutOrRecycleCurrentItems()
     currStartCacheCount_ = 0;
     currEndCacheCount_ = 0;
 
+    size_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (auto it = items_.begin(); it != items_.end(); curIndex += lanes_) {
         if (GreatNotEqual(curMainPos, endMainPos_) && currEndCacheCount_ >= endCacheCount_) {
-            for (size_t i = 0; i < lanes_ && it != items_.end(); i++) {
+            for (size_t i = 0; i < lanes && it != items_.end(); i++) {
                 // Recycle list items out of view port
                 RecycleListItem(curIndex + i);
                 it = items_.erase(it);
@@ -193,6 +195,7 @@ double RenderListItemGroup::LayoutOrRecycleCurrentItems()
 
 void RenderListItemGroup::RequestNewItemsAtEnd(double& curMainPos)
 {
+    size_t lanes = lanes_ > 1 ? lanes_ : 1;
     size_t newIndex = startIndex_ + items_.size();
     while (true) {
         if (GreatOrEqual(curMainPos, endMainPos_) && currEndCacheCount_ >= endCacheCount_) {
@@ -200,7 +203,7 @@ void RenderListItemGroup::RequestNewItemsAtEnd(double& curMainPos)
         }
         double rowSize = 0;
         size_t idx = 0;
-        for (; idx < lanes_; idx++) {
+        for (; idx < lanes; idx++) {
             auto child = RequestListItem(newIndex + idx, false);
             if (!child) {
                 break;
@@ -216,7 +219,7 @@ void RenderListItemGroup::RequestNewItemsAtEnd(double& curMainPos)
         }
         curMainPos += rowSize + spaceWidth_;
         newIndex += idx;
-        if (idx < lanes_) {
+        if (idx < lanes) {
             break;
         }
     }
