@@ -132,7 +132,7 @@ void RenderTexture::Measure()
         case ImageFit::NONE:
             CalculateFitNone();
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             CalculateFitScaleDown();
             break;
         default:

@@ -1799,7 +1799,7 @@ GestureEventFunc JsBindOptionMenuNG(const JSCallbackInfo& info, const RefPtr<NG:
             NG::ViewAbstract::ShowMenu(targetNode->GetId());
             return;
         }
-        NG::ViewAbstract::BindMenuWithItems(params, targetNode);
+        NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode);
         // clear paramArray after creation
         params.clear();
     };

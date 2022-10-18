@@ -22,12 +22,6 @@
 
 namespace OHOS::Ace::NG {
 
-struct OptionPaintBackground {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundColor, Color);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedBackgroundColor, Color);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(Hover, bool);
-};
-
 // PaintProperty are used to set paint properties.
 class ACE_EXPORT OptionPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(OptionPaintProperty, PaintProperty)
@@ -39,7 +33,7 @@ public:
     RefPtr<PaintProperty> Clone() const override
     {
         auto paintProperty = MakeRefPtr<OptionPaintProperty>();
-        paintProperty->propPaintBackground_ = ClonePaintBackground();
+        paintProperty->propHover_ = CloneHover();
         paintProperty->propNeedDivider_ = CloneNeedDivider();
 
         return paintProperty;
@@ -48,17 +42,14 @@ public:
     void Reset() override
     {
         PaintProperty::Reset();
-        ResetPaintBackground();
+        ResetHover();
         ResetNeedDivider();
     }
 
-    ACE_DEFINE_PROPERTY_GROUP(PaintBackground, OptionPaintBackground);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(PaintBackground, BackgroundColor, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(PaintBackground, SelectedBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(PaintBackground, Hover, bool, PROPERTY_UPDATE_RENDER);
-    
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Hover, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedDivider, bool, PROPERTY_UPDATE_RENDER);
 
+    ACE_DISALLOW_COPY_AND_MOVE(OptionPaintProperty);
 };
 
 } // namespace OHOS::Ace::NG

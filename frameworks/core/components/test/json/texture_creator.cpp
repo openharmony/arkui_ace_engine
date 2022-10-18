@@ -67,7 +67,7 @@ ImageFit TextureCreator::ConvertStrToFit(const std::string& fit)
     } else if (fit == "cover") {
         imageFit = ImageFit::COVER;
     } else if (fit == "scaledown") {
-        imageFit = ImageFit::SCALEDOWN;
+        imageFit = ImageFit::SCALE_DOWN;
     } else {
         imageFit = ImageFit::NONE;
     }

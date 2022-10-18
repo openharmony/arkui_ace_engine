@@ -235,7 +235,7 @@ void ImagePainter::ApplyImageFit(
         case ImageFit::FITHEIGHT:
             ApplyFitHeight(rawPicSize, dstSize, srcRect, dstRect);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             if (srcRect.GetSize() < dstRect.GetSize()) {
                 ApplyNone(rawPicSize, dstSize, srcRect, dstRect);
             } else {

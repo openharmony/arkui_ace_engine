@@ -33,7 +33,7 @@ ImageFit ConvertStrToFit(const std::string& fit)
         { "cover", ImageFit::COVER },
         { "fill", ImageFit::FILL },
         { "none", ImageFit::NONE },
-        { "scale-down", ImageFit::SCALEDOWN },
+        { "scale-down", ImageFit::SCALE_DOWN },
     };
     ImageFit imageFit = ImageFit::COVER;
     auto iter = BinarySearchFindIndex(imageFitMap, ArraySize(imageFitMap), fit.c_str());

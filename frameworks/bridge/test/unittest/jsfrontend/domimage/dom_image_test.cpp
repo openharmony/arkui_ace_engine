@@ -29,7 +29,7 @@ const std::string IMAGE_SRC_VALUE = "/example/src";
 const std::string IMAGE_ALT_VALUE = "/example/alt";
 const ImageFit IMAGE_FIT_NONE = ImageFit::NONE;
 const ImageFit IMAGE_FIT_COVER = ImageFit::COVER;
-const ImageFit IMAGE_FIT_SCALEDOWN = ImageFit::SCALEDOWN;
+const ImageFit IMAGE_FIT_SCALEDOWN = ImageFit::SCALE_DOWN;
 const ImageFit IMAGE_FIT_CONTAIN = ImageFit::CONTAIN;
 const ImageFit IMAGE_FIT_FILL = ImageFit::FILL;
 
