@@ -172,6 +172,38 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
 }
 
+void ListLayoutAlgorithm::RecyclePrevIndex(LayoutWrapper* layoutWrapper)
+{
+    if (preStartIndex_ < GetStartIndex() && preStartIndex_ >= 0) {
+        for (int32_t i = preStartIndex_; i < GetStartIndex(); i++) {
+            layoutWrapper->RemoveChildInRenderTree(i);
+        }
+    }
+    if (preEndIndex_ > GetEndIndex()) {
+        for (int32_t i = GetEndIndex() + 1; i <= preEndIndex_; i++) {
+            layoutWrapper->RemoveChildInRenderTree(i);
+        }
+    }
+}
+
+void ListLayoutAlgorithm::CalculateEstimateOffset()
+{
+    float itemsHeight = (itemPosition_.rbegin()->second.second - itemPosition_.begin()->second.first);
+    if (GetEndIndex() == totalItemCount_ - 1) {
+        itemsHeight += spaceWidth_;
+    }
+    auto lines = static_cast<int32_t>(itemPosition_.size());
+    if (lanes_.has_value() && lanes_.value() > 1) {
+        lines = (lines / lanes_.value()) + (lines % lanes_.value() > 0 ? 1 : 0);
+    }
+    if (lines > 0) {
+        float averageHeight = itemsHeight / static_cast<float>(lines);
+        estimateOffset_ = averageHeight * static_cast<float>(itemPosition_.begin()->first);
+    } else {
+        estimateOffset_ = 0;
+    }
+}
+
 void ListLayoutAlgorithm::MeasureList(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
@@ -188,10 +220,12 @@ void ListLayoutAlgorithm::MeasureList(
             jumpIndex_ = jumpIndex_.value() - jumpIndex_.value() % lanes_.value();
         }
         LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0.0f);
-        if (jumpIndex_.value() > 0) {
-            float endPos = itemPosition_.begin()->second.first - spaceWidth_;
+        float endPos = itemPosition_.begin()->second.first - spaceWidth_;
+        if (jumpIndex_.value() > 0 && GreatNotEqual(endPos, startMainPos_)) {
             LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
         }
+        RecyclePrevIndex(layoutWrapper);
+        CalculateEstimateOffset();
     } else if (NonNegative(currentOffset_)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(preStartIndex_);
         if (!wrapper) {

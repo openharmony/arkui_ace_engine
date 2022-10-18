@@ -18,12 +18,14 @@
 
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_scroller.h"
 
 namespace OHOS::Ace::Framework {
 
 class JSList : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
+    static void SetScroller(RefPtr<JSScroller> scroller);
     static void Create(const JSCallbackInfo& args);
 
     static void JsWidth(const JSCallbackInfo& info);
