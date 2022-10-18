@@ -107,7 +107,7 @@ void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapp
 JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
 {
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
-    JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<JSFunctionCallback>(ViewMeasureLayout::JSLayout);
+    JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSLayout);
     size_t index = 0;
 
     for (const auto& iter : children) {
@@ -123,7 +123,7 @@ JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children
 JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
 {
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
-    JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<JSFunctionCallback>(ViewMeasureLayout::JSMeasure);
+    JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSMeasure);
     size_t index = 0;
 
     for (const auto& iter : children) {

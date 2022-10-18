@@ -95,6 +95,11 @@ public:
         return frame_.rect_.GetOffset();
     }
 
+    void SetFrameOffset(OffsetF offset)
+    {
+        frame_.rect_.SetOffset(offset);
+    }
+
     void SetFrameSize(const SizeF& size)
     {
         frame_.rect_.SetSize(size);
