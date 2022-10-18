@@ -25,7 +25,7 @@ namespace OHOS::Ace::Framework {
 void JSListItemGroup::Create(const JSCallbackInfo& args)
 {
     auto listItemGroupComponent = AceType::MakeRefPtr<V2::ListItemGroupComponent>();
-    if (!(args.Length() < 1) && args[0]->IsObject()) {
+    if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
         Dimension space;
