@@ -107,6 +107,11 @@ public:
         return lanes_;
     }
 
+    float GetEstimateOffset() const
+    {
+        return estimateOffset_;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -120,6 +125,10 @@ private:
     void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
 
     void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+
+    void RecyclePrevIndex(LayoutWrapper* layoutWrapper);
+
+    void CalculateEstimateOffset();
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
@@ -156,6 +165,8 @@ private:
     std::optional<float> minLaneLength_;
     std::optional<float> maxLaneLength_;
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
+
+    float estimateOffset_ = 0.0f;
 
     bool mainSizeIsDefined_ = false;
     float contentMainSize_ = 0.0f;

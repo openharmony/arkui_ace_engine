@@ -115,6 +115,7 @@ build_component_ng("pattern_ng") {
     "list/list_model_ng.cpp",
     "list/list_paint_method.cpp",
     "list/list_pattern.cpp",
+    "list/list_position_controller.cpp",
     "loading_progress/loading_progress_layout_algorithm.cpp",
     "loading_progress/loading_progress_modifer.cpp",
     "loading_progress/loading_progress_pattern.cpp",

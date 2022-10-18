@@ -18,6 +18,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -39,6 +40,13 @@ void ListModelNG::SetSpace(const Dimension& space)
 void ListModelNG::SetInitialIndex(int32_t initialIndex)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex);
+}
+
+void ListModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollBarProxy> proxy)
+{
+    auto list = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ListPattern>();
+    CHECK_NULL_VOID(list);
+    list->SetPositionController(AceType::DynamicCast<ListPositionController>(scroller));
 }
 
 void ListModelNG::SetListDirection(Axis axis)

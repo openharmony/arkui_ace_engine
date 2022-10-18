@@ -33,6 +33,7 @@ namespace {
 constexpr int32_t SCROLL_STATE_IDLE = 0;
 constexpr int32_t SCROLL_STATE_SCROLL = 1;
 constexpr int32_t SCROLL_STATE_FLING = 2;
+constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 } // namespace
 
 void ListPattern::OnAttachToFrameNode()
@@ -130,65 +131,77 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
-    jumpIndex_.reset();
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
+    if (jumpIndex_) {
+        estimateOffset_ = listLayoutAlgorithm->GetEstimateOffset();
+        if (!itemPosition_.empty()) {
+            currentOffset_ = itemPosition_.begin()->second.first;
+        }
+        jumpIndex_.reset();
+    }
     auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
-    lastOffset_ = totalOffset_;
-    totalOffset_ = totalOffset_ - finalOffset;
+    lastOffset_ = currentOffset_;
+    currentOffset_ = currentOffset_ - finalOffset;
     currentDelta_ = 0.0f;
     CheckScrollable();
-
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto listEventHub = host->GetEventHub<ListEventHub>();
-    CHECK_NULL_RETURN(listEventHub, false);
-
-    if (!NearZero(finalOffset)) {
-        auto onScroll = listEventHub->GetOnScroll();
-        if (onScroll) {
-            auto source = GetScrollState();
-            auto offsetPX = Dimension(finalOffset);
-            auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-            if (source == SCROLL_FROM_UPDATE) {
-                onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_SCROLL));
-            } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
-                onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_FLING));
-            } else {
-                onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_IDLE));
-            }
-        }
-    }
 
     bool indexChanged =
         (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
-    if (totalOffset_ != lastOffset_) {
-        if (indexChanged) {
-            auto onScrollIndex = listEventHub->GetOnScrollIndex();
-            if (onScrollIndex) {
-                onScrollIndex(startIndex_, endIndex_);
-            }
-        }
-        bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(totalOffset_, 0.0);
-        bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(totalOffset_, 0.0);
-        if ((startIndex_ == 0) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
-            auto onReachStart = listEventHub->GetOnReachStart();
-            if (onReachStart) {
-                onReachStart();
-            }
-        }
-        if ((endIndex_ == maxListItemIndex_) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
-            auto onReachEnd = listEventHub->GetOnReachEnd();
-            if (onReachEnd) {
-                onReachEnd();
-            }
+    if (currentOffset_ != lastOffset_) {
+        ProcessEvent(indexChanged, finalOffset);
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
+}
+
+void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listEventHub = host->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(listEventHub);
+
+    auto onScroll = listEventHub->GetOnScroll();
+    if (onScroll) {
+        auto source = GetScrollState();
+        auto offsetPX = Dimension(finalOffset);
+        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+        if (source == SCROLL_FROM_UPDATE) {
+            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_SCROLL));
+        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
+            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_FLING));
+        } else {
+            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_IDLE));
         }
     }
 
-    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
+    if (indexChanged) {
+        auto onScrollIndex = listEventHub->GetOnScrollIndex();
+        if (onScrollIndex) {
+            onScrollIndex(startIndex_, endIndex_);
+        }
+    }
+
+    bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+    if ((startIndex_ == 0) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
+        auto onReachStart = listEventHub->GetOnReachStart();
+        if (onReachStart) {
+            onReachStart();
+        }
+    }
+    if ((endIndex_ == maxListItemIndex_) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
+        auto onReachEnd = listEventHub->GetOnReachEnd();
+        if (onReachEnd) {
+            onReachEnd();
+        }
+    }
 }
 
 void ListPattern::CheckScrollable()
@@ -385,5 +398,79 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
         return true;
     }
     return false;
+}
+
+void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration)
+{
+    LOGI("AnimateTo:%f, duration:%f", position, duration);
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+    }
+    if (!animator_->IsStopped()) {
+        animator_->Stop();
+    }
+    animator_->ClearInterpolators();
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
+    animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
+        auto list = weakScroll.Upgrade();
+        if (list) {
+            list->UpdateCurrentOffset(list->GetTotalOffset() - value);
+        }
+    });
+    animator_->AddInterpolator(animation);
+    animator_->SetDuration(static_cast<int32_t>(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration));
+    animator_->ClearStopListeners();
+    animator_->Play();
+}
+
+void ListPattern::ScrollTo(float position)
+{
+    LOGI("ScrollTo:%{public}f", position);
+    UpdateCurrentOffset(GetTotalOffset() - position);
+}
+
+void ListPattern::ScrollToIndex(int32_t index)
+{
+    LOGI("ScrollToIndex:%{public}d", index);
+    if (index >= 0 && index <= maxListItemIndex_) {
+        jumpIndex_ = index;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
+{
+    LOGI("ScrollToEdge:%{public}zu", scrollEdgeType);
+    if (((scrollEdgeType == ScrollEdgeType::SCROLL_TOP) && GetDirection() == Axis::VERTICAL) ||
+        ((scrollEdgeType == ScrollEdgeType::SCROLL_LEFT) && GetDirection() == Axis::HORIZONTAL)) {
+        jumpIndex_ = 0;
+    } else if (((scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) && GetDirection() == Axis::VERTICAL) ||
+        ((scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT) && GetDirection() == Axis::HORIZONTAL)) {
+        jumpIndex_ = maxListItemIndex_;
+    } else {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+bool ListPattern::ScrollPage(bool reverse)
+{
+    LOGI("ScrollPage:%{public}d", reverse);
+    float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
+    UpdateCurrentOffset(distance);
+    return true;
+}
+
+Offset ListPattern::GetCurrentOffset() const
+{
+    if (GetDirection() == Axis::HORIZONTAL) {
+        return {GetTotalOffset(), 0.0};
+    }
+    return {0.0, GetTotalOffset()};
 }
 } // namespace OHOS::Ace::NG
