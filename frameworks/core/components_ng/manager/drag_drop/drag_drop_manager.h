@@ -82,8 +82,10 @@ private:
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
-    std::function<void(const std::string&)> clipboardCallback_ = nullptr;
+    std::function<void(const std::string&)> addDataCallback_ = nullptr;
+    std::function<void(const std::string&)> getDataCallback_ = nullptr;
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
+    std::string extraInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

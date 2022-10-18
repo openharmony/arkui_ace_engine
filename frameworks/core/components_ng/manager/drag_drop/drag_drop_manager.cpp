@@ -356,7 +356,7 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
     if (!clipboard_) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     }
-    if (!clipboardCallback_) {
+    if (!addDataCallback_) {
         auto callback = [weakManager = WeakClaim(this), addData = newData->ToString()](const std::string& data) {
             auto dragDropManager = weakManager.Upgrade();
             if (dragDropManager) {
@@ -366,9 +366,9 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
                 dragDropManager->clipboard_->SetData(clipboardAllData->ToString(), CopyOptions::Local, true);
             }
         };
-        clipboardCallback_ = callback;
+        addDataCallback_ = callback;
     }
-    clipboard_->GetData(clipboardCallback_);
+    clipboard_->GetData(addDataCallback_, true);
 }
 
 void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
@@ -380,19 +380,23 @@ void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     }
 
-    std::string* extraInfoPtr = &extraInfo;
-    if (!clipboardCallback_) {
-        auto callback = [extraInfoPtr](const std::string& data) {
-            auto json = JsonUtil::ParseJsonString(data);
-            auto newData = JsonUtil::ParseJsonString(json->GetString("newData"));
-            *extraInfoPtr = newData->GetString("customDragInfo");
+    if (!getDataCallback_) {
+        auto callback = [weak = WeakClaim(this)](const std::string& data) {
+            auto manager = weak.Upgrade();
+            if (manager) {
+                auto json = JsonUtil::ParseJsonString(data);
+                auto newData = JsonUtil::ParseJsonString(json->GetString("newData"));
+                manager->extraInfo_ = newData->GetString("customDragInfo");
+            }
         };
-        clipboardCallback_ = callback;
+        getDataCallback_ = callback;
     }
 
-    if (clipboardCallback_) {
-        clipboard_->GetData(clipboardCallback_, true);
+    if (getDataCallback_) {
+        clipboard_->GetData(getDataCallback_, true);
     }
+
+    extraInfo = extraInfo_;
 }
 
 void DragDropManager::RestoreClipboardData()
@@ -406,15 +410,15 @@ void DragDropManager::RestoreClipboardData()
 
     if (!deleteDataCallback_) {
         auto callback = [weakManager = WeakClaim(this)](const std::string& data) {
+            auto json = JsonUtil::ParseJsonString(data);
             auto dragDropManager = weakManager.Upgrade();
-            if (dragDropManager) {
-                auto json = JsonUtil::ParseJsonString(data);
+            if (dragDropManager && json->Contains("preData")) {
                 dragDropManager->clipboard_->SetData(json->GetString("preData"));
             }
         };
         deleteDataCallback_ = callback;
     }
-    clipboard_->GetData(deleteDataCallback_);
+    clipboard_->GetData(deleteDataCallback_, true);
 }
 
 void DragDropManager::DestroyDragWindow()
