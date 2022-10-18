@@ -59,6 +59,7 @@ template("ace_core_source_set") {
       # common
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
+      "common/ace_engine_ext.cpp",
       "common/anr_thread.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
