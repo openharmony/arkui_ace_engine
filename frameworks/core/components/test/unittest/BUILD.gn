@@ -65,7 +65,7 @@ group("unittest") {
       "tween:unittest",
 
       #"view_update:unittest",
-      #"water_flow:unittest",
+      "water_flow:unittest",
       "wrap:unittest",
     ]
     if (!is_wearable_product) {
