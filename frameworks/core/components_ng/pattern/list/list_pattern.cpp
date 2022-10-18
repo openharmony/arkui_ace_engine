@@ -130,20 +130,35 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
-    isInitialized_ = listLayoutAlgorithm->GetIsInitialized();
+    jumpIndex_.reset();
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
-    auto adjustOffset = currentDelta_ - finalOffset;
-    totalOffset_ = totalOffset_ - adjustOffset;
+    lastOffset_ = totalOffset_;
+    totalOffset_ = totalOffset_ - finalOffset;
+    currentDelta_ = 0.0f;
+    CheckScrollable();
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto listEventHub = host->GetEventHub<ListEventHub>();
     CHECK_NULL_RETURN(listEventHub, false);
-    jumpIndex_.reset();
-    currentDelta_ = 0.0f;
-    CheckScrollable();
+
+    if (!NearZero(finalOffset)) {
+        auto onScroll = listEventHub->GetOnScroll();
+        if (onScroll) {
+            auto source = GetScrollState();
+            auto offsetPX = Dimension(finalOffset);
+            auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+            if (source == SCROLL_FROM_UPDATE) {
+                onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_SCROLL));
+            } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
+                onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_FLING));
+            } else {
+                onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_IDLE));
+            }
+        }
+    }
 
     bool indexChanged =
         (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
@@ -185,18 +200,19 @@ void ListPattern::CheckScrollable()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    bool scrollable = true;
     if (itemPosition_.empty()) {
-        scrollable = false;
+        scrollable_ = false;
     } else {
         if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_)) {
-            scrollable = LessOrEqual(
+            scrollable_ = GreatNotEqual(
                 (itemPosition_.rbegin()->second.second - itemPosition_.begin()->second.first), GetMainContentSize());
+        } else {
+            scrollable_ = true;
         }
     }
 
     if (scrollableEvent_) {
-        scrollableEvent_->SetEnabled(scrollable);
+        scrollableEvent_->SetEnabled(scrollable_);
     }
 }
 
@@ -207,54 +223,41 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
     }
     listLayoutAlgorithm->SetCurrentOffset(currentDelta_);
-    listLayoutAlgorithm->SetIsInitialized(isInitialized_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
-
-    // check overlay scroll.
-    std::optional<float> overlayScroll;
-    if (!itemPosition_.empty() && (!NearZero(currentDelta_) || (scrollState_ == SCROLL_FROM_ANIMATION_SPRING))) {
-        if ((itemPosition_.begin()->first == 0) && GreatOrEqual(itemPosition_.begin()->second.first, 0.0)) {
-            overlayScroll = itemPosition_.begin()->second.first - 0.0;
-        } else if ((itemPosition_.rbegin()->first == maxListItemIndex_) &&
-                   LessOrEqual(itemPosition_.rbegin()->second.second, GetMainContentSize())) {
-            overlayScroll = GetMainContentSize() - itemPosition_.rbegin()->second.second;
-        }
-    }
-    if (overlayScroll) {
-        if (scrollState_ == SCROLL_FROM_UPDATE) {
-            // adjust offset.
-            auto friction = CalculateFriction(std::abs(overlayScroll.value()) / GetMainContentSize());
-            listLayoutAlgorithm->SetCurrentOffset(currentDelta_ * friction);
-        }
+    if (overScroll_) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
-
     return listLayoutAlgorithm;
 }
 
 void ListPattern::UpdateCurrentOffset(float offset)
 {
     currentDelta_ = currentDelta_ - offset;
-    lastOffset_ = totalOffset_;
-    totalOffset_ = totalOffset_ - offset;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-    auto listEventHub = host->GetEventHub<ListEventHub>();
-    CHECK_NULL_VOID(listEventHub);
-    auto onScroll = listEventHub->GetOnScroll();
-    if (onScroll) {
-        auto source = GetScrollState();
-        auto offsetPX = Dimension(offset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (source == SCROLL_FROM_UPDATE) {
-            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_SCROLL));
-        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
-            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_FLING));
-        } else {
-            onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_IDLE));
-        }
+    if (!IsOutOfBoundary() || !scrollable_) {
+        return;
+    }
+
+    // over scroll in drag update from normal to over scroll.
+    if (!overScroll_) {
+        return;
+    }
+
+    // over scroll in drag update during over scroll.
+    auto startPos = itemPosition_.begin()->second.first - currentDelta_;
+    if ((itemPosition_.begin()->first == 0) && Positive(startPos)) {
+        overScroll_ = startPos;
+    } else {
+        overScroll_ = GetMainContentSize() - (itemPosition_.rbegin()->second.second - currentDelta_);
+    }
+
+    if (scrollState_ == SCROLL_FROM_UPDATE) {
+        // adjust offset.
+        auto friction = CalculateFriction(std::abs(overScroll_.value()) / GetMainContentSize());
+        currentDelta_ = currentDelta_ * friction;
     }
 }
 
@@ -269,6 +272,7 @@ void ListPattern::ProcessScrollEnd()
         onScrollStop();
     }
     SetScrollStop(true);
+    overScroll_.reset();
 }
 
 float ListPattern::GetMainContentSize() const
@@ -292,9 +296,10 @@ bool ListPattern::IsOutOfBoundary()
     bool outOfStart = false;
     bool outOfEnd = false;
     if (!itemPosition_.empty()) {
-        outOfStart = (itemPosition_.begin()->first == 0) && (itemPosition_.begin()->second.first > 0);
-        outOfEnd = (itemPosition_.rbegin()->first == maxListItemIndex_) &&
-                   (itemPosition_.rbegin()->second.second < GetMainContentSize());
+        auto startPos = itemPosition_.begin()->second.first - currentDelta_;
+        auto endPos = itemPosition_.rbegin()->second.second - currentDelta_;
+        outOfStart = (itemPosition_.begin()->first == 0) && Positive(startPos);
+        outOfEnd = (itemPosition_.rbegin()->first == maxListItemIndex_) && LessNotEqual(endPos, GetMainContentSize());
     }
     return outOfStart || outOfEnd;
 }

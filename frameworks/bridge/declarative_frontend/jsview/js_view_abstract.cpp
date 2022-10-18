@@ -1313,6 +1313,10 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
+    if (LessOrEqual(value, 0.0)) {
+        LOGW("the %{public}f value is illegal, use default", value);
+        value = 1.0;
+    }
 
     ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));
 }

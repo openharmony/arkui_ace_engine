@@ -97,16 +97,6 @@ public:
         return spaceWidth_;
     }
 
-    void SetIsInitialized(bool isInitialized)
-    {
-        isInitialized_ = isInitialized;
-    }
-
-    bool GetIsInitialized() const
-    {
-        return isInitialized_;
-    }
-
     void SetLanes(int32_t lanes)
     {
         lanes_ = lanes;
@@ -158,7 +148,6 @@ private:
     int32_t preEndIndex_ = -1;
 
     float spaceWidth_ = 0.0f;
-    bool isInitialized_ = false;
     bool overScrollFeature_ = false;
 
     int32_t totalItemCount_ = 0;

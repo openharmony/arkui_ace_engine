@@ -213,6 +213,10 @@ void ListLayoutAlgorithm::MeasureList(
         // the child frame offset is include list padding and border, need to delete it first to match content origin.
         float endPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) +
                        GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis) - paddingBeforeContent_;
+        endPos = endPos + spaceWidth_;
+        if (preEndIndex_ == (totalItemCount_ - 1)) {
+            endPos = endPos - spaceWidth_;
+        }
         LayoutBackward(layoutWrapper, layoutConstraint, axis, preEndIndex_, endPos);
     }
 }
@@ -278,17 +282,26 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
             break;
         }
         currentEndPos = currentStartPos + mainLength;
-        for (int i = 0; i < count; i++) {
-            itemPosition_[currentIndex - i] = { currentStartPos, currentEndPos };
-        }
         if (currentIndex >= 0) {
             currentEndPos = currentEndPos + spaceWidth_;
+        }
+        if (currentIndex == (totalItemCount_ - 1)) {
+            currentEndPos = currentEndPos - spaceWidth_;
+        }
+
+        for (int i = 0; i < count; i++) {
+            itemPosition_[currentIndex - i] = { currentStartPos, currentEndPos };
         }
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
     } while (LessNotEqual(currentEndPos, endMainPos_));
-    currentEndPos = currentEndPos - spaceWidth_;
 
+    if (overScrollFeature_) {
+        LOGD("during over scroll, just return in LayoutForward");
+        return;
+    }
+
+    bool normalToOverScroll = false;
     // adjust offset.
     if (LessNotEqual(currentEndPos, endMainPos_) && !itemPosition_.empty()) {
         auto firstItemTop = itemPosition_.begin()->second.first;
@@ -302,16 +315,23 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
                 contentMainSize_ = itemTotalSize;
             }
         } else {
-            // If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
+            // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
             auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-            if (edgeEffect != EdgeEffect::SPRING || jumpIndex_.has_value()) {
+            if ((edgeEffect != EdgeEffect::SPRING) || jumpIndex_.has_value()) {
                 currentOffset_ = currentEndPos - contentMainSize_;
                 LOGD("LayoutForward: adjust offset to %{public}f", currentOffset_);
                 startMainPos_ = currentOffset_;
                 endMainPos_ = currentEndPos;
+            } else {
+                normalToOverScroll = true;
             }
         }
+    }
+
+    if (normalToOverScroll) {
+        LOGD("in normal status to overScroll state, ignore inactive operation in LayoutForward");
+        return;
     }
 
     // Mark inactive in wrapper.
@@ -340,24 +360,43 @@ void ListLayoutAlgorithm::LayoutBackward(
         }
         currentStartPos = currentEndPos - mainLength;
 
+        if (currentIndex >= 0) {
+            currentStartPos = currentStartPos - spaceWidth_;
+        }
+
+        if (currentIndex == (totalItemCount_ - 1)) {
+            currentStartPos = currentStartPos + spaceWidth_;
+        }
+
         for (int i = 0; i < count; i++) {
             itemPosition_[currentIndex + i] = { currentStartPos, currentEndPos };
-        }
-        if (currentIndex > 0) {
-            currentStartPos = currentStartPos - spaceWidth_;
         }
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
     } while (GreatNotEqual(currentStartPos, startMainPos_));
 
+    if (overScrollFeature_) {
+        LOGD("during over scroll, just return in LayoutBackward");
+        return;
+    }
+
+    bool normalToOverScroll = false;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    if (GreatNotEqual(currentStartPos, startMainPos_) &&
-        ((edgeEffect != EdgeEffect::SPRING) || jumpIndex_.has_value())) {
-        currentOffset_ = currentStartPos;
-        endMainPos_ = currentOffset_ + contentMainSize_;
-        startMainPos_ = currentStartPos;
+    if (GreatNotEqual(currentStartPos, startMainPos_)) {
+        if ((edgeEffect != EdgeEffect::SPRING) || jumpIndex_.has_value()) {
+            currentOffset_ = currentStartPos;
+            endMainPos_ = currentOffset_ + contentMainSize_;
+            startMainPos_ = currentStartPos;
+        } else {
+            normalToOverScroll = true;
+        }
+    }
+
+    if (normalToOverScroll) {
+        LOGD("in normal status to overScroll state, ignore inactive operation in LayoutBackward");
+        return;
     }
     // Mark inactive in wrapper.
     std::list<int32_t> removeIndexes;
@@ -469,7 +508,8 @@ void ListLayoutAlgorithm::CalculateLanes(const LayoutConstraintF& layoutConstrai
         // rule 1: [minLaneLength_] has a higher priority than [maxLaneLength_] when decide [lanes_], for e.g.,
         //         if [minLaneLength_] is 40, [maxLaneLength_] is 60, list's width is 120,
         //         the [lanes_] is 3 rather than 2.
-        // rule 2: after [lanes_] is determined by rule 1, the width of lane will be as large as it can be, for e.g.,
+        // rule 2: after [lanes_] is determined by rule 1, the width of lane will be as large as it can be, for
+        // e.g.,
         //         if [minLaneLength_] is 40, [maxLaneLength_] is 60, list's width is 132, the [lanes_] is 3
         //         according to rule 1, then the width of lane will be 132 / 3 = 44 rather than 40,
         //         its [minLaneLength_].
