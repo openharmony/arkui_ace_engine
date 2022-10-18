@@ -526,27 +526,30 @@ void RenderWaterFlow::SetFooterPosition()
     switch (direction_) {
         case FlexDirection::COLUMN:
             offset = Offset((crossSize_ - width) / CENTER_POINT, footerCurrentPos - viewportStartPos_);
+            if (GreatOrEqual(offset.GetY(), mainSize_)) {
+                return;
+            }
             break;
         case FlexDirection::COLUMN_REVERSE:
             offset = Offset((crossSize_ - width) / CENTER_POINT, footerCurrentPos - viewportStartPos_ - height);
+            if (LessOrEqual(offset.GetY(), -height)) {
+                return;
+            }
             break;
         case FlexDirection::ROW:
             offset = Offset(footerCurrentPos - viewportStartPos_, (crossSize_ - height) / CENTER_POINT);
+            if (GreatOrEqual(offset.GetX(), mainSize_)) {
+                return;
+            }
             break;
         case FlexDirection::ROW_REVERSE:
             offset = Offset(footerCurrentPos - viewportStartPos_ - width, (crossSize_ - height) / CENTER_POINT);
+            if (LessOrEqual(offset.GetX(), -width)) {
+                return;
+            }
             break;
         default:
             return;
-    }
-    if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
-        if (GreatOrEqual(offset.GetX(), crossSize_) || GreatOrEqual(offset.GetY(), mainSize_)) {
-            return;
-        }
-    } else {
-        if (GreatOrEqual(offset.GetX(), mainSize_) || GreatOrEqual(offset.GetY(), crossSize_)) {
-            return;
-        }
     }
     footer_->SetPosition(offset);
     footer_->SetVisible(true);
@@ -1320,7 +1323,7 @@ void RenderWaterFlow::ClearFlowMatrix(size_t index, bool clearAll)
 void RenderWaterFlow::ClearItemsByCrossIndex(size_t index, bool clearAll)
 {
     if (!clearAll) {
-        for (auto& cross : itemsByCrossIndex_) {
+        for (auto & cross : itemsByCrossIndex_) {
             for (auto item = cross.begin(); item != cross.end();) {
                 if (*item >= index) {
                     item = cross.erase(item);
@@ -1374,7 +1377,7 @@ void RenderWaterFlow::RemoveAllChild()
 
 bool RenderWaterFlow::NeedPredictLayout()
 {
-    return !(updateFlag_ || (NearEqual(dVPStartPosBackup_, viewportStartPos_) &&
+    return !(updateFlag_ || (NearEqual(dVPStartPosBackup_, viewportStartPos_) && 
        (totalCountBack_ == getTotalCount_())));
 }
 
