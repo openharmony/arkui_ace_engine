@@ -37,6 +37,8 @@ public:
     static void GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle);
     static void SetItemSize(const JSCallbackInfo& args);
     static void SetAlignStyle(int32_t value);
+    static void SetSelected(const JSCallbackInfo& args);
+    static void SetPopupPosition(const JSCallbackInfo& args);
     static void JsOnRequestPopupData(const JSCallbackInfo& args);
     static void JsOnPopupSelected(const JSCallbackInfo& args);
 };
