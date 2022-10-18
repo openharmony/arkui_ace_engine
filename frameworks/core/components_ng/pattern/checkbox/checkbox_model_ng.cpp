@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void CheckBoxModelNG::Create(
+int32_t CheckBoxModelNG::Create(
     const std::optional<std::string>& name, const std::optional<std::string>& groupName, const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -38,7 +38,7 @@ void CheckBoxModelNG::Create(
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
     }
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return nodeId;
 }
 
 void CheckBoxModelNG::SetSelect(bool isSelected)

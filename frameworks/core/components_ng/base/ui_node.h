@@ -145,6 +145,11 @@ public:
         hostPageId_ = id;
     }
 
+    void SetRemoveSilently(bool removeSilently)
+    {
+        removeSilently_ = removeSilently;
+    }
+
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result);
     virtual HitTestMode GetHitTestMode() const
@@ -215,6 +220,7 @@ protected:
     int32_t nodeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
+    bool removeSilently_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

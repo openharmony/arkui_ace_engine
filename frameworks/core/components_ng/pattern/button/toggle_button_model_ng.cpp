@@ -22,13 +22,14 @@
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ToggleButtonModelNG::Create(const std::string& tagName)
+int32_t ToggleButtonModelNG::Create(const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<ToggleButtonPattern>(); });
     stack->Push(frameNode);
+    return nodeId;
 }
 
 void ToggleButtonModelNG::SetSelectedColor(const Color& selectedColor)
