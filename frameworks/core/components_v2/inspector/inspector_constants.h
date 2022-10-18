@@ -436,6 +436,7 @@ ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[];
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[];
 
 // Normal dialog
+ACE_EXPORT extern const char DIALOG_COMPONENT_TAG[];
 ACE_EXPORT extern const char DIALOG_ETS_TAG[];
 
 // sideBar
