@@ -54,6 +54,7 @@ void MarqueeModelNG::SetValue(const std::string& value)
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     ACE_DCHECK(textLayoutProperty);
     textLayoutProperty->UpdateContent(value);
+    textChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void MarqueeModelNG::SetPlayerStatus(bool playerStatus)
