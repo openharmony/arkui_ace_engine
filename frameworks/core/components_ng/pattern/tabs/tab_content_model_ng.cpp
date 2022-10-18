@@ -188,10 +188,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     ImageSourceInfo imageSourceInfo(tabBarParam->icon);
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
-
-    imageNode->MarkModifyDone();
-    textNode->MarkModifyDone();
-    columnNode->MarkModifyDone();
 }
 
 void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)
