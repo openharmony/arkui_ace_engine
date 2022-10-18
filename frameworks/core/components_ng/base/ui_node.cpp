@@ -31,12 +31,14 @@ namespace OHOS::Ace::NG {
 
 UINode::~UINode()
 {
-    ElementRegister::GetInstance()->RemoveItem(nodeId_);
-    if (!onMainTree_) {
-        return;
+    if (!removeSilently_) {
+        ElementRegister::GetInstance()->RemoveItem(nodeId_);
+        if (!onMainTree_) {
+            return;
+        }
+        DetachFromMainTree();
+        onMainTree_ = false;
     }
-    DetachFromMainTree();
-    onMainTree_ = false;
 }
 
 void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)

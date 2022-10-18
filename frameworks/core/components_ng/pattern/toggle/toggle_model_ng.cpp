@@ -20,38 +20,89 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
-#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
 void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
 {
-    switch (toggleType) {
-        case NG::ToggleType::CHECKBOX: {
-            CheckBoxModelNG checkBoxModelNG;
-            checkBoxModelNG.Create(std::nullopt, std::nullopt, V2::CHECKBOX_ETS_TAG);
-            checkBoxModelNG.SetSelect(isOn);
-            break;
+    if (previousToggleType_ == ToggleType::NONE) {
+        switch (toggleType) {
+            case ToggleType::CHECKBOX: {
+                CheckBoxModelNG checkBoxModelNG;
+                previousNodeId_ = checkBoxModelNG.Create(std::nullopt, std::nullopt, V2::CHECKBOX_ETS_TAG);
+                checkBoxModelNG.SetSelect(isOn);
+                previousToggleType_ = ToggleType::CHECKBOX;
+                break;
+            }
+            case ToggleType::SWITCH: {
+                auto* stack = ViewStackProcessor::GetInstance();
+                int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+                auto frameNode = FrameNode::GetOrCreateFrameNode(
+                    V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwitchPattern>(); });
+                stack->Push(frameNode);
+                ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
+                previousToggleType_ = ToggleType::SWITCH;
+                previousNodeId_ = nodeId;
+                break;
+            }
+            case ToggleType::BUTTON:
+                previousNodeId_ = ToggleButtonModelNG::Create(V2::TOGGLE_ETS_TAG);
+                ToggleButtonModelNG::SetIsOn(isOn);
+                previousToggleType_ = ToggleType::BUTTON;
+                break;
+            default:
+                break;
         }
-        case NG::ToggleType::SWITCH: {
-            auto* stack = ViewStackProcessor::GetInstance();
-            int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-            auto frameNode = FrameNode::GetOrCreateFrameNode(
-                V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwitchPattern>(); });
-            stack->Push(frameNode);
-            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
-            break;
+    } else if (previousToggleType_ != toggleType) {
+        auto childFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, previousNodeId_);
+        CHECK_NULL_VOID(childFrameNode);
+        ElementRegister::GetInstance()->RemoveItemSilently(previousNodeId_);
+        auto parentFrame = childFrameNode->GetParent();
+        childFrameNode->SetRemoveSilently(true);
+        CHECK_NULL_VOID(parentFrame);
+        auto index = parentFrame->RemoveChildAndReturnIndex(childFrameNode);
+        switch (toggleType) {
+            case ToggleType::CHECKBOX: {
+                CheckBoxModelNG checkBoxModelNG;
+                previousNodeId_ = checkBoxModelNG.Create(std::nullopt, std::nullopt, V2::CHECKBOX_ETS_TAG);
+                checkBoxModelNG.SetSelect(isOn);
+                auto newFrameNode = FrameNode::GetFrameNode(V2::CHECKBOX_ETS_TAG, previousNodeId_);
+                parentFrame->AddChild(newFrameNode, index);
+                newFrameNode->MarkModifyDone();
+                previousToggleType_ = ToggleType::CHECKBOX;
+                break;
+            }
+            case ToggleType::SWITCH: {
+                auto* stack = ViewStackProcessor::GetInstance();
+                int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+                auto frameNode = FrameNode::GetOrCreateFrameNode(
+                    V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwitchPattern>(); });
+                stack->Push(frameNode);
+                ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
+                previousNodeId_ = nodeId;
+                parentFrame->AddChild(frameNode, index);
+                frameNode->MarkModifyDone();
+                previousToggleType_ = ToggleType::SWITCH;
+                break;
+            }
+            case ToggleType::BUTTON: {
+                previousNodeId_ = ToggleButtonModelNG::Create(V2::TOGGLE_ETS_TAG);
+                ToggleButtonModelNG::SetIsOn(isOn);
+                auto newFrameNode = FrameNode::GetFrameNode(V2::CHECKBOX_ETS_TAG, previousNodeId_);
+                parentFrame->AddChild(newFrameNode, index);
+                newFrameNode->MarkModifyDone();
+                previousToggleType_ = ToggleType::BUTTON;
+                break;
+            }
+            default:
+                break;
         }
-        case NG::ToggleType::BUTTON:
-            NG::ToggleButtonModelNG::Create(V2::TOGGLE_ETS_TAG);
-            NG::ToggleButtonModelNG::SetIsOn(isOn);
-            break;
-        default:
-            break;
     }
 }
 
