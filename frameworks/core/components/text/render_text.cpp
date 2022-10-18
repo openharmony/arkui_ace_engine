@@ -17,6 +17,7 @@
 
 #include "base/geometry/size.h"
 #include "base/log/dump_log.h"
+#include "core/common/ace_engine_ext.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -977,6 +978,9 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
             dragWindow_->SetOffset(rect.Left(), rect.Top());
             dragWindow_->DrawText(paragraph_, GetPaintRect().GetOffset(), initRenderNode);
         }
+        if (dragWindow_) {
+            AceEngineExt::GetInstance().DragStartExt();
+        }
         return;
     }
 
@@ -994,6 +998,9 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
                 dragItemInfo.pixelMap->GetHeight());
             dragWindow_->SetOffset(rect.Left(), rect.Top());
             dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
+        }
+        if (dragWindow_) {
+            AceEngineExt::GetInstance().DragStartExt();
         }
         return;
     }
