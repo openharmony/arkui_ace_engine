@@ -50,16 +50,6 @@ void JSBadge::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(badge);
 }
 
-void JSBadge::Pop()
-{
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::BadgeView::Pop();
-        NG::ViewStackProcessor::GetInstance()->PopContainer();
-        return;
-    }
-    JSViewAbstract::Pop();
-}
-
 void JSBadge::CreateNG(const JSCallbackInfo& info)
 {
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -123,9 +113,9 @@ void JSBadge::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBadge>::StaticMethod("create", &JSBadge::Create, opt);
 
-    JSClass<JSBadge>::StaticMethod("pop", &JSBadge::Pop);
-
+    JSClass<JSBadge>::Inherit<JSContainerBase>();
     JSClass<JSBadge>::Inherit<JSViewAbstract>();
+
     JSClass<JSBadge>::Bind(globalObj);
 }
 
