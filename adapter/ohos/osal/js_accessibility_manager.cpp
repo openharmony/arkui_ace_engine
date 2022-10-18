@@ -644,9 +644,12 @@ bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
         return false;
     }
 
-    bool ret = instance->SubscribeStateObserver(stateObserver_, eventType);
+    Accessibility::RetError ret = instance->SubscribeStateObserver(stateObserver_, eventType);
     LOGD("SubscribeStateObserver:%{public}d", ret);
-    return ret;
+    if (ret != RET_OK) {
+        return false;
+    }
+    return true;
 }
 
 bool JsAccessibilityManager::UnsubscribeStateObserver(const int eventType)
@@ -661,9 +664,12 @@ bool JsAccessibilityManager::UnsubscribeStateObserver(const int eventType)
         return false;
     }
 
-    bool ret = instance->UnsubscribeStateObserver(stateObserver_, eventType);
+    Accessibility::RetError ret = instance->UnsubscribeStateObserver(stateObserver_, eventType);
     LOGI("UnsubscribeStateObserver:%{public}d", ret);
-    return ret;
+    if (ret != RET_OK) {
+        return false;
+    }
+    return true;
 }
 
 void JsAccessibilityManager::InitializeCallback()
@@ -1506,9 +1512,9 @@ int JsAccessibilityManager::RegisterInteractionOperation(const int windowId)
 
     interactionOperation_ = std::make_shared<JsInteractionOperation>();
     interactionOperation_->SetHandler(WeakClaim(this));
-    auto retReg = instance->RegisterElementOperator(windowId, interactionOperation_);
+    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation_);
     LOGI("RegisterInteractionOperation end windowId:%{public}d, ret:%{public}d", windowId, retReg);
-    Register(retReg == 0);
+    Register(retReg == RET_OK)
 
     return retReg;
 }
