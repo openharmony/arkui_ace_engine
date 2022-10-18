@@ -116,7 +116,7 @@ void ForEachNode::CompareAndUpdateChildren()
         }
     }
 
-    if (onMainTree_) {
+    if (IsOnMainTree()) {
         for (auto newChild : additionalChildComps) {
             newChild->AttachToMainTree();
         }
