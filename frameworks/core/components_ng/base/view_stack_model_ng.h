@@ -13,21 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_MODEL_NG_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_MODEL_NG_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_MODEL_NG_H
 
 #include <memory>
 
 #include "base/utils/macros.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/container_model.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ContainerModelNG : public ContainerModel {
+class ACE_EXPORT ViewStackModelNG : public ViewStackModel {
 public:
     void Pop() override
+    {
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    void PopContainer() override
     {
         ViewStackProcessor::GetInstance()->PopContainer();
     }
@@ -59,4 +64,4 @@ private:
 };
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_MODEL_NG_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_MODEL_NG_H

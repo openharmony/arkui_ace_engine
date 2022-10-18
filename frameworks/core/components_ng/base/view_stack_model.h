@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODEL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODEL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_MODEL_H
 
 #include <memory>
 #include <string>
@@ -25,21 +25,21 @@
 
 namespace OHOS::Ace {
 
-// TODO: change name later
-class ACE_EXPORT ContainerModel {
+class ACE_EXPORT ViewStackModel {
 public:
-    static ContainerModel* GetInstance();
-    virtual ~ContainerModel() = default;
+    static ViewStackModel* GetInstance();
+    virtual ~ViewStackModel() = default;
 
     virtual void Pop() = 0;
+    virtual void PopContainer() = 0;
     virtual void NewScope() = 0;
     virtual RefPtr<AceType> Finish() = 0;
     virtual std::string ProcessViewId(const std::string& viewId) = 0;
     virtual AnimationOption GetImplicitAnimationOption() = 0;
 
 private:
-    static std::unique_ptr<ContainerModel> instance_;
+    static std::unique_ptr<ViewStackModel> instance_;
 };
 
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODEL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_MODEL_H

@@ -13,19 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CONTAINER_MODEL_IMPL_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CONTAINER_MODEL_IMPL_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_VIEW_STACK_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_VIEW_STACK_MODEL_IMPL_H
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_ng/pattern/container_model.h"
+#include "core/components_ng/base/view_stack_model.h"
 
 namespace OHOS::Ace::Framework {
 
-class ContainerModelImpl : public ContainerModel {
+class ViewStackModelImpl : public ViewStackModel {
 public:
     void Pop() override
+    {
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    void PopContainer() override
     {
         ViewStackProcessor::GetInstance()->PopContainer();
     }
@@ -57,4 +62,4 @@ private:
 };
 
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CONTAINER_MODEL_IMPL_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_VIEW_STACK_MODEL_IMPL_H
