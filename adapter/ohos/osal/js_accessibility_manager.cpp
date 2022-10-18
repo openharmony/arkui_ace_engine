@@ -1514,7 +1514,7 @@ int JsAccessibilityManager::RegisterInteractionOperation(const int windowId)
     interactionOperation_->SetHandler(WeakClaim(this));
     Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation_);
     LOGI("RegisterInteractionOperation end windowId:%{public}d, ret:%{public}d", windowId, retReg);
-    Register(retReg == RET_OK)
+    Register(retReg == RET_OK);
 
     return retReg;
 }
