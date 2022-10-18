@@ -31,4 +31,3 @@ void AceEngineExt::DragStartExt()
     CallDragExtFunc();
 }
 } // namespace OHOS::Ace
-\ No newline at end of file
