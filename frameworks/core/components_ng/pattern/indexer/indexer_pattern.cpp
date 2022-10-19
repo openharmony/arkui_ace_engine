@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -219,31 +217,10 @@ void IndexerPattern::ApplyIndexChanged()
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
-    CHECK_NULL_VOID(indexerEventHub);
-        
-    auto onSelected = indexerEventHub->GetOnSelected();
-    if (onSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
-        onSelected(selected_);
-    }
-
-    auto onRequestPopupData = indexerEventHub->GetOnRequestPopupData();
-    std::optional<std::vector<std::string>> popupData;
-    if (onRequestPopupData && (selected_ >= 0) && (selected_ < itemCount_)) {
-        popupData = onRequestPopupData(selected_);
-    }
-
-    auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
-    if (onPopupSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
-        onPopupSelected(selected_);
-    }
-        
-    auto color = layoutProperty->GetColor().value_or(Color(INDEXER_LIST_COLOR));
-    auto selectedColor = layoutProperty->GetSelectedColor().value_or(Color(INDEXER_LIST_ACTIVE_COLOR));
-    auto popupColor = layoutProperty->GetPopupColor().value_or(Color(BUBBLE_FONT_COLOR));
-    auto selectedBackgroundColor = layoutProperty->GetSelectedBackgroundColor()
-        .value_or(Color(INDEXER_ACTIVE_BG_COLOR));
-    auto popupBackground = layoutProperty->GetPopupBackground().value_or(Color(BUBBLE_BG_COLOR));
+    auto color = layoutProperty->GetColor().value_or(Color::BLACK);
+    auto selectedColor = layoutProperty->GetSelectedColor().value_or(Color::BLACK);
+    auto popupColor = layoutProperty->GetPopupColor().value_or(Color::BLACK);
+    auto selectedBackgroundColor = layoutProperty->GetSelectedBackgroundColor().value_or(Color::BLACK);
     auto usingPopup = layoutProperty->GetUsingPopup().value_or(false);
     TextStyle textStyle;
     auto selectedFont = layoutProperty->GetSelectedFont().value_or(textStyle);
@@ -265,42 +242,12 @@ void IndexerPattern::ApplyIndexChanged()
             childRenderContext->BlendBgColor(selectedBackgroundColor);
         } else if (index == itemCount_) {
             if (usingPopup) {
-                std::vector<std::string> arrayValueSelected = {arrayValue_[selected_]};
-                auto popupDataValue = popupData.value_or(arrayValueSelected);
-
-                auto listNode = AceType::DynamicCast<FrameNode>(iter);
-                listNode->Clean();
-                for (const auto& data: popupDataValue) {
-                    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1,
-                        AceType::MakeRefPtr<TextPattern>());
-                    auto textNodeLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-                    textNodeLayoutProperty->UpdateContent(data);
-                    textNodeLayoutProperty->UpdateTextColor(popupColor);
-                    auto fontSize = popupFont.GetFontSize();
-                    textNodeLayoutProperty->UpdateFontSize(fontSize);
-                    auto fontWeight = popupFont.GetFontWeight();
-                    textNodeLayoutProperty->UpdateFontWeight(fontWeight);
-
-                    CalcLength width = CalcLength(Dimension(BUBBLE_BOX_SIZE));
-                    CalcLength height = CalcLength(Dimension(BUBBLE_BOX_SIZE));
-                    textNodeLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
-
-                    auto textNodeRenderContext = textNode->GetRenderContext();
-                    textNodeRenderContext->BlendBgColor(popupBackground);
-
-                    Dimension radius = Dimension(NG::BUBBLE_BOX_RADIUS);
-                    BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-                    textNodeRenderContext->UpdateBorderRadius(borderRadius);
-                    textNode->MarkModifyDone();
-                    auto listItemNode = FrameNode::GetOrCreateFrameNode(
-                        V2::LIST_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
-                    listItemNode->AddChild(textNode);
-                    listItemNode->MarkModifyDone();
-                    
-                    listNode->AddChild(listItemNode);
-                }
-                listNode->MarkModifyDone();
-                listNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                nodeLayoutProperty->UpdateContent(arrayValue_[selected_]);
+                nodeLayoutProperty->UpdateTextColor(popupColor);
+                auto fontSize = popupFont.GetFontSize();
+                nodeLayoutProperty->UpdateFontSize(fontSize);
+                auto fontWeight = popupFont.GetFontWeight();
+                nodeLayoutProperty->UpdateFontWeight(fontWeight);
             }
         } else {
             nodeLayoutProperty->UpdateTextColor(color);
@@ -315,6 +262,21 @@ void IndexerPattern::ApplyIndexChanged()
         index++;
     }
 
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(indexerEventHub);
+    auto onSelected = indexerEventHub->GetOnSelected();
+    if (onSelected && selected_ >= 0 && selected_ < itemCount_) {
+        onSelected(selected_);
+    }
+    auto onRequestPopupData = indexerEventHub->GetOnRequestPopupData();
+    if (onRequestPopupData && selected_ >= 0 && selected_ < itemCount_) {
+        // TODO: 需要接受返回值覆盖默认的弹窗文本
+        onRequestPopupData(selected_);
+    }
+    auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
+    if (onPopupSelected && selected_ >= 0 && selected_ < itemCount_) {
+        onPopupSelected(selected_);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

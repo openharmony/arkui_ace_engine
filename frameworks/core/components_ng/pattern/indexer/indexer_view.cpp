@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/indexer/indexer_view.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -25,30 +24,12 @@ namespace OHOS::Ace::NG {
 
 void IndexerView::Create(const std::vector<std::string>& arrayValue, int32_t selected)
 {
+    // TODO:需要考虑更新场景
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
     
-    auto indexerPattern = frameNode->GetPattern<IndexerPattern>();
-    auto storedArrayValue = indexerPattern->GetArrayValue();
-    bool arrayValueSame = false;
-    if (storedArrayValue.size() == arrayValue.size()) {
-        arrayValueSame = true;
-        auto iterStore = storedArrayValue.begin();
-        auto iter = arrayValue.begin();
-        for (auto index = 0; index < arrayValue.size(); index++) {
-            if ((*iterStore) != (*iter)) {
-                arrayValueSame = false;
-                break;
-            }
-        }
-    }
-    if (arrayValueSame) {
-        return;
-    }
-    
-    frameNode->Clean();
     int32_t indexerSize = arrayValue.size();
     for (int32_t index = 0; index < indexerSize; index++) {
         auto indexerChildNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
@@ -58,17 +39,13 @@ void IndexerView::Create(const std::vector<std::string>& arrayValue, int32_t sel
         textLayoutProperty->UpdateContent(arrayValue[index]);
         frameNode->AddChild(indexerChildNode);
     }
-    auto indexerPopupNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    auto indexerPopupNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(indexerPopupNode);
     frameNode->AddChild(indexerPopupNode);
     
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ArrayValue, arrayValue);
-    if (selected >= 0 && selected < indexerSize) {
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, selected);
-    } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, 0);
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, selected);
 }
 
 void IndexerView::SetColor(const Color& color)
@@ -118,36 +95,12 @@ void IndexerView::SetFont(const TextStyle& font)
 
 void IndexerView::SetItemSize(const Dimension& itemSize)
 {
-    auto itemSizeValue = itemSize.Value();
-    if (itemSizeValue > 0) {
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ItemSize, itemSize);
-    } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ItemSize, Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ItemSize, itemSize);
 }
 
-void IndexerView::SetAlignStyle(NG::AlignStyle alignStyle)
+void IndexerView::SetAlignStyle(V2::AlignStyle alignStyle)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AlignStyle, alignStyle);
-}
-
-void IndexerView::SetSelected(int32_t selected)
-{
-    if (selected >= 0) {
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, selected);
-    } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, 0);
-    }
-}
-
-void IndexerView::SetPopupPositionX(float popupPositionX)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionX);
-}
-
-void IndexerView::SetPopupPositionY(float popupPositionY)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionY);
 }
 
 void IndexerView::SetOnSelected(OnSelectedEvent&& onSelected)

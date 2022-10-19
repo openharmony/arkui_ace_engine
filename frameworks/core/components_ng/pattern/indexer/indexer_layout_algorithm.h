@@ -79,7 +79,7 @@ private:
     TextStyle font_;
     float itemSize_ = 0.0f;
     float itemSizeRender_ = 0.0f;
-    NG::AlignStyle alignStyle_ = NG::AlignStyle::RIGHT;
+    V2::AlignStyle alignStyle_ = V2::AlignStyle::RIGHT;
 };
 } // namespace OHOS::Ace::NG
 

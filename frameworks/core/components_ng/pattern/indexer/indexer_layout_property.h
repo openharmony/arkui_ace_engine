@@ -21,7 +21,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
+#include "core/components_v2/indexer/indexer_component.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT IndexerLayoutProperty : public LayoutProperty {
@@ -49,8 +49,6 @@ public:
         value->propFont_ = CloneFont();
         value->propItemSize_ = CloneItemSize();
         value->propAlignStyle_ = CloneAlignStyle();
-        value->propPopupPositionX_ = ClonePopupPositionX();
-        value->propPopupPositionY_ = ClonePopupPositionY();
         return value;
     }
 
@@ -70,8 +68,6 @@ public:
         ResetFont();
         ResetItemSize();
         ResetAlignStyle();
-        ResetPopupPositionX();
-        ResetPopupPositionY();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrayValue, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
@@ -87,9 +83,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupFont, TextStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Font, TextStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AlignStyle, NG::AlignStyle, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionX, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionY, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AlignStyle, V2::AlignStyle, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 
