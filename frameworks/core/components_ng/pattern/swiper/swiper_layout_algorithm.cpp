@@ -36,6 +36,19 @@ void SwiperLayoutAlgorithm::InitItemRange()
 {
     ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::InitItemRange");
     itemRange_.clear();
+
+    /* Load next index while swiping */
+    int32_t nextIndex = currentIndex_;
+    if (GreatNotEqual(currentOffset_, 0)) {
+        --nextIndex;
+    } else if (LessNotEqual(currentOffset_, 0)) {
+        ++nextIndex;
+    }
+    if (nextIndex != currentIndex_) {
+        nextIndex = isLoop_ ? (nextIndex + totalCount_) % totalCount_ : std::clamp(nextIndex, 0, totalCount_ - 1);
+        itemRange_.insert(nextIndex);
+    }
+
     if (startIndex_ <= endIndex_) {
         for (auto index = startIndex_; index <= endIndex_; ++index) {
             itemRange_.insert(index);
