@@ -75,7 +75,7 @@ HWTEST_F(SubwindowManagerTest, Subwindow_Manager_ShowToast_001, TestSize.Level1)
     Container::SetCurrentId(TEST_INT_TEAM_ONE);
     std::shared_ptr<SubwindowManager> subwindowm = SubwindowManager::GetInstance();
     subwindowm->ShowToast(TEST_STRING, TEST_INT_TEAM_ONE, TEST_STRING);
-    auto resultPtr = subwindowm->GetSubwindow(TEST_INT_TEAM_ONE);
+    auto resultPtr = subwindowm->GetDialogSubwindow(TEST_INT_TEAM_ONE);
     ASSERT_TRUE(resultPtr != nullptr);
 }
 
@@ -90,7 +90,7 @@ HWTEST_F(SubwindowManagerTest, Subwindow_Manager_ShowToast_002, TestSize.Level1)
 {
     std::shared_ptr<SubwindowManager> subwindowm = SubwindowManager::GetInstance();
     subwindowm->ShowToast(TEST_STRING, TEST_INT_TEAM_ONE, TEST_STRING);
-    auto resultPtr = subwindowm->GetSubwindow(TEST_INT_TEAM_ONE);
+    auto resultPtr = subwindowm->GetDialogSubwindow(TEST_INT_TEAM_ONE);
     ASSERT_TRUE(resultPtr != nullptr);
 }
 
@@ -109,7 +109,7 @@ HWTEST_F(SubwindowManagerTest, Subwindow_Manager_ShowDialog_001, TestSize.Level1
     std::set<std::string> callbacks;
     auto callback = [](int32_t callbackType, int32_t successType) {};
     subwindowm->ShowDialog(TEST_STRING, TEST_STRING, buttons, TEST_BOOL, callback, callbacks);
-    auto resultPtr = subwindowm->GetSubwindow(TEST_INT_TEAM_TWO);
+    auto resultPtr = subwindowm->GetDialogSubwindow(TEST_INT_TEAM_TWO);
     ASSERT_TRUE(resultPtr != nullptr);
 }
 
@@ -127,7 +127,7 @@ HWTEST_F(SubwindowManagerTest, Subwindow_Manager_ShowDialog_002, TestSize.Level1
     std::set<std::string> callbacks;
     auto callback = [](int32_t callbackType, int32_t successType) {};
     subwindowm->ShowDialog(TEST_STRING, TEST_STRING, buttons, TEST_BOOL, callback, callbacks);
-    auto resultPtr = subwindowm->GetSubwindow(TEST_INT_TEAM_TWO);
+    auto resultPtr = subwindowm->GetDialogSubwindow(TEST_INT_TEAM_TWO);
     ASSERT_TRUE(resultPtr != nullptr);
 }
 
@@ -145,7 +145,7 @@ HWTEST_F(SubwindowManagerTest, Subwindow_Manager_ShowActionMenu_001, TestSize.Le
     std::vector<ButtonInfo> buttons;
     auto callback = [](int32_t callbackType, int32_t successType) {};
     subwindowm->ShowActionMenu(TEST_STRING, buttons, callback);
-    auto resultPtr = subwindowm->GetSubwindow(TEST_INT_TEAM_THREE);
+    auto resultPtr = subwindowm->GetDialogSubwindow(TEST_INT_TEAM_THREE);
     ASSERT_TRUE(resultPtr != nullptr);
 }
 
@@ -162,7 +162,7 @@ HWTEST_F(SubwindowManagerTest, Subwindow_Manager_ShowActionMenu_002, TestSize.Le
     std::vector<ButtonInfo> buttons;
     auto callback = [](int32_t callbackType, int32_t successType) {};
     subwindowm->ShowActionMenu(TEST_STRING, buttons, callback);
-    auto resultPtr = subwindowm->GetSubwindow(TEST_INT_TEAM_THREE);
+    auto resultPtr = subwindowm->GetDialogSubwindow(TEST_INT_TEAM_THREE);
     ASSERT_TRUE(resultPtr != nullptr);
 }
 } // namespace OHOS::Ace
