@@ -53,6 +53,13 @@ void BubblePattern::OnModifyDone()
     InitTouchEvent(gestureHub);
 }
 
+void BubblePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
+}
+
 void BubblePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (touchEvent_) {
