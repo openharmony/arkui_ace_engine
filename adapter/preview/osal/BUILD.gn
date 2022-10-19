@@ -30,7 +30,7 @@ template("utilsecurec_source") {
       ]
       cflags = [ "-Wno-inconsistent-dllimport" ]
     }
-    configs = [ "//third_party/bounds_checking_function:libsec_public_config" ]
+    configs = [ "//commonlibrary/c_utils/base:utils_config" ]
   }
 }
 

@@ -17,11 +17,11 @@
 
 #include <cmath>
 
+#include "commonlibrary/c_utils/base/include/securec.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
-#include "third_party/bounds_checking_function/include/securec.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
