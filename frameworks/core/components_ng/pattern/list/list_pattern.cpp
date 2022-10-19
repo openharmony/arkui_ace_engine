@@ -238,7 +238,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     }
     listLayoutAlgorithm->SetCurrentOffset(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
-    if (IsOutOfBoundary()) {
+    if (IsOutOfBoundary(false)) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     return listLayoutAlgorithm;
@@ -301,13 +301,13 @@ Axis ListPattern::GetDirection() const
     return listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
 }
 
-bool ListPattern::IsOutOfBoundary()
+bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
     if (itemPosition_.empty()) {
         return false;
     }
-    auto startPos = startMainPos_ - currentDelta_;
-    auto endPos = endMainPos_ - currentDelta_;
+    auto startPos = useCurrentDelta ? startMainPos_ - currentDelta_ : startMainPos_;
+    auto endPos = useCurrentDelta ? endMainPos_ - currentDelta_ : endMainPos_;
     bool outOfStart = (startIndex_ == 0) && Positive(startPos);
     bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, GetMainContentSize());
     return outOfStart || outOfEnd;
