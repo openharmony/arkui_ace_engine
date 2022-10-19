@@ -62,7 +62,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
 
     // update child layout constraint
-    LayoutConstraintF childLayoutConstraint;
+    LayoutConstraintF childLayoutConstraint = bubbleLayoutProperty->CreateChildConstraint();
     if (!useCustom) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
             childLayoutConstraint.UpdateMaxSizeWithCheck(
