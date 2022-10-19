@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/common/environment/environment_impl.h"
+#include "adapter/ohos/capability/environment/environment_proxy_impl.h"
 
-#include "core/common/environment/environment.h"
+#include "adapter/ohos/capability/environment/environment_impl.h"
 
 namespace OHOS::Ace {
-EnvironmentImpl::EnvironmentImpl(const RefPtr<TaskExecutor>& taskExecutor) : Environment(taskExecutor) {}
 
-std::string EnvironmentImpl::GetAccessibilityEnabled()
+RefPtr<Environment> EnvironmentProxyImpl::GetEnvironment(const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    return AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ? "true" : "false";
+    return AceType::MakeRefPtr<EnvironmentImpl>(taskExecutor);
 }
+
 } // namespace OHOS::Ace

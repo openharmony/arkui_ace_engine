@@ -13,22 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ENVIRONMENT_ENVIRONMENT_IMPL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ENVIRONMENT_ENVIRONMENT_IMPL_H
-
-#include "base/memory/referenced.h"
+#include "adapter/ohos/capability/environment/environment_impl.h"
 #include "core/common/ace_application_info.h"
-#include "core/common/environment/environment.h"
 
 namespace OHOS::Ace {
+EnvironmentImpl::EnvironmentImpl(const RefPtr<TaskExecutor>& taskExecutor) : Environment(taskExecutor) {}
 
-class EnvironmentImpl : public Environment {
-public:
-    explicit EnvironmentImpl(const RefPtr<TaskExecutor>& taskExecutor);
-    ~EnvironmentImpl() override = default;
-
-    std::string GetAccessibilityEnabled() override;
-};
+std::string EnvironmentImpl::GetAccessibilityEnabled()
+{
+    return AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ? "true" : "false";
+}
 } // namespace OHOS::Ace
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ENVIRONMENT_ENVIRONMENT_IMPL_H
