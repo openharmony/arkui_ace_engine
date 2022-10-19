@@ -251,14 +251,14 @@ void JSGrid::SetEditMode(bool editMode)
     GridModel::GetInstance()->SetEditable(editMode);
 }
 
-void JSGrid::SetMaxCount(int32_t maxCount)
+void JSGrid::SetMaxCount(double maxCount)
 {
-    GridModel::GetInstance()->SetMaxCount(maxCount);
+    GridModel::GetInstance()->SetMaxCount(static_cast<int32_t>(maxCount));
 }
 
-void JSGrid::SetMinCount(int32_t minCount)
+void JSGrid::SetMinCount(double minCount)
 {
-    GridModel::GetInstance()->SetMinCount(minCount);
+    GridModel::GetInstance()->SetMinCount(static_cast<int32_t>(minCount));
 }
 
 void JSGrid::CellLength(int32_t cellLength)
