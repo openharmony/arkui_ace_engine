@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ToggleButtonModelNG {
 public:
-    static int32_t Create(const std::string& tagName);
+    static void Create(const std::string& tagName);
     static void SetSelectedColor(const Color& selectedColor);
     static void SetBackgroundColor(const Color& backgroundColor);
     static void SetIsOn(bool isOn);

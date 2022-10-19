@@ -29,7 +29,6 @@ enum class ToggleType {
     CHECKBOX = 0,
     SWITCH,
     BUTTON,
-    NONE,
 };
 
 } // namespace OHOS::Ace::NG
