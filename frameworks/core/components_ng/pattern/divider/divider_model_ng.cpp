@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/divider/divider_view.h"
+#include "core/components_ng/pattern/divider/divider_model_ng.h"
 
 #include "core/components/divider/divider_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void DividerView::Create()
+
+void DividerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -33,27 +33,27 @@ void DividerView::Create()
     LoadTheme(frameNode);
 }
 
-void DividerView::Vertical(bool value)
+void DividerModelNG::Vertical(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(DividerLayoutProperty, Vertical, value);
 }
 
-void DividerView::DividerColor(const Color& value)
+void DividerModelNG::DividerColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, value);
 }
 
-void DividerView::StrokeWidth(const Dimension& value)
+void DividerModelNG::StrokeWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(DividerLayoutProperty, StrokeWidth, value);
 }
 
-void DividerView::LineCap(const Ace::LineCap& value)
+void DividerModelNG::LineCap(const Ace::LineCap& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, LineCap, value);
 }
 
-void DividerView::LoadTheme(const RefPtr<FrameNode>& frameNode)
+void DividerModelNG::LoadTheme(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
