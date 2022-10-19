@@ -84,7 +84,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     // Create child
     RefPtr<FrameNode> child;
     if (useCustom) {
-        LOGE("CreateBubbleNode, UseCustom");
+        LOGI("CreateBubbleNode, UseCustom");
     } else if (primaryButton.showButton || secondaryButton.showButton) {
         child = CreateCombinedChild(param, popupId, targetId);
         popupPaintProp->UpdateAutoCancel(false);
