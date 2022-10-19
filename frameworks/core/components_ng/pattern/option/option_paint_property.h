@@ -49,6 +49,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Hover, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedDivider, bool, PROPERTY_UPDATE_RENDER);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put("hover", propHover_.value_or(false) ? "true" : "false");
+        json->Put("needDivider", propNeedDivider_.value_or(true) ? "true" : "false");
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(OptionPaintProperty);
 };
 

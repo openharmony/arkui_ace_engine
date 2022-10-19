@@ -118,6 +118,10 @@ private:
     SelectedFont selectedFont_;
     std::optional<Color> selectedBgColor_;
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    std::string InspectorGetOptions() const;
+    std::string InspectorGetSelectedFont() const;
+
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
 

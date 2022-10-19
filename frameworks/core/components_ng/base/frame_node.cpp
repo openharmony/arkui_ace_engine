@@ -165,6 +165,9 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (renderContext_) {
         renderContext_->ToJsonValue(json);
     }
+    if (pattern_) {
+        pattern_->ToJsonValue(json);
+    }
 }
 
 void FrameNode::OnAttachToMainTree()

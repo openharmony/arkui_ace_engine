@@ -48,6 +48,16 @@ public:
     // target frameNode that this menu belongs to
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetId, int32_t, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetTag, std::string, PROPERTY_UPDATE_LAYOUT);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("targetId", std::to_string(propTargetId_.value_or(-1)).c_str());
+        json->Put("targetTag", propTargetTag_.value_or("null").c_str());
+    }
+
+    ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutProperty);
+
 };
 } // namespace OHOS::Ace::NG
 

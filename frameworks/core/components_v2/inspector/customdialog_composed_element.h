@@ -37,7 +37,7 @@ public:
     std::string GetAlignment() const;
     std::unique_ptr<JsonValue> GetDialogOffset() const;
     std::string GetCustomStyle() const;
-    std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment) const;
+    static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment);
 
     AceType::IdType GetTargetTypeId() const override
     {

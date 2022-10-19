@@ -270,7 +270,7 @@ OHOS::Ace::RefPtr<OHOS::Ace::RenderSelect> SelectComposedElement::GetRenderSelec
     return nullptr;
 }
 
-std::string SelectComposedElement::GetTextStyle(TextStyle textStyle) const
+std::string SelectComposedElement::GetTextStyle(TextStyle textStyle)
 {
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("size", textStyle.GetFontSize().ToString().c_str());
@@ -304,7 +304,7 @@ std::string SelectComposedElement::GetTextStyle(TextStyle textStyle) const
     return jsonValue->ToString();
 }
 
-std::string SelectComposedElement::ConvertFontFamily(const std::vector<std::string>& fontFamily) const
+std::string SelectComposedElement::ConvertFontFamily(const std::vector<std::string>& fontFamily)
 {
     std::string result = "";
     for (const auto& item : fontFamily) {

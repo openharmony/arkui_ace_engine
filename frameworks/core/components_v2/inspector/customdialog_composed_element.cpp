@@ -91,7 +91,7 @@ std::unique_ptr<JsonValue> CustomDialogComposedElement::GetDialogOffset() const
     return jsonValue;
 }
 
-std::string CustomDialogComposedElement::ConvertDialogAlignmentToString(DialogAlignment dialogAlignment) const
+std::string CustomDialogComposedElement::ConvertDialogAlignmentToString(DialogAlignment dialogAlignment) 
 {
     std::string Alignment = "";
     switch (dialogAlignment) {
