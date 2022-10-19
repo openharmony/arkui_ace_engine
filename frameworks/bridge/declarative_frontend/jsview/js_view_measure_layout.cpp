@@ -87,7 +87,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     ACE_SCOPED_TRACE("ViewMeasureLayout::JSLayout");
     EcmaVM* vm = runtimeCallInfo->GetVM();
 
-    if ( iterLayoutChildren_ == layoutChildren_.end() ) {
+    if (iterLayoutChildren_ == layoutChildren_.end()) {
         LOGE("Call layout exceed limit");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -112,7 +112,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     if (!(xResult || yResult)) {
         LOGE("the position prop is illegal");
     } else {
-        (*iterLayoutChildren_)->GetGeometryNode()->SetFrameOffset({dimenX.ConvertToPx(), dimenY.ConvertToPx()});
+        (*iterLayoutChildren_)->GetGeometryNode()->SetFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
     }
     (*iterLayoutChildren_)->Layout();
     iterLayoutChildren_++;
