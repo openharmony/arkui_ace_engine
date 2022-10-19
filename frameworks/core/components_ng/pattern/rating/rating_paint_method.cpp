@@ -31,6 +31,7 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     CHECK_NULL_RETURN(secondaryImageCanvas_, nullptr);
     CHECK_NULL_RETURN(backgroundImageCanvas_, nullptr);
     auto offset = paintWrapper->GetContentOffset();
+    auto contentSize = paintWrapper->GetContentSize();
 
     ImagePainter foregroundImagePainter(foregroundImageCanvas_);
     ImagePainter secondaryImagePainter(secondaryImageCanvas_);
@@ -46,7 +47,8 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     double stepSize = ratingRenderProperty->GetStepSize().value_or(ratingTheme->GetStepSize());
     int32_t touchStar = ratingRenderProperty->GetTouchStar().value_or(0);
     return [foregroundImagePainter, secondaryImagePainter, backgroundPainter, drawScore, stepSize, touchStar,
-               starNum = starNum_, offset, ImagePaintConfig = singleStarImagePaintConfig_](RSCanvas& canvas) {
+               starNum = starNum_, offset, contentSize,
+               ImagePaintConfig = singleStarImagePaintConfig_](RSCanvas& canvas) {
         // step1: check if touch down any stars.
         float singleStarWidth = ImagePaintConfig.dstRect_.Width();
         float singleStarHeight = ImagePaintConfig.dstRect_.Height();
@@ -76,7 +78,7 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
             static_cast<float>(offset.GetX() + singleStarWidth * drawScore), offset.GetY() + singleStarHeight);
         canvas.ClipRect(clipRect1, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
         for (int32_t i = 0; i < foregroundImageRepeatNum; i++) {
-            foregroundImagePainter.DrawImage(canvas, offsetTemp, ImagePaintConfig);
+            foregroundImagePainter.DrawImage(canvas, offsetTemp, contentSize, ImagePaintConfig);
             offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
         }
         canvas.Restore();
@@ -91,14 +93,14 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
             // step3.1: calculate the clip area which already occupied by the foreground image.
             canvas.ClipRect(clipRect2, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
             offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() - singleStarWidth));
-            secondaryImagePainter.DrawImage(canvas, offsetTemp, ImagePaintConfig);
+            secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize, ImagePaintConfig);
             offsetTemp.SetX(offsetTemp.GetX() + ImagePaintConfig.dstRect_.Width());
             canvas.Restore();
         }
 
         // step4: draw background image.
         for (int32_t i = 0; i < backgroundImageRepeatNum; i++) {
-            backgroundPainter.DrawImage(canvas, offsetTemp, ImagePaintConfig);
+            backgroundPainter.DrawImage(canvas, offsetTemp, contentSize, ImagePaintConfig);
             if (i < backgroundImageRepeatNum - 1) {
                 offsetTemp.SetX(offsetTemp.GetX() + ImagePaintConfig.dstRect_.Width());
             }
