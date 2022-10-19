@@ -72,12 +72,28 @@ public:
     // called by pipeline in js thread of update.
     void Update();
 
+    bool FireOnMeasure(LayoutWrapper* layoutWrapper);
+
+    bool FireOnLayout(LayoutWrapper* layoutWrapper);
+
+    void SetLayoutFunction(std::function<void(LayoutWrapper* layoutWrapper)>&& layoutFunc)
+    {
+        layoutFunc_ = std::move(layoutFunc);
+    }
+
+    void SetMeasureFunction(std::function<void(LayoutWrapper* layoutWrapper)>&& measureFunc)
+    {
+        measureFunc_ = std::move(measureFunc);
+    }
+
 private:
     void BuildChildren(const RefPtr<FrameNode>& child);
 
     std::function<void()> updateFunc_;
     std::function<void()> destroyFunc_;
     std::function<void()> appearFunc_;
+    std::function<void(LayoutWrapper* layoutWrapper)> layoutFunc_;
+    std::function<void(LayoutWrapper* layoutWrapper)> measureFunc_;
     std::string viewKey_;
     bool needRebuild_ = false;
 };

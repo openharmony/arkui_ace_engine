@@ -31,8 +31,13 @@ thread_local NG::LayoutConstraintF ViewMeasureLayout::measureDefaultConstraint_;
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     ACE_SCOPED_TRACE("ViewMeasureLayout::JSMeasure");
-
     EcmaVM* vm = runtimeCallInfo->GetVM();
+
+    if (iterMeasureChildren_ == measureChildren_.end()) {
+        LOGE("Call measure exceed limit");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     auto info = runtimeCallInfo;
     if (info->GetArgsNumber() != 1 || !info->GetCallArgRef(0)->IsObject()) {
         LOGE("JSMeasure arg is wrong");
@@ -80,8 +85,13 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     ACE_SCOPED_TRACE("ViewMeasureLayout::JSLayout");
-
     EcmaVM* vm = runtimeCallInfo->GetVM();
+
+    if ( iterLayoutChildren_ == layoutChildren_.end() ) {
+        LOGE("Call layout exceed limit");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     auto info = runtimeCallInfo;
     if (info->GetArgsNumber() != 1 || !info->GetCallArgRef(0)->IsObject()) {
         LOGE("JSLayout arg is wrong");
