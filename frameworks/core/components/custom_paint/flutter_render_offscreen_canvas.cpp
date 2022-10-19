@@ -118,18 +118,38 @@ FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<Pipelin
     skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
 
-    auto currentDartState = flutter::UIDartState::Current();
-    if (!currentDartState) {
-        return;
+    auto pipelineContext = context.Upgrade();
+    if (pipelineContext) {
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this), width, height]() {
+                auto currentDartState = flutter::UIDartState::Current();
+                if (!currentDartState) {
+                    return;
+                }
+                auto flutterRenderOffscreenCanvas = weak.Upgrade();
+                if (!flutterRenderOffscreenCanvas) {
+                    LOGE("flutterRenderOffscreenCanvas is null");
+                    return;
+                }
+
+                flutterRenderOffscreenCanvas->SetRenderTaskHolder(
+                    MakeRefPtr<FlutterRenderTaskHolder>(
+                        currentDartState->GetSkiaUnrefQueue(),
+                        currentDartState->GetIOManager(),
+                        currentDartState->GetTaskRunners().GetIOTaskRunner()));
+            },
+            TaskExecutor::TaskType::UI);
     }
-#ifndef GPU_DISABLED
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
-        currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(),
-        currentDartState->GetTaskRunners().GetIOTaskRunner());
-#endif
+
     InitFilterFunc();
 }
+void FlutterRenderOffscreenCanvas::SetRenderTaskHolder(const RefPtr<FlutterRenderTaskHolder> renderTaskHolder)
+{
+#ifndef GPU_DISABLED
+    renderTaskHolder_ = renderTaskHolder;
+#endif
+}
+
 void FlutterRenderOffscreenCanvas::AddRect(const Rect& rect)
 {
     SkRect skRect = SkRect::MakeLTRB(rect.Left(), rect.Top(),
