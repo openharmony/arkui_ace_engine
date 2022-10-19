@@ -184,7 +184,6 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     validSizeCount_ = 0;
     realSize_.Reset();
     isInfiniteLayout_ = false;
-    layoutWrapper_ = layoutWrapper;
     auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     space_ = static_cast<float>(layoutProperty->GetSpaceValue({}).ConvertToPx());
@@ -474,7 +473,8 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
     }
 }
 
-void FlexLayoutAlgorithm::SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties)
+void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
+    FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper)
 {
     float remainSpace = mainAxisSize_ - allocatedSize_;
     float spacePerFlex = 0;
@@ -507,7 +507,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(FlexItemProperties& flexIte
     /**
      * get the real cross axis size.
      */
-    auto padding = layoutWrapper_->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto paddingLeft = padding.left.value_or(0.0f);
     auto paddingRight = padding.right.value_or(0.0f);
     auto paddingTop = padding.top.value_or(0.0f);
@@ -631,7 +631,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     /**
      * secondary measure
      */
-    SecondaryMeasureByProperty(flexItemProperties);
+    SecondaryMeasureByProperty(flexItemProperties, layoutWrapper);
 
     /**
      *  position property measure.
