@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT CheckBoxModelNG : public OHOS::Ace::CheckBoxModel {
 public:
-    int32_t Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
+    void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
         const std::string& tagName) override;
     void SetSelect(bool isSelected) override;
     void SetSelectedColor(const Color& color) override;

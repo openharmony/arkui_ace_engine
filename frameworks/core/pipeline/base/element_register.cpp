@@ -127,11 +127,11 @@ bool ElementRegister::RemoveItem(ElementIdType elementId)
     auto removed = itemMap_.erase(elementId);
     if (removed) {
         LOGD("ElmtId %{public}d successfully removed from registry, added to list of removed Elements.", elementId);
-        removedItems_.insert(elementId);
-        LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
     } else {
         LOGD("ElmtId %{public}d not found. Cannot be removed.", elementId);
     }
+    removedItems_.insert(elementId);
+    LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
     return removed;
 }
 

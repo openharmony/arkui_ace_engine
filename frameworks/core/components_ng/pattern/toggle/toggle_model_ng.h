@@ -30,10 +30,6 @@ public:
     void SetBackgroundColor(const Color& color) override;
     bool IsToggle() override;
     void SetPadding(const NG::PaddingPropertyF& args) override;
-
-private:
-    ToggleType previousToggleType_ = ToggleType::NONE;
-    int32_t previousNodeId_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

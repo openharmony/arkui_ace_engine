@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::Framework {
 
-int32_t CheckBoxModelImpl::Create(
+void CheckBoxModelImpl::Create(
     const std::optional<std::string>& name, const std::optional<std::string>& groupName, const std::string& tagName)
 {
     RefPtr<CheckboxTheme> checkBoxTheme = JSViewAbstract::GetTheme<CheckboxTheme>();
@@ -58,7 +58,6 @@ int32_t CheckBoxModelImpl::Create(
     checkboxComponent->SetHeight(checkBoxTheme->GetHeight() - verticalPadding * 2);
     box->SetWidth(checkBoxTheme->GetWidth());
     box->SetHeight(checkBoxTheme->GetHeight());
-    return 0;
 }
 
 void CheckBoxModelImpl::SetSelect(bool isSelected)

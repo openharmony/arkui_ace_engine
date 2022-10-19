@@ -25,7 +25,7 @@ public:
     static CheckBoxModel* GetInstance();
     virtual ~CheckBoxModel() = default;
 
-    virtual int32_t Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
+    virtual void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
         const std::string& tagName);
     virtual void SetSelect(bool isSelected);
     virtual void SetSelectedColor(const Color& color);
