@@ -45,6 +45,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -1988,9 +1989,9 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         }
         if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
             if (isMargin) {
-                ViewAbstractModel::GetInstance()->SetMargins(topDimen, bottomDimen, leftDimen, rightDimen);
+                ViewAbstractModel::GetInstance()->SetMargins(top, bottom, left, right);
             } else {
-                ViewAbstractModel::GetInstance()->SetPaddings(topDimen, bottomDimen, leftDimen, rightDimen);
+                ViewAbstractModel::GetInstance()->SetPaddings(top, bottom, left, right);
             }
             return;
         }
@@ -2045,7 +2046,7 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
     ParseBorderWidth(info[0]);
 }
 
-void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoration> decoration)
+void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
@@ -2083,56 +2084,6 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
     }
 }
 
-void JSViewAbstract::JsBorderImageForNG(const JSRef<JSObject>& object)
-{
-    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
-    auto valueSource = object->GetProperty("source");
-    if (!valueSource->IsString() && !valueSource->IsObject()) {
-        LOGE("Border image source type not recognized");
-        return;
-    }
-    std::string srcResult;
-    if (valueSource->IsString()) {
-        srcResult = valueSource->ToString();
-        if (!srcResult.empty()) {
-            borderImage->SetSrc(srcResult);
-            NG::ViewAbstract::SetBorderImageSource(srcResult);
-        }
-    } else if (valueSource->IsObject()) {
-        if (ParseJsMedia(valueSource, srcResult)) {
-            borderImage->SetSrc(srcResult);
-            NG::ViewAbstract::SetBorderImageSource(srcResult);
-        } else {
-            ParseBorderImageLinearGradientForNG(valueSource);
-        }
-    }
-    auto valueOutset = object->GetProperty("outset");
-    if (valueOutset->IsNumber() || valueOutset->IsString() || valueOutset->IsObject()) {
-        NG::ViewAbstract::SetHasBorderImageOutset(true);
-        ParseBorderImageOutset(valueOutset, borderImage);
-    }
-    auto valueRepeat = object->GetProperty("repeat");
-    if (!valueRepeat->IsNull()) {
-        NG::ViewAbstract::SetHasBorderImageRepeat(true);
-        ParseBorderImageRepeat(valueRepeat, borderImage);
-    }
-    auto valueSlice = object->GetProperty("slice");
-    if (valueSlice->IsNumber() || valueSlice->IsString() || valueSlice->IsObject()) {
-        NG::ViewAbstract::SetHasBorderImageSlice(true);
-        ParseBorderImageSlice(valueSlice, borderImage);
-    }
-    auto valueWidth = object->GetProperty("width");
-    if (valueWidth->IsNumber() || valueWidth->IsString() || valueWidth->IsObject()) {
-        NG::ViewAbstract::SetHasBorderImageWidth(true);
-        ParseBorderImageWidth(valueWidth, borderImage);
-    }
-    auto needFill = object->GetProperty("fill");
-    if (needFill->IsBoolean()) {
-        borderImage->SetNeedFillCenter(needFill->ToBoolean());
-    }
-    NG::ViewAbstract::SetBorderImage(borderImage);
-}
-
 void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -2144,51 +2095,55 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     if (object->IsEmpty()) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        JsBorderImageForNG(object);
-        info.ReturnSelf();
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-    if (!boxComponent) {
-        LOGE("boxComponent is null");
-        return;
-    }
-    auto boxDecoration = boxComponent->GetBackDecoration();
-    if (!boxDecoration) {
-        boxDecoration = AceType::MakeRefPtr<Decoration>();
-    }
+
     RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    uint8_t imageBorderBitsets = 0;
+
+    auto valueSource = object->GetProperty("source");
+    if (!valueSource->IsString() && !valueSource->IsObject()) {
+        LOGE("Border image source type not recognized");
+        return;
+    }
+    std::string srcResult;
+    if (valueSource->IsString()) {
+        srcResult = valueSource->ToString();
+        if (!srcResult.empty()) {
+            borderImage->SetSrc(srcResult);
+            imageBorderBitsets |= BorderImage::SOURCE_BIT;
+        }
+    } else if (valueSource->IsObject()) {
+        if (ParseJsMedia(valueSource, srcResult)) {
+            borderImage->SetSrc(srcResult);
+            imageBorderBitsets |= BorderImage::SOURCE_BIT;
+        } else {
+            ParseBorderImageLinearGradient(valueSource, imageBorderBitsets);
+        }
+    }
     auto valueOutset = object->GetProperty("outset");
     if (valueOutset->IsNumber() || valueOutset->IsString() || valueOutset->IsObject()) {
-        boxDecoration->SetHasBorderImageOutset(true);
+        imageBorderBitsets |= BorderImage::OUTSET_BIT;
         ParseBorderImageOutset(valueOutset, borderImage);
     }
     auto valueRepeat = object->GetProperty("repeat");
     if (!valueRepeat->IsNull()) {
-        boxDecoration->SetHasBorderImageRepeat(true);
+        imageBorderBitsets |= BorderImage::REPEAT_BIT;
         ParseBorderImageRepeat(valueRepeat, borderImage);
     }
     auto valueSlice = object->GetProperty("slice");
     if (valueSlice->IsNumber() || valueSlice->IsString() || valueSlice->IsObject()) {
-        boxDecoration->SetHasBorderImageSlice(true);
+        imageBorderBitsets |= BorderImage::SLICE_BIT;
         ParseBorderImageSlice(valueSlice, borderImage);
     }
-    auto valueSource = object->GetProperty("source");
-    ParseBorderImageSource(valueSource, borderImage, boxDecoration);
     auto valueWidth = object->GetProperty("width");
     if (valueWidth->IsNumber() || valueWidth->IsString() || valueWidth->IsObject()) {
-        boxDecoration->SetHasBorderImageWidth(true);
+        imageBorderBitsets |= BorderImage::WIDTH_BIT;
         ParseBorderImageWidth(valueWidth, borderImage);
     }
     auto needFill = object->GetProperty("fill");
     if (needFill->IsBoolean()) {
         borderImage->SetNeedFillCenter(needFill->ToBoolean());
     }
-    boxDecoration->SetBorderImage(borderImage);
-
-    boxComponent->SetBackDecoration(boxDecoration);
+    ViewAbstractModel::GetInstance()->SetBorderImage(borderImage, imageBorderBitsets);
     info.ReturnSelf();
 }
 
@@ -2227,93 +2182,7 @@ void JSViewAbstract::ParseBorderImageDimension(
     }
 }
 
-void JSViewAbstract::ParseBorderImageSource(
-    const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage, RefPtr<Decoration>& boxDecoration)
-{
-    if (!args->IsString() && !args->IsObject()) {
-        LOGE("Border image source type not recognized");
-    }
-    std::string srcResult;
-    if (args->IsString()) {
-        srcResult = args->ToString();
-        if (!srcResult.empty()) {
-            borderImage->SetSrc(srcResult);
-            boxDecoration->SetHasBorderImageSource(true);
-        }
-    } else if (args->IsObject()) {
-        if (ParseJsMedia(args, srcResult)) {
-            boxDecoration->SetHasBorderImageSource(true);
-            borderImage->SetSrc(srcResult);
-        } else {
-            ParseBorderImageLinearGradient(args, boxDecoration);
-        }
-    }
-}
-
-void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, RefPtr<Decoration>& backDecoration)
-{
-    auto argsPtrItem = JsonUtil::ParseJsonString(args->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Parse border image linear gradient failed. argsPtr is null. %{public}s", args->ToString().c_str());
-        return;
-    }
-    Gradient lineGradient;
-    lineGradient.SetType(GradientType::LINEAR);
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    // angle
-    std::optional<float> degree;
-    GetAngle("angle", argsPtrItem, degree);
-
-    if (degree) {
-        lineGradient.GetLinearGradient().angle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
-        degree.reset();
-    }
-    // direction
-    auto direction =
-        static_cast<GradientDirection>(argsPtrItem->GetInt("direction", static_cast<int32_t>(GradientDirection::NONE)));
-    switch (direction) {
-        case GradientDirection::LEFT:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
-            break;
-        case GradientDirection::RIGHT:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
-            break;
-        case GradientDirection::TOP:
-            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
-            break;
-        case GradientDirection::BOTTOM:
-            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
-            break;
-        case GradientDirection::LEFT_TOP:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
-            break;
-        case GradientDirection::LEFT_BOTTOM:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
-            break;
-        case GradientDirection::RIGHT_TOP:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
-            break;
-        case GradientDirection::RIGHT_BOTTOM:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
-            break;
-        case GradientDirection::NONE:
-        case GradientDirection::START_TO_END:
-        case GradientDirection::END_TO_START:
-        default:
-            break;
-    }
-    auto repeating = argsPtrItem->GetBool("repeating", false);
-    lineGradient.SetRepeat(repeating);
-    GetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
-    backDecoration->SetBorderImageGradient(lineGradient);
-    backDecoration->SetHasBorderImageGradient(true);
-}
-
-void JSViewAbstract::ParseBorderImageLinearGradientForNG(const JSRef<JSVal>& args)
+void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset)
 {
     auto argsPtrItem = JsonUtil::ParseJsonString(args->ToString());
     if (!argsPtrItem || argsPtrItem->IsNull()) {
@@ -2370,7 +2239,8 @@ void JSViewAbstract::ParseBorderImageLinearGradientForNG(const JSRef<JSVal>& arg
     auto repeating = argsPtrItem->GetBool("repeating", false);
     lineGradient.SetRepeat(repeating);
     NewGetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
-    NG::ViewAbstract::SetBorderImageGradient(lineGradient);
+    ViewAbstractModel::GetInstance()->SetBorderImageGradient(lineGradient);
+    bitset |= BorderImage::GRADIENT_BIT;
 }
 
 void JSViewAbstract::ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
@@ -2482,7 +2352,7 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
     ParseBorderColor(info[0]);
 }
 
-void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoration> decoration)
+void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
@@ -2532,7 +2402,7 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
     ParseBorderRadius(info[0]);
 }
 
-void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decoration> decoration)
+void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
@@ -2582,7 +2452,7 @@ void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)
     ParseBorderStyle(info[0]);
 }
 
-void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoration> decoration)
+void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber()) {
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
@@ -2725,16 +2595,6 @@ bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, Dimension& 
 {
     // 'vp' -> the value varies with pixel density of device.
     return ParseJsDimension(jsValue, result, DimensionUnit::VP);
-}
-
-bool JSViewAbstract::ParseJsAnimatableDimensionVp(const JSRef<JSVal>& jsValue, AnimatableDimension& result)
-{
-    if (ParseJsDimensionVp(jsValue, result)) {
-        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        result.SetAnimationOption(option);
-        return true;
-    }
-    return false;
 }
 
 bool JSViewAbstract::ParseJsDimensionFp(const JSRef<JSVal>& jsValue, Dimension& result)
@@ -3823,13 +3683,7 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        // new pipeline
-        NG::Gradient newGradient;
-        NewJsSweepGradient(info, newGradient);
-        NG::ViewAbstract::SetSweepGradient(newGradient);
-        return;
-    }
+
     NG::Gradient newGradient;
     NewJsSweepGradient(info, newGradient);
     ViewAbstractModel::GetInstance()->SetSweepGradient(newGradient);
@@ -4588,14 +4442,11 @@ void JSViewAbstract::SetMarginTop(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    AnimatableDimension value;
-    if (!ParseJsAnimatableDimensionVp(info[0], value)) {
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    Edge margin = box->GetMargin();
-    margin.SetTop(value);
-    box->SetMargin(margin);
+    ViewAbstractModel::GetInstance()->SetMargins(value, std::nullopt, std::nullopt, std::nullopt);
 }
 
 void JSViewAbstract::SetMarginBottom(const JSCallbackInfo& info)
@@ -4604,14 +4455,11 @@ void JSViewAbstract::SetMarginBottom(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    AnimatableDimension value;
-    if (!ParseJsAnimatableDimensionVp(info[0], value)) {
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    Edge margin = box->GetMargin();
-    margin.SetBottom(value);
-    box->SetMargin(margin);
+    ViewAbstractModel::GetInstance()->SetMargins(std::nullopt, value, std::nullopt, std::nullopt);
 }
 
 void JSViewAbstract::SetMarginLeft(const JSCallbackInfo& info)
@@ -4620,14 +4468,11 @@ void JSViewAbstract::SetMarginLeft(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    AnimatableDimension value;
-    if (!ParseJsAnimatableDimensionVp(info[0], value)) {
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    Edge margin = box->GetMargin();
-    margin.SetLeft(value);
-    box->SetMargin(margin);
+    ViewAbstractModel::GetInstance()->SetMargins(std::nullopt, std::nullopt, value, std::nullopt);
 }
 
 void JSViewAbstract::SetMarginRight(const JSCallbackInfo& info)
@@ -4636,23 +4481,11 @@ void JSViewAbstract::SetMarginRight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    AnimatableDimension value;
-    if (!ParseJsAnimatableDimensionVp(info[0], value)) {
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    Edge margin = box->GetMargin();
-    margin.SetRight(value);
-    box->SetMargin(margin);
-}
-
-void JSViewAbstract::SetMargins(
-    const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right)
-{
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    Edge margin(left, top, right, bottom, option);
-    box->SetMargin(margin);
+    ViewAbstractModel::GetInstance()->SetMargins(std::nullopt, std::nullopt, std::nullopt, value);
 }
 
 void JSViewAbstract::SetPaddingTop(const JSCallbackInfo& info)
@@ -4661,14 +4494,11 @@ void JSViewAbstract::SetPaddingTop(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    AnimatableDimension value;
-    if (!ParseJsAnimatableDimensionVp(info[0], value)) {
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    Edge padding = box->GetPadding();
-    padding.SetTop(value);
-    box->SetPadding(padding);
+    ViewAbstractModel::GetInstance()->SetPaddings(value, std::nullopt, std::nullopt, std::nullopt);
 }
 
 void JSViewAbstract::SetPaddingBottom(const JSCallbackInfo& info)
@@ -4677,14 +4507,11 @@ void JSViewAbstract::SetPaddingBottom(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    AnimatableDimension value;
-    if (!ParseJsAnimatableDimensionVp(info[0], value)) {
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    Edge padding = box->GetPadding();
-    padding.SetBottom(value);
-    box->SetPadding(padding);
+    ViewAbstractModel::GetInstance()->SetPaddings(std::nullopt, value, std::nullopt, std::nullopt);
 }
 
 void JSViewAbstract::SetPaddingLeft(const JSCallbackInfo& info)
@@ -4693,14 +4520,11 @@ void JSViewAbstract::SetPaddingLeft(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    AnimatableDimension value;
-    if (!ParseJsAnimatableDimensionVp(info[0], value)) {
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    Edge padding = box->GetPadding();
-    padding.SetLeft(value);
-    box->SetPadding(padding);
+    ViewAbstractModel::GetInstance()->SetPaddings(std::nullopt, std::nullopt, value, std::nullopt);
 }
 
 void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
@@ -4709,33 +4533,11 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    AnimatableDimension value;
-    if (!ParseJsAnimatableDimensionVp(info[0], value)) {
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    Edge padding = box->GetPadding();
-    padding.SetRight(value);
-    box->SetPadding(padding);
-}
-
-void JSViewAbstract::SetPadding(const Dimension& value)
-{
-    SetPaddings(value, value, value, value);
-}
-
-void JSViewAbstract::SetPaddings(
-    const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right)
-{
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    Edge padding(left, top, right, bottom, option);
-    box->SetPadding(padding);
-}
-
-void JSViewAbstract::SetMargin(const Dimension& value)
-{
-    SetMargins(value, value, value, value);
+    ViewAbstractModel::GetInstance()->SetPaddings(std::nullopt, std::nullopt, std::nullopt, value);
 }
 
 void JSViewAbstract::SetBlur(float radius)

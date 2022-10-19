@@ -25,6 +25,8 @@ class ViewAbstractModelImpl : public ViewAbstractModel {
 public:
     ~ViewAbstractModelImpl() override = default;
 
+    static void SwapBackBorder(const RefPtr<Decoration>& decoration);
+
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
     void SetMinWidth(const Dimension& minWidth) override;
@@ -39,11 +41,11 @@ public:
     void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
     void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) override;
     void SetPadding(const Dimension& value) override;
-    void SetPaddings(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override;
+    void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override;
     void SetMargin(const Dimension& value) override;
-    void SetMargins(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override;
+    void SetMargins(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override;
     void SetBorderRadius(const Dimension& value) override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
@@ -56,6 +58,8 @@ public:
     void SetBorderStyle(const BorderStyle& value) override;
     void SetBorderStyle(const std::optional<BorderStyle>& styleLeft, const std::optional<BorderStyle>& styleRight,
         const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override;
+    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override;
+    void SetBorderImageGradient(const NG::Gradient& gradient) override;
 
     void SetLayoutPriority(int32_t priority) override;
     void SetLayoutWeight(int32_t value) override;
