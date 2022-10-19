@@ -322,61 +322,122 @@ bool DOMPickerBase::SetTextBackgroundColor(const std::pair<std::string, std::str
 
 bool DOMPickerBase::SetTextStyleOperators(const std::pair<std::string, std::string>& style)
 {
-    static const LinearMapNode<void (*)(const DOMPickerBase&, const std::string&, TextStyle&, TextStyle&)>
+    static const LinearMapNode<void (*)(
+        const DOMPickerBase&, const std::string&, TextStyle&, TextStyle&, TextStyle&, TextStyle&)>
         textStyleOperators[] = {
             { DOM_TEXT_ALLOW_SCALE,
-                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
+                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus, TextStyle&,
+                    TextStyle&) {
                     normal.SetAllowScale(StringToBool(val));
                     focus.SetAllowScale(StringToBool(val));
                 } },
+            { DOM_PICKER_DISAPPEAR_FONT_SIZE,
+                [](const DOMPickerBase& node, const std::string& val, TextStyle&, TextStyle&, TextStyle&,
+                    TextStyle& disappear) {
+                    Dimension fontSize = node.ParseDimension(val);
+                    if (fontSize.IsValid()) {
+                        disappear.SetFontSize(fontSize);
+                        disappear.SetAdaptMaxFontSize(fontSize);
+                    }
+                } },
+            { DOM_PICKER_FOCUS_SIZE,
+                [](const DOMPickerBase& node, const std::string& val, TextStyle&, TextStyle& focus, TextStyle&,
+                    TextStyle&) {
+                    Dimension fontSize = node.ParseDimension(val);
+                    if (fontSize.IsValid()) {
+                        focus.SetFontSize(fontSize);
+                        focus.SetAdaptMaxFontSize(fontSize);
+                    }
+                } },
             { DOM_TEXT_FONT_FAMILY,
-                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
+                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus, TextStyle&,
+                    TextStyle&) {
                     normal.SetFontFamilies(node.ParseFontFamilies(val));
                     focus.SetFontFamilies(node.ParseFontFamilies(val));
                 } },
             { DOM_TEXT_FONT_SIZE,
-                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
-                    normal.SetFontSize(node.ParseDimension(val));
-                    normal.SetAdaptMaxFontSize(node.ParseDimension(val));
-                    focus.SetFontSize(node.ParseDimension(val));
-                    focus.SetAdaptMaxFontSize(node.ParseDimension(val));
+                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle&, TextStyle&,
+                    TextStyle&) {
+                    Dimension fontSize = node.ParseDimension(val);
+                    if (fontSize.IsValid()) {
+                        normal.SetFontSize(fontSize);
+                        normal.SetAdaptMaxFontSize(fontSize);
+                    }
                 } },
             { DOM_TEXT_FONT_STYLE,
-                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
+                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus, TextStyle&,
+                    TextStyle&) {
                     normal.SetFontStyle(ConvertStrToFontStyle(val));
                     focus.SetFontStyle(ConvertStrToFontStyle(val));
                 } },
             { DOM_TEXT_FONT_WEIGHT,
-                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
+                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus, TextStyle&,
+                    TextStyle&) {
                     normal.SetFontWeight(ConvertStrToFontWeight(val));
                     focus.SetFontWeight(ConvertStrToFontWeight(val));
                 } },
             { DOM_TEXT_LETTER_SPACING,
-                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
+                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus, TextStyle&,
+                    TextStyle&) {
                     normal.SetLetterSpacing(node.ParseDimension(val));
                     focus.SetLetterSpacing(node.ParseDimension(val));
                 } },
             { DOM_TEXT_LINE_HEIGHT,
-                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
+                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus, TextStyle&,
+                    TextStyle&) {
                     normal.SetLineHeight(node.ParseLineHeight(val));
                     focus.SetLineHeight(node.ParseLineHeight(val));
                 } },
+            { DOM_PICKER_SELECT_SIZE,
+                [](const DOMPickerBase& node, const std::string& val, TextStyle&, TextStyle&, TextStyle& selected,
+                    TextStyle&) {
+                    Dimension fontSize = node.ParseDimension(val);
+                    if (fontSize.IsValid()) {
+                        selected.SetFontSize(fontSize);
+                        selected.SetAdaptMaxFontSize(fontSize);
+                    }
+                } },
             { DOM_PICKER_TEXT_COLOR,
-                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
+                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus, TextStyle&,
+                    TextStyle&) {
                     normal.SetTextColor(node.ParseColor(val));
                     focus.SetTextColor(node.ParseColor(val));
                 } },
             { DOM_TEXT_DECORATION,
-                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
+                [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus, TextStyle&,
+                    TextStyle&) {
                     normal.SetTextDecoration(ConvertStrToTextDecoration(val));
                     focus.SetTextDecoration(ConvertStrToTextDecoration(val));
                 } },
         };
     auto operatorIter = BinarySearchFindIndex(textStyleOperators, ArraySize(textStyleOperators), style.first.c_str());
     if (operatorIter != -1) {
+        if (!basePickerChild_) {
+            storeStyles_.emplace_back(style);
+            return true;
+        }
+        auto theme = basePickerChild_->GetTheme();
+        if (theme) {
+            auto normalStyle = theme->GetOptionStyle(false, false);
+            auto focusStyle = theme->GetOptionStyle(true, true);
+            auto selectedStyle = theme->GetOptionStyle(true, false);
+            auto disappearStyle = theme->GetDisappearOptionStyle();
+
+            textStyleOperators[operatorIter].value(
+                *this, style.second, normalStyle, focusStyle, selectedStyle, disappearStyle);
+            theme->SetOptionStyle(false, false, normalStyle);
+            theme->SetOptionStyle(true, false, selectedStyle); // selected
+            theme->SetOptionStyle(true, true, focusStyle);
+            theme->SetDisappearOptionStyle(disappearStyle);
+        }
+
+        // theme is used only by valuePickerChild_
         auto normalStyle = theme_->GetOptionStyle(false, false);
         auto focusStyle = theme_->GetOptionStyle(true, true);
-        textStyleOperators[operatorIter].value(*this, style.second, normalStyle, focusStyle);
+        auto selectedStyle = theme_->GetOptionStyle(true, false);
+        auto disappearStyle = theme_->GetDisappearOptionStyle();
+        textStyleOperators[operatorIter].value(
+            *this, style.second, normalStyle, focusStyle, selectedStyle, disappearStyle);
         theme_->SetOptionStyle(false, false, normalStyle);
         theme_->SetOptionStyle(true, false, normalStyle);
         theme_->SetOptionStyle(true, true, focusStyle);
