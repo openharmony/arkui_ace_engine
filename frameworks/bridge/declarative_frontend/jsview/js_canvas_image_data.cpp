@@ -72,11 +72,11 @@ void JSCanvasImageData::JSBind(BindingTarget globalObj)
 {
     JSClass<JSCanvasImageData>::Declare("ImageData");
     JSClass<JSCanvasImageData>::CustomProperty("width", &JSCanvasImageData::JsGetWidth,
-                                                &JSCanvasImageData::JsSetWidth);
+        &JSCanvasImageData::JsSetWidth);
     JSClass<JSCanvasImageData>::CustomProperty("height", &JSCanvasImageData::JsGetHeight,
-                                                &JSCanvasImageData::JsSetHeight);
+        &JSCanvasImageData::JsSetHeight);
     JSClass<JSCanvasImageData>::CustomProperty("data", &JSCanvasImageData::JsGetData,
-                                                &JSCanvasImageData::JsSetData);
+        &JSCanvasImageData::JsSetData);
     JSClass<JSCanvasImageData>::Bind(globalObj, JSCanvasImageData::Constructor, JSCanvasImageData::Destructor);
 }
 

@@ -169,7 +169,6 @@ void CanvasPaintMethod::DrawImage(
     }
 
     auto image = GetImage(canvasImage.src);
-
     if (!image) {
         LOGE("image is null");
         return;

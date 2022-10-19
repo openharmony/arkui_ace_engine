@@ -21,9 +21,9 @@ void JSOffscreenCanvas::JSBind(BindingTarget globalObj)
 {
     JSClass<JSOffscreenCanvas>::Declare("OffscreenCanvas");
     JSClass<JSOffscreenCanvas>::CustomProperty("width", &JSOffscreenCanvas::JsGetWidth,
-                                            &JSOffscreenCanvas::JsSetWidth);
+        &JSOffscreenCanvas::JsSetWidth);
     JSClass<JSOffscreenCanvas>::CustomProperty("height", &JSOffscreenCanvas::JsGetHeight,
-                                            &JSOffscreenCanvas::JsSetHeight);
+        &JSOffscreenCanvas::JsSetHeight);
     JSClass<JSOffscreenCanvas>::CustomMethod("transferToImageBitmap",
         &JSOffscreenCanvas::JsTransferToImageBitmap);
     JSClass<JSOffscreenCanvas>::Bind(globalObj, JSOffscreenCanvas::Constructor,
