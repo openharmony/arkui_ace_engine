@@ -82,7 +82,7 @@ private:
     float GetStretchCrossAxisLimit() const;
     void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
     void MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties);
-    void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties);
+    void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
     void UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& layoutConstraint, float size);
     void AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper);
@@ -99,7 +99,6 @@ private:
     FlexAlign crossAxisAlign_ = FlexAlign::FLEX_START;
     FlexAlign mainAxisAlign_ = FlexAlign::FLEX_START;
 
-    RefPtr<LayoutWrapper> layoutWrapper_;
     std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
     std::map<int32_t, float> magicNodeWeights_;
     std::list<MagicLayoutNode> secondaryMeasureList_;
