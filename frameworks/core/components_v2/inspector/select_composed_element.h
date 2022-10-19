@@ -46,9 +46,6 @@ public:
     std::string GetWidth() const override;
     std::string GetHeight() const override;
 
-    static std::string GetTextStyle(TextStyle textStyle);
-    static std::string ConvertFontFamily(const std::vector<std::string>& fontFamily);
-
 private:
     OHOS::Ace::RefPtr<OHOS::Ace::RenderSelect> GetRenderSelect() const;
 };

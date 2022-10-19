@@ -59,7 +59,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        json->Put("dialogAlignment", V2::CustomDialogComposedElement::ConvertDialogAlignmentToString(
+        json->Put("dialogAlignment", DialogAlignmentUtils::ConvertDialogAlignmentToString(
                                          propDialogAlignment_.value_or(DialogAlignment::BOTTOM))
                                          .c_str());
 
