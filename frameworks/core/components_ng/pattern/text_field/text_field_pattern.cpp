@@ -141,7 +141,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     } else if (caretUpdateType_ == CaretUpdateType::EVENT || caretUpdateType_ == CaretUpdateType::DEL) {
         UpdateCaretOffsetByEvent();
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
-        caretOffsetX_ = basicPadding_;
+        caretOffsetX_ = GetPaddingLeft();
         return true;
     }
     // after new text input or events such as left right key,
@@ -166,20 +166,20 @@ void TextFieldPattern::UpdateCaretOffsetByEvent()
 {
     // set caret and text rect to basic padding if caret is at position 0 or text not exists
     if (textEditingValue_.text.empty() || textEditingValue_.caretPosition == 0) {
-        caretOffsetX_ = basicPadding_;
-        textRect_.SetLeft(basicPadding_);
+        caretOffsetX_ = GetPaddingLeft();
+        textRect_.SetLeft(GetPaddingLeft());
         return;
     }
     // simplify calculation if caret at the end and paragraph length not exceeding content width
     if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.text.size()) &&
-        LessOrEqual(paragraph_->GetLongestLine(), contentRect_.Width() - basicPadding_ * 2.0f)) {
-        caretOffsetX_ = static_cast<float>(paragraph_->GetLongestLine()) + basicPadding_;
+        LessOrEqual(paragraph_->GetLongestLine(), contentRect_.Width())) {
+        caretOffsetX_ = static_cast<float>(paragraph_->GetLongestLine());
         return;
     }
     // offsetToParagraphBeginning indicates the cursor position to paragraph beginning
     auto offsetToParagraphBeginning = CalcCursorOffsetXByPosition(textEditingValue_.caretPosition);
     // layout caret for the first time to the position by assuming text rect is at basic padding
-    caretOffsetX_ = offsetToParagraphBeginning + basicPadding_ + contentRect_.GetX();
+    caretOffsetX_ = offsetToParagraphBeginning + contentRect_.GetX();
     // layout text rect by caret offset - offsetToParagraphBeginning
     textRect_.SetLeft(caretOffsetX_ - offsetToParagraphBeginning);
 }
@@ -202,27 +202,27 @@ void TextFieldPattern::UpdateSelectionOffset()
 void TextFieldPattern::UpdateCaretPositionByTextEdit()
 {
     if (textEditingValue_.text.empty() || textEditingValue_.caretPosition == 0) {
-        caretOffsetX_ = basicPadding_;
-        textRect_.SetLeft(basicPadding_);
+        caretOffsetX_ = GetPaddingLeft();
+        textRect_.SetLeft(GetPaddingLeft());
         return;
     }
     // simplify calculation for scene of inserting text to tail when text width not exceeding content width
     if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.text.size()) &&
-        paragraph_->GetLongestLine() <= contentRect_.Width() - basicPadding_ * 2.0f) {
-        caretOffsetX_ = static_cast<float>(paragraph_->GetLongestLine()) + basicPadding_ + contentRect_.GetX();
+        paragraph_->GetLongestLine() <= contentRect_.Width()) {
+        caretOffsetX_ = static_cast<float>(paragraph_->GetLongestLine()) + GetPaddingLeft();
         return;
     }
     // scene of insert in the middle
     // after text insert, selection will update both base and extend offset to the same value
     auto offsetToParagraphBeginning = CalcCursorOffsetXByPosition(textEditingValue_.caretPosition);
-    caretOffsetX_ = offsetToParagraphBeginning + basicPadding_ + contentRect_.GetX();
+    caretOffsetX_ = offsetToParagraphBeginning + GetPaddingLeft();
     textRect_.SetLeft(caretOffsetX_ - offsetToParagraphBeginning);
 }
 
 void TextFieldPattern::UpdateCaretPositionByTouchOffset()
 {
     if (GetEditingValue().text.empty()) {
-        caretOffsetX_ = basicPadding_;
+        caretOffsetX_ = GetPaddingLeft();
         return;
     }
     // skip updating caret if touch position is in the left or right half ellipse parts
@@ -233,12 +233,12 @@ void TextFieldPattern::UpdateCaretPositionByTouchOffset()
     // simplify calculation when text not filling the textfield yet and touch out of boundary edge case
     if (textRect_.Width() <= contentRect_.Width() && GreatOrEqual(offset.GetX(), paragraph_->GetLongestLine())) {
         textEditingValue_.CursorMoveToPosition(static_cast<int32_t>(textEditingValue_.GetWideText().length()));
-        caretOffsetX_ = static_cast<float>(paragraph_->GetLongestLine()) + basicPadding_ + contentRect_.GetX();
+        caretOffsetX_ = static_cast<float>(paragraph_->GetLongestLine()) + GetPaddingLeft();
         return;
     }
     auto position = ConvertTouchOffsetToCaretPosition(offset);
     textEditingValue_.CursorMoveToPosition(position);
-    caretOffsetX_ = CalcCursorOffsetXByPosition(position) + basicPadding_ + contentRect_.GetX();
+    caretOffsetX_ = CalcCursorOffsetXByPosition(position) + GetPaddingLeft();
 }
 
 float TextFieldPattern::CalcCursorOffsetXByPosition(int32_t position)
@@ -247,14 +247,14 @@ float TextFieldPattern::CalcCursorOffsetXByPosition(int32_t position)
     CaretMetrics downStreamMetrics;
     if (!ComputeOffsetForCaretDownstream(GetEditingValue(), position, downStreamMetrics)) {
         LOGW("Get caret offset failed, set it to text tail");
-        return std::min(static_cast<float>(paragraph_->GetLongestLine()), textRect_.GetX() + textRect_.Width());
+        return textRect_.Width();
     }
     return static_cast<float>(downStreamMetrics.offset.GetX());
 }
 
 float TextFieldPattern::AdjustTextRectOffsetX()
 {
-    if (IsTextArea() || LessOrEqual(textRect_.Width(), contentRect_.Width() - basicPadding_ * 2.0f)) {
+    if (IsTextArea() || LessOrEqual(textRect_.Width(), contentRect_.Width())) {
         return 0.0f;
     }
     // text rect length exceeds content length, but cursor is still in the region
@@ -262,8 +262,8 @@ float TextFieldPattern::AdjustTextRectOffsetX()
         return 0.0f;
     }
     auto offsetToParagraphBeginning = caretOffsetX_ - textRect_.GetX();
-    auto contentLeftBoundary = contentRect_.GetX() + basicPadding_;
-    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width() - basicPadding_;
+    auto contentLeftBoundary = contentRect_.GetX();
+    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width();
     float dx = 0.0f;
     if (caretOffsetX_ < contentLeftBoundary) {
         dx = contentLeftBoundary - caretOffsetX_;
@@ -304,16 +304,15 @@ bool TextFieldPattern::CursorInContentRegion()
         return GreatOrEqual(caretOffsetY_, contentRect_.GetY()) &&
                LessOrEqual(caretOffsetY_ + caretHeight_, contentRect_.GetY() + contentRect_.Height());
     }
-    return GreatOrEqual(caretOffsetX_, contentRect_.GetX() + basicPadding_) &&
-           LessOrEqual(
-               caretOffsetX_ + CURSOR_WIDTH.ConvertToPx(), contentRect_.GetX() + contentRect_.Width() - basicPadding_);
+    return GreatOrEqual(caretOffsetX_, contentRect_.GetX()) &&
+           LessOrEqual(caretOffsetX_ + CURSOR_WIDTH.ConvertToPx(), contentRect_.GetX() + contentRect_.Width());
 }
 
 bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
 {
     // real content region will minus basic padding on left and right
-    return GreatOrEqual(offset.GetX(), contentRect_.GetX() + basicPadding_) &&
-           LessOrEqual(offset.GetX(), contentRect_.GetX() + contentRect_.Width() - basicPadding_);
+    return GreatOrEqual(offset.GetX(), contentRect_.GetX()) &&
+           LessOrEqual(offset.GetX(), contentRect_.GetX() + contentRect_.Width());
 }
 
 void TextFieldPattern::AddScrollEvent()
@@ -633,7 +632,7 @@ void TextFieldPattern::HandleOnPaste()
         }
         value.text = value.GetValueBeforePosition(start) + data + value.GetValueAfterPosition(end);
         value.CursorMoveToPosition(start + static_cast<int32_t>(StringUtils::Str8ToStr16(data).length()));
-        LOGI("Paste value %{public}s", value.text.c_str());
+        LOGI("Paste value %{private}s", value.text.c_str());
         textfield->textEditingValue_ = value;
         textfield->SetEditingValueToProperty(value.text);
         textfield->SetInSelectMode(SelectionMode::NONE);
@@ -864,6 +863,9 @@ void TextFieldPattern::OnModifyDone()
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
     caretHeight_ = GetTextOrPlaceHolderFontSize() + static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f;
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    utilPadding_ = layoutProperty->CreatePaddingAndBorderWithDefault(basicPaddingLeft_, 0.0f, 0.0f, 0.0f);
 }
 
 void TextFieldPattern::UpdatePositionOfParagraph(int32_t position)
@@ -1072,6 +1074,8 @@ void TextFieldPattern::CursorMoveLeft()
     LOGD("Handle cursor move left");
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
         textEditingValue_.caretPosition = 0;
+    } else if (InSelectMode()) {
+        textEditingValue_.caretPosition = textSelector_.GetStart();
     } else {
         textEditingValue_.CursorMoveLeft();
     }
@@ -1084,6 +1088,8 @@ void TextFieldPattern::CursorMoveRight()
     LOGD("Handle cursor move right");
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
         textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.size());
+    } else if (InSelectMode()) {
+        textEditingValue_.caretPosition = textSelector_.GetEnd();
     } else {
         textEditingValue_.CursorMoveRight();
     }
@@ -1298,6 +1304,16 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     textEditingValue_.caretPosition = position;
     selectionMode_ = SelectionMode::NONE;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::CaretMoveToLastNewLineChar()
+{
+    while (textEditingValue_.caretPosition > 0) {
+        textEditingValue_.caretPosition -= 1;
+        if (textEditingValue_.text.substr(textEditingValue_.caretPosition, 1) == "\n") {
+            break;
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

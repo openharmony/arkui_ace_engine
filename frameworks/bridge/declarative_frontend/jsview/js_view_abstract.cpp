@@ -66,11 +66,11 @@
 #include "core/components/text/text_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
-#include "core/components_ng/pattern/container_model.h"
 #include "core/components_ng/property/clip_path.h"
 #include "core/components_v2/extensions/events/on_area_change_extension.h"
 #include "core/gestures/long_press_gesture.h"
@@ -273,7 +273,7 @@ bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOp
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
     BackgroundImagePosition& bgImgPosition)
 {
-    AnimationOption option = ContainerModel::GetInstance()->GetImplicitAnimationOption();
+    AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
     bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
     bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
 }
@@ -1313,6 +1313,10 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
+    if (LessOrEqual(value, 0.0)) {
+        LOGW("the %{public}f value is illegal, use default", value);
+        value = 1.0;
+    }
 
     ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));
 }
@@ -1795,7 +1799,7 @@ GestureEventFunc JsBindOptionMenuNG(const JSCallbackInfo& info, const RefPtr<NG:
             NG::ViewAbstract::ShowMenu(targetNode->GetId());
             return;
         }
-        NG::ViewAbstract::BindMenuWithItems(params, targetNode);
+        NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode);
         // clear paramArray after creation
         params.clear();
     };
@@ -3148,10 +3152,6 @@ std::pair<Dimension, Dimension> JSViewAbstract::ParseSize(const JSCallbackInfo& 
 
 void JSViewAbstract::JsUseAlign(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGD("UseAlign is deprecated.");
-        return;
-    }
     if (info.Length() < 2) {
         LOGE("The arg is wrong, it is supposed to have atleast 2 arguments");
         return;
@@ -3192,13 +3192,14 @@ void JSViewAbstract::JsUseAlign(const JSCallbackInfo& info)
             return;
         }
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetAlignDeclarationPtr(declaration);
-    box->SetUseAlignSide(static_cast<AlignDeclaration::Edge>(sideValue));
+
+    std::optional<Dimension> optOffset;
     Dimension offsetDimension;
     if (ParseJsDimensionVp(offset, offsetDimension)) {
-        box->SetUseAlignOffset(offsetDimension);
+        optOffset = offsetDimension;
     }
+    ViewAbstractModel::GetInstance()->SetUseAlign(
+        declaration, static_cast<AlignDeclaration::Edge>(sideValue), optOffset);
 }
 
 void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
@@ -3214,11 +3215,7 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
         return;
     }
     auto gridContainerInfo = JSGridContainer::GetContainer();
-    if (gridContainerInfo != nullptr) {
-        auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
-        builder->SetParent(gridContainerInfo);
-        builder->SetColumns(span);
-    }
+    ViewAbstractModel::GetInstance()->SetGrid(span, std::nullopt, gridContainerInfo);
 }
 
 void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
@@ -3228,17 +3225,8 @@ void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
         return;
     }
     auto offset = info[0]->ToNumber<int32_t>();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetGrid(std::nullopt, offset);
-        return;
-    }
-
     auto gridContainerInfo = JSGridContainer::GetContainer();
-    if (gridContainerInfo != nullptr) {
-        auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
-        builder->SetParent(gridContainerInfo);
-        builder->SetOffset(offset);
-    }
+    ViewAbstractModel::GetInstance()->SetGrid(std::nullopt, offset, gridContainerInfo);
 }
 
 static bool ParseSpanAndOffset(const JSRef<JSVal>& val, uint32_t& span, int32_t& offset)
@@ -3271,28 +3259,7 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
     // keys order must be strictly refer to GridSizeType
     const char* keys[] = { "", "xs", "sm", "md", "lg" };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
-            JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
-            if (val->IsNull() || val->IsEmpty()) {
-                continue;
-            }
-            uint32_t span = 0;
-            int32_t offset = 0;
-            if (ParseSpanAndOffset(val, span, offset)) {
-                NG::ViewAbstract::SetGrid(span, offset, static_cast<GridSizeType>(i));
-            }
-        }
-        return;
-    }
-
     auto gridContainerInfo = JSGridContainer::GetContainer();
-    if (gridContainerInfo == nullptr) {
-        LOGE("No valid grid container.");
-        return;
-    }
-    auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
-    builder->SetParent(gridContainerInfo);
     for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
         JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
         if (val->IsNull() || val->IsEmpty()) {
@@ -3301,8 +3268,7 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
         uint32_t span = 0;
         int32_t offset = 0;
         if (ParseSpanAndOffset(val, span, offset)) {
-            builder->SetSizeColumn(static_cast<GridSizeType>(i), span);
-            builder->SetOffset(offset, static_cast<GridSizeType>(i));
+            ViewAbstractModel::GetInstance()->SetGrid(span, offset, gridContainerInfo, static_cast<GridSizeType>(i));
         }
     }
 }
@@ -3319,25 +3285,12 @@ void JSViewAbstract::JsZIndex(const JSCallbackInfo& info)
         zIndex = info[0]->ToNumber<int>();
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetZIndex(zIndex);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-    if (renderComponent) {
-        renderComponent->SetZIndex(zIndex);
-    }
+    ViewAbstractModel::GetInstance()->SetZIndex(zIndex);
 }
 
 void JSViewAbstract::Pop()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewStackProcessor::GetInstance()->Pop();
-        return;
-    }
-    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackModel::GetInstance()->Pop();
 }
 
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
@@ -3742,85 +3695,9 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        // new pipeline
-        NG::Gradient newGradient;
-        NewJsLinearGradient(info, newGradient);
-        NG::ViewAbstract::SetLinearGradient(newGradient);
-        return;
-    }
-    Gradient lineGradient;
-    lineGradient.SetType(GradientType::LINEAR);
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    // angle
-    std::optional<float> degree;
-    GetAngle("angle", argsPtrItem, degree);
-    if (degree) {
-        lineGradient.GetLinearGradient().angle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
-        degree.reset();
-    }
-    // direction
-    auto direction =
-        static_cast<GradientDirection>(argsPtrItem->GetInt("direction", static_cast<int32_t>(GradientDirection::NONE)));
-    switch (direction) {
-        case GradientDirection::LEFT:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
-            break;
-        case GradientDirection::RIGHT:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
-            break;
-        case GradientDirection::TOP:
-            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
-            break;
-        case GradientDirection::BOTTOM:
-            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
-            break;
-        case GradientDirection::LEFT_TOP:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
-            break;
-        case GradientDirection::LEFT_BOTTOM:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
-            break;
-        case GradientDirection::RIGHT_TOP:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
-            break;
-        case GradientDirection::RIGHT_BOTTOM:
-            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
-            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
-            break;
-        case GradientDirection::NONE:
-        case GradientDirection::START_TO_END:
-        case GradientDirection::END_TO_START:
-        default:
-            break;
-    }
-    // repeating
-    auto repeating = argsPtrItem->GetBool("repeating", false);
-    lineGradient.SetRepeat(repeating);
-    // color stops
-    GetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
-    auto stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        auto decoration = GetBackDecoration();
-        if (decoration) {
-            decoration->SetGradient(lineGradient);
-        }
-    } else {
-        auto boxComponent = stack->GetBoxComponent();
-        if (!boxComponent) {
-            LOGE("boxComponent is null");
-            return;
-        }
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-            BoxStateAttribute::GRADIENT, lineGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
-        }
-    }
+    NG::Gradient newGradient;
+    NewJsLinearGradient(info, newGradient);
+    ViewAbstractModel::GetInstance()->SetLinearGradient(newGradient);
 }
 
 void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
@@ -3890,67 +3767,9 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::Gradient newGradient;
-        NewJsRadialGradient(info, newGradient);
-        NG::ViewAbstract::SetRadialGradient(newGradient);
-        return;
-    }
-    Gradient radialGradient;
-    radialGradient.SetType(GradientType::RADIAL);
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    // center
-    auto center = argsPtrItem->GetValue("center");
-    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
-        Dimension value;
-        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
-            radialGradient.GetRadialGradient().radialCenterX = AnimatableDimension(value, option);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                radialGradient.GetRadialGradient().radialCenterX =
-                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
-            }
-        }
-        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
-            radialGradient.GetRadialGradient().radialCenterY = AnimatableDimension(value, option);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                radialGradient.GetRadialGradient().radialCenterY =
-                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
-            }
-        }
-    }
-    // radius
-    Dimension radius;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius)) {
-        radialGradient.GetRadialGradient().radialVerticalSize = AnimatableDimension(radius, option);
-        radialGradient.GetRadialGradient().radialHorizontalSize = AnimatableDimension(radius, option);
-    }
-    // repeating
-    auto repeating = argsPtrItem->GetBool("repeating", false);
-    radialGradient.SetRepeat(repeating);
-    // color stops
-    GetGradientColorStops(radialGradient, argsPtrItem->GetValue("colors"));
-
-    auto stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        auto decoration = GetBackDecoration();
-        if (decoration) {
-            decoration->SetGradient(radialGradient);
-        }
-    } else {
-        auto boxComponent = stack->GetBoxComponent();
-        if (!boxComponent) {
-            LOGE("boxComponent is null");
-            return;
-        }
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-            BoxStateAttribute::GRADIENT, radialGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
-        }
-    }
+    NG::Gradient newGradient;
+    NewJsRadialGradient(info, newGradient);
+    ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
 }
 
 void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
@@ -4011,74 +3830,9 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
         NG::ViewAbstract::SetSweepGradient(newGradient);
         return;
     }
-    Gradient sweepGradient;
-    sweepGradient.SetType(GradientType::SWEEP);
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    // center
-    auto center = argsPtrItem->GetValue("center");
-    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
-        Dimension value;
-        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
-            sweepGradient.GetSweepGradient().centerX = AnimatableDimension(value, option);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                sweepGradient.GetSweepGradient().centerX =
-                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
-            }
-        }
-        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
-            sweepGradient.GetSweepGradient().centerY = AnimatableDimension(value, option);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                sweepGradient.GetSweepGradient().centerY =
-                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
-            }
-        }
-    }
-    std::optional<float> degree;
-    // start
-    GetAngle("start", argsPtrItem, degree);
-    if (degree) {
-        sweepGradient.GetSweepGradient().startAngle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
-        degree.reset();
-    }
-    // end
-    GetAngle("end", argsPtrItem, degree);
-    if (degree) {
-        sweepGradient.GetSweepGradient().endAngle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
-        degree.reset();
-    }
-    // rotation
-    GetAngle("rotation", argsPtrItem, degree);
-    if (degree) {
-        sweepGradient.GetSweepGradient().rotation = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
-        degree.reset();
-    }
-    // repeating
-    auto repeating = argsPtrItem->GetBool("repeating", false);
-    sweepGradient.SetRepeat(repeating);
-    // color stops
-    GetGradientColorStops(sweepGradient, argsPtrItem->GetValue("colors"));
-
-    auto stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        auto decoration = GetBackDecoration();
-        if (decoration) {
-            decoration->SetGradient(sweepGradient);
-        }
-    } else {
-        auto boxComponent = stack->GetBoxComponent();
-        if (!boxComponent) {
-            LOGE("boxComponent is null");
-            return;
-        }
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-            BoxStateAttribute::GRADIENT, sweepGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
-                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
-        }
-    }
+    NG::Gradient newGradient;
+    NewJsSweepGradient(info, newGradient);
+    ViewAbstractModel::GetInstance()->SetSweepGradient(newGradient);
 }
 
 void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
@@ -4139,11 +3893,7 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
     MotionPathOption motionPathOption;
     if (ParseMotionPath(argsPtrItem, motionPathOption)) {
-        if (motionPathOption.GetRotate()) {
-            ViewStackProcessor::GetInstance()->GetTransformComponent();
-        }
-        auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-        flexItem->SetMotionPathOption(motionPathOption);
+        ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
     } else {
         LOGE("parse motionPath failed. %{public}s", info[0]->ToString().c_str());
     }
@@ -4181,12 +3931,7 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
         shadows.begin()->SetColor(color);
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBackShadow(shadows[0]);
-        return;
-    }
-    auto backDecoration = GetBackDecoration();
-    backDecoration->SetShadows(shadows);
+    ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
 }
 
 void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
@@ -4209,13 +3954,7 @@ void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
         value.SetValue(1.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetGrayScale(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetGrayScale(value);
+    ViewAbstractModel::GetInstance()->SetGrayScale(value);
 }
 
 void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
@@ -4230,13 +3969,7 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBrightness(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetBrightness(value);
+    ViewAbstractModel::GetInstance()->SetBrightness(value);
 }
 
 void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
@@ -4255,13 +3988,7 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetContrast(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetContrast(value);
+    ViewAbstractModel::GetInstance()->SetContrast(value);
 }
 
 void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
@@ -4279,13 +4006,7 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetSaturate(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetSaturate(value);
+    ViewAbstractModel::GetInstance()->SetSaturate(value);
 }
 
 void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
@@ -4304,13 +4025,7 @@ void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetSepia(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetSepia(value);
+    ViewAbstractModel::GetInstance()->SetSepia(value);
 }
 
 void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
@@ -4327,13 +4042,7 @@ void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetInvert(value);
-        return;
-    }
-
-    auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetInvert(value);
+    ViewAbstractModel::GetInstance()->SetInvert(value);
 }
 
 void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
@@ -4359,65 +4068,31 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
     if (deg < 0.0f) {
         deg += ROUND_UNIT;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHueRotate(deg);
-        return;
-    }
-    auto decoration = GetFrontDecoration();
-    if (decoration) {
-        decoration->SetHueRotate(deg);
-    }
+    ViewAbstractModel::GetInstance()->SetHueRotate(deg);
 }
 
 void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsObject()) {
-            JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
-            if (clipShape == nullptr) {
-                LOGE("clipShape is null");
-                return;
-            }
-            NG::ClipPathNG clipPath;
-            clipPath.SetBasicShape(clipShape->GetBasicShape());
-            NG::ViewAbstract::SetClipPath(clipPath);
-        } else if (info[0]->IsBoolean()) {
-            NG::ViewAbstract::SetEdgeClip(info[0]->ToBoolean());
+    if (info[0]->IsObject()) {
+        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            LOGE("clipShape is null");
+            return;
         }
-        return;
-    }
-    if (info.Length() > 0) {
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        if (info[0]->IsObject()) {
-            JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
-            if (clipShape == nullptr) {
-                LOGE("clipShape is null.");
-                return;
-            }
-            auto clipPath = AceType::MakeRefPtr<ClipPath>();
-            clipPath->SetBasicShape(clipShape->GetBasicShape());
-            box->SetClipPath(clipPath);
-        } else if (info[0]->IsBoolean()) {
-            box->SetBoxClipFlag(info[0]->ToBoolean());
-        }
+        ViewAbstractModel::GetInstance()->SetClipPath(clipShape->GetBasicShape());
+    } else if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetEdgeClip(info[0]->ToBoolean());
     }
 }
 
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("Mask is not supported");
-        return;
-    }
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {
             return;
-        }
-        auto maskPath = AceType::MakeRefPtr<MaskPath>();
-        maskPath->SetBasicShape(maskShape->GetBasicShape());
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        box->SetMask(maskPath);
+        };
+        ViewAbstractModel::GetInstance()->SetMask(maskShape->GetBasicShape());
     }
 }
 
@@ -4427,19 +4102,7 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to be an boolean");
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetFocusable(info[0]->ToBoolean());
-        return;
-    }
-
-    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-    if (!focusComponent) {
-        LOGE("The focusComponent is null");
-        return;
-    } else {
-        focusComponent->SetFocusable(info[0]->ToBoolean());
-    }
+    ViewAbstractModel::GetInstance()->SetFocusable(info[0]->ToBoolean());
 }
 
 void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
@@ -4455,10 +4118,7 @@ void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("onFocusMove");
             func->Execute(info);
         };
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
-        if (focusableComponent) {
-            focusableComponent->SetOnFocusMove(onFocusMove);
-        }
+        ViewAbstractModel::GetInstance()->SetOnFocusMove(std::move(onFocusMove));
     }
 }
 
@@ -4468,30 +4128,13 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
         LOGE("OnKeyEvent args need a function.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-        auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent)](KeyEventInfo& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onKey");
-            func->Execute(info);
-        };
-        NG::ViewAbstract::SetOnKeyEvent(std::move(onKeyEvent));
-        return;
-    }
-
-    RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto onKeyId = EventMarker(
-        [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
-            ACE_SCORING_EVENT("onKey");
-            func->Execute(*keyInfo);
-        },
-        "onKey", 0);
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (focusableComponent) {
-        focusableComponent->SetOnKeyId(onKeyId);
-    }
+    RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent)](KeyEventInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onKey");
+        func->Execute(info);
+    };
+    ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
@@ -4507,15 +4150,7 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
         func->Execute();
     };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetOnFocus(std::move(onFocus));
-        return;
-    }
-
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (focusableComponent) {
-        focusableComponent->SetOnFocus(onFocus);
-    }
+    ViewAbstractModel::GetInstance()->SetOnFocus(std::move(onFocus));
 }
 
 void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
@@ -4531,14 +4166,7 @@ void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
         func->Execute();
     };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetOnBlur(std::move(onBlur));
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (focusableComponent) {
-        focusableComponent->SetOnBlur(onBlur);
-    }
+    ViewAbstractModel::GetInstance()->SetOnBlur(std::move(onBlur));
 }
 
 void JSViewAbstract::JsTabIndex(const JSCallbackInfo& info)
@@ -4547,15 +4175,7 @@ void JSViewAbstract::JsTabIndex(const JSCallbackInfo& info)
         LOGE("Param is wrong, it is supposed to be a number");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetTabIndex(info[0]->ToNumber<int32_t>());
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (focusableComponent) {
-        focusableComponent->SetFocusable(true);
-        focusableComponent->SetTabIndex(info[0]->ToNumber<int32_t>());
-    }
+    ViewAbstractModel::GetInstance()->SetTabIndex(info[0]->ToNumber<int32_t>());
 }
 
 void JSViewAbstract::JsFocusOnTouch(const JSCallbackInfo& info)
@@ -4565,27 +4185,7 @@ void JSViewAbstract::JsFocusOnTouch(const JSCallbackInfo& info)
         return;
     }
     auto isFocusOnTouch = info[0]->ToBoolean();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetFocusOnTouch(isFocusOnTouch);
-        return;
-    }
-    auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
-    if (!touchComponent) {
-        LOGE("Touch listener component get failed!");
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (!focusableComponent) {
-        LOGE("focusable component get failed!");
-        return;
-    }
-    focusableComponent->SetIsFocusOnTouch(isFocusOnTouch);
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
-        LOGE("main component get failed!");
-        return;
-    }
-    component->SetIsFocusOnTouch(isFocusOnTouch);
+    ViewAbstractModel::GetInstance()->SetFocusOnTouch(isFocusOnTouch);
 }
 
 void JSViewAbstract::JsDefaultFocus(const JSCallbackInfo& info)
@@ -4595,16 +4195,7 @@ void JSViewAbstract::JsDefaultFocus(const JSCallbackInfo& info)
         return;
     }
     auto isDefaultFocus = info[0]->ToBoolean();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetDefaultFocus(isDefaultFocus);
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (!focusableComponent) {
-        LOGE("focusable component get failed!");
-        return;
-    }
-    focusableComponent->SetIsDefaultFocus(isDefaultFocus);
+    ViewAbstractModel::GetInstance()->SetDefaultFocus(isDefaultFocus);
 }
 
 void JSViewAbstract::JsGroupDefaultFocus(const JSCallbackInfo& info)
@@ -4614,43 +4205,12 @@ void JSViewAbstract::JsGroupDefaultFocus(const JSCallbackInfo& info)
         return;
     }
     auto isGroupDefaultFocus = info[0]->ToBoolean();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetGroupDefaultFocus(isGroupDefaultFocus);
-        return;
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-    if (!focusableComponent) {
-        LOGE("focusable component get failed!");
-        return;
-    }
-    focusableComponent->SetIsDefaultGroupFocus(isGroupDefaultFocus);
+    ViewAbstractModel::GetInstance()->SetGroupDefaultFocus(isGroupDefaultFocus);
 }
 
 void JSViewAbstract::JsKey(const std::string& key)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetInspectorId(key);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (component) {
-        component->SetInspectorKey(key);
-    }
-
-    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
-        auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-        if (flexItem) {
-            flexItem->SetInspectorKey(key);
-        }
-    }
-
-    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        if (focusableComponent) {
-            focusableComponent->SetInspectorKey(key);
-        }
-    }
+    ViewAbstractModel::GetInstance()->SetInspectorId(key);
 }
 
 void JSViewAbstract::JsId(const std::string& id)
@@ -4660,14 +4220,7 @@ void JSViewAbstract::JsId(const std::string& id)
 
 void JSViewAbstract::JsRestoreId(int32_t restoreId)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("RestoreId not completed in new pipe.");
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (component) {
-        component->SetRestoreId(restoreId);
-    }
+    ViewAbstractModel::GetInstance()->SetRestoreId(restoreId);
 }
 
 #if defined(PREVIEW)
@@ -4678,75 +4231,68 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
         return;
     }
 
-    auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (component) {
-        component->SetDebugLine(info[0]->ToString());
-    }
+    ViewAbstractModel::GetInstance()->SetDebugLine(info[0]->ToString());
 }
 #endif
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsOpacity(info);
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
-        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-        display->DisableLayer(true);
+
+    double opacity = 0.0;
+    if (!ParseJsDouble(info[0], opacity)) {
+        return;
     }
+
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        opacity = 1.0;
+    }
+
+    ViewAbstractModel::GetInstance()->SetOpacity(opacity, true);
 }
 
 void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsTransition(info);
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (info.Length() > 1) {
+        LOGE("Too many arguments");
         return;
     }
-    if (ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
-        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-        display->DisableLayer(true);
+    if (info.Length() == 0) {
+        ViewAbstractModel::GetInstance()->SetTransition(
+            NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
+        return;
     }
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not Object.");
+        return;
+    }
+    auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
+    auto options = ParseTransition(transitionArgs);
+    ViewAbstractModel::GetInstance()->SetTransition(options, true);
 }
 
 void JSViewAbstract::JsAccessibilityGroup(bool accessible)
 {
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("this component does not have inspector");
-        return;
-    }
-    inspector->SetAccessibilityGroup(accessible);
+    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(accessible);
 }
 
 void JSViewAbstract::JsAccessibilityText(const std::string& text)
 {
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("this component does not have inspector");
-        return;
-    }
-    inspector->SetAccessibilitytext(text);
+    ViewAbstractModel::GetInstance()->SetAccessibilityText(text);
 }
 
 void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
 {
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("this component does not have inspector");
-        return;
-    }
-    inspector->SetAccessibilityDescription(description);
+    ViewAbstractModel::GetInstance()->SetAccessibilityDescription(description);
 }
 
 void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
 {
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("this component does not have inspector");
-        return;
-    }
-    inspector->SetAccessibilityImportance(importance);
+    ViewAbstractModel::GetInstance()->SetAccessibilityImportance(importance);
 }
 
 void JsBindContextMenuNG(RefPtr<JsFunction>& builder, int32_t responseType)
@@ -5033,41 +4579,7 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
         }
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetAlignRules(alignRules);
-        return;
-    }
-
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flexItem->SetAlignRules(alignRules);
-}
-
-RefPtr<Decoration> JSViewAbstract::GetFrontDecoration()
-{
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto decoration = box->GetFrontDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-        box->SetFrontDecoration(decoration);
-    }
-
-    return decoration;
-}
-
-RefPtr<Decoration> JSViewAbstract::GetBackDecoration()
-{
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto decoration = box->GetBackDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-        box->SetBackDecoration(decoration);
-    }
-    return decoration;
-}
-
-void JSViewAbstract::SetBorderRadius(const Dimension& value, const AnimationOption& option)
-{
-    BoxComponentHelper::SetBorderRadius(GetBackDecoration(), value, option);
+    ViewAbstractModel::GetInstance()->SetAlignRules(alignRules);
 }
 
 void JSViewAbstract::SetMarginTop(const JSCallbackInfo& info)
@@ -5228,57 +4740,24 @@ void JSViewAbstract::SetMargin(const Dimension& value)
 
 void JSViewAbstract::SetBlur(float radius)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        Dimension dimensionRadius(radius, DimensionUnit::PX);
-        NG::ViewAbstract::SetFrontBlur(dimensionRadius);
-        return;
-    }
-    auto decoration = GetFrontDecoration();
-    SetBlurRadius(decoration, radius);
+    Dimension dimensionRadius(radius, DimensionUnit::PX);
+    ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius);
 }
 
 void JSViewAbstract::SetColorBlend(Color color)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetColorBlend(color);
-        return;
-    }
-    auto decoration = GetFrontDecoration();
-    if (decoration) {
-        decoration->SetColorBlend(color);
-    }
+    ViewAbstractModel::GetInstance()->SetColorBlend(color);
 }
 
 void JSViewAbstract::SetBackdropBlur(float radius)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        Dimension dimensionRadius(radius, DimensionUnit::PX);
-        NG::ViewAbstract::SetBackdropBlur(dimensionRadius);
-        return;
-    }
-    auto decoration = GetBackDecoration();
-    SetBlurRadius(decoration, radius);
-}
-
-void JSViewAbstract::SetBlurRadius(const RefPtr<Decoration>& decoration, float radius)
-{
-    if (decoration) {
-        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        decoration->SetBlurRadius(AnimatableDimension(radius, DimensionUnit::PX, option));
-    }
+    Dimension dimensionRadius(radius, DimensionUnit::PX);
+    ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
 }
 
 void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGD("Not completed in new pipe.");
-        return;
-    }
-    auto decoration = GetBackDecoration();
-    if (decoration) {
-        decoration->SetWindowBlurProgress(progress);
-        decoration->SetWindowBlurStyle(blurStyle);
-    }
+    ViewAbstractModel::GetInstance()->SetWindowBlur(progress, blurStyle);
 }
 
 bool JSViewAbstract::ParseJsonDimension(
@@ -5480,18 +4959,7 @@ void JSViewAbstract::SetDirection(const std::string& dir)
     } else if (dir == "Auto") {
         direction = TextDirection::AUTO;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetLayoutDirection(direction);
-        return;
-    }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    CHECK_NULL_VOID(box);
-    box->SetTextDirection(direction);
-    box->SetInspectorDirection(direction);
-    if (direction == TextDirection::AUTO) {
-        box->SetTextDirection(
-            AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
-    }
+    ViewAbstractModel::GetInstance()->SetLayoutDirection(direction);
 }
 
 RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& jsObj)
@@ -5568,16 +5036,7 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
         LOGE("info[0] is not a number");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
-        return;
-    }
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!boxComponent) {
-        LOGE("boxComponent is null");
-        return;
-    }
-    boxComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
+    ViewAbstractModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
 }
 
 RefPtr<Gesture> JSViewAbstract::GetTapGesture(const JSCallbackInfo& info, int32_t countNum, int32_t fingerNum)
@@ -5788,22 +5247,9 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::HitTestMode hitTestModeNG = NG::HitTestMode::HTMDEFAULT;
-        hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
-        NG::ViewAbstract::SetHitTestMode(hitTestModeNG);
-        return;
-    }
-
-    HitTestMode hitTestMode = HitTestMode::HTMDEFAULT;
-    if (info[0]->IsNumber()) {
-        hitTestMode = static_cast<HitTestMode>(info[0]->ToNumber<int32_t>());
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (component) {
-        component->SetHitTestMode(hitTestMode);
-    }
+    NG::HitTestMode hitTestModeNG = NG::HitTestMode::HTMDEFAULT;
+    hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
+    ViewAbstractModel::GetInstance()->SetHitTestMode(hitTestModeNG);
 }
 
 } // namespace OHOS::Ace::Framework

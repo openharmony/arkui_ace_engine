@@ -26,6 +26,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -668,7 +669,7 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     buttonComponent->SetRadiusState(true);
     if (!stack->IsVisualStateSet()) {
         buttonComponent->SetRectRadius(radius);
-        JSViewAbstract::SetBorderRadius(radius, option);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(radius);
     } else {
         buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
             ButtonStateAttribute::RADIUS, AnimatableDimension(radius, option), stack->GetVisualState());

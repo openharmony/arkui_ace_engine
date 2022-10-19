@@ -303,8 +303,6 @@ public:
      */
     static RefPtr<Gesture> GetTapGesture(
         const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
-    static RefPtr<Decoration> GetFrontDecoration();
-    static RefPtr<Decoration> GetBackDecoration();
     static const Border& GetBorder();
     static void SetMarginTop(const JSCallbackInfo& info);
     static void SetMarginBottom(const JSCallbackInfo& info);
@@ -316,13 +314,11 @@ public:
     static void SetPaddingRight(const JSCallbackInfo& info);
     static void SetBorder(const Border& border);
     static void SetBorderStyle(int32_t style);
-    static void SetBorderRadius(const Dimension& value, const AnimationOption& option);
     static void SetBorderColor(const Color& color, const AnimationOption& option);
     static void SetBorderWidth(const Dimension& value, const AnimationOption& option);
     static void SetBlur(float radius);
     static void SetColorBlend(Color color);
     static void SetBackdropBlur(float radius);
-    static void SetBlurRadius(const RefPtr<Decoration>& decoration, float radius);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
     static RefPtr<ThemeConstants> GetThemeConstants(const JSRef<JSObject>& jsObj = JSRef<JSObject>());
     static bool JsWidth(const JSRef<JSVal>& jsValue);

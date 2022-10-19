@@ -18,11 +18,30 @@
 #include <vector>
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/data_panel/data_panel_component.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/data_panel/data_panel_view.h"
+#include "bridge/declarative_frontend/jsview/models/data_panel_model_impl.h"
+#include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
+namespace OHOS::Ace {
+
+std::unique_ptr<DataPanelModel> DataPanelModel::instance_ = nullptr;
+
+DataPanelModel* DataPanelModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::DataPanelModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::DataPanelModelNG());
+        } else {
+            instance_.reset(new Framework::DataPanelModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 constexpr size_t MAX_COUNT = 9;
@@ -96,72 +115,16 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
             dataPanelType = 0;
         }
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::DataPanelView::Create(dateValues, max, dataPanelType);
-        return;
-    }
-    RefPtr<PercentageDataPanelComponent> component =
-        AceType::MakeRefPtr<PercentageDataPanelComponent>(ChartType::RAINBOW);
-    double valueSum = 0.0;
-    for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
-        auto item = values->GetArrayItem(i);
-        if (!item || !item->IsNumber()) {
-            LOGE("JSDataPanel::Create value is not number");
-            return;
-        }
-        auto value = item->GetDouble();
-        if (LessOrEqual(value, 0.0)) {
-            value = 0.0;
-        }
-        valueSum += value;
-        if (GreatOrEqual(valueSum, max) && max > 0) {
-            value = max - (valueSum - value);
-            if (NearEqual(value, 0.0)) {
-                break;
-            }
-            Segment segment;
-            segment.SetValue(value);
-            segment.SetColorType(SegmentStyleType::NONE);
-            component->AppendSegment(segment);
-            break;
-        }
-        Segment segment;
-        segment.SetValue(value);
-        segment.SetColorType(SegmentStyleType::NONE);
-        component->AppendSegment(segment);
-    }
-    if (LessOrEqual(max, 0.0)) {
-        max = valueSum;
-    }
-    component->SetMaxValue(max);
-    if (type->IsNumber()) {
-        if (type->GetInt() == static_cast<int32_t>(ChartType::LINE)) {
-            component->SetPanelType(ChartType::LINE);
-        } else if (type->GetInt() == static_cast<int32_t>(ChartType::RAINBOW)) {
-            component->SetPanelType(ChartType::RAINBOW);
-        }
-    }
-    RefPtr<ThemeManager> dataPanelManager = AceType::MakeRefPtr<ThemeManager>();
-    component->InitalStyle(dataPanelManager);
-    ViewStackProcessor::GetInstance()->ClaimElementId(component);
-    ViewStackProcessor::GetInstance()->Push(component);
+    DataPanelModel::GetInstance()->Create(dateValues, max, dataPanelType);
 }
 
 void JSDataPanel::CloseEffect(const JSCallbackInfo& info)
 {
-    bool isCloseEffect = false;
-    bool ngCloseEffect = true;
+    bool isCloseEffect = true;
     if (info[0]->IsBoolean()) {
         isCloseEffect = info[0]->ToBoolean();
-        ngCloseEffect = info[0]->ToBoolean();
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::DataPanelView::SetEffect(!ngCloseEffect);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<PercentageDataPanelComponent>(stack->GetMainComponent());
-    component->SetEffects(!isCloseEffect);
+    DataPanelModel::GetInstance()->SetEffect(isCloseEffect);
 }
 
 } // namespace OHOS::Ace::Framework

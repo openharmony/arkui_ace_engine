@@ -15,6 +15,9 @@
 
 #include "core/common/environment/environment_proxy.h"
 
+#include "base/memory/ace_type.h"
+#include "core/common/environment/environment_impl.h"
+
 namespace OHOS::Ace {
 
 EnvironmentProxy* EnvironmentProxy::inst_ = nullptr;
@@ -32,17 +35,9 @@ EnvironmentProxy* EnvironmentProxy::GetInstance()
     return (inst_);
 }
 
-void EnvironmentProxy::SetDelegate(std::unique_ptr<EnvironmentInterface>&& delegate)
-{
-    delegate_ = std::move(delegate);
-}
-
 RefPtr<Environment> EnvironmentProxy::GetEnvironment(const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    if (!delegate_) {
-        return nullptr;
-    }
-    return delegate_->GetEnvironment(taskExecutor);
+    return AceType::MakeRefPtr<EnvironmentImpl>(taskExecutor);
 }
 
 } // namespace OHOS::Ace

@@ -34,10 +34,28 @@ void ImageModelImpl::SetAlt(const std::string& src)
 
 void ImageModelImpl::SetBorder(const Border& border)
 {
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto decoration = box->GetFrontDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+        box->SetFrontDecoration(decoration);
+    }
+    decoration->SetBorder(border);
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
         image->SetBorder(border);
     }
+}
+
+void ImageModelImpl::SetBackBorder()
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto decoration = box->GetBackDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+        box->SetBackDecoration(decoration);
+    }
+    SetBorder(decoration->GetBorder());
 }
 
 void ImageModelImpl::SetBlur(double blur)

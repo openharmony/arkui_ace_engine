@@ -168,7 +168,7 @@ public:
     // Bind properties
     static void BindPopup(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
-    static void BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode);
+    static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode);
     static void ShowMenu(int32_t targetId);
     // inspector

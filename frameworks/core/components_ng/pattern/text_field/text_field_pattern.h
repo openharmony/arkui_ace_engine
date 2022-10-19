@@ -202,14 +202,24 @@ public:
     float AdjustTextRectOffsetX();
     float AdjustTextAreaOffsetY();
 
-    void SetBasicPadding(float padding)
+    void SetBasicPaddingLeft(float padding)
     {
-        basicPadding_ = padding;
+        basicPaddingLeft_ = padding;
     }
 
-    float GetBasicPadding() const
+    float GetPaddingLeft() const
     {
-        return basicPadding_;
+        return utilPadding_.left.value_or(basicPaddingLeft_);
+    }
+
+    const PaddingPropertyF& GetUtilPadding() const
+    {
+        return utilPadding_;
+    }
+
+    float GetHorizontalPaddingSum() const
+    {
+        return utilPadding_.left.value_or(basicPaddingLeft_) + utilPadding_.right.value_or(basicPaddingLeft_);
     }
 
     const RectF& GetTextRect()
@@ -252,6 +262,7 @@ public:
     {
         return textBoxes_;
     }
+    void CaretMoveToLastNewLineChar();
 
 private:
     bool IsTextArea();
@@ -330,7 +341,9 @@ private:
     TextDirection textDirection_ = TextDirection::LTR;
 
     Offset lastTouchOffset_;
-    float basicPadding_ = 0.0f;
+    float basicPaddingLeft_ = 0.0f;
+    PaddingPropertyF utilPadding_;
+
     float baselineOffset_ = 0.0f;
     float selectionBaseOffsetX_ = 0.0f;
     float selectionDestinationOffsetX_ = 0.0f;

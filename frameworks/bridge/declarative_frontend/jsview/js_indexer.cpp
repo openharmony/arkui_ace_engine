@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
+#include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/indexer/indexer_view.h"
 #include "core/components_v2/indexer/indexer_component.h"
 #include "core/components_v2/indexer/indexer_event_info.h"
@@ -29,6 +30,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::AlignStyle::RIGHT };
+const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = {NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT};
 }; // namespace
 
 void JSIndexer::Create(const JSCallbackInfo& args)
@@ -454,7 +456,7 @@ void JSIndexer::SetAlignStyle(int32_t value)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
-            NG::IndexerView::SetAlignStyle(ALIGN_STYLE[value]);
+            NG::IndexerView::SetAlignStyle(NG_ALIGN_STYLE[value]);
         }
     }
     if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
@@ -462,6 +464,35 @@ void JSIndexer::SetAlignStyle(int32_t value)
                 AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (indexerComponent) {
             indexerComponent->SetAlignStyle(ALIGN_STYLE[value]);
+        }
+    }
+}
+
+void JSIndexer::SetSelected(const JSCallbackInfo& args)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args.Length() >= 1) {
+            int32_t selected = 0;
+            if (ParseJsInteger<int32_t>(args[0], selected)) {
+                NG::IndexerView::SetSelected(selected);
+            }
+        }
+    }
+}
+
+void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args.Length() >= 1) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+            float positionX = 0.0f;
+            float positionY = 0.0f;
+            if (ConvertFromJSValue(obj->GetProperty("x"), positionX)) {
+                NG::IndexerView::SetPopupPositionX(positionX);
+            }
+            if (ConvertFromJSValue(obj->GetProperty("y"), positionY)) {
+                NG::IndexerView::SetPopupPositionY(positionY);
+            }
         }
     }
 }
@@ -486,6 +517,8 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("itemSize", &JSIndexer::SetItemSize, opt);
     JSClass<JSIndexer>::StaticMethod("alignStyle", &JSIndexer::SetAlignStyle, opt);
     JSClass<JSIndexer>::StaticMethod("onRequestPopupData", &JSIndexer::JsOnRequestPopupData, opt);
+    JSClass<JSIndexer>::StaticMethod("selected", &JSIndexer::SetSelected, opt);
+    JSClass<JSIndexer>::StaticMethod("popupPosition", &JSIndexer::SetPopupPosition, opt);
     // keep compatible, need remove after
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);

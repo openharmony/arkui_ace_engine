@@ -27,13 +27,11 @@ class ACE_EXPORT EnvironmentProxy : public EnvironmentInterface {
 public:
     static EnvironmentProxy* GetInstance();
 
-    void SetDelegate(std::unique_ptr<EnvironmentInterface>&& delegate);
     RefPtr<Environment> GetEnvironment(const RefPtr<TaskExecutor>& taskExecutor) const override;
     EnvironmentProxy() = default;
-    ~EnvironmentProxy() = default;
+    ~EnvironmentProxy() override = default;
 
 private:
-    std::unique_ptr<EnvironmentInterface> delegate_;
     static EnvironmentProxy* inst_;
     static std::mutex mutex_;
 };

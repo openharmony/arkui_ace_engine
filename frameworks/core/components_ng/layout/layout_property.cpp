@@ -318,6 +318,32 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder()
         padding.bottom.value_or(0) + borderWidth.bottomDimen.value_or(0) };
 }
 
+PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault,
+    float paddingVerticalDefault, float borderHorizontalDefault, float borderVerticalDefault)
+{
+    if (layoutConstraint_.has_value()) {
+        auto padding = ConvertToPaddingPropertyF(
+            padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        auto borderWidth = ConvertToBorderWidthPropertyF(
+            borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        return PaddingPropertyF { padding.left.value_or(paddingHorizontalDefault) +
+                                      borderWidth.leftDimen.value_or(borderHorizontalDefault),
+            padding.right.value_or(paddingHorizontalDefault) + borderWidth.rightDimen.value_or(borderHorizontalDefault),
+            padding.top.value_or(paddingVerticalDefault) + borderWidth.topDimen.value_or(borderVerticalDefault),
+            padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
+    }
+    auto padding = ConvertToPaddingPropertyF(
+        padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    auto borderWidth = ConvertToBorderWidthPropertyF(
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+
+    return PaddingPropertyF { padding.left.value_or(paddingHorizontalDefault) +
+                                  borderWidth.leftDimen.value_or(borderHorizontalDefault),
+        padding.right.value_or(paddingHorizontalDefault) + borderWidth.rightDimen.value_or(borderHorizontalDefault),
+        padding.top.value_or(paddingVerticalDefault) + borderWidth.topDimen.value_or(borderVerticalDefault),
+        padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
+}
+
 PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 {
     if (layoutConstraint_.has_value()) {
