@@ -71,6 +71,8 @@ public:
 
     void BuildChild(const DialogProperties& dialogProperties);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 private:
     void OnModifyDone() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -96,6 +98,10 @@ private:
 
     RefPtr<DialogTheme> dialogTheme_;
     RefPtr<UINode> customNode_;
+
+    // XTS inspector values
+    std::string message_;
+    std::string title_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };

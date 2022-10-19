@@ -19,6 +19,7 @@
 
 #include "base/json/json_util.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -33,7 +34,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_v2/inspector/select_composed_element.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -434,9 +435,29 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("options", InspectorGetOptions().c_str());
     json->Put("selected", std::to_string(selected_).c_str());
+
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    json->Put("value", props->GetContent().value_or("").c_str());
+    Color fontColor = props->GetTextColor().value_or(Color::BLACK);
+    json->Put("fontColor", fontColor.ColorToString().c_str());
+    json->Put("font", props->InspectorGetTextFont().c_str());
+
     json->Put("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str());
     json->Put("selectedOptionFont", InspectorGetSelectedFont().c_str());
     json->Put("selectedOptionFontColor", selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str());
+
+    if (options_.empty()) {
+        json->Put("optionBgColor", "");
+        json->Put("optionFont", "");
+        json->Put("optionFontColor", "");
+    } else {
+        auto optionPattern = options_[0]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        json->Put("optionBgColor", optionPattern->GetBgColor().ColorToString().c_str());
+        json->Put("optionFont", optionPattern->InspectorGetFont().c_str());
+        json->Put("optionFontColor", optionPattern->GetFontColor().ColorToString().c_str());
+    }
 }
 
 std::string SelectPattern::InspectorGetOptions() const
@@ -447,6 +468,7 @@ std::string SelectPattern::InspectorGetOptions() const
         auto temp = JsonUtil::Create(true);
         auto optionPattern = options_[i]->GetPattern<OptionPattern>();
         temp->Put("value", optionPattern->GetText().c_str());
+        temp->Put("icon", optionPattern->GetIcon().c_str());
         auto index = std::to_string(i);
         jsonOptions->Put(index.c_str(), temp);
     }
@@ -469,7 +491,7 @@ std::string SelectPattern::InspectorGetSelectedFont() const
     if (selectedFont_.FontWeight.has_value()) {
         font.SetFontWeight(selectedFont_.FontWeight.value());
     }
-    return V2::SelectComposedElement::GetTextStyle(font);
+    return V2::GetTextStyle(font);
 }
 
 } // namespace OHOS::Ace::NG

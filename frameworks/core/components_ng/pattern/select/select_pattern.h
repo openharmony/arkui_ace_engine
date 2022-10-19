@@ -119,6 +119,7 @@ private:
     std::optional<Color> selectedBgColor_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;
 

@@ -19,6 +19,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
@@ -64,6 +65,25 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
+
+    // for XTS inspector
+    std::string InspectorGetTextFont() const
+    {
+        TextStyle font;
+        if (GetFontFamily().has_value()) {
+            font.SetFontFamilies(GetFontFamily().value());
+        }
+        if (GetFontSize().has_value()) {
+            font.SetFontSize(GetFontSize().value());
+        }
+        if (GetItalicFontStyle().has_value()) {
+            font.SetFontStyle(GetItalicFontStyle().value());
+        }
+        if (GetFontWeight().has_value()) {
+            font.SetFontWeight(GetFontWeight().value());
+        }
+        return V2::GetTextStyle(font);
+    }
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override

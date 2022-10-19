@@ -21,7 +21,6 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_v2/inspector/customdialog_composed_element.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DialogLayoutProperty : public LayoutProperty {
@@ -59,17 +58,16 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        json->Put("dialogAlignment", DialogAlignmentUtils::ConvertDialogAlignmentToString(
+        json->Put("alignment", DialogAlignmentUtils::ConvertDialogAlignmentToString(
                                          propDialogAlignment_.value_or(DialogAlignment::BOTTOM))
                                          .c_str());
 
         auto offsetValue = JsonUtil::Create(true);
         offsetValue->Put("dX", propDialogOffset_.value_or(DimensionOffset()).GetX().Value());
         offsetValue->Put("dY", propDialogOffset_.value_or(DimensionOffset()).GetY().Value());
-        json->Put("dialogOffset", offsetValue);
+        json->Put("offset", offsetValue);
 
         json->Put("gridCount", std::to_string(propGridCount_.value_or(-1)).c_str());
-        json->Put("useCustom", propUseCustom_.value_or(false) ? "true" : "false");
     }
 
 private:

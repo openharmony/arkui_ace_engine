@@ -173,6 +173,14 @@ void OptionPattern::SetFontColor(const Color& color)
     props->UpdateTextColor(color);
 }
 
+std::string OptionPattern::InspectorGetFont()
+{
+    CHECK_NULL_RETURN(text_, "");
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, "");
+    return props->InspectorGetTextFont();
+}
+
 Dimension OptionPattern::GetFontSize()
 {
     CHECK_NULL_RETURN(text_, Dimension());

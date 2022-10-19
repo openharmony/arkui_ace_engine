@@ -52,8 +52,8 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);
-        json->Put("useCustomStyle", propUseCustomStyle_.value_or(false) ? "true" : "false");
-        json->Put("autCancel", propAutoCancel_.value_or(true) ? "true" : "false");
+        json->Put("customStyle", propUseCustomStyle_.value_or(false) ? "true" : "false");
+        json->Put("autoCancel", propAutoCancel_.value_or(true) ? "true" : "false");
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogRenderProperty);
