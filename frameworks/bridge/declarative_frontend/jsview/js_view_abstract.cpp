@@ -2812,8 +2812,7 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
         return true;
     }
     if (jsValue->IsString()) {
-        result = Color::FromString(jsValue->ToString());
-        return true;
+        return Color::ParseColorString(jsValue->ToString(), result);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
