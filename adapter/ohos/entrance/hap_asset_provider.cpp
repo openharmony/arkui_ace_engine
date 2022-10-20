@@ -28,10 +28,13 @@ bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<
         return false;
     }
 
+    runtimeExtractor_ = AbilityRuntime::RuntimeExtractor::Create(hapPath);
+    if (!runtimeExtractor_) {
+        return false;
+    }
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
     LOGD("hapPath_:%{public}s", hapPath_.c_str());
-    runtimeExtractor_ = AbilityRuntime::RuntimeExtractor::Create(hapPath_);
     return true;
 }
 
