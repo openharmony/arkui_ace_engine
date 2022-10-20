@@ -112,6 +112,7 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(
     auto text = CreateText(value, row);
     auto pattern = option->GetPattern<OptionPattern>();
     pattern->SetTextNode(text);
+    pattern->SetIcon(icon);
 
     return option;
 }

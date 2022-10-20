@@ -369,6 +369,51 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
             return "Edge::Center";
         }
     }
+
+    inline std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
+    {
+        std::string result = "";
+        for (const auto& item : fontFamily) {
+            result += item;
+            result += ",";
+        }
+        result = result.substr(0, result.size() - 1);
+        return result;
+    }
+
+    inline std::string GetTextStyle(TextStyle textStyle)
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("size", textStyle.GetFontSize().ToString().c_str());
+        auto weight = textStyle.GetFontWeight();
+        if (weight == FontWeight::W100) {
+            jsonValue->Put("weight", "100");
+        } else if (weight == FontWeight::W200) {
+            jsonValue->Put("weight", "200");
+        } else if (weight == FontWeight::W300) {
+            jsonValue->Put("weight", "300");
+        } else if (weight == FontWeight::W400) {
+            jsonValue->Put("weight", "400");
+        } else if (weight == FontWeight::W500) {
+            jsonValue->Put("weight", "500");
+        } else if (weight == FontWeight::W600) {
+            jsonValue->Put("weight", "600");
+        } else if (weight == FontWeight::W700) {
+            jsonValue->Put("weight", "700");
+        } else if (weight == FontWeight::W800) {
+            jsonValue->Put("weight", "800");
+        } else if (weight == FontWeight::W900) {
+            jsonValue->Put("weight", "900");
+        } else {
+            jsonValue->Put("weight", ConvertWrapFontWeightToStirng(weight).c_str());
+        }
+        auto family = textStyle.GetFontFamilies();
+        std::string jsonFamily = ConvertFontFamily(family);
+        jsonValue->Put("family", jsonFamily.c_str());
+        auto fontStyle = textStyle.GetFontStyle();
+        jsonValue->Put("style", ConvertWrapFontStyleToStirng(fontStyle).c_str());
+        return jsonValue->ToString();
+    }
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_UTILS_H

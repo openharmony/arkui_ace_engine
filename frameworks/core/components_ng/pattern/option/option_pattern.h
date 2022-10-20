@@ -87,6 +87,19 @@ public:
 
     const std::string& GetText();
 
+    // XTS inspector functions
+    std::string InspectorGetFont();
+
+    void SetIcon(const std::string& src)
+    {
+        iconSrc_ = src;
+    }
+
+    const std::string& GetIcon()
+    {
+        return iconSrc_;
+    }
+
 private:
     void OnModifyDone() override;
 
@@ -99,8 +112,10 @@ private:
     // change option paint props on hover
     void OnHover(const TouchEventInfo& info);
 
-    Color bgColor_ = Color(DEFAULT_BACKGROUND_COLOR);
+    Color bgColor_ = Color(OPTION_DEFAULT_BACKGROUND_COLOR);
 
+    // src of icon image, used in XTS inspector
+    std::string iconSrc_;
     RefPtr<FrameNode> text_ = nullptr;
     RefPtr<TextTheme> textTheme_ = nullptr;
     // to hide menu through OverlayManager when option is clicked
