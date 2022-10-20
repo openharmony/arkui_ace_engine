@@ -80,6 +80,11 @@ public:
         DumpLog::GetInstance().AddDesc(std::string("Type: ").append(isWrap_ ? "Wrap" : "NoWrap"));
     }
 
+    bool GetIsWrap() const
+    {
+        return isWrap_;
+    }
+
 private:
     bool isWrap_ = false;
     bool isDialogStretch_ = false;
