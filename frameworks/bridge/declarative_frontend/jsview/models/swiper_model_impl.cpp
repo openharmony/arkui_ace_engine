@@ -15,10 +15,10 @@
 
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -199,6 +199,116 @@ void SwiperModelImpl::SetOnChange(NG::ChangeEvent&& onChange)
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
         swiper->SetChangeEventId(onChangeEvent);
+    }
+}
+
+void SwiperModelImpl::SetRemoteMessageEventId(RemoteCallback&& remoteCallback)
+{
+    EventMarker remoteMessageEventId(std::move(remoteCallback));
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperComponent = AceType::DynamicCast<SwiperComponent>(stack->GetMainComponent());
+    if (!swiperComponent) {
+        LOGE("swiperComponent is null");
+        return;
+    }
+    swiperComponent->SetRemoteMessageEventId(remoteMessageEventId);
+}
+
+void SwiperModelImpl::SetDigital(bool digitalIndicator)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetDigitalIndicator(digitalIndicator);
+    }
+}
+
+void SwiperModelImpl::SetIndicatorStyle(const SwiperParameters& swiperParameters)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        auto indictor = swiper->GetIndicator();
+        if (!indictor) {
+            return;
+        }
+
+        if (swiperParameters.dimLeft.has_value()) {
+            indictor->SetLeft(swiperParameters.dimLeft.value());
+        }
+        if (swiperParameters.dimTop.has_value()) {
+            indictor->SetTop(swiperParameters.dimTop.value());
+        }
+        if (swiperParameters.dimRight.has_value()) {
+            indictor->SetRight(swiperParameters.dimRight.value());
+        }
+        if (swiperParameters.dimBottom.has_value()) {
+            indictor->SetBottom(swiperParameters.dimBottom.value());
+        }
+        if (swiperParameters.dimSize.has_value()) {
+            indictor->SetSize(swiperParameters.dimSize.value());
+        }
+        if (swiperParameters.maskValue.has_value()) {
+            indictor->SetIndicatorMask(swiperParameters.maskValue.value());
+        }
+        if (swiperParameters.colorVal.has_value()) {
+            indictor->SetColor(swiperParameters.colorVal.value());
+        }
+        if (swiperParameters.selectedColorVal.has_value()) {
+            indictor->SetSelectedColor(swiperParameters.selectedColorVal.value());
+        }
+    }
+}
+
+void SwiperModelImpl::SetOnClick(
+    std::function<void(const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl)>&& value)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("fail to get inspector for on get click event marker");
+        if (swiper) {
+            swiper->SetClickEventId(EventMarker());
+        }
+        return;
+    }
+    auto impl = inspector->GetInspectorFunctionImpl();
+    auto onClick = [func = std::move(value), impl](const BaseEventInfo* info) {
+        {
+            func(info, impl);
+        }
+    };
+    if (swiper) {
+        swiper->SetClickEventId(EventMarker(onClick));
+    }
+}
+
+void SwiperModelImpl::SetMainSwiperSizeWidth()
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        if (swiper->GetMainSwiperSize() == MainSwiperSize::MAX ||
+            swiper->GetMainSwiperSize() == MainSwiperSize::MAX_Y) {
+            swiper->SetMainSwiperSize(MainSwiperSize::MAX);
+        } else {
+            swiper->SetMainSwiperSize(MainSwiperSize::MAX_X);
+        }
+    }
+}
+
+void SwiperModelImpl::SetMainSwiperSizeHeight()
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        if (swiper->GetMainSwiperSize() == MainSwiperSize::MAX ||
+            swiper->GetMainSwiperSize() == MainSwiperSize::MAX_X) {
+            swiper->SetMainSwiperSize(MainSwiperSize::MAX);
+        } else {
+            swiper->SetMainSwiperSize(MainSwiperSize::MAX_Y);
+        }
     }
 }
 

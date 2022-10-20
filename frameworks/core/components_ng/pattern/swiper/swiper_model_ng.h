@@ -47,6 +47,14 @@ public:
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
     void SetOnChange(ChangeEvent&& onChange) override;
+
+    void SetRemoteMessageEventId(RemoteCallback&& remoteCallback) override;
+    void SetDigital(bool digitalIndicator) override;
+    void SetOnClick(
+        std::function<void(const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl)>&& value) override;
+    void SetMainSwiperSizeWidth() override;
+    void SetMainSwiperSizeHeight() override;
+    void SetIndicatorStyle(const SwiperParameters& swiperParameters) override;
 };
 
 } // namespace OHOS::Ace::NG

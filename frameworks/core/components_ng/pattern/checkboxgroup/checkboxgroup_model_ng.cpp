@@ -26,8 +26,8 @@ void CheckBoxGroupModelNG::Create(const std::optional<std::string>& groupName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CHECKBOXGROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
@@ -35,7 +35,7 @@ void CheckBoxGroupModelNG::Create(const std::optional<std::string>& groupName)
         eventHub->SetGroupName(groupName.value());
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    
+
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, false);
 }
 
