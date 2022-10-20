@@ -98,8 +98,8 @@ public:
     void SetSweepGradient(const NG::Gradient& gradient) override;
     void SetRadialGradient(const NG::Gradient& gradient) override;
 
-    void SetClipPath(const RefPtr<BasicShape>& shape) override;
-    void SetEdgeClip(bool isClip) override;
+    void SetClipShape(const RefPtr<BasicShape>& shape) override;
+    void SetClipEdge(bool isClip) override;
     void SetMask(const RefPtr<BasicShape>& shape) override;
 
     void SetBackdropBlur(const Dimension& radius) override;

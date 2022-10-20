@@ -27,6 +27,7 @@
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -189,7 +190,6 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
     ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
-    // Border
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBrightness, Dimension);
@@ -222,14 +222,23 @@ public:
 
     // Clip
     ACE_DEFINE_PROPERTY_GROUP(Clip, ClipProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, ClipPathNG);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, RefPtr<BasicShape>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipEdge, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipMask, RefPtr<BasicShape>);
 
     // Gradient
     ACE_DEFINE_PROPERTY_GROUP(Gradient, GradientProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, RadialGradient, NG::Gradient);
+
+    // Overlay
+    ACE_DEFINE_PROPERTY_GROUP(Overlay, OverlayProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Overlay, OverlayText, OverlayOptions)
+
+    // MotionPath
+    ACE_DEFINE_PROPERTY_GROUP(Motion, MotionPathProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
 
 protected:
     RenderContext() = default;
@@ -264,8 +273,9 @@ protected:
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
-    virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
+    virtual void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
+    virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
 
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
@@ -279,6 +289,9 @@ protected:
     virtual void OnFrontInvertUpdate(const Dimension& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
+
+    virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
+    virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
 
 private:
     std::function<void()> requestFrame_;

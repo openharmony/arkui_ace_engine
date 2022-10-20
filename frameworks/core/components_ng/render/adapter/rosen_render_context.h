@@ -186,8 +186,9 @@ private:
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
 
-    void OnClipShapeUpdate(const ClipPathNG& clipPath) override;
+    void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) override;
     void OnClipEdgeUpdate(bool isClip) override;
+    void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) override;
 
     void OnLinearGradientUpdate(const NG::Gradient& value) override;
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
@@ -202,6 +203,9 @@ private:
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
 
+    void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
+    void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
     bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
         std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
@@ -212,6 +216,7 @@ private:
     void PaintGradient(const SizeF& frameSize);
     void PaintGraphics();
     void OnPaintGraphics();
+    void PaintOverlayText();
 
     RectF AdjustPaintRect();
 
