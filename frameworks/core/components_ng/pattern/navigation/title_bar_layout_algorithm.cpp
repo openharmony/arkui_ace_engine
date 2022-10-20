@@ -80,7 +80,6 @@ void MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& t
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAVDESTINATION) {
-        
         if (titleBarNode->GetBackButton()) {
             auto occupiedWidth = MAX_PADDING_START + BACK_BUTTON_ICON_SIZE + HORIZONTAL_MARGIN_M + MAX_PADDING_END;
             constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()));
@@ -127,7 +126,6 @@ void MeasureTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titl
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAVDESTINATION) {
-        
         if (titleBarNode->GetBackButton()) {
             auto occupiedWidth = MAX_PADDING_START + BACK_BUTTON_ICON_SIZE + HORIZONTAL_MARGIN_M + MAX_PADDING_END;
             constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()));
@@ -205,7 +203,6 @@ void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& 
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAVDESTINATION) {
-
         if (!titleBarNode->GetBackButton()) {
             return;
         }
@@ -251,7 +248,6 @@ void LayoutTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& title
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAVDESTINATION) {
-        
         if (titleBarNode->GetBackButton()) {
             OffsetF offset = OffsetF(static_cast<float>(MAX_PADDING_START.ConvertToPx()) +
                 static_cast<float>(BACK_BUTTON_ICON_SIZE.ConvertToPx()) +
@@ -311,7 +307,6 @@ void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& ti
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAVDESTINATION) {
-        
         if (titleBarNode->GetBackButton()) {
             OffsetF offset = OffsetF(static_cast<float>(MAX_PADDING_START.ConvertToPx()) +
                 static_cast<float>(BACK_BUTTON_ICON_SIZE.ConvertToPx()) +

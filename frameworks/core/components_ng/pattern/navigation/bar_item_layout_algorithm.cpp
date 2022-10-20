@@ -52,14 +52,11 @@ void MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNo
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
     CHECK_NULL_VOID(textWrapper);
     auto constraint = barItemLayoutProperty->CreateChildConstraint();
-    auto textHeight = TOOLBAR_HEIGHT - ICON_SIZE - TEXT_TOP_PADDING;
-    constraint.selfIdealSize = OptionalSizeF(
-        static_cast<float>(ICON_SIZE.ConvertToPx()), static_cast<float>(textHeight.ConvertToPx()));
     textWrapper->Measure(constraint);
 }
 
 float LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
-    const RefPtr<LayoutProperty>& barItemLayoutProperty, float barItemHeight)
+    const RefPtr<LayoutProperty>& barItemLayoutProperty, float textHeight)
 {
     auto iconNode = hostNode->GetIconNode();
     CHECK_NULL_RETURN(iconNode, 0.0f);
@@ -76,10 +73,12 @@ float LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNo
         return static_cast<float>(iconOffsetY.ConvertToPx());
     }
 
-    auto offset = OffsetF(0.0f, barItemHeight);
+    auto occupiedHeight = MENU_HEIGHT - ICON_SIZE - TEXT_TOP_PADDING;
+    auto iconOffsetY = (static_cast<float>(occupiedHeight.ConvertToPx()) - textHeight) / 2;
+    auto offset = OffsetF(0.0f, iconOffsetY);
     geometryNode->SetMarginFrameOffset(offset);
     iconWrapper->Layout();
-    return barItemHeight;
+    return iconOffsetY;
 }
 
 void LayoutText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
@@ -107,8 +106,7 @@ void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(barItemLayoutProperty);
     const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto width = HORIZONTAL_MARGIN / 2 + ICON_SIZE;
-    auto size = SizeF(static_cast<float>(width.ConvertToPx()), static_cast<float>(MENU_HEIGHT.ConvertToPx()));
+    auto size = SizeF(static_cast<float>(ICON_SIZE.ConvertToPx()), static_cast<float>(TOOLBAR_HEIGHT.ConvertToPx()));
     MeasureIcon(layoutWrapper, hostNode, barItemLayoutProperty);
     MeasureText(layoutWrapper, hostNode, barItemLayoutProperty);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
@@ -120,8 +118,18 @@ void BarItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(barItemLayoutProperty);
-    float barItemHeight = layoutWrapper->GetGeometryNode()->GetFrameOffset().GetY();
-    float iconOffsetY = LayoutIcon(layoutWrapper, hostNode, barItemLayoutProperty, barItemHeight);
+
+    float textHeight = 0.0f;
+    auto textNode = hostNode->GetTextNode();
+    if (textNode) {
+        auto index = hostNode->GetChildIndexById(textNode->GetId());
+        auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(textWrapper);
+        auto geometryNode = textWrapper->GetGeometryNode();
+        textHeight = geometryNode->GetFrameSize().Height();
+    }
+
+    float iconOffsetY = LayoutIcon(layoutWrapper, hostNode, barItemLayoutProperty, textHeight);
     LayoutText(layoutWrapper, hostNode, barItemLayoutProperty, iconOffsetY);
 }
 

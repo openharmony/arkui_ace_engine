@@ -39,12 +39,11 @@ void MountNavBar(const RefPtr<NavigationGroupNode>& hostNode)
     if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
         navBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         eventHub->FireNavBarStateChangeEvent(false);
-        navBarNode->MarkModifyDone();
     } else {
         navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         eventHub->FireNavBarStateChangeEvent(true);
-        navBarNode->MarkModifyDone();
     }
+    navBarNode->MarkModifyDone();
 }
 
 }
@@ -57,7 +56,9 @@ void NavigationPattern::OnModifyDone()
 
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    for (const auto& child : navBarNode->GetNavBarContentNode()->GetChildren()) {
+    auto navBarContentNode = navBarNode->GetNavBarContentNode();
+    CHECK_NULL_VOID(navBarContentNode);
+    for (const auto& child : navBarContentNode->GetChildren()) {
         AddBackButtonIconToNavDestination(child, hostNode);
     }
 }
@@ -73,16 +74,16 @@ void NavigationPattern::AddBackButtonIconToNavDestination(const RefPtr<UINode>& 
     CHECK_NULL_VOID(navDestination);
     auto navDestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
-    if (navigationLayoutProperty->GetNoPixMap().value_or(false)) {
+
+    // back button icon
+    if (navigationLayoutProperty->HasNoPixMap()) {
         if (navigationLayoutProperty->HasImageSource()) {
             navDestinationLayoutProperty->UpdateImageSource(navigationLayoutProperty->GetImageSourceValue());
         }
-        navDestinationLayoutProperty->UpdateNoPixMap(navigationLayoutProperty->GetNoPixMapValue());
-    } else {
         if (navigationLayoutProperty->HasPixelMap()) {
             navDestinationLayoutProperty->UpdatePixelMap(navigationLayoutProperty->GetPixelMapValue());
         }
-        navDestinationLayoutProperty->UpdateNoPixMap(navigationLayoutProperty->GetNoPixMapValue(false));
+        navDestinationLayoutProperty->UpdateNoPixMap(navigationLayoutProperty->GetNoPixMapValue());
     }
     navDestination->MarkModifyDone();
 }
