@@ -74,8 +74,12 @@ public:
     ImageEncodedInfo(const SizeF& imageSize, int32_t frameCount) : imageSize_(imageSize), frameCount_(frameCount) {}
     ~ImageEncodedInfo() override = default;
 
-    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfo(const RefPtr<NG::ImageData>& data);
-    static RefPtr<ImageEncodedInfo> CreateSvgEncodedInfo(const RefPtr<NG::ImageData>& data);
+    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfo(
+        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo);
+    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForStaticImage(const RefPtr<NG::ImageData>& data);
+    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForSvg(const RefPtr<NG::ImageData>& data);
+    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForDecodedPixelMap(
+        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& sourceInfo);
     const SizeF& GetImageSize() const
     {
         return imageSize_;
@@ -117,8 +121,7 @@ public:
         const std::optional<Color>& svgFillColor);
     static void MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
         const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
-    static void MakeCanvasImageForSVG(
-        const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
+    static void MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
     static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
         std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder);
 

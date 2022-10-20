@@ -18,6 +18,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
@@ -61,8 +62,7 @@ void ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj, const 
     do {
         auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
         if (!imageLoader) {
-            LOGE("Fail to create image loader. source info: %{private}s",
-                imageObj->GetSourceInfo().ToString().c_str());
+            LOGE("Fail to create image loader. source info: %{private}s", imageObj->GetSourceInfo().ToString().c_str());
             errorMessage = "Image source type is not supported";
             break;
         }
@@ -76,12 +76,41 @@ void ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj, const 
     } while (false);
     if (!imageObj->GetData()) {
         auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), sourceInfo = imageObj->GetSourceInfo(),
-                                    loadCallbacks] {
+                                      loadCallbacks] {
             loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::MAKE_CANVAS_IMAGE_FAIL);
         };
         ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
         return;
     }
+}
+
+RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfo(
+    const RefPtr<NG::ImageData>& data, const ImageSourceInfo& sourceInfo)
+{
+    if (!data) {
+        LOGW("data is null when try CreateImageEncodedInfo, sourceInfo: %{public}s", sourceInfo.ToString().c_str());
+        return nullptr;
+    }
+    if (sourceInfo.IsSvg()) {
+        return ImageEncodedInfo::CreateImageEncodedInfoForSvg(data);
+    }
+    if (SrcType::DATA_ABILITY_DECODED == sourceInfo.GetSrcType()) {
+        return ImageEncodedInfo::CreateImageEncodedInfoForDecodedPixelMap(data, sourceInfo);
+    }
+    return ImageEncodedInfo::CreateImageEncodedInfoForStaticImage(data);
+}
+
+RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForDecodedPixelMap(
+    const RefPtr<NG::ImageData>& data, const ImageSourceInfo& sourceInfo)
+{
+    auto pixelMap = data->GetPixelMapData();
+    if (!pixelMap) {
+        LOGW(
+            "ImageData has no pixel map data when try CreateImageEncodedInfoForDecodedPixelMap, sourceInfo: %{public}s",
+            sourceInfo.ToString().c_str());
+        return nullptr;
+    }
+    return MakeRefPtr<ImageEncodedInfo>(SizeF(pixelMap->GetWidth(), pixelMap->GetHeight()), 1);
 }
 
 void ImageProvider::CreateImageObject(
@@ -103,8 +132,7 @@ void ImageProvider::CreateImageObject(
             imageLoader->GetImageData(sourceInfo, WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
 
         // step2: make codec to determine which ImageObject to create
-        auto encodedInfo = sourceInfo.IsSvg() ? ImageEncodedInfo::CreateSvgEncodedInfo(data)
-                                              : ImageEncodedInfo::CreateImageEncodedInfo(data);
+        auto encodedInfo = ImageEncodedInfo::CreateImageEncodedInfo(data, sourceInfo);
         if (!encodedInfo) {
             LOGE("Fail to make encoded info. source info: %{public}s", sourceInfo.ToString().c_str());
             std::string errorMessage("Image data is broken.");
@@ -126,6 +154,16 @@ void ImageProvider::CreateImageObject(
                     // no SvgDom, can not trigger dataReadyCallback_, should return
                     return;
                 }
+                break;
+            }
+            if (SrcType::DATA_ABILITY_DECODED == sourceInfo.GetSrcType()) {
+                if (!data->HasPixelMapData()) {
+                    LOGE("no decoded pixel map data when try make PixelMapImageObject, sourceInfo: %{public}s",
+                        sourceInfo.ToString().c_str());
+                    break;
+                }
+                imageObj = MakeRefPtr<NG::PixelMapImageObject>(
+                    data->GetPixelMapData(), sourceInfo, encodedInfo->GetImageSize());
                 break;
             }
             if (encodedInfo->GetFrameCount() == 1) {
@@ -162,8 +200,7 @@ void ImageProvider::MakeSvgDom(const RefPtr<SvgImageObject>& imageObj, const Loa
     }
 }
 
-void ImageProvider::MakeCanvasImageForSVG(
-    const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks)
+void ImageProvider::MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks)
 {
     auto canvasImageMakingTask = [objWp = imageObjWp, loadCallbacks] {
         // update SVGSkiaDom to ImageObject and trigger loadSuccessCallback_
