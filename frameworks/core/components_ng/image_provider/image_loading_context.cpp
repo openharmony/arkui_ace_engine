@@ -132,7 +132,8 @@ EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
 
         // step2: calculate resize target
         auto resizeTarget = imageLoadingContext->GetImageSize();
-        if (imageLoadingContext->needResize_) {
+        bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == imageLoadingContext->GetSourceInfo().GetSrcType());
+        if (imageLoadingContext->needResize_ && !isPixelMapResource) {
             resizeTarget = ImageLoadingContext::CalculateResizeTarget(imageLoadingContext->srcRect_.GetSize(),
                 imageLoadingContext->dstRect_.GetSize(),
                 imageLoadingContext->GetSourceSize().value_or(imageLoadingContext->GetImageSize()));
@@ -274,8 +275,8 @@ void ImageLoadingContext::MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext
     }
 }
 
-void ImageLoadingContext::MakeCanvasImage(const SizeF& dstSize, bool needResize, ImageFit imageFit,
-    const std::optional<SizeF>& sourceSize)
+void ImageLoadingContext::MakeCanvasImage(
+    const SizeF& dstSize, bool needResize, ImageFit imageFit, const std::optional<SizeF>& sourceSize)
 {
     // Because calling of this interface does not guarantee the excution of [MakeCanvasImage], so in order to avoid
     // updating params before they are not actually used, caputure the params in a function. This funtion will only run

@@ -102,7 +102,7 @@ void ImagePattern::OnImageLoadSuccess()
     lastAltSrcRect_.reset();
     // TODO: only do paint task when the pattern is active
     // figure out why here is always inactive
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::CacheImageObject()

@@ -274,8 +274,10 @@ public:
     }
 
     void OnAccessibilityEvent(AccessibilityEventType eventType) const;
+    void MarkNeedRenderOnly();
 
 private:
+    void MarkNeedRender(bool isRenderBoundary);
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
 
