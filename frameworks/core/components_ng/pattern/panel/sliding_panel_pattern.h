@@ -64,6 +64,7 @@ public:
     void UpdateCurrentOffset(float offset);
     void UpdateCurrentOffsetOnAnimate(float currentOffset);
     void MarkDirtyNode(PropertyChangeFlag extraFlag);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
 private:
     void OnModifyDone() override;
@@ -103,8 +104,7 @@ private:
     RefPtr<Animator> animator_;
     std::unordered_map<PanelMode, double> defaultBlankHeights_;
     std::optional<int32_t> dragBarId_;
-
-    float minBlankHeight_ = 0.0;
+    
     bool isAnimating_ = false;
     bool isFirstLayout_ = true;
 
@@ -115,8 +115,13 @@ private:
     float halfMiniBoundary_ = 0.0f;
     float fullMiniBoundary_ = 0.0f;
 
+    Dimension fullHeight_;
+    Dimension halfHeight_;
+    Dimension miniHeight_;
+
     SizeF previousSize_;
 
+    float minBlankHeight_ = 0.0;
     float currentOffset_ = 0.0f;
     float dragStartCurrentOffset_ = 0.0f;
 

@@ -60,8 +60,6 @@ public:
         ResetFullHeight();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Show, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PanelType, PanelType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PanelMode, PanelMode, PROPERTY_UPDATE_MEASURE);
