@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1314,6 +1315,14 @@ void RenderNode::UpdateAccessibilityPosition()
     accessibilityNode->SetPositionInfo(positionInfo);
 }
 
+void RenderNode::UpdateAccessibilityEnable(bool isEnabled)
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetEnabledState(isEnabled);
+    }
+}
+
 void RenderNode::UpdateAll(const RefPtr<Component>& component)
 {
     if (!component) {
@@ -1323,12 +1332,10 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     hitTestMode_ = component->GetHitTestMode();
     touchable_ = component->IsTouchable();
     disabled_ = component->IsDisabledStatus();
+    UpdateAccessibilityEnable(!disabled_);
     isFirstNode_ = component->IsFirstNode();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-    if (!renderComponent) {
-        LOGE("renderComponent is null");
-        return;
-    }
+    CHECK_NULL_VOID(renderComponent);
     positionParam_ = renderComponent->GetPositionParam();
     motionPathOption_ = renderComponent->GetMotionPathOption();
 #ifdef ENABLE_ROSEN_BACKEND
