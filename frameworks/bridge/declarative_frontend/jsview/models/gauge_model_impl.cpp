@@ -21,7 +21,6 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/chart/chart_component.h"
 #include "core/components/progress/progress_component.h"
-#include "core/components_ng/pattern/gauge/gauge_view.h"
 
 namespace OHOS::Ace::Framework {
 
