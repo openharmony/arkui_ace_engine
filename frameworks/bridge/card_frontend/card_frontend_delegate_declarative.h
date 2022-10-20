@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CARD_FRONTEND_CARD_FRONTEND_DELEGATE_DECLARATIVE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CARD_FRONTEND_CARD_FRONTEND_DELEGATE_DECLARATIVE_H
 
+#include <mutex>
+
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/base/utils/noncopyable.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
@@ -26,6 +28,7 @@ namespace OHOS::Ace::Framework {
 // This is the primary class by which the CardFrontend delegates
 
 using LoadCardCallback = std::function<bool(const std::string&, uint64_t cardId)>;
+using UpdateCardDataCallback = std::function<void(const std::string&)>;
 
 class CardFrontendDelegateDeclarative : public FrontendDelegateDeclarativeNG {
     DECLARE_ACE_TYPE(CardFrontendDelegateDeclarative, FrontendDelegateDeclarativeNG);
@@ -47,7 +50,36 @@ public:
         pageRouterManager->SetLoadCardCallback(loadCallback);
     }
 
+    void UpdatePageData(const std::string& dataList)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (updateCardData_) {
+            updateCardData_(dataList);
+        } else {
+            cardData_ = dataList;
+        }
+    }
+
+    void SetUpdateCardDataCallback(UpdateCardDataCallback&& callback)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        updateCardData_ = std::move(callback);
+    }
+
+    void UpdatePageDataImmediately()
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!cardData_.empty() && updateCardData_) {
+            updateCardData_(cardData_);
+        }
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(CardFrontendDelegateDeclarative);
+
+private:
+    UpdateCardDataCallback updateCardData_;
+    std::string cardData_;
+    mutable std::mutex mutex_;
 };
 } // namespace OHOS::Ace::Framework
 
