@@ -67,6 +67,12 @@ public:
         return { FocusType::NODE, true };
     }
 
+    void SetClickedColor(const Color& color)
+    {
+        clickedColor_ = color;
+        isSetClickedColor_ = true;
+    }
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -74,6 +80,9 @@ protected:
 private:
     void OnTouchDown();
     void OnTouchUp();
+    Color clickedColor_;
+    Color backgroundColor_;
+    bool isSetClickedColor_ = false;
 
     RefPtr<TouchEventImpl> touchListener_;
 

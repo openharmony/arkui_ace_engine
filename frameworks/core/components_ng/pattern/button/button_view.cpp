@@ -16,6 +16,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_accessibility_property.h"
@@ -26,7 +27,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 void ButtonView::CreateWithLabel(const std::string& label)
@@ -36,6 +36,7 @@ void ButtonView::CreateWithLabel(const std::string& label)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(frameNode);
+    SetDefaultAttributes(frameNode);
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -64,7 +65,22 @@ void ButtonView::Create(const std::string& tagName)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    SetDefaultAttributes(frameNode);
     stack->Push(frameNode);
+}
+
+void ButtonView::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    SetType(ButtonType::CAPSULE);
+    renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
+    buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
 }
 
 void ButtonView::SetType(ButtonType buttonType)
