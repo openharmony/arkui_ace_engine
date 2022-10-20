@@ -168,7 +168,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childrenSize = layoutWrapper->GetTotalChildCount();
     auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
-    auto paddingOffset = layoutWrapper->GetGeometryNode()->GetPaddingOffset();
+    auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
+    OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
     // Effect when difference between current index and target index is greater than 1.
     // eg. Current index is 0, call swipeTo method to jump to index 2,
