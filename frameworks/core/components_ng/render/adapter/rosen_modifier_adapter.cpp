@@ -57,19 +57,19 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 
 template<typename T>
 void UpdateRSPropWithAnimation(
-    const std::shared_ptr<RSAnimatableProperty<T>>& rsProp, const AnimateConfig& config, const T& value)
+    const std::shared_ptr<RSAnimatableProperty<T>>& rsProperty, const AnimateConfig& config, const T& value)
 {
     RSAnimationTimingProtocol protocol;
     protocol.SetSpeed(config.speed);
     protocol.SetAutoReverse(config.autoReverse);
     protocol.SetRepeatCount(config.repeatTimes);
     RSNode::Animate(
-        protocol, RSAnimationTimingCurve::LINEAR, [rsProp, value]() { 
-            rsProp->Set(value);
+        protocol, RSAnimationTimingCurve::LINEAR, [rsProperty, value]() {
+            rsProperty->Set(value);
         });
 }
 
-#define CONVERT_PROPS(prop, srcType, propType)                                                    \
+#define CONVERT_PROP(prop, srcType, propType)                                                     \
     if (AceType::InstanceOf<srcType>(prop)) {                                                     \
         auto castProp = AceType::DynamicCast<srcType>(prop);                                      \
         auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get());          \
@@ -81,26 +81,23 @@ void UpdateRSPropWithAnimation(
         return rsProp;                                                                            \
     }
 
-inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<AnimatablePropBase>& prop)
+inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<AnimatablePropertyBase>& property)
 {
     // should manually add convert type here
-    CONVERT_PROPS(prop, AnimatablePropFloat, float);
-    CONVERT_PROPS(prop, AnimatablePropColor, LinearColor);
+    CONVERT_PROP(property, AnimatablePropertyFloat, float);
+    CONVERT_PROP(property, AnimatablePropertyColor, LinearColor);
+    LOGE("ConvertToRSProperty failed!");
     return nullptr;
 }
 
 void ContentModifierAdapter::AttachProperties()
 {
     if (!attachedProperties_.size() && modifier_) {
-        auto propFloat = modifier_->GetAttachedProps()[0];
-        auto rsPropFloat = ConvertToRSProperty(propFloat);
-        AttachProperty(rsPropFloat);
-        attachedProperties_.emplace_back(rsPropFloat);
-
-        auto propColor = modifier_->GetAttachedProps()[1];
-        auto rsPropColor = ConvertToRSPropertyColor(propColor);
-        AttachProperty(rsPropColor);
-        attachedProperties_.emplace_back(rsPropColor);
+        for (const auto& property : modifier_->GetAttachedProperties()) {
+            auto rsProperty = ConvertToRSProperty(property);
+            AttachProperty(rsProperty);
+            attachedProperties_.emplace_back(rsProperty);
+        }
     }
 }
 

@@ -75,8 +75,8 @@ public:
     }
 
 private:
-    RefPtr<AnimatablePropFloat> date_;
-    RefPtr<AnimatablePropColor> color_;
+    RefPtr<AnimatablePropertyFloat> date_;
+    RefPtr<AnimatablePropertyColor> color_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };

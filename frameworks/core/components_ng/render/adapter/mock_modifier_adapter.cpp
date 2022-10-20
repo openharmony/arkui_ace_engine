@@ -13,25 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_MODIFIER_ADAPTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_MODIFIER_ADAPTER_H
-
-#include <cstdint>
-#include "base/memory/referenced.h"
-#include "base/utils/macros.h"
-#include "base/utils/noncopyable.h"
+#include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
 
-class ModifierAdapter final {
-public:
-    ModifierAdapter() = delete;
-    ~ModifierAdapter() = delete;
-    static void RemoveModifier(int32_t modifierId);
-
-private:
-    ACE_DISALLOW_COPY_AND_MOVE(ModifierAdapter);
-};
+#ifndef ENABLE_ROSEN_BACKEND
+void ModifierAdapter::RemoveModifier(int32_t modifierId) {}
+#endif
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_MODIFIER_ADAPTER_H

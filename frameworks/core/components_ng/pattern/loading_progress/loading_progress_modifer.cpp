@@ -37,12 +37,12 @@ const float HALF_COUNT = 25.0f;
 
 } // namespace
 
-LoadingProgressModifier::LoadingProgressModifier() 
-    : date_(AceType::MakeRefPtr<AnimatablePropFloat>(0.0)),
-      color_(AceType::MakeRefPtr<AnimatablePropColor>(LinearColor::BLUE))
+LoadingProgressModifier::LoadingProgressModifier()
+    : date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0)),
+      color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE))
 {
-    AttachProp(date_);
-    AttachProp(color_);
+    AttachProperty(date_);
+    AttachProperty(color_);
 }
 
 void LoadingProgressModifier::DrawRing(DrawingContext& context, float date, float scale_) const
