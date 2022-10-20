@@ -71,6 +71,8 @@ public:
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
     const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
+    void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
+    const RefPtr<Subwindow>& GetCurrentDialogWindow();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom);
     void ShowDialog(const std::string& title, const std::string& message,
@@ -103,6 +105,8 @@ private:
     // Used to save the relationship between container and dialog subwindow, it is 1:1
     std::mutex dialogSubwindowMutex_;
     SubwindowMap dialogSubwindowMap_;
+    std::mutex currentDialogSubwindowMutex_;
+    RefPtr<Subwindow> currentDialogSubwindow_;
 };
 
 } // namespace OHOS::Ace
