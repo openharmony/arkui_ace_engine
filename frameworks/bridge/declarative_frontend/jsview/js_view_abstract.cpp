@@ -2474,12 +2474,6 @@ void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<Bord
 
 void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
-        JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsBorderColor", info, checkList)) {
-        LOGE("args need a string or number or object");
-        return;
-    }
     ParseBorderColor(info[0]);
 }
 
@@ -2487,6 +2481,10 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
+        if (args->IsNull()) {
+            // use default color when color args is null.
+            ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
+        }
         return;
     }
     std::optional<Color> leftColor;
