@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -40,6 +41,8 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/components_ng/pattern/navigator/navigator_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -211,8 +214,8 @@ void NavigationView::Create()
         // navBar content node
         if (!navBarNode->GetNavBarContentNode()) {
             int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG,
-                navBarContentNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
             navBarNode->AddChild(navBarContentNode);
             navBarNode->SetNavBarContentNode(navBarContentNode);
         }
@@ -235,8 +238,8 @@ void NavigationView::Create()
     // content node
     if (!navigationGroupNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
-            contentNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
     }
@@ -365,8 +368,8 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
         return;
     } while (false);
     int32_t subtitleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto subtitleNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, subtitleNodeId, AceType::MakeRefPtr<TextPattern>());
+    auto subtitleNode =
+        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, subtitleNodeId, AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(subtitle);
@@ -475,13 +478,23 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
     } while (false);
     navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(mode));
     if (needAddBackButton) {
+        // put component inside navigator pattern to trigger back navigation
+        auto navigator = FrameNode::CreateFrameNode(V2::NAVIGATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigatorPattern>());
+        auto hub = navigator->GetEventHub<NavigatorEventHub>();
+        CHECK_NULL_VOID(hub);
+        hub->SetType(NavigatorType::BACK);
+        navigator->MarkModifyDone();
+
         int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto backButtonNode = FrameNode::CreateFrameNode(
-            V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<TextPattern>());
+        auto backButtonNode =
+            FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = backButtonNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(BACK_BUTTON);
-        navBarNode->SetBackButton(backButtonNode);
+        backButtonNode->MountToParent(navigator);
+
+        navBarNode->SetBackButton(navigator);
         navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
         navBarNode->MarkModifyDone();
         return;
