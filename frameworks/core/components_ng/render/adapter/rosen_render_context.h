@@ -35,6 +35,7 @@
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+class BorderImageModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -243,6 +244,7 @@ private:
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
+    std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
 
