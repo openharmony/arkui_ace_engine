@@ -235,6 +235,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     auto listLayoutAlgorithm = MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_);
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
+        listLayoutAlgorithm->SetIndexAlignment(scrollIndexAlignment_);
     }
     listLayoutAlgorithm->SetCurrentOffset(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
@@ -369,7 +370,17 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
+    if (event.code == KeyCode::KEY_PAGE_DOWN) {
+        LOGD("Keycode is PgDn. Scroll to next page");
+        ScrollPage(false);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_PAGE_UP) {
+        LOGD("Keycode is PgDn. Scroll to next page");
+        ScrollPage(true);
+        return true;
+    }
+    if (event.IsDirectionalKey()) {
         HandleDirectionKey(event.code);
         return true;
     }
@@ -378,12 +389,28 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
 
 bool ListPattern::HandleDirectionKey(KeyCode code)
 {
-    if (code == KeyCode::KEY_DPAD_UP) {
+    if ((GetDirection() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_UP) ||
+        (GetDirection() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_LEFT)) {
+        auto nextIndex = std::clamp(scrollIndex_ - 1, 0, maxListItemIndex_);
+        if (nextIndex == scrollIndex_) {
+            return false;
+        }
+        scrollIndex_ = nextIndex;
+        LOGD("Scorll to next index: %{public}d", scrollIndex_);
         // Need to update: current selection
+        ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_TOP);
         return true;
     }
-    if (code == KeyCode::KEY_DPAD_DOWN) {
+    if ((GetDirection() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_DOWN) ||
+        (GetDirection() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_RIGHT)) {
+        auto nextIndex = std::clamp(scrollIndex_ + 1, 0, maxListItemIndex_);
+        if (nextIndex == scrollIndex_) {
+            return false;
+        }
+        scrollIndex_ = nextIndex;
+        LOGD("Scorll to previous index: %{public}d", scrollIndex_);
         // Need to update: current selection
+        ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
         return true;
     }
     return false;
@@ -418,11 +445,12 @@ void ListPattern::ScrollTo(float position)
     UpdateCurrentOffset(GetTotalOffset() - position);
 }
 
-void ListPattern::ScrollToIndex(int32_t index)
+void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
 {
     LOGI("ScrollToIndex:%{public}d", index);
     if (index >= 0 && index <= maxListItemIndex_) {
         jumpIndex_ = index;
+        scrollIndexAlignment_ = align;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

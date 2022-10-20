@@ -64,12 +64,29 @@ void GridPattern::OnModifyDone()
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
     gridLayoutInfo_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
+    isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
 
     if (gridLayoutProperty->GetColumnsTemplate().has_value() && gridLayoutProperty->GetRowsTemplate().has_value()) {
         LOGD("use fixed grid template");
         return;
     }
     AddScrollEvent();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
+}
+
+float GridPattern::GetMainContentSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    return geometryNode->GetPaddingSize().MainSize(gridLayoutInfo_.axis_);
 }
 
 void GridPattern::AddScrollEvent()
@@ -208,6 +225,59 @@ void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     Pattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
     json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
+}
+
+void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool GridPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_PAGE_DOWN) {
+        if (!isConfigScrollable_) {
+            return false;
+        }
+        LOGD("Keycode is PgDn. Scroll offset is %{public}f", -GetMainContentSize());
+        UpdateScrollPosition(-GetMainContentSize(), SCROLL_FROM_UPDATE);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_PAGE_UP) {
+        if (!isConfigScrollable_) {
+            return false;
+        }
+        LOGD("Keycode is PgUp. Scroll offset is %{public}f", GetMainContentSize());
+        UpdateScrollPosition(GetMainContentSize(), SCROLL_FROM_UPDATE);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
+        HandleDirectionKey(event.code);
+        return true;
+    }
+    return false;
+}
+
+bool GridPattern::HandleDirectionKey(KeyCode code)
+{
+    if (code == KeyCode::KEY_DPAD_UP) {
+        // Need to update: current selection
+        return true;
+    }
+    if (code == KeyCode::KEY_DPAD_DOWN) {
+        // Need to update: current selection
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG
