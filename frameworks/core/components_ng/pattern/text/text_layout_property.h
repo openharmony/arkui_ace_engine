@@ -82,7 +82,7 @@ public:
         if (GetFontWeight().has_value()) {
             font.SetFontWeight(GetFontWeight().value());
         }
-        return V2::GetTextStyle(font);
+        return V2::GetTextStyleInJson(font);
     }
 
 protected:

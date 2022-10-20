@@ -491,7 +491,7 @@ std::string SelectPattern::InspectorGetSelectedFont() const
     if (selectedFont_.FontWeight.has_value()) {
         font.SetFontWeight(selectedFont_.FontWeight.value());
     }
-    return V2::GetTextStyle(font);
+    return V2::GetTextStyleInJson(font);
 }
 
 } // namespace OHOS::Ace::NG

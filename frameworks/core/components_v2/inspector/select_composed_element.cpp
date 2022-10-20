@@ -117,7 +117,7 @@ std::string SelectComposedElement::GetFont() const
 {
     auto render = GetRenderSelect();
     if (render) {
-        return GetTextStyle(render->GetSelectComponent()->GetSelectStyle());
+        return GetTextStyleInJson(render->GetSelectComponent()->GetSelectStyle());
     }
     return "";
 }
@@ -162,7 +162,7 @@ std::string SelectComposedElement::GetSelectFont() const
         auto option = popup->GetSelectOptions();
         for (auto& optionItem : option) {
             if (optionItem) {
-                return GetTextStyle(optionItem->GetSelectedTextStyle());
+                return GetTextStyleInJson(optionItem->GetSelectedTextStyle());
             }
         }
     }
@@ -219,7 +219,7 @@ std::string SelectComposedElement::GetOptionFont() const
         auto option = popup->GetSelectOptions();
         for (auto& optionItem : option) {
             if (optionItem) {
-                return GetTextStyle(optionItem->GetTextStyle());
+                return GetTextStyleInJson(optionItem->GetTextStyle());
             }
         }
     }
