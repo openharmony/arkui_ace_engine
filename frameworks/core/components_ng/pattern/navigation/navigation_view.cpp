@@ -75,12 +75,12 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
 
 void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem)
 {
-    if (barItem.text.has_value()) {
+    if (barItem.text.has_value() && !barItem.text.value().empty()) {
         auto textNode = CreateBarItemTextNode(barItem.text.value());
         barItemNode->SetTextNode(textNode);
         barItemNode->AddChild(textNode);
     }
-    if (barItem.icon.has_value()) {
+    if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
         auto iconNode = CreateBarItemIconNode(barItem.icon.value());
         barItemNode->SetIconNode(iconNode);
         barItemNode->AddChild(iconNode);
@@ -304,6 +304,7 @@ void NavigationView::SetTitle(const std::string& title)
     textLayoutProperty->UpdateContent(title);
     textLayoutProperty->UpdateFontSize(TITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(TITLE_COLOR);
+    textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
     navBarNode->MarkModifyDone();
@@ -371,6 +372,7 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateContent(subtitle);
     textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
+    textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
     navBarNode->SetSubtitle(subtitleNode);
     navBarNode->MarkModifyDone();
 }
@@ -509,6 +511,11 @@ void NavigationView::SetHideNavBar(bool hideNavBar)
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
 }
 
+void NavigationView::SetTitleHeight(const Dimension& height)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, TitleBarHeight, height);
+}
+
 void NavigationView::SetHideTitleBar(bool hideTitleBar)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -616,6 +623,22 @@ void NavigationView::SetOnTitleModeChange(std::function<void(NavigationTitleMode
     auto eventHub = navigationGroupNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnTitleModeChange(std::move(onTitleModeChange));
+}
+
+void NavigationView::SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navigationEventHub);
+    navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
+}
+
+void NavigationView::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+{
+    ImageSourceInfo imageSourceInfo(src);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, noPixMap);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap);
 }
 
 } // namespace OHOS::Ace::NG

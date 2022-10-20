@@ -53,6 +53,11 @@ public:
     {
         return MakeRefPtr<NavigationLayoutAlgorithm>();
     }
+
+    void OnModifyDone() override;
+
+private:
+    void AddBackButtonIconToNavDestination(const RefPtr<UINode>& child, const RefPtr<NavigationGroupNode>& hostNode);
 };
 
 } // namespace OHOS::Ace::NG

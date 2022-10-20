@@ -69,7 +69,7 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     CHECK_NULL_VOID(navRouter);
     auto eventHub = navRouter->GetEventHub<NavRouterEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDestinationChange(onDestinationChange);
+    eventHub->SetOnDestinationChange(std::move(onDestinationChange));
 
     AddNavDestinationToNavigation(child);
 }

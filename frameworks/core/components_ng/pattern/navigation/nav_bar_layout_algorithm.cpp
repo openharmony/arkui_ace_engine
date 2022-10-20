@@ -58,16 +58,16 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     // FREE 和 FULL 模式，有subtitle
     if (hostNode->GetSubtitle()) {
         constraint.selfIdealSize = OptionalSizeF(
-            navigationSize.Width(), static_cast<float>(TITLEBAR_HEIGHT_WITH_SUBTITLE.ConvertToPx()));
+            navigationSize.Width(), static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
         titleBarWrapper->Measure(constraint);
-        return static_cast<float>(TITLEBAR_HEIGHT_WITH_SUBTITLE.ConvertToPx());
+        return static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     }
 
     // no subtitle
     constraint.selfIdealSize = OptionalSizeF(
-        navigationSize.Width(), static_cast<float>(TITLEBAR_HEIGHT_WITHOUT_SUBTITLE.ConvertToPx()));
+        navigationSize.Width(), static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
     titleBarWrapper->Measure(constraint);
-    return static_cast<float>(TITLEBAR_HEIGHT_WITHOUT_SUBTITLE.ConvertToPx());
+    return static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
 }
 
 float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,

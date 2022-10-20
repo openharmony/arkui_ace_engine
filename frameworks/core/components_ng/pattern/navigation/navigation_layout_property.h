@@ -22,6 +22,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,6 +42,10 @@ public:
         copy->propNavBarWidth_ = CloneNavBarWidth();
         copy->propNavBarPosition_ = CloneNavBarPosition();
         copy->propHideNavBar_ = CloneHideNavBar();
+        copy->propTitleBarHeight_ = CloneTitleBarHeight();
+        copy->propNoPixMap_ = CloneNoPixMap();
+        copy->propImageSource_ = CloneImageSource();
+        copy->propPixelMap_ = ClonePixelMap();
         return copy;
     }
 
@@ -51,12 +56,21 @@ public:
         ResetNavBarWidth();
         ResetNavBarPosition();
         ResetHideNavBar();
+        ResetTitleBarHeight();
+        ResetNoPixMap();
+        ResetImageSource();
+        ResetPixelMap();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavigationMode, NavigationMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarPosition, NavBarPosition, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideNavBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleBarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    // back button icon
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PixelMap, RefPtr<PixelMap>, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG
