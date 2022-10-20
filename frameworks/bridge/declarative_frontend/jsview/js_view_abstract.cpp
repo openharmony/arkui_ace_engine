@@ -48,6 +48,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -1847,9 +1848,20 @@ void JsBindMenuNG(const JSCallbackInfo& info)
         LOGE("bindMenu info is invalid");
         return;
     }
-    auto hub = targetNode->GetOrCreateGestureEventHub();
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(event));
-    hub->AddClickEvent(onClick);
+    gestureHub->AddClickEvent(onClick);
+
+    // delete menu when target node is removed from render tree
+    auto eventHub = targetNode->GetEventHub<NG::EventHub>();
+    auto destructor = [id = targetNode->GetId()]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteMenu(id);
+    };
+    eventHub->SetOnDisappear(destructor);
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
