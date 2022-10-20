@@ -141,6 +141,15 @@ void TabController::ChangeDispatch(int32_t index)
     }
 }
 
+void TabController::SetIndicatorByScrollContent(double percent, int32_t newIndex, bool needChange){
+    if (barElement_.Upgrade()) {
+        auto tabBar = AceType::DynamicCast<TabBarElement>(barElement_.Upgrade());
+        if (tabBar) {
+            tabBar->UpdateScrollIndicator(percent , newIndex, needChange);
+        }
+    }
+}
+
 void TabController::SetIndexByScrollContent(int32_t index)
 {
     if (index_ == index || index < 0) {
