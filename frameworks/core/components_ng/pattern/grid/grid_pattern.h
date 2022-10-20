@@ -99,6 +99,8 @@ public:
         gridLayoutInfo_ = GridLayoutInfo();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

@@ -203,4 +203,11 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     return nullptr;
 }
 
+void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    Pattern::ToJsonValue(json);
+    json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
+    json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
+}
+
 } // namespace OHOS::Ace::NG
