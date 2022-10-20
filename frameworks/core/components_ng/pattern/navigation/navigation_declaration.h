@@ -136,10 +136,5 @@ enum class TitleBarParentType {
     NAVBAR,
     NAVDESTINATION
 };
-
-enum class BarItemParentType {
-    TOOLBAR,
-    MENU
-};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

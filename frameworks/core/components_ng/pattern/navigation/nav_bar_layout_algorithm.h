@@ -30,9 +30,7 @@ class ACE_EXPORT NavBarLayoutAlgorithm : public LayoutAlgorithm {
 public:
     NavBarLayoutAlgorithm() = default;
     ~NavBarLayoutAlgorithm() override = default;
-
     void Measure(LayoutWrapper* layoutWrapper) override;
-
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     float GetLastScrollDistance() const

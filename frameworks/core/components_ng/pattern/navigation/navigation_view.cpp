@@ -48,6 +48,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
+constexpr float WINDOW_WIDTH = 520;
+
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -57,6 +60,7 @@ RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
     textLayoutProperty->UpdateContent(text);
     textLayoutProperty->UpdateFontSize(TEXT_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(TEXT_COLOR);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     return textNode;
 }
 
@@ -498,7 +502,18 @@ void NavigationView::SetNavBarWidth(const Dimension& value)
 
 void NavigationView::SetNavigationMode(NavigationMode mode)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, static_cast<NG::NavigationMode>(mode));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto navigationMode = static_cast<NG::NavigationMode>(mode);
+    if (navigationMode == NavigationMode::AUTO) {
+        if (context->GetCurrentRootWidth() >= WINDOW_WIDTH) {
+            navigationMode = NavigationMode::SPLIT;
+        } else {
+            navigationMode = NavigationMode::STACK;
+        }
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, navigationMode);
 }
 
 void NavigationView::SetNavBarPosition(NG::NavBarPosition mode)
