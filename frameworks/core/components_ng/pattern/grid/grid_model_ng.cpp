@@ -67,12 +67,16 @@ void GridModelNG::SetRowsTemplate(const std::string& value)
 
 void GridModelNG::SetColumnsGap(const Dimension& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, value);
+    if (value.IsNonNegative()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, value);
+    }
 }
 
 void GridModelNG::SetRowsGap(const Dimension& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, value);
+    if (value.IsNonNegative()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, value);
+    }
 }
 
 void GridModelNG::SetGridHeight(const Dimension& value)
@@ -124,7 +128,9 @@ void GridModelNG::SetMinCount(int32_t value)
 
 void GridModelNG::SetCellLength(int32_t value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CellLength, value);
+    if (value > 0) {
+        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CellLength, value);
+    }
 }
 
 void GridModelNG::SetMultiSelectable(bool value)
