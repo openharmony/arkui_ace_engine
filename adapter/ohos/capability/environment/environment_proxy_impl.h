@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,31 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ENVIRONMENT_ENVIRONMENT_PROXY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ENVIRONMENT_ENVIRONMENT_PROXY_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_ENVIRONMENT_PROXY_IMPL_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_ENVIRONMENT_PROXY_IMPL_H
 
-#include <mutex>
-
-#include "base/utils/singleton.h"
+#include "base/utils/noncopyable.h"
 #include "core/common/environment/environment_interface.h"
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT EnvironmentProxy : public EnvironmentInterface {
+class EnvironmentProxyImpl final : public EnvironmentInterface {
 public:
-    static EnvironmentProxy* GetInstance();
+    EnvironmentProxyImpl() = default;
+    ~EnvironmentProxyImpl() override = default;
 
-    void SetDelegate(std::unique_ptr<EnvironmentInterface>&& delegate);
     RefPtr<Environment> GetEnvironment(const RefPtr<TaskExecutor>& taskExecutor) const override;
-    EnvironmentProxy() = default;
-    ~EnvironmentProxy() override = default;
 
-private:
-    std::unique_ptr<EnvironmentInterface> delegate_;
-    static EnvironmentProxy* inst_;
-    static std::mutex mutex_;
+    ACE_DISALLOW_COPY_AND_MOVE(EnvironmentProxyImpl);
 };
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ENVIRONMENT_ENVIRONMENT_PROXY_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_ENVIRONMENT_PROXY_IMPL_H
