@@ -2625,7 +2625,17 @@ bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
 {
     CHECK_NULL_RETURN(rootElement_, false);
-    return rootElement_->RequestFocusImmediatelyById(targetNodeId);
+    auto currentFocusChecked =  rootElement_->RequestFocusImmediatelyById(targetNodeId);
+    if (!isSubPipeline_ || currentFocusChecked) {
+        LOGI("Request focus finish currentFocus is %{public}d", currentFocusChecked);
+        return currentFocusChecked;
+    }
+    LOGI("Search focus in main pipeline");
+    auto parentPipelineBase = parentPipeline_.Upgrade();
+    CHECK_NULL_RETURN(parentPipelineBase, false);
+    auto parentPipelineContext = AceType::DynamicCast<PipelineContext>(parentPipelineBase);
+    CHECK_NULL_RETURN(parentPipelineContext, false);
+    return parentPipelineContext->RequestFocus(targetNodeId);
 }
 
 RefPtr<AccessibilityManager> PipelineContext::GetAccessibilityManager() const

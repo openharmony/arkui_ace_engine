@@ -1060,6 +1060,11 @@ public:
         SetRootSizeWithWidthHeight(width, height, offset);
     }
 
+    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
+    {
+        parentPipeline_ = pipeline;
+    }
+
     void SetAppTitle(const std::string& title);
     void SetAppIcon(const RefPtr<PixelMap>& icon);
 
@@ -1293,6 +1298,7 @@ private:
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     bool isSubPipeline_ = false;
+    WeakPtr<PipelineBase> parentPipeline_;
     bool isForegroundCalled_ = false;
 
     PostRTTaskCallback postRTTaskCallback_;
