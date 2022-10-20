@@ -33,6 +33,9 @@ using StoreMessage = void (*)(int32_t instanceId, const std::string& message);
 using RemoveMessage = void (*)(int32_t instanceId);
 using WaitForDebugger = bool (*)();
 
+SendMessage g_sendMessage = nullptr;
+RemoveMessage g_removeMessage = nullptr;
+StoreMessage g_storeMessage = nullptr;
 } // namespace
 
 ConnectServerManager::ConnectServerManager(): handlerConnectServerSo_(nullptr)
@@ -42,8 +45,7 @@ ConnectServerManager::ConnectServerManager(): handlerConnectServerSo_(nullptr)
         return;
     }
     packageName_ = AceApplicationInfo::GetInstance().GetPackageName();
-    LoadConnectServerSo();
-    StartConnectServer();
+    InitConnectServer();
 }
 
 ConnectServerManager::~ConnectServerManager()
@@ -61,13 +63,32 @@ ConnectServerManager& ConnectServerManager::Get()
     return connectServerManager;
 }
 
-void ConnectServerManager::LoadConnectServerSo()
+bool ConnectServerManager::InitFunc()
+{
+    g_sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    g_storeMessage = reinterpret_cast<StoreMessage>(dlsym(handlerConnectServerSo_, "StoreMessage"));
+    g_removeMessage = reinterpret_cast<RemoveMessage>(dlsym(handlerConnectServerSo_, "RemoveMessage"));
+    if (g_sendMessage == nullptr || g_storeMessage == nullptr || g_removeMessage == nullptr) {
+        CloseConnectServerSo();
+        return false;
+    }
+    return true;
+}
+
+void ConnectServerManager::InitConnectServer()
 {
     const std::string soDir = "libconnectserver_debugger.z.so";
     handlerConnectServerSo_ = dlopen(soDir.c_str(), RTLD_LAZY);
     if (handlerConnectServerSo_ == nullptr) {
         LOGE("Cannot find %{public}s", soDir.c_str());
+        return;
     }
+    StartServer startServer = reinterpret_cast<StartServer>(dlsym(handlerConnectServerSo_, "StartServer"));
+    if (startServer == nullptr || !InitFunc()) {
+        LOGE("startServer = NULL, dlerror = %s", dlerror());
+        return;
+    }
+    startServer(packageName_);
 }
 
 void ConnectServerManager::CloseConnectServerSo()
@@ -79,29 +100,31 @@ void ConnectServerManager::CloseConnectServerSo()
     handlerConnectServerSo_ = nullptr;
 }
 
-void ConnectServerManager::StartConnectServer()
+// When use multi-instances project, debug mode should be set to support debug
+void ConnectServerManager::SetDebugMode()
 {
-    LOGI("Start connect server");
-    if (handlerConnectServerSo_ == nullptr) {
-        LOGE("handlerConnectServerSo_ is null");
+    if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
         return;
     }
-    StartServer startServer = (StartServer)dlsym(handlerConnectServerSo_, "StartServer");
-    if (startServer == nullptr) {
-        LOGE("startServer = NULL, dlerror = %s", dlerror());
+    WaitForDebugger waitForDebugger = reinterpret_cast<WaitForDebugger>(
+        dlsym(handlerConnectServerSo_, "WaitForDebugger"));
+    if (waitForDebugger == nullptr) {
         return;
     }
-    startServer(packageName_);
+    if (!waitForDebugger()) { // waitForDebugger : waitForDebugger means the connection state of the connect server
+        isDebugMode_ = true;
+        AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(true);
+    }
 }
 
 void ConnectServerManager::StopConnectServer()
 {
-    LOGI("Stop connect server");
+    LOGD("Stop connect server");
     if (handlerConnectServerSo_ == nullptr) {
         LOGE("handlerConnectServerSo_ is null");
         return;
     }
-    StopServer stopServer = (StopServer)dlsym(handlerConnectServerSo_, "StopServer");
+    StopServer stopServer = reinterpret_cast<StopServer>(dlsym(handlerConnectServerSo_, "StopServer"));
     if (stopServer == nullptr) {
         LOGE("stopServer = NULL, dlerror = %s", dlerror());
         return;
@@ -114,7 +137,7 @@ void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
     if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
         return;
     }
-    LOGI("AddInstance %{public}d", instanceId);
+    LOGD("AddInstance %{public}d", instanceId);
     {
         std::lock_guard<std::mutex> lock(mutex_);
         const auto result = instanceMap_.try_emplace(instanceId, instanceName);
@@ -126,21 +149,10 @@ void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
     // Get the message including information of new instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("addInstance", instanceId);
 
-    WaitForDebugger waitForDebugger = (WaitForDebugger)dlsym(handlerConnectServerSo_, "WaitForDebugger");
-    if (waitForDebugger == nullptr) {
-        return;
-    }
-    if (!waitForDebugger()) { // waitForDebugger : waitForDebugger means the connection state of the connect server
-        AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(true);
-        SendMessage sendMessage = (SendMessage)dlsym(handlerConnectServerSo_, "SendMessage");
-        if (sendMessage != nullptr) {
-            sendMessage(message); // if connected, message will be sent immediately.
-        }
+    if (isDebugMode_) { // isDebugMode_ : isDebugMode_ means the connection state of the connect server
+        g_sendMessage(message); // if connected, message will be sent immediately.
     } else { // if not connected, message will be stored and sent later when "connected" coming.
-        StoreMessage storeMessage = (StoreMessage)dlsym(handlerConnectServerSo_, "StoreMessage");
-        if (storeMessage != nullptr) {
-            storeMessage(instanceId, message);
-        }
+        g_storeMessage(instanceId, message);
     }
 }
 
@@ -149,7 +161,7 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
     if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
         return;
     }
-    LOGI("RemoveInstance %{public}d", instanceId);
+    LOGD("RemoveInstance %{public}d", instanceId);
 
     // Get the message including information of deleted instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("destroyInstance", instanceId);
@@ -162,20 +174,10 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
         LOGW("Instance name not found with instance id: %{public}d", instanceId);
     }
 
-    WaitForDebugger waitForDebugger = (WaitForDebugger)dlsym(handlerConnectServerSo_, "WaitForDebugger");
-    if (waitForDebugger == nullptr) {
-        return;
-    }
-    if (!waitForDebugger()) {
-        SendMessage sendMessage = (SendMessage)dlsym(handlerConnectServerSo_, "SendMessage");
-        if (sendMessage != nullptr) {
-            sendMessage(message);
-        }
+    if (isDebugMode_) {
+        g_sendMessage(message);
     } else {
-        RemoveMessage removeMessage = (RemoveMessage)dlsym(handlerConnectServerSo_, "RemoveMessage");
-        if (removeMessage != nullptr) {
-            removeMessage(instanceId);
-        }
+        g_removeMessage(instanceId);
     }
 }
 
