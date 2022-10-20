@@ -143,9 +143,9 @@ RefPtr<V2::Gutter> ParserGutter(const JSRef<JSVal>& jsValue)
 RefPtr<V2::GridContainerSize> ParserColumns(const JSRef<JSVal>& jsValue)
 {
     if (jsValue->IsNumber()) {
-        double columnNumber = 0.0;
-        JSViewAbstract::ParseJsDouble(jsValue, columnNumber);
-        return AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber);
+        auto columnNumber = jsValue->ToNumber<int32_t>();
+        return columnNumber > 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber)
+                                : AceType::MakeRefPtr<V2::GridContainerSize>();
     } else if (jsValue->IsObject()) {
         auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(12);
         auto gridParam = JSRef<JSObject>::Cast(jsValue);
