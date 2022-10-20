@@ -449,14 +449,15 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
         return;
     }
 
-    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+    SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
     auto showDialogCallback = [message, duration, bottom]() {
         int32_t posX = 0;
         int32_t posY = 0;
         int32_t width = 0;
         int32_t height = 0;
         float density = 1.0f;
-        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentWindow());
+        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(
+            SubwindowManager::GetInstance()->GetCurrentDialogWindow());
         CHECK_NULL_VOID(subwindowOhos);
         subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
         auto childContainerId = subwindowOhos->GetChildContainerId();
@@ -493,7 +494,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
         return;
     }
 
-    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+    SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
     auto showDialogCallback = [
         title, message, &buttons, autoCancel, callbackParam = std::move(callback), &callbacks]() {
         int32_t posX = 0;
@@ -501,7 +502,8 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
         int32_t width = 0;
         int32_t height = 0;
         float density = 1.0f;
-        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentWindow());
+        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(
+            SubwindowManager::GetInstance()->GetCurrentDialogWindow());
         CHECK_NULL_VOID(subwindowOhos);
         subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
         bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY);
@@ -533,14 +535,15 @@ void SubwindowOhos::ShowActionMenu(const std::string& title,
         return;
     }
 
-    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+    SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
     auto showDialogCallback = [title, &button, callbackParam = std::move(callback)]() {
         int32_t posX = 0;
         int32_t posY = 0;
         int32_t width = 0;
         int32_t height = 0;
         float density = 1.0f;
-        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentWindow());
+        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(
+            SubwindowManager::GetInstance()->GetCurrentDialogWindow());
         CHECK_NULL_VOID(subwindowOhos);
         subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
         bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY);

@@ -242,6 +242,18 @@ const RefPtr<Subwindow> SubwindowManager::GetDialogSubwindow(int32_t instanceId)
     }
 }
 
+void SubwindowManager::SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow)
+{
+    std::lock_guard<std::mutex> lock(currentDialogSubwindowMutex_);
+    currentDialogSubwindow_ = subwindow;
+}
+
+const RefPtr<Subwindow>& SubwindowManager::GetCurrentDialogWindow()
+{
+    std::lock_guard<std::mutex> lock(currentDialogSubwindowMutex_);
+    return currentDialogSubwindow_;
+}
+
 RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
 {
     auto containerId = Container::CurrentId();
