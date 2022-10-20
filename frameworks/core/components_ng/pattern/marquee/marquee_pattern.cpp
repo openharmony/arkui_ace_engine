@@ -20,7 +20,6 @@
 #include <sys/time.h>
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/property.h"
@@ -86,8 +85,7 @@ float MarqueePattern::CheckAndAdjustPosition(LayoutWrapper* layoutWrapper)
         childOffset_ = (direction_ == MarqueeDirection::LEFT)
                            ? childOffset_ = layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Width()
                            : -(child->GetGeometryNode()->GetMarginFrameSize().Width());
-    }
-    if (!isNeedMarquee_) {
+    } else {
         startAfterLayout_ = false;
         StopMarquee();
         childOffset_ = GetTextChildOffset();
