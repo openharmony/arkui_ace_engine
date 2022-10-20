@@ -15,8 +15,8 @@
 
 #include "frameworks/core/components/shape/rosen_render_shape_container.h"
 
-#include "commonlibrary/c_utils/base/include/securec.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 

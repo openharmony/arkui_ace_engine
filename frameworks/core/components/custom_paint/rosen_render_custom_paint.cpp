@@ -17,11 +17,11 @@
 
 #include <cmath>
 
-#include "commonlibrary/c_utils/base/include/securec.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
