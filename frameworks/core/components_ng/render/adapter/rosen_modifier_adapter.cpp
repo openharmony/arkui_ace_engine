@@ -85,13 +85,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Animatab
 {
     // should manually add convert type here
     CONVERT_PROPS(prop, AnimatablePropFloat, float);
-    return nullptr;
-}
-
-inline std::shared_ptr<RSPropertyBase> ConvertToRSPropertyColor(const RefPtr<AnimatablePropBase>& prop)
-{
-    // should manually add convert type here
-    CONVERT_PROPS(prop, AnimatableProp<Color>, Color);
+    CONVERT_PROPS(prop, AnimatablePropColor, LinearColor);
     return nullptr;
 }
 

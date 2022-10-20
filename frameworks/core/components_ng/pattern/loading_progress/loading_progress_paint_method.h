@@ -47,7 +47,7 @@ public:
             color_ = paintProperty->GetColor().value_or(color_);
         }
         loadingProgressModifier_->SetDate(FULL_COUNT);
-        loadingProgressModifier_->SetColor(color_);
+        loadingProgressModifier_->SetColor(LinearColor(color_));
     }
 
 private:

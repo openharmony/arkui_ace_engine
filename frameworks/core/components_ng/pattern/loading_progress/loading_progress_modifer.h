@@ -67,7 +67,7 @@ public:
         }
     }
 
-    void SetColor(Color color)
+    void SetColor(LinearColor color)
     {
         if (color_) {
             color_->Set(color);
@@ -76,7 +76,7 @@ public:
 
 private:
     RefPtr<AnimatablePropFloat> date_;
-    RefPtr<AnimatableProp<Color>> color_;
+    RefPtr<AnimatablePropColor> color_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };

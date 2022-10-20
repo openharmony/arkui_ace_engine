@@ -148,6 +148,57 @@ inline void StringSplitter(const std::string& source, char delimiter, std::vecto
 }
 
 } // namespace StringUtils
+
+class ACE_EXPORT LinearColor : public Color {
+public:
+    LinearColor() = default;
+    explicit LinearColor(uint32_t value) : Color(value) {}
+    explicit LinearColor(const Color& color) : Color(color.GetValue()) {}
+    LinearColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
+    {
+        ColorParam colorValue {
+#if BIG_ENDIANNESS
+        .argb = { .alpha = alpha, .red = red, .green = green, .blue = blue }
+#else
+        .argb = { .blue = blue, .green = green, .red = red, .alpha = alpha }
+#endif
+        };
+        SetValue(colorValue.value);
+    }
+    ~LinearColor() = default;
+
+    static const LinearColor TRANSPARENT;
+    static const LinearColor WHITE;
+    static const LinearColor BLACK;
+    static const LinearColor RED;
+    static const LinearColor GREEN;
+    static const LinearColor BLUE;
+    static const LinearColor GRAY;
+
+    LinearColor operator+(const LinearColor& color) const
+    {
+        return LinearColor(GetAlpha() + color.GetAlpha(), GetRed() + color.GetRed(),
+            GetGreen() + color.GetGreen(), GetBlue() + color.GetBlue());
+    }
+
+    LinearColor operator-(const LinearColor& color) const
+    {
+        return LinearColor(GetAlpha() - color.GetAlpha(), GetRed() - color.GetRed(),
+            GetGreen() - color.GetGreen(), GetBlue() - color.GetBlue());
+    }
+
+    LinearColor operator*(double value) const
+    {
+        return LinearColor(GetAlpha() * value, GetRed() * value,
+            GetGreen() * value, GetBlue() * value);
+    }
+
+    bool operator==(const LinearColor& color) const
+    {
+        return GetValue() == color.GetValue();
+    }
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_COLOR_H

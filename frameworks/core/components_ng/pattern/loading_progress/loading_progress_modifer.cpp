@@ -39,7 +39,7 @@ const float HALF_COUNT = 25.0f;
 
 LoadingProgressModifier::LoadingProgressModifier() 
     : date_(AceType::MakeRefPtr<AnimatablePropFloat>(0.0)),
-      color_(AceType::MakeRefPtr<AnimatableProp<Color>>(Color::BLUE))
+      color_(AceType::MakeRefPtr<AnimatablePropColor>(LinearColor::BLUE))
 {
     AttachProp(date_);
     AttachProp(color_);

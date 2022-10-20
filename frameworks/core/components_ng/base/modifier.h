@@ -159,6 +159,7 @@ private:
     };
 
 DECLARE_PROP_TYPED_CLASS(AnimatablePropFloat, AnimatableProp, float);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropColor, AnimatableProp, LinearColor);
 
 } // namespace OHOS::Ace::NG
 

@@ -50,6 +50,14 @@ const Color Color::GREEN = Color(0xff00ff00);
 const Color Color::BLUE = Color(0xff0000ff);
 const Color Color::GRAY = Color(0xffc0c0c0);
 
+const LinearColor LinearColor::TRANSPARENT = LinearColor(0x00000000);
+const LinearColor LinearColor::WHITE = LinearColor(0xffffffff);
+const LinearColor LinearColor::BLACK = LinearColor(0xff000000);
+const LinearColor LinearColor::RED = LinearColor(0xffff0000);
+const LinearColor LinearColor::GREEN = LinearColor(0xff00ff00);
+const LinearColor LinearColor::BLUE = LinearColor(0xff0000ff);
+const LinearColor LinearColor::GRAY = LinearColor(0xffc0c0c0);
+
 Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
 {
     if (colorStr.empty()) {
@@ -251,9 +259,8 @@ Color Color::operator+(const Color& color) const
     ConvertGammaToLinear(color, secondLinearRed, secondLinearGreen, secondLinearBlue);
 
     // get linear result and convert to gamma
-    // return ConvertLinearToGamma(GetAlpha() + color.GetAlpha(), firstLinearRed + secondLinearRed,
-    //     firstLinearGreen + secondLinearGreen, firstLinearBlue + secondLinearBlue);
-    return FromARGB(GetAlpha() + color.GetAlpha(), GetRed() + color.GetRed(), GetGreen() + color.GetGreen(), GetBlue() + color.GetBlue());
+    return ConvertLinearToGamma(GetAlpha() + color.GetAlpha(), firstLinearRed + secondLinearRed,
+        firstLinearGreen + secondLinearGreen, firstLinearBlue + secondLinearBlue);
 }
 
 Color Color::operator-(const Color& color) const
@@ -271,9 +278,8 @@ Color Color::operator-(const Color& color) const
     ConvertGammaToLinear(color, secondLinearRed, secondLinearGreen, secondLinearBlue);
 
     // get linear result and convert to gamma
-    // return ConvertLinearToGamma(GetAlpha() - color.GetAlpha(), firstLinearRed - secondLinearRed,
-    //     firstLinearGreen - secondLinearGreen, firstLinearBlue - secondLinearBlue);
-    return FromARGB(GetAlpha() - color.GetAlpha(), GetRed() - color.GetRed(), GetGreen() - color.GetGreen(), GetBlue() - color.GetBlue());
+    return ConvertLinearToGamma(GetAlpha() - color.GetAlpha(), firstLinearRed - secondLinearRed,
+        firstLinearGreen - secondLinearGreen, firstLinearBlue - secondLinearBlue);
 }
 
 Color Color::operator*(double value) const
@@ -285,8 +291,7 @@ Color Color::operator*(double value) const
     ConvertGammaToLinear(*this, linearRed, linearGreen, linearBlue);
 
     // get linear result and convert to gamma
-    // return ConvertLinearToGamma(GetAlpha() * value, linearRed * value, linearGreen * value, linearBlue * value);
-    return FromARGB(GetAlpha() * value, GetRed() * value, GetGreen() * value, GetBlue() * value);
+    return ConvertLinearToGamma(GetAlpha() * value, linearRed * value, linearGreen * value, linearBlue * value);
 }
 
 Color Color::operator/(double value) const
@@ -301,8 +306,7 @@ Color Color::operator/(double value) const
     ConvertGammaToLinear(*this, linearRed, linearGreen, LinearBlue);
 
     // get linear result and convert to gamma
-    // return ConvertLinearToGamma(GetAlpha() / value, linearRed / value, linearGreen / value, LinearBlue / value);
-    return FromARGB(GetAlpha() / value, GetRed() / value, GetGreen() / value, GetBlue() / value);
+    return ConvertLinearToGamma(GetAlpha() / value, linearRed / value, linearGreen / value, LinearBlue / value);
 }
 
 double Color::ConvertGammaToLinear(uint8_t value)
