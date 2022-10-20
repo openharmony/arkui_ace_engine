@@ -41,4 +41,13 @@ void GridItemLayoutProperty::ResetGridLayoutInfoAndMeasure() const
     grid->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void GridItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    LayoutProperty::ToJsonValue(json);
+    json->Put("rowStart", propRowStart_.value_or(0));
+    json->Put("rowEnd", propRowEnd_.value_or(0));
+    json->Put("columnStart", propColumnStart_.value_or(0));
+    json->Put("columnEnd", propColumnEnd_.value_or(0));
+}
+
 } // namespace OHOS::Ace::NG

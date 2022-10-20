@@ -162,6 +162,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
     if (renderContext_) {
         renderContext_->ToJsonValue(json);
     }

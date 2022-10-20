@@ -61,6 +61,7 @@ void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
         });
     stack->Push(frameNode);
     SetTabBar(DEFAULT_TAB_BAR_NAME, "", nullptr, true); // Set default tab bar.
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, DEFAULT_TAB_BAR_NAME);
 }
 
 void TabContentModelNG::Create()
@@ -164,6 +165,8 @@ void TabContentModelNG::Pop()
 void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
     TabBarBuilderFunc&& builder, bool /*useContentOnly*/)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, icon.value_or(""));
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, text.value_or(""));
     TabBarParam tabBarParam { .text = text.value_or(""), .icon = icon.value_or(""), .builder = std::move(builder) };
     ViewStackProcessor::GetInstance()->PushTabBar(tabBarParam);
 }

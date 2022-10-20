@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "base/geometry/dimension.h"
 #include "core/components_ng/base/group_node.h"
 
 namespace OHOS::Ace::NG {
@@ -31,6 +32,7 @@ public:
     {}
     ~TabsNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     bool HasSwiperNode() const
     {
@@ -82,6 +84,13 @@ public:
     }
 
 private:
+    bool Scrollable() const;
+    int32_t GetAnimationDuration() const;
+    TabBarMode GetTabBarMode() const;
+    Dimension GetBarWidth() const;
+    Dimension GetBarHeight() const;
+    int32_t GetIndex() const;
+
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;
     std::set<int32_t> swiperChildren_;
