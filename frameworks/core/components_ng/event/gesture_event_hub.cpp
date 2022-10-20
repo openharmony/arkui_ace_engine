@@ -324,7 +324,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
     }
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo);
+    dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo, GetFrameNode());
 }
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)

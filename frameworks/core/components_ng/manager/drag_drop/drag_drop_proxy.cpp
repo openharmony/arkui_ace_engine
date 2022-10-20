@@ -15,20 +15,23 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void DragDropProxy::OnDragStart(const GestureEvent& info, const std::string& extraInfo)
+void DragDropProxy::OnDragStart(
+    const GestureEvent& info, const std::string& extraInfo, const RefPtr<FrameNode>& frameNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     manager->OnDragStart(
-        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()));
+        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), frameNode);
 
     manager->AddDataToClipboard(extraInfo);
 }
@@ -39,6 +42,7 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
@@ -53,6 +57,7 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info)
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
@@ -67,19 +72,21 @@ void DragDropProxy::onDragCancel()
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     manager->onDragCancel();
 }
 
-void DragDropProxy::OnItemDragStart(const GestureEvent& info)
+void DragDropProxy::OnItemDragStart(const GestureEvent& info, const RefPtr<FrameNode>& frameNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     manager->OnItemDragStart(
-        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()));
+        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), frameNode);
 }
 
 void DragDropProxy::OnItemDragMove(const GestureEvent& info, int32_t draggedIndex)
@@ -88,6 +95,7 @@ void DragDropProxy::OnItemDragMove(const GestureEvent& info, int32_t draggedInde
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     manager->OnItemDragMove(static_cast<float>(info.GetGlobalPoint().GetX()),
         static_cast<float>(info.GetGlobalPoint().GetY()), draggedIndex);
@@ -99,6 +107,7 @@ void DragDropProxy::OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     manager->OnItemDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
         static_cast<float>(info.GetGlobalPoint().GetY()), draggedIndex);
@@ -110,6 +119,7 @@ void DragDropProxy::onItemDragCancel()
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     manager->onItemDragCancel();
 }
@@ -120,6 +130,7 @@ void DragDropProxy::DestroyDragWindow()
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     manager->DestroyDragWindow();
 }
