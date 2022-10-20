@@ -15,12 +15,17 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+int64_t g_proxyId = 0;
+} // namespace
+
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     const RefPtr<PixelMap>& pixelMap, const GestureEvent& info)
 {
@@ -34,8 +39,8 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     CreateDragWindow(info, pixelMap->GetWidth(), pixelMap->GetHeight());
     dragWindow_->DrawPixelMap(pixelMap);
 #endif
-    auto proxy = MakeRefPtr<DragDropProxy>();
-    return proxy;
+    currentId_ = ++g_proxyId;
+    return MakeRefPtr<DragDropProxy>(currentId_);
 }
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
@@ -56,9 +61,8 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     CreateDragWindow(info, static_cast<uint32_t>(frameRect.Width()), static_cast<uint32_t>(frameRect.Height()));
     dragWindow_->DrawFrameNode(dragWindowRootNode_);
 #endif
-
-    auto proxy = MakeRefPtr<DragDropProxy>();
-    return proxy;
+    currentId_ = ++g_proxyId;
+    return MakeRefPtr<DragDropProxy>(currentId_);
 }
 
 void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height)
@@ -89,8 +93,7 @@ RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& cust
     rootNode->AddChild(customNode);
     rootNode->AttachToMainTree();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    pipeline->FlushPipelineImmediately();
-
+    pipeline->FlushUITasks();
     return rootNode;
 }
 
@@ -120,22 +123,20 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
         return nullptr;
     }
 
+    PointF point(globalX, globalY);
     std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
     for (const auto& weakNode : frameNodes) {
         auto frameNode = weakNode.Upgrade();
         if (!frameNode) {
             continue;
         }
-
         auto geometryNode = frameNode->GetGeometryNode();
         if (!geometryNode) {
             continue;
         }
-
         auto globalFrameRect = geometryNode->GetFrameRect();
         globalFrameRect.SetOffset(frameNode->GetOffsetRelativeToWindow());
-
-        if (globalFrameRect.IsInRegion(PointF(globalX, globalY))) {
+        if (globalFrameRect.IsInRegion(point)) {
             hitFrameNodes.insert(std::make_pair(frameNode->GetDepth(), frameNode));
         }
     }
@@ -146,9 +147,15 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
     return hitFrameNodes.rbegin()->second;
 }
 
-void DragDropManager::OnDragStart(float globalX, float globalY)
+bool DragDropManager::CheckDragDropProxy(int64_t id) const
 {
-    preTargetFrameNode_ = FindDragFrameNodeByPosition(globalX, globalY, DragType::COMMON);
+    return currentId_ == id;
+}
+
+void DragDropManager::OnDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    preTargetFrameNode_ = frameNode;
     draggedFrameNode_ = preTargetFrameNode_;
 }
 
@@ -166,8 +173,7 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, DragType::COMMON);
     if (!dragFrameNode) {
         if (preTargetFrameNode_) {
-            FireOnDragEvent(
-                preTargetFrameNode_, event, DragEventType::LEAVE, extraInfo);
+            FireOnDragEvent(preTargetFrameNode_, event, DragEventType::LEAVE, extraInfo);
             preTargetFrameNode_ = nullptr;
         }
 
@@ -244,9 +250,9 @@ void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const 
     }
 }
 
-void DragDropManager::OnItemDragStart(float globalX, float globalY)
+void DragDropManager::OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode)
 {
-    preGridTargetFrameNode_ = FindDragFrameNodeByPosition(globalX, globalY, DragType::GRID);
+    preGridTargetFrameNode_ = frameNode;
 }
 
 void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t draggedIndex)
@@ -431,6 +437,7 @@ void DragDropManager::DestroyDragWindow()
     if (dragWindowRootNode_) {
         dragWindowRootNode_ = nullptr;
     }
+    currentId_ = -1;
 }
 
 } // namespace OHOS::Ace::NG
