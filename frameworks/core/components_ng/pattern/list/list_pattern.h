@@ -144,7 +144,7 @@ public:
 
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true);
     void ScrollTo(float position);
-    void ScrollToIndex(int32_t index);
+    void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
     Offset GetCurrentOffset() const;
@@ -185,6 +185,8 @@ private:
     float currentDelta_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
+    ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
+    int32_t scrollIndex_ = 0;
     bool scrollable_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;

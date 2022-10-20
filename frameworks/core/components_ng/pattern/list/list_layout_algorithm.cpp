@@ -216,10 +216,18 @@ void ListLayoutAlgorithm::MeasureList(
         if (lanes_.has_value() && lanes_.value() > 1) {
             jumpIndex_ = jumpIndex_.value() - jumpIndex_.value() % lanes_.value();
         }
-        LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0.0f);
-        float endPos = itemPosition_.begin()->second.first - spaceWidth_;
-        if (jumpIndex_.value() > 0 && GreatNotEqual(endPos, startMainPos_)) {
-            LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
+        if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0.0f);
+            float endPos = itemPosition_.begin()->second.first - spaceWidth_;
+            if (jumpIndex_.value() > 0 && GreatNotEqual(endPos, startMainPos_)) {
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
+            }
+        } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BUTTON) {
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), endMainPos_);
+            float startPos = itemPosition_.rbegin()->second.second + spaceWidth_;
+            if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(startPos, endMainPos_)) {
+                LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, startPos);
+            }
         }
         RecyclePrevIndex(layoutWrapper);
         CalculateEstimateOffset();

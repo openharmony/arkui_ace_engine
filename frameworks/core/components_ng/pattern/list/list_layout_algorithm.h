@@ -29,6 +29,11 @@
 namespace OHOS::Ace::NG {
 class PipelineContext;
 
+enum class ScrollIndexAlignment {
+    ALIGN_TOP = 0,
+    ALIGN_BUTTON = 1,
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListLayoutAlgorithm, LayoutAlgorithm);
@@ -60,6 +65,11 @@ public:
     void SetIndex(int32_t index)
     {
         jumpIndex_ = index;
+    }
+
+    void SetIndexAlignment(ScrollIndexAlignment align)
+    {
+        scrollIndexAlignment_ = align;
     }
 
     void SetCurrentOffset(float offset)
@@ -170,6 +180,7 @@ private:
         int& currentIndex, float& mainLen);
 
     std::optional<int32_t> jumpIndex_;
+    ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
 
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;
