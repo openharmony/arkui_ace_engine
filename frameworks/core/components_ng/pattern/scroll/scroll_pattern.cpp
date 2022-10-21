@@ -87,12 +87,12 @@ void ScrollPattern::OnModifyDone()
     auto offsetTask = [weak = WeakClaim(this)](double offset, int32_t source) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                float adjustOffset = static_cast<float>(offset);
-                pattern->AdjustOffset(adjustOffset, source);
-                return pattern->UpdateCurrentOffset(adjustOffset, source);
+            if (!pattern || pattern->GetAxis() == Axis::NONE) {
+                return false;
             }
-            return false;
+            float adjustOffset = static_cast<float>(offset);
+            pattern->AdjustOffset(adjustOffset, source);
+            return pattern->UpdateCurrentOffset(adjustOffset, source);
         }
         return true;
     };
