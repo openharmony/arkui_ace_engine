@@ -482,7 +482,7 @@ sk_sp<SkData> DecodedDataProviderImageLoader::LoadImageData(
 RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
-#if defined(PREVIEW)
+#if !defined(PIXEL_MAP_SUPPORTED)
     return nullptr;
 #else
     auto pipelineContext = context.Upgrade();

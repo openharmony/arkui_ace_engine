@@ -71,10 +71,10 @@ RefPtr<CanvasImage> CanvasImage::Create(
 
 SkImageInfo SkiaCanvasImage::MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
 {
-    SkColorType ct = PixelFormatToSkColorType(pixmap);
-    SkAlphaType at = AlphaTypeToSkAlphaType(pixmap);
-    sk_sp<SkColorSpace> cs = ColorSpaceToSkColorSpace(pixmap);
-    return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), ct, at, cs);
+    SkColorType colorType = PixelFormatToSkColorType(pixmap);
+    SkAlphaType alphaType = AlphaTypeToSkAlphaType(pixmap);
+    sk_sp<SkColorSpace> colorSpace = ColorSpaceToSkColorSpace(pixmap);
+    return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
 }
 
 sk_sp<SkColorSpace> SkiaCanvasImage::ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
