@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/common/layout/grid_layout_info.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/event/ace_event_handler.h"
 
@@ -159,6 +160,17 @@ void ViewAbstractModelImpl::SetWidth(const Dimension& width)
     }
 }
 
+void ViewAbstractModelImpl::SwapBackBorder(const RefPtr<Decoration>& decoration)
+{
+    CHECK_NULL_VOID(decoration);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto boxDecoration = box->GetBackDecoration();
+    if (boxDecoration) {
+        decoration->SetBorder(boxDecoration->GetBorder());
+        boxDecoration->SetBorder({});
+    }
+}
+
 void ViewAbstractModelImpl::SetHeight(const Dimension& height)
 {
     bool isPercentSize = (height.Unit() == DimensionUnit::PERCENT);
@@ -292,35 +304,53 @@ void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle)
 
 void ViewAbstractModelImpl::SetPadding(const Dimension& value)
 {
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    AnimatableDimension animValue(value);
-    animValue.SetAnimationOption(option);
+    AnimatableDimension animValue = ToAnimatableDimension(value);
     SetPaddings(animValue, animValue, animValue, animValue);
 }
 
-void ViewAbstractModelImpl::SetPaddings(
-    const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right)
+void ViewAbstractModelImpl::SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+    const std::optional<Dimension>& left, const std::optional<Dimension>& right)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    Edge padding(left, top, right, bottom, option);
+    Edge padding = box->GetPadding();
+    if (top.has_value()) {
+        padding.SetTop(ToAnimatableDimension(top.value()));
+    }
+    if (bottom.has_value()) {
+        padding.SetBottom(ToAnimatableDimension(bottom.value()));
+    }
+    if (left.has_value()) {
+        padding.SetLeft(ToAnimatableDimension(left.value()));
+    }
+    if (right.has_value()) {
+        padding.SetRight(ToAnimatableDimension(right.value()));
+    }
     box->SetPadding(padding);
 }
 
 void ViewAbstractModelImpl::SetMargin(const Dimension& value)
 {
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    AnimatableDimension animValue(value);
-    animValue.SetAnimationOption(option);
+    AnimatableDimension animValue = ToAnimatableDimension(value);
     SetMargins(animValue, animValue, animValue, animValue);
 }
 
-void ViewAbstractModelImpl::SetMargins(
-    const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right)
+void ViewAbstractModelImpl::SetMargins(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+    const std::optional<Dimension>& left, const std::optional<Dimension>& right)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    Edge margin(left, top, right, bottom, option);
+    Edge margin = box->GetMargin();
+    if (top.has_value()) {
+        margin.SetTop(ToAnimatableDimension(top.value()));
+    }
+    if (bottom.has_value()) {
+        margin.SetBottom(ToAnimatableDimension(bottom.value()));
+    }
+    if (left.has_value()) {
+        margin.SetLeft(ToAnimatableDimension(left.value()));
+    }
+    if (right.has_value()) {
+        margin.SetRight(ToAnimatableDimension(right.value()));
+    }
     box->SetMargin(margin);
 }
 
@@ -445,6 +475,40 @@ void ViewAbstractModelImpl::SetBorderStyle(const std::optional<BorderStyle>& sty
                 BoxStateAttribute::BORDER_STYLE, BoxComponentHelper::GetBorderStyle(decoration), VisualState::NORMAL);
         }
     }
+}
+
+void ViewAbstractModelImpl::SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset)
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto boxDecoration = GetBackDecoration();
+    if (bitset | BorderImage::OUTSET_BIT) {
+        boxDecoration->SetHasBorderImageOutset(true);
+    }
+    if (bitset | BorderImage::REPEAT_BIT) {
+        boxDecoration->SetHasBorderImageRepeat(true);
+    }
+    if (bitset | BorderImage::SLICE_BIT) {
+        boxDecoration->SetHasBorderImageSlice(true);
+    }
+    if (bitset | BorderImage::SOURCE_BIT) {
+        boxDecoration->SetHasBorderImageSource(true);
+    }
+    if (bitset | BorderImage::WIDTH_BIT) {
+        boxDecoration->SetHasBorderImageWidth(true);
+    }
+    if (bitset | BorderImage::GRADIENT_BIT) {
+        boxDecoration->SetHasBorderImageGradient(true);
+    }
+    boxDecoration->SetBorderImage(borderImage);
+    boxComponent->SetBackDecoration(boxDecoration);
+}
+
+void ViewAbstractModelImpl::SetBorderImageGradient(const NG::Gradient& gradient)
+{
+    auto boxDecoration = GetBackDecoration();
+    Gradient borderGradient = ToGradient(gradient);
+    boxDecoration->SetBorderImageGradient(borderGradient);
+    boxDecoration->SetHasBorderImageGradient(true);
 }
 
 void ViewAbstractModelImpl::SetLayoutPriority(int32_t priority)
