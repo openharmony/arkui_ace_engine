@@ -54,6 +54,14 @@ const Color Color::GREEN = Color(0xff00ff00);
 const Color Color::BLUE = Color(0xff0000ff);
 const Color Color::GRAY = Color(0xffc0c0c0);
 
+const LinearColor LinearColor::TRANSPARENT = LinearColor(0x00000000);
+const LinearColor LinearColor::WHITE = LinearColor(0xffffffff);
+const LinearColor LinearColor::BLACK = LinearColor(0xff000000);
+const LinearColor LinearColor::RED = LinearColor(0xffff0000);
+const LinearColor LinearColor::GREEN = LinearColor(0xff00ff00);
+const LinearColor LinearColor::BLUE = LinearColor(0xff0000ff);
+const LinearColor LinearColor::GRAY = LinearColor(0xffc0c0c0);
+
 Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
 {
     if (colorStr.empty()) {

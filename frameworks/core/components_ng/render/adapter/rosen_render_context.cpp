@@ -719,7 +719,9 @@ void RosenRenderContext::FlushModifier(const RefPtr<Modifier>& modifier)
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(modifier);
-    rsNode_->AddModifier(ConvertModifier(modifier));
+    auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertModifier(modifier));
+    rsNode_->AddModifier(modifierAdapter);
+    modifierAdapter->AttachProperties();
 }
 
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)

@@ -484,7 +484,7 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     auto paintMethod = pattern_->CreateNodePaintMethod();
     if (paintMethod) {
         auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_);
-        paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());
+        paintWrapper->SetNodePaintMethod(paintMethod);
         return paintWrapper;
     }
     return nullptr;

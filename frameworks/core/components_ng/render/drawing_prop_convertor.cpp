@@ -26,6 +26,11 @@ RSColor ToRSColor(const Color& color)
     return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 }
 
+RSColor ToRSColor(const LinearColor& color)
+{
+    return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
+}
+
 RSRect ToRSRect(const NG::RectF& rect)
 {
     return RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
