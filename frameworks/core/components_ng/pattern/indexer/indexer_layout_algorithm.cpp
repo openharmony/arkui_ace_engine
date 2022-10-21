@@ -145,11 +145,20 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
+    
+    auto layoutConstraint = indexerLayoutProperty->GetContentLayoutConstraint().value();
+    auto selfIdealSize = layoutConstraint.selfIdealSize;
+    constexpr float half = 0.5f;
+    if (selfIdealSize.Width().has_value() && selfIdealSize.Width().value() >= size.Width()) {
+       left = left + half * (selfIdealSize.Width().value() - size.Width());
+    }
+    if (selfIdealSize.Height().has_value() && selfIdealSize.Height().value() >= size.Height()) {
+        top = top + half * (selfIdealSize.Height().value() - size.Height());
+    }
     auto paddingOffset = OffsetF(left, top);
 
     float popupPositionX = 0.0f;
     float popupPositionY = 0.0f;
-    constexpr float half = 0.5f;
     if (indexerLayoutProperty->GetPopupPositionX().has_value()) {
         popupPositionX = indexerLayoutProperty->GetPopupPositionX().value();
     } else {

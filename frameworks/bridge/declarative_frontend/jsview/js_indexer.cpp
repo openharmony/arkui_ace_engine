@@ -406,10 +406,11 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     JSRef<JSVal> size = obj->GetProperty("size");
-    if (size->IsNumber()) {
-        textStyle.SetFontSize(Dimension(size->ToNumber<double>(), DimensionUnit::FP));
+    Dimension fontSize;
+    if (ParseJsDimensionVp(size, fontSize)) {
+        textStyle.SetFontSize(fontSize);
     }
-
+    
     JSRef<JSVal> weight = obj->GetProperty("weight");
     if (weight->IsString()) {
         textStyle.SetFontWeight(ConvertStrToFontWeight(weight->ToString()));
