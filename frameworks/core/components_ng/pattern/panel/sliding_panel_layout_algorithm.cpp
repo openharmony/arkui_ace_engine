@@ -81,35 +81,36 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
 
-    auto fullHeight =
+    fullHeight_ =
         layoutProperty->GetFullHeight().value_or(Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()));
-    auto halfHeight = layoutProperty->GetHalfHeight().value_or(Dimension(frameSize.Height() / 2));
-    auto miniHeight = layoutProperty->GetMiniHeight().value_or(Dimension(DRAG_UP_THRESHOLD.ConvertToPx()));
+    halfHeight_ = layoutProperty->GetHalfHeight().value_or(Dimension(frameSize.Height() / 2));
+    miniHeight_ = layoutProperty->GetMiniHeight().value_or(Dimension(DRAG_UP_THRESHOLD.ConvertToPx()));
+
     auto currentPanelType = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
     auto currentPanelMode = layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     auto childOffset = OffsetF();
     if (isFirstLayout_) {
         switch (currentPanelMode) {
             case PanelMode::FULL:
-                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(fullHeight.ConvertToPx()));
+                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(fullHeight_.ConvertToPx()));
                 childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
                 break;
             case PanelMode::HALF:
-                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight.ConvertToPx()));
+                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight_.ConvertToPx()));
                 if (currentPanelType == PanelType::MINI_BAR) {
-                    childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight.ConvertToPx()));
+                    childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight_.ConvertToPx()));
                 }
                 childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
                 break;
             case PanelMode::MINI:
-                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight.ConvertToPx()));
+                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight_.ConvertToPx()));
                 if (currentPanelType == PanelType::TEMP_DISPLAY) {
-                    childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight.ConvertToPx()));
+                    childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight_.ConvertToPx()));
                 }
                 childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
                 break;
             case PanelMode::AUTO:
-                childOffset = OffsetF(0.0, static_cast<float>(halfHeight.ConvertToPx()));
+                childOffset = OffsetF(0.0, static_cast<float>(halfHeight_.ConvertToPx()));
                 childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
                 break;
             default:

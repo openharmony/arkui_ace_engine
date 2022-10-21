@@ -161,7 +161,6 @@ build_component_ng("pattern_ng") {
     "panel/drag_bar_paint_method.cpp",
     "panel/drag_bar_pattern.cpp",
     "panel/sliding_panel_layout_algorithm.cpp",
-    "panel/sliding_panel_layout_property.cpp",
     "panel/sliding_panel_node.cpp",
     "panel/sliding_panel_pattern.cpp",
     "panel/sliding_panel_view.cpp",

@@ -77,6 +77,9 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
     InitializeLayoutProps();
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
     isFirstLayout_ = layoutAlgorithm->GetIsFirstLayout();
+    fullHeight_ = layoutAlgorithm->GetFullHeight();
+    halfHeight_ = layoutAlgorithm->GetHalfHeight();
+    miniHeight_ = layoutAlgorithm->GetMiniHeight();
     return true;
 }
 
@@ -477,6 +480,26 @@ void SlidingPanelPattern::MarkDirtyNode(PropertyChangeFlag extraFlag)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(extraFlag);
+}
+
+void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    Pattern::ToJsonValue(json);
+    auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    json->Put("show", layoutProperty->GetShow().value_or(true) ? "true" : "false");
+    static const char* PANEL_TYPE[] = { "PanelType.Minibar", "PanelType.Foldable", "PanelType.Temporary" };
+    json->Put(
+        "type", PANEL_TYPE[static_cast<int32_t>(layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR))]);
+    static const char* PANEL_MODE[] = { "PanelMode.Mini", "PanelMode.Half", "PanelMode.Full" };
+    json->Put("mode", PANEL_MODE[static_cast<int32_t>(layoutProperty->GetPanelMode().value_or(PanelMode::HALF))]);
+    json->Put("dragBar", layoutProperty->GetHasDragBar().value_or(true) ? "true" : "false");
+    json->Put(
+        "miniHeight", std::to_string(layoutProperty->GetMiniHeight().value_or(miniHeight_).ConvertToPx()).c_str());
+    json->Put(
+        "halfHeight", std::to_string(layoutProperty->GetHalfHeight().value_or(halfHeight_).ConvertToPx()).c_str());
+    json->Put(
+        "fullHeight", std::to_string(layoutProperty->GetFullHeight().value_or(fullHeight_).ConvertToPx()).c_str());
 }
 
 } // namespace OHOS::Ace::NG
