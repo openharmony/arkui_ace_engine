@@ -56,6 +56,7 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
     frameNode->UpdateLayoutConstraint(layoutConstraint);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     rootNode->RebuildRenderContextTree();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
