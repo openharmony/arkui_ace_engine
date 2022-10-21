@@ -27,6 +27,8 @@ template("ace_capability_ohos_source_set") {
     sources = [
       "clipboard/clipboard_impl.cpp",
       "distributed/storage/distributed_storage.cpp",
+      "environment/environment_impl.cpp",
+      "environment/environment_proxy_impl.cpp",
       "preference/storage_impl.cpp",
     ]
     include_dirs = []
