@@ -36,7 +36,7 @@ public:
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        auto shapePaintProperty = DynamicCast<PathPaintProperty>(paintWrapper->GetPaintProperty());
+        auto shapePaintProperty = DynamicCast<PathPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
         if (!shapePaintProperty) {
             return nullptr;
         }

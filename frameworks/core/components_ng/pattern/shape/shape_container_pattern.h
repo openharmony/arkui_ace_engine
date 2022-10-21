@@ -46,6 +46,10 @@ public:
         return MakeRefPtr<ContainerPaintProperty>();
     }
 
+    void OnModifyDone() override;
+
+    void MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode);
+
     bool NeedOverridePaintRect() override
     {
         auto frameNode = GetHost();
