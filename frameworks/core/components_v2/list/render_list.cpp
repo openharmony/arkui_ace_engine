@@ -42,9 +42,6 @@ namespace {
 constexpr double VIEW_PORT_SCALE = 1.2;
 constexpr int32_t CHAIN_ANIMATION_NODE_COUNT = 30;
 constexpr int32_t DEFAULT_SOURCE = 3;
-constexpr int32_t SCROLL_STATE_IDLE = 0;
-constexpr int32_t SCROLL_STATE_SCROLL = 1;
-constexpr int32_t SCROLL_STATE_FLING = 2;
 constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 constexpr int32_t SCROLL_FROM_JUMP = 3;
 constexpr int32_t DEFAULT_FINGERS = 1;
@@ -611,6 +608,7 @@ void RenderList::PerformLayout()
         CalculateLanes();
     }
 
+    double prevTotalOffset = startIndexOffset_ - prevOffset_;
     double curMainPos = 0.0;
     if (isLaneList_) {
         curMainPos = LayoutOrRecycleCurrentItemsForLaneList(mainSize);
@@ -698,9 +696,14 @@ void RenderList::PerformLayout()
 
     // Clear auto scrolling flags
     autoScrollingForItemMove_ = false;
-    if (scrollable_ && scrollable_->Idle()) {
-        ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
-            ScrollState(SCROLL_STATE_IDLE));
+    double currentTotalOffset = startIndexOffset_ - currentOffset_;
+    if (!NearEqual(currentTotalOffset, prevTotalOffset)) {
+        auto offset = Dimension((currentTotalOffset - prevTotalOffset) / dipScale_, DimensionUnit::VP);
+        if (scrollable_ && scrollable_->Idle()) {
+            ResumeEventCallback(component_, &ListComponent::GetOnScroll, offset, ScrollState::IDLE);
+        } else {
+            ResumeEventCallback(component_, &ListComponent::GetOnScroll, offset, scrollState_);
+        }
     }
 
     realMainSize_ = curMainPos - currentOffset_;
@@ -1188,11 +1191,11 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     }
     offset_ = offset;
     if (source == SCROLL_FROM_UPDATE) {
-        ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
-            ScrollState(SCROLL_STATE_SCROLL));
+        scrollState_ = ScrollState::SCROLL;
     } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
-        ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
-            ScrollState(SCROLL_STATE_FLING));
+        scrollState_ = ScrollState::FLING;
+    } else {
+        scrollState_ = ScrollState::IDLE;
     }
     currentOffset_ += offset;
     if (source == SCROLL_FROM_AXIS) {
