@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_MODEL_NG_H
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,9 +37,6 @@ public:
     void SetShowTips(bool value) override;
     void SetThickness(const Dimension& value) override;
     void SetOnChange(SliderOnChangeEvent&& eventOnChange) override;
-
-private:
-    static void LoadTheme(const RefPtr<FrameNode>& frameNode);
 };
 
 } // namespace OHOS::Ace::NG
