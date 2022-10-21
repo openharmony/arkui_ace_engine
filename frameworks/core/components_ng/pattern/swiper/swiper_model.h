@@ -23,9 +23,22 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 
 namespace OHOS::Ace {
+
+struct SwiperParameters {
+    std::optional<Dimension> dimLeft;
+    std::optional<Dimension> dimTop;
+    std::optional<Dimension> dimRight;
+    std::optional<Dimension> dimBottom;
+    std::optional<Dimension> dimSize;
+    std::optional<bool> maskValue;
+    std::optional<Color> colorVal;
+    std::optional<Color> selectedColorVal;
+};
 
 class ACE_EXPORT SwiperModel {
 public:
@@ -49,6 +62,14 @@ public:
     virtual void SetItemSpace(const Dimension& itemSpace);
     virtual void SetCachedCount(int32_t cachedCount);
     virtual void SetOnChange(NG::ChangeEvent&& onChange);
+
+    virtual void SetDigital(bool digitalIndicator);
+    virtual void SetRemoteMessageEventId(RemoteCallback&& remoteCallback);
+    virtual void SetOnClick(
+        std::function<void(const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl)>&& value);
+    virtual void SetMainSwiperSizeWidth();
+    virtual void SetMainSwiperSizeHeight();
+    virtual void SetIndicatorStyle(const SwiperParameters& swiperParameters);
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

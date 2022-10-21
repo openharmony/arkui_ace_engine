@@ -118,4 +118,18 @@ void SwiperModelNG::SetOnChange(ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void SwiperModelNG::SetRemoteMessageEventId(RemoteCallback&& remoteCallback) {}
+
+void SwiperModelNG::SetDigital(bool digitalIndicator) {}
+
+void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters) {};
+
+void SwiperModelNG::SetOnClick(
+    std::function<void(const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl)>&& value)
+{}
+
+void SwiperModelNG::SetMainSwiperSizeWidth() {}
+
+void SwiperModelNG::SetMainSwiperSizeHeight() {}
+
 } // namespace OHOS::Ace::NG
