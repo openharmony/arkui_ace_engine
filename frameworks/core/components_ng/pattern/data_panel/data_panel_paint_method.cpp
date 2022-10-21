@@ -25,6 +25,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/pattern/data_panel/data_panel_modifer.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
@@ -40,40 +41,111 @@ constexpr float HALF_CIRCLE = 180.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12;
 constexpr Color BACKGROUND_COLOR = Color(0x4C000000);
+constexpr float SHADOW_BLUR_RADIUS = 5.0f;
 
 } // namespace
 
-CanvasDrawFunction DataPanelPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+DataPanelModifier::DataPanelModifier() : date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0))
 {
-    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto dataPanel = weak.Upgrade();
-        if (dataPanel) {
-            dataPanel->Paint(canvas, paintWrapper);
-        }
-    };
-    return paintFunc;
+    AttachProperty(date_);
 }
 
-void DataPanelPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
+void PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto paintProperty = DynamicCast<DataPanelPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
+    float thickness = arcData.thickness;
+    float radius = arcData.radius - SHADOW_BLUR_RADIUS;
+    float progress = arcData.progress;
+    if (GreatNotEqual(progress, 100.0f)) {
+        progress = 100.0f;
+    }
+    if (LessNotEqual(progress, 0.0f)) {
+        progress = 0.0f;
+    }
+    if (NearEqual(progress, 0.0f)) {
+        return;
+    }
+    Offset center = arcData.center;
+    PointF centerPt = PointF(center.GetX(), center.GetY() - radius + thickness / 2);
+
+    // for example whole circle is 100 which is divided into 100 piece 360 / 100 = 3.6
+    float drawAngle = arcData.wholeAngle * 0.01 * progress;
+    float startAngle = arcData.startAngle;
+
+    // 101 is Opacity 40%
+    std::vector<RSColorQuad> colors { arcData.startColor.ChangeAlpha(101).GetValue(),
+        arcData.endColor.ChangeAlpha(101).GetValue() };
+    std::vector<float> pos { 0.0f, 1.0f };
+    RSPen gradientPaint;
+    gradientPaint.SetWidth(thickness);
+    gradientPaint.SetAntiAlias(true);
+    RSFilter filter;
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, 5.0f));
+    gradientPaint.SetFilter(filter);
+    RSPath path;
+    RSRect rRect(center.GetX() - radius + thickness / 2, center.GetY() - radius + thickness / 2,
+        center.GetX() + radius - thickness / 2, center.GetY() + radius - thickness / 2);
+    path.AddArc(rRect, startAngle, drawAngle);
+
+    RSBrush startCirclePaint;
+    startCirclePaint.SetAntiAlias(true);
+    startCirclePaint.SetColor(arcData.startColor.ChangeAlpha(101).GetValue());
+    startCirclePaint.SetFilter(filter);
+
+    RSBrush endCirclePaint;
+    endCirclePaint.SetAntiAlias(true);
+    endCirclePaint.SetColor(arcData.endColor.ChangeAlpha(101).GetValue());
+    endCirclePaint.SetFilter(filter);
+
+    if (progress < START_COLOR_TRANSITION_EDGE) {
+        startCirclePaint.SetColor(Color::LineColorTransition(arcData.endColor.ChangeAlpha(101),
+            arcData.startColor.ChangeAlpha(101), progress / START_COLOR_TRANSITION_EDGE)
+                                      .GetValue());
+        colors[0] = Color::LineColorTransition(arcData.endColor.ChangeAlpha(101), arcData.startColor.ChangeAlpha(101),
+            progress / START_COLOR_TRANSITION_EDGE)
+                        .GetValue();
+        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+            ToRSPonit(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+    } else {
+        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+            ToRSPonit(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+    }
 
     canvas.Save();
-    auto offset = paintWrapper->GetContentOffset();
+    canvas.AttachBrush(startCirclePaint);
+    RSRect edgeRect(center.GetX() - thickness / 2, center.GetY() - radius, center.GetX() + thickness / 2,
+        center.GetY() - radius + thickness);
+    canvas.DrawArc(edgeRect, QUARTER_CIRCLE, HALF_CIRCLE);
+    canvas.DetachBrush();
+    canvas.Restore();
+
+    canvas.Save();
+    canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
+    gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+        ToRSPonit(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+    canvas.AttachPen(gradientPaint);
+    canvas.DrawPath(path);
+    canvas.DetachPen();
+    canvas.Restore();
+
+    canvas.Save();
+    canvas.Rotate(drawAngle, center.GetX(), center.GetY());
+    canvas.AttachBrush(endCirclePaint);
+    canvas.DrawArc(edgeRect, -QUARTER_CIRCLE, HALF_CIRCLE);
+    canvas.DetachBrush();
+    canvas.Restore();
+}
+
+void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, float date) const
+{
+    RSCanvas canvas = context.canvas;
+
+    canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto type = paintProperty->GetDataPanelType();
-    if (type.has_value() && type.value() == 1) {
-        PaintLinearProgress(canvas, paintWrapper);
-        return;
-    }
     ArcData arcData;
-    auto frameSize = paintWrapper->GetContentSize();
-    arcData.center = Offset(frameSize.Width() / 2.0f, frameSize.Height() / 2.0f);
-    arcData.radius = std::min(frameSize.Width(), frameSize.Height()) / 2.0f;
+    arcData.center = Offset(context.width / 2.0f, context.height / 2.0f);
+    arcData.radius = std::min(context.width, context.height) / 2.0f;
     auto theme = pipelineContext->GetTheme<DataPanelTheme>();
     auto colors = theme->GetColorsArray();
     auto defaultThickness = theme->GetThickness().ConvertToPx();
@@ -84,103 +156,88 @@ void DataPanelPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) c
     }
     arcData.wholeAngle = 360.0f;
     arcData.startAngle = 0.0f;
-    auto dataValues = paintProperty->GetValues();
-    std::vector<double> values = dataValues.value();
     PaintTrackBackground(canvas, arcData, BACKGROUND_COLOR);
     double proportions = 1.0;
-    auto max = paintProperty->GetMax();
-    double maxValue = max.value();
+    double maxValue = max_;
     if (LessOrEqual(maxValue, 0.0)) {
         maxValue = 100.0;
     }
     double totalValue = 0.0;
-    for (uint32_t i = 0; i < values.size(); i++) {
-        totalValue += values[i];
+    float factor = 1.0;
+    for (uint32_t i = 0; i < values_.size(); i++) {
+        totalValue += values_[i];
     }
     if (GreatNotEqual(totalValue, maxValue)) {
+        factor = maxValue / totalValue;
         proportions = 100.0f / totalValue;
     } else {
         proportions = 100.0f / maxValue;
     }
-    arcData.maxValue = maxValue;
-    bool useEffect_ = false;
-    auto effect_ = paintProperty->GetEffect();
-    if (effect_.has_value()) {
-        useEffect_ = effect_.value();
-    }
-    // TODO add closeEffct
-    if (useEffect_ && GreatNotEqual(totalValue, 0.0)) {
-    }
-
     totalValue = totalValue * proportions;
-    for (int32_t i = static_cast<int32_t>(values.size()) - 1; i >= 0; i--) {
+    for (int32_t i = static_cast<int32_t>(values_.size()) - 1; i >= 0; i--) {
         arcData.startColor = colors[i].first;
         arcData.endColor = colors[i].second;
-        arcData.progress = totalValue;
-        PaintProgress(canvas, arcData, useEffect_, false, 0.0);
-        totalValue -= values[i] * proportions;
+        if (effect_ && GreatNotEqual(totalValue, 0.0)) {
+            arcData.progress = totalValue * date;
+            PaintRainbowFilterMask(canvas, factor * date, arcData);
+        } else {
+            arcData.progress = totalValue;
+        }
+        PaintProgress(canvas, arcData, effect_, false, 0.0);
+        totalValue -= values_[i] * proportions;
     }
     canvas.Restore();
 }
 
-void DataPanelPaintMethod::PaintLinearProgress(RSCanvas& canvas, PaintWrapper* paintWrapper) const
+void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF offset) const
 {
-    auto frameSize = paintWrapper->GetGeometryNode()->GetMarginFrameSize();
-    auto offset = paintWrapper->GetContentOffset();
-    auto totalWidth = frameSize.Width();
-    auto paintProperty = DynamicCast<DataPanelPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    auto max = paintProperty->GetMax();
+    auto canvas = context.canvas;
+    auto totalWidth = context.width;
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
     auto segmentWidthSum = 0.0;
-    auto values = paintProperty->GetValues();
-    std::vector<double> data_values = values.value();
-    for (uint32_t i = 0; i < data_values.size(); i++) {
-        segmentWidthSum += data_values[i];
+    for (uint32_t i = 0; i < values_.size(); i++) {
+        segmentWidthSum += values_[i];
     }
     auto segmentSize = 0.0;
-    if (segmentWidthSum == max.value()) {
-        segmentSize = static_cast<double>(data_values.size() - 1);
+    if (segmentWidthSum == max_) {
+        segmentSize = static_cast<double>(values_.size() - 1);
     } else {
-        segmentSize = static_cast<double>(data_values.size());
+        segmentSize = static_cast<double>(values_.size());
     }
-    for (uint32_t i = 0; i < data_values.size(); i++) {
-        if (NearEqual(data_values[i], 0.0)) {
+    for (uint32_t i = 0; i < values_.size(); i++) {
+        if (NearEqual(values_[i], 0.0)) {
             segmentSize -= 1;
         }
     }
     float scaleMaxValue = 0.0f;
-    if (max.value() > 0) {
-        scaleMaxValue = (totalWidth - segmentSize * spaceWidth) / max.value();
+    if (max_ > 0) {
+        scaleMaxValue = (totalWidth - segmentSize * spaceWidth) / max_;
     }
-    auto height = frameSize.Height();
+    auto height = context.height;
     auto widthSegment = offset.GetX();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto theme = pipelineContext->GetTheme<DataPanelTheme>();
     auto colors = theme->GetColorsArray();
-    PaintBackground(canvas, paintWrapper, totalWidth, height);
+    PaintBackground(canvas, offset, totalWidth, height);
 
-    for (uint32_t i = 0; i < data_values.size(); i++) {
-        if (data_values[i] > 0) {
-            auto segmentWidth = data_values[i];
+    for (uint32_t i = 0; i < values_.size(); i++) {
+        if (values_[i] > 0) {
+            auto segmentWidth = values_[i];
             if (NearEqual(segmentWidth, 0.0)) {
                 continue;
             }
             auto startColor = colors[i].first;
             auto endColor = colors[i].second;
-            PaintColorSegment(
-                canvas, paintWrapper, segmentWidth * scaleMaxValue, widthSegment, height, startColor, endColor);
-            widthSegment += data_values[i] * scaleMaxValue;
-            PaintSpace(canvas, paintWrapper, spaceWidth, widthSegment, height);
+            PaintColorSegment(canvas, offset, segmentWidth * scaleMaxValue, widthSegment, height, startColor, endColor);
+            widthSegment += values_[i] * scaleMaxValue;
+            PaintSpace(canvas, offset, spaceWidth, widthSegment, height);
             widthSegment += spaceWidth;
         }
     }
 }
 
-void DataPanelPaintMethod::PaintBackground(
-    RSCanvas& canvas, PaintWrapper* paintWrapper, float totalWidth, float height) const
+void DataPanelModifier::PaintBackground(RSCanvas& canvas, OffsetF offset, float totalWidth, float height) const
 {
-    auto offset = paintWrapper->GetContentOffset();
     RSBrush brush;
     brush.SetColor(ToRSColor(BACKGROUND_COLOR));
     brush.SetAntiAlias(true);
@@ -192,10 +249,9 @@ void DataPanelPaintMethod::PaintBackground(
     canvas.DetachBrush();
 }
 
-void DataPanelPaintMethod::PaintColorSegment(RSCanvas& canvas, PaintWrapper* paintWrapper, float segmentWidth,
-    float xSegment, float height, const Color segmentStartColor, const Color segmentEndColor) const
+void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, OffsetF offset, float segmentWidth, float xSegment,
+    float height, const Color segmentStartColor, const Color segmentEndColor) const
 {
-    auto offset = paintWrapper->GetContentOffset();
     RSBrush brush;
     RSRect rect(xSegment, offset.GetY(), xSegment + segmentWidth, offset.GetY() + height);
     RSPoint segmentStartPoint;
@@ -215,10 +271,8 @@ void DataPanelPaintMethod::PaintColorSegment(RSCanvas& canvas, PaintWrapper* pai
     canvas.DetachBrush();
 }
 
-void DataPanelPaintMethod::PaintSpace(
-    RSCanvas& canvas, PaintWrapper* paintWrapper, float spaceWidth, float xSpace, float height) const
+void DataPanelModifier::PaintSpace(RSCanvas& canvas, OffsetF offset, float spaceWidth, float xSpace, float height) const
 {
-    auto offset = paintWrapper->GetContentOffset();
     RSBrush brush;
     RSRect rect(xSpace, offset.GetY(), xSpace + spaceWidth, offset.GetY() + height);
     brush.SetColor(ToRSColor(Color::WHITE));
@@ -228,7 +282,7 @@ void DataPanelPaintMethod::PaintSpace(
     canvas.DetachBrush();
 }
 
-void DataPanelPaintMethod::PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const
+void DataPanelModifier::PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const
 {
     RSPen backgroundTrackData;
     RSPath backgroundTrackPath;
@@ -249,7 +303,7 @@ void DataPanelPaintMethod::PaintTrackBackground(RSCanvas& canvas, ArcData arcDat
     canvas.DetachPen();
 }
 
-void DataPanelPaintMethod::PaintProgress(
+void DataPanelModifier::PaintProgress(
     RSCanvas& canvas, ArcData arcData, bool useEffect, bool useAnimator, float percent) const
 {
     float thickness = arcData.thickness;
