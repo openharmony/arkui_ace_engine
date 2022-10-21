@@ -142,7 +142,31 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     }
 
     CheckSelfIdealSize();
+    CheckBorderAndPadding();
     CheckAspectRatio();
+}
+
+void LayoutProperty::CheckBorderAndPadding()
+{
+    auto selfWidth = layoutConstraint_->selfIdealSize.Width();
+    auto selfHeight = layoutConstraint_->selfIdealSize.Height();
+    if (!selfWidth && !selfHeight) {
+        return;
+    }
+    auto selfWidthFloat = selfWidth.value_or(0.0f);
+    auto selfHeightFloat = selfHeight.value_or(0.0f);
+    auto paddingWithBorder = CreatePaddingAndBorder();
+    auto deflateWidthF = paddingWithBorder.Width();
+    auto deflateHeightF = paddingWithBorder.Height();
+    if (LessOrEqual(deflateWidthF, selfWidthFloat) && LessOrEqual(deflateHeightF, selfHeightFloat)) {
+        return;
+    }
+    if (GreatNotEqual(deflateWidthF, selfWidthFloat)) {
+        layoutConstraint_->selfIdealSize.SetWidth(deflateWidthF);
+    }
+    if (GreatNotEqual(deflateHeightF, selfHeightFloat)) {
+        layoutConstraint_->selfIdealSize.SetHeight(deflateHeightF);
+    }
 }
 
 void LayoutProperty::CheckAspectRatio()
