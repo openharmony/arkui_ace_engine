@@ -21,8 +21,19 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/common/declaration.h"
+#include "core/components/navigation_bar/navigation_bar_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+inline RefPtr<NavigationBarTheme> NavigationGetTheme()
+{
+    // get theme
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = pipeline->GetTheme<NavigationBarTheme>();
+    return theme;
+}
+
 // TODO：move some items to theme
 // title bar back button
 const std::string BACK_BUTTON = "Back";
@@ -38,8 +49,6 @@ constexpr float TITLE_WIDTH = 100.0f;
 constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 
 // title
-constexpr Dimension TITLE_FONT_SIZE = 30.0_vp; // ohos_id_text_size_headline6
-constexpr Color TITLE_COLOR = Color(0x66182431); // ohos_id_color_text_tertiary
 constexpr Dimension TITLE_HEIGHT = 56.0_vp;
 // subtitle
 constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title3
@@ -54,10 +63,8 @@ constexpr Dimension TITLEBAR_HEIGHT_WITHOUT_SUBTITLE = 112.0_vp;
 // toolbar item
 constexpr Dimension TEXT_FONT_SIZE = 10.0_vp;
 constexpr Color TEXT_COLOR = Color(0xE6000000);
-constexpr Dimension ICON_SIZE = 24.0_vp;
 constexpr Color ICON_COLOR = Color(0xE6000000);
 // toolbar
-constexpr Dimension TOOLBAR_HEIGHT = 56.0_vp;
 constexpr Dimension ICON_PADDING = 10.0_vp;
 constexpr Dimension TEXT_TOP_PADDING = 2.0_vp;
 
@@ -68,15 +75,10 @@ constexpr Color DIVIDER_COLOR = Color(0x08000000);
 // navigation content
 constexpr Dimension SINGLE_LINE_TITLEBAR_HEIGHT = 56.0_vp;
 constexpr Dimension DOUBLE_LINE_TITLEBAR_HEIGHT = 82.0_vp;
-constexpr Dimension MAX_PADDING_START = 24.0_vp;
-constexpr Dimension MAX_PADDING_END = 24.0_vp;
-constexpr Dimension TITLE_TEXT_SIZE = 24.0_vp;
-constexpr Color TITLE_TEXT_COLOR = Color(0x66182431); // Light mode
 
 // navBar
 constexpr Dimension FULL_SINGLE_LINE_TITLEBAR_HEIGHT = 112.0_vp;
 constexpr Dimension FULL_DOUBLE_LINE_TITLEBAR_HEIGHT = 138.0_vp;
-constexpr Dimension MENU_HEIGHT = 56.0_vp;
 constexpr Dimension HORIZONTAL_MARGIN = 16.0_vp; // ohos_id_elements_margin_horizontal_l
 constexpr Dimension HORIZONTAL_MARGIN_M = 8.0_vp; // ohos_id_elements_margin_horizontal_m
 
@@ -128,13 +130,13 @@ enum class ChildNodeOperation {
 };
 
 enum class TitleHeight {
-    MAINONLY,
-    MAINWITHSUB
+    MAIN_ONLY,
+    MAIN_WITH_SUB
 };
 
 enum class TitleBarParentType {
     NAVBAR,
-    NAVDESTINATION
+    NAV_DESTINATION
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H
