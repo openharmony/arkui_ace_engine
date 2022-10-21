@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 
-#include "core/components/flex/flex_component_v2.h"
 #include "core/components_ng/pattern/flex/flex_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -27,7 +26,6 @@ namespace OHOS::Ace::Framework {
 
 void JSFlexImpl::Create(const JSCallbackInfo& info)
 {
-    std::list<RefPtr<Component>> children;
     if (info.Length() < 1) {
         LOGD("No input args, use default row setting");
         FlexModel::GetInstance()->CreateFlexRow();
@@ -40,7 +38,6 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> wrapVal = obj->GetProperty("wrap");
-    RefPtr<Component> mainComponent;
     if (wrapVal->IsNumber()) {
         auto wrapNum = wrapVal->ToNumber<int32_t>();
         if (wrapNum == 0) {
@@ -55,7 +52,6 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
 
 void JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
 {
-    std::list<RefPtr<Component>> children;
     if (info.Length() < 1) {
         FlexModel::GetInstance()->CreateFlexRow();
         return;
