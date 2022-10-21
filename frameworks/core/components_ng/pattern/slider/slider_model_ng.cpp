@@ -29,7 +29,6 @@ void SliderModelNG::Create(float value, float step, float min, float max)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SLIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SliderPattern>(); });
     stack->Push(frameNode);
-    LoadTheme(frameNode);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Value, value);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Step, step);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Min, min);
@@ -87,35 +86,6 @@ void SliderModelNG::SetOnChange(SliderOnChangeEvent&& eventOnChange)
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(eventOnChange));
-}
-
-// TODO: When used, it is obtained from the theme, and cannot be saved in the object set by the developer.
-void SliderModelNG::LoadTheme(const RefPtr<FrameNode>& frameNode)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SliderTheme>();
-    CHECK_NULL_VOID(theme);
-    auto castSliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
-    if (castSliderLayoutProperty) {
-        castSliderLayoutProperty->UpdateOutsetBlockSize(theme->GetOutsetBlockSize());
-        castSliderLayoutProperty->UpdateOutsetBlockHotSize(theme->GetOutsetBlockHotSize());
-        castSliderLayoutProperty->UpdateOutsetTrackThickness(theme->GetOutsetTrackThickness());
-        castSliderLayoutProperty->UpdateInsetBlockSize(theme->GetInsetBlockSize());
-        castSliderLayoutProperty->UpdateInsetBlockHotSize(theme->GetInsetBlockHotSize());
-        castSliderLayoutProperty->UpdateInsetTrackThickness(theme->GetInsetTrackThickness());
-    }
-    auto castSliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    if (castSliderPaintProperty) {
-        castSliderPaintProperty->UpdateBlockColor(theme->GetBlockColor());
-        castSliderPaintProperty->UpdateBlockHoverColor(theme->GetBlockHoverColor());
-        castSliderPaintProperty->UpdateTipColor(theme->GetTipColor());
-        castSliderPaintProperty->UpdateTipTextColor(theme->GetTipTextColor());
-        castSliderPaintProperty->UpdateMarkerColor(theme->GetMarkerColor());
-        castSliderPaintProperty->UpdateTrackBackgroundColor(theme->GetTrackBgColor());
-        castSliderPaintProperty->UpdateSelectColor(theme->GetTrackSelectedColor());
-        castSliderPaintProperty->UpdateMarkerSize(theme->GetMarkerSize());
-    }
 }
 
 } // namespace OHOS::Ace::NG

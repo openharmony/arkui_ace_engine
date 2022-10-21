@@ -573,8 +573,6 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     padding.top = CalcLength(sliderEdge.Top());
     padding.bottom = CalcLength(sliderEdge.Bottom());
     sliderLayoutProperty->UpdatePadding(padding);
-    sliderLayoutProperty->UpdateInsetBlockHotSize(sliderTheme->GetInsetBlockHotSize());
-    sliderLayoutProperty->UpdateInsetBlockSize(sliderTheme->GetInsetBlockSize());
     sliderLayoutProperty->UpdateLayoutWeight(1.0);
 
     SliderOnChangeEvent sliderOnChangeEvent = [weak = WeakClaim(this)](float value, int32_t mode) {

@@ -20,8 +20,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr float HALF = 0.5;
-}
+constexpr float HALF = 0.5;
+} // namespace
 
 void SliderPattern::OnModifyDone()
 {
@@ -40,7 +40,7 @@ void SliderPattern::OnModifyDone()
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
-    valueRatio_ = value_ / (max - min);
+    valueRatio_ = (value_ - min) / (max - min);
     stepRatio_ = step / (max - min);
     InitTouchEvent(gestureHub);
     InitClickEvent(gestureHub);
@@ -63,7 +63,6 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(sliderLayoutAlgorithm, false);
     trackThickness_ = sliderLayoutAlgorithm->GetTrackThickness();
     blockDiameter_ = sliderLayoutAlgorithm->GetBlockDiameter();
-    blockHotDiameter_ = sliderLayoutAlgorithm->GetBlockHotDiameter();
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -162,7 +161,9 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     valueRatio_ = touchLength / sliderLength_;
     CHECK_NULL_VOID(stepRatio_ != 0);
     valueRatio_ = std::round(valueRatio_ / stepRatio_) * stepRatio_;
+    float oldValue = value_;
     value_ = valueRatio_ * (max - min) + min;
+    valueChangeFlag_ = NearEqual(oldValue, value_);
 }
 
 void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -269,11 +270,13 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     return true;
 }
 
-void SliderPattern::FireChangeEvent(int32_t mode) const
+void SliderPattern::FireChangeEvent(int32_t mode)
 {
+    CHECK_NULL_VOID(valueChangeFlag_);
     auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
+    valueChangeFlag_ = false;
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)
