@@ -56,4 +56,24 @@ void ShapeContainerPattern::ViewPortTansform()
     }
 }
 
+void ShapeContainerPattern::OnModifyDone()
+{
+    MarkChildrenDirty(GetHost());
+}
+
+void ShapeContainerPattern::MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode)
+{
+    if (!curentFrameNode || curentFrameNode->GetChildren().empty()) {
+        return;
+    }
+    auto children = curentFrameNode->GetChildren();
+    for (const auto& child : children) {
+        auto childNode = AceType::DynamicCast<FrameNode>(child);
+        if (childNode) {
+            childNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            MarkChildrenDirty(childNode);
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

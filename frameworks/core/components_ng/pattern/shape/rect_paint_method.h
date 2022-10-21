@@ -32,7 +32,7 @@ public:
     ~RectPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        auto rectPaintProperty = DynamicCast<RectPaintProperty>(paintWrapper->GetPaintProperty());
+        auto rectPaintProperty = DynamicCast<RectPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
         if (!rectPaintProperty) {
             return nullptr;
         }
