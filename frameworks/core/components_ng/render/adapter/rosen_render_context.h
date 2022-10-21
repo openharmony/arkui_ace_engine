@@ -126,12 +126,14 @@ public:
     void UpdateTransition(const TransitionOptions& options) override;
     bool HasAppearingTransition() const
     {
-        return transitionAppearingEffect_ != nullptr;
+        return propTransitionAppearing_ != nullptr;
     }
     bool HasDisappearingTransition() const
     {
-        return transitionDisappearingEffect_ != nullptr;
+        return propTransitionDisappearing_ != nullptr;
     }
+    void OnNodeAppear() override;
+    void OnNodeDisappear(FrameNode* host) override;
     void ClipWithRect(const RectF& rectF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const override;
@@ -207,9 +209,10 @@ private:
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
-    bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
-        std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
-        std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex);
+
+    void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
+    void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
+    void SetPivot(float xPivot, float yPivot);
 
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);
@@ -236,12 +239,12 @@ private:
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
+    bool firstTransitionIn_ = false;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
-    std::shared_ptr<Rosen::RSTransitionEffect> transitionAppearingEffect_ = nullptr;
-    std::shared_ptr<Rosen::RSTransitionEffect> transitionDisappearingEffect_ = nullptr;
 
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
+    std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

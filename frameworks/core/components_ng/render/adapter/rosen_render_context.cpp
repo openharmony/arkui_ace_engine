@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
@@ -49,6 +50,17 @@
 #include "frameworks/core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+float ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
+{
+    if (dimension.Unit() == DimensionUnit::PERCENT) {
+        return static_cast<float>(dimension.Value());
+    }
+    const float defaultPivot = 0.5f;
+    return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : defaultPivot;
+}
+} // namespace
 
 RosenRenderContext::~RosenRenderContext()
 {
@@ -86,6 +98,59 @@ void RosenRenderContext::StopRecordingIfNeeded()
     }
 }
 
+void RosenRenderContext::OnNodeAppear()
+{
+    // because when call this function, the size of frameNode is not calculated. We need frameNode size
+    // to calculate the pivot, so just mark need to perform appearing transition.
+    if (propTransitionAppearing_) {
+        firstTransitionIn_ = true;
+    }
+}
+
+void RosenRenderContext::OnNodeDisappear(FrameNode* host)
+{
+    if (!propTransitionDisappearing_) {
+        return;
+    }
+    CHECK_NULL_VOID(rsNode_);
+    LOGD("rsNode disappear transition, rsNode:%{public}p", rsNode_.get());
+    CHECK_NULL_VOID(host);
+    NotifyTransitionInner(host->GetGeometryNode()->GetFrameSize(), false);
+}
+
+void RosenRenderContext::SetPivot(float xPivot, float yPivot)
+{
+    // change pivot without animation
+    CHECK_NULL_VOID(rsNode_);
+    if (pivotProperty_) {
+        pivotProperty_->Set({ xPivot, yPivot });
+    } else {
+        pivotProperty_ = std::make_shared<Rosen::RSProperty<Rosen::Vector2f>>(Rosen::Vector2f(xPivot, yPivot));
+        auto modifier = std::make_shared<Rosen::RSPivotModifier>(pivotProperty_);
+        rsNode_->AddModifier(modifier);
+    }
+}
+
+void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transitionIn)
+{
+    auto& transitionEffect = transitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
+    if (!transitionEffect) {
+        return;
+    }
+    float xPivot = 0.0f;
+    float yPivot = 0.0f;
+    if (transitionEffect->HasRotate()) {
+        xPivot = ConvertDimensionToScaleBySize(transitionEffect->GetRotateValue().centerX, frameSize.Width());
+        yPivot = ConvertDimensionToScaleBySize(transitionEffect->GetRotateValue().centerY, frameSize.Height());
+    } else if (transitionEffect->HasScale()) {
+        xPivot = ConvertDimensionToScaleBySize(transitionEffect->GetScaleValue().centerX, frameSize.Width());
+        yPivot = ConvertDimensionToScaleBySize(transitionEffect->GetScaleValue().centerY, frameSize.Height());
+    } else {
+        return;
+    }
+    SetPivot(xPivot, yPivot);
+}
+
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode)
 {
     // skip if useExternalNode is true or node already created
@@ -117,16 +182,19 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    rsNode_->SetPivot(0.5f, 0.5f); // default pivot is center
 
+    if (firstTransitionIn_) {
+        // need to perform transitionIn early so not influence the following SetPivot
+        NotifyTransitionInner(paintRect.GetSize(), true);
+        firstTransitionIn_ = false;
+    }
     if (propTransform_ && propTransform_->HasTransformCenter()) {
         auto vec = propTransform_->GetTransformCenterValue();
-        if (vec.GetX().Unit() == DimensionUnit::PERCENT) {
-            rsNode_->SetPivot(vec.GetX().Value(), vec.GetY().Value());
-        } else {
-            rsNode_->SetPivot(
-                vec.GetX().ConvertToPx() / paintRect.Width(), vec.GetY().ConvertToPx() / paintRect.Height());
-        }
+        float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
+        float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
+        SetPivot(xPivot, yPivot);
+    } else {
+        SetPivot(0.5f, 0.5f); // default pivot is center
     }
 
     if (bgLoadingCtx_ && bgLoadingCtx_->GetCanvasImage()) {
@@ -388,6 +456,19 @@ void RosenRenderContext::NotifyTransition(
             }
         },
         option.GetOnFinishEvent());
+}
+
+void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
+{
+    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
+    if (transOptions == nullptr) {
+        return;
+    }
+    CHECK_NULL_VOID(rsNode_);
+    SetTransitionPivot(frameSize, isTransitionIn);
+    auto effect = GetRSTransitionWithoutType(*transOptions);
+    // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
+    rsNode_->NotifyTransition(effect, isTransitionIn);
 }
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
@@ -798,76 +879,21 @@ std::list<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes
     return rsNodes;
 }
 
-bool RosenRenderContext::GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
-    std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
-    std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex)
-{
-    CHECK_NULL_RETURN(rsNode_, false);
-    auto preRSNodesID = rsNode_->GetChildren();
-    std::unordered_set<std::shared_ptr<Rosen::RSNode>> nowRSNodesSet;
-    std::unordered_set<std::shared_ptr<Rosen::RSNode>> preRSNodesSet;
-    // get previous rsnode children set and now rsnode children set
-    for (const auto& node : nowRSNodes) {
-        nowRSNodesSet.insert(node);
-    }
-    for (const auto& id : preRSNodesID) {
-        auto preNode = Rosen::RSNodeMap::Instance().GetNode<Rosen::RSNode>(id);
-        preRSNodesSet.insert(preNode);
-    }
-    // get the difference
-    for (const auto& node : preRSNodesSet) {
-        if (nowRSNodesSet.find(node) == nowRSNodesSet.end()) {
-            toRemoveRSNodes.emplace_back(node);
-        }
-    }
-    int cntIndex = 0;
-    for (const auto& node : nowRSNodes) {
-        if (preRSNodesSet.find(node) == preRSNodesSet.end()) {
-            toAddRSNodesAndIndex.emplace_back(node, cntIndex);
-        }
-        cntIndex++;
-    }
-    return !toRemoveRSNodes.empty() || !toAddRSNodesAndIndex.empty();
-}
-
 void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
 {
     CHECK_NULL_VOID(rsNode_);
     auto nowRSNodes = GetChildrenRSNodes(children);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto option = pipeline->GetExplicitAnimationOption();
-    // if no explicit animation, cannot animate
-    if (!option.GetCurve()) {
-        std::vector<OHOS::Rosen::NodeId> childNodeIds;
-        for (auto& child : nowRSNodes) {
-            childNodeIds.emplace_back(child->GetId());
-        }
-        if (childNodeIds == rsNode_->GetChildren()) {
-            return;
-        }
-        rsNode_->ClearChildren();
-        for (const auto& rsnode : nowRSNodes) {
-            rsNode_->AddChild(rsnode, -1);
-        }
+    std::vector<OHOS::Rosen::NodeId> childNodeIds;
+    for (auto& child : nowRSNodes) {
+        childNodeIds.emplace_back(child->GetId());
+    }
+    if (childNodeIds == rsNode_->GetChildren()) {
         return;
     }
-    // do transition animate
-    std::list<std::shared_ptr<Rosen::RSNode>> toRemoveRSNodes;
-    std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>> toAddRSNodesAndIndex;
-    bool diffRes = GetRSNodeTreeDiff(nowRSNodes, toRemoveRSNodes, toAddRSNodesAndIndex);
-    if (!diffRes) {
-        return;
+    rsNode_->ClearChildren();
+    for (const auto& rsnode : nowRSNodes) {
+        rsNode_->AddChild(rsnode, -1);
     }
-    AnimationUtils::Animate(
-        option, [rsParentNode = rsNode_, &removing = toRemoveRSNodes, &adding = toAddRSNodesAndIndex]() {
-            for (auto& node : removing) {
-                rsParentNode->RemoveChild(node);
-            }
-            for (auto& [node, index] : adding) {
-                rsParentNode->AddChild(node, index);
-            }
-        });
 }
 
 void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
@@ -1168,7 +1194,6 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
             *propTransitionAppearing_ = options;
         }
         propTransitionAppearing_->Type = TransitionType::APPEARING;
-        transitionAppearingEffect_ = GetRSTransitionWithoutType(*propTransitionAppearing_);
     }
     if (options.Type == TransitionType::ALL || options.Type == TransitionType::DISAPPEARING) {
         if (!propTransitionDisappearing_) {
@@ -1177,11 +1202,7 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
             *propTransitionDisappearing_ = options;
         }
         propTransitionDisappearing_->Type = TransitionType::DISAPPEARING;
-        transitionDisappearingEffect_ = GetRSTransitionWithoutType(*propTransitionDisappearing_);
     }
-    rsNode_->SetTransitionEffect(Rosen::RSTransitionEffect::Asymmetric(
-        HasAppearingTransition() ? transitionAppearingEffect_ : Rosen::RSTransitionEffect::Create(),
-        HasDisappearingTransition() ? transitionDisappearingEffect_ : Rosen::RSTransitionEffect::Create()));
 }
 
 std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
