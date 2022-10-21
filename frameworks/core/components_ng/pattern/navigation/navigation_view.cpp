@@ -312,6 +312,7 @@ void NavigationView::SetTitle(const std::string& title)
     textLayoutProperty->UpdateFontSize(TITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(TITLE_COLOR);
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
     navBarNode->MarkModifyDone();
@@ -380,6 +381,7 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetSubtitle(subtitleNode);
     navBarNode->MarkModifyDone();
 }
