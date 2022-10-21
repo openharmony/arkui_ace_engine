@@ -113,11 +113,8 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(
         return false;
     }
     CHECK_NULL_RETURN(paragraph_, false);
-    if (contentConstraint.selfIdealSize.Width()) {
-        paragraph_->Layout(contentConstraint.selfIdealSize.Width().value());
-    } else {
-        paragraph_->Layout(contentConstraint.maxSize.Width());
-    }
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
+    paragraph_->Layout(maxSize.Width());
     return true;
 }
 
@@ -147,12 +144,13 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
             contentConstraint.maxSize.Height(), stepSize)) {
         return false;
     }
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
     while (GreatOrEqual(maxFontSize, minFontSize)) {
         textStyle.SetFontSize(Dimension(maxFontSize));
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint)) {
             return false;
         }
-        if (!DidExceedMaxLines(contentConstraint)) {
+        if (!DidExceedMaxLines(maxSize)) {
             break;
         }
         maxFontSize -= stepSize;
@@ -160,13 +158,12 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     return true;
 }
 
-bool TextLayoutAlgorithm::DidExceedMaxLines(const LayoutConstraintF& contentConstraint)
+bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
 {
     CHECK_NULL_RETURN(paragraph_, false);
     bool didExceedMaxLines = paragraph_->DidExceedMaxLines();
-    didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph_->GetHeight(), contentConstraint.maxSize.Height());
-    didExceedMaxLines =
-        didExceedMaxLines || GreatNotEqual(paragraph_->GetLongestLine(), contentConstraint.maxSize.Width());
+    didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph_->GetHeight(), maxSize.Height());
+    didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph_->GetLongestLine(), maxSize.Width());
     return didExceedMaxLines;
 }
 
@@ -201,6 +198,13 @@ const std::shared_ptr<RSParagraph>& TextLayoutAlgorithm::GetParagraph()
 float TextLayoutAlgorithm::GetBaselineOffset() const
 {
     return baselineOffset_;
+}
+
+SizeF TextLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const
+{
+    auto maxSize = contentConstraint.selfIdealSize;
+    maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
+    return maxSize.ConvertToSizeT();
 }
 
 } // namespace OHOS::Ace::NG
