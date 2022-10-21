@@ -40,10 +40,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    
+
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
-    TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
-        textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    TextStyle textStyle = CreateTextStyleUsingTheme(
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraphAndLayout(textStyle, textLayoutProperty->GetContent().value_or(""), contentConstraint)) {
             return std::nullopt;
@@ -53,12 +53,14 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             return std::nullopt;
         }
     }
-    auto paragraphNewWidth =
-        std::clamp(GetTextWidth(), contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
-    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
-        paragraph_->Layout(std::ceil(paragraphNewWidth));
-    }
 
+    if (!contentConstraint.selfIdealSize.Width()) {
+        auto paragraphNewWidth =
+            std::clamp(GetTextWidth(), contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
+        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+            paragraph_->Layout(std::ceil(paragraphNewWidth));
+        }
+    }
     auto height = static_cast<float>(paragraph_->GetHeight());
     double baselineOffset = 0.0;
     textStyle.GetBaselineOffset().NormalizeToPx(
