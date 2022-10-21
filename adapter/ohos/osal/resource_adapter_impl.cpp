@@ -119,7 +119,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
         resConfig->GetColorMode(), resConfig->GetInputDevice());
     sysResourceManager_ = newResMgr;
     resourceManager_ = sysResourceManager_;
-    packagePathStr_ = IsDirExist(resPath) ? resPath : std::string();
+    packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
     resConfig_ = resConfig;
 }
 
