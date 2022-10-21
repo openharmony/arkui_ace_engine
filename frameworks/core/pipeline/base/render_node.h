@@ -1206,6 +1206,7 @@ protected:
     double GetFirstChildBaseline(TextBaseline baseline);
     Size GetLargestChildContentSize();
     void UpdateAccessibilityPosition();
+    void UpdateAccessibilityEnable(bool isEnabled);
     void CheckIfNeedUpdateTouchRect();
 
     RefPtr<ThemeManager> GetThemeManager() const
