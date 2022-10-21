@@ -160,6 +160,9 @@ void JSText::SetTextAlign(int32_t value)
 void JSText::SetAlign(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsAlign(info);
+    if (!info[0]->IsNumber()) {
+        return;
+    }
     TextModel::GetInstance()->OnSetAlign();
 }
 
