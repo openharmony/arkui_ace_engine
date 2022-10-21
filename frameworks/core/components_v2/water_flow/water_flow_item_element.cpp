@@ -20,20 +20,6 @@
 namespace OHOS::Ace::V2 {
 RefPtr<RenderNode> WaterFlowItemElement::CreateRenderNode()
 {
-    SetOnFocusCallback([weak = WeakClaim(this)](void) {
-        auto element = weak.Upgrade();
-        if (element) {
-            element->HandleOnFocus();
-        }
-    });
     return SoleChildElement::CreateRenderNode();
-}
-
-void WaterFlowItemElement::HandleOnFocus()
-{
-    auto waterFlowItem = AceType::DynamicCast<RenderWaterFlowItem>(GetRenderNode());
-    if (waterFlowItem) {
-        waterFlowItem->HandleOnFocus();
-    }
 }
 } // namespace OHOS::Ace::V2

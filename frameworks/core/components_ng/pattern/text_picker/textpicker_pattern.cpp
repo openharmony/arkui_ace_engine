@@ -144,7 +144,7 @@ void TextPickerPattern::FlushCurrentOptions()
         CHECK_NULL_VOID(textPickerEventHub);
         auto currentValue = textPickerPattern->GetOption(currentIndex);
         textPickerEventHub->FireChangeEvent(currentValue, currentIndex);
-        textPickerEventHub->FireDailogChangeEvent(GetSelectedObject(true, 1));
+        textPickerEventHub->FireDialogChangeEvent(GetSelectedObject(true, 1));
     }
 }
 

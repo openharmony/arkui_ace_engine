@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -48,19 +49,20 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     SizeF maxSize = layoutConstraint.maxSize;
 
-    color_ = indexerLayoutProperty->GetColor().value_or(Color::BLACK);
-    selectedColor_ = indexerLayoutProperty->GetSelectedColor().value_or(Color::BLACK);
-    popupColor_ = indexerLayoutProperty->GetPopupColor().value_or(Color::BLACK);
-    selectedBackgroundColor_ = indexerLayoutProperty->GetSelectedBackgroundColor().value_or(Color::BLACK);
-    popupBackground_ = indexerLayoutProperty->GetPopupBackground().value_or(Color::BLACK);
+    color_ = indexerLayoutProperty->GetColor().value_or(Color(INDEXER_LIST_COLOR));
+    selectedColor_ = indexerLayoutProperty->GetSelectedColor().value_or(Color(INDEXER_LIST_ACTIVE_COLOR));
+    popupColor_ = indexerLayoutProperty->GetPopupColor().value_or(Color(BUBBLE_FONT_COLOR));
+    selectedBackgroundColor_ = indexerLayoutProperty->GetSelectedBackgroundColor()
+        .value_or(Color(INDEXER_ACTIVE_BG_COLOR));
+    popupBackground_ = indexerLayoutProperty->GetPopupBackground().value_or(Color(BUBBLE_BG_COLOR));
     usingPopup_ = indexerLayoutProperty->GetUsingPopup().value_or(false);
     TextStyle textStyle;
     selectedFont_ = indexerLayoutProperty->GetSelectedFont().value_or(textStyle);
     popupFont_ = indexerLayoutProperty->GetPopupFont().value_or(textStyle);
     font_ = indexerLayoutProperty->GetFont().value_or(textStyle);
-    auto itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(0));
+    auto itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
     itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, maxSize.Height()).value();
-    alignStyle_ = indexerLayoutProperty->GetAlignStyle().value_or(V2::AlignStyle::RIGHT);
+    alignStyle_ = indexerLayoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
 
     if (itemCount_ <= 0) {
         LOGE("AlphabetIndexer arrayValue size is less than 0");
@@ -76,7 +78,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         itemSizeRender_ = maxSize.Height() / itemCount_;
     }
-    // TODO:移动到onModifyDone
+    
     auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
     for (int32_t index = 0; index < itemCount_; index++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -97,7 +99,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto childRenderContext = childFrameNode->GetRenderContext();
             childRenderContext->BlendBgColor(selectedBackgroundColor_);
 
-            Dimension radius = Dimension(BOX_RADIUS);
+            Dimension radius = Dimension(NG::BOX_RADIUS);
             BorderRadiusProperty borderRadius { radius, radius, radius, radius };
             childRenderContext->UpdateBorderRadius(borderRadius);
         } else {
@@ -111,7 +113,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto childRenderContext = childFrameNode->GetRenderContext();
             childRenderContext->ResetBlendBgColor();
 
-            Dimension radius = Dimension(BOX_RADIUS);
+            Dimension radius = Dimension(NG::BOX_RADIUS);
             BorderRadiusProperty borderRadius { radius, radius, radius, radius };
             childRenderContext->UpdateBorderRadius(borderRadius);
         }
@@ -121,26 +123,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (usingPopup_) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(itemCount_);
         CHECK_NULL_VOID(childWrapper);
-        auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
-        CHECK_NULL_VOID(childLayoutProperty);
-
-        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE));
-        childLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        childLayoutProperty->UpdateContent(arrayValue_[selected_]);
-        childLayoutProperty->UpdateTextColor(popupColor_);
-        auto fontSize = popupFont_.GetFontSize();
-        childLayoutProperty->UpdateFontSize(fontSize);
-        auto fontWeight = popupFont_.GetFontWeight();
-        childLayoutProperty->UpdateFontWeight(fontWeight);
-
-        auto childFrameNode = childWrapper->GetHostNode();
-        auto childRenderContext = childFrameNode->GetRenderContext();
-        childRenderContext->BlendBgColor(popupBackground_);
-
-        Dimension radius = Dimension(BUBBLE_BOX_RADIUS);
-        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        childRenderContext->UpdateBorderRadius(borderRadius);
-
+        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(NG::BUBBLE_BOX_SIZE, NG::BUBBLE_BOX_SIZE));
         childWrapper->Measure(childLayoutConstraint);
     }
     auto size = SizeF(itemSizeRender_, itemSizeRender_ * itemCount_);
@@ -162,8 +145,31 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
+    
+    auto layoutConstraint = indexerLayoutProperty->GetContentLayoutConstraint().value();
+    auto selfIdealSize = layoutConstraint.selfIdealSize;
+    constexpr float half = 0.5f;
+    if (selfIdealSize.Width().has_value() && selfIdealSize.Width().value() >= size.Width()) {
+       left = left + half * (selfIdealSize.Width().value() - size.Width());
+    }
+    if (selfIdealSize.Height().has_value() && selfIdealSize.Height().value() >= size.Height()) {
+        top = top + half * (selfIdealSize.Height().value() - size.Height());
+    }
     auto paddingOffset = OffsetF(left, top);
 
+    float popupPositionX = 0.0f;
+    float popupPositionY = 0.0f;
+    if (indexerLayoutProperty->GetPopupPositionX().has_value()) {
+        popupPositionX = indexerLayoutProperty->GetPopupPositionX().value();
+    } else {
+        if (alignStyle_ == NG::AlignStyle::LEFT) {
+            popupPositionX = -NG::BUBBLE_POSITION_X + itemSizeRender_ * half;
+        } else {
+            popupPositionX = NG::BUBBLE_POSITION_X + itemSizeRender_ * half;
+        }
+    }
+    popupPositionY = indexerLayoutProperty->GetPopupPositionY().value_or(NG::BUBBLE_POSITION_Y);
+    
     for (int32_t index = 0; index < itemCount_; index++) {
         auto offset = paddingOffset;
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -188,12 +194,7 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             return;
         }
 
-        OffsetF bubblePosition;
-        if (alignStyle_ == V2::AlignStyle::RIGHT) {
-            bubblePosition = OffsetF(-BUBBLE_POSITION_X, BUBBLE_POSITION_Y);
-        } else {
-            bubblePosition = OffsetF(BUBBLE_POSITION_X + itemSizeRender_, BUBBLE_POSITION_Y);
-        }
+        OffsetF bubblePosition = OffsetF(popupPositionX, popupPositionY);
         offset = offset + bubblePosition;
         childWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
 

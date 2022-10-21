@@ -213,15 +213,56 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects)
     }
 }
 
+void SubwindowManager::AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow)
+{
+    if (!subwindow) {
+        LOGE("Add dialog subwindow failed, the subwindow is null.");
+        return;
+    }
+    LOGI("Add dialog subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.", instanceId,
+        subwindow->GetSubwindowId());
+    std::lock_guard<std::mutex> lock(dialogSubwindowMutex_);
+    auto result = dialogSubwindowMap_.try_emplace(instanceId, subwindow);
+    if (!result.second) {
+        LOGE("Add dialog failed of this instance %{public}d", instanceId);
+        return;
+    }
+    LOGI("Add dialog subwindow success of this instance %{public}d.", instanceId);
+}
+
+const RefPtr<Subwindow> SubwindowManager::GetDialogSubwindow(int32_t instanceId)
+{
+    LOGI("Get dialog subwindow of instance %{public}d.", instanceId);
+    std::lock_guard<std::mutex> lock(dialogSubwindowMutex_);
+    auto result = dialogSubwindowMap_.find(instanceId);
+    if (result != dialogSubwindowMap_.end()) {
+        return result->second;
+    } else {
+        return nullptr;
+    }
+}
+
+void SubwindowManager::SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow)
+{
+    std::lock_guard<std::mutex> lock(currentDialogSubwindowMutex_);
+    currentDialogSubwindow_ = subwindow;
+}
+
+const RefPtr<Subwindow>& SubwindowManager::GetCurrentDialogWindow()
+{
+    std::lock_guard<std::mutex> lock(currentDialogSubwindowMutex_);
+    return currentDialogSubwindow_;
+}
+
 RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
 {
     auto containerId = Container::CurrentId();
     LOGI("SubwindowManager::GetOrCreateSubWindow containerId = %{public}d.", containerId);
-    auto subwindow = GetSubwindow(containerId);
+    auto subwindow = GetDialogSubwindow(containerId);
     if (!subwindow) {
         LOGI("Subwindow is null, add a new one.");
         subwindow = Subwindow::CreateSubwindow(containerId);
-        AddSubwindow(containerId, subwindow);
+        AddDialogSubwindow(containerId, subwindow);
     }
     return subwindow;
 }

@@ -51,6 +51,7 @@ build_component("common") {
     "layout/grid_column_info.cpp",
     "layout/grid_container_info.cpp",
     "layout/grid_system_manager.cpp",
+    "layout/templates_parser.cpp",
   ]
   rosen_sources = [
     "painter/rosen_checkable_painter.cpp",

@@ -39,6 +39,7 @@ public:
     static void SetNavBarPosition(int32_t value);
     static void SetHideNavBar(bool hide);
     static void SetBackButtonIcon(const JSCallbackInfo& info);
+    static void SetOnNavBarStateChange(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

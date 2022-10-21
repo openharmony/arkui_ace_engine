@@ -93,7 +93,6 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     } else {
         pen.SetColor(ToRSColor(Color::GRAY));
         brush.SetColor(ToRSColor(Color::WHITE));
-        brush.SetAlpha(50);
         DrawUnselected(canvas, paintOffset, pen, brush, contentSize);
     }
 }

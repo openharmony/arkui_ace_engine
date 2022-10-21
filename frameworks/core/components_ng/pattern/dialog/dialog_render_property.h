@@ -49,6 +49,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseCustomStyle, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCancel, bool, PROPERTY_UPDATE_RENDER);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put("customStyle", propUseCustomStyle_.value_or(false) ? "true" : "false");
+        json->Put("autoCancel", propAutoCancel_.value_or(true) ? "true" : "false");
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(DialogRenderProperty);
 };
 

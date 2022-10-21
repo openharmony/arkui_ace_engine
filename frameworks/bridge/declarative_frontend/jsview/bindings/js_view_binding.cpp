@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
-
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 namespace OHOS::Ace::Framework {
@@ -55,9 +54,9 @@ void JSView::RestoreInstanceId()
     ContainerScope::UpdateCurrent(restoreInstanceId_);
 }
 
-JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject,
-    JSRef<JSFunc> jsRenderFunction) : viewId_(viewId)
+JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
 {
+    viewId_ = viewId;
     jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject, jsRenderFunction);
     LOGD("JSView constructor");
 }
@@ -285,7 +284,6 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
     LOGD("JSViewPartialUpdate::Destroy end");
 }
 
-
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     LOGD("JSViewPartialUpdate::Bind");
@@ -334,8 +332,6 @@ void JSViewPartialUpdate::DestructorCallback(JSViewPartialUpdate* view)
     view->DecRefCount();
     LOGD("JSViewPartialUpdate(DestructorCallback) end");
 }
-
-
 
 void JSViewPartialUpdate::JsGetDeletedElemtIds(const JSCallbackInfo& info)
 {

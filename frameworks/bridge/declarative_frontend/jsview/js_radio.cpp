@@ -16,12 +16,34 @@
 #include "bridge/declarative_frontend/jsview/js_radio.h"
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/radio/radio_view.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
+namespace OHOS::Ace {
+
+std::unique_ptr<RadioModel> RadioModel::instance_ = nullptr;
+
+RadioModel* RadioModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::RadioModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::RadioModelNG());
+        } else {
+            instance_.reset(new Framework::RadioModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 void JSRadio::Create(const JSCallbackInfo& info)
@@ -31,47 +53,20 @@ void JSRadio::Create(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto value = std::optional<std::string>();
-        auto group = std::optional<std::string>();
-        if ((info.Length() >= 1) && info[0]->IsObject()) {
-            auto paramObject = JSRef<JSObject>::Cast(info[0]);
-            auto valueTemp = paramObject->GetProperty("name");
-            auto groupTemp = paramObject->GetProperty("group");
-            if (valueTemp->IsString()) {
-                value = valueTemp->ToString();
-            }
-            if (groupTemp->IsString()) {
-                group = groupTemp->ToString();
-            }
+    std::optional<std::string> value;
+    std::optional<std::string> group;
+    if ((info.Length() >= 1) && info[0]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto valueTemp = paramObject->GetProperty("value");
+        auto groupTemp = paramObject->GetProperty("group");
+        if (valueTemp->IsString()) {
+            value = valueTemp->ToString();
         }
-        NG::RadioView::Create(value, group);
-        return;
+        if (groupTemp->IsString()) {
+            group = groupTemp->ToString();
+        }
     }
-
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto groupName = paramObject->GetProperty("group");
-    auto radioValue = paramObject->GetProperty("value");
-    RefPtr<RadioTheme> radioTheme = GetTheme<RadioTheme>();
-    auto radioComponent = AceType::MakeRefPtr<OHOS::Ace::RadioComponent<std::string>>(radioTheme);
-    auto radioGroupName = groupName->ToString();
-    std::string value = radioValue->ToString();
-    radioComponent->SetValue(value);
-    auto radioGroupComponent = ViewStackProcessor::GetInstance()->GetRadioGroupComponent();
-    radioComponent->SetGroupName(radioGroupName);
-    auto& radioGroup = (*radioGroupComponent)[radioGroupName];
-    radioGroup.SetIsDeclarative(true);
-    radioGroup.AddRadio(radioComponent);
-    radioComponent->SetMouseAnimationType(HoverAnimationType::NONE);
-    ViewStackProcessor::GetInstance()->Push(radioComponent);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto horizontalPadding = radioTheme->GetHotZoneHorizontalPadding();
-    auto verticalPadding = radioTheme->GetHotZoneVerticalPadding();
-    radioComponent->SetWidth(radioTheme->GetWidth() - horizontalPadding * 2);
-    radioComponent->SetHeight(radioTheme->GetHeight() - verticalPadding * 2);
-    box->SetDeliverMinToChild(true);
-    box->SetWidth(radioTheme->GetWidth());
-    box->SetHeight(radioTheme->GetHeight());
+    RadioModel::GetInstance()->Create(value, group);
 }
 
 void JSRadio::JSBind(BindingTarget globalObj)
@@ -109,13 +104,8 @@ void JSRadio::Checked(bool checked)
 
 void JSRadio::Checked(const JSCallbackInfo& info)
 {
-    if (info[0]->IsBoolean() && Container::IsCurrentUseNewPipeline()) {
-        NG::RadioView::SetChecked(info[0]->ToBoolean());
-        return;
-    }
-
     if (info[0]->IsBoolean()) {
-        Checked(info[0]->ToBoolean());
+        RadioModel::GetInstance()->SetChecked(info[0]->ToBoolean());
     }
 }
 
@@ -141,15 +131,7 @@ void JSRadio::JsWidth(const JSRef<JSVal>& jsValue)
         return;
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    auto radioComponent = AceType::DynamicCast<RadioComponent<std::string>>(stack->GetMainComponent());
-    if (radioComponent) {
-        Dimension padding;
-        padding = radioComponent->GetHotZoneHorizontalPadding();
-        radioComponent->SetWidth(value);
-        box->SetWidth(value + padding * 2);
-    }
+    RadioModel::GetInstance()->SetWidth(value);
 }
 
 void JSRadio::JsHeight(const JSCallbackInfo& info)
@@ -174,15 +156,7 @@ void JSRadio::JsHeight(const JSRef<JSVal>& jsValue)
         return;
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    Dimension padding;
-    auto radioComponent = AceType::DynamicCast<RadioComponent<std::string>>(stack->GetMainComponent());
-    if (radioComponent) {
-        padding = radioComponent->GetHotZoneVerticalPadding();
-        radioComponent->SetHeight(value);
-        box->SetHeight(value + padding * 2);
-    }
+    RadioModel::GetInstance()->SetHeight(value);
 }
 
 void JSRadio::JsSize(const JSCallbackInfo& info)
@@ -213,6 +187,7 @@ void JSRadio::JsPadding(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
+
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetPadding(NG::CalcLength(value));
         return;
@@ -243,14 +218,25 @@ void JSRadio::JsPadding(const JSCallbackInfo& info)
             if (leftDimen == 0.0_vp) {
                 leftDimen = topDimen;
             }
-            SetPadding(topDimen, leftDimen);
+            NG::PaddingPropertyF padding;
+            padding.left = leftDimen.ConvertToPx();
+            padding.right = rightDimen.ConvertToPx();
+            padding.top = topDimen.ConvertToPx();
+            padding.bottom = bottomDimen.ConvertToPx();
+            RadioModel::GetInstance()->SetPadding(padding);
             return;
         }
     }
     Dimension length;
-    if (ParseJsDimensionVp(info[0], length)) {
-        SetPadding(length, length);
+    if (!ParseJsDimensionVp(info[0], length)) {
+        return;
     }
+    NG::PaddingPropertyF padding;
+    padding.left = length.ConvertToPx();
+    padding.right = length.ConvertToPx();
+    padding.top = length.ConvertToPx();
+    padding.bottom = length.ConvertToPx();
+    RadioModel::GetInstance()->SetPadding(padding);
 }
 
 void JSRadio::SetPadding(const Dimension& topDimen, const Dimension& leftDimen)
@@ -276,22 +262,14 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-        auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool check) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Radio.onChange");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::RadioView::SetOnChange(std::move(onChange));
-        return;
-    }
-
-    if (!JSViewBindEvent(&CheckableComponent::SetOnChange, args)) {
-        LOGW("Failed to bind event");
-    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool check) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Radio.onChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    RadioModel::GetInstance()->SetOnChange(std::move(onChange));
     args.ReturnSelf();
 }
 

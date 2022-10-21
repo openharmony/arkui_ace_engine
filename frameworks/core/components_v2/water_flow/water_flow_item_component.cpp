@@ -28,22 +28,4 @@ RefPtr<RenderNode> WaterFlowItemComponent::CreateRenderNode()
 {
     return RenderWaterFlowItem::Create();
 }
-
-void WaterFlowItemComponent::SetColumnSpan(int32_t columnSpan)
-{
-    if (columnSpan <= 0) {
-        LOGW("Invalid columnSpan %{public}d", columnSpan);
-        return;
-    }
-    columnSpan_ = columnSpan;
-}
-
-void WaterFlowItemComponent::SetRowSpan(int32_t rowSpan)
-{
-    if (rowSpan <= 0) {
-        LOGW("Invalid rowSpan %{public}d", rowSpan);
-        return;
-    }
-    rowSpan_ = rowSpan;
-}
 } // namespace OHOS::Ace::V2

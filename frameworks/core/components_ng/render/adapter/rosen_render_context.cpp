@@ -35,6 +35,8 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/adapter/graphics_modifier.h"
+#include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
@@ -42,7 +44,6 @@
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/graphics_modifier_painter.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
@@ -152,6 +153,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (propGraphics_) {
         PaintGraphics();
+    }
+
+    if (propOverlay_) {
+        PaintOverlayText();
     }
 }
 
@@ -598,8 +603,10 @@ RectF RosenRenderContext::AdjustPaintRect()
                                                                : PipelineContext::GetCurrentRootHeight();
 
     auto anchor = GetAnchorValue({});
-    auto anchorX = ConvertToPx(anchor.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
-    auto anchorY = ConvertToPx(anchor.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
+    auto anchorWidthReference = rect.Width();
+    auto anchorHeightReference = rect.Height();
+    auto anchorX = ConvertToPx(anchor.GetX(), ScaleProperty::CreateScaleProperty(), anchorWidthReference);
+    auto anchorY = ConvertToPx(anchor.GetY(), ScaleProperty::CreateScaleProperty(), anchorHeightReference);
     // Position properties take precedence over offset locations.
     if (HasPosition()) {
         auto position = GetPositionValue({});
@@ -1268,12 +1275,18 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
     CHECK_NULL_VOID(rsNode_);
     auto& clip = GetOrCreateClip();
     if (clip->HasClipShape()) {
-        auto clipShape = clip->GetClipShapeValue();
-        auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(clipShape.GetBasicShape(), frameSize);
+        auto basicShape = clip->GetClipShapeValue();
+        auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
         if (skPath.isEmpty()) {
             return;
         }
         rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+    }
+
+    if (clip->HasClipMask()) {
+        auto basicShape = clip->GetClipMaskValue();
+        auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
+        rsNode_->SetMask(Rosen::RSMask::CreatePathMask(skPath, SkiaDecorationPainter::CreateMaskSkPaint(basicShape)));
     }
 }
 
@@ -1285,17 +1298,11 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 }
 
-void RosenRenderContext::OnClipShapeUpdate(const ClipPathNG& clipPath)
+void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& /*basicShape*/)
 {
-    auto& clip = GetOrCreateClip();
-    if (!clip || !clip->UpdateClipShape(clipPath)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintClip(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintClip(SizeF(rect.Width(), rect.Height()));
     }
     RequestNextFrame();
 }
@@ -1304,6 +1311,15 @@ void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetClipToBounds(isClip);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape*/)
+{
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintClip(SizeF(rect.Width(), rect.Height()));
+    }
     RequestNextFrame();
 }
 
@@ -1344,6 +1360,41 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
         onFinish);
     return true;
+}
+
+void RosenRenderContext::PaintOverlayText()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto& overlay = GetOrCreateOverlay();
+    if (overlay->HasOverlayText()) {
+        auto overlayText = overlay->GetOverlayTextValue();
+        auto modifier = std::make_shared<OverlayTextModifier>();
+        modifier->SetCustomData(NG::OverlayTextData(overlayText));
+        rsNode_->AddModifier(modifier);
+        // TODO: PaintOverlayText
+    }
+}
+
+void RosenRenderContext::OnOverlayTextUpdate(const OverlayOptions& overlay)
+{
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintOverlayText();
+    }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnMotionPathUpdate(const MotionPathOption& motionPath)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto motionOption = Rosen::RSMotionPathOption(motionPath.GetPath());
+    motionOption.SetBeginFraction(motionPath.GetBegin());
+    motionOption.SetEndFraction(motionPath.GetEnd());
+    motionOption.SetRotationMode(
+        motionPath.GetRotate() ? Rosen::RotationMode::ROTATE_AUTO : Rosen::RotationMode::ROTATE_NONE);
+    motionOption.SetPathNeedAddOrigin(true);
+    rsNode_->SetMotionPathOption(std::make_shared<Rosen::RSMotionPathOption>(motionOption));
+    RequestNextFrame();
 }
 
 void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, int index)

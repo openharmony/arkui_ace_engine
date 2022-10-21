@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "core/components/common/properties/color.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -34,13 +35,14 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
 {
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(ratingLayoutProperty);
+    auto currentSourceInfo = ImageSourceInfo("");
     switch (imageFlag) {
         case 0b001:
-            if (ratingLayoutProperty->GetForegroundImageSourceInfo() != sourceInfo) {
+            currentSourceInfo = ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
+            if (currentSourceInfo != sourceInfo) {
                 LOGW("Foreground image sourceInfo does not match, ignore current %{private}s callback. "
                      "current: %{private}s vs callback's: %{private}s",
-                    lifeCycleTag.c_str(), ratingLayoutProperty->GetForegroundImageSourceInfo()->ToString().c_str(),
-                    sourceInfo.ToString().c_str());
+                    lifeCycleTag.c_str(), currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
                 return;
             }
             if (lifeCycleTag == "ImageDataFailed") {
@@ -48,11 +50,11 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
             }
             break;
         case 0b010:
-            if (ratingLayoutProperty->GetSecondaryImageSourceInfo() != sourceInfo) {
+            currentSourceInfo = ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
+            if (currentSourceInfo != sourceInfo) {
                 LOGW("Secondary image sourceInfo does not match, ignore current %{private}s callback. "
                      "current: %{private}s vs callback's: %{private}s",
-                    lifeCycleTag.c_str(), ratingLayoutProperty->GetSecondaryImageSourceInfo()->ToString().c_str(),
-                    sourceInfo.ToString().c_str());
+                    lifeCycleTag.c_str(), currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
                 return;
             }
             if (lifeCycleTag == "ImageDataFailed") {
@@ -60,11 +62,11 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
             }
             break;
         case 0b100:
-            if (ratingLayoutProperty->GetBackgroundImageSourceInfo() != sourceInfo) {
+            currentSourceInfo = ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
+            if (currentSourceInfo != sourceInfo) {
                 LOGW("Background image sourceInfo does not match, ignore current %{private}s callback. "
                      "current: %{private}s vs callback's: %{private}s",
-                    lifeCycleTag.c_str(), ratingLayoutProperty->GetBackgroundImageSourceInfo()->ToString().c_str(),
-                    sourceInfo.ToString().c_str());
+                    lifeCycleTag.c_str(), currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
                 return;
             }
             if (lifeCycleTag == "ImageDataFailed") {
@@ -157,9 +159,10 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(backgroundImageCanvas_, nullptr);
     auto starNum = GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
         GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
-    ImagePaintConfig singleStarImagePaintConfig(singleStarRect_, singleStarDstRect_);
+    singleStarImagePaintConfig_.srcRect_ = singleStarRect_;
+    singleStarImagePaintConfig_.dstRect_ = singleStarDstRect_;
     return MakeRefPtr<RatingPaintMethod>(
-        foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig, starNum);
+        foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig_, starNum);
 }
 
 bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -222,7 +225,16 @@ void RatingPattern::ConstrainsRatingScore()
     int32_t starNum =
         ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
     double drawScore = fmin(Round(ratingScore / stepSize) * stepSize, static_cast<double>(starNum));
+
+    // do not fire onChange callback when rating is initialized for the first time.
+    if (hasInit_ && lastRatingScore_ != drawScore) {
+        FireChangeEvent();
+    }
+    if (!hasInit_) {
+        hasInit_ = true;
+    }
     ratingRenderProperty->UpdateRatingScore(drawScore);
+    lastRatingScore_ = drawScore;
 }
 
 void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(const double eventPointX)
@@ -399,6 +411,36 @@ void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddClickEvent(clickEvent_);
 }
 
+void RatingPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag)
+{
+    if (!sourceInfo.IsInternalResource()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
+    if (!iconPath.empty()) {
+        sourceInfo.SetSrc(iconPath);
+        auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+        CHECK_NULL_VOID(ratingLayoutProperty);
+        switch (imageFlag) {
+            case 0b001:
+                ratingLayoutProperty->UpdateForegroundImageSourceInfo(sourceInfo);
+                break;
+            case 0b010:
+                ratingLayoutProperty->UpdateSecondaryImageSourceInfo(sourceInfo);
+                break;
+            case 0b100:
+                ratingLayoutProperty->UpdateBackgroundImageSourceInfo(sourceInfo);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void RatingPattern::OnModifyDone()
 {
     // Reset image state code.
@@ -410,8 +452,13 @@ void RatingPattern::OnModifyDone()
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(ratingLayoutProperty);
 
+    if (!ratingLayoutProperty->HasForegroundImageSourceInfo()) {
+        ratingLayoutProperty->UpdateForegroundImageSourceInfo(GetImageSourceInfoFromTheme(0b001));
+        singleStarImagePaintConfig_.isSvg = true;
+    }
     ImageSourceInfo foregroundImageSourceInfo =
         ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b001));
+    UpdateInternalResource(foregroundImageSourceInfo, 0b001);
     // Recreate ImageLoadingContext only when image source info has changed.
     if (!foregroundImageLoadingCtx_ ||
         (foregroundImageLoadingCtx_ && (foregroundImageLoadingCtx_->GetSourceInfo() != foregroundImageSourceInfo))) {
@@ -422,9 +469,12 @@ void RatingPattern::OnModifyDone()
             AceType::MakeRefPtr<ImageLoadingContext>(foregroundImageSourceInfo, std::move(loadNotifierForegroundImage));
         foregroundImageLoadingCtx_->LoadImageData();
     }
-
+    if (!ratingLayoutProperty->HasSecondaryImageSourceInfo()) {
+        ratingLayoutProperty->UpdateSecondaryImageSourceInfo(GetImageSourceInfoFromTheme(0b010));
+    }
     ImageSourceInfo secondaryImageSourceInfo =
         ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b010));
+    UpdateInternalResource(secondaryImageSourceInfo, 0b010);
     if (!secondaryImageLoadingCtx_ ||
         (secondaryImageLoadingCtx_ && secondaryImageLoadingCtx_->GetSourceInfo() != secondaryImageSourceInfo)) {
         LoadNotifier loadNotifierSecondaryImage(
@@ -434,8 +484,12 @@ void RatingPattern::OnModifyDone()
         secondaryImageLoadingCtx_->LoadImageData();
     }
 
+    if (!ratingLayoutProperty->HasBackgroundImageSourceInfo()) {
+        ratingLayoutProperty->UpdateBackgroundImageSourceInfo(GetImageSourceInfoFromTheme(0b100));
+    }
     ImageSourceInfo backgroundImageSourceInfo =
         ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b100));
+    UpdateInternalResource(backgroundImageSourceInfo, 0b100);
     if (!backgroundImageLoadingCtx_ || backgroundImageLoadingCtx_->GetSourceInfo() != backgroundImageSourceInfo) {
         LoadNotifier loadNotifierBackgroundImage(
             CreateDataReadyCallback(0b100), CreateLoadSuccessCallback(0b100), CreateLoadFailCallback(0b100));

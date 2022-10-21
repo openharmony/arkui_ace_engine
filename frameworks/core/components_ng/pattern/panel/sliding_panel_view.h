@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SlidingPanelView {
 public:
-    static void Create();
+    static void Create(bool isShow);
     static void SetPanelType(PanelType type);
     static void SetPanelMode(PanelMode mode);
     static void SetHasDragBar(bool hasDragBar);

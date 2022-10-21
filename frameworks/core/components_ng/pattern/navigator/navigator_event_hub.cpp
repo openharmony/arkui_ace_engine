@@ -39,6 +39,7 @@ void NavigatorEventHub::NavigatePage()
         default:
             LOGE("Navigator type is invalid!");
     }
+    LOGD("navigate success");
 }
 
 } // namespace OHOS::Ace::NG

@@ -47,12 +47,12 @@ namespace OHOS::Ace::Framework {
 
 void JSFlex::SetFillParent()
 {
-    FlexModel::GetInstance()->SetFillParent();
+    /* Deprecated */
 }
 
 void JSFlex::SetWrapContent()
 {
-    FlexModel::GetInstance()->SetWrapContent();
+    /* Deprecated */
 }
 
 void JSFlex::SetJustifyContent(int32_t value)

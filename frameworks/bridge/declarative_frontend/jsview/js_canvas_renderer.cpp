@@ -1229,7 +1229,7 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
             } else {
                 customPaintPattern_->UpdateMiterLimit(limit);
             }
-        } else {      
+        } else {
             if (isOffscreen_) {
                 offscreenCanvas_->SetMiterLimit(limit);
             } else {
@@ -1251,7 +1251,7 @@ void JSCanvasRenderer::JsSetLineWidth(const JSCallbackInfo& info)
             } else {
                 customPaintPattern_->UpdateLineWidth(lineWidth);
             }
-        } else {          
+        } else {
             if (isOffscreen_) {
                 offscreenCanvas_->SetLineWidth(lineWidth);
             } else {
@@ -1571,7 +1571,7 @@ void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
         param.y = SystemProperties::Vp2Px(param.y);
 
         if (Container::IsCurrentUseNewPipeline()) {
-            isOffscreen_ ? offscreenCanvasPattern_->QuadraticCurveTo(param) 
+            isOffscreen_ ? offscreenCanvasPattern_->QuadraticCurveTo(param)
                          : customPaintPattern_->QuadraticCurveTo(param);
             return;
         }

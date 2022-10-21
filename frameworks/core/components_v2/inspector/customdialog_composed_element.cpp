@@ -78,7 +78,7 @@ std::string CustomDialogComposedElement::GetAlignment() const
 {
     auto renderDialog = GetRenderDialog();
     auto Alignment = renderDialog ? renderDialog->GetDialogProperties().alignment : DialogAlignment::DEFAULT;
-    return ConvertDialogAlignmentToString(Alignment);
+    return DialogAlignmentUtils::ConvertDialogAlignmentToString(Alignment);
 }
 
 std::unique_ptr<JsonValue> CustomDialogComposedElement::GetDialogOffset() const
@@ -89,43 +89,6 @@ std::unique_ptr<JsonValue> CustomDialogComposedElement::GetDialogOffset() const
     jsonValue->Put("dX", dialogOffset.GetX().Value());
     jsonValue->Put("dY", dialogOffset.GetY().Value());
     return jsonValue;
-}
-
-std::string CustomDialogComposedElement::ConvertDialogAlignmentToString(DialogAlignment dialogAlignment) const
-{
-    std::string Alignment = "";
-    switch (dialogAlignment) {
-        case DialogAlignment::TOP:
-            Alignment = "DialogAlignment.TOP";
-            break;
-        case DialogAlignment::CENTER:
-            Alignment = "DialogAlignment.CENTER";
-            break;
-        case DialogAlignment::BOTTOM:
-            Alignment = "DialogAlignment.BOTTOM";
-            break;
-        case DialogAlignment::TOP_START:
-            Alignment = "DialogAlignment.TOP_START";
-            break;
-        case DialogAlignment::TOP_END:
-            Alignment = "DialogAlignment.TOP_END";
-            break;
-        case DialogAlignment::CENTER_START:
-            Alignment = "DialogAlignment.CENTER_START";
-            break;
-        case DialogAlignment::CENTER_END:
-            Alignment = "DialogAlignment.CENTER_END";
-            break;
-        case DialogAlignment::BOTTOM_START:
-            Alignment = "DialogAlignment.BOTTOM_START";
-            break;
-        case DialogAlignment::BOTTOM_END:
-            Alignment = "DialogAlignment.BOTTOM_END";
-            break;
-        default:
-            Alignment = "DialogAlignment.DEFAULT";
-    }
-    return Alignment;
 }
 
 std::string CustomDialogComposedElement::GetCustomStyle() const

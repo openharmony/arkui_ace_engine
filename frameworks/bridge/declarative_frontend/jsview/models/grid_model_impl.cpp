@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -85,7 +86,7 @@ void GridModelImpl::SetRowsGap(const Dimension& value)
 
 void GridModelImpl::SetGridHeight(const Dimension& value)
 {
-    JSViewAbstract::JsHeight(value);
+    ViewAbstractModel::GetInstance()->SetHeight(value);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid && value.IsValid()) {

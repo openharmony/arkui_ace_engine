@@ -698,7 +698,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
         instanceId, type, isArkApp, aceAbility, std::move(callback), useCurrentEventRunner, useNewPipeline);
     AceEngine::Get().AddContainer(instanceId, aceContainer);
-
+    ConnectServerManager::Get().SetDebugMode();
     HdcRegister::Get().StartHdcRegister(instanceId);
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
@@ -713,7 +713,6 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
         return;
     }
     jsFront->SetInstanceName(instanceName);
-    ConnectServerManager::Get();
 }
 
 void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
@@ -854,6 +853,11 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 
 void AceContainer::SetHapPath(const std::string& hapPath)
 {
+    if (!SystemProperties::GetResourceUseHapPathEnable()) {
+        LOGI("SetHapPath, Use .index to load resource");
+        return;
+    }
+    LOGI("SetHapPath, Use hap path to load resource");
     resourceInfo_.SetHapPath(hapPath);
     if (!hapPath.empty()) {
         SystemProperties::SetUnZipHap(false);

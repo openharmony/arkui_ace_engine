@@ -226,7 +226,6 @@ void CardFrontendDeclarative::SetColorMode(ColorMode colorMode)
 
 void CardFrontendDeclarative::RebuildAllPages()
 {
-
 }
 
 void CardFrontendDeclarative::OnSurfaceChanged(int32_t width, int32_t height)

@@ -53,6 +53,11 @@ public:
 
     void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
 
+    static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
+    static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
+    static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
+    static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
+
 private:
     // TODO: should not deps on flutter.
 #ifndef NG_BUILD

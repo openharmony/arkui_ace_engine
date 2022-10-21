@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 
+#include "base/memory/ace_type.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+
 namespace OHOS::Ace::NG {
 
 void TextFieldController::Focus(bool focus) {}
@@ -25,9 +28,9 @@ void TextFieldController::Delete() {}
 
 void TextFieldController::CaretPosition(int32_t caretPosition)
 {
-    if (caretPosition < 0) {
-        caretPosition = 0;
-    }
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->SetCaretPosition(caretPosition);
     if (setCaretPosition_) {
         setCaretPosition_(caretPosition);
     }

@@ -15,6 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/base/frame_node.h"
+
 namespace OHOS::Ace::Framework {
 
 #ifdef USE_ARK_ENGINE
@@ -25,54 +28,56 @@ thread_local std::list<RefPtr<NG::LayoutWrapper>> ViewMeasureLayout::layoutChild
 thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator ViewMeasureLayout::iterLayoutChildren_;
 thread_local NG::LayoutConstraintF ViewMeasureLayout::measureDefaultConstraint_;
 
-namespace {
-
-std::unordered_map<std::string, Local<JSValueRef>> ParseJsObject(
-    Local<ObjectRef> obj, Local<ArrayRef> names, EcmaVM* vm)
-{
-    std::unordered_map<std::string, Local<JSValueRef>> jsValue;
-    auto length = names->Length(vm);
-
-    for (int i = 0; i < length; i++) {
-        auto value = ArrayRef::GetValueAt(vm, names, i);
-        if (value->IsString()) {
-            auto key = value->ToString(vm)->ToString();
-            auto val = obj->Get(vm, value->ToString(vm));
-            jsValue.insert({ key, val });
-        }
-    }
-
-    return jsValue;
-}
-
-} // namespace
-
-Local<JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     ACE_SCOPED_TRACE("ViewMeasureLayout::JSMeasure");
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
-    if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
+
+    if (iterMeasureChildren_ == measureChildren_.end()) {
+        LOGE("Call measure exceed limit");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto info = runtimeCallInfo;
+    if (info->GetArgsNumber() != 1 || !info->GetCallArgRef(0)->IsObject()) {
+        LOGE("JSMeasure arg is wrong");
         (*iterMeasureChildren_)->Measure(measureDefaultConstraint_);
         iterMeasureChildren_++;
         return panda::JSValueRef::Undefined(vm);
     }
 
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    NG::SizeF minSize;
-    NG::SizeF maxSize;
-    NG::LayoutConstraintF jsConstraint_;
-    auto value_ = firstArg->ToObject(vm);
-    auto jsValue_ = ParseJsObject(value_, value_->GetOwnPropertyNames(vm), vm);
+    auto jsObject = JsiObject(info->GetCallArgRef(0)->ToObject(vm));
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Make(jsObject);
+    JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
+    Dimension minWidth;
+    JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
+    Dimension maxWidth;
+    JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
+    Dimension minHeight;
+    JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
+    Dimension maxHeight;
 
-    minSize.SetWidth(jsValue_.at("minWidth")->ToNumber(vm)->Value());
-    minSize.SetHeight(jsValue_.at("minHeight")->ToNumber(vm)->Value());
-    maxSize.SetWidth(jsValue_.at("maxWidth")->ToNumber(vm)->Value());
-    maxSize.SetHeight(jsValue_.at("maxHeight")->ToNumber(vm)->Value());
-    jsConstraint_.minSize = minSize;
-    jsConstraint_.maxSize = maxSize;
-    (*iterMeasureChildren_)->Measure(jsConstraint_);
+    if (JSViewAbstract::ParseJsDimensionVp(minWidthValue, minWidth)) {
+        (*iterMeasureChildren_)
+            ->GetLayoutProperty()
+            ->UpdateCalcMinSize(NG::CalcSize(NG::CalcLength(minWidth), std::nullopt));
+    }
+    if (JSViewAbstract::ParseJsDimensionVp(maxWidthValue, maxWidth)) {
+        (*iterMeasureChildren_)
+            ->GetLayoutProperty()
+            ->UpdateCalcMaxSize(NG::CalcSize(NG::CalcLength(maxWidth), std::nullopt));
+    }
+    if (JSViewAbstract::ParseJsDimensionVp(minHeightValue, minHeight)) {
+        (*iterMeasureChildren_)
+            ->GetLayoutProperty()
+            ->UpdateCalcMinSize(NG::CalcSize(std::nullopt, NG::CalcLength(minHeight)));
+    }
+    if (JSViewAbstract::ParseJsDimensionVp(maxHeightValue, maxHeight)) {
+        (*iterMeasureChildren_)
+            ->GetLayoutProperty()
+            ->UpdateCalcMaxSize(NG::CalcSize(std::nullopt, NG::CalcLength(maxHeight)));
+    }
+    (*iterMeasureChildren_)->Measure(measureDefaultConstraint_);
     iterMeasureChildren_++;
     return panda::JSValueRef::Undefined(vm);
 }
@@ -81,21 +86,35 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
 {
     ACE_SCOPED_TRACE("ViewMeasureLayout::JSLayout");
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto jsParams = runtimeCallInfo->GetCallArgRef(0)->ToObject(vm);
-    auto names = jsParams->GetOwnPropertyNames(vm);
-    if (names->Length(vm) != 2) {
-        LOGE("invalid param number for layout");
+
+    if (iterLayoutChildren_ == layoutChildren_.end()) {
+        LOGE("Call layout exceed limit");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto info = runtimeCallInfo;
+    if (info->GetArgsNumber() != 1 || !info->GetCallArgRef(0)->IsObject()) {
+        LOGE("JSLayout arg is wrong");
         (*iterLayoutChildren_)->Layout();
         iterLayoutChildren_++;
         return panda::JSValueRef::Undefined(vm);
     }
 
-    auto first = ParseJsObject(jsParams, names, vm);
-    auto posInfo = first.at("position");
-    auto second = ParseJsObject(posInfo, posInfo->ToObject(vm)->GetOwnPropertyNames(vm), vm);
-    auto xVal = second.at("x")->ToNumber(vm)->Value();
-    auto yVal = second.at("y")->ToNumber(vm)->Value();
-    (*iterLayoutChildren_)->GetGeometryNode()->SetMarginFrameOffset(NG::OffsetF(xVal, yVal));
+    auto jsObject = JsiObject(info->GetCallArgRef(0)->ToObject(vm));
+    JSRef<JSObject> layoutInfo = JSRef<JSObject>::Make(jsObject);
+    JSRef<JSObject> sizeObj = layoutInfo->GetProperty("position");
+    JSRef<JSVal> xVal = sizeObj->GetProperty("x");
+    JSRef<JSVal> yVal = sizeObj->GetProperty("y");
+    Dimension dimenX;
+    Dimension dimenY;
+    auto xResult = JSViewAbstract::ParseJsDimensionVp(xVal, dimenX);
+    auto yResult = JSViewAbstract::ParseJsDimensionVp(yVal, dimenY);
+    if (!(xResult || yResult)) {
+        LOGE("the position prop is illegal");
+    } else {
+        (*iterLayoutChildren_)->GetGeometryNode()->SetFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
+    }
+    (*iterLayoutChildren_)->Layout();
     iterLayoutChildren_++;
     return panda::JSValueRef::Undefined(vm);
 }

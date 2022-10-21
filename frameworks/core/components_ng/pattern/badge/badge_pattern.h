@@ -47,6 +47,7 @@ public:
 
 private:
     void OnModifyDone() override;
+    int32_t textNodeId_ = -2;
 };
 } // namespace OHOS::Ace::NG
 

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 
-#include <list>
-
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -26,6 +24,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -47,6 +46,7 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
+    accessibilityProperty_ = pattern->CreateAccessibilityProperty();
     // first create make layout property dirty.
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
@@ -162,8 +162,12 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
     if (renderContext_) {
         renderContext_->ToJsonValue(json);
+    }
+    if (pattern_) {
+        pattern_->ToJsonValue(json);
     }
 }
 
@@ -449,7 +453,9 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
     } while (false);
     // check position flag.
-    if (renderContext_->HasPosition()) {
+    const auto& gridProperty = layoutWrapper->GetLayoutProperty()->GetGridProperty(Claim(this));
+    bool hasGridOffset = gridProperty ? (gridProperty->GetOffset() != UNDEFINED_DIMENSION) : false;
+    if (renderContext_->HasPosition() || hasGridOffset) {
         layoutWrapper->SetOutOfLayout(true);
     }
     layoutWrapper->SetActive(isActive_);
@@ -553,14 +559,44 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame() const
     return nullptr;
 }
 
+void FrameNode::MarkNeedRenderOnly()
+{
+    MarkNeedRender(IsRenderBoundary());
+}
+
+void FrameNode::MarkNeedRender(bool isRenderBoundary)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    // If it has dirtyLayoutBox, need to mark dirty after layout done.
+    paintProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
+        LOGD("this node has already mark dirty, %{public}s, %{public}d, %{public}d", GetTag().c_str(),
+            isRenderDirtyMarked_, isLayoutDirtyMarked_);
+        return;
+    }
+    isRenderDirtyMarked_ = true;
+    if (isRenderBoundary) {
+        context->AddDirtyRenderNode(Claim(this));
+        return;
+    }
+    auto parent = GetAncestorNodeOfFrame();
+    if (parent) {
+        parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
+    }
+}
+
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
 {
+    if (CheckNeedRender(extraFlag)) {
+        paintProperty_->UpdatePropertyChangeFlag(extraFlag);
+    }
     layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
     paintProperty_->UpdatePropertyChangeFlag(extraFlag);
     auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
     auto paintFlag = paintProperty_->GetPropertyChangeFlag();
     if (CheckNoChanged(layoutFlag | paintFlag)) {
-        LOGD("MarkDirtyNode: flag not changed");
+        LOGD("MarkDirtyNode: flag not changed, node tag: %{public}s", GetTag().c_str());
         return;
     }
     auto context = GetContext();
@@ -585,22 +621,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
         return;
     }
     layoutProperty_->CleanDirty();
-
-    // If it has dirtyLayoutBox, need to mark dirty after layout done.
-    if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
-        LOGD("this node has already mark dirty, %{public}s, %{public}d, %{public}d", GetTag().c_str(),
-            isRenderDirtyMarked_, isLayoutDirtyMarked_);
-        return;
-    }
-    isRenderDirtyMarked_ = true;
-    if (isRenderBoundary) {
-        context->AddDirtyRenderNode(Claim(this));
-        return;
-    }
-    auto parent = GetAncestorNodeOfFrame();
-    if (parent) {
-        parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
-    }
+    MarkNeedRender(isRenderBoundary);
 }
 
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
@@ -933,6 +954,16 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
+}
+
+void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = GetId();
+        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -35,8 +35,8 @@ public:
     }
 
 #ifdef USE_ARK_ENGINE
-    static Local<JSValueRef> JSMeasure(panda::JsiRuntimeCallInfo* runtimeCallInfo);
-    static Local<JSValueRef> JSLayout(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> JSMeasure(panda::JsiRuntimeCallInfo* info);
+    static panda::Local<panda::JSValueRef> JSLayout(panda::JsiRuntimeCallInfo* info);
 
     static void SetMeasureChildren(std::list<RefPtr<NG::LayoutWrapper>> children)
     {

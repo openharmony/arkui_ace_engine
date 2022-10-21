@@ -51,7 +51,9 @@ RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValu
     if (jsValue->IsNumber()) {
         double columnNumber = 0.0;
         JSViewAbstract::ParseJsDouble(jsValue, columnNumber);
-        auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber);
+        auto gridContainerSize = columnNumber >= 0 ?
+                                    AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber):
+                                    AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
         return gridContainerSize;
     } else if (jsValue->IsObject()) {
         auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);

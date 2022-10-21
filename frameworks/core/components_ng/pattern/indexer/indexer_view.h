@@ -36,7 +36,10 @@ public:
     static void SetPopupFont(const TextStyle& popupFont);
     static void SetFont(const TextStyle& font);
     static void SetItemSize(const Dimension& itemSize);
-    static void SetAlignStyle(V2::AlignStyle alignStyle);
+    static void SetAlignStyle(NG::AlignStyle alignStyle);
+    static void SetSelected(int32_t selected);
+    static void SetPopupPositionX(float popupPositionX);
+    static void SetPopupPositionY(float popupPositionY);
     static void SetOnSelected(OnSelectedEvent&& onSelected);
     static void SetOnRequestPopupData(OnRequestPopupDataEvent&& onRequestPopupData);
     static void SetOnPopupSelected(OnPopupSelectedEvent&& onPopupSelectedEvent);

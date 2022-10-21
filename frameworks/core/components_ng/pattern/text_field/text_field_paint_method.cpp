@@ -40,10 +40,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr Dimension CURSOR_WIDTH = 1.5_vp;
-constexpr Dimension CURSOR_PADDING = 2.0_vp;
-} // namespace
 
 CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
@@ -51,16 +47,13 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
     CHECK_NULL_RETURN(textFieldPattern, nullptr);
     CHECK_NULL_RETURN(textFieldPattern->GetParagraph(), nullptr);
     auto offset = paintWrapper->GetContentOffset();
-    auto paintOffset = offset - OffsetF(-static_cast<float>(textFieldPattern->GetBasicPadding()),
-                                    textFieldPattern->GetBaseLineOffset());
-    auto drawFunction = [paragraph = textFieldPattern->GetParagraph(), paintOffset, textFieldPattern,
+    auto drawFunction = [paragraph = textFieldPattern->GetParagraph(), offset, textFieldPattern,
                             contentSize = paintWrapper->GetContentSize(),
                             contentOffset = paintWrapper->GetContentOffset()](RSCanvas& canvas) {
-        RSRect clipInnerRect(paintOffset.GetX(), contentOffset.GetY(),
-            paintOffset.GetX() + contentSize.Width() - textFieldPattern->GetBasicPadding() * 2.0f,
+        RSRect clipInnerRect(offset.GetX(), contentOffset.GetY(), offset.GetX() + contentSize.Width(),
             contentOffset.GetY() + contentSize.Height());
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-        paragraph->Paint(&canvas, paintOffset.GetX(), paintOffset.GetY());
+        paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), offset.GetY());
     };
     return drawFunction;
 }
@@ -89,6 +82,8 @@ void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintW
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto theme = themeManager->GetTheme<TextFieldTheme>();
+    auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(theme->GetSelectedColor().GetValue());
@@ -97,10 +92,26 @@ void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintW
         std::min(textFieldPattern->GetSelectionBaseOffsetX(), textFieldPattern->GetSelectionDestinationOffsetX());
     auto endOffset =
         std::max(textFieldPattern->GetSelectionBaseOffsetX(), textFieldPattern->GetSelectionDestinationOffsetX());
-    startOffset += textFieldPattern->GetBasicPadding();
-    endOffset += textFieldPattern->GetBasicPadding();
-    canvas.DrawRect(RSRect(startOffset, paintWrapper->GetContentOffset().GetY(), endOffset,
-        paintWrapper->GetContentOffset().GetY() + paintWrapper->GetContentSize().Height()));
+    auto paintOffset = paintWrapper->GetContentOffset() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
+    RSRect clipInnerRect(paintOffset.GetX(), textFieldPattern->GetFrameRect().GetY(),
+        paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
+        textFieldPattern->GetFrameRect().GetY() + textFieldPattern->GetFrameRect().Height());
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
+        case InputStyle::DEFAULT:
+            // for default style, selection height is equal to the content height
+            canvas.DrawRect(RSRect(startOffset, paintWrapper->GetContentOffset().GetY(), endOffset,
+                paintWrapper->GetContentOffset().GetY() + paintWrapper->GetContentSize().Height()));
+            break;
+        case InputStyle::INLINE:
+            // for inline style, selection height is equal to the frame height
+            canvas.DrawRect(RSRect(startOffset, textFieldPattern->GetFrameRect().GetY(), endOffset,
+                textFieldPattern->GetFrameRect().GetY() + textFieldPattern->GetFrameRect().Height()));
+            break;
+        default:
+            LOGE("Unsupported style");
+    }
+
     canvas.Restore();
 }
 
@@ -109,7 +120,7 @@ void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrap
     CHECK_NULL_VOID(paintWrapper);
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (!textFieldPattern->GetCursorVisible()) {
+    if (!textFieldPattern->GetCursorVisible() || textFieldPattern->GetSelectMode() == SelectionMode::SELECT_ALL) {
         return;
     }
     auto paragraph = textFieldPattern->GetParagraph();
@@ -127,10 +138,7 @@ void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrap
     caretHeight += static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f;
     auto top = static_cast<float>(
         paintWrapper->GetContentOffset().GetY() + (paintWrapper->GetContentSize().Height() - caretHeight) / 2);
-    auto textRectF = textFieldPattern->GetTextRect();
-    auto textRect = RSRect(textRectF.GetX(), textRectF.GetY(), textRectF.GetX() + textRectF.Width(),
-        textRectF.GetY() + textRectF.Height());
-    auto cursorOffsetX = textFieldPattern->GetCaretOffsetX() + textFieldPattern->GetBasicPadding();
+    auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
     canvas.DrawRect(
         RSRect(cursorOffsetX, top, cursorOffsetX + static_cast<float>(CURSOR_WIDTH.ConvertToPx()), top + caretHeight));
     canvas.Restore();

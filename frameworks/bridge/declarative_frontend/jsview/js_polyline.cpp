@@ -16,24 +16,14 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 
 #include "core/common/container.h"
-#include "core/components/shape/shape_component.h"
-#include "core/components_ng/pattern/shape/polygon_view.h"
+#include "core/components_ng/pattern/shape/polygon_model.h"
 #include "frameworks/base/memory/referenced.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSPolyline::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::PolygonView::Create(false);
-        JSShapeAbstract::SetNgSize(info);
-        return;
-    }
-    RefPtr<Component> polylineComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::POLYLINE);
-    ViewStackProcessor::GetInstance()->ClaimElementId(polylineComponent);
-    ViewStackProcessor::GetInstance()->Push(polylineComponent);
+    PolygonModel::GetInstance()->Create(false);
     JSShapeAbstract::SetSize(info);
 }
 
@@ -84,16 +74,7 @@ void JSPolyline::JSPoints(const JSCallbackInfo& info)
             }
             points.push_back(point);
         }
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::PolygonView::SetPoints(points);
-            return;
-        }
-        auto polyline = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (!polyline) {
-            LOGE("polylineComponent is null.");
-            return;
-        }
-        polyline->SetPoints(points);
+        PolygonModel::GetInstance()->SetPoints(points);
     }
 }
 

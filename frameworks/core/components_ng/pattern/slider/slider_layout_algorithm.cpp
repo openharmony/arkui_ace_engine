@@ -32,45 +32,35 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(sliderLayoutProperty, std::nullopt);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, std::nullopt);
 
     float width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     float height = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
 
-    if (sliderLayoutProperty->HasThickness()) {
-        trackThickness_ = static_cast<float>(sliderLayoutProperty->GetThickness().value().ConvertToPx());
-    } else {
-        trackThickness_ = static_cast<float>(
-            sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-                    SliderModel::SliderMode::OUTSET
-                ? sliderLayoutProperty->GetOutsetTrackThickness().value_or(DEFAULT_SLIDER_HEIGHT_DP).ConvertToPx()
-                : sliderLayoutProperty->GetInsetTrackThickness().value_or(DEFAULT_SLIDER_HEIGHT_DP).ConvertToPx());
-    }
-    float blockHotSize = static_cast<float>(
-        sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-                SliderModel::SliderMode::OUTSET
-            ? sliderLayoutProperty->GetOutsetBlockHotSize().value_or(DEFAULT_PRESS_DIAMETER).ConvertToPx()
-            : sliderLayoutProperty->GetInsetBlockHotSize().value_or(DEFAULT_PRESS_DIAMETER).ConvertToPx());
-    float blockSize = static_cast<float>(
-        sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-                SliderModel::SliderMode::OUTSET
-            ? sliderLayoutProperty->GetOutsetBlockSize().value_or(DEFAULT_HOVER_DIAMETER).ConvertToPx()
-            : sliderLayoutProperty->GetInsetBlockSize().value_or(DEFAULT_HOVER_DIAMETER).ConvertToPx());
+    Dimension themeTrackThickness = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+                                            SliderModel::SliderMode::OUTSET
+                                        ? theme->GetOutsetTrackThickness()
+                                        : theme->GetInsetTrackThickness();
+    trackThickness_ =
+        static_cast<float>(sliderLayoutProperty->GetThickness().value_or(themeTrackThickness).ConvertToPx());
+    float scaleValue = trackThickness_ / static_cast<float>(themeTrackThickness.ConvertToPx());
+    Dimension themeBlockSize = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+                                       SliderModel::SliderMode::OUTSET
+                                   ? theme->GetOutsetBlockSize()
+                                   : theme->GetInsetBlockSize();
+    blockDiameter_ = scaleValue * static_cast<float>(themeBlockSize.ConvertToPx());
+    Dimension themeBlockHotSize = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+                                          SliderModel::SliderMode::OUTSET
+                                      ? theme->GetOutsetBlockHotSize()
+                                      : theme->GetInsetBlockHotSize();
+    float blockHotDiameter = scaleValue * static_cast<float>(themeBlockHotSize.ConvertToPx());
 
     float sliderWidth = trackThickness_;
-    float blockSizeRatio = blockHotSize / blockSize;
-    if (sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-        SliderModel::SliderMode::OUTSET) {
-        blockSize = trackThickness_ * DEFAULT_THICKNESS_ENLARGES_BLOCKSIZE_RATIO;
-        blockHotSize = blockSize * blockSizeRatio;
-    } else {
-        blockSize = std::min(trackThickness_, blockSize);
-        blockHotSize = blockSize * blockSizeRatio;
-    }
-    blockDiameter_ = blockSize;
-    blockHotDiameter_ = blockHotSize;
-
-    sliderWidth = std::max(sliderWidth, blockHotSize);
-    sliderWidth = std::max(sliderWidth, blockSize);
+    sliderWidth = std::max(sliderWidth, blockHotDiameter);
+    sliderWidth = std::max(sliderWidth, blockDiameter_);
     Axis direction = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     sliderWidth = std::clamp(sliderWidth, 0.0f, direction == Axis::HORIZONTAL ? height : width);
     float sliderLength = direction == Axis::HORIZONTAL ? width : height;

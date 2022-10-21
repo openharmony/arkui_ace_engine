@@ -75,10 +75,12 @@ public:
 
 private:
     void AddNavDestinationToNavigation(const RefPtr<UINode>& child);
+    void BackToPreNavDestination(const RefPtr<UINode>& child);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    bool isFirstNavDestination_ = true;
 };
 
 } // namespace OHOS::Ace::NG

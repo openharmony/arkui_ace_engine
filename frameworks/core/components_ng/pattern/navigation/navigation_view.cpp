@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -40,6 +41,8 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/components_ng/pattern/navigator/navigator_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -48,6 +51,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
+constexpr float WINDOW_WIDTH = 520;
+
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -57,6 +63,7 @@ RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
     textLayoutProperty->UpdateContent(text);
     textLayoutProperty->UpdateFontSize(TEXT_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(TEXT_COLOR);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     return textNode;
 }
 
@@ -75,12 +82,12 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
 
 void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem)
 {
-    if (barItem.text.has_value()) {
+    if (barItem.text.has_value() && !barItem.text.value().empty()) {
         auto textNode = CreateBarItemTextNode(barItem.text.value());
         barItemNode->SetTextNode(textNode);
         barItemNode->AddChild(textNode);
     }
-    if (barItem.icon.has_value()) {
+    if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
         auto iconNode = CreateBarItemIconNode(barItem.icon.value());
         barItemNode->SetIconNode(iconNode);
         barItemNode->AddChild(iconNode);
@@ -211,8 +218,8 @@ void NavigationView::Create()
         // navBar content node
         if (!navBarNode->GetNavBarContentNode()) {
             int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG,
-                navBarContentNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
             navBarNode->AddChild(navBarContentNode);
             navBarNode->SetNavBarContentNode(navBarContentNode);
         }
@@ -235,8 +242,8 @@ void NavigationView::Create()
     // content node
     if (!navigationGroupNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
-            contentNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
     }
@@ -304,6 +311,8 @@ void NavigationView::SetTitle(const std::string& title)
     textLayoutProperty->UpdateContent(title);
     textLayoutProperty->UpdateFontSize(TITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(TITLE_COLOR);
+    textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
     navBarNode->MarkModifyDone();
@@ -364,13 +373,15 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
         return;
     } while (false);
     int32_t subtitleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto subtitleNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, subtitleNodeId, AceType::MakeRefPtr<TextPattern>());
+    auto subtitleNode =
+        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, subtitleNodeId, AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(subtitle);
     textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
+    textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetSubtitle(subtitleNode);
     navBarNode->MarkModifyDone();
 }
@@ -473,13 +484,23 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
     } while (false);
     navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(mode));
     if (needAddBackButton) {
+        // put component inside navigator pattern to trigger back navigation
+        auto navigator = FrameNode::CreateFrameNode(V2::NAVIGATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigatorPattern>());
+        auto hub = navigator->GetEventHub<NavigatorEventHub>();
+        CHECK_NULL_VOID(hub);
+        hub->SetType(NavigatorType::BACK);
+        navigator->MarkModifyDone();
+
         int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto backButtonNode = FrameNode::CreateFrameNode(
-            V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<TextPattern>());
+        auto backButtonNode =
+            FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = backButtonNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(BACK_BUTTON);
-        navBarNode->SetBackButton(backButtonNode);
+        backButtonNode->MountToParent(navigator);
+
+        navBarNode->SetBackButton(navigator);
         navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
         navBarNode->MarkModifyDone();
         return;
@@ -496,7 +517,18 @@ void NavigationView::SetNavBarWidth(const Dimension& value)
 
 void NavigationView::SetNavigationMode(NavigationMode mode)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, static_cast<NG::NavigationMode>(mode));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto navigationMode = static_cast<NG::NavigationMode>(mode);
+    if (navigationMode == NavigationMode::AUTO) {
+        if (context->GetCurrentRootWidth() >= WINDOW_WIDTH) {
+            navigationMode = NavigationMode::SPLIT;
+        } else {
+            navigationMode = NavigationMode::STACK;
+        }
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, navigationMode);
 }
 
 void NavigationView::SetNavBarPosition(NG::NavBarPosition mode)
@@ -507,6 +539,11 @@ void NavigationView::SetNavBarPosition(NG::NavBarPosition mode)
 void NavigationView::SetHideNavBar(bool hideNavBar)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
+}
+
+void NavigationView::SetTitleHeight(const Dimension& height)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, TitleBarHeight, height);
 }
 
 void NavigationView::SetHideTitleBar(bool hideTitleBar)
@@ -616,6 +653,22 @@ void NavigationView::SetOnTitleModeChange(std::function<void(NavigationTitleMode
     auto eventHub = navigationGroupNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnTitleModeChange(std::move(onTitleModeChange));
+}
+
+void NavigationView::SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navigationEventHub);
+    navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
+}
+
+void NavigationView::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+{
+    ImageSourceInfo imageSourceInfo(src);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, noPixMap);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap);
 }
 
 } // namespace OHOS::Ace::NG

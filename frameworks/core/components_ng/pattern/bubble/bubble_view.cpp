@@ -84,7 +84,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     // Create child
     RefPtr<FrameNode> child;
     if (useCustom) {
-        LOGE("CreateBubbleNode, UseCustom");
+        LOGI("CreateBubbleNode, UseCustom");
     } else if (primaryButton.showButton || secondaryButton.showButton) {
         child = CreateCombinedChild(param, popupId, targetId);
         popupPaintProp->UpdateAutoCancel(false);
@@ -98,7 +98,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
 RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     const std::string& targetTag, int32_t targetId, const RefPtr<UINode>& customNode, const RefPtr<PopupParam>& param)
 {
-    LOGI("yjd customNode = %{public}p", AceType::RawPtr(customNode));
+    LOGD("customNode = %{public}p", AceType::RawPtr(customNode));
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     auto popupNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));

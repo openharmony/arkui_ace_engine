@@ -52,28 +52,37 @@ void MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNo
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
     CHECK_NULL_VOID(textWrapper);
     auto constraint = barItemLayoutProperty->CreateChildConstraint();
-    auto textHeight = TOOLBAR_HEIGHT - ICON_SIZE - TEXT_TOP_PADDING;
-    constraint.selfIdealSize = OptionalSizeF(
-        static_cast<float>(ICON_SIZE.ConvertToPx()), static_cast<float>(textHeight.ConvertToPx()));
     textWrapper->Measure(constraint);
 }
 
-void LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
-    const RefPtr<LayoutProperty>& barItemLayoutProperty, float barItemHeight)
+float LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    const RefPtr<LayoutProperty>& barItemLayoutProperty, float textHeight)
 {
     auto iconNode = hostNode->GetIconNode();
-    CHECK_NULL_VOID(iconNode);
+    CHECK_NULL_RETURN(iconNode, 0.0f);
     auto index = hostNode->GetChildIndexById(iconNode->GetId());
     auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(iconWrapper);
+    CHECK_NULL_RETURN(iconWrapper, 0.0f);
     auto geometryNode = iconWrapper->GetGeometryNode();
-    auto offset = OffsetF(static_cast<float>(ICON_PADDING.ConvertToPx()), barItemHeight);
+
+    if (!hostNode->GetTextNode()) {
+        auto iconOffsetY = (MENU_HEIGHT - ICON_SIZE) / 2;
+        auto offset = OffsetF(0.0f, static_cast<float>(iconOffsetY.ConvertToPx()));
+        geometryNode->SetMarginFrameOffset(offset);
+        iconWrapper->Layout();
+        return static_cast<float>(iconOffsetY.ConvertToPx());
+    }
+
+    auto occupiedHeight = MENU_HEIGHT - ICON_SIZE - TEXT_TOP_PADDING;
+    auto iconOffsetY = (static_cast<float>(occupiedHeight.ConvertToPx()) - textHeight) / 2;
+    auto offset = OffsetF(0.0f, iconOffsetY);
     geometryNode->SetMarginFrameOffset(offset);
     iconWrapper->Layout();
+    return iconOffsetY;
 }
 
 void LayoutText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
-    const RefPtr<LayoutProperty>& barItemLayoutProperty)
+    const RefPtr<LayoutProperty>& barItemLayoutProperty, float iconOffsetY)
 {
     auto textNode = hostNode->GetTextNode();
     CHECK_NULL_VOID(textNode);
@@ -82,8 +91,7 @@ void LayoutText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNod
     CHECK_NULL_VOID(textWrapper);
     auto geometryNode = textWrapper->GetGeometryNode();
     auto textOffsetY = ICON_SIZE + TEXT_TOP_PADDING;
-    auto offset = OffsetF(static_cast<float>(ICON_PADDING.ConvertToPx()),
-        static_cast<float>(textOffsetY.ConvertToPx()));
+    auto offset = OffsetF(0.0f, iconOffsetY + static_cast<float>(textOffsetY.ConvertToPx()));
     geometryNode->SetMarginFrameOffset(offset);
     textWrapper->Layout();
 }
@@ -98,8 +106,7 @@ void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(barItemLayoutProperty);
     const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto width = ICON_SIZE + ICON_PADDING * 2;
-    auto size = SizeF(static_cast<float>(width.ConvertToPx()), static_cast<float>(TOOLBAR_HEIGHT.ConvertToPx()));
+    auto size = SizeF(static_cast<float>(ICON_SIZE.ConvertToPx()), static_cast<float>(TOOLBAR_HEIGHT.ConvertToPx()));
     MeasureIcon(layoutWrapper, hostNode, barItemLayoutProperty);
     MeasureText(layoutWrapper, hostNode, barItemLayoutProperty);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
@@ -111,9 +118,19 @@ void BarItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(barItemLayoutProperty);
-    float barItemHeight = layoutWrapper->GetGeometryNode()->GetFrameOffset().GetY();
-    LayoutIcon(layoutWrapper, hostNode, barItemLayoutProperty, barItemHeight);
-    LayoutText(layoutWrapper, hostNode, barItemLayoutProperty);
+
+    float textHeight = 0.0f;
+    auto textNode = hostNode->GetTextNode();
+    if (textNode) {
+        auto index = hostNode->GetChildIndexById(textNode->GetId());
+        auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(textWrapper);
+        auto geometryNode = textWrapper->GetGeometryNode();
+        textHeight = geometryNode->GetFrameSize().Height();
+    }
+
+    float iconOffsetY = LayoutIcon(layoutWrapper, hostNode, barItemLayoutProperty, textHeight);
+    LayoutText(layoutWrapper, hostNode, barItemLayoutProperty, iconOffsetY);
 }
 
 } // namespace OHOS::Ace::NG

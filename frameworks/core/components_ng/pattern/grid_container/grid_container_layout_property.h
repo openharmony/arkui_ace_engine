@@ -59,6 +59,11 @@ public:
     void RegistGridChild(const RefPtr<FrameNode>& child);
     void BuildWidth(float width);
 
+    GridContainerInfo& GetContainerInfoRef()
+    {
+        return propContainerInfo_.value();
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContainerInfo, GridContainerInfo, PROPERTY_UPDATE_NORMAL);
 
 private:

@@ -72,6 +72,14 @@ public:
         return !path_.empty();
     }
 
+    bool operator==(const MotionPathOption& other) const
+    {
+        return (path_ == other.path_ &&
+                begin_ == other.begin_ &&
+                end_ == other.end_ &&
+                rotate_ == other.rotate_);
+    }
+
 private:
     std::string path_;
     float begin_ = 0.0f;

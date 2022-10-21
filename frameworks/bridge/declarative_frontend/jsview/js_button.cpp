@@ -26,6 +26,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -55,7 +56,7 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontSize(fontSize);
         textStyle.SetAdaptTextSize(fontSize, fontSize);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 
     auto stack = ViewStackProcessor::GetInstance();
@@ -68,7 +69,7 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
     }
 }
 
-void JSButton::SetFontWeight(std::string value)
+void JSButton::SetFontWeight(const std::string& value)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ButtonView::SetFontWeight(ConvertStrToFontWeight(value));
@@ -78,7 +79,7 @@ void JSButton::SetFontWeight(std::string value)
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 }
 
@@ -97,7 +98,7 @@ void JSButton::SetFontStyle(int32_t value)
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontStyle(fontStyles[value]);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 }
 
@@ -120,7 +121,7 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontFamilies(fontFamilies);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 }
 
@@ -142,7 +143,7 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetTextColor(textColor);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 }
 
@@ -262,7 +263,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         auto textStyle = buttonTheme ? buttonTheme->GetTextStyle() : textComponent->GetTextStyle();
         textStyle.SetMaxLines(buttonTheme->GetTextMaxLines());
         textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
         auto padding = AceType::MakeRefPtr<PaddingComponent>();
         padding->SetPadding(buttonTheme ? buttonTheme->GetPadding() : Edge());
         padding->SetChild(textComponent);
@@ -668,7 +669,7 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     buttonComponent->SetRadiusState(true);
     if (!stack->IsVisualStateSet()) {
         buttonComponent->SetRectRadius(radius);
-        JSViewAbstract::SetBorderRadius(radius, option);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(radius);
     } else {
         buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
             ButtonStateAttribute::RADIUS, AnimatableDimension(radius, option), stack->GetVisualState());

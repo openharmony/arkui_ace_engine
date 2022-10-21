@@ -30,18 +30,10 @@ class ACE_EXPORT NavigationLayoutAlgorithm : public LayoutAlgorithm {
 public:
     NavigationLayoutAlgorithm() = default;
     ~NavigationLayoutAlgorithm() override = default;
-
     void Measure(LayoutWrapper* layoutWrapper) override;
-
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    float GetLastScrollDistance() const
-    {
-        return lastScrollDistance_;
-    }
 private:
-    float lastScrollDistance_ = 0.0f;
-
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
 };
 

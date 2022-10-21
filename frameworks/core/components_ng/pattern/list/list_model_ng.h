@@ -25,7 +25,7 @@ public:
     void Create() override;
     void SetSpace(const Dimension& space) override;
     void SetInitialIndex(int32_t initialIndex) override;
-    void SetScroller(void* scroller) override {}
+    void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollBarProxy> proxy) override;
     void SetListDirection(Axis axis) override;
     void SetScrollBar(DisplayMode scrollBar) override {}
     void SetEdgeEffect(EdgeEffect edgeEffect) override;

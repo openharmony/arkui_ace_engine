@@ -26,7 +26,6 @@ namespace OHOS::Ace {
 
 class ScrollBarTheme;
 class ScrollControllerBase;
-enum class DisplayMode;
 
 class ScrollModel {
 public:
@@ -43,7 +42,7 @@ public:
     virtual void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& proxy) = 0;
     virtual void InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
         const std::pair<bool, Dimension>& width, EdgeEffect effect) = 0;
-    virtual void SetDisplayMode(DisplayMode displayMode) = 0;
+    virtual void SetDisplayMode(int displayMode) = 0;
     virtual void SetScrollBarWidth(const Dimension& dimension) = 0;
     virtual void SetScrollBarColor(const Color& color) = 0;
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;

@@ -16,16 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_SKIA_DECORATION_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_SKIA_DECORATION_PAINTER_H
 
+#include "include/core/SkCanvas.h"
 #include "include/core/SkMaskFilter.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
 #include "include/core/SkRRect.h"
 #include "include/core/SkShader.h"
-#include "include/core/SkPath.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkCanvas.h"
-#include "base/geometry/ng/size_t.h"
+
 #include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/property/gradient_property.h"
+#include "base/geometry/ng/size_t.h"
 #include "core/components/common/properties/clip_path.h"
+#include "core/components_ng/property/gradient_property.h"
+
 
 namespace OHOS::Ace::NG {
 class SkiaDecorationPainter : public virtual AceType {
@@ -57,7 +59,7 @@ public:
     static float SkiaDimensionToPx(const Dimension& value, const SizeF& size, LengthMode type);
     static float SkiaGetFloatRadiusValue(
         const Dimension& src, const Dimension& dest, const SizeF& size, LengthMode type);
-        
+
     static void PaintGrayScale(const SizeF& frameSize, SkCanvas* canvas, float grayscale);
     static void PaintBrightness(const SizeF& frameSize, SkCanvas* canvas, float brightness);
     static void PaintContrast(const SizeF& frameSize, SkCanvas* canvas, float contrast);
@@ -66,6 +68,8 @@ public:
     static void PaintSepia(const SizeF& frameSize, SkCanvas* canvas, float sepia);
     static void PaintInvert(const SizeF& frameSize, SkCanvas* canvas, float invert);
     static void PaintHueRotate(const SizeF& frameSize, SkCanvas* canvas, float hueRotate);
+
+    static SkPaint CreateMaskSkPaint(const RefPtr<BasicShape>& basicShape);
 };
 } // namespace OHOS::Ace::NG
 

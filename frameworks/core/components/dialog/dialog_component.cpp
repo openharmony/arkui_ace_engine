@@ -42,6 +42,8 @@
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/wrap/wrap_component.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -204,7 +206,7 @@ void DialogComponent::BuildDialogTween(const RefPtr<TransitionComponent>& transi
     dialogTween->SetOffset(properties_.offset);
     dialogTween->SetGridCount(properties_.gridCount);
     if (dialogTweenBox_) {
-        const auto& dialogComposed = GenerateComposed("dialog", dialogTween, false);
+        const auto& dialogComposed = GenerateComposed(V2::DIALOG_COMPONENT_TAG, dialogTween, false);
         dialogTween->SetComposedId(dialogTweenComposedId_);
         dialogTween->SetCustomDialogId(customDialogId_);
         dialogTweenBox_->SetChild(dialogComposed);
@@ -279,7 +281,7 @@ void DialogComponent::BuildTitle(const RefPtr<ColumnComponent>& column)
     }
 
     auto titleFlex = AceType::MakeRefPtr<FlexItemComponent>(0, 0, 0.0, row);
-    column->AppendChild(GenerateComposed("dialogTitle", titleFlex, true));
+    column->AppendChild(GenerateComposed(V2::TEXT_COMPONENT_TAG, titleFlex, true));
 }
 
 void DialogComponent::BuildContent(const RefPtr<ColumnComponent>& column)
@@ -306,7 +308,7 @@ void DialogComponent::BuildContent(const RefPtr<ColumnComponent>& column)
         contentPadding->SetChild(scroll);
         contentFlex = AceType::MakeRefPtr<FlexItemComponent>(0, 1, 0.0, contentPadding);
     }
-    column->AppendChild(GenerateComposed("dialogContent", contentFlex, true));
+    column->AppendChild(GenerateComposed(V2::TEXT_COMPONENT_TAG, contentFlex, true));
 }
 
 void DialogComponent::BuildMenu(const RefPtr<ColumnComponent>& column)
@@ -413,7 +415,7 @@ RefPtr<Component> DialogComponent::BuildButton(
     auto buttonPadding = AceType::MakeRefPtr<PaddingComponent>();
     buttonPadding->SetPadding(edge);
     buttonPadding->SetChild(button);
-    return GenerateComposed("dialogButton", buttonPadding, true);
+    return GenerateComposed(V2::BUTTON_COMPONENT_TAG, buttonPadding, true);
 }
 
 RefPtr<TransitionComponent> DialogComponent::BuildAnimation(const RefPtr<BoxComponent>& child)
@@ -545,12 +547,15 @@ RefPtr<Component> DialogComponent::GenerateComposed(
     const auto& pipelineContext = context_.Upgrade();
     if (pipelineContext) {
         const auto& accessibilityManager = pipelineContext->GetAccessibilityManager();
-        if (accessibilityManager) {
-            // use accessibility node already created with dom node in JS app
-            int32_t composedId = customDialogId_;
-            if (composedId == -1) {
-                composedId = accessibilityManager->GenerateNextAccessibilityId();
-            }
+        if (!accessibilityManager) {
+            return child;
+        }
+        // use accessibility node already created with dom node in JS app
+        int32_t composedId = customDialogId_;
+        if (composedId == -1) {
+            composedId = accessibilityManager->GenerateNextAccessibilityId();
+        }
+        if (!pipelineContext->GetIsDeclarative()) {
             const auto& composed = AceType::MakeRefPtr<ComposedComponent>(std::to_string(composedId), name, child);
             if (isDialogTweenChild) {
                 accessibilityManager->CreateSpecializedNode(name, composedId, dialogTweenComposedId_);
@@ -559,6 +564,10 @@ RefPtr<Component> DialogComponent::GenerateComposed(
             }
             return composed;
         }
+#if !defined(PREVIEW)
+        return AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+            V2::InspectorComposedComponent::GenerateId(), name, child);
+#endif
     }
     return child;
 }

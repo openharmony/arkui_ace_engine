@@ -26,6 +26,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+}
 
 void ScrollModelNG::Create()
 {
@@ -58,6 +61,7 @@ RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController()
 void ScrollModelNG::SetAxis(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis);
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollPaintProperty, Axis, axis);
 }
 
 void ScrollModelNG::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
@@ -102,11 +106,34 @@ void ScrollModelNG::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std
     const std::pair<bool, Dimension>& width, EdgeEffect effect)
 {}
 
-void ScrollModelNG::SetDisplayMode(DisplayMode displayMode) {}
+void ScrollModelNG::SetDisplayMode(int displayMode)
+{
+    if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->SetDisplayMode(DISPLAY_MODE[displayMode]);
+}
 
-void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension) {}
+void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
+    paintProperty->SetScrollBarWidth(dimension);
+}
 
-void ScrollModelNG::SetScrollBarColor(const Color& color) {}
+void ScrollModelNG::SetScrollBarColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->SetScrollBarColor(color);
+}
 
 void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
 {

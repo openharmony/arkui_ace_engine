@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components_v2/list/list_position_controller.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::Framework {
@@ -44,22 +45,11 @@ void ListModelImpl::SetInitialIndex(int32_t initialIndex)
     JSViewSetProperty(&V2::ListComponent::SetInitialIndex, initialIndex);
 }
 
-void ListModelImpl::SetScroller(void* scrollerPtr)
+void ListModelImpl::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollBarProxy> proxy)
 {
-    RefPtr<JSScroller> scroller = Referenced::Claim(reinterpret_cast<JSScroller*>(scrollerPtr));
-    if (scroller) {
-        auto listController = AceType::MakeRefPtr<V2::ListPositionController>();
-        scroller->SetController(listController);
-        JSViewSetProperty(&V2::ListComponent::SetScrollController, listController);
-
-        // Init scroll bar proxy.
-        auto proxy = scroller->GetScrollBarProxy();
-        if (!proxy) {
-            proxy = AceType::MakeRefPtr<ScrollBarProxy>();
-            scroller->SetScrollBarProxy(proxy);
-        }
-        JSViewSetProperty(&V2::ListComponent::SetScrollBarProxy, proxy);
-    }
+    auto listScroller = AceType::DynamicCast<V2::ListPositionController>(scroller);
+    JSViewSetProperty(&V2::ListComponent::SetScrollController, listScroller);
+    JSViewSetProperty(&V2::ListComponent::SetScrollBarProxy, proxy);
 }
 
 void ListModelImpl::SetListDirection(Axis axis)

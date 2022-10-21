@@ -115,7 +115,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         if (popupInfo.isCurrentOnShow) {
             return;
         }
-        LOGE("begin push");
+        LOGI("begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         popupMap_[targetId].popupNode->MountToParent(rootNode);
     }
@@ -159,11 +159,22 @@ void OverlayManager::HideMenu(int32_t targetId)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     if (menuMap_.find(targetId) == menuMap_.end()) {
-        LOGE("OverlayManager: menuNode %{public}d not found in map", targetId);
+        LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
         return;
     }
     rootNode->RemoveChild(menuMap_[targetId]);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OverlayManager::DeleteMenu(int32_t targetId)
+{
+    LOGI("OverlayManager::DeleteMenuNode");
+    auto it = menuMap_.find(targetId);
+    if (it == menuMap_.end()) {
+        LOGW("OverlayManager: menuNode %{public}d doesn't exist", targetId);
+        return;
+    }
+    menuMap_.erase(it);
 }
 
 RefPtr<FrameNode> OverlayManager::ShowDialog(
@@ -181,11 +192,10 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
     std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
-    std::map<std::string, NG::DailogEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto dialogNode = DatePickerDialogView::Show(
-        dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancalEvent));
+        dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancelEvent));
     CHECK_NULL_VOID(dialogNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -195,11 +205,10 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
     std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
-    std::map<std::string, NG::DailogEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto dialogNode = TimePickerDialogView::Show(dialogProps, std::move(timePickerProperty), isUseMilitaryTime,
-        std::move(dialogEvent), std::move(dialogCancalEvent));
+        std::move(dialogEvent), std::move(dialogCancelEvent));
     CHECK_NULL_VOID(dialogNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -208,11 +217,11 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-    const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextEvent> dialogEvent,
-    std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent)
+    const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto dialogNode = TextPickerDialogView::Show(
-        dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancalEvent));
+        dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancelEvent));
     CHECK_NULL_VOID(dialogNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -220,7 +229,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::CloseDialog(RefPtr<FrameNode> dialogNode)
+void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     LOGI("OverlayManager::CloseDialog");
     auto rootNode = rootNodeWeak_.Upgrade();

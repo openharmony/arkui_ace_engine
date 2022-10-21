@@ -16,7 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H
 
-#include "core/components/xcomponent/xcomponent_component.h"
+#include "core/common/container.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
@@ -36,17 +36,6 @@ public:
     {
         static XComponentClient instance;
         return instance;
-    }
-
-    RefPtr<XComponentComponent> GetXComponentFromXcomponentsMap(const std::string& xcomponentId)
-    {
-        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
-        auto iter = xcomponentsMap_.find(idWithContainerId);
-        if (iter == xcomponentsMap_.end()) {
-            LOGE("xcomponent: %s not exists", xcomponentId.c_str());
-            return nullptr;
-        }
-        return AceType::DynamicCast<XComponentComponent>(iter->second.Upgrade());
     }
 
     RefPtr<JSXComponentController> GetControllerFromJSXComponentControllersMap(const std::string& xcomponentId)
@@ -74,37 +63,10 @@ public:
         }
     }
 
-    void AddXComponentToXcomponentsMap(const std::string& xcomponentId, const RefPtr<XComponentComponent>& component)
-    {
-        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
-        auto result = xcomponentsMap_.try_emplace(idWithContainerId, component);
-        if (!result.second) {
-            auto oldXcomponent = result.first->second.Upgrade();
-            if (oldXcomponent) {
-                oldXcomponent->SetDeleteCallbackToNull();
-            }
-            result.first->second = component;
-        }
-    }
-
     void AddControllerToJSXComponentControllersMap(const std::string& xcomponentId, JSXComponentController*& controller)
     {
         auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
         jsXComponentControllersMap_[idWithContainerId] = controller;
-    }
-
-    void DeleteFromXcomponentsMapById(const std::string& xcomponentId)
-    {
-        auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
-        auto it = xcomponentsMap_.find(idWithContainerId);
-        if (it == xcomponentsMap_.end()) {
-            return;
-        }
-        auto xcomponent = it->second.Upgrade();
-        if (xcomponent) {
-            xcomponent->SetDeleteCallbackToNull();
-        }
-        xcomponentsMap_.erase(it);
     }
 
     void DeleteControllerFromJSXComponentControllersMap(const std::string& xcomponentId)
@@ -160,7 +122,6 @@ public:
 
 private:
     XComponentClient() = default;
-    std::unordered_map<std::string, WeakPtr<XComponentComponent>> xcomponentsMap_;
     std::unordered_map<std::string, RefPtr<JSXComponentController>> jsXComponentControllersMap_;
     std::unordered_map<std::string, std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, OH_NativeXComponent*>>
         nativeXcomponentsMap_;
@@ -174,9 +135,6 @@ public:
     static void JsOnLoad(const JSCallbackInfo& args);
     static void JsOnDestroy(const JSCallbackInfo& args);
     static void OmitEvent(const JSCallbackInfo& args);
-
-private:
-    static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H

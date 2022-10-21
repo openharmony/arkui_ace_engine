@@ -100,8 +100,6 @@ public:
 
     void SetBuildAfterCallback(const std::function<void()>& callback) override {}
 
-    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) override {}
-
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 
     void CreateExplicitAnimator(const std::function<void()>& onFinishEvent) override {}
@@ -224,6 +222,11 @@ public:
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
 
+    void FlushUITasks() override
+    {
+        taskScheduler_.FlushTask();
+    }
+
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -232,11 +235,6 @@ protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight) override;
-
-    void FlushUITasks() override
-    {
-        taskScheduler_.FlushTask();
-    }
 
 private:
     void FlushWindowStateChangedCallback(bool isShow);

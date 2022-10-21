@@ -57,6 +57,7 @@ public:
     static Color FromRGB(uint8_t red, uint8_t green, uint8_t blue);
     // Need to change the input parameters, it is more appropriate to use the passed value here.
     static Color FromString(std::string colorStr, uint32_t maskAlpha = COLOR_ALPHA_MASK);
+    static bool ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha = COLOR_ALPHA_MASK);
     // Return the linear transition color from startColor to endColor.
     static const Color LineColorTransition(const Color& startColor, const Color& endColor, double percent);
 
@@ -133,6 +134,14 @@ private:
         const Color& gammaColor, double& linearRed, double& linearGreen, double& linearBlue);
     static uint8_t ConvertLinearToGamma(double value);
     static Color ConvertLinearToGamma(double alpha, double linearRed, double linearGreen, double linearBlue);
+    static bool MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color& color);
+    static bool MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, Color& color);
+    static bool MatchColorWithRGB(const std::string& colorStr, Color& color);
+    static bool MatchColorWithRGBA(const std::string& colorStr, Color& color);
+    static bool MatchColorSpecialString(const std::string& colorStr, Color& color);
+    static bool ParseUintColorString(const std::string& colorStr, Color& color);
+    static bool IsRGBValid(int value);
+    static bool IsOpacityValid(double value);
 
     float CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const;
     ColorParam colorValue_ { .value = 0xff000000 };

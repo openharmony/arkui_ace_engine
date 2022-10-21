@@ -35,6 +35,8 @@ public:
     ~RenderGridRow() override = default;
 
     static RefPtr<RenderNode> Create();
+    static void ParseNewLineForLargeOffset(int32_t childSpan, int32_t childOffset, int32_t restColumnNum,
+        int32_t totalColumnNum, NewLineOffset& newLineOffset);
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
@@ -43,8 +45,6 @@ public:
 
     void CalculateOffsetOfNewline(const RefPtr<RenderNode>& node, int32_t currentChildSpan, int32_t restColumnNum,
         int32_t totalColumnNum, GridSizeType sizeType, NewLineOffset& newLineOffset) const;
-    bool ParseNewLineForLargeOffset(int32_t childSpan, int32_t childOffset, int32_t restColumnNum,
-        int32_t totalColumnNum, NewLineOffset& newLineOffset) const;
     inline int32_t GetRelativeOffset(const RefPtr<RenderNode>& node, GridSizeType sizeType) const;
     inline int32_t GetGridColSpan(const RefPtr<RenderNode>& node, GridSizeType sizeType) const;
     void FindGridColChild(RefPtr<RenderNode>& node) const;

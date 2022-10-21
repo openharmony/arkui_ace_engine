@@ -30,7 +30,7 @@ public:
     void SetDelegate(std::unique_ptr<EnvironmentInterface>&& delegate);
     RefPtr<Environment> GetEnvironment(const RefPtr<TaskExecutor>& taskExecutor) const override;
     EnvironmentProxy() = default;
-    ~EnvironmentProxy() = default;
+    ~EnvironmentProxy() override = default;
 
 private:
     std::unique_ptr<EnvironmentInterface> delegate_;

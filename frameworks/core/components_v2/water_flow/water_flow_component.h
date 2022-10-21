@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_COMPONENT_H
 
-#include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/components_v2/water_flow/water_flow_position_controller.h"
 #include "core/pipeline/base/component_group.h"
 
@@ -28,20 +28,15 @@ class ACE_EXPORT WaterFlowComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(WaterFlowComponent, ComponentGroup);
 
 public:
-    WaterFlowComponent(const std::list<RefPtr<Component>>& children, int32_t crossSplice)
-        : ComponentGroup(children), crossSplice_(crossSplice)
-    {}
+    explicit WaterFlowComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {}
 
     ~WaterFlowComponent() override = default;
 
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
 
-    void SetMainLength(const Dimension& mainLength);
     void SetColumnsGap(const Dimension& columnsGap);
     void SetRowsGap(const Dimension& rowsGap);
-    void SetFlexAlign(FlexAlign flexAlign);
-    void SetRightToLeft(bool rightToLeft);
     void SetLayoutDirection(FlexDirection direction);
     void SetController(const RefPtr<V2::WaterFlowPositionController>& controller);
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
@@ -49,16 +44,13 @@ public:
     void SetScrollBarDisplayMode(DisplayMode displayMode);
     void SetScrollBarColor(const std::string& color);
     void SetScrollBarWidth(const std::string& width);
-
-    int32_t GetCrossSplice() const
-    {
-        return crossSplice_;
-    }
-
-    const Dimension& GetMainLength() const
-    {
-        return mainLength_;
-    }
+    void SetColumnsArgs(const std::string& columnsArgs);
+    void SetRowsArgs(const std::string& rowsArgs);
+    void SetMinWidth(const Dimension& minWidth);
+    void SetMinHeight(const Dimension& minHeight);
+    void SetMaxWidth(const Dimension& maxWidth);
+    void SetMaxHeight(const Dimension& maxHeight);
+    void SetFooterComponent(RefPtr<Component> component);
 
     const Dimension& GetColumnsGap() const
     {
@@ -75,11 +67,6 @@ public:
         return direction_;
     }
 
-    FlexAlign GetFlexAlign() const
-    {
-        return flexAlign_;
-    }
-
     const RefPtr<V2::WaterFlowPositionController>& GetController() const
     {
         return controller_;
@@ -88,11 +75,6 @@ public:
     const RefPtr<ScrollBarProxy>& GetScrollBarProxy() const
     {
         return scrollBarProxy_;
-    }
-
-    bool GetRightToLeft() const
-    {
-        return rightToLeft_;
     }
 
     const EventMarker& GetScrolledEvent() const
@@ -105,32 +87,62 @@ public:
         return displayMode_;
     }
 
-    const std::string& GetScrollBarColor() const
+    const std::string& GetColumnsArgs() const
     {
-        return scrollBarColor_;
+        return columnsArgs_;
     }
 
-    const std::string& GetScrollBarWidth() const
+    const std::string& GetRowsArgs() const
     {
-        return scrollBarWidth_;
+        return rowsArgs_;
     }
+
+    const Dimension& GetMinWidth() const
+    {
+        return minWidth_;
+    }
+
+    const Dimension& GetMinHeight() const
+    {
+        return minHeight_;
+    }
+
+    const Dimension& GetMaxWidth() const
+    {
+        return maxWidth_;
+    }
+
+    const Dimension& GetMaxHeight() const
+    {
+        return maxHeight_;
+    }
+
+    RefPtr<Component> GetFooterComponent() const
+    {
+        return footerComponent_;
+    }
+
+    ACE_DEFINE_COMPONENT_EVENT(OnReachStart, void());
+    ACE_DEFINE_COMPONENT_EVENT(OnReachEnd, void());
 
 private:
-    int32_t crossSplice_ = 0;
-    Dimension mainLength_ = 0.0_px;
     Dimension columnsGap_ = 0.0_px;
     Dimension rowsGap_ = 0.0_px;
     FlexDirection direction_ = FlexDirection::COLUMN;
-    FlexAlign flexAlign_ = FlexAlign::CENTER;
-    bool rightToLeft_ = false;
+    std::string columnsArgs_;
+    std::string rowsArgs_;
+    Dimension minWidth_ = 0.0_px;
+    Dimension minHeight_ = 0.0_px;
+    Dimension maxWidth_ = 0.0_px;
+    Dimension maxHeight_ = 0.0_px;
 
     // scroll bar attribute
-    std::string scrollBarColor_;
-    std::string scrollBarWidth_;
     DisplayMode displayMode_ = DisplayMode::ON;
     RefPtr<V2::WaterFlowPositionController> controller_;
     RefPtr<ScrollBarProxy> scrollBarProxy_;
     EventMarker scrolledEvent_;
+    RefPtr<Component> footerComponent_;
+    ACE_DISALLOW_COPY_AND_MOVE(WaterFlowComponent);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_COMPONENT_H

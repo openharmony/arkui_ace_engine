@@ -102,7 +102,7 @@ void ImagePattern::OnImageLoadSuccess()
     lastAltSrcRect_.reset();
     // TODO: only do paint task when the pattern is active
     // figure out why here is always inactive
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::CacheImageObject()
@@ -277,6 +277,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->altLoadingCtx_);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {

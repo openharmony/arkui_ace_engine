@@ -43,7 +43,7 @@ void NavRouterView::SetOnStateChange(std::function<void(bool)>&& onStateChange)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navRouterEventHub = AceType::DynamicCast<NavRouterEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navRouterEventHub);
-    navRouterEventHub->SetOnStateChangeChange(std::move(onStateChange));
+    navRouterEventHub->SetOnStateChange(std::move(onStateChange));
 }
 
 } // namespace OHOS::Ace::NG

@@ -46,8 +46,6 @@ void WebPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
-    InitEvent();
 }
 
 void WebPattern::InitEvent()
@@ -82,6 +80,10 @@ void WebPattern::InitEvent()
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (touchEvent_) {
+        return;
+    }
+
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -528,6 +530,9 @@ void WebPattern::OnModifyDone()
     if (renderContext->HasBackgroundColor()) {
         delegate_->UpdateBackgroundColor(static_cast<int32_t>(renderContext->GetBackgroundColor()->GetValue()));
     }
+
+    // Initialize events such as keyboard, focus, etc.
+    InitEvent();
 }
 
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)

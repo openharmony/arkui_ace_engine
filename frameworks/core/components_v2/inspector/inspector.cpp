@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 namespace {
+const char IFELSE_ELEMENT_TAG[] = "IfElseElement";
 const char INSPECTOR_TYPE[] = "$type";
 const char INSPECTOR_ROOT[] = "root";
 const char INSPECTOR_WIDTH[] = "width";
@@ -65,8 +66,12 @@ void DumpElementTree(
         return;
     }
     const auto& children = element->GetChildren();
-    depthElementMap[depth].insert(depthElementMap[depth].end(), children.begin(), children.end());
     for (auto& depthElement : children) {
+        if (strcmp(AceType::TypeName(depthElement), IFELSE_ELEMENT_TAG) == 0) {
+            DumpElementTree(depth, depthElement, depthElementMap);
+            continue;
+        }
+        depthElementMap[depth].insert(depthElementMap[depth].end(), depthElement);
         DumpElementTree(depth + 1, depthElement, depthElementMap);
     }
 }

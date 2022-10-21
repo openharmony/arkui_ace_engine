@@ -16,13 +16,14 @@
 #ifndef FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H
 #define FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H
 
+#include <cstdint>
+
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/component.h"
-#include "core/components_ng/event/click_event.h"
 
 namespace OHOS::Ace {
 
@@ -46,12 +47,52 @@ enum class DialogAlignment {
     BOTTOM_END,
 };
 
+class DialogAlignmentUtils {
+public:
+    static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment)
+    {
+        std::string Alignment = "";
+        switch (dialogAlignment) {
+            case DialogAlignment::TOP:
+                Alignment = "DialogAlignment.TOP";
+                break;
+            case DialogAlignment::CENTER:
+                Alignment = "DialogAlignment.CENTER";
+                break;
+            case DialogAlignment::BOTTOM:
+                Alignment = "DialogAlignment.BOTTOM";
+                break;
+            case DialogAlignment::TOP_START:
+                Alignment = "DialogAlignment.TOP_START";
+                break;
+            case DialogAlignment::TOP_END:
+                Alignment = "DialogAlignment.TOP_END";
+                break;
+            case DialogAlignment::CENTER_START:
+                Alignment = "DialogAlignment.CENTER_START";
+                break;
+            case DialogAlignment::CENTER_END:
+                Alignment = "DialogAlignment.CENTER_END";
+                break;
+            case DialogAlignment::BOTTOM_START:
+                Alignment = "DialogAlignment.BOTTOM_START";
+                break;
+            case DialogAlignment::BOTTOM_END:
+                Alignment = "DialogAlignment.BOTTOM_END";
+                break;
+            default:
+                Alignment = "DialogAlignment.DEFAULT";
+        }
+        return Alignment;
+    }
+};
+
 // Information of ActionSheet
 struct ActionSheetInfo {
-    std::string title;       // title of ActionSheet, necessary.
-    std::string icon;        // icon of ActionSheet, not necessary.
-    EventMarker callbackId;  // called when ActionSheet is clicked.
-    RefPtr<Gesture> gesture; // called when ActionSheet is clicked.
+    std::string title;             // title of ActionSheet, necessary.
+    std::string icon;              // icon of ActionSheet, not necessary.
+    EventMarker callbackId;        // called when ActionSheet is clicked.
+    RefPtr<Gesture> gesture;       // called when ActionSheet is clicked.
     RefPtr<NG::ClickEvent> action; // NG sheet item click action
 
     // Whether sheetInfo is valid, valid if title if not empty.
@@ -66,7 +107,7 @@ struct ButtonInfo {
     std::string text;      // text of button.
     std::string textColor; // style of text in button.
     bool isBgColorSetted = false;
-    Color bgColor; // background color of button.
+    Color bgColor;                 // background color of button.
     RefPtr<NG::ClickEvent> action; // NG button click action
 
     // Whether button info is valid, valid if text is not empty.
@@ -85,7 +126,8 @@ struct DialogProperties {
     bool isMenu = false;
     std::vector<ButtonInfo> buttons;
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
-    std::function<void()> onCancel; // NG cancel callback
+    std::function<void()> onCancel;                         // NG cancel callback
+    std::function<void(int32_t, int32_t)> onSuccess;        // NG prompt success callback
     DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
     DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
     int32_t gridCount = 0;

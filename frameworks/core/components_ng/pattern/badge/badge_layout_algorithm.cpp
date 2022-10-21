@@ -40,21 +40,21 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childrenSize = children.size();
     auto layoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
     if (GreatOrEqual(idealSize.Width(), Infinity<float>()) || GreatOrEqual(idealSize.Height(), Infinity<float>())) {
         LOGW("Size is infinity.");
-        geometryNode->SetFrameSize(SizeF());
         return;
     }
-    geometryNode->SetFrameSize(idealSize);
-    geometryNode->SetContentSize(idealSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
+
+    auto textFirstLayoutConstraint = childLayoutConstraint;
+    textFirstLayoutConstraint.maxSize = { Infinity<float>(), Infinity<float>() };
+
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
     if (textWrapper) {
-        textWrapper->Measure(childLayoutConstraint);
+        textWrapper->Measure(textFirstLayoutConstraint);
     }
 
     auto circleSize = layoutProperty->GetBadgeCircleSize();
@@ -70,7 +70,11 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto textGeometryNode = textWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
 
-    auto textData = textLayoutProperty->GetContentValue();
+    std::string textData;
+    if (textLayoutProperty->HasContent()) {
+        textData = textLayoutProperty->GetContentValue();
+    }
+
     auto messageCount = textData.size();
     auto textSize = textGeometryNode->GetContentSize();
 
@@ -87,13 +91,15 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     textLayoutProperty->UpdateMarginSelfIdealSize(SizeF(badgeWidth, badgeHeight));
-    auto textLayoutConstraint = childLayoutConstraint;
+    auto textLayoutConstraint = textFirstLayoutConstraint;
     textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);
     textWrapper->Measure(textLayoutConstraint);
 
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);
     childWrapper->Measure(childLayoutConstraint);
+
+    PerformMeasureSelf(layoutWrapper);
 }
 
 void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -128,7 +134,12 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textLayoutProperty);
     auto textGeometryNode = textWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
-    auto textData = textLayoutProperty->GetContentValue();
+
+    std::string textData;
+    if (textLayoutProperty->HasContent()) {
+        textData = textLayoutProperty->GetContentValue();
+    }
+
     auto messageCount = textData.size();
     auto textSize = textGeometryNode->GetContentSize();
 
@@ -183,6 +194,39 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);
     childWrapper->Layout();
+}
+
+void BadgeLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
+{
+    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& minSize = layoutConstraint->minSize;
+    const auto& maxSize = layoutConstraint->maxSize;
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    OptionalSizeF frameSize;
+    do {
+        // Use idea size first if it is valid.
+        frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
+        if (frameSize.IsValid()) {
+            break;
+        }
+        // use the last child size.
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto children = host->GetChildren();
+        if (children.empty()) {
+            LOGW("Badge has no child node.");
+            return;
+        }
+        auto childrenSize = children.size();
+        auto childFrame =
+            layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2)->GetGeometryNode()->GetMarginFrameSize();
+        AddPaddingToSize(padding, childFrame);
+        frameSize.UpdateIllegalSizeWithCheck(childFrame);
+        frameSize.Constrain(minSize, maxSize);
+        frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
+    } while (false);
+
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
 } // namespace OHOS::Ace::NG
