@@ -644,9 +644,12 @@ bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
         return false;
     }
 
-    bool ret = instance->SubscribeStateObserver(stateObserver_, eventType);
+    Accessibility::RetError ret = instance->SubscribeStateObserver(stateObserver_, eventType);
     LOGD("SubscribeStateObserver:%{public}d", ret);
-    return ret;
+    if (ret != RET_OK) {
+        return false;
+    }
+    return true;
 }
 
 bool JsAccessibilityManager::UnsubscribeStateObserver(const int eventType)
@@ -661,9 +664,12 @@ bool JsAccessibilityManager::UnsubscribeStateObserver(const int eventType)
         return false;
     }
 
-    bool ret = instance->UnsubscribeStateObserver(stateObserver_, eventType);
+    Accessibility::RetError ret = instance->UnsubscribeStateObserver(stateObserver_, eventType);
     LOGI("UnsubscribeStateObserver:%{public}d", ret);
-    return ret;
+    if (ret != RET_OK) {
+        return false;
+    }
+    return true;
 }
 
 void JsAccessibilityManager::InitializeCallback()
@@ -683,11 +689,13 @@ void JsAccessibilityManager::InitializeCallback()
     if (!client) {
         return;
     }
-    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(client->IsEnabled());
+    bool isEnabled = false;
+    client->IsEnabled(isEnabled);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
 
     SubscribeToastObserver();
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
-    if (client->IsEnabled()) {
+    if (isEnabled) {
         RegisterInteractionOperation(windowId_);
     }
 }
@@ -700,7 +708,9 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent
 
     auto client = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(client, false);
-    if (!client->IsEnabled()) {
+    bool isEnabled = false;
+    client->IsEnabled(isEnabled);
+    if (!isEnabled) {
         return false;
     }
 
@@ -1502,9 +1512,9 @@ int JsAccessibilityManager::RegisterInteractionOperation(const int windowId)
 
     interactionOperation_ = std::make_shared<JsInteractionOperation>();
     interactionOperation_->SetHandler(WeakClaim(this));
-    auto retReg = instance->RegisterElementOperator(windowId, interactionOperation_);
+    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation_);
     LOGI("RegisterInteractionOperation end windowId:%{public}d, ret:%{public}d", windowId, retReg);
-    Register(retReg == 0);
+    Register(retReg == RET_OK);
 
     return retReg;
 }
@@ -1523,7 +1533,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     Register(false);
     currentFocusNodeId_ = -1;
     LOGI("DeregisterInteractionOperation windowId:%{public}d", windowId);
-    return instance->DeregisterElementOperator(windowId);
+    instance->DeregisterElementOperator(windowId);
 }
 
 void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const bool state)
