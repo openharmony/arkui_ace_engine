@@ -76,4 +76,11 @@ void ShapeContainerPattern::MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode)
     }
 }
 
+void ShapeContainerPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+}
+
 } // namespace OHOS::Ace::NG
