@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_PATTERN_H
 
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -121,6 +122,16 @@ public:
         return libraryname_;
     }
 
+    const std::optional<std::string>& GetSoPath() const
+    {
+        return soPath_;
+    }
+
+    void SetSoPath(const std::string& soPath)
+    {
+        soPath_ = soPath;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -145,6 +156,7 @@ private:
     XComponentType type_;
     std::string libraryname_;
     RefPtr<XComponentController> xcomponentController_;
+    std::optional<std::string> soPath_;
 
     RefPtr<RenderSurface> renderSurface_;
     RefPtr<RenderContext> renderContextForSurface_;

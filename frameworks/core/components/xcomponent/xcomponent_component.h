@@ -230,6 +230,16 @@ public:
         deleteCallback_ = nullptr;
     }
 
+    const std::optional<std::string>& GetSoPath() const
+    {
+        return soPath_;
+    }
+
+    void SetSoPath(const std::string& soPath)
+    {
+        soPath_ = soPath;
+    }
+
 #ifdef OHOS_STANDARD_SYSTEM
     void SetNativeWindow(void* nativeWindow)
     {
@@ -251,6 +261,7 @@ private:
     RefPtr<XComponentTaskPool> pool_;
     RefPtr<XComponentController> xcomponentController_;
     std::string type_;
+    std::optional<std::string> soPath_;
     int64_t textureId_ = -1;
     int32_t nodeId_ = -1;
     RefPtr<NativeTexture> texture_;
