@@ -159,11 +159,22 @@ void OverlayManager::HideMenu(int32_t targetId)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     if (menuMap_.find(targetId) == menuMap_.end()) {
-        LOGE("OverlayManager: menuNode %{public}d not found in map", targetId);
+        LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
         return;
     }
     rootNode->RemoveChild(menuMap_[targetId]);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OverlayManager::DeleteMenu(int32_t targetId)
+{
+    LOGI("OverlayManager::DeleteMenuNode");
+    auto it = menuMap_.find(targetId);
+    if (it == menuMap_.end()) {
+        LOGW("OverlayManager: menuNode %{public}d doesn't exist", targetId);
+        return;
+    }
+    menuMap_.erase(it);
 }
 
 RefPtr<FrameNode> OverlayManager::ShowDialog(
