@@ -40,6 +40,44 @@ void SideBarContainerPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
+    if (newShowSideBar != showSideBar_) {
+        SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
+    }
+}
+
+void SideBarContainerPattern::OnUpdateShowControlButton(
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(host);
+
+    auto showControlButton = layoutProperty->GetShowControlButton().value_or(true);
+
+    auto children = host->GetChildren();
+    if (children.empty()) {
+        LOGE("OnUpdateShowControlButton: children is empty.");
+        return;
+    }
+
+    auto controlButtonNode = children.back();
+    if (controlButtonNode->GetTag() != V2::IMAGE_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
+        LOGE("OnUpdateShowControlButton: Get control button failed.");
+        return;
+    }
+
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(controlButtonNode);
+    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+
+    imageLayoutProperty->UpdateVisibility(showControlButton ? VisibleType::VISIBLE : VisibleType::GONE);
+    imgFrameNode->MarkModifyDone();
+}
+
 void SideBarContainerPattern::OnModifyDone()
 {
     CreateAnimation();
@@ -53,6 +91,10 @@ void SideBarContainerPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
 
     InitDragEvent(gestureHub);
+
+    auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    OnUpdateShowSideBar(layoutProperty);
+    OnUpdateShowControlButton(layoutProperty, host);
 }
 
 void SideBarContainerPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -105,7 +147,6 @@ void SideBarContainerPattern::InitSideBar()
 
     auto showSideBar = layoutProperty->GetShowSideBar().value_or(true);
     sideBarStatus_ = showSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN;
-    showControlButton_ = layoutProperty->GetShowControlButton().value_or(true);
 }
 
 void SideBarContainerPattern::CreateAnimation()
