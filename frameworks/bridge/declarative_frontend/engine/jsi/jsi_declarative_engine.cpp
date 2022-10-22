@@ -1258,7 +1258,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
 {
     CHECK_RUN_ON(JS);
     if (Container::IsCurrentUseNewPipeline()) {
-        InitXComponent(componentId);
+        ACE_DCHECK(engineInstance_);
         auto xcFrameNode = NG::FrameNode::GetFrameNode(V2::XCOMPONENT_ETS_TAG, static_cast<int32_t>(nodeId));
         if (!xcFrameNode) {
             LOGE("FireExternalEvent xcFrameNode is null.");
@@ -1271,12 +1271,19 @@ void JsiDeclarativeEngine::FireExternalEvent(
 
         nativeWindow = xcPattern->GetNativeWindow();
 
+        OH_NativeXComponent* nativeXComponent = nullptr;
+        RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
+
+        std::tie(nativeXComponentImpl, nativeXComponent) = xcPattern->GetNativeXComponent();
+        CHECK_NULL_VOID(nativeXComponent);
+        CHECK_NULL_VOID(nativeXComponentImpl);
+
         if (!nativeWindow) {
             LOGE("FireExternalEvent nativeWindow invalid");
             return;
         }
-        nativeXComponentImpl_->SetSurface(nativeWindow);
-        nativeXComponentImpl_->SetXComponentId(componentId);
+        nativeXComponentImpl->SetSurface(nativeWindow);
+        nativeXComponentImpl->SetXComponentId(componentId);
 
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
@@ -1286,7 +1293,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
 
         std::string arguments;
         auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName(), true, arguments,
-            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
+            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent));
 
         auto runtime = engineInstance_->GetJsRuntime();
         shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
@@ -1317,8 +1324,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
             auto bridge = weak.Upgrade();
             if (bridge) {
 #ifdef XCOMPONENT_SUPPORTED
-                pattern->NativeXComponentInit(
-                    bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+                pattern->NativeXComponentInit();
 #endif
             }
         };
