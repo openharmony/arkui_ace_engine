@@ -80,7 +80,6 @@ RefPtr<RenderNode> RenderListItemGroup::RequestListItemHeader()
     header_ =  generator ? generator->RequestListItemHeader() : RefPtr<RenderNode>();
     if (header_) {
         AddChild(header_);
-        header_->Layout(GetLayoutParam());
     }
     return header_;
 }
@@ -91,7 +90,6 @@ RefPtr<RenderNode> RenderListItemGroup::RequestListItemFooter()
     footer_ = generator ? generator->RequestListItemFooter() : RefPtr<RenderNode>();
     if (footer_) {
         AddChild(footer_);
-        footer_->Layout(GetLayoutParam());
     }
     return footer_;
 }
@@ -269,6 +267,31 @@ void RenderListItemGroup::RequestNewItemsAtStart()
     }
 }
 
+void RenderListItemGroup::LayoutHeaderFooter(bool reachEnd)
+{
+    if ((stickyHeader_ || startIndex_ == 0) && !header_) {
+        RequestListItemHeader();
+    } else if (!stickyHeader_ && startIndex_ > 0 && header_) {
+        RemoveChild(header_);
+        header_ = nullptr;
+    }
+
+    if ((stickyFooter_ || reachEnd) && !footer_) {
+        RequestListItemFooter();
+    } else if (!stickyFooter_ && !reachEnd && footer_) {
+        RemoveChild(footer_);
+        footer_ = nullptr;
+    }
+
+    if (header_) {
+        header_->Layout(GetLayoutParam());
+    }
+
+    if (footer_) {
+        footer_->Layout(GetLayoutParam());
+    }
+}
+
 double RenderListItemGroup::CalculateCrossOffset(double crossSize, double childCrossSize)
 {
     double delta = crossSize - childCrossSize;
@@ -345,19 +368,7 @@ void RenderListItemGroup::PerformLayout()
     RequestNewItemsAtStart();
 
     bool reachEnd = (startIndex_ + items_.size() >= TotalCount());
-    if ((stickyHeader_ || startIndex_ == 0) && !header_) {
-        RequestListItemHeader();
-    } else if (!stickyHeader_ && startIndex_ > 0 && header_) {
-        RemoveChild(header_);
-        header_ = nullptr;
-    }
-
-    if ((stickyFooter_ || reachEnd) && !footer_) {
-        RequestListItemFooter();
-    } else if (!stickyFooter_ && !reachEnd && footer_) {
-        RemoveChild(footer_);
-        footer_ = nullptr;
-    }
+    LayoutHeaderFooter(reachEnd);
 
     double headerSize = header_ && (startIndex_ == 0) ? GetMainSize(header_->GetLayoutSize()) : 0.0;
     double footerSize = footer_ && reachEnd ? GetMainSize(footer_->GetLayoutSize()) : 0.0;
@@ -406,8 +417,8 @@ void RenderListItemGroup::SetItemGroupLayoutParam(const ListItemLayoutParam &par
     listMainSize_ = param.listMainSize;
     vertical_ = param.isVertical;
     align_ = param.align;
-    stickyHeader_ = (param.sticky == StickyStyle::HEADER);
-    stickyFooter_ = (param.sticky == StickyStyle::FOOTER);
+    stickyHeader_ = (param.sticky == StickyStyle::HEADER) || (param.sticky == StickyStyle::BOTH);
+    stickyFooter_ = (param.sticky == StickyStyle::FOOTER) || (param.sticky == StickyStyle::BOTH);
     lanes_ = static_cast<size_t>(param.lanes);
     if (!isInitialized_) {
         isInitialized_ = true;
