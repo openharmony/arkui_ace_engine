@@ -163,6 +163,11 @@ public:
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
+    virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
+    virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
+    virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
+    virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
+    virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;

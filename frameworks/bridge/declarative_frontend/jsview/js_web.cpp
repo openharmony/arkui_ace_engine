@@ -18,6 +18,7 @@
 #include <optional>
 #include <string>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -3330,10 +3331,10 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
                     LOGE("builder param is not an object.");
                     return;
                 }
-                auto component = ParseDragItemComponent(ret);
+                auto component = ParseDragNode(ret);
                 if (component) {
                     LOGI("use custom builder param.");
-                    itemInfo.customComponent = component;
+                    itemInfo.customComponent =  AceType::DynamicCast<Component>(component);
                     return;
                 }
 
@@ -3344,8 +3345,8 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
 #endif
                 auto extraInfo = builderObj->GetProperty("extraInfo");
                 ParseJsString(extraInfo, itemInfo.extraInfo);
-                component = ParseDragItemComponent(builderObj->GetProperty("builder"));
-                itemInfo.customComponent = component;
+                component = ParseDragNode(builderObj->GetProperty("builder"));
+                itemInfo.customComponent = AceType::DynamicCast<Component>(component);
             });
             return itemInfo;
         };
@@ -3362,10 +3363,10 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
             LOGE("builder param is not an object.");
             return itemInfo;
         }
-        auto component = ParseDragItemComponent(ret);
+        auto component = ParseDragNode(ret);
         if (component) {
             LOGI("use custom builder param.");
-            itemInfo.customComponent = component;
+            itemInfo.customComponent = AceType::DynamicCast<Component>(component);
             return itemInfo;
         }
 
@@ -3376,8 +3377,8 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
 #endif
         auto extraInfo = builderObj->GetProperty("extraInfo");
         ParseJsString(extraInfo, itemInfo.extraInfo);
-        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
-        itemInfo.customComponent = component;
+        component = ParseDragNode(builderObj->GetProperty("builder"));
+        itemInfo.customComponent = AceType::DynamicCast<Component>(component);
         return itemInfo;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

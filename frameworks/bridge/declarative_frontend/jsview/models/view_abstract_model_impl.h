@@ -18,6 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -26,6 +27,7 @@ public:
     ~ViewAbstractModelImpl() override = default;
 
     static void SwapBackBorder(const RefPtr<Decoration>& decoration);
+    static OnDragFunc ToDragFunc(NG::OnDragStartFunc&& onDragStart);
 
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
@@ -132,6 +134,11 @@ public:
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override;
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override;
+    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
+    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
+    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
+    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;

@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
@@ -347,9 +348,9 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
-        DragItemInfo itemInfo;
+    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
+        NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
 
         auto ret = func->Execute(info, extraParams);
@@ -357,28 +358,26 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
             LOGE("builder param is not an object.");
             return itemInfo;
         }
-#ifndef NG_BUILD
-        auto component = ParseDragItemComponent(ret);
-        if (component) {
+        auto node = ParseDragNode(ret);
+        if (node) {
             LOGI("use custom builder param.");
-            itemInfo.customComponent = component;
+            itemInfo.node = node;
             return itemInfo;
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
-#if !defined(PREVIEW)
+#if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
         itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
 #endif
         auto extraInfo = builderObj->GetProperty("extraInfo");
         ParseJsString(extraInfo, itemInfo.extraInfo);
-        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
-        itemInfo.customComponent = component;
-#endif
+        node = ParseDragNode(builderObj->GetProperty("builder"));
+        itemInfo.node = node;
         return itemInfo;
     };
 
-    TextModel::GetInstance()->SetOnDragStartId(onDragStartId);
+    TextModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
 }
 
 void JSText::JsOnDragEnter(const JSCallbackInfo& info)
@@ -391,7 +390,7 @@ void JSText::JsOnDragEnter(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDragEnter");
         func->Execute(info, extraParams);
     };
-    TextModel::GetInstance()->SetOnDragEnterId(onDragEnterId);
+    TextModel::GetInstance()->SetOnDragEnter(std::move(onDragEnterId));
 }
 
 void JSText::JsOnDragMove(const JSCallbackInfo& info)
@@ -404,7 +403,7 @@ void JSText::JsOnDragMove(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDragMove");
         func->Execute(info, extraParams);
     };
-    TextModel::GetInstance()->SetOnDragMoveId(onDragMoveId);
+    TextModel::GetInstance()->SetOnDragMove(std::move(onDragMoveId));
 }
 
 void JSText::JsOnDragLeave(const JSCallbackInfo& info)
@@ -417,7 +416,7 @@ void JSText::JsOnDragLeave(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDragLeave");
         func->Execute(info, extraParams);
     };
-    TextModel::GetInstance()->SetOnDragLeaveId(onDragLeaveId);
+    TextModel::GetInstance()->SetOnDragLeave(std::move(onDragLeaveId));
 }
 
 void JSText::JsOnDrop(const JSCallbackInfo& info)
@@ -430,7 +429,7 @@ void JSText::JsOnDrop(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDrop");
         func->Execute(info, extraParams);
     };
-    TextModel::GetInstance()->SetOnDropId(onDropId);
+    TextModel::GetInstance()->SetOnDrop(std::move(onDropId));
 }
 
 void JSText::JsFocusable(const JSCallbackInfo& info)
