@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_RECT_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_RECT_PAINT_PROPERTY_H
 
+#include <vector>
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/radius.h"
 #include "base/log/log_wrapper.h"
@@ -60,6 +61,25 @@ public:
         ResetBottomRightRadius();
         ResetTopLeftRadius();
         ResetTopRightRadius();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        ShapePaintProperty::ToJsonValue(json);
+        if (!propTopLeftRadius_.has_value() || !propTopRightRadius_.has_value() || !propBottomLeftRadius_.has_value() ||
+            !propBottomRightRadius_.has_value()) {
+            return;
+        }
+        std::vector<std::vector<double>> radiusArray(4);
+        radiusArray[0] = { propTopLeftRadius_.value().GetX().ConvertToVp(),
+            propTopLeftRadius_.value().GetY().ConvertToVp() };
+        radiusArray[1] = { propTopRightRadius_.value().GetX().ConvertToVp(),
+            propTopRightRadius_.value().GetY().ConvertToVp() };
+        radiusArray[2] = { propBottomRightRadius_.value().GetX().ConvertToVp(),
+            propBottomRightRadius_.value().GetY().ConvertToVp() };
+        radiusArray[3] = { propBottomLeftRadius_.value().GetX().ConvertToVp(),
+            propBottomLeftRadius_.value().GetY().ConvertToVp() };
+        json->Put("radius", radiusArray.data());
     }
 
     const std::optional<Radius>& GetTopLeftRadius()
