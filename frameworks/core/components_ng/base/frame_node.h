@@ -225,10 +225,7 @@ public:
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
-    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
-
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
