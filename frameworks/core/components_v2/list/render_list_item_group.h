@@ -162,6 +162,7 @@ private:
     double LayoutALine(std::list<RefPtr<RenderListItem>>::iterator& it);
     void RequestNewItemsAtEnd(double& curMainPos);
     void RequestNewItemsAtStart();
+    void LayoutHeaderFooter(bool reachEnd);
     void SetItemsPostion();
     double CalculateCrossOffset(double crossSize, double childCrossSize);
 
