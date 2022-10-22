@@ -343,12 +343,12 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        return list->GetMainContentSize() - (list->endMainPos_ - list->currentDelta_ - list->startMainPos_);
+        return list->GetMainContentSize() - (list->endMainPos_ - list->startMainPos_);
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        return list->GetMainContentSize() - (list->endMainPos_ - list->currentDelta_ - list->startMainPos_);
+        return list->GetMainContentSize() - (list->endMainPos_ - list->startMainPos_);
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
 }
@@ -462,16 +462,11 @@ void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
     LOGI("ScrollToEdge:%{public}zu", scrollEdgeType);
     if (((scrollEdgeType == ScrollEdgeType::SCROLL_TOP) && GetDirection() == Axis::VERTICAL) ||
         ((scrollEdgeType == ScrollEdgeType::SCROLL_LEFT) && GetDirection() == Axis::HORIZONTAL)) {
-        jumpIndex_ = 0;
+        ScrollToIndex(0, ScrollIndexAlignment::ALIGN_TOP);
     } else if (((scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) && GetDirection() == Axis::VERTICAL) ||
         ((scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT) && GetDirection() == Axis::HORIZONTAL)) {
-        jumpIndex_ = maxListItemIndex_;
-    } else {
-        return;
+        ScrollToIndex(maxListItemIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 bool ListPattern::ScrollPage(bool reverse)
