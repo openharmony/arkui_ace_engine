@@ -58,7 +58,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 break;
             }
         } else {
-            // use the max child size.
+            // use the child size.
             auto childFrame = child->GetGeometryNode()->GetMarginFrameSize();
             childFrameSize = childFrame;
             childFrame.Constrain(SizeF(Infinity<float>(), minSize.Height()), maxSize);
