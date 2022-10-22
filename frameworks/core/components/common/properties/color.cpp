@@ -151,9 +151,7 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
 bool Color::ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha)
 {
     if (colorStr.empty()) {
-        // empty string, return transparent
-        color = Color::TRANSPARENT;
-        return true;
+        return false;
     }
 
     // Remove all " ".
