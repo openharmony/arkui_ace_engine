@@ -3306,32 +3306,14 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
     }
     auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(info[0]));
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto onAreaChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction)](
-                                        const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect,
-                                        const NG::OffsetF& origin) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onAreaChange");
-            func->Execute(oldRect, oldOrigin, rect, origin);
-        };
-        NG::ViewAbstract::SetOnAreaChanged(std::move(onAreaChangeCallback));
-        return;
-    }
-
-    auto onAreaChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction)](
+    auto onAreaChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction)](
                                     const Rect& oldRect, const Offset& oldOrigin, const Rect& rect,
                                     const Offset& origin) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAreaChange");
         func->Execute(oldRect, oldOrigin, rect, origin);
     };
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!boxComponent) {
-        LOGE("boxComponent is null");
-        return;
-    }
-    boxComponent->GetEventExtensions()->GetOnAreaChangeExtension()->AddOnAreaChangeEvent(
-        std::move(onAreaChangeCallback));
+    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
 }
 
 #ifndef WEARABLE_PRODUCT
@@ -4742,62 +4724,20 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
 }
 
-RefPtr<Gesture> JSViewAbstract::GetTapGesture(const JSCallbackInfo& info, int32_t countNum, int32_t fingerNum)
-{
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("fail to get inspector for on touch event");
-        return nullptr;
-    }
-    auto impl = inspector->GetInspectorFunctionImpl();
-    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(countNum, fingerNum);
-    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    tapGesture->SetOnActionId(
-        [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](GestureEvent& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            if (impl) {
-                impl->UpdateEventInfo(info);
-            }
-            ACE_SCORING_EVENT("onClick");
-            func->Execute(info);
-        });
-    return tapGesture;
-}
-
 void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
         LOGE("the param is not a function");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onMouseId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMouseFunc)](MouseInfo& mouseInfo) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onMouse");
-            func->Execute(mouseInfo);
-        };
-        NG::ViewAbstract::SetOnMouse(std::move(onMouseId));
-        return;
-    }
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("fail to get inspector for on mouse event");
-        return;
-    }
-    auto impl = inspector->GetInspectorFunctionImpl();
+
     RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onMouseId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMouseFunc), impl](
-                         MouseInfo& mouseInfo) {
+    auto onMouse = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMouseFunc)](MouseInfo& mouseInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        if (impl) {
-            impl->UpdateEventInfo(mouseInfo);
-        }
         ACE_SCORING_EVENT("onMouse");
         func->Execute(mouseInfo);
     };
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnMouseId(onMouseId);
+    ViewAbstractModel::GetInstance()->SetOnMouse(std::move(onMouse));
 }
 
 void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
@@ -4806,24 +4746,14 @@ void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
         LOGE("the param is not a function");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onHover");
-            func->Execute(param);
-        };
-        NG::ViewAbstract::SetOnHover(std::move(onHoverId));
-        return;
-    }
+
     RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
+    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHover");
         func->Execute(param);
     };
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnHoverId(onHoverId);
+    ViewAbstractModel::GetInstance()->SetOnHover(std::move(onHover));
 }
 
 void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
@@ -4832,53 +4762,19 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         LOGW("the info is not click function");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClick = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](GestureEvent& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onClick");
-            func->Execute(info);
-        };
-        NG::ViewAbstract::SetOnClick(std::move(onClick));
-        return;
-    }
 
-    if (info[0]->IsFunction()) {
-        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        auto tapGesture = GetTapGesture(info);
-        if (tapGesture) {
-            click->SetOnClick(tapGesture);
-        }
-
-        auto onClickId = GetClickEventMarker(info);
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
-        if (focusableComponent) {
-            focusableComponent->SetOnClickId(onClickId);
-        }
-    }
-}
-
-EventMarker JSViewAbstract::GetClickEventMarker(const JSCallbackInfo& info)
-{
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("fail to get inspector for on get click event marker");
-        return EventMarker();
-    }
-    auto impl = inspector->GetInspectorFunctionImpl();
-    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onClickId = EventMarker(
-        [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-            auto newInfo = *clickInfo;
-            if (impl) {
-                impl->UpdateEventInfo(newInfo);
-            }
-            ACE_SCORING_EVENT("onClick");
-            func->Execute(newInfo);
-        });
-    return onClickId;
+    auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onTap = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](GestureEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onClick");
+        func->Execute(info);
+    };
+    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const ClickInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onClick");
+        func->Execute(*info);
+    };
+    ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
 }
 
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
@@ -4892,43 +4788,10 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
         LOGE("JsOnVisibleAreaChange: The param type is invalid.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("OnVisibleAreaChange not completed");
-        return;
-    }
-
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("JsOnVisibleAreaChange: This component does not have inspector");
-        return;
-    }
-
-    auto container = Container::Current();
-    if (!container) {
-        LOGE("JsOnVisibleAreaChange: Fail to get container");
-        return;
-    }
-    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!context) {
-        LOGE("JsOnVisibleAreaChange: Fail to get context");
-        return;
-    }
-
-    auto nodeId = inspector->GetId();
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
-    auto onVisibleChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                                       bool visible, double ratio) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onVisibleAreaChange");
-
-        JSRef<JSVal> params[2];
-        params[0] = JSRef<JSVal>::Make(ToJSValue(visible));
-        params[1] = JSRef<JSVal>::Make(ToJSValue(ratio));
-        func->ExecuteJS(2, params);
-    };
 
     auto ratioArray = JSRef<JSArray>::Cast(info[0]);
     size_t size = ratioArray->Length();
+    std::vector<double> ratioVec(size);
     for (size_t i = 0; i < size; i++) {
         double ratio = 0.0;
         ParseJsDouble(ratioArray->GetValueAt(i), ratio);
@@ -4939,8 +4802,21 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
         if (GreatOrEqual(ratio, VISIBLE_RATIO_MAX)) {
             ratio = VISIBLE_RATIO_MAX;
         }
-        context->AddVisibleAreaChangeNode(nodeId, ratio, onVisibleChangeCallback);
+        ratioVec.push_back(ratio);
     }
+
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    auto onVisibleChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                       bool visible, double ratio) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onVisibleAreaChange");
+
+        JSRef<JSVal> params[2];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(visible));
+        params[1] = JSRef<JSVal>::Make(ToJSValue(ratio));
+        func->ExecuteJS(2, params);
+    };
+    ViewAbstractModel::GetInstance()->SetOnVisibleChange(std::move(onVisibleChange), ratioVec);
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)

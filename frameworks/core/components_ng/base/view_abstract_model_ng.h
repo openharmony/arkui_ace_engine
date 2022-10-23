@@ -21,6 +21,8 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/vector.h"
+#include "base/geometry/offset.h"
+#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/border_image.h"
@@ -553,6 +555,23 @@ public:
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override
     {
         ViewAbstract::SetOnDragMove(std::move(onDragMove));
+    }
+
+    void SetOnVisibleChange(
+        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override
+    {}
+
+    void SetOnAreaChanged(
+        std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
+            onAreaChanged) override
+    {
+        auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
+                                      const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+            areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
+                Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
+                Offset(origin.GetX(), origin.GetY()));
+        };
+        ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
     }
 
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override

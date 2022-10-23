@@ -138,7 +138,6 @@ public:
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
-    static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
@@ -291,8 +290,6 @@ public:
     /**
      * box properties setter
      */
-    static RefPtr<Gesture> GetTapGesture(
-        const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
     static const Border& GetBorder();
     static void SetMarginTop(const JSCallbackInfo& info);
     static void SetMarginBottom(const JSCallbackInfo& info);

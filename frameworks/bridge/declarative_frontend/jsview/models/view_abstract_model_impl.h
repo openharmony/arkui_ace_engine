@@ -139,6 +139,11 @@ public:
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
+    void SetOnVisibleChange(
+        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override;
+    void SetOnAreaChanged(
+        std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
+            onAreaChanged) override;
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;

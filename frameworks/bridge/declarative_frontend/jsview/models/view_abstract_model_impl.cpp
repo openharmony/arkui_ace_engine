@@ -1030,7 +1030,20 @@ void ViewAbstractModelImpl::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
     }
 }
 
-void ViewAbstractModelImpl::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) {}
+void ViewAbstractModelImpl::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    auto impl = inspector->GetInspectorFunctionImpl();
+    auto onMouseId = [func = std::move(onMouseEventFunc), impl](MouseInfo& mouseInfo) {
+        if (impl) {
+            impl->UpdateEventInfo(mouseInfo);
+        }
+        func(mouseInfo);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnMouseId(onMouseId);
+}
 
 void ViewAbstractModelImpl::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
 {
@@ -1128,6 +1141,29 @@ void ViewAbstractModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetOnDropId(onDrop);
+}
+
+void ViewAbstractModelImpl::SetOnVisibleChange(
+    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto nodeId = inspector->GetId();
+
+    for (const auto& ratio : ratios) {
+        context->AddVisibleAreaChangeNode(nodeId, ratio, onVisibleChange);
+    }
+}
+
+void ViewAbstractModelImpl::SetOnAreaChanged(
+    std::function<void(const Rect&, const Offset&, const Rect&, const Offset&)>&& onAreaChanged)
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->GetEventExtensions()->GetOnAreaChangeExtension()->AddOnAreaChangeEvent(std::move(onAreaChanged));
 }
 
 void ViewAbstractModelImpl::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)

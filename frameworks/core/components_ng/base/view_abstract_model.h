@@ -168,6 +168,11 @@ public:
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
+    virtual void SetOnVisibleChange(
+        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
+    virtual void SetOnAreaChanged(
+        std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
+            onAreaChanged) = 0;
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
