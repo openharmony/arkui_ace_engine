@@ -21,10 +21,10 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/badge/badge_theme.h"
 
 namespace OHOS::Ace::NG {
 
-constexpr Dimension NUMERICAL_BADGE_CIRCLE_SIZE = 16.0_vp;
 constexpr Dimension NUMERICAL_BADGE_PADDING = 6.0_vp;
 constexpr int MAX_COUNT = 99;
 
@@ -57,9 +57,15 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         textWrapper->Measure(textFirstLayoutConstraint);
     }
 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(badgeTheme);
+    auto badgeCircleSize = badgeTheme->GetBadgeCircleSize();
     auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeCircleDiameter = circleSize.has_value() ? (circleSize->IsValid() ? circleSize->ConvertToPx() : 0)
-                                                      : NUMERICAL_BADGE_CIRCLE_SIZE.ConvertToPx();
+                                                      : badgeCircleSize.ConvertToPx();
+
     auto badgeWidth = 0.0;
     auto badgeHeight = badgeCircleDiameter;
     auto countLimit = layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : MAX_COUNT;
@@ -77,7 +83,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto messageCount = textData.size();
     auto textSize = textGeometryNode->GetContentSize();
-
     if (!textData.empty() || messageCount > 0) {
         if ((textData.size() <= 1 && !textData.empty()) ||
             ((messageCount < 10 && messageCount <= countLimit) && textData.empty())) {
@@ -93,8 +98,10 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     textLayoutProperty->UpdateMarginSelfIdealSize(SizeF(badgeWidth, badgeHeight));
     auto textLayoutConstraint = textFirstLayoutConstraint;
     textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);
+    if (textSize.Height() > badgeCircleDiameter) {
+        textLayoutProperty->UpdateFontSize(0.0_vp);
+    }
     textWrapper->Measure(textLayoutConstraint);
-
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);
     childWrapper->Measure(childLayoutConstraint);
@@ -122,9 +129,16 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto layoutProperty = DynamicCast<BadgeLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto badgePosition = layoutProperty->GetBadgePosition();
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(badgeTheme);
+    auto badgeCircleSize = badgeTheme->GetBadgeCircleSize();
     auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeCircleDiameter = circleSize.has_value() ? (circleSize->IsValid() ? circleSize->ConvertToPx() : 0)
-                                                      : NUMERICAL_BADGE_CIRCLE_SIZE.ConvertToPx();
+                                                      : badgeCircleSize.ConvertToPx();
+
     auto badgeWidth = 0.0;
     auto badgeCircleRadius = badgeCircleDiameter / 2;
     auto countLimit = layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : MAX_COUNT;

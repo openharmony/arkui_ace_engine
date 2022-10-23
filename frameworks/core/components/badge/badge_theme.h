@@ -98,6 +98,11 @@ public:
         return badgeFontSize_;
     }
 
+    static const Dimension& GetBadgeCircleSize()
+    {
+        return 16.0_vp;
+    }
+
 protected:
     BadgeTheme() = default;
 
