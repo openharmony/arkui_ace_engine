@@ -23,8 +23,10 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -189,6 +191,10 @@ public:
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
+
+    // popup and menu
+    virtual void BindPopup(
+        const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;

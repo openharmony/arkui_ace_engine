@@ -160,6 +160,8 @@ public:
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
 
+    void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;

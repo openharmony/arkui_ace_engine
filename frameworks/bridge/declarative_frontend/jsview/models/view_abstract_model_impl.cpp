@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 
 #include "base/geometry/animatable_dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -25,7 +26,9 @@
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/placement.h"
 #include "core/event/ace_event_handler.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -1331,6 +1334,50 @@ void ViewAbstractModelImpl::SetHitTestMode(NG::HitTestMode hitTestMode)
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     if (component) {
         component->SetHitTestMode(mode);
+    }
+}
+
+void ViewAbstractModelImpl::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto popupComponent = ViewStackProcessor::GetInstance()->GetPopupComponent(true);
+    CHECK_NULL_VOID(popupComponent);
+
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    param->SetTargetMargin(boxComponent->GetMargin());
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    param->SetTargetId(inspector->GetId());
+
+    popupComponent->SetPopupParam(param);
+    if (param->GetOnStateChange()) {
+        auto changeEvent = EventMarker(param->GetOnStateChange());
+        popupComponent->SetOnStateChange(changeEvent);
+    }
+    popupComponent->SetMessage(param->GetMessage());
+    popupComponent->SetPlacementOnTop(param->GetPlacement() == Placement::TOP);
+
+    auto btnPropFirst = param->GetPrimaryButtonProperties();
+    if (btnPropFirst.touchFunc) {
+        btnPropFirst.actionId = EventMarker([onTouch = btnPropFirst.touchFunc]() {
+            TouchEventInfo info("unknown");
+            onTouch(info);
+        });
+    }
+    popupComponent->SetPrimaryButtonProperties(btnPropFirst);
+
+    auto btnPropSecond = param->GetSecondaryButtonProperties();
+    if (btnPropSecond.touchFunc) {
+        btnPropSecond.actionId = EventMarker([onTouch = btnPropSecond.touchFunc]() {
+            TouchEventInfo info("unknown");
+            onTouch(info);
+        });
+    }
+    popupComponent->SetSecondaryButtonProperties(btnPropSecond);
+
+    auto customComponent = AceType::DynamicCast<Component>(customNode);
+    if (customComponent) {
+        popupComponent->SetCustomComponent(customComponent);
     }
 }
 

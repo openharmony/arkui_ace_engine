@@ -28,6 +28,7 @@
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
@@ -638,6 +639,12 @@ public:
     void SetHitTestMode(NG::HitTestMode hitTestMode) override
     {
         ViewAbstract::SetHitTestMode(hitTestMode);
+    }
+
+    void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
+    {
+        auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
     void SetAccessibilityGroup(bool accessible) override {}

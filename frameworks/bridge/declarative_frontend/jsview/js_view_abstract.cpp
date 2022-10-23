@@ -378,33 +378,13 @@ const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Pl
     Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT, Placement::LEFT_TOP,
     Placement::LEFT_BOTTOM, Placement::RIGHT_TOP, Placement::RIGHT_BOTTOM };
 
-void ParseShowObject(const JSCallbackInfo& info, const JSRef<JSObject>& showObj,
-    const RefPtr<PopupComponentV2>& popupComponent, const RefPtr<PopupParam>& popupParam)
+void ParseShowObject(const JSCallbackInfo& info, const JSRef<JSObject>& showObj, const RefPtr<PopupParam>& popupParam)
 {
     JSRef<JSVal> changeEventVal = showObj->GetProperty("changeEvent");
     if (!changeEventVal->IsFunction()) {
         return;
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-
-    if (popupComponent) {
-        auto eventMarker =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("Popup.onStateChange");
-
-                if (param != "true" && param != "false") {
-                    LOGE("param is not equal true or false, invalid.");
-                    return;
-                }
-
-                bool newValue = StringToBool(param);
-                JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
-                func->ExecuteJS(1, &newJSVal);
-            });
-        popupComponent->SetChangeEvent(eventMarker);
-        return;
-    }
 
     if (popupParam) {
         auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
@@ -425,13 +405,10 @@ void ParseShowObject(const JSCallbackInfo& info, const JSRef<JSObject>& showObj,
     }
 }
 
-void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj,
-    const RefPtr<PopupComponentV2>& popupComponent, const RefPtr<PopupParam>& popupParam)
+void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
     JSRef<JSVal> messageVal = popupObj->GetProperty("message");
-    if (popupComponent) {
-        popupComponent->SetMessage(messageVal->ToString());
-    } else if (popupParam) {
+    if (popupParam) {
         popupParam->SetMessage(messageVal->ToString());
     } else {
         LOGI("Empty popup.");
@@ -440,10 +417,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
     auto arrowOffset = popupObj->GetProperty("arrowOffset");
     Dimension offset;
     if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
-        if (popupComponent) {
-            auto param = popupComponent->GetPopupParam();
-            param->SetArrowOffset(offset);
-        } else if (popupParam) {
+        if (popupParam) {
             popupParam->SetArrowOffset(offset);
         } else {
             LOGI("Empty popup.");
@@ -456,10 +430,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 #else
     JSRef<JSVal> showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
     if (showInSubWindowValue->IsBoolean()) {
-        if (popupComponent) {
-            auto param = popupComponent->GetPopupParam();
-            param->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
-        } else if (popupParam) {
+        if (popupParam) {
             popupParam->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
         } else {
             LOGI("Empty popup.");
@@ -469,9 +440,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 
     JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
     if (placementOnTopVal->IsBoolean()) {
-        if (popupComponent) {
-            popupComponent->SetPlacementOnTop(placementOnTopVal->ToBoolean());
-        } else if (popupParam) {
+        if (popupParam) {
             popupParam->SetPlacement(placementOnTopVal->ToBoolean() ? Placement::TOP : Placement::BOTTOM);
         } else {
             LOGI("Empty popup.");
@@ -483,15 +452,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
         std::vector<std::string> keys = { "isVisible" };
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onStateChangeVal));
-        if (popupComponent) {
-            auto eventMarker = EventMarker(
-                [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("Popup.onStateChange");
-                    func->Execute(keys, param);
-                });
-            popupComponent->SetOnStateChange(eventMarker);
-        } else if (popupParam) {
+        if (popupParam) {
             auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](
                                              const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -516,14 +477,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
         JSRef<JSVal> actionValue = obj->GetProperty("action");
         if (actionValue->IsFunction()) {
             auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-            if (popupComponent) {
-                EventMarker actionId([execCtx = info.GetExecutionContext(), func = std::move(actionFunc)]() {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("primaryButton.action");
-                    func->Execute();
-                });
-                properties.actionId = actionId;
-            } else if (popupParam) {
+            if (popupParam) {
                 auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
                                          TouchEventInfo&) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -537,9 +491,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             }
         }
         properties.showButton = true;
-        if (popupComponent) {
-            popupComponent->SetPrimaryButtonProperties(properties);
-        } else if (popupParam) {
+        if (popupParam) {
             popupParam->SetPrimaryButtonProperties(properties);
         } else {
             LOGI("Empty.");
@@ -558,14 +510,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
         JSRef<JSVal> actionValue = obj->GetProperty("action");
         if (actionValue->IsFunction()) {
             auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-            if (popupComponent) {
-                EventMarker actionId([execCtx = info.GetExecutionContext(), func = std::move(actionFunc)]() {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("secondaryButton.action");
-                    func->Execute();
-                });
-                properties.actionId = actionId;
-            } else if (popupParam) {
+            if (popupParam) {
                 auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
                                          TouchEventInfo&) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -579,9 +524,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             }
         }
         properties.showButton = true;
-        if (popupComponent) {
-            popupComponent->SetSecondaryButtonProperties(properties);
-        } else if (popupParam) {
+        if (popupParam) {
             popupParam->SetSecondaryButtonProperties(properties);
         } else {
             LOGI("Empty.");
@@ -589,10 +532,9 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
     }
 }
 
-void ParseCustomPopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj,
-    const RefPtr<PopupComponentV2>& popupComponent, const RefPtr<PopupParam>& ngPopupParam)
+void ParseCustomPopupParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
-    RefPtr<Component> customComponent;
     auto builderValue = popupObj->GetProperty("builder");
     if (!builderValue->IsObject()) {
         LOGE("builder param is not an object.");
@@ -611,23 +553,9 @@ void ParseCustomPopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         LOGE("builder function is null.");
         return;
     }
-    // use another VSP instance while executing the builder function
-    if (popupComponent) {
-        ScopedViewStackProcessor builderViewStackProcessor;
-        {
-            ACE_SCORING_EVENT("popup.builder");
-            builderFunc->Execute();
-        }
-        customComponent = ViewStackProcessor::GetInstance()->Finish();
-    }
 
-    auto popupParam = ngPopupParam;
-    if (popupComponent) {
-        popupComponent->SetCustomComponent(customComponent);
-        popupParam = popupComponent->GetPopupParam();
+    if (popupParam) {
         popupParam->SetUseCustomComponent(true);
-    } else if (ngPopupParam) {
-        ngPopupParam->SetUseCustomComponent(true);
     }
 
     auto placementValue = popupObj->GetProperty("placement");
@@ -681,22 +609,14 @@ void ParseCustomPopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         std::vector<std::string> keys = { "isVisible" };
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onStateChangeVal));
-        if (popupComponent) {
-            auto eventMarker = EventMarker(
-                [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("popup.onStateChange");
-                    func->Execute(keys, param);
-                });
-            popupComponent->SetOnStateChange(eventMarker);
-        } else if (ngPopupParam) {
+        if (popupParam) {
             auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](
                                              const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("popup.onStateChange");
                 func->Execute(keys, param);
             };
-            ngPopupParam->SetOnStateChange(onStateChangeCallback);
+            popupParam->SetOnStateChange(onStateChangeCallback);
         }
     }
 }
@@ -3307,8 +3227,7 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
     auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(info[0]));
 
     auto onAreaChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction)](
-                                    const Rect& oldRect, const Offset& oldOrigin, const Rect& rect,
-                                    const Offset& origin) {
+                             const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAreaChange");
         func->Execute(oldRect, oldOrigin, rect, origin);
@@ -3317,57 +3236,6 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
 }
 
 #ifndef WEARABLE_PRODUCT
-void JSViewAbstract::JsBindPopupNG(const JSCallbackInfo& info)
-{
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    // Set IsShow to popupParam
-    if (info[0]->IsBoolean()) {
-        popupParam->SetIsShow(info[0]->ToBoolean());
-    } else {
-        JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
-        ParseShowObject(info, showObj, nullptr, popupParam);
-        popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
-    }
-
-    // Set popup to popupParam
-    auto popupObj = JSRef<JSObject>::Cast(info[1]);
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (popupObj->GetProperty("message")->IsString()) {
-        ParsePopupParam(info, popupObj, nullptr, popupParam); // Parse PopupOptions param
-        NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
-    } else if (!popupObj->GetProperty("builder").IsEmpty()) {
-        ParseCustomPopupParam(info, popupObj, nullptr, popupParam); // Parse CustomPopupOptions param
-        auto builderValue = popupObj->GetProperty("builder");
-        if (!builderValue->IsObject()) {
-            LOGE("builder param is not an object.");
-            return;
-        }
-
-        JSRef<JSObject> builderObj;
-        builderObj = JSRef<JSObject>::Cast(builderValue);
-        auto builder = builderObj->GetProperty("builder");
-        if (!builder->IsFunction()) {
-            LOGE("builder param is not a function.");
-            return;
-        }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        CHECK_NULL_VOID(builderFunc);
-        CreateCustomPopup(builderFunc, targetNode, popupParam);
-    } else {
-        LOGE("BindPop info is invalid");
-        return;
-    }
-}
-
-void JSViewAbstract::CreateCustomPopup(
-    RefPtr<JsFunction>& builder, const RefPtr<NG::FrameNode>& targetNode, const RefPtr<PopupParam>& popupParam)
-{
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
-    builder->Execute();
-    auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    NG::ViewAbstract::BindPopup(popupParam, targetNode, customNode);
-}
-
 void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 {
     if (info.Length() < 2) {
@@ -3384,44 +3252,47 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         LOGE("The second param type is not object, invalid.");
         return;
     }
-    // NG
-    if (Container::IsCurrentUseNewPipeline()) {
-        JsBindPopupNG(info);
-        return;
-    }
 
-    ViewStackProcessor::GetInstance()->GetCoverageComponent();
-    auto popupComponent = ViewStackProcessor::GetInstance()->GetPopupComponent(true);
-    if (!popupComponent) {
-        return;
-    }
-    auto popupParam = popupComponent->GetPopupParam();
-    if (!popupParam) {
-        return;
-    }
-
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    popupParam->SetTargetMargin(boxComponent->GetMargin());
-
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("this component does not have inspector");
-        return;
-    }
-    popupParam->SetTargetId(inspector->GetId());
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    // Set IsShow to popupParam
     if (info[0]->IsBoolean()) {
         popupParam->SetIsShow(info[0]->ToBoolean());
     } else {
         JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
-        ParseShowObject(info, showObj, popupComponent, nullptr);
+        ParseShowObject(info, showObj, popupParam);
         popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
 
-    JSRef<JSObject> popupObj = JSRef<JSObject>::Cast(info[1]);
+    // Set popup to popupParam
+    auto popupObj = JSRef<JSObject>::Cast(info[1]);
+
     if (popupObj->GetProperty("message")->IsString()) {
-        ParsePopupParam(info, popupObj, popupComponent, nullptr);
+        ParsePopupParam(info, popupObj, popupParam); // Parse PopupOptions param
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
+    } else if (!popupObj->GetProperty("builder").IsEmpty()) {
+        ParseCustomPopupParam(info, popupObj, popupParam); // Parse CustomPopupOptions param
+        auto builderValue = popupObj->GetProperty("builder");
+        if (!builderValue->IsObject()) {
+            LOGE("builder param is not an object.");
+            return;
+        }
+
+        JSRef<JSObject> builderObj;
+        builderObj = JSRef<JSObject>::Cast(builderValue);
+        auto builder = builderObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        CHECK_NULL_VOID(builderFunc);
+        ViewStackModel::GetInstance()->NewScope();
+        builderFunc->Execute();
+        auto customNode = ViewStackModel::GetInstance()->Finish();
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
     } else {
-        ParseCustomPopupParam(info, popupObj, popupComponent, nullptr);
+        LOGE("BindPop info is invalid");
+        return;
     }
 }
 #endif
@@ -4807,7 +4678,7 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
     auto onVisibleChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                                       bool visible, double ratio) {
+                               bool visible, double ratio) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onVisibleAreaChange");
 

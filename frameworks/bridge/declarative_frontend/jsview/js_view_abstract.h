@@ -246,9 +246,6 @@ public:
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
-    static void JsBindPopupNG(const JSCallbackInfo& info);
-    static void CreateCustomPopup(
-        RefPtr<JsFunction>& builder, const RefPtr<NG::FrameNode>& targetNode, const RefPtr<PopupParam>& popupParam);
 #endif
 
     /**
