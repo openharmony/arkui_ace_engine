@@ -48,6 +48,16 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     return true;
 }
 
+void CustomPaintPattern::SetAntiAlias(bool isEnabled)
+{
+    auto task = [isEnabled](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetAntiAlias(isEnabled);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::FillRect(const Rect& rect)
 {
     auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
@@ -320,7 +330,7 @@ void CustomPaintPattern::PutImageData(const Ace::ImageData& imageData)
 void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern)
 {
     auto task = [offscreenCanvasPattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.TransferFromImageBitmap(offscreenCanvasPattern);
+        paintMethod.TransferFromImageBitmap(paintWrapper, offscreenCanvasPattern);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();

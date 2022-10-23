@@ -271,10 +271,18 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::SetAntiAlias()
 {
-    if (isOffscreen_) {
-        offscreenCanvas_->SetAntiAlias(anti_);
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            offscreenCanvasPattern_->SetAntiAlias(anti_);
+        } else {
+            customPaintPattern_->SetAntiAlias(anti_);
+        }
     } else {
-        pool_->SetAntiAlias(anti_);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetAntiAlias(anti_);
+        } else {
+            pool_->SetAntiAlias(anti_);
+        }
     }
 }
 

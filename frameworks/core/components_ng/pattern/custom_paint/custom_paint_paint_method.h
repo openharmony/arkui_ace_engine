@@ -69,6 +69,11 @@ public:
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
 
+    void SetAntiAlias(bool isEnabled)
+    {
+        antiAlias_ = isEnabled;
+    }
+
     void SetFillColor(const Color& color)
     {
         fillState_.SetColor(color);

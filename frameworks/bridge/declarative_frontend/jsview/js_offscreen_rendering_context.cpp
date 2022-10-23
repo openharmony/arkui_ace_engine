@@ -161,13 +161,8 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
                 return;
             }
             bool anti = jsContextSetting->GetAntialias();
-
-            if (Container::IsCurrentUseNewPipeline()) {
-                jsRenderContext->SetAnti(anti);
-            } else {
-                jsRenderContext->SetAnti(anti);
-                jsRenderContext->SetAntiAlias();
-            }
+            jsRenderContext->SetAnti(anti);
+            jsRenderContext->SetAntiAlias();
         }
     }
 }
