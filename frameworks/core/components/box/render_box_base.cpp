@@ -737,6 +737,14 @@ void RenderBoxBase::Update(const RefPtr<Component>& component)
         minHeight_ = box->GetMinHeight();
         maxWidth_ = box->GetMaxWidth();
         maxHeight_ = box->GetMaxHeight();
+        if (aspectRatio_.IsValid()) {
+            if (GreatNotEqual(minWidth_.Value(), 0.0) && NearZero(minHeight_.Value())) {
+                minHeight_ = minWidth_ / aspectRatio_.Value();
+            }
+            if (GreatNotEqual(minHeight_.Value(), 0.0) && NearZero(minWidth_.Value())) {
+                minWidth_ = minHeight_ * aspectRatio_.Value();
+            }
+        }
         useLiteStyle_ = box->UseLiteStyle();
         mask_ = box->GetMask();
         auto gridLayoutInfo = box->GetGridLayoutInfo();
