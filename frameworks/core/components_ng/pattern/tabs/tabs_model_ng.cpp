@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
@@ -70,6 +71,18 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
     }
+
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnIndicatorChange([tabBarNode](int32_t index) {
+        auto layoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+        layoutProperty->UpdateIndicator(index);
+        RectF rect = layoutProperty->GetIndicatorRect(index);
+        auto paintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+        paintProperty->UpdateIndicator(rect);
+        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    });
+
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 
     SetTabBarPosition(barPosition);
@@ -131,6 +144,10 @@ void TabsModelNG::SetIndex(int32_t index)
     auto swiperLayoutProperty = GetSwiperLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateIndex(index);
+
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateIndicator(index);
 }
 
 void TabsModelNG::SetScrollable(bool scrollable)

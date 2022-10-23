@@ -43,6 +43,11 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
+    void SetOnIndicatorChange(std::function<void(int32_t)>&& indexChangeEvent)
+    {
+        indicatorChangeEvent_ = std::move(indexChangeEvent);
+    }
+
     void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
     {
         changeDoneEvent_ = std::move(changeDoneEvent);
@@ -65,6 +70,9 @@ public:
         if (changeEvent_) {
             changeEvent_(std::make_shared<SwiperChangeEvent>(index).get());
         }
+        if (indicatorChangeEvent_) {
+            indicatorChangeEvent_(index);
+        }
     }
 
     Direction GetDirection()
@@ -75,6 +83,7 @@ public:
 private:
     Direction direction_;
     ChangeEvent changeEvent_;
+    std::function<void(int32_t)> indicatorChangeEvent_;
     ChangeDoneEvent changeDoneEvent_;
 };
 

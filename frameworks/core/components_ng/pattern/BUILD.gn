@@ -234,6 +234,8 @@ build_component_ng("pattern_ng") {
     "swiper/swiper_paint_property.cpp",
     "swiper/swiper_pattern.cpp",
     "tabs/tab_bar_layout_algorithm.cpp",
+    "tabs/tab_bar_layout_property.cpp",
+    "tabs/tab_bar_paint_method.cpp",
     "tabs/tab_bar_pattern.cpp",
     "tabs/tab_content_model_ng.cpp",
     "tabs/tabs_layout_algorithm.cpp",

@@ -51,6 +51,7 @@ public:
     }
 
 private:
+    void SetIndicator(LayoutWrapper* layoutWrapper) const;
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
     void UpdateChildConstraint(LayoutConstraintF& childConstraint, const RefPtr<TabBarLayoutProperty>& layoutProperty,
         const SizeF& ideaSize, int32_t childCount, Axis axis);

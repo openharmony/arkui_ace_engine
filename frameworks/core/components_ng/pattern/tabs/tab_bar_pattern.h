@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -58,6 +60,18 @@ public:
         auto layoutAlgorithm = MakeRefPtr<TabBarLayoutAlgorithm>();
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         return layoutAlgorithm;
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        auto paintProperty = MakeRefPtr<TabBarPaintProperty>();
+        return paintProperty;
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        auto paintMethod = MakeRefPtr<TabBarPaintMethod>();
+        return paintMethod;
     }
 
     void UpdateCurrentOffset(float offset);
