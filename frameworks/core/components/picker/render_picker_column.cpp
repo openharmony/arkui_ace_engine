@@ -16,6 +16,7 @@
 #include "core/components/picker/render_picker_column.h"
 
 #include "base/log/event_report.h"
+#include "core/gestures/pan_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -113,43 +114,39 @@ uint32_t RenderPickerColumn::GetWidthRatio() const
 void RenderPickerColumn::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (!rawRecognizer_) {
-        rawRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
-        auto weak = AceType::WeakClaim(this);
-        rawRecognizer_->SetOnTouchDown([weak](const TouchEventInfo& info) {
+    auto context = context_.Upgrade();
+    if (!panRecognizer_ && context) {
+        PanDirection panDirection;
+        panDirection.type = PanDirection::VERTICAL;
+        panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+        panRecognizer_->SetOnActionStart([weak = AceType::WeakClaim(this)](const GestureEvent& event) {
             auto refPtr = weak.Upgrade();
             if (refPtr) {
-                refPtr->HandleDragStart(info);
+                refPtr->HandleDragStart(event);
             }
         });
-        rawRecognizer_->SetOnTouchMove([weak](const TouchEventInfo& info) {
+        panRecognizer_->SetOnActionUpdate([weak = AceType::WeakClaim(this)](const GestureEvent& event) {
             auto refPtr = weak.Upgrade();
             if (refPtr) {
-                refPtr->HandleDragMove(info);
+                refPtr->HandleDragMove(event);
             }
         });
-        rawRecognizer_->SetOnTouchUp([weak](const TouchEventInfo& info) {
+        panRecognizer_->SetOnActionEnd([weak = AceType::WeakClaim(this)](const GestureEvent& event) {
             auto refPtr = weak.Upgrade();
             if (refPtr) {
-                refPtr->HandleDragEnd(info);
+                refPtr->HandleDragEnd();
             }
         });
-        rawRecognizer_->SetOnTouchCancel([weak](const TouchEventInfo& info) {
+        panRecognizer_->SetOnActionCancel([weak = AceType::WeakClaim(this)]() {
             auto refPtr = weak.Upgrade();
             if (refPtr) {
-                refPtr->HandleDragEnd(info);
+                refPtr->HandleDragEnd();
             }
         });
     }
 
-    if (!dragRecognizer_) {
-        dragRecognizer_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
-    }
-
-    rawRecognizer_->SetCoordinateOffset(coordinateOffset);
-    dragRecognizer_->SetCoordinateOffset(coordinateOffset);
-    result.emplace_back(rawRecognizer_);
-    result.emplace_back(dragRecognizer_);
+    panRecognizer_->SetCoordinateOffset(coordinateOffset);
+    result.emplace_back(panRecognizer_);
 }
 
 bool RenderPickerColumn::InnerHandleScroll(bool isDown)
@@ -327,16 +324,11 @@ void RenderPickerColumn::UpdateAccessibility()
     }
 }
 
-void RenderPickerColumn::HandleDragStart(const TouchEventInfo& info)
+void RenderPickerColumn::HandleDragStart(const GestureEvent& event)
 {
     bool isPhone = SystemProperties::GetDeviceType() == DeviceType::PHONE;
     if (data_ && !isPhone) {
         data_->HandleRequestFocus();
-    }
-
-    if (info.GetTouches().empty()) {
-        LOGE("touches is empty.");
-        return;
     }
 
     if (!data_ || !data_->GetToss()) {
@@ -344,16 +336,16 @@ void RenderPickerColumn::HandleDragStart(const TouchEventInfo& info)
     }
 
     auto toss = data_->GetToss();
-    yOffset_ = info.GetTouches().back().GetGlobalLocation().GetY();
+    yOffset_ = event.GetGlobalPoint().GetY();
     toss->SetStart(yOffset_);
     yLast_ = yOffset_;
     pressed_ = true;
 }
 
-void RenderPickerColumn::HandleDragMove(const TouchEventInfo& info)
+void RenderPickerColumn::HandleDragMove(const GestureEvent& event)
 {
-    if (info.GetTouches().empty()) {
-        LOGE("touches is empty.");
+    if (event.GetInputEventType() == InputEventType::AXIS) {
+        InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
     }
 
@@ -367,7 +359,7 @@ void RenderPickerColumn::HandleDragMove(const TouchEventInfo& info)
     }
 
     auto toss = data_->GetToss();
-    double y = info.GetTouches().back().GetGlobalLocation().GetY();
+    double y = event.GetGlobalPoint().GetY();
     if (NearEqual(y, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
         return;
     }
@@ -406,7 +398,7 @@ void RenderPickerColumn::TossStoped()
     ScrollOption(0.0);
 }
 
-void RenderPickerColumn::HandleDragEnd(const TouchEventInfo& info)
+void RenderPickerColumn::HandleDragEnd()
 {
     pressed_ = false;
 
