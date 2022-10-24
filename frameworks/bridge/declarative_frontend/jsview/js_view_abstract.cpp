@@ -2273,7 +2273,7 @@ void JSViewAbstract::ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<Bor
 
 void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    if (args->IsNumber()) {
+    if (args->IsNumber() || args->IsString()) {
         Dimension outsetDimension;
         ParseJsDimensionVp(args, outsetDimension);
         if (args->IsNumber()) {
@@ -2304,12 +2304,12 @@ void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<Bor
 void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
     Dimension sliceDimension;
-    if (args->IsNumber()) {
+    if (args->IsNumber() || args->IsString()) {
         ParseJsDimensionVp(args, sliceDimension);
-        borderImage->SetEdgeWidth(BorderImageDirection::LEFT, sliceDimension);
-        borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, sliceDimension);
-        borderImage->SetEdgeWidth(BorderImageDirection::TOP, sliceDimension);
-        borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, sliceDimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::LEFT, sliceDimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, sliceDimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::TOP, sliceDimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, sliceDimension);
         return;
     }
 
@@ -2326,7 +2326,7 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
 
 void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    if (args->IsNumber()) {
+    if (args->IsNumber() || args->IsString()) {
         Dimension widthDimension;
         ParseJsDimensionVp(args, widthDimension);
         if (args->IsNumber()) {
