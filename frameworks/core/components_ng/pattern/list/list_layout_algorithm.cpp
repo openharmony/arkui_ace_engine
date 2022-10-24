@@ -267,6 +267,10 @@ int ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper, const 
             LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
             return cnt;
         }
+        auto itemGroup = GetListItemGroup(wrapper);
+        if (itemGroup) {
+            SetListItemGroupProperty(itemGroup, axis);
+        }
         cnt++;
         ++currentIndex;
         {
@@ -288,6 +292,10 @@ int ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper, const
         if (!wrapper) {
             LOGI("the %{public}d wrapper is null", currentIndex - 1);
             break;
+        }
+        auto itemGroup = GetListItemGroup(wrapper);
+        if (itemGroup) {
+            SetListItemGroupProperty(itemGroup, axis);
         }
         --currentIndex;
         cnt++;
@@ -597,4 +605,15 @@ void ListLayoutAlgorithm::ModifyLaneLength(const LayoutConstraintF& layoutConstr
     }
 }
 
+RefPtr<ListItemGroupLayoutProperty> ListLayoutAlgorithm::GetListItemGroup(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    return AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutProperty);
+}
+
+void ListLayoutAlgorithm::SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis)
+{
+    itemGroup->UpdateListDirection(axis);
+    itemGroup->UpdateListItemAlign(listItemAlign_);
+}
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
@@ -39,6 +40,13 @@ public:
     {
         return { FocusType::SCOPE, true };
     }
+
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<ListItemGroupLayoutProperty>();
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;

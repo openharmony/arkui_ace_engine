@@ -31,8 +31,17 @@ void ListItemGroupModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemGroupPattern>(nullptr); });
+        V2::LIST_ITEM_GROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemGroupPattern>(nullptr); });
     stack->Push(frameNode);
 }
 
+void ListItemGroupModelNG::SetSpace(const Dimension& space)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space);
+}
+
+void ListItemGroupModelNG::SetDivider(const V2::ItemDivider& divider)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider);
+}
 } // namespace OHOS::Ace::NG

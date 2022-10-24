@@ -30,8 +30,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ListItemGroupModelNG : public ListItemGroupModel {
 public:
     void Create() override;
-    void SetSpace(const Dimension& space) override {};
-    void SetDivider(const V2::ItemDivider& divider) override {};
+    void SetSpace(const Dimension& space) override;
+    void SetDivider(const V2::ItemDivider& divider) override;
     void SetHeader(std::function<void()>&& header) override {};
     void SetFooter(std::function<void()>&& footer) override {};
 };
