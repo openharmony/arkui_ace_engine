@@ -59,7 +59,7 @@ void ShapeModelImpl::SetViewPort(
     component->SetViewBox(viewBox);
 }
 
-void ShapeModelImpl::SetWidth(Dimension& /*width*/)
+void ShapeModelImpl::SetWidth()
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     if (!box) {
@@ -75,9 +75,12 @@ void ShapeModelImpl::SetWidth(Dimension& /*width*/)
     }
 }
 
-void ShapeModelImpl::SetHeight(Dimension& /*height*/)
+void ShapeModelImpl::SetHeight()
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!box) {
+        return;
+    }
     if (!box->GetHeight().IsValid()) {
         return;
     }
