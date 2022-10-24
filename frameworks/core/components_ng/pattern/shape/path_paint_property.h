@@ -56,6 +56,14 @@ public:
         ResetCommands();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        ShapePaintProperty::ToJsonValue(json);
+        if (propCommands_.has_value()) {
+            json->Put("commands", propCommands_.value().c_str());
+        }
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Commands, std::string, PROPERTY_UPDATE_RENDER);
 
 private:
