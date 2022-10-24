@@ -44,7 +44,6 @@ void BorderImagePainter::InitBorderImageSlice()
     BorderImageEdge imageTop = borderImage->GetBorderImageEdge(BorderImageDirection::TOP);
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
-
     if (!borderImageProperty_.GetHasBorderImageSlice()) {
         leftSlice_ = imageWidth_;
         topSlice_ = imageHeight_;
@@ -78,6 +77,7 @@ void BorderImagePainter::InitBorderImageSlice()
     if (GreatNotEqual(bottomSlice_, imageHeight_)) {
         bottomSlice_ = imageHeight_;
     }
+
     ParseNegativeNumberToZeroOrCeil(leftSlice_);
     ParseNegativeNumberToZeroOrCeil(rightSlice_);
     ParseNegativeNumberToZeroOrCeil(topSlice_);
@@ -86,24 +86,34 @@ void BorderImagePainter::InitBorderImageSlice()
 
 void BorderImagePainter::InitBorderImageWidth()
 {
+    if (!borderImageProperty_.GetHasBorderImageWidth() && !hasBorderWidthProperty_) {
+        return;
+    }
     auto borderImage = borderImageProperty_.GetBorderImageValue();
     BorderImageEdge imageLeft = borderImage->GetBorderImageEdge(BorderImageDirection::LEFT);
     BorderImageEdge imageTop = borderImage->GetBorderImageEdge(BorderImageDirection::TOP);
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
 
-    if (!borderImageProperty_.GetHasBorderImageWidth() && hasBorderWidthProperty_) {
+    if (GreatNotEqual(imageLeft.GetBorderImageWidth().Value(), 0.0)) {
+        imageLeft.GetBorderImageWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftWidth_);
+    } else if (hasBorderWidthProperty_) {
         borderWidthProperty_.leftDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftWidth_);
-        borderWidthProperty_.rightDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightWidth_);
-        borderWidthProperty_.topDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topWidth_);
-        borderWidthProperty_.bottomDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomWidth_);
-        return;
     }
-    if (borderImageProperty_.GetHasBorderImageWidth()) {
-        leftWidth_ = imageLeft.GetBorderImageWidth().ConvertToPx();
-        rightWidth_ = imageRight.GetBorderImageWidth().ConvertToPx();
-        topWidth_ = imageTop.GetBorderImageWidth().ConvertToPx();
-        bottomWidth_ = imageBottom.GetBorderImageWidth().ConvertToPx();
+    if (GreatNotEqual(imageRight.GetBorderImageWidth().Value(), 0.0)) {
+        imageRight.GetBorderImageWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightWidth_);
+    } else if (hasBorderWidthProperty_) {
+        borderWidthProperty_.rightDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightWidth_);
+    }
+    if (GreatNotEqual(imageTop.GetBorderImageWidth().Value(), 0.0)) {
+        imageTop.GetBorderImageWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topWidth_);
+    } else if (hasBorderWidthProperty_) {
+        borderWidthProperty_.topDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topWidth_);
+    }
+    if (GreatNotEqual(imageBottom.GetBorderImageWidth().Value(), 0.0)) {
+        imageBottom.GetBorderImageWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomWidth_);
+    } else if (hasBorderWidthProperty_) {
+        borderWidthProperty_.bottomDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomWidth_);
     }
 
     ParseNegativeNumberToZeroOrCeil(leftWidth_);
@@ -114,56 +124,41 @@ void BorderImagePainter::InitBorderImageWidth()
 
 void BorderImagePainter::InitBorderImageOutset()
 {
+    if (!borderImageProperty_.GetHasBorderImageOutset() && !hasBorderWidthProperty_) {
+        return;
+    }
     auto borderImage = borderImageProperty_.GetBorderImageValue();
     BorderImageEdge imageLeft = borderImage->GetBorderImageEdge(BorderImageDirection::LEFT);
     BorderImageEdge imageTop = borderImage->GetBorderImageEdge(BorderImageDirection::TOP);
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
-    if (!borderImageProperty_.GetHasBorderImageOutset() || !hasBorderWidthProperty_) {
-        leftOutset_ = 0.0;
-        topOutset_ = 0.0;
-        rightOutset_ = 0.0;
-        bottomOutset_ = 0.0;
-        return;
-    }
-    leftOutset_ = imageLeft.GetBorderImageOutset().ConvertToPx();
-    rightOutset_ = imageRight.GetBorderImageOutset().ConvertToPx();
-    topOutset_ = imageTop.GetBorderImageOutset().ConvertToPx();
-    bottomOutset_ = imageBottom.GetBorderImageOutset().ConvertToPx();
 
     if (GreatNotEqual(imageLeft.GetBorderImageOutset().Value(), 0.0)) {
-        imageLeft.GetBorderImageOutset().NormalizeToPx(
-            dipscale_, 0, 0, borderWidthProperty_.leftDimen->ConvertToPx(), leftOutset_);
-    } else {
+        imageLeft.GetBorderImageOutset().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftOutset_);
+    } else if (hasBorderWidthProperty_) {
         borderWidthProperty_.leftDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftOutset_);
     }
-
     if (GreatNotEqual(imageRight.GetBorderImageOutset().Value(), 0.0)) {
-        imageRight.GetBorderImageOutset().NormalizeToPx(
-            dipscale_, 0, 0, borderWidthProperty_.rightDimen->ConvertToPx(), rightOutset_);
-    } else {
+        imageRight.GetBorderImageOutset().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightOutset_);
+    } else if (hasBorderWidthProperty_) {
         borderWidthProperty_.rightDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightOutset_);
     }
-
     if (GreatNotEqual(imageTop.GetBorderImageOutset().Value(), 0.0)) {
-        imageTop.GetBorderImageOutset().NormalizeToPx(
-            dipscale_, 0, 0, borderWidthProperty_.topDimen->ConvertToPx(), topOutset_);
-    } else {
+        imageTop.GetBorderImageOutset().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topOutset_);
+    } else if (hasBorderWidthProperty_) {
         borderWidthProperty_.topDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topOutset_);
     }
-
     if (GreatNotEqual(imageBottom.GetBorderImageOutset().Value(), 0.0)) {
-        imageBottom.GetBorderImageOutset().NormalizeToPx(
-            dipscale_, 0, 0, borderWidthProperty_.bottomDimen->ConvertToPx(), bottomOutset_);
-    } else {
+        imageBottom.GetBorderImageOutset().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomOutset_);
+    } else if (hasBorderWidthProperty_) {
         borderWidthProperty_.bottomDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomOutset_);
     }
+
     ParseNegativeNumberToZeroOrCeil(leftOutset_);
     ParseNegativeNumberToZeroOrCeil(rightOutset_);
     ParseNegativeNumberToZeroOrCeil(topOutset_);
     ParseNegativeNumberToZeroOrCeil(bottomOutset_);
 }
-
 
 void BorderImagePainter::PaintBorderImage(const OffsetF& offset, RSCanvas& canvas) const
 {
@@ -263,18 +258,16 @@ void BorderImagePainter::PaintBorderImageStretch(const OffsetF& offset, RSCanvas
         offsetLeftX, offsetTopY + topWidth_, offsetLeftX + leftWidth_, offsetTopY + topWidth_ + borderCenterHeight_);
     canvas.DrawImageRect(rsImage, srcRectLeft_, desRectLeft, options);
 
-    RSRect desRectRight = RSRect(offsetRightX - rightWidth_, offsetTopY + topWidth_,
-        offsetRightX - rightWidth_ + rightWidth_, offsetTopY + topWidth_ + borderCenterHeight_);
+    RSRect desRectRight = RSRect(
+        offsetRightX - rightWidth_, offsetTopY + topWidth_, offsetRightX, offsetTopY + topWidth_ + borderCenterHeight_);
     canvas.DrawImageRect(rsImage, srcRectRight_, desRectRight, options);
 
     RSRect desRectTop = RSRect(offsetLeftX + leftWidth_, offsetTopY,
-        offsetLeftX + leftWidth_ + paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_,
-        offsetTopY + topWidth_);
+        offsetLeftX + paintSize_.Width() - rightWidth_ + leftOutset_ + rightOutset_, offsetTopY + topWidth_);
     canvas.DrawImageRect(rsImage, srcRectTop_, desRectTop, options);
 
     RSRect desRectBottom = RSRect(offsetLeftX + leftWidth_, offsetBottomY - bottomWidth_,
-        offsetLeftX + leftWidth_ + paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_,
-        offsetBottomY - bottomWidth_ + bottomWidth_);
+        offsetLeftX + paintSize_.Width() - rightWidth_ + leftOutset_ + rightOutset_, offsetBottomY);
     canvas.DrawImageRect(rsImage, srcRectBottom_, desRectBottom, options);
 }
 
