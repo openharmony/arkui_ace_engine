@@ -55,6 +55,9 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
 FrameNode::~FrameNode()
 {
     pattern_->DetachFromFrameNode(this);
+    if (IsOnMainTree()) {
+        OnDetachFromMainTree();
+    }
     auto focusHub = GetFocusHub();
     if (focusHub) {
         focusHub->RemoveSelf();
@@ -175,6 +178,7 @@ void FrameNode::OnAttachToMainTree()
 {
     UINode::OnAttachToMainTree();
     eventHub_->FireOnAppear();
+    renderContext_->OnNodeAppear();
     if (!hasPendingRequest_) {
         return;
     }
@@ -198,6 +202,7 @@ void FrameNode::OnAttachToMainTree()
 void FrameNode::OnDetachFromMainTree()
 {
     eventHub_->FireOnDisappear();
+    renderContext_->OnNodeDisappear(this);
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
