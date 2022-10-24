@@ -129,7 +129,7 @@ private:
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
     void Reset();
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isTouchEvent = true);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);
@@ -161,6 +161,7 @@ private:
     double newDistance_ = 0.0;
     PanDirection newDirection_;
     bool isFlushTouchEventsEnd_ = false;
+    InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
 };
 
 } // namespace OHOS::Ace
