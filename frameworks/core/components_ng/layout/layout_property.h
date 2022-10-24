@@ -358,8 +358,6 @@ private:
 
     void CheckAspectRatio();
 
-    void CheckBorderAndPadding();
-
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;

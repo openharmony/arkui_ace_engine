@@ -44,11 +44,6 @@ public:
         sideBarStatus_ = sideBarStatus;
     }
 
-    void SetShowControlButton(bool showControlButton)
-    {
-        showControlButton_ = showControlButton;
-    }
-
     void SetRealSideBarWidth(float realSideBarWidth)
     {
         realSideBarWidth_ = realSideBarWidth;
@@ -90,7 +85,6 @@ private:
     float realSideBarWidth_ = 0.0f;
     float realSideBarHeight_ = 0.0f;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
-    bool showControlButton_ = true;
     bool needInitRealSideBarWidth_ = true;
     OffsetF sideBarOffset_;
 

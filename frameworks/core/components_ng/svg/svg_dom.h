@@ -66,7 +66,7 @@ private:
     void ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);
     void ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);
     void ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);
-    void ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY, bool skip = true);
+    void ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY);
     void ApplyFill(double& scaleX, double& scaleY);
     void ApplyContain(double& scaleX, double& scaleY);
     void ApplyCover(double& scaleX, double& scaleY);

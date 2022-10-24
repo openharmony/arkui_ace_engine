@@ -60,11 +60,12 @@ public:
     {
         ShapePaintProperty::ToJsonValue(json);
         if (propPoints_.has_value()) {
-            std::vector<double> point(propPoints_.value().size());
-            for (int i = 0; i < propPoints_.value().size(); i++) {
-                point[i] = propPoints_.value()[i].first.ConvertToVp();
-                ++i;
-                point[i] = propPoints_.value()[i].second.ConvertToVp();
+            auto pointSize = propPoints_.value().size() * 2;
+            std::vector<double> point(pointSize);
+            for (int i = 0, j = 0; i < propPoints_.value().size() && j < pointSize; i++) {
+                point[j] = propPoints_.value()[i].first.ConvertToVp();
+                ++j;
+                point[j] = propPoints_.value()[i].second.ConvertToVp();
             }
             json->Put("points", point.data());
         }

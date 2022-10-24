@@ -19,7 +19,6 @@
 #include <string>
 
 #include "base/geometry/ng/image_mesh.h"
-#include "base/json/json_util.h"
 #include "core/components/shape/shape_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"

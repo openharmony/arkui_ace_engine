@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -56,6 +57,12 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+        CHECK_NULL_VOID(textChild);
+        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+        json->Put("src", textLayoutProperty->GetContent().value_or("").c_str());
         constexpr double DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0;
         json->Put("step", std::to_string(propScrollAmount_.value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT)).c_str());
         json->Put("loop", std::to_string(propLoop_.value_or(-1)).c_str());

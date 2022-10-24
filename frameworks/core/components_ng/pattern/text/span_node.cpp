@@ -15,7 +15,11 @@
 
 #include "core/components_ng/pattern/text/span_node.h"
 
+#include <optional>
+
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -23,6 +27,33 @@
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration)
+{
+    auto jsonSpanDeclaration = JsonUtil::Create(true);
+    if (color) {
+        jsonSpanDeclaration->Put("color", (color.value().ColorToString()).c_str());
+    }
+    if (textDecoration) {
+        jsonSpanDeclaration->Put("type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value()).c_str());
+    }
+    return jsonSpanDeclaration->ToString();
+}
+} // namespace
+
+void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("content", content.c_str());
+    if (fontStyle) {
+        json->Put("fontSize", fontStyle->GetFontSize().value_or(Dimension()).ToString().c_str());
+        json->Put(
+            "decoration", GetDeclaration(fontStyle->GetTextDecorationColor(), fontStyle->GetTextDecoration()).c_str());
+        json->Put("letterSpacing", fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
+        json->Put(
+            "textCase", V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str());
+    }
+}
+
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
 {
     auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);
