@@ -16,8 +16,32 @@
 #include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
 
 #include "base/log/ace_trace.h"
+#include "bridge/declarative_frontend/jsview/models/patternlock_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<PatternLockModel> PatternLockModel::instance_ = nullptr;
+
+PatternLockModel* PatternLockModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::PatternLockModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::PatternLockModelNG());
+        } else {
+            instance_.reset(new Framework::PatternLockModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 JSRef<JSArray> JSPatternLock::ChoosePointToJSValue(std::vector<int> input)
@@ -30,27 +54,14 @@ JSRef<JSArray> JSPatternLock::ChoosePointToJSValue(std::vector<int> input)
 }
 void JSPatternLock::Create(const JSCallbackInfo& info)
 {
-    auto lock = AceType::MakeRefPtr<V2::PatternLockComponent>();
-    SetDefaultTheme(lock);
+    auto controller = PatternLockModel::GetInstance()->Create();
+
     if (info.Length() > 0 && info[0]->IsObject()) {
-        JSPatternLockController* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPatternLockController>();
+        auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPatternLockController>();
         if (jsController) {
-            jsController->SetController(lock->GetPatternLockController());
+            jsController->SetController(controller);
         }
     }
-
-    ViewStackProcessor::GetInstance()->Push(lock);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    Dimension defaultSideLength { V2::DEFAULT_SIDE_LENGTH, DimensionUnit::VP };
-    box->SetMinWidth(defaultSideLength);
-    box->SetMinHeight(defaultSideLength);
-    box->SetMaxHeight(defaultSideLength);
-    box->SetMaxWidth(defaultSideLength);
-    flexItem->SetMinWidth(defaultSideLength);
-    flexItem->SetMinHeight(defaultSideLength);
-    flexItem->SetMaxWidth(defaultSideLength);
-    flexItem->SetMaxHeight(defaultSideLength);
 }
 void JSPatternLock::JSBind(BindingTarget globalObj)
 {
@@ -84,23 +95,20 @@ void JSPatternLock::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::V2::PatternLock
 
 void JSPatternLock::SetPatternComplete(const JSCallbackInfo& args)
 {
-    if (args[0]->IsFunction()) {
-        auto onComplete = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* event) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto eventInfo = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(event);
-                if (!eventInfo) {
-                    return;
-                }
-                JSRef<JSVal> params[] = { ChoosePointToJSValue(eventInfo->GetInput()) };
-                func->Call(JSRef<JSObject>(), ArraySize(params), params);
-            });
-        auto lock =
-            AceType::DynamicCast<V2::PatternLockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (lock) {
-            lock->SetPatternCompleteEvent(onComplete);
-        }
+    if (!args[0]->IsFunction()) {
+        return;
     }
+
+    auto onComplete = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                          const BaseEventInfo* event) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
+        JSRef<JSVal> params[] = { ChoosePointToJSValue(eventInfo->GetInput()) };
+        func->Call(JSRef<JSObject>(), ArraySize(params), params);
+    };
+
+    PatternLockModel::GetInstance()->SetPatternComplete(std::move(onComplete));
 }
 void JSPatternLock::SetSelectedColor(const JSCallbackInfo& info)
 {
@@ -112,13 +120,12 @@ void JSPatternLock::SetSelectedColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], selectedColor)) {
         return;
     }
-    auto lock = AceType::DynamicCast<V2::PatternLockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    lock->SetSelectedColor(selectedColor);
+
+    PatternLockModel::GetInstance()->SetSelectedColor(selectedColor);
 }
 void JSPatternLock::SetAutoReset(bool isAutoReset)
 {
-    auto lock = AceType::DynamicCast<V2::PatternLockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    lock->SetAutoReset(isAutoReset);
+    PatternLockModel::GetInstance()->SetAutoReset(isAutoReset);
 }
 
 void JSPatternLock::SetPathColor(const JSCallbackInfo& info)
@@ -131,8 +138,8 @@ void JSPatternLock::SetPathColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], pathColor)) {
         return;
     }
-    auto lock = AceType::DynamicCast<V2::PatternLockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    lock->SetPathColor(pathColor);
+
+    PatternLockModel::GetInstance()->SetPathColor(pathColor);
 }
 void JSPatternLock::SetActiveColor(const JSCallbackInfo& info)
 {
@@ -144,8 +151,8 @@ void JSPatternLock::SetActiveColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], activeColor)) {
         return;
     }
-    auto lock = AceType::DynamicCast<V2::PatternLockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    lock->SetActiveColor(activeColor);
+
+    PatternLockModel::GetInstance()->SetActiveColor(activeColor);
 }
 void JSPatternLock::SetRegularColor(const JSCallbackInfo& info)
 {
@@ -157,8 +164,8 @@ void JSPatternLock::SetRegularColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], regularColor)) {
         return;
     }
-    auto lock = AceType::DynamicCast<V2::PatternLockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    lock->SetRegularColor(regularColor);
+
+    PatternLockModel::GetInstance()->SetRegularColor(regularColor);
 }
 void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
 {
@@ -170,11 +177,8 @@ void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], radius)) {
         return;
     }
-    auto lock = AceType::DynamicCast<V2::PatternLockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (lock == nullptr) {
-        return;
-    }
-    lock->SetCircleRadius(radius);
+
+    PatternLockModel::GetInstance()->SetCircleRadius(radius);
 }
 void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
 {
@@ -186,23 +190,10 @@ void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], sideLength)) {
         return;
     }
-    auto lock = AceType::DynamicCast<V2::PatternLockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (lock == nullptr) {
-        return;
-    }
-    lock->SetSideLength(sideLength);
     JSViewAbstract::JsWidth(info);
     JSViewAbstract::JsHeight(info);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetMinWidth(sideLength);
-    box->SetMinHeight(sideLength);
-    box->SetMaxWidth(sideLength);
-    box->SetMaxHeight(sideLength);
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flexItem->SetMinWidth(sideLength);
-    flexItem->SetMinHeight(sideLength);
-    flexItem->SetMaxWidth(sideLength);
-    flexItem->SetMaxHeight(sideLength);
+
+    PatternLockModel::GetInstance()->SetSideLength(sideLength);
 }
 void JSPatternLock::SetPathStrokeWidth(const JSCallbackInfo& info)
 {
@@ -214,17 +205,8 @@ void JSPatternLock::SetPathStrokeWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], lineWidth)) {
         return;
     }
-    auto component =
-        AceType::DynamicCast<V2::PatternLockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        LOGE("ShapeComponent is null");
-        return;
-    }
-    if (GreatOrEqual(lineWidth.Value(), 0.0)) {
-        component->SetStrokeWidth(lineWidth);
-    } else {
-        component->SetStrokeWidth(0.0_vp);
-    }
+
+    PatternLockModel::GetInstance()->SetStrokeWidth(lineWidth);
 }
 void JSPatternLockController::JSBind(BindingTarget globalObj)
 {

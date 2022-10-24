@@ -262,6 +262,7 @@ template("declarative_js_engine") {
       "jsview/models/linear_split_model_impl.cpp",
       "jsview/models/list_item_model_impl.cpp",
       "jsview/models/list_model_impl.cpp",
+      "jsview/models/patternlock_model_impl.cpp",
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
