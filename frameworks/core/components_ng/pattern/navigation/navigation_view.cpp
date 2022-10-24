@@ -52,7 +52,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr float WINDOW_WIDTH = 520;
+constexpr Dimension WINDOW_WIDTH = 520.0_vp;
+constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
 
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
@@ -246,6 +247,10 @@ void NavigationView::Create()
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
+
+        auto context = contentNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateBackgroundColor(Color::WHITE);
     }
 
     // divider node
@@ -267,7 +272,8 @@ void NavigationView::Create()
 
     stack->Push(navigationGroupNode);
     auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
-    navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
+    navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
+    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 }
 
 void NavigationView::SetTitle(const std::string& title)
@@ -520,7 +526,7 @@ void NavigationView::SetNavigationMode(NavigationMode mode)
     CHECK_NULL_VOID(context);
     auto navigationMode = static_cast<NG::NavigationMode>(mode);
     if (navigationMode == NavigationMode::AUTO) {
-        if (context->GetCurrentRootWidth() >= WINDOW_WIDTH) {
+        if (context->GetCurrentRootWidth() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
             navigationMode = NavigationMode::SPLIT;
         } else {
             navigationMode = NavigationMode::STACK;
@@ -602,9 +608,8 @@ void NavigationView::SetToolBarItems(std::list<BarItem>&& toolBarItems)
         }
         navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     }
-    int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto toolBarNode = FrameNode::GetOrCreateFrameNode(
-        V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(navBarNode->GetPreToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
     auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_EVENLY);
@@ -616,6 +621,7 @@ void NavigationView::SetToolBarItems(std::list<BarItem>&& toolBarItems)
         toolBarNode->AddChild(barItemNode);
     }
     navBarNode->SetToolBarNode(toolBarNode);
+    navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
     navBarNode->MarkModifyDone();
 }

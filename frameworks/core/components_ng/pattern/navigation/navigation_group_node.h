@@ -76,6 +76,8 @@ public:
 private:
     void AddNavDestinationToNavigation(const RefPtr<UINode>& child);
     void BackToPreNavDestination(const RefPtr<UINode>& child);
+    void BackToNavBar();
+    void SetOnStateChangeFalse(const RefPtr<UINode>& child);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;

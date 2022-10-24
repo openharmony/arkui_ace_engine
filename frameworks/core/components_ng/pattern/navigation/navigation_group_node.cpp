@@ -64,6 +64,12 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     contentNode->AddChild(child);
 
     auto onDestinationChange = [child = child, navigation = this]() {
+        auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
+            layoutProperty->UpdateDestinationChange(true);
+        }
+        navigation->MarkModifyDone();
         navigation->AddNavDestinationToNavigation(child);
     };
     auto navRouter = AceType::DynamicCast<NavRouterGroupNode>(child);
@@ -72,7 +78,10 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestinationChange(std::move(onDestinationChange));
 
-    if (isFirstNavDestination_) {
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (isFirstNavDestination_ &&
+        layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
         AddNavDestinationToNavigation(child);
         isFirstNavDestination_ = false;
     }
@@ -87,9 +96,31 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     auto backButtonEventHub = backButtonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(backButtonEventHub);
     auto onBackButtonEvent = [navDestination = navDestination, navigation = this](GestureEvent& /*info*/) {
-        if (navDestination->GetPreNode()) {
-            navigation->BackToPreNavDestination(navDestination->GetPreNode());
+        auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
+            if (navDestination->GetPreNode()) {
+                layoutProperty->UpdateDestinationChange(true);
+                navigation->BackToPreNavDestination(navDestination->GetPreNode());
+                navigation->SetOnStateChangeFalse(navDestination);
+                return;
+            }
+
+            layoutProperty->UpdateDestinationChange(false);
+            navigation->BackToNavBar();
+            navigation->SetOnStateChangeFalse(navDestination);
+            return;
         }
+
+        if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
+            if (navDestination->GetPreNode()) {
+                navigation->BackToPreNavDestination(navDestination->GetPreNode());
+                navigation->SetOnStateChangeFalse(navDestination);
+                layoutProperty->UpdateDestinationChange(false);
+                return;
+            }
+        }
+        navigation->MarkModifyDone();
     };
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(onBackButtonEvent));
     backButtonEventHub->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent);
@@ -106,6 +137,11 @@ void NavigationGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& ch
             auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
             navigationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
                 nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            auto contentNode = AceType::DynamicCast<FrameNode>(navigationContentNode);
+            CHECK_NULL_VOID(contentNode);
+            auto context = contentNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->UpdateBackgroundColor(Color::WHITE);
             SetContentNode(navigationContentNode);
             auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
@@ -118,6 +154,7 @@ void NavigationGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& ch
             auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(childNode);
             if (navDestinationNode) {
                 navDestination->SetPreNode(navDestinationNode);
+                SetOnStateChangeFalse(navDestinationNode);
                 break;
             }
         }
@@ -139,5 +176,30 @@ void NavigationGroupNode::BackToPreNavDestination(const RefPtr<UINode>& child)
         navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
+
+void NavigationGroupNode::BackToNavBar()
+{
+    auto navigationContentNode = GetContentNode();
+    CHECK_NULL_VOID(navigationContentNode);
+    navigationContentNode->Clean();
+    navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavigationGroupNode::SetOnStateChangeFalse(const RefPtr<UINode>& navDestination)
+{
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarContentNode = navBarNode->GetNavBarContentNode();
+    CHECK_NULL_VOID(navBarContentNode);
+    for (const auto& child : navBarContentNode->GetChildren()) {
+        auto navRouter = AceType::DynamicCast<NavRouterGroupNode>(child);
+        if (navRouter && navRouter->GetNavDestinationNode() == navDestination) {
+            auto eventHub = navRouter->GetEventHub<NavRouterEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireChangeEvent(false);
+        }
+    }
+}
+
 
 } // namespace OHOS::Ace::NG
