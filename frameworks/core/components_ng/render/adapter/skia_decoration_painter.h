@@ -28,8 +28,12 @@
 #include "core/components/common/properties/clip_path.h"
 #include "core/components_ng/property/gradient_property.h"
 
+namespace OHOS::Rosen::Drawing {
+class Image;
+} // namespace OHOS::Rosen::Drawing
 
 namespace OHOS::Ace::NG {
+using RSImage = Rosen::Drawing::Image;
 class SkiaDecorationPainter : public virtual AceType {
     DECLARE_ACE_TYPE(SkiaDecorationPainter, AceType);
 
@@ -68,8 +72,8 @@ public:
     static void PaintSepia(const SizeF& frameSize, SkCanvas* canvas, float sepia);
     static void PaintInvert(const SizeF& frameSize, SkCanvas* canvas, float invert);
     static void PaintHueRotate(const SizeF& frameSize, SkCanvas* canvas, float hueRotate);
-
     static SkPaint CreateMaskSkPaint(const RefPtr<BasicShape>& basicShape);
+    static RSImage CreateBorderImageGradient(const NG::Gradient& gradients, const SizeF& paintSize);
 };
 } // namespace OHOS::Ace::NG
 

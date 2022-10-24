@@ -23,13 +23,10 @@ constexpr double EXTRA_OFFSET = 1.0;
 
 void BorderImagePainter::InitPainter()
 {
-    CHECK_NULL_VOID(image_);
-    CHECK_NULL_VOID(borderImage_);
-    imageWidth_ = std::ceil(image_->width());
-    imageHeight_ = std::ceil(image_->height());
-    InitBorderImageSlice(borderImage_);
-    InitBorderImageWidth(borderWidthProperty_, borderImage_);
-    InitBorderImageOutset(borderWidthProperty_, borderImage_);
+    CHECK_NULL_VOID(borderImageProperty_.GetBorderImage());
+    InitBorderImageSlice();
+    InitBorderImageWidth();
+    InitBorderImageOutset();
     imageCenterWidth_ = std::ceil(imageWidth_ - leftSlice_ - rightSlice_);
     imageCenterHeight_ = std::ceil(imageHeight_ - topSlice_ - bottomSlice_);
     borderCenterWidth_ = std::ceil(paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_);
@@ -40,14 +37,15 @@ void BorderImagePainter::InitPainter()
     srcRectBottom_ = RSRect(leftSlice_, imageHeight_ - bottomSlice_, leftSlice_ + imageCenterWidth_, imageHeight_);
 }
 
-void BorderImagePainter::InitBorderImageSlice(RefPtr<BorderImage>& borderImage)
+void BorderImagePainter::InitBorderImageSlice()
 {
+    auto borderImage = borderImageProperty_.GetBorderImageValue();
     BorderImageEdge imageLeft = borderImage->GetBorderImageEdge(BorderImageDirection::LEFT);
     BorderImageEdge imageTop = borderImage->GetBorderImageEdge(BorderImageDirection::TOP);
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
 
-    if (!borderImageProperty_ || !borderImageProperty_->GetHasBorderImageSlice()) {
+    if (!borderImageProperty_.GetHasBorderImageSlice()) {
         leftSlice_ = imageWidth_;
         topSlice_ = imageHeight_;
         rightSlice_ = imageWidth_;
@@ -86,23 +84,22 @@ void BorderImagePainter::InitBorderImageSlice(RefPtr<BorderImage>& borderImage)
     ParseNegativeNumberToZeroOrCeil(bottomSlice_);
 }
 
-void BorderImagePainter::InitBorderImageWidth(
-    const std::unique_ptr<BorderWidthProperty>& borderWidthProperty, const RefPtr<BorderImage>& borderImage)
+void BorderImagePainter::InitBorderImageWidth()
 {
+    auto borderImage = borderImageProperty_.GetBorderImageValue();
     BorderImageEdge imageLeft = borderImage->GetBorderImageEdge(BorderImageDirection::LEFT);
     BorderImageEdge imageTop = borderImage->GetBorderImageEdge(BorderImageDirection::TOP);
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
 
-    if (!borderImageProperty_ || !borderImageProperty_->GetHasBorderImageWidth()) {
-        CHECK_NULL_VOID(borderWidthProperty);
-        borderWidthProperty->leftDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftWidth_);
-        borderWidthProperty->rightDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightWidth_);
-        borderWidthProperty->topDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topWidth_);
-        borderWidthProperty->bottomDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomWidth_);
+    if (!borderImageProperty_.GetHasBorderImageWidth() && hasBorderWidthProperty_) {
+        borderWidthProperty_.leftDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftWidth_);
+        borderWidthProperty_.rightDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightWidth_);
+        borderWidthProperty_.topDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topWidth_);
+        borderWidthProperty_.bottomDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomWidth_);
         return;
     }
-    if (borderImageProperty_ && borderImageProperty_->GetHasBorderImageWidth()) {
+    if (borderImageProperty_.GetHasBorderImageWidth()) {
         leftWidth_ = imageLeft.GetBorderImageWidth().ConvertToPx();
         rightWidth_ = imageRight.GetBorderImageWidth().ConvertToPx();
         topWidth_ = imageTop.GetBorderImageWidth().ConvertToPx();
@@ -115,14 +112,14 @@ void BorderImagePainter::InitBorderImageWidth(
     ParseNegativeNumberToZeroOrCeil(bottomWidth_);
 }
 
-void BorderImagePainter::InitBorderImageOutset(
-    const std::unique_ptr<BorderWidthProperty>& borderWidthProperty, const RefPtr<BorderImage>& borderImage)
+void BorderImagePainter::InitBorderImageOutset()
 {
+    auto borderImage = borderImageProperty_.GetBorderImageValue();
     BorderImageEdge imageLeft = borderImage->GetBorderImageEdge(BorderImageDirection::LEFT);
     BorderImageEdge imageTop = borderImage->GetBorderImageEdge(BorderImageDirection::TOP);
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
-    if (!borderImageProperty_ || !borderImageProperty_->GetHasBorderImageOutset() || !borderWidthProperty) {
+    if (!borderImageProperty_.GetHasBorderImageOutset() || !hasBorderWidthProperty_) {
         leftOutset_ = 0.0;
         topOutset_ = 0.0;
         rightOutset_ = 0.0;
@@ -136,30 +133,30 @@ void BorderImagePainter::InitBorderImageOutset(
 
     if (GreatNotEqual(imageLeft.GetBorderImageOutset().Value(), 0.0)) {
         imageLeft.GetBorderImageOutset().NormalizeToPx(
-            dipscale_, 0, 0, borderWidthProperty->leftDimen->ConvertToPx(), leftOutset_);
+            dipscale_, 0, 0, borderWidthProperty_.leftDimen->ConvertToPx(), leftOutset_);
     } else {
-        borderWidthProperty->leftDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftOutset_);
+        borderWidthProperty_.leftDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftOutset_);
     }
 
     if (GreatNotEqual(imageRight.GetBorderImageOutset().Value(), 0.0)) {
         imageRight.GetBorderImageOutset().NormalizeToPx(
-            dipscale_, 0, 0, borderWidthProperty->rightDimen->ConvertToPx(), rightOutset_);
+            dipscale_, 0, 0, borderWidthProperty_.rightDimen->ConvertToPx(), rightOutset_);
     } else {
-        borderWidthProperty->rightDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightOutset_);
+        borderWidthProperty_.rightDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightOutset_);
     }
 
     if (GreatNotEqual(imageTop.GetBorderImageOutset().Value(), 0.0)) {
         imageTop.GetBorderImageOutset().NormalizeToPx(
-            dipscale_, 0, 0, borderWidthProperty->topDimen->ConvertToPx(), topOutset_);
+            dipscale_, 0, 0, borderWidthProperty_.topDimen->ConvertToPx(), topOutset_);
     } else {
-        borderWidthProperty->topDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topOutset_);
+        borderWidthProperty_.topDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topOutset_);
     }
 
     if (GreatNotEqual(imageBottom.GetBorderImageOutset().Value(), 0.0)) {
         imageBottom.GetBorderImageOutset().NormalizeToPx(
-            dipscale_, 0, 0, borderWidthProperty->bottomDimen->ConvertToPx(), bottomOutset_);
+            dipscale_, 0, 0, borderWidthProperty_.bottomDimen->ConvertToPx(), bottomOutset_);
     } else {
-        borderWidthProperty->bottomDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomOutset_);
+        borderWidthProperty_.bottomDimen->NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomOutset_);
     }
     ParseNegativeNumberToZeroOrCeil(leftOutset_);
     ParseNegativeNumberToZeroOrCeil(rightOutset_);
@@ -167,21 +164,20 @@ void BorderImagePainter::InitBorderImageOutset(
     ParseNegativeNumberToZeroOrCeil(bottomOutset_);
 }
 
-void BorderImagePainter::UpdateExtraOffsetToPaintSize(const OffsetF& extraOffset)
-{
-    paintSize_ += SizeF(extraOffset.GetX() * 2, extraOffset.GetY() * 2);
-    paintSize_.SetWidth(std::ceil(paintSize_.Width()));
-    paintSize_.SetHeight(std::ceil(paintSize_.Height()));
-}
 
-void BorderImagePainter::PaintBorderImage(const OffsetF& offset, RSCanvas& canvas)
+void BorderImagePainter::PaintBorderImage(const OffsetF& offset, RSCanvas& canvas) const
 {
+    CHECK_NULL_VOID(borderImageProperty_.GetBorderImage());
     OffsetF ceiledOffset(std::ceil(offset.GetX()), std::ceil(offset.GetY()));
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    canvas.AttachPen(pen);
+    canvas.Save();
     PaintBorderImageCorners(ceiledOffset, canvas);
     if (paintCornersOnly_) {
         return;
     }
-    switch (borderImage_->GetRepeatMode()) {
+    switch (borderImageProperty_.GetBorderImageValue()->GetRepeatMode()) {
         case BorderImageRepeat::STRETCH:
             PaintBorderImageStretch(ceiledOffset, canvas);
             break;
@@ -197,14 +193,14 @@ void BorderImagePainter::PaintBorderImage(const OffsetF& offset, RSCanvas& canva
         default:
             LOGE("Unsupported Border Image repeat mode");
     }
-    if (borderImage_->GetNeedFillCenter()) {
+    if (borderImageProperty_.GetBorderImageValue()->GetNeedFillCenter()) {
         FillBorderImageCenter(ceiledOffset, canvas);
     }
+    canvas.Restore();
 }
 
-void BorderImagePainter::FillBorderImageCenter(const OffsetF& offset, RSCanvas& canvas)
+void BorderImagePainter::FillBorderImageCenter(const OffsetF& offset, RSCanvas& canvas) const
 {
-    RSImage rsImage(&image_);
     RSSamplingOptions options;
     double destLeftOffset = offset.GetX() - leftOutset_ + leftWidth_ - EXTRA_OFFSET;
     double destTopOffset = offset.GetY() - topOutset_ + topWidth_ - EXTRA_OFFSET;
@@ -215,9 +211,8 @@ void BorderImagePainter::FillBorderImageCenter(const OffsetF& offset, RSCanvas& 
     canvas.DrawImageRect(rsImage, srcRectCenter, desRectCenter, options);
 }
 
-void BorderImagePainter::PaintBorderImageCorners(const OffsetF& offset, RSCanvas& canvas)
+void BorderImagePainter::PaintBorderImageCorners(const OffsetF& offset, RSCanvas& canvas) const
 {
-    RSImage rsImage(&image_);
     RSSamplingOptions options;
     double offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
     double offsetRightX = std::ceil(offset.GetX() + paintSize_.Width() + rightOutset_);
@@ -256,9 +251,8 @@ void BorderImagePainter::PaintBorderImageCorners(const OffsetF& offset, RSCanvas
     canvas.DrawImageRect(rsImage, srcRectRightBottom, desRectRightBottom, options);
 }
 
-void BorderImagePainter::PaintBorderImageStretch(const OffsetF& offset, RSCanvas& canvas)
+void BorderImagePainter::PaintBorderImageStretch(const OffsetF& offset, RSCanvas& canvas) const
 {
-    RSImage rsImage(&image_);
     RSSamplingOptions options;
     double offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
     double offsetRightX = std::ceil(offset.GetX() + paintSize_.Width() + rightOutset_);
@@ -284,9 +278,8 @@ void BorderImagePainter::PaintBorderImageStretch(const OffsetF& offset, RSCanvas
     canvas.DrawImageRect(rsImage, srcRectBottom_, desRectBottom, options);
 }
 
-void BorderImagePainter::PaintBorderImageRound(const OffsetF& offset, RSCanvas& canvas)
+void BorderImagePainter::PaintBorderImageRound(const OffsetF& offset, RSCanvas& canvas) const
 {
-    RSImage rsImage(&image_);
     RSSamplingOptions options;
     double offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
     double offsetRightX = std::ceil(offset.GetX() + paintSize_.Width() + rightOutset_);
@@ -337,9 +330,8 @@ void BorderImagePainter::PaintBorderImageRound(const OffsetF& offset, RSCanvas& 
     }
 }
 
-void BorderImagePainter::PaintBorderImageSpace(const OffsetF& offset, RSCanvas& canvas)
+void BorderImagePainter::PaintBorderImageSpace(const OffsetF& offset, RSCanvas& canvas) const
 {
-    RSImage rsImage(&image_);
     RSSamplingOptions options;
     double offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
     double offsetRightX = std::ceil(offset.GetX() + paintSize_.Width() + rightOutset_);
@@ -388,9 +380,8 @@ void BorderImagePainter::PaintBorderImageSpace(const OffsetF& offset, RSCanvas& 
     }
 }
 
-void BorderImagePainter::PaintBorderImageRepeat(const OffsetF& offset, RSCanvas& canvas)
+void BorderImagePainter::PaintBorderImageRepeat(const OffsetF& offset, RSCanvas& canvas) const
 {
-    RSImage rsImage(&image_);
     RSSamplingOptions options;
     double offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
     double offsetRightX = std::ceil(offset.GetX() + paintSize_.Width() + rightOutset_);
