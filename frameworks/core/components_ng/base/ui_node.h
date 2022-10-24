@@ -262,6 +262,7 @@ protected:
 
 private:
     void OnRemoveFromParent();
+    void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
 
     std::list<RefPtr<UINode>> children_;
     WeakPtr<UINode> parent_;

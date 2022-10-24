@@ -53,14 +53,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
 
     it = children_.begin();
     std::advance(it, slot);
-    children_.insert(it, child);
-
-    child->SetParent(Claim(this));
-    child->SetDepth(GetDepth() + 1);
-    if (!silently && onMainTree_) {
-        child->AttachToMainTree();
-    }
-    MarkNeedSyncRenderTree();
+    DoAddChild(it, child, silently);
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
@@ -119,13 +112,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     }
 
     auto iter = RemoveChild(oldNode);
-    children_.insert(iter, newNode);
-    newNode->SetParent(Claim(this));
-    newNode->SetDepth(GetDepth() + 1);
-    if (onMainTree_) {
-        newNode->AttachToMainTree();
-    }
-    MarkNeedSyncRenderTree();
+    DoAddChild(iter, newNode);
 }
 
 void UINode::Clean()
@@ -151,6 +138,18 @@ void UINode::OnRemoveFromParent()
     DetachFromMainTree();
     parent_.Reset();
     depth_ = -1;
+}
+
+void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
+{
+    children_.insert(it, child);
+
+    child->SetParent(Claim(this));
+    child->SetDepth(GetDepth() + 1);
+    if (!silently && onMainTree_) {
+        child->AttachToMainTree();
+    }
+    MarkNeedSyncRenderTree();
 }
 
 RefPtr<FrameNode> UINode::GetFocusParent() const
