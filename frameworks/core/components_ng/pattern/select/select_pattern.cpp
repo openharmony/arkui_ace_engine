@@ -118,12 +118,12 @@ void SelectPattern::CreateSelectedCallback()
 
         auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
-        auto onScroll = hub->GetSelectEvent();
-        // execute onScroll callback
-        if (onScroll) {
+        auto onSelect = hub->GetSelectEvent();
+        // execute onSelect callback
+        if (onSelect) {
             auto newSelected = pattern->options_[index]->GetPattern<OptionPattern>();
             CHECK_NULL_VOID(newSelected);
-            onScroll(index, newSelected->GetText());
+            onSelect(index, newSelected->GetText());
         }
     };
     for (auto&& option : options_) {
