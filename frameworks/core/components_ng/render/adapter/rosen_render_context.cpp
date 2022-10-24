@@ -528,6 +528,45 @@ void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnAccessibilityFocusUpdate(bool /* isAccessibilityFocus */)
+{
+    auto uiNode = GetHost();
+    CHECK_NULL_VOID(uiNode);
+    uiNode->MarkDirtyNode(false, true, PROPERTY_UPDATE_RENDER);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::PaintAccessibilityFocus()
+{
+    CHECK_NULL_VOID(rsNode_);
+    constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
+    constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
+    constexpr double ACCESSIBILITY_FOCUS_RADIUS_X = 2.0;
+    constexpr double ACCESSIBILITY_FOCUS_RADIUS_Y = 2.0;
+
+    auto paintAccessibilityFocusTask = [weak = WeakClaim(this)](std::shared_ptr<SkCanvas> canvas) {
+        auto rosenRenderContext = weak.Upgrade();
+        CHECK_NULL_VOID(rosenRenderContext);
+        auto paintRect = rosenRenderContext->GetPaintRectWithoutTransform();
+        if (NearZero(paintRect.Width()) || NearZero(paintRect.Height())) {
+            LOGE("PaintAccessibilityFocus return");
+            return;
+        }
+        RSCanvas rsCanvas(&canvas);
+        RSPen pen;
+        pen.SetAntiAlias(true);
+        pen.SetColor(ACCESSIBILITY_FOCUS_COLOR);
+        pen.SetWidth(ACCESSIBILITY_FOCUS_WIDTH);
+        rsCanvas.AttachPen(pen);
+        rsCanvas.Save();
+        RSRect rect(0, 0, paintRect.Width(), paintRect.Height());
+        RSRoundRect rrect(rect, ACCESSIBILITY_FOCUS_RADIUS_X, ACCESSIBILITY_FOCUS_RADIUS_Y);
+        rsCanvas.DrawRoundRect(rrect);
+        rsCanvas.Restore();
+    };
+    rsNode_->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE, paintAccessibilityFocusTask);
+}
+
 void RosenRenderContext::PaintBorderImage()
 {
     CHECK_NULL_VOID(rsNode_);
