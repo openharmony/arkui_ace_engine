@@ -38,6 +38,7 @@
 #include "core/components/menu/menu_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/pipeline/base/component.h"
@@ -194,9 +195,8 @@ public:
     static void Pop();
 
     static void JsOnDragStart(const JSCallbackInfo& info);
-    static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragItemInfo& dragInfo);
-    static RefPtr<Component> ParseDragItemComponent(const JSRef<JSVal>& info);
-    static RefPtr<NG::UINode> ParseDragCustomUINode(const JSRef<JSVal>& info);
+    static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo);
+    static RefPtr<AceType> ParseDragNode(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);

@@ -172,27 +172,27 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
     LOGE("no support CopyOption");
 }
 
-void TextModelNG::SetOnDragStartId(const OnDragFunc& onDragStartId)
+void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     LOGE("no support SetOnDragStartId");
 }
 
-void TextModelNG::SetOnDragEnterId(const OnDropFunc& onDragEnterId)
+void TextModelNG::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
 {
     LOGE("no support SetOnDragEnterId");
 }
 
-void TextModelNG::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+void TextModelNG::SetOnDragMove(NG::OnDragDropFunc&& onDragMove)
 {
     LOGE("no support SetOnDragMoveId");
 }
 
-void TextModelNG::SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
+void TextModelNG::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
 {
     LOGE("no support SetOnDragLeaveId");
 }
 
-void TextModelNG::SetOnDropId(const OnDropFunc& onDropId)
+void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 {
     LOGE("no support SetOnDropId");
 }

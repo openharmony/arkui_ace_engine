@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/box/box_component_helper.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/decoration.h"
@@ -134,6 +135,31 @@ Gradient ToGradient(const NG::Gradient& gradient)
     return retGradient;
 }
 
+void ViewAbstractModelImpl::SwapBackBorder(const RefPtr<Decoration>& decoration)
+{
+    CHECK_NULL_VOID(decoration);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto boxDecoration = box->GetBackDecoration();
+    if (boxDecoration) {
+        decoration->SetBorder(boxDecoration->GetBorder());
+        boxDecoration->SetBorder({});
+    }
+}
+
+OnDragFunc ViewAbstractModelImpl::ToDragFunc(NG::OnDragStartFunc&& onDragStart)
+{
+    auto dragStart = [dragStartFunc = std::move(onDragStart)](
+                         const RefPtr<DragEvent>& event, const std::string& extraParams) -> DragItemInfo {
+        auto dragInfo = dragStartFunc(event, extraParams);
+        DragItemInfo info;
+        info.extraInfo = dragInfo.extraInfo;
+        info.pixelMap = dragInfo.pixelMap;
+        info.customComponent = AceType::DynamicCast<Component>(dragInfo.node);
+        return info;
+    };
+    return dragStart;
+}
+
 void ViewAbstractModelImpl::SetWidth(const Dimension& width)
 {
     bool isPercentSize = (width.Unit() == DimensionUnit::PERCENT);
@@ -157,17 +183,6 @@ void ViewAbstractModelImpl::SetWidth(const Dimension& width)
             box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
                 BoxStateAttribute::WIDTH, AnimatableDimension(box->GetWidth(), option), VisualState::NORMAL);
         }
-    }
-}
-
-void ViewAbstractModelImpl::SwapBackBorder(const RefPtr<Decoration>& decoration)
-{
-    CHECK_NULL_VOID(decoration);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto boxDecoration = box->GetBackDecoration();
-    if (boxDecoration) {
-        decoration->SetBorder(boxDecoration->GetBorder());
-        boxDecoration->SetBorder({});
     }
 }
 
@@ -1083,6 +1098,36 @@ void ViewAbstractModelImpl::SetOnBlur(OnBlurFunc&& onBlurCallback)
     if (focusableComponent) {
         focusableComponent->SetOnBlur(onBlurCallback);
     }
+}
+
+void ViewAbstractModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragStartId(ToDragFunc(std::move(onDragStart)));
+}
+
+void ViewAbstractModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragEnterId(onDragEnter);
+}
+
+void ViewAbstractModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragLeaveId(onDragLeave);
+}
+
+void ViewAbstractModelImpl::SetOnDragMove(NG::OnDragDropFunc&& onDragMove)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragMoveId(onDragMove);
+}
+
+void ViewAbstractModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDropId(onDrop);
 }
 
 void ViewAbstractModelImpl::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
