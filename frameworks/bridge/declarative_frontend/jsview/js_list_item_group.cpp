@@ -17,41 +17,60 @@
 
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/list_item_group_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_v2/list/list_item_group_component.h"
+#include "core/components_ng/pattern/list/list_item_group_model.h"
+#include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 
+namespace OHOS::Ace {
+
+std::unique_ptr<ListItemGroupModel> ListItemGroupModel::instance_ = nullptr;
+
+ListItemGroupModel* ListItemGroupModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ListItemModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ListItemGroupModelNG());
+        } else {
+            instance_.reset(new Framework::ListItemGroupModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 void JSListItemGroup::Create(const JSCallbackInfo& args)
 {
-    auto listItemGroupComponent = AceType::MakeRefPtr<V2::ListItemGroupComponent>();
+    ListItemGroupModel::GetInstance()->Create();
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
         Dimension space;
         if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
-            listItemGroupComponent->SetSpace(space);
+            ListItemGroupModel::GetInstance()->SetSpace(space);
         }
 
         auto headerObject = obj->GetProperty("header");
         if (headerObject->IsFunction()) {
-            ScopedViewStackProcessor builderViewStackProcessor;
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerObject));
-            builderFunc->Execute();
-            RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
-            listItemGroupComponent->SetHeaderComponent(customComponent);
+            auto headerAction = [builderFunc]() { builderFunc->Execute(); };
+            ListItemGroupModel::GetInstance()->SetHeader(headerAction);
         }
 
         auto footerObject = obj->GetProperty("footer");
         if (footerObject->IsFunction()) {
-            ScopedViewStackProcessor builderViewStackProcessor;
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
-            builderFunc->Execute();
-            RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
-            listItemGroupComponent->SetFooterComponent(customComponent);
+            auto footerAction = [builderFunc]() { builderFunc->Execute(); };
+            ListItemGroupModel::GetInstance()->SetFooter(footerAction);
         }
     }
-    ViewStackProcessor::GetInstance()->Push(listItemGroupComponent);
     args.ReturnSelf();
 }
 
@@ -70,19 +89,19 @@ void JSListItemGroup::SetDivider(const JSCallbackInfo& args)
             break;
         }
 
-        auto divider = std::make_unique<V2::ItemDivider>();
-        divider->strokeWidth = strokeWidth;
-        if (!ConvertFromJSValue(obj->GetProperty("color"), divider->color)) {
+        V2::ItemDivider divider;
+        divider.strokeWidth = strokeWidth;
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
             // Failed to get color from param, using default color defined in theme
             RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
             if (listTheme) {
-                divider->color = listTheme->GetDividerColor();
+                divider.color = listTheme->GetDividerColor();
             }
         }
-        ConvertFromJSValue(obj->GetProperty("startMargin"), divider->startMargin);
-        ConvertFromJSValue(obj->GetProperty("endMargin"), divider->endMargin);
+        ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
+        ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
 
-        JSViewSetProperty(&V2::ListItemGroupComponent::SetItemDivider, std::move(divider));
+        ListItemGroupModel::GetInstance()->SetDivider(divider);
     } while (false);
 
     args.ReturnSelf();
