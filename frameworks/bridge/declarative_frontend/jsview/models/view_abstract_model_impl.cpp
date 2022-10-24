@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 
+#include <functional>
+
 #include "base/geometry/animatable_dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -29,8 +31,18 @@
 #include "core/components/common/properties/placement.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
+#include "core/gestures/gesture_info.h"
+#include "core/gestures/long_press_gesture.h"
+
+// avoid windows build error about macro defined in winuser.h
+#ifdef GetMessage
+#undef GetMessage
+#endif
 
 namespace OHOS::Ace::Framework {
+
+constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
+constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 
 RefPtr<Decoration> GetBackDecoration()
 {
@@ -1378,6 +1390,155 @@ void ViewAbstractModelImpl::BindPopup(const RefPtr<PopupParam>& param, const Ref
     auto customComponent = AceType::DynamicCast<Component>(customNode);
     if (customComponent) {
         popupComponent->SetCustomComponent(customComponent);
+    }
+}
+
+RefPtr<SelectTheme> GetSelectTheme()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetTheme<SelectTheme>();
+}
+
+GestureEventFunc CreateMenuEventWithParams(
+    const WeakPtr<OHOS::Ace::MenuComponent>& weak, std::vector<NG::OptionParam>&& params)
+{
+    return [weak, params](const GestureEvent& info) {
+        auto menuComponent = weak.Upgrade();
+        CHECK_NULL_VOID(menuComponent);
+        auto menuTheme = GetSelectTheme();
+        if (menuTheme) {
+            menuComponent->SetTheme(menuTheme);
+        }
+        menuComponent->ClearOptions();
+
+        for (const auto& param : params) {
+            auto optionTheme = GetSelectTheme();
+            if (!optionTheme) {
+                continue;
+            }
+            auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(param.first);
+
+            optionComponent->SetTextStyle(optionTheme->GetOptionTextStyle());
+            optionComponent->SetTheme(optionTheme);
+            optionComponent->SetText(textComponent);
+            optionComponent->SetValue(param.first);
+            optionComponent->SetCustomizedCallback(param.second);
+            menuComponent->AppendOption(optionComponent);
+        }
+
+        auto showDialog = menuComponent->GetTargetCallback();
+        showDialog("BindMenu", info.GetGlobalLocation());
+    };
+}
+
+void ExecMenuBuilder(const std::function<void()>& builderFunc, const RefPtr<MenuComponent>& menuComponent)
+{
+    // use another VSP instance while executing the builder function
+    ScopedViewStackProcessor builderViewStackProcessor;
+    {
+        ACE_SCORING_EVENT("contextMenu.builder");
+        builderFunc();
+    }
+    auto customComponent = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(customComponent);
+
+    // Set the theme
+    auto menuTheme = GetSelectTheme();
+    if (menuTheme) {
+        menuComponent->SetTheme(menuTheme);
+    }
+    auto optionTheme = GetSelectTheme();
+    auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+
+    // Set the custom component
+    optionComponent->SetCustomComponent(customComponent);
+    menuComponent->ClearOptions();
+    menuComponent->AppendOption(optionComponent);
+}
+
+GestureEventFunc CreateMenuEventWithBuilder(
+    const WeakPtr<OHOS::Ace::MenuComponent>& weak, std::function<void()>&& buildFunc)
+{
+    return [weak, builderFunc = std::move(buildFunc)](const GestureEvent& info) {
+        auto menuComponent = weak.Upgrade();
+        CHECK_NULL_VOID(menuComponent);
+        menuComponent->SetIsCustomMenu(true);
+        ExecMenuBuilder(builderFunc, menuComponent);
+        auto showDialog = menuComponent->GetTargetCallback();
+        showDialog("BindMenu", info.GetGlobalLocation());
+    };
+}
+
+void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
+    CHECK_NULL_VOID(menuComponent);
+    auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
+    GestureEventFunc eventFunc;
+    if (!params.empty()) {
+        eventFunc = CreateMenuEventWithParams(weak, std::move(params));
+    } else if (buildFunc) {
+        eventFunc = CreateMenuEventWithBuilder(weak, std::move(buildFunc));
+    } else {
+        LOGE("No param object.");
+        return;
+    }
+    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    tapGesture->SetOnActionId(eventFunc);
+    click->SetOnClick(tapGesture);
+}
+
+void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
+    CHECK_NULL_VOID(menuComponent);
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+    menuComponent->SetIsContextMenu(true);
+#endif
+
+    auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
+    if (type == ResponseType::RIGHT_CLICK) {
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        box->SetOnMouseId([weak, builderFunc = std::move(buildFunc)](MouseInfo& info) {
+            auto menuComponent = weak.Upgrade();
+            CHECK_NULL_VOID(menuComponent);
+            if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                ExecMenuBuilder(builderFunc, menuComponent);
+                auto showMenu = menuComponent->GetTargetCallback();
+                info.SetStopPropagation(true);
+                LOGI("Context menu is triggered, type is right click.");
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+                showMenu("", info.GetScreenLocation());
+#else
+                showMenu("", info.GetGlobalLocation());
+#endif
+            }
+        });
+    } else if (type == ResponseType::LONGPRESS) {
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        RefPtr<Gesture> longGesture = AceType::MakeRefPtr<LongPressGesture>(
+            DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION, false, true);
+        longGesture->SetOnActionId([weak, builderFunc = std::move(buildFunc)](const GestureEvent& info) mutable {
+            auto menuComponent = weak.Upgrade();
+            CHECK_NULL_VOID(menuComponent);
+            ExecMenuBuilder(builderFunc, menuComponent);
+            auto showMenu = menuComponent->GetTargetCallback();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+            showMenu("", info.GetScreenLocation());
+#else
+            showMenu("", info.GetGlobalLocation());
+#endif
+        });
+        box->SetOnLongPress(longGesture);
+    } else {
+        LOGE("The arg responseType is invalid.");
     }
 }
 

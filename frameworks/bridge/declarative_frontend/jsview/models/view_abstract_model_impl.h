@@ -161,6 +161,8 @@ public:
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override;
+    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
