@@ -434,4 +434,32 @@ void UINode::SetActive(bool active)
     }
 }
 
+std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
+{
+    if (GetId() == id)
+    {
+        return std::pair<bool, int32_t>(true, 0);
+    }
+
+    const auto node = ElementRegister::GetInstance()->GetUINodeById(id);
+    if (!node) {
+        return std::pair<bool, int32_t>(false, 0);
+    }
+
+    if (node && (node->GetTag() == GetTag()))
+    {
+        return std::pair<bool, int32_t>(false, 1);
+    }
+
+    int32_t count = 0;
+    for (const auto& child : GetChildren()) {
+        auto res = child->GetChildFlatIndex(id);
+        if (res.first) {
+            return std::pair<bool, int32_t>(true, count + res.second);
+        }
+        count += res.second;
+    }
+    return std::pair<bool, int32_t>(false, count);
+}
+
 } // namespace OHOS::Ace::NG

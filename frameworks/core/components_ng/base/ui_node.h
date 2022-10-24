@@ -67,33 +67,11 @@ public:
     int32_t TotalChildCount() const;
 
     // Returns index in the flattern tree structure 
-    // of the node with given id and class type
+    // of the node with given id and type
     // Returns std::pair with
     // boolean first - inidication of node is found
     // int32_t second - index of the node
-    template<class T>
-    std::pair<bool, int32_t> GetShallowIndex(int32_t id)
-    {
-        if (GetId() == id)
-        {
-            return std::pair<bool, int32_t>(true, 0);
-        }
-
-        if (AceType::InstanceOf<T>(this))
-        {
-            return std::pair<bool, int32_t>(false, 1);
-        }
-
-        int32_t count = 0;
-        for (const auto& child : GetChildren()) {
-            auto res = child->GetShallowIndex<T>(id);
-            if (res.first) {
-                return std::pair<bool, int32_t>(true, count + res.second);
-            }
-            count += res.second;
-        }
-        return std::pair<bool, int32_t>(false, count);
-    }
+    std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
     const std::list<RefPtr<UINode>>& GetChildren() const
     {

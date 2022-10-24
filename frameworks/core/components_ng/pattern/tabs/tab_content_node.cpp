@@ -28,7 +28,7 @@ void TabContentNode::OnAttachToMainTree()
     }
 
     auto swiper = tabs? tabs->GetTabs() : nullptr;
-    auto myIndex = swiper ? swiper->GetShallowIndex<TabContentNode>(GetId()).second : 0;
+    auto myIndex = swiper ? swiper->GetChildFlatIndex(GetId()).second : 0;
 
     TabContentModelNG::AddTabBarItem(Referenced::Claim(this), myIndex);
 }
@@ -50,7 +50,7 @@ void TabContentNode::OnDetachFromMainTree()
     auto pattern = swiper ? AceType::DynamicCast<FrameNode>(swiper)->GetPattern():nullptr;
     auto swiperPattern = pattern? AceType::DynamicCast<SwiperPattern>(pattern) : nullptr;
 
-    auto deletedIdx = swiper->GetShallowIndex<TabContentNode>(GetId()).second;
+    auto deletedIdx = swiper->GetChildFlatIndex(GetId()).second;
     auto currentIdx = swiperPattern->GetCurrentShownIndex();
     LOGD( "Deleting tab: %{public}d, currentTab: %{public}d", deletedIdx,
         swiperPattern->GetCurrentShownIndex());
