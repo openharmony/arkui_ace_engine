@@ -123,7 +123,8 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (usingPopup_) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(itemCount_);
         CHECK_NULL_VOID(childWrapper);
-        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(NG::BUBBLE_BOX_SIZE, NG::BUBBLE_BOX_SIZE));
+        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(
+            OptionalSizeF(NG::BUBBLE_BOX_SIZE, NG::BUBBLE_BOX_SIZE * INDEXER_BUBBLE_MAXSIZE));
         childWrapper->Measure(childLayoutConstraint);
     }
     auto size = SizeF(itemSizeRender_, itemSizeRender_ * itemCount_);

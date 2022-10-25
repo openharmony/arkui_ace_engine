@@ -472,6 +472,20 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
     rsNode_->NotifyTransition(effect, isTransitionIn);
 }
 
+void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double begin, double end)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetAlpha(begin);
+    AnimationUtils::Animate(
+        option,
+        [rsNode = rsNode_, endAlpha = end]() {
+            if (rsNode) {
+                rsNode->SetAlpha(endAlpha);
+            }
+        },
+        option.GetOnFinishEvent());
+}
+
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);

@@ -137,6 +137,8 @@ public:
 
     virtual void ClipWithRect(const RectF& rectF) {}
 
+    virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
+
     virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
 
     virtual RectF GetPaintRectWithTransform()
