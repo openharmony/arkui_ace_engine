@@ -15,9 +15,9 @@
 
 #include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
 
-#include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
-
+#include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -31,7 +31,7 @@ void PaintIndicator(RSCanvas& canvas, PaintWrapper* paintWrapper)
     }
 
     RectF indicator = paintProperty->GetIndicatorValue();
-    indicator.SetHeight(10);
+    indicator.SetHeight(Dimension(4, DimensionUnit::VP).ConvertToPx());
 
     // draw line
     RSBrush brush;

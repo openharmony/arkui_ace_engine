@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 
-
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"

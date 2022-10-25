@@ -100,6 +100,18 @@ public:
         return { FocusType::NODE, true };
     }
 
+    void UpdateChangeEvent(ChangeEvent&& event)
+    {
+        if (!changeEvent_) {
+            changeEvent_ = std::make_shared<ChangeEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddOnChangeEvent(changeEvent_);
+        } else {
+            (*changeEvent_).swap(event);
+        }
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -192,6 +204,8 @@ private:
     Axis direction_ = Axis::HORIZONTAL;
 
     uint64_t elapsedTime_ = 0; // millisecond.
+
+    ChangeEventPtr changeEvent_;
 };
 } // namespace OHOS::Ace::NG
 

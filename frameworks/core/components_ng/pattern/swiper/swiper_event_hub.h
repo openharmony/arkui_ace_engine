@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_EVENT_HUB_H
 
+#include <algorithm>
+#include <memory>
+
 #include "base/memory/ace_type.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/event/event_hub.h"
@@ -28,7 +31,8 @@ enum class Direction {
     NEXT,
 };
 
-using ChangeEvent = std::function<void(const BaseEventInfo*)>;
+using ChangeEvent = std::function<void(int32_t index)>;
+using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeDoneEvent = std::function<void()>;
 
 class SwiperEventHub : public EventHub {
@@ -38,14 +42,10 @@ public:
     SwiperEventHub() = default;
     ~SwiperEventHub() override = default;
 
-    void SetOnChange(ChangeEvent&& changeEvent)
+    /* Using shared_ptr to enable event modification without adding again */
+    void AddOnChangeEvent(const ChangeEventPtr& changeEvent)
     {
-        changeEvent_ = std::move(changeEvent);
-    }
-
-    void SetOnIndicatorChange(std::function<void(int32_t)>&& indexChangeEvent)
-    {
-        indicatorChangeEvent_ = std::move(indexChangeEvent);
+        changeEvents_.emplace_back(changeEvent);
     }
 
     void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
@@ -67,11 +67,9 @@ public:
 
     void FireChangeEvent(int32_t index) const
     {
-        if (changeEvent_) {
-            changeEvent_(std::make_shared<SwiperChangeEvent>(index).get());
-        }
-        if (indicatorChangeEvent_) {
-            indicatorChangeEvent_(index);
+        if (!changeEvents_.empty()) {
+            std::for_each(
+                changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& event) { (*event)(index); });
         }
     }
 
@@ -82,8 +80,7 @@ public:
 
 private:
     Direction direction_;
-    ChangeEvent changeEvent_;
-    std::function<void(int32_t)> indicatorChangeEvent_;
+    std::list<ChangeEventPtr> changeEvents_;
     ChangeDoneEvent changeDoneEvent_;
 };
 

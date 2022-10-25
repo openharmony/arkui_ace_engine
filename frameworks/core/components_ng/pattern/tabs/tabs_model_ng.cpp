@@ -72,17 +72,6 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         swiperNode->MountToParent(tabsNode);
     }
 
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnIndicatorChange([tabBarNode](int32_t index) {
-        auto layoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-        layoutProperty->UpdateIndicator(index);
-        RectF rect = layoutProperty->GetIndicatorRect(index);
-        auto paintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-        paintProperty->UpdateIndicator(rect);
-        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    });
-
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 
     SetTabBarPosition(barPosition);
@@ -168,11 +157,9 @@ void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChan
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
-    CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChange(std::move(onChange));
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnChangeEvent(std::move(onChange));
 }
 
 RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty()
