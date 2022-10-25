@@ -84,6 +84,12 @@ ACE_EXPORT extern const char TAB_CONTENT_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_VIEW_COMPONENT_TAG[];
 ACE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
 
+// navigation title view
+ACE_EXPORT extern const char NAVIGATION_TITLE_COMPONENT_TAG[];
+
+// navigation menus view
+ACE_EXPORT extern const char NAVIGATION_MENUS_COMPONENT_TAG[];
+
 // row split
 ACE_EXPORT extern const char ROW_SPLIT_COMPONENT_TAG[];
 ACE_EXPORT extern const char ROW_SPLIT_ETS_TAG[];

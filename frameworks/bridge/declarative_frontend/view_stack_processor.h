@@ -174,6 +174,7 @@ public:
         auto emptyStack = std::stack<std::unordered_map<std::string, RefPtr<Component>>>();
         componentsStack_.swap(emptyStack);
     }
+    RefPtr<ComposedComponent> CreateInspectorWrapper(const std::string& inspectorTag);
 
 private:
     ViewStackProcessor();
