@@ -71,6 +71,7 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
         // step3: draw the foreground images.
         canvas.Save();
         auto offsetTemp = offset;
+        auto contentSize = SizeF(singleStarWidth, singleStarHeight);
         // step2.1: calculate the clip area in order to display the secondary image.
         auto clipRect1 = OHOS::Rosen::Drawing::RectF(offset.GetX(), offsetTemp.GetY(),
             static_cast<float>(offset.GetX() + singleStarWidth * drawScore), offset.GetY() + singleStarHeight);
