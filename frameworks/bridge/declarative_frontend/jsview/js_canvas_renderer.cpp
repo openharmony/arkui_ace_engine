@@ -408,7 +408,11 @@ void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
             lineDash = customPaintPattern_->GetLineDash().lineDash;
         }
     } else {
-        lineDash = pool_->GetLineDash();
+        if (isOffscreen_) {
+            lineDash = offscreenCanvas_->GetLineDash().lineDash;
+        } else {
+            lineDash = pool_->GetLineDash().lineDash;
+        }
     }
     JSRef<JSObject> lineDashObj = JSRef<JSObject>::New();
     for (int i = 0; i < lineDash.size(); i++) {
