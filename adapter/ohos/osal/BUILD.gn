@@ -40,6 +40,7 @@ template("ace_osal_ohos_source_set") {
       configs = [ "$ace_root:ace_config" ]
     }
     include_dirs = [
+      "$ability_runtime_napi_path/inner/napi_common",
       "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include",
       "//commonlibrary/c_utils/base/include",
       "//foundation/window/window_manager/interfaces/innerkits",
@@ -57,6 +58,7 @@ template("ace_osal_ohos_source_set") {
       "ressched_report.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",
+      "want_wrap_ohos.cpp",
     ]
 
     public_deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
