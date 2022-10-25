@@ -54,12 +54,14 @@ public:
 
     void InitContainerEvent();
 
+    void ShowTitle(bool isShow);
+
+    void SetAppTitle(const std::string& title);
+
+    void SetAppIcon(const RefPtr<PixelMap>& icon);
+
 private:
     void OnModifyDone() override;
-
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
-    void ShowTitle(bool isShow);
 
     void WindowFocus(bool isFocus);
 

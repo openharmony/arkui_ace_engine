@@ -752,7 +752,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
                 LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
                 return;
             }
-            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
                 return;
@@ -910,20 +910,13 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask([container, mode]() {
-        auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-        if (!pipelineContext) {
-            LOGE("UpdateWindowMode failed, pipeline context is null.");
-            return;
-        }
-        if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
-            mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            pipelineContext->ShowContainerTitle(false);
-        } else {
-            pipelineContext->ShowContainerTitle(true);
-        }
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(
+        [container, mode]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
@@ -1082,7 +1075,7 @@ void UIContentImpl::SetAppWindowTitle(const std::string& title)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     LOGI("set app title");
     pipelineContext->SetAppTitle(title);
@@ -1092,7 +1085,7 @@ void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pix
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     LOGI("set app icon");
     pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));

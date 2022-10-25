@@ -119,6 +119,14 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
+    void ShowContainerTitle(bool isShow) override;
+
+    void SetAppBgColor(const Color& color) override;
+
+    void SetAppTitle(const std::string& title) override;
+
+    void SetAppIcon(const RefPtr<PixelMap>& icon) override;
+
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
     {

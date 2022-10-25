@@ -145,6 +145,8 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
+    virtual void ShowContainerTitle(bool isShow) = 0;
+
     virtual void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
 
@@ -198,6 +200,10 @@ public:
     {
         return appBgColor_;
     }
+
+    virtual void SetAppTitle(const std::string& title) = 0;
+
+    virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
 
     virtual void RefreshRootBgColor() const {}
 
