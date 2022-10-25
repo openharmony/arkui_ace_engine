@@ -235,11 +235,34 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
     // We are done, tell to the JSAgePage
     page->SetPageCreated();
-    page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
-    page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
-    page->SetDeclarativeOnBackPressCallback([view]() { return view->FireOnBackPress(); });
-    page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
-    page->SetDeclarativeOnUpdateWithValueParamsCallback([view](const std::string& params) {
+    auto weak = Referenced::WeakClaim(view);
+    page->SetDeclarativeOnPageAppearCallback([weak]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnShow();
+        }
+    });
+    page->SetDeclarativeOnPageDisAppearCallback([weak]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnHide();
+        }
+    });
+    page->SetDeclarativeOnBackPressCallback([weak]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            return view->FireOnBackPress();
+        }
+        return false;
+    });
+    page->SetDeclarativeOnPageRefreshCallback([weak]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->MarkNeedUpdate();
+        }
+    });
+    page->SetDeclarativeOnUpdateWithValueParamsCallback([weak](const std::string& params) {
+        auto view = weak.Upgrade();
         if (view && !params.empty()) {
             view->ExecuteUpdateWithValueParams(params);
         }
