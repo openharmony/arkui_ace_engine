@@ -67,22 +67,34 @@ public:
         return MakeRefPtr<XComponentLayoutAlgorithm>();
     }
 
-    void NativeXComponentInit(OH_NativeXComponent* nativeXComponent, WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
+    std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, OH_NativeXComponent*> GetNativeXComponent()
     {
+        if (!nativeXComponent_ || !nativeXComponentImpl_) {
+            if (nativeXComponent_) {
+                delete nativeXComponent_;
+                nativeXComponent_ = nullptr;
+            }
+            nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
+            nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
+        }
+        return std::make_pair(nativeXComponentImpl_, nativeXComponent_);
+    }
+
+    void NativeXComponentInit()
+    {
+        CHECK_NULL_VOID(nativeXComponentImpl_);
+        CHECK_NULL_VOID(nativeXComponent_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipelineContext = host->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
-        nativeXComponent_ = nativeXComponent;
-        nativeXComponentImpl_ = std::move(nativeXComponentImpl);
         auto width = geometryNode->GetContentSize().Width();
         auto height = geometryNode->GetContentSize().Height();
 
         pipelineContext->GetTaskExecutor()->PostTask(
-            [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, width, height] {
-                auto nXCompImpl = weakNXCompImpl.Upgrade();
+            [nXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, width, height] {
                 if (nXComp && nXCompImpl) {
                     nXCompImpl->SetXComponentWidth(static_cast<int>(width));
                     nXCompImpl->SetXComponentHeight(static_cast<int>(height));
@@ -97,6 +109,7 @@ public:
             },
             TaskExecutor::TaskType::JS);
     }
+
     void OnPaint();
     void NativeXComponentOffset(double x, double y);
     void NativeXComponentChange(float width, float height);
@@ -162,7 +175,7 @@ private:
     RefPtr<RenderContext> renderContextForSurface_;
 
     OH_NativeXComponent* nativeXComponent_ = nullptr;
-    WeakPtr<NativeXComponentImpl> nativeXComponentImpl_;
+    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
 
     bool hasXComponentInit_ = false;
 

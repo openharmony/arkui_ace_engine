@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/navigation/bar_item_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,6 +33,22 @@ public:
     ~BarItemLayoutAlgorithm() override = default;
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+
+private:
+    void MeasureIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+        const RefPtr<LayoutProperty>& barItemLayoutProperty);
+
+    void MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+        const RefPtr<LayoutProperty>& barItemLayoutProperty);
+
+    float LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+        const RefPtr<LayoutProperty>& barItemLayoutProperty, float barItemHeight);
+
+    void LayoutText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+        const RefPtr<LayoutProperty>& barItemLayoutProperty, float iconOffsetY);
+
+    Dimension iconSize_;
+    Dimension menuHeight_;
 };
 
 } // namespace OHOS::Ace::NG

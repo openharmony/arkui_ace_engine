@@ -49,13 +49,9 @@ void ImageModelNG::SetAlt(const std::string& src)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(src));
 }
 
-void ImageModelNG::SetBorder(const Border& border)
-{
-}
+void ImageModelNG::SetBorder(const Border& border) {}
 
-void ImageModelNG::SetBlur(double blur)
-{
-}
+void ImageModelNG::SetBlur(double blur) {}
 
 void ImageModelNG::SetImageFit(int32_t value)
 {
@@ -90,9 +86,7 @@ void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent& info)
     eventHub->SetOnError(std::move(callback));
 }
 
-void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
-{
-}
+void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback) {}
 
 void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& size)
 {
@@ -131,38 +125,24 @@ void ImageModelNG::SetAutoResize(bool autoResize)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize);
 }
 
-void ImageModelNG::SetSyncMode(bool syncMode)
-{
-}
+void ImageModelNG::SetSyncMode(bool syncMode) {}
 
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
 }
 
-void ImageModelNG::SetOnDragStartId(const OnDragFunc& onDragStartId)
-{
-}
+void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart) {}
 
-void ImageModelNG::SetOnDragEnterId(const OnDropFunc&  onDragStartId)
-{
-}
+void ImageModelNG::SetOnDragEnter(OnDragDropFunc&& onDragEnter) {}
 
-void ImageModelNG::SetOnDragLeaveId(const OnDropFunc& onDragStartId)
-{
-}
+void ImageModelNG::SetOnDragLeave(OnDragDropFunc&& onDragLeave) {}
 
-void ImageModelNG::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
-{
-}
+void ImageModelNG::SetOnDragMove(OnDragDropFunc&& onDragMove) {}
 
-void ImageModelNG::SetOnDropId(const OnDropFunc& onDropId)
-{
-}
+void ImageModelNG::SetOnDrop(OnDragDropFunc&& onDrop) {}
 
-void ImageModelNG::SetCopyOption(const CopyOptions& copyOption)
-{
-}
+void ImageModelNG::SetCopyOption(const CopyOptions& copyOption) {}
 
 bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)
 {

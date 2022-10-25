@@ -15,7 +15,9 @@
 
 #include "core/components_ng/base/inspector.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -32,16 +34,16 @@ const char INSPECTOR_CHILDREN[] = "$children";
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 
-RefPtr<FrameNode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
+RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
 {
     std::queue<RefPtr<UINode>> elements;
     elements.push(root);
-    RefPtr<FrameNode> inspectorElement;
+    RefPtr<UINode> inspectorElement;
     while (!elements.empty()) {
         auto current = elements.front();
         elements.pop();
         inspectorElement = AceType::DynamicCast<FrameNode>(current);
-        if (inspectorElement != nullptr && inspectorElement->HasInspectorId()) {
+        if (inspectorElement && inspectorElement->HasInspectorId()) {
             if (key == inspectorElement->GetInspectorIdValue()) {
                 return inspectorElement;
             }
@@ -83,7 +85,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     CHECK_NULL_RETURN(rootNode, "");
 
     auto inspectorElement = GetInspectorByKey(rootNode, key);
-    if (inspectorElement == nullptr) {
+    if (!inspectorElement) {
         LOGE("no inspector with key:%{public}s is found", key.c_str());
         return "";
     }
@@ -91,7 +93,10 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
-    jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetGeometryNode()->GetFrameRect().ToBounds().c_str());
+    if (AceType::InstanceOf<FrameNode>(inspectorElement)) {
+        jsonNode->Put(INSPECTOR_RECT,
+            AceType::DynamicCast<FrameNode>(inspectorElement)->GetGeometryNode()->GetFrameRect().ToBounds().c_str());
+    }
     auto jsonAttrs = JsonUtil::Create(true);
     inspectorElement->ToJsonValue(jsonAttrs);
     jsonNode->Put(INSPECTOR_ATTRS, jsonAttrs);
@@ -180,8 +185,8 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
     auto rootNode = context->GetRootElement();
     CHECK_NULL_RETURN(rootNode, false);
 
-    auto inspectorElement = GetInspectorByKey(rootNode, key);
-    if (inspectorElement == nullptr) {
+    auto inspectorElement = AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key));
+    if (!inspectorElement) {
         LOGE("no inspector with key:%{public}s is found", key.c_str());
         return false;
     }

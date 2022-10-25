@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/search/search_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -606,20 +607,21 @@ void JSSearch::JsBorder(const JSCallbackInfo& info)
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     auto valueWidth = object->GetProperty("width");
     if (!valueWidth->IsUndefined()) {
-        ParseBorderWidth(valueWidth, decoration);
+        ParseBorderWidth(valueWidth);
     }
     auto valueColor = object->GetProperty("color");
     if (!valueColor->IsUndefined()) {
-        ParseBorderColor(valueColor, decoration);
+        ParseBorderColor(valueColor);
     }
     auto valueRadius = object->GetProperty("radius");
     if (!valueRadius->IsUndefined()) {
-        ParseBorderRadius(valueRadius, decoration);
+        ParseBorderRadius(valueRadius);
     }
     auto valueStyle = object->GetProperty("style");
     if (!valueStyle->IsUndefined()) {
-        ParseBorderStyle(valueStyle, decoration);
+        ParseBorderStyle(valueStyle);
     }
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     textFieldComponent->SetOriginBorder(decoration->GetBorder());
     info.ReturnSelf();
 }
@@ -652,7 +654,8 @@ void JSSearch::JsBorderWidth(const JSCallbackInfo& info)
         return;
     }
     decoration = textFieldComponent->GetDecoration();
-    JSViewAbstract::ParseBorderWidth(info[0], decoration);
+    JSViewAbstract::ParseBorderWidth(info[0]);
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     textFieldComponent->SetOriginBorder(decoration->GetBorder());
 }
 
@@ -684,7 +687,8 @@ void JSSearch::JsBorderColor(const JSCallbackInfo& info)
         return;
     }
     decoration = textFieldComponent->GetDecoration();
-    JSViewAbstract::ParseBorderColor(info[0], decoration);
+    JSViewAbstract::ParseBorderColor(info[0]);
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     textFieldComponent->SetOriginBorder(decoration->GetBorder());
 }
 
@@ -716,7 +720,8 @@ void JSSearch::JsBorderStyle(const JSCallbackInfo& info)
         return;
     }
     decoration = textFieldComponent->GetDecoration();
-    JSViewAbstract::ParseBorderStyle(info[0], decoration);
+    JSViewAbstract::ParseBorderStyle(info[0]);
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     textFieldComponent->SetOriginBorder(decoration->GetBorder());
 }
 
@@ -748,7 +753,8 @@ void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
         return;
     }
     decoration = textFieldComponent->GetDecoration();
-    JSViewAbstract::ParseBorderRadius(info[0], decoration);
+    JSViewAbstract::ParseBorderRadius(info[0]);
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     textFieldComponent->SetOriginBorder(decoration->GetBorder());
 }
 

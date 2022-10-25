@@ -492,7 +492,12 @@ public:
                 linearGradientInfo_ == other.GetLinearGradientInfo() &&
                 radialGradientInfo_ == other.GetRadialGradientInfo());
     }
-    
+
+    bool operator!=(const Gradient& other) const
+    {
+        return !(*this == other);
+    }
+
 private:
     GradientType type_ = GradientType::LINEAR;
     bool repeat_ = false;

@@ -62,7 +62,7 @@ void NavDestinationView::Create()
 
         auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
         CHECK_NULL_VOID(titleBarLayoutProperty);
-        titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAVDESTINATION);
+        titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
     }
     
     // content node
@@ -122,8 +122,11 @@ void NavDestinationView::SetTitle(const std::string& title)
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(title);
-    textLayoutProperty->UpdateFontSize(TITLE_TEXT_SIZE);
-    textLayoutProperty->UpdateTextColor(TITLE_TEXT_COLOR);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
     navDestinationNode->SetTitle(titleNode);
     navDestinationNode->UpdatePrevTitleIsCustom(false);

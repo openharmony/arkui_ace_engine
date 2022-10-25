@@ -75,7 +75,11 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(ICON_SIZE), CalcLength(ICON_SIZE)));
+    
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto iconSize = theme->GetMenuIconSize();
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
     iconNode->MarkModifyDone();
     return iconNode;
 }
@@ -256,10 +260,10 @@ void NavigationView::Create()
         navigationGroupNode->AddChild(dividerNode);
         navigationGroupNode->SetDividerNode(dividerNode);
 
-        auto dividerlayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
-        CHECK_NULL_VOID(dividerlayoutProperty);
-        dividerlayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
-        dividerlayoutProperty->UpdateVertical(true);
+        auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+        CHECK_NULL_VOID(dividerLayoutProperty);
+        dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
+        dividerLayoutProperty->UpdateVertical(true);
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_VOID(dividerRenderProperty);
         dividerRenderProperty->UpdateDividerColor(DIVIDER_COLOR);
@@ -309,8 +313,11 @@ void NavigationView::SetTitle(const std::string& title)
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(title);
-    textLayoutProperty->UpdateFontSize(TITLE_FONT_SIZE);
-    textLayoutProperty->UpdateTextColor(TITLE_COLOR);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetTitle(titleNode);

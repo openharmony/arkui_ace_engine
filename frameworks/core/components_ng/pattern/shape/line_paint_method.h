@@ -31,7 +31,7 @@ public:
     ~LinePaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        auto linePaintProperty = DynamicCast<LinePaintProperty>(paintWrapper->GetPaintProperty());
+        auto linePaintProperty = DynamicCast<LinePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
         if (!linePaintProperty) {
             return nullptr;
         }

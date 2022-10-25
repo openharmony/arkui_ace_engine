@@ -139,8 +139,8 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (!hasXComponentInit_) {
         auto position = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
         auto drawSize = geometryNode->GetContentSize();
-        NativeXComponentOffset(position.GetX(), position.GetY());
         XComponentSizeInit(drawSize.Width(), drawSize.Height());
+        NativeXComponentOffset(position.GetX(), position.GetY());
         hasXComponentInit_ = true;
     } else {
         if (config.frameOffsetChange || config.contentOffsetChange) {
@@ -175,8 +175,7 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, width, height] {
-            auto nXCompImpl = weakNXCompImpl.Upgrade();
+        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, width, height] {
             if (nXComp && nXCompImpl) {
                 nXCompImpl->SetXComponentWidth(static_cast<int>(width));
                 nXCompImpl->SetXComponentHeight(static_cast<int>(height));
@@ -197,14 +196,15 @@ void XComponentPattern::NativeXComponentDestroy()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_] {
-            auto nXCompImpl = weakNXCompImpl.Upgrade();
+        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_] {
             if (nXComp != nullptr && nXCompImpl) {
                 auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
                 const auto* callback = nXCompImpl->GetCallback();
                 if (callback != nullptr && callback->OnSurfaceDestroyed != nullptr) {
                     callback->OnSurfaceDestroyed(nXComp, surface);
                 }
+                delete nXComp;
+                nXComp = nullptr;
             } else {
                 LOGE("Native XComponent nullptr");
             }
@@ -218,11 +218,12 @@ void XComponentPattern::NativeXComponentOffset(double x, double y)
     CHECK_NULL_VOID(pipelineContext);
     float scale = pipelineContext->GetViewScale();
     pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, x, y, scale] {
-            auto nXCompImpl = weakNXCompImpl.Upgrade();
-            if (nXCompImpl) {
+        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, x, y, scale] {
+            if (nXComp && nXCompImpl) {
                 nXCompImpl->SetXComponentOffsetX(x * scale);
                 nXCompImpl->SetXComponentOffsetY(y * scale);
+            } else {
+                LOGE("Native XComponent nullptr");
             }
         },
         TaskExecutor::TaskType::JS);
@@ -233,8 +234,7 @@ void XComponentPattern::NativeXComponentDispatchTouchEvent(const OH_NativeXCompo
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchEvent] {
-            auto nXCompImpl = weakNXCompImpl.Upgrade();
+        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, touchEvent] {
             if (nXComp != nullptr && nXCompImpl) {
                 nXCompImpl->SetTouchEvent(touchEvent);
                 auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
@@ -426,8 +426,7 @@ void XComponentPattern::HandleMouseHoverEvent(bool isHover)
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, isHover] {
-            auto nXCompImpl = weakNXCompImpl.Upgrade();
+        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, isHover] {
             if (nXComp != nullptr && nXCompImpl) {
                 const auto* callback = nXCompImpl->GetMouseEventCallback();
                 if (callback != nullptr && callback->DispatchHoverEvent != nullptr) {
@@ -445,8 +444,7 @@ void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXCompo
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseEvent] {
-            auto nXCompImpl = weakNXCompImpl.Upgrade();
+        [nXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseEvent] {
             if (nXComp != nullptr && nXCompImpl) {
                 nXCompImpl->SetMouseEvent(mouseEvent);
                 auto* surface = const_cast<void*>(nXCompImpl->GetSurface());

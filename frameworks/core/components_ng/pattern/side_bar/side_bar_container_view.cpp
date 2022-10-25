@@ -31,7 +31,9 @@ void SideBarContainerView::Create()
     auto sideBarContainerNode = FrameNode::GetOrCreateFrameNode(
         V2::SIDE_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SideBarContainerPattern>(); });
 
-    ViewStackProcessor::GetInstance()->Push(sideBarContainerNode);
+    CHECK_NULL_VOID(sideBarContainerNode);
+
+    stack->Push(sideBarContainerNode);
 }
 
 void SideBarContainerView::Pop()
@@ -42,6 +44,13 @@ void SideBarContainerView::Pop()
     auto children = sideBarContainerNode->GetChildren();
     if (children.empty()) {
         LOGE("SideBarContainerView::Pop children is null.");
+        return;
+    }
+
+    auto pattern = sideBarContainerNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    if (pattern->HasControlButton()) {
         return;
     }
 
@@ -82,15 +91,12 @@ void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& 
     auto gestureHub = imgHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     auto parentPattern = parentNode->GetPattern<SideBarContainerPattern>();
+    parentPattern->SetHasControlButton(true);
     parentPattern->InitControlButtonTouchEvent(gestureHub);
 
     auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateImageSourceInfo(info);
-    auto showControlButton = layoutProperty->GetShowControlButton().value_or(true);
-    if (!showControlButton) {
-        imageLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    }
 
     imgNode->MountToParent(parentNode);
     imgNode->MarkModifyDone();

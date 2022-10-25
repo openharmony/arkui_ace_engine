@@ -61,11 +61,11 @@ public:
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) = 0;
     virtual void SetPadding(const Dimension& value) = 0;
-    virtual void SetPaddings(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) = 0;
+    virtual void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right) = 0;
     virtual void SetMargin(const Dimension& value) = 0;
-    virtual void SetMargins(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) = 0;
+    virtual void SetMargins(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right) = 0;
     virtual void SetBorderRadius(const Dimension& value) = 0;
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
@@ -80,6 +80,8 @@ public:
     virtual void SetBorderStyle(const std::optional<BorderStyle>& styleLeft,
         const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
         const std::optional<BorderStyle>& styleBottom) = 0;
+    virtual void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) = 0;
+    virtual void SetBorderImageGradient(const NG::Gradient& gradient) = 0;
 
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
@@ -161,6 +163,11 @@ public:
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
+    virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
+    virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
+    virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
+    virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
+    virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;

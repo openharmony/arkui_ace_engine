@@ -36,21 +36,18 @@ public:
     RefPtr<Modifier> GetModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(loadingProgressModifier_, nullptr);
-        auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
-        if (paintProperty) {
-            color_ = paintProperty->GetColor().value_or(color_);
-        }
-        loadingProgressModifier_->SetColor(color_);
         return loadingProgressModifier_;
     }
 
     void UpdateModifier(PaintWrapper* paintWrapper) override
     {
-        constexpr float speedOfModifier = 0.1f;
-        if (loadingProgressModifier_) {
-            loadingProgressModifier_->UpdateModifier(
-                { .speed = speedOfModifier, .repeatTimes = -1, .autoReverse = false }, FULL_COUNT);
+        CHECK_NULL_VOID(loadingProgressModifier_);
+        auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
+        if (paintProperty) {
+            color_ = paintProperty->GetColor().value_or(color_);
         }
+        loadingProgressModifier_->SetDate(FULL_COUNT);
+        loadingProgressModifier_->SetColor(LinearColor(color_));
     }
 
 private:

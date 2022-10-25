@@ -808,4 +808,15 @@ void PipelineContext::OnIdle(int64_t deadline)
     taskScheduler_.FlushPredictTask(deadline - TIME_THRESHOLD);
 }
 
+void PipelineContext::Finish(bool /*autoFinish*/) const
+{
+    CHECK_RUN_ON(UI);
+    if (finishEventHandler_) {
+        LOGI("call finishEventHandler");
+        finishEventHandler_();
+    } else {
+        LOGE("fail to finish current context due to handler is nullptr");
+    }
+}
+
 } // namespace OHOS::Ace::NG

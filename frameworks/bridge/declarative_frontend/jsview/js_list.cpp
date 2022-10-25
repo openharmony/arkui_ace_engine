@@ -274,6 +274,7 @@ void JSList::ItemMoveCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onItemMove = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                               int32_t start, int32_t end) -> bool {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             auto params = ConvertToJSValues(start, end);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return true;
@@ -288,6 +289,7 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                                  const int32_t start, const int32_t end) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(start, end);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
