@@ -50,16 +50,6 @@ void JSBadge::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(badge);
 }
 
-void JSBadge::Pop()
-{
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::BadgeView::Pop();
-        NG::ViewStackProcessor::GetInstance()->PopContainer();
-        return;
-    }
-    JSViewAbstract::Pop();
-}
-
 void JSBadge::CreateNG(const JSCallbackInfo& info)
 {
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -95,7 +85,16 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
 
         Dimension badgeSize;
         if (ParseJsDimensionFp(badgeSizeValue, badgeSize)) {
-            badgeParameters.badgeCircleSize = badgeSize;
+            auto badgeTheme = GetTheme<BadgeTheme>();
+            if (!badgeTheme) {
+                LOGE("Get badge theme error");
+                return;
+            }
+            if (badgeSize.IsNonNegative()) {
+                badgeParameters.badgeCircleSize = badgeSize;
+            } else {
+                badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
+            }
         }
 
         Color color;
@@ -123,9 +122,9 @@ void JSBadge::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBadge>::StaticMethod("create", &JSBadge::Create, opt);
 
-    JSClass<JSBadge>::StaticMethod("pop", &JSBadge::Pop);
-
+    JSClass<JSBadge>::Inherit<JSContainerBase>();
     JSClass<JSBadge>::Inherit<JSViewAbstract>();
+
     JSClass<JSBadge>::Bind(globalObj);
 }
 
@@ -142,6 +141,7 @@ void JSBadge::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badg
     badge->SetBadgePosition(badgeTheme->GetBadgePosition());
     badge->SetBadgeTextColor(badgeTheme->GetBadgeTextColor());
     badge->SetBadgeFontSize(badgeTheme->GetBadgeFontSize());
+    badge->SetBadgeCircleSize(badgeTheme->GetBadgeCircleSize());
 }
 
 void JSBadge::SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge)
@@ -184,7 +184,9 @@ void JSBadge::SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<O
 
         Dimension badgeSize;
         if (ParseJsDimensionFp(badgeSizeValue, badgeSize)) {
-            badge->SetBadgeCircleSize(badgeSize);
+            if (badgeSize.IsNonNegative()) {
+                badge->SetBadgeCircleSize(badgeSize);
+            }
         }
 
         Color badgeColor;

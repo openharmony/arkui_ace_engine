@@ -36,6 +36,9 @@ const std::string TRIM_TEMPLATE = "$1$2";
 const std::string INVALID_PATTERN = R"(((repeat)\(\s{0,}(auto-fill)\s{0,},))";
 const std::string SIZE_PATTERN = "\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}";
 const std::string PREFIX_PATTERN = R"(\S{1,}(repeat)|(px|%|vp)\d{1,}|\)\d{1,})";
+const std::regex UNIT_PIXEL_REGEX(R"(^([0-9]\d*|[0-9]\d*.\d*|0\.\d*[0-9]\d*)px$)", std::regex::icase);
+const std::regex UNIT_RATIO_REGEX(R"(^([0-9]\d*|[0-9]\d*.\d*|0\.\d*[0-9]\d*)fr$)", std::regex::icase);
+const std::regex UNIT_PERCENT_REGEX(R"(^([0-9]\d*|[0-9]\d*.\d*|0\.\d*[0-9]\d*)%$)", std::regex::icase);
 const std::regex AUTO_REGEX(R"(^repeat\((.+),(.+)\))", std::regex::icase);        // regex for "repeat(auto-fill, 10px)"
 const std::regex REPEAT_NUM_REGEX(R"(^repeat\((\d+),(.+)\))", std::regex::icase); // regex for "repeat(2, 100px)"
 const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)", std::regex::icase);
@@ -276,11 +279,11 @@ std::vector<double> TemplatesParser::ParseArgs(const std::string& args, double s
     }
     // first loop calculate all type sums.
     for (const auto& str : strs) {
-        if (str.find(UNIT_PIXEL) != std::string::npos) {
+        if (std::regex_match(str, UNIT_PIXEL_REGEX)) {
             pxSum += StringUtils::StringToDouble(str);
-        } else if (str.find(UNIT_PERCENT) != std::string::npos) {
+        } else if (std::regex_match(str, UNIT_PERCENT_REGEX)) {
             peSum += StringUtils::StringToDouble(str);
-        } else if (str.find(UNIT_RATIO) != std::string::npos) {
+        } else if (std::regex_match(str, UNIT_RATIO_REGEX)) {
             frSum += StringUtils::StringToDouble(str);
         } else {
             LOGE("Unsupported type: %{public}s, and use 0.0", str.c_str());
@@ -307,6 +310,7 @@ std::vector<double> TemplatesParser::ParseArgs(const std::string& args, double s
             prSumLeft -= num;
             sizeLeft -= prSize;
         } else if (str.find(UNIT_RATIO) != std::string::npos) {
+            frSum = LessNotEqual(frSum, 1) ? 1 : frSum;
             lens.push_back(NearZero(frSum) ? 0.0 : frSizeSum / frSum * num);
         }
     }

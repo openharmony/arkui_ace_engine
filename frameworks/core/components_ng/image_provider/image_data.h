@@ -24,11 +24,20 @@ namespace OHOS::Ace::NG {
 class ImageData : public AceType {
     DECLARE_ACE_TYPE(ImageData, AceType);
 public:
+    explicit ImageData(const RefPtr<PixelMap>& pixelMap) : pixelMap_(pixelMap) {}
+    ImageData() = default;
+    ~ImageData() override = default;
     static RefPtr<ImageData> MakeFromDataWithCopy(const void* data, size_t length);
     static RefPtr<ImageData> MakeFromDataWrapper(void* dataWrapper);
-    virtual size_t GetSize() const = 0;
-    virtual const void* GetData() const = 0;
-    virtual RefPtr<SvgDomBase> MakeSvgDom(const std::optional<Color>& svgFillColor) = 0;
+    static RefPtr<ImageData> MakeFromPixelMap(const RefPtr<PixelMap>& pixelMap);
+    virtual size_t GetSize() const;
+    virtual const void* GetData() const;
+
+    bool HasPixelMapData();
+    RefPtr<PixelMap>& GetPixelMapData();
+
+protected:
+    RefPtr<PixelMap> pixelMap_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -404,9 +404,11 @@ void RenderImage::PerformLayout()
         imageLayoutCallbacks.begin(), imageLayoutCallbacks.end(), [](std::function<void()> callback) { callback(); });
     LayoutImageObject();
     if (renderAltImage_) {
-        LayoutParam altLayoutParam;
-        altLayoutParam.SetFixedSize(GetLayoutSize());
-        renderAltImage_->Layout(altLayoutParam);
+        renderAltImage_->Layout(GetLayoutParam());
+        // don't wait for network image to return its size
+        if (!GetLayoutSize().IsValid()) {
+            SetLayoutSize(renderAltImage_->GetLayoutSize());
+        }
     }
 
     CalculateResizeTarget();
@@ -508,7 +510,7 @@ void RenderImage::ApplyImageFit(Rect& srcRect, Rect& dstRect)
         case ImageFit::FITHEIGHT:
             ApplyFitHeight(srcRect, dstRect, rawPicSize, layoutSize);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             if (srcRect.GetSize() < dstRect.GetSize()) {
                 ApplyNone(srcRect, dstRect, rawPicSize, layoutSize);
             } else {

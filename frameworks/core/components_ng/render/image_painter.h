@@ -29,7 +29,9 @@ public:
     explicit ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;
 
-    void DrawImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const;
+    void DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
+        const ImagePaintConfig& imagePaintConfig) const;
+    void DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const;
     void DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize,
         const ImagePaintConfig& imagePaintConfig) const;
     void DrawImageWithRepeat(RSCanvas& canvas, const ImagePaintConfig& ImagePaintConfig, const RectF& rect) const;

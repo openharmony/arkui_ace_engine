@@ -55,6 +55,9 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
 FrameNode::~FrameNode()
 {
     pattern_->DetachFromFrameNode(this);
+    if (IsOnMainTree()) {
+        OnDetachFromMainTree();
+    }
     auto focusHub = GetFocusHub();
     if (focusHub) {
         focusHub->RemoveSelf();
@@ -162,8 +165,12 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
     if (renderContext_) {
         renderContext_->ToJsonValue(json);
+    }
+    if (pattern_) {
+        pattern_->ToJsonValue(json);
     }
 }
 
@@ -171,6 +178,7 @@ void FrameNode::OnAttachToMainTree()
 {
     UINode::OnAttachToMainTree();
     eventHub_->FireOnAppear();
+    renderContext_->OnNodeAppear();
     if (!hasPendingRequest_) {
         return;
     }
@@ -194,6 +202,7 @@ void FrameNode::OnAttachToMainTree()
 void FrameNode::OnDetachFromMainTree()
 {
     eventHub_->FireOnDisappear();
+    renderContext_->OnNodeDisappear(this);
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -480,7 +489,7 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     auto paintMethod = pattern_->CreateNodePaintMethod();
     if (paintMethod) {
         auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_);
-        paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());
+        paintWrapper->SetNodePaintMethod(paintMethod);
         return paintWrapper;
     }
     return nullptr;
@@ -555,14 +564,44 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame() const
     return nullptr;
 }
 
+void FrameNode::MarkNeedRenderOnly()
+{
+    MarkNeedRender(IsRenderBoundary());
+}
+
+void FrameNode::MarkNeedRender(bool isRenderBoundary)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    // If it has dirtyLayoutBox, need to mark dirty after layout done.
+    paintProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
+        LOGD("this node has already mark dirty, %{public}s, %{public}d, %{public}d", GetTag().c_str(),
+            isRenderDirtyMarked_, isLayoutDirtyMarked_);
+        return;
+    }
+    isRenderDirtyMarked_ = true;
+    if (isRenderBoundary) {
+        context->AddDirtyRenderNode(Claim(this));
+        return;
+    }
+    auto parent = GetAncestorNodeOfFrame();
+    if (parent) {
+        parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
+    }
+}
+
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
 {
+    if (CheckNeedRender(extraFlag)) {
+        paintProperty_->UpdatePropertyChangeFlag(extraFlag);
+    }
     layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
     paintProperty_->UpdatePropertyChangeFlag(extraFlag);
     auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
     auto paintFlag = paintProperty_->GetPropertyChangeFlag();
     if (CheckNoChanged(layoutFlag | paintFlag)) {
-        LOGD("MarkDirtyNode: flag not changed");
+        LOGD("MarkDirtyNode: flag not changed, node tag: %{public}s", GetTag().c_str());
         return;
     }
     auto context = GetContext();
@@ -587,22 +626,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
         return;
     }
     layoutProperty_->CleanDirty();
-
-    // If it has dirtyLayoutBox, need to mark dirty after layout done.
-    if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
-        LOGD("this node has already mark dirty, %{public}s, %{public}d, %{public}d", GetTag().c_str(),
-            isRenderDirtyMarked_, isLayoutDirtyMarked_);
-        return;
-    }
-    isRenderDirtyMarked_ = true;
-    if (isRenderBoundary) {
-        context->AddDirtyRenderNode(Claim(this));
-        return;
-    }
-    auto parent = GetAncestorNodeOfFrame();
-    if (parent) {
-        parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
-    }
+    MarkNeedRender(isRenderBoundary);
 }
 
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)

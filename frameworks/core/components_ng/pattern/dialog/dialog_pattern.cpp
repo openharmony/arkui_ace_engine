@@ -18,6 +18,7 @@
 #include <climits>
 #include <cstdint>
 
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -26,7 +27,6 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/divider/divider_view.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -227,6 +227,8 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(std::string& data, const DialogPrope
     titlePadding.top = CalcLength(paddingInTheme.Top());
     titlePadding.bottom = CalcLength(paddingInTheme.Bottom());
     titleProp->UpdatePadding(titlePadding);
+    // XTS inspector value
+    title_ = dialogProperties.title;
     return title;
 }
 
@@ -260,6 +262,9 @@ RefPtr<FrameNode> DialogPattern::BuildContent(std::string& data, const DialogPro
     contentPadding.top = CalcLength(contentPaddingInTheme.Top());
     contentPadding.bottom = CalcLength(contentPaddingInTheme.Bottom());
     contentProp->UpdatePadding(contentPadding);
+
+    // XTS inspector value
+    message_ = dialogProperties.content;
     return contentNode;
 }
 
@@ -444,10 +449,21 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
         props->UpdateFlexGrow(1);
         props->UpdateFlexShrink(1);
-    
+
         button->MountToParent(menu);
     }
     return menu;
+}
+
+// XTS inspector
+void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() == V2::ALERT_DIALOG_ETS_TAG || host->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {
+        json->Put("title", title_.c_str());
+        json->Put("message", message_.c_str());
+    }
 }
 
 } // namespace OHOS::Ace::NG

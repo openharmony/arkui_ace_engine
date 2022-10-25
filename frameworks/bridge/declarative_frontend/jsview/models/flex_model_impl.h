@@ -17,24 +17,35 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_FLEX_MODEL_IMPL_H
 
 #include "core/components_ng/pattern/flex/flex_model.h"
-
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 namespace OHOS::Ace::Framework {
 
 class FlexModelImpl : public FlexModel {
 public:
-    void SetFillParent() override;
+    void CreateFlexRow() override;
 
-    void SetWrapContent() override;
+    void CreateWrap() override;
 
-    void SetJustifyContent(int32_t value) override;
+    void SetDirection(FlexDirection direction) override;
+    void SetWrapDirection(WrapDirection direction) override;
+
+    void SetMainAxisAlign(FlexAlign flexAlign) override;
+    void SetWrapMainAlignment(WrapAlignment value) override;
+
+    void SetCrossAxisAlign(FlexAlign flexAlign) override;
+    void SetWrapCrossAlignment(WrapAlignment value) override;
 
     void SetAlignItems(int32_t value) override;
 
-    void SetAlignContent(int32_t value) override;
+    void SetWrapAlignment(WrapAlignment value) override;
 
+    void SetFlexWidth() override;
+    void SetFlexHeight() override;
     void SetHasHeight() override;
-
     void SetHasWidth() override;
+
+    void SetJustifyContent(int32_t value) override;
+    void SetAlignContent(int32_t value) override;
 };
 
 } // namespace OHOS::Ace::Framework

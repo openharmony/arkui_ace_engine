@@ -55,7 +55,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
-    LayoutConstraintF childLayoutConstraint;
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
     ComputeInnerLayoutParam(childLayoutConstraint);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();

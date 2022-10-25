@@ -18,12 +18,16 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::Framework {
 
 class ViewAbstractModelImpl : public ViewAbstractModel {
 public:
     ~ViewAbstractModelImpl() override = default;
+
+    static void SwapBackBorder(const RefPtr<Decoration>& decoration);
+    static OnDragFunc ToDragFunc(NG::OnDragStartFunc&& onDragStart);
 
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
@@ -39,11 +43,11 @@ public:
     void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
     void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) override;
     void SetPadding(const Dimension& value) override;
-    void SetPaddings(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override;
+    void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override;
     void SetMargin(const Dimension& value) override;
-    void SetMargins(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override;
+    void SetMargins(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override;
     void SetBorderRadius(const Dimension& value) override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
@@ -56,6 +60,8 @@ public:
     void SetBorderStyle(const BorderStyle& value) override;
     void SetBorderStyle(const std::optional<BorderStyle>& styleLeft, const std::optional<BorderStyle>& styleRight,
         const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override;
+    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override;
+    void SetBorderImageGradient(const NG::Gradient& gradient) override;
 
     void SetLayoutPriority(int32_t priority) override;
     void SetLayoutWeight(int32_t value) override;
@@ -98,8 +104,8 @@ public:
     void SetSweepGradient(const NG::Gradient& gradient) override;
     void SetRadialGradient(const NG::Gradient& gradient) override;
 
-    void SetClipPath(const RefPtr<BasicShape>& shape) override;
-    void SetEdgeClip(bool isClip) override;
+    void SetClipShape(const RefPtr<BasicShape>& shape) override;
+    void SetClipEdge(bool isClip) override;
     void SetMask(const RefPtr<BasicShape>& shape) override;
 
     void SetBackdropBlur(const Dimension& radius) override;
@@ -128,6 +134,11 @@ public:
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override;
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override;
+    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
+    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
+    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
+    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;

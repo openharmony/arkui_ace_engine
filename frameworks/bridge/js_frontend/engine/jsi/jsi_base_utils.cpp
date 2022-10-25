@@ -90,13 +90,15 @@ std::string JsiBaseUtils::GenerateSummaryBody(
     auto errorPos = GetErrorPos(rawStack);
     std::string sourceCodeInfo = GetSourceCodeInfo(runtime, errorFunc, errorPos);
 
-    std::string runningPageTag = "app_.js";
-    bool isAppPage = rawStack.find(runningPageTag, 1) != std::string::npos && appMap;
-    sourceCodeInfo = isAppPage ? appMap->GetOriginalNames(sourceCodeInfo, errorPos.second)
-                               : pageMap->GetOriginalNames(sourceCodeInfo, errorPos.second);
-
     std::string stackHead = "Stacktrace:\n";
     if (pageMap || appMap) {
+        std::string runningPageTag = "app_.js";
+        bool isAppPage = rawStack.find(runningPageTag, 1) != std::string::npos && appMap;
+        if (isAppPage) {
+            sourceCodeInfo = appMap->GetOriginalNames(sourceCodeInfo, errorPos.second);
+        } else if (pageMap) {
+            sourceCodeInfo = pageMap->GetOriginalNames(sourceCodeInfo, errorPos.second);
+        }
         std::string showStack = TranslateStack(rawStack, pageUrl, pageMap, appMap, data);
         summaryBody.append(sourceCodeInfo).append(stackHead).append(showStack);
         // show raw stack for troubleshooting in the frame

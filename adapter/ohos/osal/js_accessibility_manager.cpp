@@ -50,6 +50,7 @@ const char MOUSE_HOVER_EXIT[] = "mousehoverexit";
 const char IMPORTANT_YES[] = "yes";
 const char IMPORTANT_NO[] = "no";
 const char IMPORTANT_NO_HIDE_DES[] = "no-hide-descendants";
+const char COLUMN_TAG[] = "Column";
 const char LIST_TAG[] = "List";
 const char SIDEBARCONTAINER_TAG[] = "SideBarContainer";
 constexpr int32_t INVALID_PARENT_ID = -2100000;
@@ -190,7 +191,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         Accessibility::Rect bounds(leftTopX, leftTopY, rightBottomX, rightBottomY);
         nodeInfo.SetRectInScreen(bounds);
     } else {
-        if (node->GetTag() == SIDEBARCONTAINER_TAG) {
+        if (node->GetTag() == SIDEBARCONTAINER_TAG || node->GetTag() == COLUMN_TAG) {
             Rect sideBarRect = node->GetRect();
             for (const auto& childNode : node->GetChildList()) {
                 sideBarRect = sideBarRect.CombineRect(childNode->GetRect());

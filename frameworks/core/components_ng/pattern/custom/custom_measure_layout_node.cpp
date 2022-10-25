@@ -67,4 +67,23 @@ void CustomMeasureLayoutNode::MarkNeedUpdate()
     needRebuild_ = true;
     context->AddDirtyCustomNode(Claim(this));
 }
+
+bool CustomMeasureLayoutNode::FireOnMeasure(NG::LayoutWrapper* layoutWrapper)
+{
+    if (measureFunc_) {
+        measureFunc_(layoutWrapper);
+        return true;
+    }
+    return false;
+}
+
+bool CustomMeasureLayoutNode::FireOnLayout(NG::LayoutWrapper* layoutWrapper)
+{
+    if (layoutFunc_) {
+        layoutFunc_(layoutWrapper);
+        return true;
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

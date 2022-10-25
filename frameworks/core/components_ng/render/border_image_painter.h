@@ -30,44 +30,37 @@ class BorderImagePainter : public virtual AceType {
     DECLARE_ACE_TYPE(BorderImagePainter, AceType);
 
 public:
-    BorderImagePainter(const std::unique_ptr<BorderImageProperty>& borderImageProperty,
-        const std::unique_ptr<BorderWidthProperty>& borderWidthProperty, const SizeF& paintSize,
-        const RefPtr<BorderImage>& borderImage, const sk_sp<SkImage>& image, double dipscale)
-        : paintSize_(paintSize), borderImage_(borderImage), image_(image), dipscale_(dipscale)
+    BorderImagePainter(bool hasBorderWidthProperty, const BorderImageProperty& borderImageProperty,
+        const BorderWidthProperty& borderWidthProperty, const SizeF& paintSize, const RSImage& image, double dipscale)
+        : hasBorderWidthProperty_(hasBorderWidthProperty), borderImageProperty_(borderImageProperty),
+          borderWidthProperty_(borderWidthProperty), paintSize_(paintSize), rsImage(image), dipscale_(dipscale)
     {
-        if (borderImageProperty) {
-            borderImageProperty_ = std::make_unique<BorderImageProperty>(*borderImageProperty);
-        }
-        if (borderWidthProperty) {
-            borderWidthProperty_ = std::make_unique<BorderWidthProperty>(*borderWidthProperty);
-        }
+        imageWidth_ = rsImage.GetWidth();
+        imageHeight_ = rsImage.GetHeight();
+        InitPainter();
     }
     ~BorderImagePainter() override = default;
-    void InitPainter();
-    void UpdateExtraOffsetToPaintSize(const OffsetF& offset);
-    void PaintBorderImage(const OffsetF& offset, RSCanvas& canvas);
-    static sk_sp<SkShader> CreateGradientShader(const NG::Gradient& gradient, const SkSize& size, double dipScale);
+    void PaintBorderImage(const OffsetF& offset, RSCanvas& canvas) const;
 
 private:
-    void PaintBorderImageCorners(const OffsetF& offset, RSCanvas& canvas);
-    void PaintBorderImageStretch(const OffsetF& offset, RSCanvas& canvas);
-    void PaintBorderImageRound(const OffsetF& offset, RSCanvas& canvas);
-    void PaintBorderImageSpace(const OffsetF& offset, RSCanvas& canvas);
-    void PaintBorderImageRepeat(const OffsetF& offset, RSCanvas& canvas);
-    void FillBorderImageCenter(const OffsetF& offset, RSCanvas& canvas);
+    void InitPainter();
+    void PaintBorderImageCorners(const OffsetF& offset, RSCanvas& canvas) const;
+    void PaintBorderImageStretch(const OffsetF& offset, RSCanvas& canvas) const;
+    void PaintBorderImageRound(const OffsetF& offset, RSCanvas& canvas) const;
+    void PaintBorderImageSpace(const OffsetF& offset, RSCanvas& canvas) const;
+    void PaintBorderImageRepeat(const OffsetF& offset, RSCanvas& canvas) const;
+    void FillBorderImageCenter(const OffsetF& offset, RSCanvas& canvas) const;
 
-    void InitBorderImageSlice(RefPtr<BorderImage>& borderImage);
-    void InitBorderImageWidth(
-        const std::unique_ptr<BorderWidthProperty>& borderWidthProperty, const RefPtr<BorderImage>& borderImage);
-    void InitBorderImageOutset(
-        const std::unique_ptr<BorderWidthProperty>& borderWidthProperty, const RefPtr<BorderImage>& borderImage);
+    void InitBorderImageSlice();
+    void InitBorderImageWidth();
+    void InitBorderImageOutset();
     void ParseNegativeNumberToZeroOrCeil(double& value);
 
-    std::unique_ptr<BorderImageProperty> borderImageProperty_;
-    std::unique_ptr<BorderWidthProperty> borderWidthProperty_;
+    bool hasBorderWidthProperty_;
+    BorderImageProperty borderImageProperty_;
+    BorderWidthProperty borderWidthProperty_;
     SizeF paintSize_;
-    RefPtr<BorderImage> borderImage_;
-    sk_sp<SkImage> image_;
+    RSImage rsImage;
 
     double imageWidth_ = 0.0;
     double imageHeight_ = 0.0;

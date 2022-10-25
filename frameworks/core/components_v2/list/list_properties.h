@@ -54,6 +54,7 @@ enum class StickyStyle : uint32_t {
     NONE = 0,
     HEADER = 1,
     FOOTER = 2,
+    BOTH = 3,
 };
 
 enum class StickyMode {

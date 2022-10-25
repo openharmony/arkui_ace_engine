@@ -95,6 +95,11 @@ public:
         return frame_.rect_.GetOffset();
     }
 
+    void SetFrameOffset(const OffsetF& offset)
+    {
+        frame_.rect_.SetOffset(offset);
+    }
+
     void SetFrameSize(const SizeF& size)
     {
         frame_.rect_.SetSize(size);
@@ -233,20 +238,6 @@ public:
         return parentLayoutConstraint_;
     }
 
-    bool Measure(NG::LayoutWrapper* layoutWrapper);
-
-    bool Layout(NG::LayoutWrapper* layoutWrapper);
-
-    void SetLayoutFunction(std::function<void(NG::LayoutWrapper* layoutWrapper)>&& layoutFunc)
-    {
-        layoutFunc_ = std::move(layoutFunc);
-    }
-
-    void SetMeasureFunction(std::function<void(NG::LayoutWrapper* layoutWrapper)>&& measureFunc)
-    {
-        measureFunc_ = std::move(measureFunc);
-    }
-
     void SetBaselineDistance(float baselineDistance)
     {
         baselineDistance_ = baselineDistance;
@@ -273,9 +264,6 @@ private:
     std::unique_ptr<GeometryProperty> content_;
 
     OffsetF parentGlobalOffset_;
-
-    std::function<void(NG::LayoutWrapper* layoutWrapper)> layoutFunc_;
-    std::function<void(NG::LayoutWrapper* layoutWrapper)> measureFunc_;
 };
 } // namespace OHOS::Ace::NG
 

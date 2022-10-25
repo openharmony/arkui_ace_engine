@@ -80,7 +80,6 @@ RefPtr<RenderNode> RenderListItemGroup::RequestListItemHeader()
     header_ =  generator ? generator->RequestListItemHeader() : RefPtr<RenderNode>();
     if (header_) {
         AddChild(header_);
-        header_->Layout(GetLayoutParam());
     }
     return header_;
 }
@@ -91,7 +90,6 @@ RefPtr<RenderNode> RenderListItemGroup::RequestListItemFooter()
     footer_ = generator ? generator->RequestListItemFooter() : RefPtr<RenderNode>();
     if (footer_) {
         AddChild(footer_);
-        footer_->Layout(GetLayoutParam());
     }
     return footer_;
 }
@@ -121,9 +119,10 @@ void RenderListItemGroup::RecycleStartCacheItems()
 {
     double curMainPosForRecycle = startIndexOffset_;
     size_t curIndex = startIndex_;
+    size_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (auto it = items_.begin(); it != items_.end() && currStartCacheCount_ > startCacheCount_; curIndex += lanes_) {
         double rowSize = 0;
-        for (size_t i = 0; i < lanes_ && it != items_.end(); i++) {
+        for (size_t i = 0; i < lanes && it != items_.end(); i++) {
             const auto& child = *(it);
             double childSize = GetMainSize(child->GetLayoutSize());
             rowSize = std::max(childSize, rowSize);
@@ -133,7 +132,7 @@ void RenderListItemGroup::RecycleStartCacheItems()
         }
         curMainPosForRecycle += rowSize + spaceWidth_;
         startIndexOffset_ = curMainPosForRecycle;
-        startIndex_ = curIndex + lanes_;
+        startIndex_ = curIndex + lanes;
         currStartCacheCount_--;
     }
 }
@@ -169,9 +168,10 @@ double RenderListItemGroup::LayoutOrRecycleCurrentItems()
     currStartCacheCount_ = 0;
     currEndCacheCount_ = 0;
 
+    size_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (auto it = items_.begin(); it != items_.end(); curIndex += lanes_) {
         if (GreatNotEqual(curMainPos, endMainPos_) && currEndCacheCount_ >= endCacheCount_) {
-            for (size_t i = 0; i < lanes_ && it != items_.end(); i++) {
+            for (size_t i = 0; i < lanes && it != items_.end(); i++) {
                 // Recycle list items out of view port
                 RecycleListItem(curIndex + i);
                 it = items_.erase(it);
@@ -193,6 +193,7 @@ double RenderListItemGroup::LayoutOrRecycleCurrentItems()
 
 void RenderListItemGroup::RequestNewItemsAtEnd(double& curMainPos)
 {
+    size_t lanes = lanes_ > 1 ? lanes_ : 1;
     size_t newIndex = startIndex_ + items_.size();
     while (true) {
         if (GreatOrEqual(curMainPos, endMainPos_) && currEndCacheCount_ >= endCacheCount_) {
@@ -200,7 +201,7 @@ void RenderListItemGroup::RequestNewItemsAtEnd(double& curMainPos)
         }
         double rowSize = 0;
         size_t idx = 0;
-        for (; idx < lanes_; idx++) {
+        for (; idx < lanes; idx++) {
             auto child = RequestListItem(newIndex + idx, false);
             if (!child) {
                 break;
@@ -216,7 +217,7 @@ void RenderListItemGroup::RequestNewItemsAtEnd(double& curMainPos)
         }
         curMainPos += rowSize + spaceWidth_;
         newIndex += idx;
-        if (idx < lanes_) {
+        if (idx < lanes) {
             break;
         }
     }
@@ -263,6 +264,31 @@ void RenderListItemGroup::RequestNewItemsAtStart()
         if (idx < lanes_) {
             break;
         }
+    }
+}
+
+void RenderListItemGroup::LayoutHeaderFooter(bool reachEnd)
+{
+    if ((stickyHeader_ || startIndex_ == 0) && !header_) {
+        RequestListItemHeader();
+    } else if (!stickyHeader_ && startIndex_ > 0 && header_) {
+        RemoveChild(header_);
+        header_ = nullptr;
+    }
+
+    if ((stickyFooter_ || reachEnd) && !footer_) {
+        RequestListItemFooter();
+    } else if (!stickyFooter_ && !reachEnd && footer_) {
+        RemoveChild(footer_);
+        footer_ = nullptr;
+    }
+
+    if (header_) {
+        header_->Layout(GetLayoutParam());
+    }
+
+    if (footer_) {
+        footer_->Layout(GetLayoutParam());
     }
 }
 
@@ -342,19 +368,7 @@ void RenderListItemGroup::PerformLayout()
     RequestNewItemsAtStart();
 
     bool reachEnd = (startIndex_ + items_.size() >= TotalCount());
-    if ((stickyHeader_ || startIndex_ == 0) && !header_) {
-        RequestListItemHeader();
-    } else if (!stickyHeader_ && startIndex_ > 0 && header_) {
-        RemoveChild(header_);
-        header_ = nullptr;
-    }
-
-    if ((stickyFooter_ || reachEnd) && !footer_) {
-        RequestListItemFooter();
-    } else if (!stickyFooter_ && !reachEnd && footer_) {
-        RemoveChild(footer_);
-        footer_ = nullptr;
-    }
+    LayoutHeaderFooter(reachEnd);
 
     double headerSize = header_ && (startIndex_ == 0) ? GetMainSize(header_->GetLayoutSize()) : 0.0;
     double footerSize = footer_ && reachEnd ? GetMainSize(footer_->GetLayoutSize()) : 0.0;
@@ -403,8 +417,8 @@ void RenderListItemGroup::SetItemGroupLayoutParam(const ListItemLayoutParam &par
     listMainSize_ = param.listMainSize;
     vertical_ = param.isVertical;
     align_ = param.align;
-    stickyHeader_ = (param.sticky == StickyStyle::HEADER);
-    stickyFooter_ = (param.sticky == StickyStyle::FOOTER);
+    stickyHeader_ = (param.sticky == StickyStyle::HEADER) || (param.sticky == StickyStyle::BOTH);
+    stickyFooter_ = (param.sticky == StickyStyle::FOOTER) || (param.sticky == StickyStyle::BOTH);
     lanes_ = static_cast<size_t>(param.lanes);
     if (!isInitialized_) {
         isInitialized_ = true;

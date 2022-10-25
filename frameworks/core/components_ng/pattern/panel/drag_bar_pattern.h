@@ -39,15 +39,30 @@ public:
     DragBarPattern() = default;
     ~DragBarPattern() override = default;
 
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<DragBarLayoutProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<DragBarLayoutAlgorithm>();
+        iconOffset_ = layoutAlgorithm->GetIconOffset();
         return layoutAlgorithm;
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<DragBarPaintProperty>();
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<DragBarPaintMethod>();
+        auto paintMethod = MakeRefPtr<DragBarPaintMethod>();
+        paintMethod->SetIconOffset(iconOffset_);
+        paintMethod->SetScaleWidth(scaleWidth_);
+        paintMethod->SetScaleIcon(scaleIcon_);
+        return paintMethod;
     }
 
     PanelMode GetPanelMode() const
@@ -55,28 +70,55 @@ public:
         return showMode_;
     }
 
-    void SetFullScreenMode(bool fullScreenMode)
+    float GetStatusBarHeight() const
     {
-        fullScreenMode_ = fullScreenMode;
+        return statusBarHeight_.Value();
     }
+
+    void InitProps();
+    void ShowArrow(bool show);
+    void ShowInPanelMode(PanelMode mode);
+    void UpdateDrawPoint();
+    void SetStatusBarHeight(float height);
+
+    void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDown(const TouchLocationInfo& info);
+    void HandleTouchMove(const TouchLocationInfo& info);
+    void HandleTouchUp();
+    void MarkDirtyNode(PropertyChangeFlag extraFlag);
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    void ShowInPanelMode(PanelMode mode);
-    void UpdateDrawPoint();
-
-    void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleTouchEvent(const TouchLocationInfo& info);
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void DoStyleAnimation(
+        const OffsetT<Dimension>& left, const OffsetT<Dimension>& center, const OffsetT<Dimension>& right);
+    void FadingOut();
+    void Stretching();
 
     RefPtr<TouchEventImpl> touchEvent_;
-    Offset barLeftPoint_;
-    Offset barCenterPoint_;
-    Offset barRightPoint_;
+    OffsetF iconOffset_;
+    OffsetF barLeftPoint_;
+    OffsetF barCenterPoint_;
+    OffsetF barRightPoint_;
+
+    Dimension statusBarHeight_ = 0.0_vp; // height in vp
+    OffsetF dragOffset_;
+    OffsetF downPoint_;
+    float dragRangeX_ = 0.0f;
+    float dragRangeY_ = 0.0f;
+    float scaleIcon_ = 1.0f;
+    float scaleWidth_ = 1.0f;
+
     PanelMode showMode_ = PanelMode::HALF;
-    bool fullScreenMode_ = false;
+    bool isFirstUpdate_ = true;
+
+    RefPtr<Animator> animator_;
+    RefPtr<Animator> barTouchAnimator_;
+    RefPtr<Animator> barRangeAnimator_;
+    RefPtr<Animator> barStyleAnimator_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragBarPattern);
 };

@@ -37,7 +37,13 @@ const float HALF_COUNT = 25.0f;
 
 } // namespace
 
-LoadingProgressModifier::LoadingProgressModifier() : ContentModifierFloat(0.0) {}
+LoadingProgressModifier::LoadingProgressModifier()
+    : date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0)),
+      color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE))
+{
+    AttachProperty(date_);
+    AttachProperty(color_);
+}
 
 void LoadingProgressModifier::DrawRing(DrawingContext& context, float date, float scale_) const
 {
@@ -47,7 +53,7 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, float date, floa
     float ringRadius_ = scale_ * RING_RADIUS.ConvertToPx();
     canvas.Save();
     RSPen pen;
-    pen.SetColor(ToRSColor(color_));
+    pen.SetColor(ToRSColor(color_->Get()));
     pen.SetWidth(RING_WIDTH.ConvertToPx() * scale_);
     date = abs(COUNT - date);
     canvas.AttachPen(pen);
@@ -74,7 +80,7 @@ void LoadingProgressModifier::DrawOrbit(DrawingContext& context, float date, flo
     auto center = RSPoint(width_ / 2, height_ / 2);
     RSBrush brush;
     brush.SetAntiAlias(true);
-    RSColor cometColor = ToRSColor(color_);
+    RSColor cometColor = ToRSColor(color_->Get());
     float colorAlpha = cometColor.GetAlphaF();
     if (date > 0 && date < COUNT) {
         colorAlpha = colorAlpha * pow((date - HALF_COUNT) / HALF_COUNT, DECAY_FACTOR) * (1 - HALF * HALF * HALF) +

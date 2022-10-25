@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CORE_PROPERTIES_BORDER_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CORE_PROPERTIES_BORDER_IMAGE_H
 
+#include <cstdint>
+
 #include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border_image_edge.h"
 #include "core/components/common/properties/color.h"
@@ -29,7 +31,15 @@ namespace OHOS::Ace {
 
 class ACE_EXPORT BorderImage final : public AceType {
     DECLARE_ACE_TYPE(BorderImage, AceType);
+
 public:
+    const static uint8_t OUTSET_BIT = 1 << 0;
+    const static uint8_t REPEAT_BIT = 1 << 1;
+    const static uint8_t SLICE_BIT = 1 << 2;
+    const static uint8_t SOURCE_BIT = 1 << 3;
+    const static uint8_t WIDTH_BIT = 1 << 4;
+    const static uint8_t GRADIENT_BIT = 1 << 5;
+
     BorderImage() = default;
     explicit BorderImage(const std::string& src)
     {
@@ -99,6 +109,6 @@ private:
     bool hasBorderImageWidth_ = false;
 };
 
-}
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CORE_PROPERTIES_BORDER_IMAGE_H

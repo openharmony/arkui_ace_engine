@@ -56,9 +56,10 @@ private:
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline);
-    bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
+    bool DidExceedMaxLines(const SizeF& maxSize);
     static TextDirection GetTextDirection(const std::string& content);
     float GetTextWidth() const;
+    SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const;
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::shared_ptr<RSParagraph> paragraph_;

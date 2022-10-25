@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 class PolygonPattern : public ShapePattern {
-    DECLARE_ACE_TYPE(PolygonPattern, Pattern);
+    DECLARE_ACE_TYPE(PolygonPattern, ShapePattern);
 
 public:
     PolygonPattern() = default;

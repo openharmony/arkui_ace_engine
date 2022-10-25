@@ -151,6 +151,7 @@ void SubwindowOhos::InitContainer()
         LOGE("Get SubPipelineContext failed, pipelineContext is null");
         return;
     }
+    subPipelineContext->SetParentPipeline(parentContainer->GetPipelineContext());
     subPipelineContext->SetupSubRootElement();
 }
 

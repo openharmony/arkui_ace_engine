@@ -78,6 +78,15 @@ enum class HitTestResult {
     SELF_TRANSPARENT,
 };
 
+struct DragDropBaseInfo {
+    RefPtr<AceType> node;
+    RefPtr<PixelMap> pixelMap;
+    std::string extraInfo;
+};
+
+using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+
 struct DragDropInfo {
     RefPtr<UINode> customNode;
     RefPtr<PixelMap> pixelMap;

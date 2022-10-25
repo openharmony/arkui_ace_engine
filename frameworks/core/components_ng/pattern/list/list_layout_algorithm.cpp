@@ -188,10 +188,7 @@ void ListLayoutAlgorithm::RecyclePrevIndex(LayoutWrapper* layoutWrapper)
 
 void ListLayoutAlgorithm::CalculateEstimateOffset()
 {
-    float itemsHeight = (itemPosition_.rbegin()->second.second - itemPosition_.begin()->second.first);
-    if (GetEndIndex() == totalItemCount_ - 1) {
-        itemsHeight += spaceWidth_;
-    }
+    float itemsHeight = (itemPosition_.rbegin()->second.second - itemPosition_.begin()->second.first) + spaceWidth_;
     auto lines = static_cast<int32_t>(itemPosition_.size());
     if (lanes_.has_value() && lanes_.value() > 1) {
         lines = (lines / lanes_.value()) + (lines % lanes_.value() > 0 ? 1 : 0);
@@ -219,10 +216,18 @@ void ListLayoutAlgorithm::MeasureList(
         if (lanes_.has_value() && lanes_.value() > 1) {
             jumpIndex_ = jumpIndex_.value() - jumpIndex_.value() % lanes_.value();
         }
-        LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0.0f);
-        float endPos = itemPosition_.begin()->second.first - spaceWidth_;
-        if (jumpIndex_.value() > 0 && GreatNotEqual(endPos, startMainPos_)) {
-            LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
+        if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0.0f);
+            float endPos = itemPosition_.begin()->second.first - spaceWidth_;
+            if (jumpIndex_.value() > 0 && GreatNotEqual(endPos, startMainPos_)) {
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
+            }
+        } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BUTTON) {
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), endMainPos_);
+            float startPos = itemPosition_.rbegin()->second.second + spaceWidth_;
+            if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(startPos, endMainPos_)) {
+                LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, startPos);
+            }
         }
         RecyclePrevIndex(layoutWrapper);
         CalculateEstimateOffset();
@@ -247,10 +252,6 @@ void ListLayoutAlgorithm::MeasureList(
         // the child frame offset is include list padding and border, need to delete it first to match content origin.
         float endPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) +
                        GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis) - paddingBeforeContent_;
-        endPos = endPos + spaceWidth_;
-        if (preEndIndex_ == (totalItemCount_ - 1)) {
-            endPos = endPos - spaceWidth_;
-        }
         LayoutBackward(layoutWrapper, layoutConstraint, axis, preEndIndex_, endPos);
     }
 }
@@ -316,15 +317,11 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
             break;
         }
         currentEndPos = currentStartPos + mainLength;
-        if (currentIndex >= 0) {
-            currentEndPos = currentEndPos + spaceWidth_;
-        }
-        if (currentIndex == (totalItemCount_ - 1)) {
-            currentEndPos = currentEndPos - spaceWidth_;
-        }
-
         for (int i = 0; i < count; i++) {
             itemPosition_[currentIndex - i] = { currentStartPos, currentEndPos };
+        }
+        if (currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) {
+            currentEndPos += spaceWidth_;
         }
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
@@ -394,16 +391,12 @@ void ListLayoutAlgorithm::LayoutBackward(
         }
         currentStartPos = currentEndPos - mainLength;
 
-        if (currentIndex >= 0) {
-            currentStartPos = currentStartPos - spaceWidth_;
-        }
-
-        if (currentIndex == (totalItemCount_ - 1)) {
-            currentStartPos = currentStartPos + spaceWidth_;
-        }
-
         for (int i = 0; i < count; i++) {
             itemPosition_[currentIndex + i] = { currentStartPos, currentEndPos };
+        }
+
+        if (currentIndex > 0) {
+            currentStartPos = currentStartPos - spaceWidth_;
         }
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);

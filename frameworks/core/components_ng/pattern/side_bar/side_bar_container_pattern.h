@@ -31,6 +31,11 @@ public:
     SideBarContainerPattern() = default;
     ~SideBarContainerPattern() override = default;
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<SideBarContainerLayoutProperty>();
@@ -41,7 +46,6 @@ public:
         auto layoutAlgorithm = MakeRefPtr<SideBarContainerLayoutAlgorithm>();
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetSideBarStatus(sideBarStatus_);
-        layoutAlgorithm->SetShowControlButton(showControlButton_);
         layoutAlgorithm->SetNeedInitRealSideBarWidth(needInitRealSideBarWidth_);
         layoutAlgorithm->SetRealSideBarWidth(realSideBarWidth_);
         return layoutAlgorithm;
@@ -55,6 +59,17 @@ public:
     void SetSideBarStatus(SideBarStatus sideBarStatus)
     {
         sideBarStatus_ = sideBarStatus;
+        showSideBar_ = sideBarStatus_ == SideBarStatus::SHOW;
+    }
+
+    void SetHasControlButton(bool hasControlButton)
+    {
+        hasControlButton_ = hasControlButton;
+    }
+
+    bool HasControlButton() const
+    {
+        return hasControlButton_;
     }
 
     void InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -74,6 +89,9 @@ private:
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void UpdateResponseRegion(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
+    void OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
+    void OnUpdateShowControlButton(
+        const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
 
     RefPtr<ClickEvent> controlButtonClickEvent_;
     RefPtr<Animator> controller_;
@@ -84,10 +102,11 @@ private:
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
-    bool showControlButton_ = true;
+    bool showSideBar_ = true;
     bool needInitRealSideBarWidth_ = true;
     RectF dragRect_;
     float preSidebarWidth_ = 0.0f;
+    bool hasControlButton_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
 };

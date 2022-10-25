@@ -13,21 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_MODIFIER_ADAPTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_MODIFIER_ADAPTER_H
 
+#include <cstdint>
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/pattern/radio/radio_event_hub.h"
+#include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT RadioView {
+class ModifierAdapter final {
 public:
-    static void Create(const std::optional<std::string>& value, const std::optional<std::string>& group);
-    static void SetChecked(bool isChecked);
-    static void SetOnChange(ChangeEvent&& onChange);
+    ModifierAdapter() = delete;
+    ~ModifierAdapter() = delete;
+    static void RemoveModifier(int32_t modifierId);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(ModifierAdapter);
 };
 
 } // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_MODIFIER_ADAPTER_H

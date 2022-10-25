@@ -30,7 +30,7 @@ public:
     size_t GetSize() const override;
     const void* GetData() const override;
     sk_sp<SkData> GetSkData() const;
-    RefPtr<SvgDomBase> MakeSvgDom(const std::optional<Color>& svgFillColor) override;
+    RefPtr<SvgDomBase> MakeSvgDom(const std::optional<Color>& svgFillColor);
 
 private:
     sk_sp<SkData> skData_;

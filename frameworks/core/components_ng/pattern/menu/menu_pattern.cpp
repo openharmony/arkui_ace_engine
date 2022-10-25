@@ -15,9 +15,11 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
+#include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

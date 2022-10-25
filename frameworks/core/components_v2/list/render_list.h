@@ -470,6 +470,7 @@ private:
     bool hasHeight_ = false;
     bool hasWidth_ = false;
     bool isAxisResponse_ = true;
+    ScrollState scrollState_;
 
     void MultiSelectWithoutKeyboard(const Rect& selectedZone);
     void HandleMouseEventWithoutKeyboard(const MouseEvent& event);

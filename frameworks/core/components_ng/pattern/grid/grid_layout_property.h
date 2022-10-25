@@ -16,7 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 
+#include <string>
+
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -67,6 +72,8 @@ public:
         ResetCellLength();
         ResetScrollBarProperty();
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     bool IsVertical() const
     {
@@ -141,7 +148,11 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutProperty);
 
     void ResetGridLayoutInfoAndMeasure() const;
+    std::string GetBarStateString() const;
+    std::string GetLayoutDirectionStr() const;
+    Color GetBarColor() const;
+    Dimension GetBarWidth() const;
 };
-} // namespace OHOS::Ace::NG
 
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H

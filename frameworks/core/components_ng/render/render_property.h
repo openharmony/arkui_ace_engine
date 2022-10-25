@@ -21,8 +21,9 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components_ng/property/clip_path.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/image/image_source_info.h"
@@ -105,14 +106,23 @@ struct RenderPositionProperty {
 };
 
 struct ClipProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipShape, ClipPathNG);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipShape, RefPtr<BasicShape>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipEdge, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipMask, RefPtr<BasicShape>);
 };
 
 struct GradientProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(RadialGradient, NG::Gradient);
+};
+
+struct OverlayProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OverlayText, OverlayOptions);
+};
+
+struct MotionPathProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MotionPath, MotionPathOption);
 };
 
 } // namespace OHOS::Ace::NG

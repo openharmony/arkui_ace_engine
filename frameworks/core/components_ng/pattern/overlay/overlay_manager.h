@@ -69,6 +69,7 @@ public:
 
     void ShowMenu(int32_t targetId, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(int32_t targetId);
+    void DeleteMenu(int32_t targetId);
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
     void PopToast(int32_t toastId);

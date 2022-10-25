@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace::NG {
 
-void SlidingPanelView::Create()
+void SlidingPanelView::Create(bool isShow)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -37,20 +37,18 @@ void SlidingPanelView::Create()
         V2::PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SlidingPanelPattern>(); });
 
     // Create Column node to mount to Panel.
-    auto columnId_ = panelNode->GetColumnId();
+    auto columnId = panelNode->GetColumnId();
     auto columnNode = FrameNode::GetOrCreateFrameNode(
-        V2::COLUMN_ETS_TAG, columnId_, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
-    ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, FlexAlign::CENTER);
-    ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, FlexAlign::STRETCH);
-    auto columnPattern = columnNode->GetPattern<LinearLayoutPattern>();
-    CHECK_NULL_VOID(columnPattern);
+        V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     columnNode->MountToParent(panelNode);
 
     ViewStackProcessor::GetInstance()->Push(panelNode);
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, PanelType::FOLDABLE_BAR); // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, true);                   // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, PanelMode::HALF);         // default value
+
+    auto type = isShow ? VisibleType::VISIBLE : VisibleType::GONE;
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, type);
 }
 
 RefPtr<SlidingPanelNode> SlidingPanelView::GetOrCreateSlidingPanelNode(
@@ -163,7 +161,9 @@ void SlidingPanelView::Pop()
         if (!isFirstChildDragBar) {
             auto dragBarNode = FrameNode::GetOrCreateFrameNode(V2::DRAG_BAR_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DragBarPattern>(); });
+            auto layoutProp = dragBarNode->GetLayoutProperty<DragBarPaintProperty>();
             dragBarNode->MountToParent(columnNode, 0);
+            dragBarNode->MarkModifyDone();
         }
         return;
     }

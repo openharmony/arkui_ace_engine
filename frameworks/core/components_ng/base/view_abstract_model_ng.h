@@ -16,16 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_NG_H
 
+#include <optional>
 #include <utility>
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/vector.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/clip_path.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/overlay_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
@@ -97,14 +102,22 @@ public:
         ViewAbstract::SetPadding(NG::CalcLength(value));
     }
 
-    void SetPaddings(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override
+    void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override
     {
         NG::PaddingProperty paddings;
-        paddings.top = NG::CalcLength(top);
-        paddings.bottom = NG::CalcLength(bottom);
-        paddings.left = NG::CalcLength(left);
-        paddings.right = NG::CalcLength(right);
+        if (top.has_value()) {
+            paddings.top = NG::CalcLength(top.value());
+        }
+        if (bottom.has_value()) {
+            paddings.bottom = NG::CalcLength(bottom.value());
+        }
+        if (left.has_value()) {
+            paddings.left = NG::CalcLength(left.value());
+        }
+        if (right.has_value()) {
+            paddings.right = NG::CalcLength(right.value());
+        }
         ViewAbstract::SetPadding(paddings);
     }
 
@@ -113,14 +126,22 @@ public:
         ViewAbstract::SetMargin(NG::CalcLength(value));
     }
 
-    void SetMargins(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right) override
+    void SetMargins(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override
     {
         NG::MarginProperty margins;
-        margins.top = NG::CalcLength(top);
-        margins.bottom = NG::CalcLength(bottom);
-        margins.left = NG::CalcLength(left);
-        margins.right = NG::CalcLength(right);
+        if (top.has_value()) {
+            margins.top = NG::CalcLength(top.value());
+        }
+        if (bottom.has_value()) {
+            margins.bottom = NG::CalcLength(bottom.value());
+        }
+        if (left.has_value()) {
+            margins.left = NG::CalcLength(left.value());
+        }
+        if (right.has_value()) {
+            margins.right = NG::CalcLength(right.value());
+        }
         ViewAbstract::SetMargin(margins);
     }
 
@@ -185,6 +206,32 @@ public:
         borderStyles.styleTop = styleTop;
         borderStyles.styleBottom = styleBottom;
         ViewAbstract::SetBorderStyle(borderStyles);
+    }
+
+    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
+    {
+        CHECK_NULL_VOID(borderImage);
+        if (bitset | BorderImage::SOURCE_BIT) {
+            ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
+        }
+        if (bitset | BorderImage::OUTSET_BIT) {
+            ViewAbstract::SetHasBorderImageOutset(true);
+        }
+        if (bitset | BorderImage::SLICE_BIT) {
+            ViewAbstract::SetHasBorderImageSlice(true);
+        }
+        if (bitset | BorderImage::REPEAT_BIT) {
+            ViewAbstract::SetHasBorderImageRepeat(true);
+        }
+        if (bitset | BorderImage::WIDTH_BIT) {
+            ViewAbstract::SetHasBorderImageWidth(true);
+        }
+        ViewAbstract::SetBorderImage(borderImage);
+    }
+
+    void SetBorderImageGradient(const NG::Gradient& gradient) override
+    {
+        ViewAbstract::SetBorderImageGradient(gradient);
     }
 
     void SetLayoutPriority(int32_t priority) override {}
@@ -285,7 +332,18 @@ public:
 
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override
-    {}
+    {
+        NG::OverlayOptions overlay;
+        overlay.content = text;
+        overlay.align = align.value_or(Alignment::TOP_LEFT);
+        if (offsetX.has_value()) {
+            overlay.x = offsetX.value();
+        }
+        if (offsetY.has_value()) {
+            overlay.y = offsetY.value();
+        }
+        ViewAbstract::SetOverlay(overlay);
+    }
 
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override
     {
@@ -296,7 +354,10 @@ public:
 
     void SetGeometryTransition(const std::string& id) override {}
 
-    void SetMotionPath(const MotionPathOption& option) override {}
+    void SetMotionPath(const MotionPathOption& option) override
+    {
+        ViewAbstract::SetMotionPath(option);
+    }
 
     void SetFlexBasis(const Dimension& value) override
     {
@@ -338,19 +399,20 @@ public:
         ViewAbstract::SetRadialGradient(gradient);
     }
 
-    void SetClipPath(const RefPtr<BasicShape>& shape) override
+    void SetClipShape(const RefPtr<BasicShape>& basicShape) override
     {
-        ClipPathNG clipPath;
-        clipPath.SetBasicShape(shape);
-        ViewAbstract::SetClipPath(clipPath);
+        ViewAbstract::SetClipShape(basicShape);
     }
 
-    void SetEdgeClip(bool isClip) override
+    void SetClipEdge(bool isClip) override
     {
-        ViewAbstract::SetEdgeClip(isClip);
+        ViewAbstract::SetClipEdge(isClip);
     }
 
-    void SetMask(const RefPtr<BasicShape>& shape) override {}
+    void SetMask(const RefPtr<BasicShape>& shape) override
+    {
+        ViewAbstract::SetMask(shape);
+    }
 
     void SetBackdropBlur(const Dimension& radius) override
     {
@@ -462,6 +524,40 @@ public:
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override
     {
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
+    }
+
+    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override
+    {
+        auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                             const std::string& extraParams) -> DragDropInfo {
+            auto dragInfo = dragStartFunc(event, extraParams);
+            DragDropInfo info;
+            info.extraInfo = dragInfo.extraInfo;
+            info.pixelMap = dragInfo.pixelMap;
+            info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
+            return info;
+        };
+        ViewAbstract::SetOnDragStart(std::move(dragStart));
+    }
+
+    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override
+    {
+        ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
+    }
+
+    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override
+    {
+        ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
+    }
+
+    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override
+    {
+        ViewAbstract::SetOnDragMove(std::move(onDragMove));
+    }
+
+    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override
+    {
+        ViewAbstract::SetOnDrop(std::move(onDrop));
     }
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override

@@ -92,7 +92,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
 
     auto toggleTypeInt = static_cast<int32_t>(toggleType);
-
+    
     ToggleModel::GetInstance()->Create(NG::ToggleType(toggleTypeInt), isOn);
 }
 

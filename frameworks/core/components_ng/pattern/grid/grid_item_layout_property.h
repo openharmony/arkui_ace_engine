@@ -47,6 +47,8 @@ public:
         ResetColumnEnd();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RowStart, int32_t);
     void OnRowStartUpdate(int32_t /*rowStart*/) const
     {

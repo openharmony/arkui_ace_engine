@@ -13,22 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_PARAGRAPH_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_PARAGRAPH_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_OVERLAY_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_OVERLAY_PROPERTY_H
+
+#include <memory>
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
+#include "base/geometry/ng/offset_t.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-struct DividerLayoutParagraph {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(Vertical, bool);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
+
+struct OverlayOptions {
+    OverlayOptions() = default;
+    ~OverlayOptions() = default;
+    std::string content;
+    Alignment align;
+    Dimension x;
+    Dimension y;
+
+    bool operator==(const OverlayOptions& value) const
+    {
+        return (content.compare(value.content) == 0) && (align == value.align) &&
+               (x == value.x) && (y == value.y);
+    }
 };
-struct DividerRenderParagraph {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerColor, Color);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(LineCap, LineCap);
-};
+
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_PARAGRAPH_H
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_OVERLAY_PROPERTY_H

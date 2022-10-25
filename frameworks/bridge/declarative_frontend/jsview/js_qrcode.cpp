@@ -97,7 +97,7 @@ void JSQRCode::JSBind(BindingTarget globalObj)
     JSClass<JSQRCode>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSQRCode>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSQRCode>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSQRCode>::Inherit<JSContainerBase>();
+    JSClass<JSQRCode>::Inherit<JSInteractableView>();
     JSClass<JSQRCode>::Inherit<JSViewAbstract>();
     JSClass<JSQRCode>::Bind<>(globalObj);
 }

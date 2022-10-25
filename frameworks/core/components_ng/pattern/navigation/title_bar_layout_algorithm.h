@@ -19,6 +19,8 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,6 +32,38 @@ public:
     ~TitleBarLayoutAlgorithm() override = default;
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+
+private:
+    void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
+
+    void MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
+
+    void MeasureTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
+
+    void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
+
+    void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
+
+    void LayoutTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
+
+    void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight);
+    void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode);
+
+    // set variables from theme
+    void InitializeTheme();
+
+    Dimension maxPaddingStart_;
+    Dimension maxPaddingEnd_;
+    Dimension menuHeight_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(TitleBarLayoutAlgorithm);
 };
 
 } // namespace OHOS::Ace::NG

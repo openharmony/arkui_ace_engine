@@ -16,9 +16,11 @@
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
+#include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -30,17 +32,18 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& maxSize = layoutConstraint->maxSize;
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
-
+    auto child = layoutWrapper->GetAllChildrenWithBuild().front();
+    auto lastChildFrame = child->GetGeometryNode()->GetMarginFrameSize();
     // measure child.
     LayoutConstraintF textLayoutConstraint;
     textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
     textLayoutConstraint.UpdateMinSizeWithCheck(minSize);
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(textLayoutConstraint);
-    }
+    child->Measure(textLayoutConstraint);
 
     // measure self.
     OptionalSizeF frameSize;
+    SizeF childFrameSize;
+    auto lastMarqueeFrame = layoutWrapper->GetGeometryNode()->GetFrameSize();
     do {
         // Use idea size first if it is valid.
         frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
@@ -55,13 +58,10 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 break;
             }
         } else {
-            // use the max child size.
-            auto childFrame = SizeF(-1, -1);
-            for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-                auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-                childFrame = childFrame > childSize ? childFrame : childSize;
-            }
-            childFrame.Constrain(minSize, maxSize);
+            // use the child size.
+            auto childFrame = child->GetGeometryNode()->GetMarginFrameSize();
+            childFrameSize = childFrame;
+            childFrame.Constrain(SizeF(Infinity<float>(), minSize.Height()), maxSize);
             AddPaddingToSize(padding, childFrame);
             frameSize.UpdateIllegalSizeWithCheck(childFrame);
         }
@@ -69,19 +69,14 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } while (false);
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
-}
-
-void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
-{
-    if (isNeedMarquee_) {
-        PerformLayout(layoutWrapper);
-    } else {
-        BoxLayoutAlgorithm::Layout(layoutWrapper);
+    if (lastChildFrame != childFrameSize || lastMarqueeFrame != frameSize.ConvertToSizeT()) {
+        auto pattern = layoutWrapper->GetHostNode()->GetPattern<MarqueePattern>();
+        childOffset_ = pattern->CheckAndAdjustPosition(layoutWrapper);
     }
 }
 
 // Called to perform layout render node and child.
-void MarqueeLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper) const
+void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
