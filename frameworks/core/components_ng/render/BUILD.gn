@@ -16,6 +16,7 @@ import(
 
 build_component_ng("render_ng") {
   sources = [
+    "adapter/mock_animation_utils.cpp",
     "adapter/mock_modifier_adapter.cpp",
     "adapter/skia_canvas.cpp",
     "adapter/skia_canvas_image.cpp",
