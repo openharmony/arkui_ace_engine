@@ -225,6 +225,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("backgroundColor", &JSButton::JsBackgroundColor);
     JSClass<JSButton>::StaticMethod("width", &JSButton::JsWidth);
     JSClass<JSButton>::StaticMethod("height", &JSButton::JsHeight);
+    JSClass<JSButton>::StaticMethod("aspectRatio", &JSButton::JsAspectRatio);
     JSClass<JSButton>::StaticMethod("borderRadius", &JSButton::JsRadius);
     JSClass<JSButton>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -589,6 +590,29 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
                 AnimatableDimension(buttonComponent->GetHeight(), option), VisualState::NORMAL);
         }
     }
+}
+
+void JSButton::JsAspectRatio(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsAspectRatio(info);
+        return;
+    }
+    JSViewAbstract::JsAspectRatio(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    double value = 0.0;
+    if (!ParseJsDouble(info[0], value)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (!buttonComponent) {
+        return;
+    }
+    buttonComponent->SetAspectRatio(value);
 }
 
 void JSButton::JsSize(const JSCallbackInfo& info)
