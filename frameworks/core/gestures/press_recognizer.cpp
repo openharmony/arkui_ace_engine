@@ -32,6 +32,14 @@ void PressRecognizer::OnAccepted(size_t touchId)
         info.SetTimeStamp(trackPoint_.time);
         info.SetGlobalLocation(trackPoint_.GetOffset()).SetLocalLocation(trackPoint_.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetForce(trackPoint_.force);
+        if (trackPoint_.tiltX.has_value()) {
+            info.SetTiltX(trackPoint_.tiltX.value());
+        }
+        if (trackPoint_.tiltY.has_value()) {
+            info.SetTiltY(trackPoint_.tiltY.value());
+        }
+        info.SetSourceTool(trackPoint_.sourceTool);
         onPress_(info);
     }
 }

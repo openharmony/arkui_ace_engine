@@ -68,6 +68,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
+    lastTouchEvent_ = event;
     touchPoints_[event.id] = event;
     inputEventType_ = InputEventType::TOUCH_SCREEN;
 
@@ -113,6 +114,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     globalPoint_ = Point(event.x, event.y);
+    lastTouchEvent_ = event;
     touchPoints_.erase(itr);
     velocityTracker_.UpdateTouchPoint(event, true);
 
@@ -199,6 +201,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
 
     globalPoint_ = Point(event.x, event.y);
+    lastTouchEvent_ = event;
     if (state_ == DetectState::READY) {
         touchPoints_[event.id] = event;
         return;
@@ -393,7 +396,8 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
-        info.SetGlobalPoint(globalPoint_).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
+        info.SetGlobalPoint(globalPoint_)
+            .SetLocalLocation(Offset(globalPoint_.GetX(), globalPoint_.GetY()) - coordinateOffset_);
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetDelta(delta_);
@@ -407,6 +411,14 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetInputEventType(inputEventType_);
+        info.SetForce(lastTouchEvent_.force);
+        if (lastTouchEvent_.tiltX.has_value()) {
+            info.SetTiltX(lastTouchEvent_.tiltX.value());
+        }
+        if (lastTouchEvent_.tiltY.has_value()) {
+            info.SetTiltY(lastTouchEvent_.tiltY.value());
+        }
+        info.SetSourceTool(lastTouchEvent_.sourceTool);
         (*callback)(info);
     }
 }

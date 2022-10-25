@@ -74,6 +74,7 @@ private:
     WeakPtr<PipelineBase> context_;
     std::map<int32_t, TouchEvent> touchPoints_;
     std::map<int32_t, Offset> fingersDistance_;
+    TouchEvent lastTouchEvent_;
     AxisEvent axisEventStart_;
     double axisVerticalTotal_ = 0.0;
     double axisHorizontalTotal_ = 0.0;

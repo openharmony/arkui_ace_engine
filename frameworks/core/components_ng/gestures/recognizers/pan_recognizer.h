@@ -138,6 +138,7 @@ private:
     PanDirection direction_;
     double distance_ = 0.0;
     std::map<int32_t, TouchEvent> touchPoints_;
+    TouchEvent lastTouchEvent_;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
     Offset delta_;

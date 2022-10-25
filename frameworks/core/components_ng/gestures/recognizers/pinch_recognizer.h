@@ -61,6 +61,7 @@ private:
     Offset pinchCenter_;
     TimeStamp time_;
     std::map<int32_t, TouchEvent> touchPoints_;
+    TouchEvent lastTouchEvent_;
     bool pendingEnd_ = false;
     bool pendingCancel_ = false;
     bool isFlushTouchEventsEnd_ = false;

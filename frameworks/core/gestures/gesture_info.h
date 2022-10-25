@@ -394,6 +394,8 @@ public:
     GestureEvent& SetGlobalPoint(const Point& globalPoint)
     {
         globalPoint_ = globalPoint;
+        globalLocation_.SetX(globalPoint.GetX());
+        globalLocation_.SetY(globalPoint.GetY());
         return *this;
     }
 
@@ -416,6 +418,8 @@ public:
     GestureEvent& SetGlobalLocation(const Offset& globalLocation)
     {
         globalLocation_ = globalLocation;
+        globalPoint_.SetX(globalLocation.GetX());
+        globalPoint_.SetY(globalLocation.GetY());
         return *this;
     }
     GestureEvent& SetLocalLocation(const Offset& localLocation)
@@ -622,11 +626,11 @@ protected:
     std::unique_ptr<GestureEventNoParameter> onActionCancelId_;
 };
 
-class ClickInfo : public BaseEventInfo, public TouchLocationInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(ClickInfo, BaseEventInfo, TouchLocationInfo);
+class ClickInfo : public TouchLocationInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ClickInfo, TouchLocationInfo);
 
 public:
-    explicit ClickInfo(int32_t fingerId) : BaseEventInfo("onClick"), TouchLocationInfo(fingerId) {}
+    explicit ClickInfo(int32_t fingerId) : TouchLocationInfo("onClick", fingerId) {}
     ~ClickInfo() override = default;
 };
 using ClickCallback = std::function<void(const ClickInfo&)>;

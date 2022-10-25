@@ -21,11 +21,11 @@
 
 namespace OHOS::Ace::NG {
 
-class LongPressInfo : public BaseEventInfo, public TouchLocationInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(LongPressInfo, BaseEventInfo, TouchLocationInfo);
+class LongPressInfo : public TouchLocationInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LongPressInfo, TouchLocationInfo);
 
 public:
-    explicit LongPressInfo(int32_t fingerId) : BaseEventInfo("onLongPress"), TouchLocationInfo(fingerId) {}
+    explicit LongPressInfo(int32_t fingerId) : TouchLocationInfo("onLongPress", fingerId) {}
     ~LongPressInfo() override = default;
 };
 
