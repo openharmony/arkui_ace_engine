@@ -24,14 +24,6 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-// TODO:创建主题文件，将这些和component的公共类放到主题文件里
-namespace {
-constexpr double BUBBLE_POSITION_X = -168.0;
-constexpr double BUBBLE_POSITION_Y = 96.0;
-constexpr double BUBBLE_BOX_SIZE = 112.0;
-constexpr double BOX_RADIUS = 8.0;
-constexpr double BUBBLE_BOX_RADIUS = 16.0;
-}
 
 class IndexerPattern : public Pattern {
     DECLARE_ACE_TYPE(IndexerPattern, Pattern);
@@ -63,6 +55,11 @@ public:
         isTouch_ = isTouch;
     }
 
+    const std::vector<std::string>& GetArrayValue()
+    {
+        return arrayValue_;
+    }
+    
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
@@ -82,6 +79,7 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void BeginBubbleAnimation(RefPtr<FrameNode> animationNode);
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;

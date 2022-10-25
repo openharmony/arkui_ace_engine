@@ -39,8 +39,8 @@ public:
     static void SetCachedCount(int32_t cachedCount);
     static void SetEditMode(bool editMode);
     static void SetMultiSelectable(bool multiSelectable);
-    static void SetMaxCount(int32_t maxCount);
-    static void SetMinCount(int32_t minCount);
+    static void SetMaxCount(double maxCount);
+    static void SetMinCount(double minCount);
     static void CellLength(int32_t cellLength);
     static void SetLayoutDirection(int32_t value);
     static void SetDirection(const std::string& dir);

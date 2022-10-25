@@ -649,6 +649,8 @@ public:
     }
     virtual void FlushMessages() = 0;
 
+    virtual void FlushUITasks() = 0;
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -657,7 +659,7 @@ protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
-    virtual void FlushUITasks() = 0;
+
     virtual void OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);

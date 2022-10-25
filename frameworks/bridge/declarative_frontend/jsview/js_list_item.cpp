@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_item_model_impl.h"
 #include "core/common/container.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_model.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 
@@ -193,8 +194,8 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 {
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
-        DragItemInfo itemInfo;
+                           const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
+        NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
 
         auto ret = func->Execute(info, extraParams);
@@ -202,10 +203,10 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
             LOGE("builder param is not an object.");
             return itemInfo;
         }
-        auto component = ParseDragItemComponent(ret);
-        if (component) {
+        auto node = ParseDragNode(ret);
+        if (node) {
             LOGI("use custom builder param.");
-            itemInfo.customComponent = component;
+            itemInfo.node = node;
             return itemInfo;
         }
 
@@ -216,8 +217,8 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 #endif
         auto extraInfo = builderObj->GetProperty("extraInfo");
         ParseJsString(extraInfo, itemInfo.extraInfo);
-        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
-        itemInfo.customComponent = component;
+        node = ParseDragNode(builderObj->GetProperty("builder"));
+        itemInfo.node = node;
         return itemInfo;
     };
     ListItemModel::GetInstance()->SetOnDragStart(std::move(onDragStart));

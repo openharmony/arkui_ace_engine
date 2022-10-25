@@ -16,12 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MODIFIER_H
 
+#include <atomic>
+#include <cstdint>
 #include <functional>
+#include <vector>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,11 +33,35 @@ class Modifier : public virtual AceType {
     DECLARE_ACE_TYPE(Modifier, AceType);
 
 public:
-    Modifier() = default;
-    ~Modifier() override = default;
+    Modifier()
+    {
+        static std::atomic<int32_t> genId = 0;
+        id_ = genId.fetch_add(1, std::memory_order_relaxed);
+    }
+    ~Modifier() override
+    {
+        ModifierAdapter::RemoveModifier(id_);
+    }
+
+    int32_t GetId() const
+    {
+        return id_;
+    }
 
 private:
+    int32_t id_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(Modifier);
+};
+
+class AnimatablePropertyBase : public virtual AceType {
+    DECLARE_ACE_TYPE(AnimatablePropertyBase, AceType);
+
+public:
+    AnimatablePropertyBase() = default;
+    ~AnimatablePropertyBase() override = default;
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(AnimatablePropertyBase);
 };
 
 struct AnimateConfig {
@@ -49,46 +77,91 @@ struct DrawingContext {
 };
 
 template<typename T>
-class ContentModifier : public Modifier {
-    DECLARE_ACE_TYPE(ContentModifier, Modifier);
+class AnimatableProperty : public AnimatablePropertyBase {
+    DECLARE_ACE_TYPE(AnimatableProperty, AnimatablePropertyBase);
 
 public:
-    explicit ContentModifier(T prop) : initValue_(prop) {}
-    ~ContentModifier() override = default;
-    virtual void onDraw(DrawingContext& Context, const T& prop) = 0;
-    T GetInitValue()
+    AnimatableProperty(const T& value) : value_(value) {}
+    ~AnimatableProperty() override = default;
+
+    void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc,
+        std::function<void(const AnimateConfig&, const T&)> setWithAnimationFunc)
     {
-        return initValue_;
+        getFunc_ = getFunc;
+        setFunc_ = setFunc;
+        setWithAnimationFunc_ = setWithAnimationFunc;
     }
 
-    void SetUpdateFunc(const std::function<void(const AnimateConfig&, const T&)>& updateFunc)
+    T Get()
     {
-        updateFunc_ = updateFunc;
+        if (getFunc_) {
+            return getFunc_();
+        } else {
+            return value_;
+        }
     }
-    void UpdateModifier(const AnimateConfig& config, const T& prop)
+
+    void Set(const T& value)
     {
-        if (updateFunc_) {
-            updateFunc_(config, prop);
+        if (setFunc_) {
+            setFunc_(value);
+        } else {
+            value_ = value;
+        }
+    }
+
+    void SetWithAnimation(const AnimateConfig& config, const T& value)
+    {
+        if (setWithAnimationFunc_) {
+            setWithAnimationFunc_(config, value);
+        } else {
+            value_ = value;
         }
     }
 
 private:
-    T initValue_;
-    std::function<void(const AnimateConfig&, const T&)> updateFunc_;
+    T value_;
+    std::function<T()> getFunc_;
+    std::function<void(const T&)> setFunc_;
+    std::function<void(const AnimateConfig&, const T&)> setWithAnimationFunc_;
+    ACE_DISALLOW_COPY_AND_MOVE(AnimatableProperty);
+};
+
+class ContentModifier : public Modifier {
+    DECLARE_ACE_TYPE(ContentModifier, Modifier);
+
+public:
+    ContentModifier() = default;
+    ~ContentModifier() override = default;
+    virtual void onDraw(DrawingContext& Context) = 0;
+
+    void AttachProperty(const RefPtr<AnimatablePropertyBase>& prop)
+    {
+        attachedProperties_.push_back(prop);
+    }
+
+    const std::vector<RefPtr<AnimatablePropertyBase>>& GetAttachedProperties()
+    {
+        return attachedProperties_;
+    }
+
+private:
+    std::vector<RefPtr<AnimatablePropertyBase>> attachedProperties_;
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
 
-#define DECLARE_MODIFIER_TYPED_CLASS(classname, template_class, type) \
-    class classname : public template_class<type> {                   \
-        DECLARE_ACE_TYPE(classname, template_class);                  \
-                                                                      \
-    public:                                                           \
-        explicit classname(type value) : template_class(value) {}     \
-        ~classname() override = default;                              \
-        ACE_DISALLOW_COPY_AND_MOVE(classname);                        \
+#define DECLARE_PROP_TYPED_CLASS(classname, template_class, type) \
+    class classname : public template_class<type> {               \
+        DECLARE_ACE_TYPE(classname, template_class);              \
+                                                                  \
+    public:                                                       \
+        explicit classname(type value) : template_class(value) {} \
+        ~classname() override = default;                          \
+        ACE_DISALLOW_COPY_AND_MOVE(classname);                    \
     };
 
-DECLARE_MODIFIER_TYPED_CLASS(ContentModifierFloat, ContentModifier, float);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);
 
 } // namespace OHOS::Ace::NG
 

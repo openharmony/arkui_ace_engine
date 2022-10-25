@@ -116,7 +116,7 @@ private:
     void AddPreviewNodeIfNeeded();
     void AddControlBarNodeIfNeeded();
     RefPtr<FrameNode> CreateControlBar();
-    static RefPtr<FrameNode> CreateButton();
+    static RefPtr<FrameNode> CreateSVG();
     static RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn);

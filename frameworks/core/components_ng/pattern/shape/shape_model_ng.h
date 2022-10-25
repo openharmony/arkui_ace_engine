@@ -29,8 +29,8 @@ public:
     void SetViewPort(const Dimension& dimLeft, const Dimension& dimTop, const Dimension& dimWidth,
         const Dimension& dimHeight) override;
     void InitBox(RefPtr<PixelMap>& pixMap) override {}
-    void SetWidth(Dimension& width) override;
-    void SetHeight(Dimension& height) override;
+    void SetWidth() override {}
+    void SetHeight() override {}
 };
 
 } // namespace OHOS::Ace::NG

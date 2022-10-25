@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_DRAG_DROP_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_DRAG_DROP_MANAGER_H
 
+#include <cstdint>
 #include <string>
 
 #include "base/memory/ace_type.h"
@@ -52,11 +53,11 @@ public:
     }
 
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
-    void OnDragStart(float globalX, float globalY);
+    void OnDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(float globalX, float globalY, const std::string& extraInfo);
     void OnDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
-    void OnItemDragStart(float globalX, float globalY);
+    void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex);
     void OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex);
     void onItemDragCancel();
@@ -64,6 +65,8 @@ public:
     void GetExtraInfoFromClipboard(std::string& extraInfo);
     void RestoreClipboardData();
     void DestroyDragWindow();
+
+    bool CheckDragDropProxy(int64_t id) const;
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
@@ -82,8 +85,12 @@ private:
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
-    std::function<void(const std::string&)> clipboardCallback_ = nullptr;
+    std::function<void(const std::string&)> addDataCallback_ = nullptr;
+    std::function<void(const std::string&)> getDataCallback_ = nullptr;
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
+    std::string extraInfo_;
+
+    int64_t currentId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

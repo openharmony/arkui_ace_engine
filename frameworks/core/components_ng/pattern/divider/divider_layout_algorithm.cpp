@@ -29,12 +29,10 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto dividerLayoutProperty = DynamicCast<DividerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(dividerLayoutProperty, std::nullopt);
-    const auto& dividerLayoutParagraph = dividerLayoutProperty->GetDividerLayoutParagraph();
-    CHECK_NULL_RETURN(dividerLayoutParagraph, std::nullopt);
 
-    Dimension strokeWidth = dividerLayoutParagraph->GetStrokeWidth().value_or(Dimension(1));
+    Dimension strokeWidth = dividerLayoutProperty->GetStrokeWidth().value_or(Dimension(1));
     constrainStrokeWidth_ = Positive(strokeWidth.ConvertToPx()) ? static_cast<float>(strokeWidth.ConvertToPx()) : 0.0f;
-    vertical_ = dividerLayoutParagraph->GetVertical().value_or(false);
+    vertical_ = dividerLayoutProperty->GetVertical().value_or(false);
     SizeF constrainSize;
     if (!vertical_) {
         dividerLength_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()

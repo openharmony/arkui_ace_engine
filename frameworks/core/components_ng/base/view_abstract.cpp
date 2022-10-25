@@ -574,7 +574,7 @@ void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId)
     LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
 }
 
-void ViewAbstract::BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode)
+void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode)
 {
     CHECK_NULL_VOID(targetNode);
 
@@ -582,7 +582,7 @@ void ViewAbstract::BindMenuWithItems(const std::vector<OptionParam>& params, con
         LOGD("menu params is empty");
         return;
     }
-    auto menuNode = MenuView::Create(params, targetNode->GetTag(), targetNode->GetId());
+    auto menuNode = MenuView::Create(std::move(params), targetNode->GetTag(), targetNode->GetId());
     BindMenu(menuNode, targetNode->GetId());
 }
 
@@ -668,14 +668,19 @@ void ViewAbstract::SetTransition(const TransitionOptions& options)
     ACE_UPDATE_RENDER_CONTEXT(Transition, options);
 }
 
-void ViewAbstract::SetClipPath(const ClipPathNG& clipPath)
+void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
 {
-    ACE_UPDATE_RENDER_CONTEXT(ClipShape, clipPath);
+    ACE_UPDATE_RENDER_CONTEXT(ClipShape, basicShape);
 }
 
-void ViewAbstract::SetEdgeClip(bool isClip)
+void ViewAbstract::SetClipEdge(bool isClip)
 {
     ACE_UPDATE_RENDER_CONTEXT(ClipEdge, isClip);
+}
+
+void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
+{
+    ACE_UPDATE_RENDER_CONTEXT(ClipMask, basicShape);
 }
 
 void ViewAbstract::SetBrightness(const Dimension& brightness)
@@ -752,6 +757,16 @@ void ViewAbstract::SetHasBorderImageRepeat(bool tag)
 void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
 {
     ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
+}
+
+void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
+{
+    ACE_UPDATE_RENDER_CONTEXT(OverlayText, overlay);
+}
+
+void ViewAbstract::SetMotionPath(const MotionPathOption& motionPath)
+{
+    ACE_UPDATE_RENDER_CONTEXT(MotionPath, motionPath);
 }
 
 } // namespace OHOS::Ace::NG

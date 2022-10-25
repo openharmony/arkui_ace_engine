@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_LINE_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_LINE_PAINT_PROPERTY_H
 
+#include <vector>
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/property/property.h"
@@ -56,6 +57,23 @@ public:
         ShapePaintProperty::Reset();
         ResetStartPoint();
         ResetEndPoint();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        ShapePaintProperty::ToJsonValue(json);
+        if (propStartPoint_.has_value()) {
+            std::vector<double> point(2);
+            point[0] = propStartPoint_.value().first.ConvertToVp();
+            point[1] = propStartPoint_.value().second.ConvertToVp();
+            json->Put("startPoint", point.data());
+        }
+        if (propEndPoint_.has_value()) {
+            std::vector<double> point(2);
+            point[0] = propEndPoint_.value().first.ConvertToVp();
+            point[1] = propEndPoint_.value().second.ConvertToVp();
+            json->Put("endPoint", point.data());
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartPoint, ShapePoint, PROPERTY_UPDATE_RENDER);

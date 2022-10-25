@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
-#include "core/components/tab_bar/tabs_event.h"
+#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
@@ -63,7 +63,7 @@ public:
     void FireChangeEvent(int32_t index) const
     {
         if (changeEvent_) {
-            changeEvent_(std::make_shared<TabContentChangeEvent>(index).get());
+            changeEvent_(std::make_shared<SwiperChangeEvent>(index).get());
         }
     }
 

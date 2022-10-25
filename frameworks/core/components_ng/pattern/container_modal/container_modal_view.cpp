@@ -199,10 +199,14 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);
 
-    // TODO set click color
+    auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    buttonPattern->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
+
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
-    buttonEventHub->SetClickEvent(std::move(clickCallback));
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    buttonEventHub->AddClickEvent(clickEvent);
 
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
@@ -213,6 +217,7 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     MarginProperty margin;
     margin.right = CalcLength(isCloseButton ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL);
     buttonLayoutProperty->UpdateMargin(margin);
+    buttonNode->MarkModifyDone();
 
     buttonNode->AddChild(imageIcon);
     return buttonNode;

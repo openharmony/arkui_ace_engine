@@ -136,7 +136,7 @@ void RosenRenderBubble::PaintBubbleWithArrow(SkCanvas* skCanvas, const SkPaint& 
     BuildCompletePath(path_);
     RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawPath(path_, paint);
-    skCanvas->clipPath(path_, SkClipOp::kIntersect);
+    skCanvas->clipPath(path_, SkClipOp::kIntersect, true);
 }
 
 void RosenRenderBubble::PaintTopBubbleInJs(SkCanvas* skCanvas, const SkPaint& paint)

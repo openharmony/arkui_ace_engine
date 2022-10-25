@@ -185,7 +185,7 @@ const char* ScopedString::get() const
 
 std::string ScopedString::str()
 {
-    return stringValue_;
+    return (stringValue_ != nullptr) ? std::string(stringValue_) : std::string();
 }
 
 std::string ScopedString::Stringify(JSValueConst val)

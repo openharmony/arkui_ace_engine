@@ -29,12 +29,13 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/clip_path.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
@@ -168,16 +169,21 @@ public:
     // Bind properties
     static void BindPopup(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
-    static void BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode);
+    static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode);
     static void ShowMenu(int32_t targetId);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
     // transition
     static void SetTransition(const TransitionOptions& options);
-    // clip
-    static void SetClipPath(const ClipPathNG& clipPath);
-    static void SetEdgeClip(bool isClip);
+    // clip and mask
+    static void SetClipShape(const RefPtr<BasicShape>& basicShape);
+    static void SetClipEdge(bool isClip);
+    static void SetMask(const RefPtr<BasicShape>& basicShape);
+    // overlay
+    static void SetOverlay(const NG::OverlayOptions& overlay);
+    // motionPath
+    static void SetMotionPath(const MotionPathOption& motionPath);
 
     static void Pop();
 

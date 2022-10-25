@@ -37,6 +37,13 @@ void PageEventHub::RemoveRadioFromGroup(const std::string& group, int32_t radioI
     radioGroupNotify_[group].remove(radioId);
 }
 
+bool PageEventHub::HasRadioId(const std::string& group, int32_t radioId)
+{
+    auto list = radioGroupNotify_[group];
+    auto it = find(list.begin(), list.end(), radioId);
+    return it != list.end();
+}
+    
 void PageEventHub::UpdateRadioGroupValue(const std::string& group, int32_t radioId)
 {
     const auto& list = radioGroupNotify_[group];

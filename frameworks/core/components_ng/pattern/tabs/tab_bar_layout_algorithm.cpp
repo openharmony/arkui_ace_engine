@@ -113,8 +113,9 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         auto childGeometryNode = childWrapper->GetGeometryNode();
         auto childFrameSize = childGeometryNode->GetMarginFrameSize();
-        auto centerOffset =
-            OffsetF(0, (frameSize.Height() - childFrameSize.Height()) / 2.0); // Center child in vertical.
+        OffsetF centerOffset = (axis == Axis::HORIZONTAL)
+                                   ? OffsetF(0, (frameSize.Height() - childFrameSize.Height()) / 2.0)
+                                   : OffsetF((frameSize.Width() - childFrameSize.Width()) / 2.0, 0);
         childGeometryNode->SetMarginFrameOffset(childOffset + centerOffset);
         childWrapper->Layout();
         tabItemOffset_.emplace_back(childOffset);

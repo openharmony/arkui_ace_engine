@@ -99,6 +99,7 @@ void SwitchPattern::OnModifyDone()
 
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
+    InitPanEvent(gestureHub);
 }
 
 void SwitchPattern::UpdateCurrentOffset(float offset)
@@ -144,12 +145,12 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
         auto switch_ = weak.Upgrade();
         CHECK_NULL_VOID(switch_);
         if (!isOn_.value()) {
-            if (NearEqual(switch_->currentOffset_, GetSwitchWidth())) {
+            if (NearEqual(switch_->currentOffset_, GetSwitchWidth()) && changeFlag_) {
                 switch_->isOn_ = true;
                 switch_->UpdateChangeEvent();
             }
         } else {
-            if (NearEqual(switch_->currentOffset_, 0)) {
+            if (NearEqual(switch_->currentOffset_, 0) && changeFlag_) {
                 switch_->isOn_ = false;
                 switch_->UpdateChangeEvent();
             }
@@ -190,6 +191,7 @@ void SwitchPattern::OnChange()
     CHECK_NULL_VOID(geometryNode);
     auto translateOffset = GetSwitchWidth();
     StopTranslateAnimation();
+    changeFlag_ = true;
     if (!isOn_.value()) {
         PlayTranslateAnimation(0, translateOffset);
     } else {
@@ -225,6 +227,97 @@ void SwitchPattern::OnClick()
         controller_->Stop();
     }
     OnChange();
+}
+
+void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (panEvent_) {
+        return;
+    }
+
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        LOGD("Pan event start");
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (info.GetInputEventType() == InputEventType::AXIS) {
+                return;
+            }
+        }
+    };
+
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleDragUpdate(info);
+        }
+    };
+
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        LOGD("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (info.GetInputEventType() == InputEventType::AXIS) {
+                return;
+            }
+            pattern->HandleDragEnd();
+        }
+    };
+
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        LOGD("Pan event cancel");
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleDragEnd();
+        }
+    };
+
+    PanDirection panDirection;
+    panDirection.type = PanDirection::HORIZONTAL;
+
+    float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
+    panEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+}
+
+void SwitchPattern::HandleDragUpdate(const GestureEvent& info)
+{
+    auto mainDelta = static_cast<float>(info.GetMainDelta());
+    auto isOutOfBoundary = IsOutOfBoundary(mainDelta + currentOffset_);
+    if (isOutOfBoundary) {
+        LOGD("Switch has reached boundary, can't drag any more.");
+        return;
+    }
+    UpdateCurrentOffset(static_cast<float>(mainDelta));
+}
+
+void SwitchPattern::HandleDragEnd()
+{
+    LOGD("Drag end currentOffset: %{public}lf", currentOffset_);
+    // Play translate animation.
+    auto mainSize = GetSwitchWidth();
+    if (std::abs(currentOffset_) >= mainSize / 2) {
+        if (!isOn_.value()) {
+            changeFlag_ = true;
+            PlayTranslateAnimation(mainSize, mainSize);
+        } else {
+            changeFlag_ = false;
+            PlayTranslateAnimation(currentOffset_, mainSize);
+        }
+    } else if (std::abs(currentOffset_) < mainSize / 2) {
+        if (isOn_.value()) {
+            changeFlag_ = true;
+            PlayTranslateAnimation(0.0f, 0.0f);
+        } else {
+            changeFlag_ = false;
+            PlayTranslateAnimation(currentOffset_, 0.0f);
+        }
+    }
+}
+
+bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
+{
+    return mainOffset < 0 || mainOffset > GetSwitchWidth();
 }
 
 } // namespace OHOS::Ace::NG

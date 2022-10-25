@@ -147,7 +147,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
 
     dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnItemDragStart(info);
+    dragDropProxy_->OnItemDragStart(info, GetFrameNode());
 }
 
 void GridEventHub::HandleOnItemDragUpdate(const GestureEvent& info)

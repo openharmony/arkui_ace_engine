@@ -302,7 +302,7 @@ ImageFit DOMVideo::ConvertStrToFit(const std::string& fit)
         { "fill", ImageFit::FILL },
         { "contain", ImageFit::CONTAIN },
         { "cover", ImageFit::COVER },
-        { "scaledown", ImageFit::SCALEDOWN },
+        { "scaledown", ImageFit::SCALE_DOWN },
         { "none", ImageFit::NONE },
     };
     auto imageFitIter = IMAGE_FIT_TABLE.find(fit);

@@ -237,10 +237,10 @@ void RenderGridScroll::OnTouchTestHit(
     if (!GetVisible()) {
         return;
     }
-    if (!scrollable_ || !scrollable_->Available()) {
+    if (!scrollable_) {
         return;
     }
-    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
+    if (scrollable_->Available() && scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
         scrollBar_->AddScrollBarController(coordinateOffset, result);
     } else {
         scrollable_->SetCoordinateOffset(coordinateOffset);

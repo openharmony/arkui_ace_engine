@@ -31,7 +31,9 @@ namespace OHOS::Ace::NG {
 
 UINode::~UINode()
 {
-    ElementRegister::GetInstance()->RemoveItem(nodeId_);
+    if (!removeSilently_) {
+        ElementRegister::GetInstance()->RemoveItem(nodeId_);
+    }
     if (!onMainTree_) {
         return;
     }

@@ -34,21 +34,13 @@ public:
         childOffset_ = offset;
     }
 
-    void SetIsNeedMarquee(bool isNeedMarquee)
-    {
-        isNeedMarquee_ = isNeedMarquee;
-    }
-
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     void OnReset() override {}
 
 private:
-    void PerformLayout(LayoutWrapper* layoutWrapper) const;
-
     float childOffset_ = 0.0f;
-    bool isNeedMarquee_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(MarqueeLayoutAlgorithm);
 };

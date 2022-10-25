@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
-#include "commonlibrary/c_utils/base/include/securec.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 
 int32_t OH_NativeXComponent::GetXComponentId(char* id, uint64_t* size)
 {

@@ -33,8 +33,8 @@ public:
     virtual void SetViewPort(
         const Dimension& dimLeft, const Dimension& dimTop, const Dimension& dimWidth, const Dimension& dimHeight);
     virtual void InitBox(RefPtr<PixelMap>& pixMap);
-    virtual void SetWidth(Dimension& width);
-    virtual void SetHeight(Dimension& height);
+    virtual void SetWidth();
+    virtual void SetHeight();
 
 private:
     static std::unique_ptr<ShapeModel> instance_;

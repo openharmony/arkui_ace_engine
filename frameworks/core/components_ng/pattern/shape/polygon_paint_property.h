@@ -56,6 +56,21 @@ public:
         ResetPoints();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        ShapePaintProperty::ToJsonValue(json);
+        if (propPoints_.has_value()) {
+            auto pointSize = propPoints_.value().size() * 2;
+            std::vector<double> point(pointSize);
+            for (int i = 0, j = 0; i < propPoints_.value().size() && j < pointSize; i++) {
+                point[j] = propPoints_.value()[i].first.ConvertToVp();
+                ++j;
+                point[j] = propPoints_.value()[i].second.ConvertToVp();
+            }
+            json->Put("points", point.data());
+        }
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Points, ShapePoints, PROPERTY_UPDATE_RENDER);
 
 private:

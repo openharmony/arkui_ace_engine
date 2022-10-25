@@ -49,14 +49,4 @@ void ShapeModelNG::SetViewPort(
     ACE_UPDATE_PAINT_PROPERTY(ContainerPaintProperty, ShapeViewBox, shapeViewBox);
 }
 
-void ShapeModelNG::SetWidth(Dimension& width)
-{
-    ViewAbstract::SetWidth(CalcLength(width));
-}
-
-void ShapeModelNG::SetHeight(Dimension& height)
-{
-    ViewAbstract::SetHeight(CalcLength(height));
-}
-
 } // namespace OHOS::Ace::NG

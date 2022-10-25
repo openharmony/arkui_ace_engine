@@ -61,6 +61,26 @@ public:
         ResetShapeViewBox();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        ShapePaintProperty::ToJsonValue(json);
+        if (propShapeViewBox_.has_value()) {
+            JsonValue viewBoxJson;
+            viewBoxJson.Put("x", propShapeViewBox_.value().Left().ConvertToVp());
+            viewBoxJson.Put("y", propShapeViewBox_.value().Top().ConvertToVp());
+            viewBoxJson.Put("width", propShapeViewBox_.value().Width().ConvertToVp());
+            viewBoxJson.Put("height", propShapeViewBox_.value().Height().ConvertToVp());
+            json->Put("viewPort", viewBoxJson.ToString().c_str());
+        }
+        if (propImageMesh_.has_value()) {
+            std::string str;
+            str.insert(str.begin(), propImageMesh_.value().GetMesh().begin(), propImageMesh_.value().GetMesh().end());
+            str.append(",").append(std::to_string(propImageMesh_.value().GetColumn())).append(",");
+            str.append(std::to_string(propImageMesh_.value().GetRow()));
+            json->Put("mesh", str.c_str());
+        }
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageMesh, ImageMesh, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShapeViewBox, ShapeViewBox, PROPERTY_UPDATE_RENDER);
 

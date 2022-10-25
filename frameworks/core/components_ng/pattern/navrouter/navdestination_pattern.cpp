@@ -39,50 +39,63 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void BuildTitleAndSubtitle(
+void BuildTitle(
     const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    if (!navDestinationNode->GetTitle() && !navDestinationNode->GetSubtitle()) {
+    if (!navDestinationNode->GetTitle()) {
         return;
     }
-    if (navDestinationNode->GetTitle() && navDestinationNode->HasTitleNodeOperation()) {
-        if (navDestinationNode->GetTitleNodeOperationValue() != ChildNodeOperation::NONE) {
-            if (navDestinationNode->GetTitleNodeOperationValue() == ChildNodeOperation::REPLACE) {
-                navDestinationNode->RemoveChild(titleBarNode->GetTitle());
-            }
-            titleBarNode->SetTitle(navDestinationNode->GetTitle());
-            titleBarNode->AddChild(titleBarNode->GetTitle());
-        }
+    if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
+        return;
     }
-    if (navDestinationNode->GetSubtitle() && navDestinationNode->HasSubtitleNodeOperation()) {
-        if (navDestinationNode->GetSubtitleNodeOperationValue() == ChildNodeOperation::NONE) {
-            return;
-        }
-        if (navDestinationNode->GetSubtitleNodeOperationValue() == ChildNodeOperation::REPLACE) {
-            navDestinationNode->RemoveChild(titleBarNode->GetSubtitle());
-        }
-        titleBarNode->SetSubtitle(navDestinationNode->GetSubtitle());
-        titleBarNode->AddChild(titleBarNode->GetSubtitle());
+    if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
+        navDestinationNode->RemoveChild(titleBarNode->GetTitle());
     }
-    titleBarNode->MarkModifyDone();
+    titleBarNode->SetTitle(navDestinationNode->GetTitle());
+    titleBarNode->AddChild(titleBarNode->GetTitle());
+}
+
+void BuildSubtitle(
+    const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
+{
+    if (!navDestinationNode->GetSubtitle()) {
+        return;
+    }
+    if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
+        return;
+    }
+    if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
+        navDestinationNode->RemoveChild(titleBarNode->GetSubtitle());
+    }
+    titleBarNode->SetSubtitle(navDestinationNode->GetSubtitle());
+    titleBarNode->AddChild(titleBarNode->GetSubtitle());
 }
 
 void BuildTitleBar(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode,
     RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty)
 {
-    if (!navDestinationNode->GetTitleBarNode()) {
-        return;
-    }
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    BuildTitleAndSubtitle(navDestinationNode, titleBarNode);
+
+    // back button icon
+    if (navDestinationLayoutProperty->HasNoPixMap()) {
+        if (navDestinationLayoutProperty->HasImageSource()) {
+            titleBarLayoutProperty->UpdateImageSource(navDestinationLayoutProperty->GetImageSourceValue());
+        }
+        if (navDestinationLayoutProperty->HasPixelMap()) {
+            titleBarLayoutProperty->UpdatePixelMap(navDestinationLayoutProperty->GetPixelMapValue());
+        }
+        titleBarLayoutProperty->UpdateNoPixMap(navDestinationLayoutProperty->GetNoPixMapValue());
+    }
+
+    BuildTitle(navDestinationNode, titleBarNode);
+    BuildSubtitle(navDestinationNode, titleBarNode);
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        titleBarNode->MarkModifyDone();
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        titleBarNode->MarkModifyDone();
     }
+    titleBarNode->MarkModifyDone();
 }
 
 void MountTitleBar(const RefPtr<NavDestinationGroupNode>& hostNode)

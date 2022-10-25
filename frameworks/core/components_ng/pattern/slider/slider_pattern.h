@@ -36,7 +36,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto blockDiameter = hotFlag_ ? blockHotDiameter_ : blockDiameter_;
+        auto blockDiameter = hotFlag_ ? blockDiameter_ * BLOCK_DIAMETER_SCALE : blockDiameter_;
         SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter, sliderLength_, borderBlank_,
             static_cast<float>(stepRatio_), static_cast<float>(valueRatio_) };
         return MakeRefPtr<SliderPaintMethod>(paintParameters);
@@ -82,7 +82,7 @@ private:
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
     void UpdateValueByLocalLocation(const std::optional<Offset>& localLocation);
-    void FireChangeEvent(int32_t mode) const;
+    void FireChangeEvent(int32_t mode);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -92,6 +92,7 @@ private:
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
     bool hotFlag_ = false;
+    bool valueChangeFlag_ = false;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
@@ -100,7 +101,7 @@ private:
 
     float trackThickness_ = 0.0f;
     float blockDiameter_ = 0.0f;
-    float blockHotDiameter_ = 0.0f;
+    static constexpr float BLOCK_DIAMETER_SCALE = 1.1f;
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<PanEvent> panEvent_;

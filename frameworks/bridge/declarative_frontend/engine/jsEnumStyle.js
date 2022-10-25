@@ -707,6 +707,12 @@ var NavBarPosition;
   NavBarPosition[NavBarPosition["End"] = 1] = "End";
 })(NavBarPosition || (NavBarPosition = {}));
 
+var TitleHeight;
+(function (TitleHeight) {
+  TitleHeight[TitleHeight["MainOnly"] = 0] = "MainOnly";
+  TitleHeight[TitleHeight["MainWithSub"] = 1] = "MainWithSub";
+})(TitleHeight || (TitleHeight = {}));
+
 var ResponseType;
 (function (ResponseType) {
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";

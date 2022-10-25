@@ -148,7 +148,7 @@ void ClipLayer::Dump()
     if (DumpLog::GetInstance().GetDumpFile()) {
         SkRect rect = rrect_.sk_rrect.getBounds();
         DumpLog::GetInstance().AddDesc(
-            "ClipRect: (", rect.left(), ",", rect.right(), ") -", rect.width(), "x", rect.height());
+            "ClipRect: (", rect.left(), ",", rect.top(), ") -", rect.width(), "x", rect.height());
         SkVector leftTop = rrect_.sk_rrect.radii(SkRRect::Corner::kUpperLeft_Corner);
         SkVector rightTop = rrect_.sk_rrect.radii(SkRRect::Corner::kUpperRight_Corner);
         SkVector leftBottom = rrect_.sk_rrect.radii(SkRRect::Corner::kLowerLeft_Corner);

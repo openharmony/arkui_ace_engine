@@ -99,19 +99,26 @@ public:
         gridLayoutInfo_ = GridLayoutInfo();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    float GetMainContentSize() const;
     void AddScrollEvent();
     bool UpdateScrollPosition(float offset, int32_t source);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    bool HandleDirectionKey(KeyCode code);
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<ScrollableEvent> scrollableEvent_;
 
     bool multiSelectable_ = false;
     bool supportAnimation_ = false;
+    bool isConfigScrollable_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };

@@ -104,14 +104,8 @@ void JSShape::JsWidth(const JSCallbackInfo& info)
 
 void JSShape::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
-    }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
-    }
-    ShapeModel::GetInstance()->SetWidth(value);
+    JSViewAbstract::JsWidth(jsValue);
+    ShapeModel::GetInstance()->SetWidth();
 }
 
 void JSShape::JsHeight(const JSCallbackInfo& info)
@@ -126,14 +120,8 @@ void JSShape::JsHeight(const JSCallbackInfo& info)
 
 void JSShape::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
-    }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
-    }
-    ShapeModel::GetInstance()->SetHeight(value);
+    JSViewAbstract::JsHeight(jsValue);
+    ShapeModel::GetInstance()->SetHeight();
 }
 
 void JSShape::JsSize(const JSCallbackInfo& info)

@@ -34,7 +34,10 @@ void ButtonPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     host->GetRenderContext()->SetClipToFrame(true);
+    clickedColor_ = pipeline->GetTheme<ButtonTheme>()->GetClickedColor();
 }
 
 bool ButtonPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -100,11 +103,17 @@ void ButtonPattern::OnTouchDown()
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
+
     if (buttonEventHub->GetStateEffect()) {
         const auto& renderContext = host->GetRenderContext();
-        renderContext->BlendBgColor(pipeline->GetTheme<ButtonTheme>()->GetClickedColor());
+        backgroundColor_ = renderContext->GetBackgroundColorValue();
+        if (isSetClickedColor_) {
+            // for user self-defined
+            renderContext->UpdateBackgroundColor(clickedColor_);
+            return;
+        }
+        // for system default
+        renderContext->BlendBgColor(clickedColor_);
     }
 }
 
@@ -116,6 +125,10 @@ void ButtonPattern::OnTouchUp()
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         const auto& renderContext = host->GetRenderContext();
+        if (isSetClickedColor_) {
+            renderContext->UpdateBackgroundColor(backgroundColor_);
+            return;
+        }
         renderContext->ResetBlendBgColor();
     }
 }

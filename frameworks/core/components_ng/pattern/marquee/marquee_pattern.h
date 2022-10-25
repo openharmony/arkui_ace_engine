@@ -55,10 +55,10 @@ public:
     {
         auto marqueeLayoutAlgorithm = MakeRefPtr<MarqueeLayoutAlgorithm>();
         marqueeLayoutAlgorithm->SetChildOffset(childOffset_);
-        marqueeLayoutAlgorithm->SetIsNeedMarquee(isNeedMarquee_);
         return marqueeLayoutAlgorithm;
     }
 
+    float CheckAndAdjustPosition(LayoutWrapper* layoutWrapper);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 protected:
@@ -68,7 +68,6 @@ protected:
     void OnActive() override;
 
 private:
-    void InitMarqueeController();
     void InitAnimatorController();
 
     void FireStartEvent() const;
@@ -79,7 +78,7 @@ private:
     int32_t GetLoop() const;
     bool GetPlayerStatus() const;
     MarqueeDirection GetDirection() const;
-    bool NeedMarquee() const;
+    float GetTextChildOffset() const;
 
     void StartMarquee();
     void StopMarquee();
@@ -92,13 +91,11 @@ private:
     RefPtr<Animator> animatorController_;
     RefPtr<CurveAnimation<float>> translate_;
     bool needAnimation_ = true;
-    bool startAfterLayout_ = true;
+    bool startAfterLayout_ = false;
     bool startAfterShowed_ = false;
-    bool playerFinishControl_ = false;
     bool playStatus_ = false;
     bool isActive_ = false;
     bool isNeedMarquee_ = true;
-    bool flag_ = true;
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT;
     float childOffset_ {};
     int32_t loop_ = DEFAULT_MARQUEE_LOOP;

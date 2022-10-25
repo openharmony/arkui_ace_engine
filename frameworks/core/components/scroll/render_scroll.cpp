@@ -496,7 +496,10 @@ void RenderScroll::ResetScrollEventCallBack()
                     std::make_shared<ScrollEventInfo>(ScrollEvent::SCROLL_END, 0.0, 0.0, -1));
             }
             // Send scroll none when scroll is end.
-            scroll->HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
+            auto context = scroll->GetContext().Upgrade();
+            if (!(context && context->GetIsDeclarative())) {
+                scroll->HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
+            }
             scroll->HandleScrollBarEnd();
 
             auto proxy = scroll->scrollBarProxy_;
@@ -646,10 +649,10 @@ void RenderScroll::OnTouchTestHit(
     if (!GetVisible() || axis_ == Axis::NONE) {
         return;
     }
-    if (!scrollable_ || !scrollable_->Available()) {
+    if (!scrollable_) {
         return;
     }
-    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
+    if (scrollable_->Available() && scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
         scrollBar_->AddScrollBarController(coordinateOffset, result);
     } else {
         scrollable_->SetCoordinateOffset(coordinateOffset);

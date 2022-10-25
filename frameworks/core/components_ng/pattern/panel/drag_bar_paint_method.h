@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_DRAG_BAR_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_DRAG_BAR_PAINT_METHOD_H
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -29,25 +30,25 @@ public:
     ~DragBarPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
+    void SetIconOffset(OffsetF iconOffset)
+    {
+        iconOffset_ = iconOffset;
+    }
+
+    void SetScaleWidth(float scaleWidth)
+    {
+        scaleWidth_ = scaleWidth;
+    }
+
+    void SetScaleIcon(float scaleIcon)
+    {
+        scaleIcon_ = scaleIcon;
+    }
+
 protected:
-    NG::OffsetF iconOffset_;
-    NG::OffsetF barLeftPoint_;
-    NG::OffsetF barCenterPoint_;
-    NG::OffsetF barRightPoint_;
-    NG::OffsetF dragOffset_;
-    NG::OffsetF downPoint_;
-    
-    float barWidth_ = 4.0f;
-    float scaleX_ = 1.0f;
-    float scaleY_ = 1.0f;
-    float opacity_ = 1.0f;
-   
-    float dragRangeX_ = 0.0f;
-    float dragRangeY_ = 0.0f;
+    OffsetF iconOffset_;
     float scaleIcon_ = 1.0f;
     float scaleWidth_ = 1.0f;
-
-    uint8_t alpha_ = UINT8_MAX;
 
 private:
     void Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;

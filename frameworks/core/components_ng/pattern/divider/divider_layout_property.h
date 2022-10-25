@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_LAYOUT_PROPERTY_H
 
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/divider/divider_paragraph.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DividerLayoutProperty : public LayoutProperty {
@@ -30,18 +29,27 @@ public:
     {
         auto value = MakeRefPtr<DividerLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propDividerLayoutParagraph_ = CloneDividerLayoutParagraph();
+        value->propVertical_ = CloneVertical();
+        value->propStrokeWidth_ = CloneStrokeWidth();
         return value;
     }
 
     void Reset() override
     {
         LayoutProperty::Reset();
-        ResetDividerLayoutParagraph();
+        ResetVertical();
+        ResetStrokeWidth();
     }
-    ACE_DEFINE_PROPERTY_GROUP(DividerLayoutParagraph, DividerLayoutParagraph);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerLayoutParagraph, Vertical, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerLayoutParagraph, StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("vertical", propVertical_.value_or(true) ? "true" : "false");
+        json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension(1, DimensionUnit::VP)).ToString().c_str());
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Vertical, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DividerLayoutProperty);

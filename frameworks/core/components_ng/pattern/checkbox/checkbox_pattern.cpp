@@ -349,4 +349,9 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
     groupPaintProperty->SetIsCheckBoxCallbackDealed(true);
 }
 
+bool CheckBoxPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+{
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

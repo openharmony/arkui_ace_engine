@@ -47,6 +47,14 @@ public:
         ResetBackgroundColor();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put("value", propValue_.value_or("").c_str());
+        json->Put("color", propColor_.value_or(Color::BLACK).ColorToString().c_str());
+        json->Put("backgroundColor", propColor_.value_or(Color::WHITE).ColorToString().c_str());
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);

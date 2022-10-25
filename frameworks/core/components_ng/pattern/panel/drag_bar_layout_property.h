@@ -36,13 +36,21 @@ public:
     {
         auto value = MakeRefPtr<DragBarLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
+        value->propFullScreenMode_ = CloneFullScreenMode();
+        value->propHotRegionHeight_ = CloneHotRegionHeight();
         return value;
     }
 
     void Reset() override
     {
         LayoutProperty::Reset();
+        ResetFullScreenMode();
+        ResetHotRegionHeight();
     }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FullScreenMode, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HotRegionHeight, float, PROPERTY_UPDATE_MEASURE);
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DragBarLayoutProperty);
 };

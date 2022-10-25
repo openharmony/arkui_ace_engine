@@ -45,6 +45,8 @@ public:
     {
         return false;
     }
+
+    void OnModifyDone() override;
 };
 
 } // namespace OHOS::Ace::NG

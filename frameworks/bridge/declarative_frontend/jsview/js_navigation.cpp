@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 
 #include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/navigation_bar/navigation_bar_component_v2.h"
 #include "core/components/navigation_bar/navigation_container_component.h"
@@ -112,6 +113,28 @@ void ParseBarItems(const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, st
         items.push_back(toolBarItem);
     }
 }
+
+bool ParseCommonTitle(const JSRef<JSVal>& jsValue)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return false;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> title = jsObj->GetProperty("main");
+    bool isCommonTitle = false;
+    if (title->IsString()) {
+        NG::NavigationView::SetTitle(title->ToString());
+        isCommonTitle = true;
+    }
+    JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
+    if (subtitle->IsString()) {
+        NG::NavigationView::SetSubtitle(subtitle->ToString());
+        isCommonTitle = true;
+    }
+    return isCommonTitle;
+}
+
 } // namespace
 
 void JSNavigation::Create()
@@ -144,6 +167,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("navBarPosition", &JSNavigation::SetNavBarPosition);
     JSClass<JSNavigation>::StaticMethod("hideNavBar", &JSNavigation::SetHideNavBar);
     JSClass<JSNavigation>::StaticMethod("backButtonIcon", &JSNavigation::SetBackButtonIcon);
+    JSClass<JSNavigation>::StaticMethod("onNavBarStateChange", &JSNavigation::SetOnNavBarStateChange);
     JSClass<JSNavigation>::Inherit<JSContainerBase>();
     JSClass<JSNavigation>::Inherit<JSViewAbstract>();
     JSClass<JSNavigation>::Bind(globalObj);
@@ -168,7 +192,13 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         }
         navigationContainer->GetDeclaration()->title = info[0]->ToString();
     } else if (info[0]->IsObject()) {
-        auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+        if (ParseCommonTitle(info[0])) {
+            return;
+        }
+
+        // CustomBuilder | NavigationCustomTitle
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             if (Container::IsCurrentUseNewPipeline()) {
                 RefPtr<NG::UINode> customNode;
@@ -180,21 +210,47 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
                     customNode = NG::ViewStackProcessor::GetInstance()->Finish();
                 }
                 NG::NavigationView::SetCustomTitle(customNode);
+            } else {
+                auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+                auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
+                if (!navigationContainer) {
+                    LOGI("component is not navigationContainer.");
+                    return;
+                }
+                {
+                    ScopedViewStackProcessor builderViewStackProcessor;
+                    JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+                    ACE_SCORING_EVENT("Navigation.title.builder");
+                    jsBuilderFunc.Execute();
+                    auto customTile = ViewStackProcessor::GetInstance()->Finish();
+#if defined(PREVIEW)
+                    auto composedComponent =
+                        ViewStackProcessor::GetInstance()->CreateInspectorWrapper("NavigationTitle");
+                    composedComponent->SetChild(customTile);
+                    navigationContainer->GetDeclaration()->customTitle = composedComponent;
+#else
+                    navigationContainer->GetDeclaration()->customTitle = customTile;
+#endif
+                }
+            }
+        }
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            return;
+        }
+        JSRef<JSVal> height = jsObj->GetProperty("height");
+        if (height->IsNumber()) {
+            if (height->ToNumber<int32_t>() == 0) {
+                NG::NavigationView::SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
+            }
+            if (height->ToNumber<int32_t>() == 1) {
+                NG::NavigationView::SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
+            }
+            Dimension titleHeight;
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
                 return;
             }
-            auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-            auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-            if (!navigationContainer) {
-                LOGI("component is not navigationContainer.");
-                return;
-            }
-            {
-                ScopedViewStackProcessor builderViewStackProcessor;
-                JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
-                ACE_SCORING_EVENT("Navigation.title.builder");
-                jsBuilderFunc.Execute();
-                navigationContainer->GetDeclaration()->customTitle = ViewStackProcessor::GetInstance()->Finish();
-            }
+            NG::NavigationView::SetTitleHeight(titleHeight);
         }
     } else {
         LOGE("arg is not [String|Function].");
@@ -254,7 +310,26 @@ void JSNavigation::SetHideNavBar(bool hide)
     NG::NavigationView::SetHideNavBar(hide);
 }
 
-void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info) {}
+void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    std::string src;
+    auto noPixMap = ParseJsMedia(info[0], src);
+
+    RefPtr<PixelMap> pixMap = nullptr;
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (!noPixMap) {
+        pixMap = CreatePixelMapFromNapiValue(info[0]);
+    }
+#endif
+    NG::NavigationView::SetBackButtonIcon(src, noPixMap, pixMap);
+}
 
 void JSNavigation::SetHideBackButton(bool hide)
 {
@@ -390,7 +465,14 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
                 JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
                 ACE_SCORING_EVENT("Navigation.menu.builder");
                 jsBuilderFunc.Execute();
-                navigationContainer->GetDeclaration()->customMenus = ViewStackProcessor::GetInstance()->Finish();
+                auto customMenus = ViewStackProcessor::GetInstance()->Finish();
+#if defined(PREVIEW)
+                auto composedComponent = ViewStackProcessor::GetInstance()->CreateInspectorWrapper("NavigationMenus");
+                composedComponent->SetChild(customMenus);
+                navigationContainer->GetDeclaration()->customMenus = composedComponent;
+#else
+                navigationContainer->GetDeclaration()->customMenus = customMenus;
+#endif
             }
         }
     } else {
@@ -454,6 +536,7 @@ void JSNavigation::SetNavigationMode(int32_t value)
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
+
     if (value >= 0 && value <= NAVIGATION_MODE_RANGE) {
         NG::NavigationView::SetNavigationMode(static_cast<NG::NavigationMode>(value));
     } else {
@@ -466,6 +549,7 @@ void JSNavigation::SetNavBarPosition(int32_t value)
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
+
     if (value >= 0 && value <= NAV_BAR_POSITION_RANGE) {
         NG::NavigationView::SetNavBarPosition(static_cast<NG::NavBarPosition>(value));
     } else {
@@ -478,16 +562,41 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
+
     Dimension navBarWidth;
     if (!ParseJsDimensionVp(info[0], navBarWidth)) {
         return;
     }
     NG::NavigationView::SetNavBarWidth(navBarWidth);
+}
+
+void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least one argument");
+        return;
+    }
+
+    if (info[0]->IsFunction()) {
+        auto onNavBarStateChangeCallback =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onNavBarStateChange = [execCtx = info.GetExecutionContext(),
+                                       func = std::move(onNavBarStateChangeCallback)](bool isVisible) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("OnNavBarStateChange");
+            JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(isVisible));
+            func->ExecuteJS(1, &param);
+        };
+        NG::NavigationView::SetOnNavBarStateChange(std::move(onNavBarStateChange));
+    }
+    info.ReturnSelf();
 }
 
 } // namespace OHOS::Ace::Framework

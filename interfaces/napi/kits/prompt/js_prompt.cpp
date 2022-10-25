@@ -140,7 +140,15 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
     }
 #ifdef OHOS_STANDARD_SYSTEM
-    if (SubwindowManager::GetInstance() != nullptr) {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto delegate = EngineHelper::GetCurrentDelegate();
+        if (!delegate) {
+            LOGE("can not get delegate.");
+            NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            return nullptr;
+        }
+        delegate->ShowToast(messageString, duration, bottomString);
+    } else if (SubwindowManager::GetInstance() != nullptr) {
         SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString);
     }
 #else

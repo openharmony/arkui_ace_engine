@@ -46,6 +46,10 @@ public:
         return MakeRefPtr<ContainerPaintProperty>();
     }
 
+    void OnModifyDone() override;
+
+    void MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode);
+
     bool NeedOverridePaintRect() override
     {
         auto frameNode = GetHost();
@@ -91,6 +95,7 @@ public:
 
 private:
     void ViewPortTansform();
+    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(ShapeContainerPattern);
 };

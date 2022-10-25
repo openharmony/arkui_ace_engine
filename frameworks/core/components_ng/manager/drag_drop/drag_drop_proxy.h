@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_DRAG_DROP_PROXY_H
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/gestures/gesture_info.h"
 
@@ -34,20 +35,22 @@ class ACE_EXPORT DragDropProxy : public virtual AceType {
     DECLARE_ACE_TYPE(DragDropProxy, AceType);
 
 public:
-    DragDropProxy() = default;
+    explicit DragDropProxy(int64_t id) : id_(id) {}
     ~DragDropProxy() override = default;
 
-    void OnDragStart(const GestureEvent& info, const std::string& extraInfo);
+    void OnDragStart(const GestureEvent& info, const std::string& extraInfo, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const GestureEvent& info);
     void OnDragEnd(const GestureEvent& info);
     void onDragCancel();
-    void OnItemDragStart(const GestureEvent& info);
+    void OnItemDragStart(const GestureEvent& info, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(const GestureEvent& info, int32_t draggedIndex);
     void OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex);
     void onItemDragCancel();
     void DestroyDragWindow();
 
 private:
+    int64_t id_ = -1;
+
     ACE_DISALLOW_COPY_AND_MOVE(DragDropProxy);
 };
 } // namespace OHOS::Ace::NG

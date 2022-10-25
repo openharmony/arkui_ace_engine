@@ -37,19 +37,8 @@ public:
         auto offset = paintWrapper->GetContentOffset();
         auto contentSize = paintWrapper->GetContentSize();
         ImagePainter imagePainter(canvasImage_);
-        return
-            [imagePainter, offset, ImagePaintConfig = *canvasImage_->imagePaintConfig_, contentSize](RSCanvas& canvas) {
-                if (ImagePaintConfig.isSvg) {
-                    imagePainter.DrawSVGImage(canvas, offset, contentSize, ImagePaintConfig);
-                    return;
-                }
-                if (ImagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
-                    imagePainter.DrawImage(canvas, offset, ImagePaintConfig);
-                    return;
-                }
-                imagePainter.DrawImageWithRepeat(canvas, ImagePaintConfig,
-                    RectF(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height()));
-            };
+        return [imagePainter, offset, ImagePaintConfig = *canvasImage_->imagePaintConfig_, contentSize](
+                   RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, contentSize, ImagePaintConfig); };
     }
 
 private:

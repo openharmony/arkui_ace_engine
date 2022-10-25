@@ -677,7 +677,7 @@ void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> 
         jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
     };
     if (jsViewFunction_->HasMeasure()) {
-        customNode->GetGeometryNode()->SetMeasureFunction(std::move(measureFunc));
+        customNode->SetMeasureFunction(std::move(measureFunc));
     }
 
     auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
@@ -686,7 +686,7 @@ void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> 
         jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
     };
     if (jsViewFunction_->HasLayout()) {
-        customNode->GetGeometryNode()->SetLayoutFunction(std::move(layoutFunc));
+        customNode->SetLayoutFunction(std::move(layoutFunc));
     }
 }
 

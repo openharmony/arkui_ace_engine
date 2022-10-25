@@ -70,7 +70,11 @@ private:
     static void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus = true);
 
+    bool CanShowFloatingTitle();
+
     WindowMode windowMode_;
+    float moveX_ = 0.0f;
+    float moveY_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

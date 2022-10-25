@@ -145,6 +145,11 @@ public:
         hostPageId_ = id;
     }
 
+    void SetRemoveSilently(bool removeSilently)
+    {
+        removeSilently_ = removeSilently;
+    }
+
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result);
     virtual HitTestMode GetHitTestMode() const
@@ -197,6 +202,11 @@ public:
         return onMainTree_;
     }
 
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
+    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -230,6 +240,7 @@ private:
     int32_t nodeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
+    bool removeSilently_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

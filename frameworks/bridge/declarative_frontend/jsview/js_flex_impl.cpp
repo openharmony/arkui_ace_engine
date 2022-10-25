@@ -15,201 +15,84 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 
-#include "core/components/flex/flex_component_v2.h"
-#include "core/components_ng/pattern/flex/flex_view.h"
+#include "core/components_ng/pattern/flex/flex_model.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/flex_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/components_ng/pattern/flex/flex_model_ng.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
-
-// corresponding to FlexAlign enum
-const std::vector<WrapAlignment> WRAP_TABLE = {
-    WrapAlignment::START,
-    WrapAlignment::START,
-    WrapAlignment::CENTER,
-    WrapAlignment::END,
-    WrapAlignment::STRETCH,
-    WrapAlignment::BASELINE,
-    WrapAlignment::SPACE_BETWEEN,
-    WrapAlignment::SPACE_AROUND,
-    WrapAlignment::SPACE_EVENLY,
-};
-
-constexpr int32_t MAIN_ALIGN_MAX_VALUE = 8;
-constexpr int32_t CROSS_ALIGN_MAX_VALUE = 5;
-constexpr int32_t DIRECTION_MAX_VALUE = 3;
-
-} // namespace
 
 void JSFlexImpl::Create(const JSCallbackInfo& info)
 {
-    std::list<RefPtr<Component>> children;
     if (info.Length() < 1) {
         LOGD("No input args, use default row setting");
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
-            return;
-        }
-        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(
-            FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
-        row->SetInspectorTag("FlexComponentV2");
-        ViewStackProcessor::GetInstance()->ClaimElementId(row);
-        ViewStackProcessor::GetInstance()->Push(row);
+        FlexModel::GetInstance()->CreateFlexRow();
         return;
     }
     if (!info[0]->IsObject()) {
         LOGD("arg is not a object, use default row setting");
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
-            return;
-        }
-        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(
-            FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
-        row->SetInspectorTag("FlexComponentV2");
-        ViewStackProcessor::GetInstance()->ClaimElementId(row);
-        ViewStackProcessor::GetInstance()->Push(row);
+        FlexModel::GetInstance()->CreateFlexRow();
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> wrapVal = obj->GetProperty("wrap");
-    RefPtr<Component> mainComponent;
     if (wrapVal->IsNumber()) {
         auto wrapNum = wrapVal->ToNumber<int32_t>();
         if (wrapNum == 0) {
-            mainComponent = CreateFlexComponent(info);
+            CreateFlexComponent(info);
         } else {
-            mainComponent = CreateWrapComponent(info, wrapNum);
+            CreateWrapComponent(info, wrapNum);
         }
     } else {
-        mainComponent = CreateFlexComponent(info);
+        CreateFlexComponent(info);
     }
-    if (!mainComponent) {
-        return;
-    }
-    ViewStackProcessor::GetInstance()->ClaimElementId(mainComponent);
-    ViewStackProcessor::GetInstance()->Push(mainComponent);
 }
 
-RefPtr<FlexComponent> JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
+void JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
 {
-    std::list<RefPtr<Component>> children;
     if (info.Length() < 1) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
-            return nullptr;
-        }
-        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(
-            FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
-        return row;
+        FlexModel::GetInstance()->CreateFlexRow();
+        return;
     }
     if (!info[0]->IsObject()) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
-            return nullptr;
-        }
-        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(
-            FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
-        return row;
+        FlexModel::GetInstance()->CreateFlexRow();
+        return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> directionVal = obj->GetProperty("direction");
     JSRef<JSVal> justifyVal = obj->GetProperty("justifyContent");
     JSRef<JSVal> alignItemVal = obj->GetProperty("alignItems");
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
-        if (directionVal->IsNumber()) {
-            auto direction = directionVal->ToNumber<int32_t>();
-            if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
-                NG::FlexView::Direction(static_cast<FlexDirection>(direction));
-            }
-        }
-        if (justifyVal->IsNumber()) {
-            auto mainAlign = justifyVal->ToNumber<int32_t>();
-            if (mainAlign >= 0 && mainAlign <= MAIN_ALIGN_MAX_VALUE) {
-                NG::FlexView::MainAxisAlign(static_cast<FlexAlign>(mainAlign));
-            }
-        }
-        if (alignItemVal->IsNumber()) {
-            auto crossAlign = alignItemVal->ToNumber<int32_t>();
-            if (crossAlign >= 0 && crossAlign <= CROSS_ALIGN_MAX_VALUE) {
-                NG::FlexView::CrossAxisAlign(static_cast<FlexAlign>(crossAlign));
-            }
-        }
-        return nullptr;
-    }
-    auto flex =
-        AceType::MakeRefPtr<FlexComponentV2>(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+    FlexModel::GetInstance()->CreateFlexRow();
     if (directionVal->IsNumber()) {
         auto direction = directionVal->ToNumber<int32_t>();
         if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
-            flex->SetDirection(static_cast<FlexDirection>(direction));
+            FlexModel::GetInstance()->SetDirection(static_cast<FlexDirection>(direction));
         }
     }
     if (justifyVal->IsNumber()) {
         auto mainAlign = justifyVal->ToNumber<int32_t>();
         if (mainAlign >= 0 && mainAlign <= MAIN_ALIGN_MAX_VALUE) {
-            flex->SetMainAxisAlign(static_cast<FlexAlign>(mainAlign));
+            FlexModel::GetInstance()->SetMainAxisAlign(static_cast<FlexAlign>(mainAlign));
         }
     }
     if (alignItemVal->IsNumber()) {
         auto crossAlign = alignItemVal->ToNumber<int32_t>();
         if (crossAlign >= 0 && crossAlign <= CROSS_ALIGN_MAX_VALUE) {
-            flex->SetCrossAxisAlign(static_cast<FlexAlign>(crossAlign));
+            FlexModel::GetInstance()->SetCrossAxisAlign(static_cast<FlexAlign>(crossAlign));
         }
     }
-    return flex;
 }
 
-RefPtr<WrapComponent> JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal)
+void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> directionVal = obj->GetProperty("direction");
     JSRef<JSVal> justifyVal = obj->GetProperty("justifyContent");
     JSRef<JSVal> alignItemVal = obj->GetProperty("alignItems");
     JSRef<JSVal> alignContentVal = obj->GetProperty("alignContent");
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::FlexView::CreateWrap(WrapDirection::HORIZONTAL, WrapAlignment::START, WrapAlignment::STRETCH,
-            WrapAlignment::START);
-        if (directionVal->IsNumber()) {
-            auto direction = directionVal->ToNumber<int32_t>();
-            if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
-                // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
-                if (direction <= 1) {
-                    direction += 2 * (wrapVal - 1);
-                } else {
-                    direction -= 2 * (wrapVal - 1);
-                }
-                NG::FlexView::SetWrapDirection((WrapDirection)direction);
-            }
-        } else {
-            // No direction set case: wrapVal == 2 means FlexWrap.WrapReverse.
-            WrapDirection wrapDirection = wrapVal == 2 ? WrapDirection::HORIZONTAL_REVERSE : WrapDirection::HORIZONTAL;
-            NG::FlexView::SetWrapDirection(wrapDirection);
-        }
-        if (justifyVal->IsNumber()) {
-            auto mainAlign = justifyVal->ToNumber<int32_t>();
-            if (mainAlign >= 0 && mainAlign <= MAIN_ALIGN_MAX_VALUE) {
-                NG::FlexView::SetWrapMainAlignment(WRAP_TABLE[mainAlign]);
-            }
-        }
-        if (alignItemVal->IsNumber()) {
-            auto crossAlign = alignItemVal->ToNumber<int32_t>();
-            if (crossAlign >= 0 && crossAlign <= CROSS_ALIGN_MAX_VALUE) {
-                NG::FlexView::SetWrapCrossAlignment(WRAP_TABLE[crossAlign]);
-            }
-        }
-        if (alignContentVal->IsNumber()) {
-            auto alignContent = alignContentVal->ToNumber<int32_t>();
-            if (alignContent >= 0 && alignContent <= MAIN_ALIGN_MAX_VALUE) {
-                NG::FlexView::SetWrapAlignment(WRAP_TABLE[alignContent]);
-            }
-        }
-        return nullptr;
-    }
-    std::list<RefPtr<Component>> children;
-    auto wrapComponent = AceType::MakeRefPtr<WrapComponent>(children);
-    wrapComponent->SetMainAlignment(WrapAlignment::START);
-    wrapComponent->SetCrossAlignment(WrapAlignment::STRETCH);
+    FlexModel::GetInstance()->CreateWrap();
     if (directionVal->IsNumber()) {
         auto direction = directionVal->ToNumber<int32_t>();
         if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
@@ -219,32 +102,31 @@ RefPtr<WrapComponent> JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info
             } else {
                 direction -= 2 * (wrapVal - 1);
             }
-            wrapComponent->SetDirection((WrapDirection)direction);
+            FlexModel::GetInstance()->SetWrapDirection(static_cast<WrapDirection>(direction));
         }
     } else {
         // No direction set case: wrapVal == 2 means FlexWrap.WrapReverse.
         WrapDirection wrapDirection = wrapVal == 2 ? WrapDirection::HORIZONTAL_REVERSE : WrapDirection::HORIZONTAL;
-        wrapComponent->SetDirection(wrapDirection);
+        FlexModel::GetInstance()->SetWrapDirection(wrapDirection);
     }
     if (justifyVal->IsNumber()) {
         auto mainAlign = justifyVal->ToNumber<int32_t>();
         if (mainAlign >= 0 && mainAlign <= MAIN_ALIGN_MAX_VALUE) {
-            wrapComponent->SetMainAlignment(WRAP_TABLE[mainAlign]);
+            FlexModel::GetInstance()->SetWrapMainAlignment(WRAP_TABLE[mainAlign]);
         }
     }
     if (alignItemVal->IsNumber()) {
         auto crossAlign = alignItemVal->ToNumber<int32_t>();
         if (crossAlign >= 0 && crossAlign <= CROSS_ALIGN_MAX_VALUE) {
-            wrapComponent->SetCrossAlignment(WRAP_TABLE[crossAlign]);
+            FlexModel::GetInstance()->SetWrapCrossAlignment(WRAP_TABLE[crossAlign]);
         }
     }
     if (alignContentVal->IsNumber()) {
         auto alignContent = alignContentVal->ToNumber<int32_t>();
         if (alignContent >= 0 && alignContent <= MAIN_ALIGN_MAX_VALUE) {
-            wrapComponent->SetAlignment(WRAP_TABLE[alignContent]);
+            FlexModel::GetInstance()->SetWrapAlignment(WRAP_TABLE[alignContent]);
         }
     }
-    return wrapComponent;
 }
 
 void JSFlexImpl::JsFlexWidth(const JSCallbackInfo& info)
@@ -260,25 +142,7 @@ void JSFlexImpl::JsFlexWidth(const JSCallbackInfo& info)
 void JSFlexImpl::JsFlexWidth(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsWidth(jsValue);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto widthVal = box->GetWidth();
-    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto flex = AceType::DynamicCast<FlexComponent>(mainComponent);
-    if (flex) {
-        if (flex->GetDirection() == FlexDirection::ROW || flex->GetDirection() == FlexDirection::ROW_REVERSE) {
-            flex->SetMainAxisSize(widthVal.Value() < 0.0 ? MainAxisSize::MIN : MainAxisSize::MAX);
-        } else {
-            flex->SetCrossAxisSize(widthVal.Value() < 0.0 ? CrossAxisSize::MIN : CrossAxisSize::MAX);
-        }
-    } else {
-        auto wrap = AceType::DynamicCast<WrapComponent>(mainComponent);
-        if (wrap) {
-            wrap->SetHorizontalMeasure(widthVal.Value() < 0.0 ? MeasureType::CONTENT : MeasureType::PARENT);
-        }
-    }
+    FlexModel::GetInstance()->SetFlexWidth();
 }
 
 void JSFlexImpl::JsFlexHeight(const JSCallbackInfo& info)
@@ -294,25 +158,7 @@ void JSFlexImpl::JsFlexHeight(const JSCallbackInfo& info)
 void JSFlexImpl::JsFlexHeight(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsHeight(jsValue);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto heightVal = box->GetHeight();
-    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto flex = AceType::DynamicCast<FlexComponent>(mainComponent);
-    if (flex) {
-        if (flex->GetDirection() == FlexDirection::COLUMN || flex->GetDirection() == FlexDirection::COLUMN_REVERSE) {
-            flex->SetMainAxisSize(heightVal.Value() < 0.0 ? MainAxisSize::MIN : MainAxisSize::MAX);
-        } else {
-            flex->SetCrossAxisSize(heightVal.Value() < 0.0 ? CrossAxisSize::MIN : CrossAxisSize::MAX);
-        }
-    } else {
-        auto wrap = AceType::DynamicCast<WrapComponent>(mainComponent);
-        if (wrap) {
-            wrap->SetVerticalMeasure(heightVal.Value() < 0.0 ? MeasureType::CONTENT : MeasureType::PARENT);
-        }
-    }
+    FlexModel::GetInstance()->SetFlexHeight();
 }
 
 void JSFlexImpl::JsFlexSize(const JSCallbackInfo& info)

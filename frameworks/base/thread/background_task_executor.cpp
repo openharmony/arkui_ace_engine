@@ -25,6 +25,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr size_t MAX_BACKGROUND_THREADS = 8;
+constexpr size_t MAX_DEFAULT_THREADS = 4;
 constexpr uint32_t PURGE_FLAG_MASK = (1 << MAX_BACKGROUND_THREADS) - 1;
 
 void SetThreadName(uint32_t threadNo)
@@ -86,6 +87,7 @@ bool BackgroundTaskExecutor::PostTask(Task&& task, BgTaskPriority priority)
     switch (priority) {
         case BgTaskPriority::LOW:
             lowPriorityTasks_.emplace_back(std::move(task));
+            condition_.notify_all();
             break;
         default:
             tasks_.emplace_back(std::move(task));
@@ -108,6 +110,7 @@ bool BackgroundTaskExecutor::PostTask(const Task& task, BgTaskPriority priority)
     switch (priority) {
         case BgTaskPriority::LOW:
             lowPriorityTasks_.emplace_back(task);
+            condition_.notify_all();
             break;
         default:
             tasks_.emplace_back(task);
@@ -136,7 +139,8 @@ void BackgroundTaskExecutor::StartNewThreads(size_t num)
     // Start new threads.
     std::list<std::thread> newThreads;
     for (size_t idx = 0; idx < num; ++idx) {
-        newThreads.emplace_back(std::bind(&BackgroundTaskExecutor::ThreadLoop, this, currentThreadNo + idx));
+        bool handleLow = currentThreadNo + idx > MAX_DEFAULT_THREADS;
+        newThreads.emplace_back(std::bind(&BackgroundTaskExecutor::ThreadLoop, this, currentThreadNo + idx, handleLow));
     }
 
     {
@@ -154,7 +158,7 @@ void BackgroundTaskExecutor::StartNewThreads(size_t num)
     }
 }
 
-void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
+void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo, bool handleLow)
 {
     LOGD("Background thread is started");
 
@@ -164,7 +168,7 @@ void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
     const uint32_t purgeFlag = (1 << (threadNo - 1));
     std::unique_lock<std::mutex> lock(mutex_);
     while (running_) {
-        if (tasks_.empty() && lowPriorityTasks_.empty()) {
+        if (tasks_.empty() && (!handleLow || lowPriorityTasks_.empty())) {
             if ((purgeFlags_ & purgeFlag) != purgeFlag) {
                 condition_.wait(lock);
                 continue;
@@ -181,9 +185,11 @@ void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
         if (!tasks_.empty()) {
             task = std::move(tasks_.front());
             tasks_.pop_front();
-        } else {
+        } else if (handleLow) {
             task = std::move(lowPriorityTasks_.front());
             lowPriorityTasks_.pop_front();
+        } else {
+            continue;
         }
 
         lock.unlock();

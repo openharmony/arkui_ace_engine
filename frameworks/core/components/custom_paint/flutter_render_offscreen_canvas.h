@@ -143,6 +143,7 @@ private:
     double BlurStrToDouble(const std::string& str);
     bool IsPercentStr(std::string& percentStr);
     void SetColorFilter(float matrix[20]);
+    void SetRenderTaskHolder(const RefPtr<FlutterRenderTaskHolder> renderTaskHolder);
 };
 } // namespace OHOS::Ace
 

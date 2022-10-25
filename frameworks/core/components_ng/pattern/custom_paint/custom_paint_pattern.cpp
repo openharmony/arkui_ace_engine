@@ -330,7 +330,7 @@ void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPat
 void CustomPaintPattern::UpdateGlobalAlpha(double alpha)
 {
     auto task = [alpha](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.SetAlpha(alpha); ;
+        paintMethod.SetAlpha(alpha);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
