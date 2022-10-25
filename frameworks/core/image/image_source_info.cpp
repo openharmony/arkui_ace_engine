@@ -198,6 +198,16 @@ InternalResource::ResourceId ImageSourceInfo::GetResourceId() const
     return resourceId_;
 }
 
+void ImageSourceInfo::SetPixMap(const RefPtr<PixelMap>& pixmap, std::optional<Color> fillColor)
+{
+    resourceId_ = InternalResource::ResourceId::NO_ID;
+    srcType_ = SrcType::PIXMAP;
+    src_.clear();
+    isSvg_ = IsSVGSource(src_, resourceId_);
+    fillColor_ = fillColor;
+    pixmap_ = pixmap;
+}
+
 bool ImageSourceInfo::IsInternalResource() const
 {
     return src_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID && !pixmap_;

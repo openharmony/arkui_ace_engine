@@ -334,7 +334,7 @@ public:
 
     void RefreshStageFocus();
 
-    void ShowContainerTitle(bool isShow);
+    void ShowContainerTitle(bool isShow) override;
 
     void BlurWindowWithDrag(bool isBlur);
 
@@ -836,8 +836,8 @@ public:
         parentPipeline_ = pipeline;
     }
 
-    void SetAppTitle(const std::string& title);
-    void SetAppIcon(const RefPtr<PixelMap>& icon);
+    void SetAppTitle(const std::string& title) override;
+    void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;
 
 protected:

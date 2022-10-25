@@ -717,18 +717,12 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
     ContainerScope scope(abilityId_);
     taskExecutor->PostTask(
         [container, mode]() {
-            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("OnModeChange failed, pipeline context is null.");
                 return;
             }
-            if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
-                mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-                pipelineContext->ShowContainerTitle(false);
-            } else {
-                pipelineContext->ShowContainerTitle(true);
-            }
+            pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -919,7 +913,7 @@ uint32_t AceAbility::GetBackgroundColor()
                 LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
                 return;
             }
-            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
                 return;

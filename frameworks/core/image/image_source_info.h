@@ -51,6 +51,7 @@ public:
     // interfaces to change [ImageSourceInfo]
     void SetSrc(const std::string& src, std::optional<Color> fillColor = std::nullopt);
     void SetResourceId(InternalResource::ResourceId id, std::optional<Color> fillColor = std::nullopt);
+    void SetPixMap(const RefPtr<PixelMap>& pixmap, std::optional<Color> fillColor = std::nullopt);
     void SetDimension(Dimension width, Dimension Height);
     void SetFillColor(const Color& color);
     void Reset();
