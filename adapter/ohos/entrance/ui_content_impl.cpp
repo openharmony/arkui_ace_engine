@@ -618,6 +618,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
 
+    if (window_->IsFocused()) {
+        LOGI("UIContentImpl: focus again");
+        Focus();
+    }
+
     // create ace_view
     auto flutterAceView =
         Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
