@@ -22,11 +22,11 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT GaugeModelNG : public OHOS::Ace::GaugeModel {
 public:
-    void Create(float values, float min,float max) override;
+    void Create(float values, float min, float max) override;
     void SetValue(float value) override;
     void SetStartAngle(float startAngle) override;
     void SetEndAngle(float endAngle) override;
-    void SetColors(const std::vector<Color>& colors,const std::vector<float>& values) override;
+    void SetColors(const std::vector<Color>& colors, const std::vector<float>& values) override;
     void SetStrokeWidth(const Dimension& strokeWidth) override;
     void SetLabelMarkedText(std::string labelTextString) override;
     void SetMarkedTextColor(const Color color) override;

@@ -21,7 +21,6 @@
 
 namespace OHOS::Ace {
 
-
 class ACE_EXPORT GaugeModel {
 public:
     static GaugeModel* GetInstance();
@@ -31,7 +30,7 @@ public:
     virtual void SetValue(float value) = 0;
     virtual void SetStartAngle(float startAngle) = 0;
     virtual void SetEndAngle(float endAngle) = 0;
-    virtual void SetColors(const std::vector<Color>& colors,const std::vector<float>& values) = 0;
+    virtual void SetColors(const std::vector<Color>& colors, const std::vector<float>& values) = 0;
     virtual void SetStrokeWidth(const Dimension& strokeWidth) = 0;
     virtual void SetLabelMarkedText(std::string labelTextString) = 0;
     virtual void SetMarkedTextColor(const Color color) = 0;
