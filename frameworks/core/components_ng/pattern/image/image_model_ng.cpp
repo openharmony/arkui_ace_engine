@@ -30,11 +30,17 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ImageSourceInfo imageSourceInfo(src);
+    auto createSourceInfoFunc = [&src, noPixMap, &pixMap]() -> ImageSourceInfo {
+#if defined(PIXEL_MAP_SUPPORTED)
+        return noPixMap ? ImageSourceInfo(src) : ImageSourceInfo(pixMap);
+#else
+        return ImageSourceInfo(src);
+#endif
+    };
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
 
     // register image frame node to pipeline context to receive memory level notification and window state change
     // notification
