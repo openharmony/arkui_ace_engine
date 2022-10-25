@@ -171,6 +171,7 @@ build_component_ng("pattern_ng") {
     "picker/datepicker_view.cpp",
     "progress/progress_layout_algorithm.cpp",
     "progress/progress_paint_method.cpp",
+    "progress/progress_paint_property.cpp",
     "progress/progress_pattern.cpp",
     "progress/progress_view.cpp",
     "radio/radio_layout_algorithm.cpp",
