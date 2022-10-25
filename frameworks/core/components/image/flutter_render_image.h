@@ -96,8 +96,9 @@ public:
 
     void OnAppHide() override;
     void OnAppShow() override;
-    void OnVisibleChanged() override;
 
+    // pause image when not visible
+    void OnVisibleChanged() override;
     void PerformLayoutPixmap() override;
     void PerformLayoutSvgImage() override;
 
@@ -146,6 +147,7 @@ private:
     void UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context);
     void ProcessPixmapForPaint();
 
+    RefPtr<ImageObject> imageObj_;
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;
     fml::RefPtr<flutter::CanvasImage> image_;
@@ -161,11 +163,10 @@ private:
     UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
-    RefPtr<ImageObject> imageObj_;
     RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     CancelableTask fetchImageObjTask_;
-    bool backgroundTaskCancled_ = false;
+    bool backgroundTaskCanceled_ = false;
 };
 
 } // namespace OHOS::Ace

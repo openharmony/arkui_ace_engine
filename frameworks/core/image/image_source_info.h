@@ -132,8 +132,7 @@ public:
     std::string ToString() const
     {
         if (!src_.empty()) {
-            return src_ + std::string("w") + std::to_string(sourceWidth_.Value()) +
-                std::string("h") + std::to_string(sourceHeight_.Value());
+            return src_;
         } else if (resourceId_ != InternalResource::ResourceId::NO_ID) {
             return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
         } else if (pixmap_) {
