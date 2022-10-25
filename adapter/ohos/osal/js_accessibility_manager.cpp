@@ -70,6 +70,7 @@ struct CommonProperty {
     int32_t windowLeft = 0;
     int32_t windowTop = 0;
     int32_t pageId = 0;
+    std::string pagePath;
 };
 
 Accessibility::EventType ConvertStrToEventType(const std::string& type)
@@ -225,6 +226,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     if (node->GetNodeId() == 0) {
         nodeInfo.SetParent(INVALID_PARENT_ID);
     }
+    nodeInfo.SetPagePath(manager->GetPagePath());
     nodeInfo.SetWindowId(windowId);
     nodeInfo.SetChecked(node->GetCheckedState());
     nodeInfo.SetEnabled(node->GetEnabledState());
@@ -660,6 +662,7 @@ void UpdateAccessibilityElementInfo(
 
     nodeInfo.SetWindowId(commonProperty.windowId);
     nodeInfo.SetPageId(node->GetPageId());
+    nodeInfo.SetPagePath(commonProperty.pagePath);
 
     UpdateSupportAction(node, nodeInfo);
 }
@@ -1246,7 +1249,8 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID)
         auto windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         auto windowTop = GetWindowTop(ngPipeline->GetWindowId());
         auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
-        CommonProperty commonProperty { ngPipeline->GetWindowId(), windowLeft, windowTop, pageId };
+        auto pagePath = GetPagePath();
+        CommonProperty commonProperty { ngPipeline->GetWindowId(), windowLeft, windowTop, pageId, pagePath };
         DumpTreeNG(rootNode, depth, nodeID, commonProperty);
     }
 }
@@ -1404,8 +1408,9 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(
     }
 
     auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
+    auto pagePath = GetPagePath();
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
-        GetWindowTop(ngPipeline->GetWindowId()), pageId };
+        GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
     UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo);
 
     infos.push_back(nodeInfo);
@@ -1433,8 +1438,9 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(
         return;
     }
     auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
+    auto pagePath = GetPagePath();
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
-        GetWindowTop(ngPipeline->GetWindowId()), pageId };
+        GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
     for (const auto& node : results) {
         AccessibilityElementInfo nodeInfo;
         UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo);
@@ -1624,8 +1630,9 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(
     }
     if (resultNode) {
         auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
+        auto pagePath = GetPagePath();
         CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
-            GetWindowTop(ngPipeline->GetWindowId()), pageId };
+            GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
         UpdateAccessibilityElementInfo(resultNode, commonProperty, info);
     }
 }
@@ -2203,8 +2210,9 @@ void JsAccessibilityManager::FocusMoveSearchNG(
 
     if (resultNode) {
         auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
+        auto pagePath = GetPagePath();
         CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
-            GetWindowTop(ngPipeline->GetWindowId()), pageId };
+            GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
         UpdateAccessibilityElementInfo(resultNode, commonProperty, info);
     }
 }
@@ -2248,6 +2256,15 @@ void JsAccessibilityManager::SetExecuteActionResult(
     if (IsRegister()) {
         callback.SetExecuteActionResult(succeeded, requestId);
     }
+}
+
+std::string JsAccessibilityManager::GetPagePath()
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, "");
+    auto frontend = context->GetFrontend();
+    CHECK_NULL_RETURN(frontend, "");
+    return frontend->GetPagePath();
 }
 
 } // namespace OHOS::Ace::Framework
