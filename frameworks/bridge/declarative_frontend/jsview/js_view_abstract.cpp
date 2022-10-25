@@ -17,9 +17,10 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <optional>
 #include <memory>
+#include <optional>
 #include <regex>
+#include <utility>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -2272,7 +2273,7 @@ void JSViewAbstract::ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<Bor
 
 void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    if (args->IsNumber()) {
+    if (args->IsNumber() || args->IsString()) {
         Dimension outsetDimension;
         ParseJsDimensionVp(args, outsetDimension);
         if (args->IsNumber()) {
@@ -2303,12 +2304,12 @@ void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<Bor
 void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
     Dimension sliceDimension;
-    if (args->IsNumber()) {
+    if (args->IsNumber() || args->IsString()) {
         ParseJsDimensionVp(args, sliceDimension);
-        borderImage->SetEdgeWidth(BorderImageDirection::LEFT, sliceDimension);
-        borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, sliceDimension);
-        borderImage->SetEdgeWidth(BorderImageDirection::TOP, sliceDimension);
-        borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, sliceDimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::LEFT, sliceDimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, sliceDimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::TOP, sliceDimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, sliceDimension);
         return;
     }
 
@@ -2325,7 +2326,7 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
 
 void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    if (args->IsNumber()) {
+    if (args->IsNumber() || args->IsString()) {
         Dimension widthDimension;
         ParseJsDimensionVp(args, widthDimension);
         if (args->IsNumber()) {
@@ -3079,11 +3080,6 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
         return;
     }
     auto span = info[0]->ToNumber<int32_t>();
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetGrid(span, std::nullopt);
-        return;
-    }
     auto gridContainerInfo = JSGridContainer::GetContainer();
     ViewAbstractModel::GetInstance()->SetGrid(span, std::nullopt, gridContainerInfo);
 }
@@ -3172,115 +3168,62 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
-                                 const RefPtr<OHOS::Ace::DragEvent>& info,
-                                 const std::string& extraParams) -> NG::DragDropInfo {
-            NG::DragDropInfo dragDropInfo;
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, dragDropInfo);
-
-            auto ret = func->Execute(info, extraParams);
-            if (!ret->IsObject()) {
-                LOGE("NG: builder param is not an object.");
-                return dragDropInfo;
-            }
-
-            auto customNode = ParseDragCustomUINode(ret);
-            if (customNode) {
-                LOGI("use custom builder param.");
-                dragDropInfo.customNode = customNode;
-                return dragDropInfo;
-            }
-
-            auto builderObj = JSRef<JSObject>::Cast(ret);
-#if !defined(PREVIEW)
-            auto pixmap = builderObj->GetProperty("pixelMap");
-            dragDropInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
-#endif
-            auto extraInfo = builderObj->GetProperty("extraInfo");
-            ParseJsString(extraInfo, dragDropInfo.extraInfo);
-            return dragDropInfo;
-        };
-        NG::ViewAbstract::SetOnDragStart(std::move(onDragStartId));
-        return;
-    }
-
-    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
-        DragItemInfo itemInfo;
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
+    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                           const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
+        NG::DragDropBaseInfo dragDropInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, dragDropInfo);
 
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
-            LOGE("builder param is not an object.");
-            return itemInfo;
+            LOGE("NG: builder param is not an object.");
+            return dragDropInfo;
         }
-        auto component = ParseDragItemComponent(ret);
-        if (component) {
+
+        auto node = ParseDragNode(ret);
+        if (node) {
             LOGI("use custom builder param.");
-            itemInfo.customComponent = component;
-            return itemInfo;
+            dragDropInfo.node = node;
+            return dragDropInfo;
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
-#if !defined(PREVIEW)
+#if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
-        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+        dragDropInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
 #endif
         auto extraInfo = builderObj->GetProperty("extraInfo");
-        ParseJsString(extraInfo, itemInfo.extraInfo);
-        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
-        itemInfo.customComponent = component;
-        return itemInfo;
+        ParseJsString(extraInfo, dragDropInfo.extraInfo);
+        node = ParseDragNode(builderObj->GetProperty("builder"));
+        dragDropInfo.node = node;
+        return dragDropInfo;
     };
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnDragStartId(onDragStartId);
+    ViewAbstractModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
 }
 
-bool JSViewAbstract::ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragItemInfo& dragInfo)
+bool JSViewAbstract::ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo)
 {
-    auto component = ParseDragItemComponent(info);
-
-    if (!component) {
+    auto node = ParseDragNode(info);
+    if (!node) {
         return false;
     }
-    dragInfo.customComponent = component;
+    dragInfo.node = node;
     return true;
 }
 
-RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& info)
+RefPtr<AceType> JSViewAbstract::ParseDragNode(const JSRef<JSVal>& info)
 {
     auto builderFunc = ParseDragStartBuilderFunc(info);
     if (!builderFunc) {
         return nullptr;
     }
     // use another VSP instance while executing the builder function
-    ScopedViewStackProcessor builderViewStackProcessor;
-    {
-        ACE_SCORING_EVENT("onDragStart.builder");
-        builderFunc->Execute();
-    }
-    auto component = ViewStackProcessor::GetInstance()->Finish();
-    if (!component) {
-        LOGE("Custom component is null.");
-    }
-    return component;
-}
-
-RefPtr<NG::UINode> JSViewAbstract::ParseDragCustomUINode(const JSRef<JSVal>& info)
-{
-    auto builderFunc = ParseDragStartBuilderFunc(info);
-    if (!builderFunc) {
-        return nullptr;
-    }
-    // use another VSP instance while executing the builder function
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    ViewStackModel::GetInstance()->NewScope();
     {
         ACE_SCORING_EVENT("onDragStart.builder");
         builderFunc->Execute();
     }
 
-    return NG::ViewStackProcessor::GetInstance()->Finish();
+    return ViewStackModel::GetInstance()->Finish();
 }
 
 void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
@@ -3291,26 +3234,14 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
     }
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                                 const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onDragEnter");
-            func->Execute(info, extraParams);
-        };
-
-        NG::ViewAbstract::SetOnDragEnter(std::move(onDragEnterId));
-        return;
-    }
-
-    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+    auto onDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                           const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnter");
         func->Execute(info, extraParams);
     };
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnDragEnterId(onDragEnterId);
+
+    ViewAbstractModel::GetInstance()->SetOnDragEnter(std::move(onDragEnter));
 }
 
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
@@ -3321,26 +3252,14 @@ void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
     }
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                                const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onDragMove");
-            func->Execute(info, extraParams);
-        };
-
-        NG::ViewAbstract::SetOnDragMove(std::move(onDragMoveId));
-        return;
-    }
-
-    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
+    auto onDragMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                          const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragMove");
         func->Execute(info, extraParams);
     };
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnDragMoveId(onDragMoveId);
+
+    ViewAbstractModel::GetInstance()->SetOnDragMove(std::move(onDragMove));
 }
 
 void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
@@ -3351,26 +3270,14 @@ void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
     }
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                                 const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onDragLeave");
-            func->Execute(info, extraParams);
-        };
-
-        NG::ViewAbstract::SetOnDragLeave(std::move(onDragLeaveId));
-        return;
-    }
-
-    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+    auto onDragLeave = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                           const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragLeave");
         func->Execute(info, extraParams);
     };
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnDragLeaveId(onDragLeaveId);
+
+    ViewAbstractModel::GetInstance()->SetOnDragLeave(std::move(onDragLeave));
 }
 
 void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
@@ -3381,26 +3288,14 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
     }
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                            const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onDrop");
-            func->Execute(info, extraParams);
-        };
-
-        NG::ViewAbstract::SetOnDrop(std::move(onDropId));
-        return;
-    }
-
-    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
+    auto onDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                      const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDrop");
         func->Execute(info, extraParams);
     };
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnDropId(onDropId);
+
+    ViewAbstractModel::GetInstance()->SetOnDrop(std::move(onDrop));
 }
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
@@ -3971,10 +3866,6 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGD("Deprecated in new pipe");
-        return;
-    }
     if (args[0]->IsFunction()) {
         RefPtr<JsFocusFunction> jsOnFocusMove = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
         auto onFocusMove = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocusMove)](int info) {

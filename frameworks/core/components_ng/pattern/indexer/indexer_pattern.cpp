@@ -265,8 +265,9 @@ void IndexerPattern::ApplyIndexChanged()
             childRenderContext->BlendBgColor(selectedBackgroundColor);
         } else if (index == itemCount_) {
             if (usingPopup) {
-                std::vector<std::string> arrayValueSelected = {arrayValue_[selected_]};
+                std::vector<std::string> arrayValueSelected = {};
                 auto popupDataValue = popupData.value_or(arrayValueSelected);
+                popupDataValue.insert(std::begin(popupDataValue), arrayValue_[selected_]);
 
                 auto listNode = AceType::DynamicCast<FrameNode>(iter);
                 listNode->Clean();
@@ -301,6 +302,7 @@ void IndexerPattern::ApplyIndexChanged()
                 }
                 listNode->MarkModifyDone();
                 listNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                BeginBubbleAnimation(listNode);
             }
         } else {
             nodeLayoutProperty->UpdateTextColor(color);
@@ -345,5 +347,14 @@ bool IndexerPattern::OnKeyEvent(const KeyEvent& event)
         return MoveIndexBySearch(event.ConvertCodeToString());
     }
     return false;
+}
+
+void IndexerPattern::BeginBubbleAnimation(RefPtr<FrameNode> animationNode)
+{
+    auto renderContext = animationNode->GetRenderContext();
+    AnimationOption animationOption;
+    animationOption.SetDuration(INDEXER_BUBBLE_ANIMATION_DURATION);
+    animationOption.SetCurve(Curves::DECELE);
+    renderContext->OpacityAnimation(animationOption, 1.0f, 0.0f);
 }
 } // namespace OHOS::Ace::NG

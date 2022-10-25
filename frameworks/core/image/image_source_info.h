@@ -28,165 +28,48 @@
 namespace OHOS::Ace {
 class ImageSourceInfo {
 public:
+    explicit ImageSourceInfo(const std::string& imageSrc, Dimension width = Dimension(-1),
+        Dimension height = Dimension(-1), InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
+        const RefPtr<PixelMap>& pixmap = nullptr);
+    explicit ImageSourceInfo(const RefPtr<PixelMap>& pixmap)
+        : ImageSourceInfo("", Dimension(-1), Dimension(-1), InternalResource::ResourceId::NO_ID, pixmap)
+    {}
+    ImageSourceInfo() = default;
+    ~ImageSourceInfo() = default;
+
+    // static functions
     static bool IsSVGSource(const std::string& imageSrc, InternalResource::ResourceId resourceId);
     static bool IsPngSource(const std::string& src, InternalResource::ResourceId resourceId);
     static SrcType ResolveURIType(const std::string& uri);
     static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);
     static bool IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern);
 
-    explicit ImageSourceInfo(
-        const std::string& imageSrc,
-        Dimension width = Dimension(-1),
-        Dimension height = Dimension(-1),
-        InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
-        const RefPtr<PixelMap>& pixmap = nullptr);
+    // operators
+    bool operator==(const ImageSourceInfo& info) const;
+    bool operator!=(const ImageSourceInfo& info) const;
 
-    ImageSourceInfo() = default;
-    ~ImageSourceInfo() = default;
-
-    bool operator==(const ImageSourceInfo& info) const
-    {
-        return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
-                // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
-               src_ == info.src_ &&
-               resourceId_ == info.resourceId_ &&
-               sourceWidth_ == info.sourceWidth_ &&
-               sourceHeight_ == info.sourceHeight_ &&
-               fillColor_ == info.fillColor_;
-    }
-
-    bool operator!=(const ImageSourceInfo& info) const
-    {
-        return (!pixmap_ && info.pixmap_) ||
-               (pixmap_ && !info.pixmap_) ||
-               (pixmap_ && info.pixmap_ && pixmap_ != info.pixmap_) ||
-                // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
-               src_ != info.src_ ||
-               resourceId_ != info.resourceId_ ||
-               sourceWidth_ != info.sourceWidth_ ||
-               sourceHeight_ != info.sourceHeight_ ||
-               fillColor_ != info.fillColor_;
-    }
-
-    void SetSrc(const std::string& src, std::optional<Color> fillColor = std::nullopt)
-    {
-        src_ = src;
-        srcType_ = ResolveURIType(src_);
-        resourceId_ = InternalResource::ResourceId::NO_ID;
-        isSvg_ = IsSVGSource(src_, resourceId_);
-        fillColor_ = fillColor;
-        pixmap_ = nullptr;
-    }
-
-    const std::string& GetSrc() const
-    {
-        return src_;
-    }
-
-    void SetResourceId(InternalResource::ResourceId id, std::optional<Color> fillColor = std::nullopt)
-    {
-        resourceId_ = id;
-        srcType_ = SrcType::RESOURCE_ID;
-        src_.clear();
-        isSvg_ = IsSVGSource(src_, resourceId_);
-        fillColor_ = fillColor;
-        pixmap_ = nullptr;
-    }
-
-    InternalResource::ResourceId GetResourceId() const
-    {
-        return resourceId_;
-    }
-
-    bool IsInternalResource() const
-    {
-        return src_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID && !pixmap_;
-    }
-
-    bool IsValid() const
-    {
-        return (src_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID) ||
-               (!src_.empty() && resourceId_ == InternalResource::ResourceId::NO_ID) ||
-               pixmap_;
-    }
-
-    bool isPng() const
-    {
-        return isPng_;
-    }
-    bool IsSvg() const
-    {
-        return isSvg_;
-    }
-
-    bool IsPixmap() const
-    {
-        return pixmap_ != nullptr;
-    }
-
-    SrcType GetSrcType() const
-    {
-        return srcType_;
-    }
-
-    std::string ToString() const
-    {
-        if (!src_.empty()) {
-            return src_;
-        } else if (resourceId_ != InternalResource::ResourceId::NO_ID) {
-            return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
-        } else if (pixmap_) {
-            return std::string("pixmapID: ") + pixmap_->GetId() +
-                std::string(" -> modifyID: ") + pixmap_->GetModifyId();
-        } else {
-            return std::string("empty source");
-        }
-    }
-
-    void SetDimension(Dimension width, Dimension Height)
-    {
-        sourceWidth_ = width;
-        sourceHeight_ = Height;
-    }
-
-    bool IsSourceDimensionValid() const
-    {
-        return sourceWidth_.IsValid() && sourceHeight_.IsValid();
-    }
-
-    Size GetSourceSize() const
-    {
-        return Size(sourceWidth_.Value(), sourceHeight_.Value());
-    }
-
-    void Reset()
-    {
-        src_.clear();
-        sourceWidth_ = Dimension(-1);
-        sourceHeight_ = Dimension(-1);
-        resourceId_ = InternalResource::ResourceId::NO_ID;
-        isSvg_ = false;
-        fillColor_.reset();
-        pixmap_ = nullptr;
-        cacheKey_.clear();
-    }
-
+    // interfaces to change [ImageSourceInfo]
+    void SetSrc(const std::string& src, std::optional<Color> fillColor = std::nullopt);
+    void SetResourceId(InternalResource::ResourceId id, std::optional<Color> fillColor = std::nullopt);
+    void SetDimension(Dimension width, Dimension Height);
     void SetFillColor(const Color& color);
+    void Reset();
 
-    std::optional<Color> GetFillColor() const
-    {
-        return fillColor_;
-    }
-
-    const RefPtr<PixelMap>& GetPixmap() const
-    {
-        return pixmap_;
-    }
-
-    const std::string& GetCacheKey() const
-    {
-        return cacheKey_;
-    }
+    // interfaces to get infomation from [ImageSourceInfo]
+    bool IsInternalResource() const;
+    bool IsValid() const;
+    bool IsPng() const;
+    bool IsSvg() const;
+    bool IsPixmap() const;
+    bool IsSourceDimensionValid() const;
+    std::string ToString() const;
+    InternalResource::ResourceId GetResourceId() const;
+    SrcType GetSrcType() const;
+    Size GetSourceSize() const;
+    const std::string& GetSrc() const;
+    std::optional<Color> GetFillColor() const;
+    const RefPtr<PixelMap>& GetPixmap() const;
+    const std::string& GetCacheKey() const;
 
 private:
     SrcType ResolveSrcType() const;

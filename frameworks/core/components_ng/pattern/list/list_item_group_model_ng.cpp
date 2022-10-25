@@ -13,31 +13,26 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
-
-#include <string>
+#include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
-#include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void LinearSplitModelNG::Create(SplitType splitType)
-{
-    std::string tag = splitType == SplitType::ROW_SPLIT ? V2::ROW_SPLIT_ETS_TAG : V2::COLUMN_SPLIT_ETS_TAG;
-    auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        tag, nodeId, [splitType]() { return AceType::MakeRefPtr<LinearSplitPattern>(splitType); });
-    stack->Push(frameNode);
-}
 
-void LinearSplitModelNG::SetResizeable(NG::SplitType splitType, bool resizeable)
+void ListItemGroupModelNG::Create()
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizeable, resizeable);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemGroupPattern>(nullptr); });
+    stack->Push(frameNode);
 }
 
 } // namespace OHOS::Ace::NG

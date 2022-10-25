@@ -64,12 +64,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(AnimatablePropertyBase);
 };
 
-struct AnimateConfig {
-    float speed = 1.0f;
-    int repeatTimes = -1;
-    bool autoReverse = false;
-};
-
 struct DrawingContext {
     RSCanvas& canvas;
     float width = 0;
@@ -84,12 +78,10 @@ public:
     AnimatableProperty(const T& value) : value_(value) {}
     ~AnimatableProperty() override = default;
 
-    void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc,
-        std::function<void(const AnimateConfig&, const T&)> setWithAnimationFunc)
+    void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc)
     {
         getFunc_ = getFunc;
         setFunc_ = setFunc;
-        setWithAnimationFunc_ = setWithAnimationFunc;
     }
 
     T Get()
@@ -110,20 +102,10 @@ public:
         }
     }
 
-    void SetWithAnimation(const AnimateConfig& config, const T& value)
-    {
-        if (setWithAnimationFunc_) {
-            setWithAnimationFunc_(config, value);
-        } else {
-            value_ = value;
-        }
-    }
-
 private:
     T value_;
     std::function<T()> getFunc_;
     std::function<void(const T&)> setFunc_;
-    std::function<void(const AnimateConfig&, const T&)> setWithAnimationFunc_;
     ACE_DISALLOW_COPY_AND_MOVE(AnimatableProperty);
 };
 

@@ -79,6 +79,7 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void BeginBubbleAnimation(RefPtr<FrameNode> animationNode);
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;

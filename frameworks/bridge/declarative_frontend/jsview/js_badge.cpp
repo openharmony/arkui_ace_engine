@@ -90,7 +90,7 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
                 LOGE("Get badge theme error");
                 return;
             }
-            if (!badgeSize.IsNonNegative()) {
+            if (badgeSize.IsNonNegative()) {
                 badgeParameters.badgeCircleSize = badgeSize;
             } else {
                 badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();

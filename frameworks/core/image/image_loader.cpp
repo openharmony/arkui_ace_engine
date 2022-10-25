@@ -110,6 +110,9 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
         case SrcType::RESOURCE_ID: {
             return MakeRefPtr<InternalImageLoader>();
         }
+        case SrcType::PIXMAP: {
+            return MakeRefPtr<PixelMapImageLoader>();
+        }
         default: {
             LOGE("Image source type not supported!  srcType: %{public}d, sourceInfo: %{public}s", srcType,
                 imageSourceInfo.ToString().c_str());
@@ -145,7 +148,7 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
-    if (SrcType::DATA_ABILITY_DECODED == imageSourceInfo.GetSrcType()) {
+    if (imageSourceInfo.IsPixmap()) {
         return LoadDecodedImageData(imageSourceInfo, context);
     }
     sk_sp<SkData> skData = LoadImageData(imageSourceInfo, context);
@@ -474,7 +477,7 @@ sk_sp<SkData> ResourceImageLoader::LoadImageData(
 }
 
 sk_sp<SkData> DecodedDataProviderImageLoader::LoadImageData(
-    const ImageSourceInfo& /*imageSourceInfo*/, const WeakPtr<PipelineBase>& /*context*/)
+    const ImageSourceInfo& /* imageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
 {
     return nullptr;
 }
@@ -503,6 +506,26 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
         return nullptr;
     }
     return MakeRefPtr<NG::ImageData>(pixmapOhos);
+#endif
+}
+
+sk_sp<SkData> PixelMapImageLoader::LoadImageData(
+    const ImageSourceInfo& /* imageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
+{
+    return nullptr;
+}
+
+RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+{
+#if !defined(PIXEL_MAP_SUPPORTED)
+    return nullptr;
+#else
+    if (!imageSourceInfo.GetPixmap()) {
+        LOGW("no pixel map in imageSourceInfo, imageSourceInfo: %{public}s", imageSourceInfo.ToString().c_str());
+        return nullptr;
+    }
+    return MakeRefPtr<NG::ImageData>(imageSourceInfo.GetPixmap());
 #endif
 }
 

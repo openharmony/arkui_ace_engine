@@ -36,6 +36,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/adapter/border_image_modifier.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
@@ -471,6 +472,20 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
     rsNode_->NotifyTransition(effect, isTransitionIn);
 }
 
+void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double begin, double end)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetAlpha(begin);
+    AnimationUtils::Animate(
+        option,
+        [rsNode = rsNode_, endAlpha = end]() {
+            if (rsNode) {
+                rsNode->SetAlpha(endAlpha);
+            }
+        },
+        option.GetOnFinishEvent());
+}
+
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -529,28 +544,20 @@ void RosenRenderContext::PaintBorderImage()
         if (NearZero(paintRect.Width()) || NearZero(paintRect.Height())) {
             return;
         }
-
+        auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
+                                ? (*layoutProperty->GetBorderWidthProperty())
+                                : BorderWidthProperty();
+        RSImage rsImage(&skImage);
         RSCanvas rsCanvas(&canvas);
-        RSPen pen;
-        pen.SetAntiAlias(true);
-        rsCanvas.AttachPen(pen);
-        rsCanvas.Save();
-
-        BorderImagePainter borderImagePainter(rosenRenderContext->GetBdImage(),
-            layoutProperty->GetBorderWidthProperty(), paintRect.GetSize(), rosenRenderContext->GetBorderImage().value(),
-            skImage, NG::PipelineContext::GetCurrentContext()->GetDipScale());
-        borderImagePainter.InitPainter();
-
-        auto position = OffsetF(0.0, 0.0);
-        if (layoutProperty->GetMarginProperty()) {
-            auto margin = *layoutProperty->GetMarginProperty();
-            auto scaleProperty = ScaleProperty::CreateScaleProperty();
-            const auto& rect = rosenRenderContext->GetHost()->GetGeometryNode()->GetFrameRect();
-            position += OffsetF(ConvertToPx(margin.left, scaleProperty, rect.Width()).value_or(0.0),
-                ConvertToPx(margin.top, scaleProperty, rect.Height()).value_or(0.0));
-        }
-        borderImagePainter.PaintBorderImage(position, rsCanvas);
-        rsCanvas.Restore();
+        BorderImagePainter borderImagePainter(
+            layoutProperty->GetBorderWidthProperty() != nullptr,
+            *rosenRenderContext->GetBdImage(),
+            borderWidthProperty,
+            paintRect.GetSize(),
+            rsImage,
+            NG::PipelineContext::GetCurrentContext()->GetDipScale()
+        );
+        borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
     rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE, paintBorderImageTask);
@@ -590,7 +597,11 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
     return task;
 }
 
-void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
+void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& /*borderImage*/)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RequestNextFrame();
+}
 
 void RosenRenderContext::OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo)
 {
@@ -602,6 +613,7 @@ void RosenRenderContext::OnBorderImageSourceUpdate(const ImageSourceInfo& border
         CHECK_NULL_VOID(bdImageLoadingCtx_);
         bdImageLoadingCtx_->LoadImageData();
     }
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnHasBorderImageSliceUpdate(bool tag) {}
@@ -618,24 +630,46 @@ void RosenRenderContext::OnBorderImageGradientUpdate(const Gradient& gradient)
     if (GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
         PaintBorderImageGradient();
     }
+    RequestNextFrame();
 }
 
 void RosenRenderContext::PaintBorderImageGradient()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto PaintBorderImageGradientTask = [weak = WeakClaim(this)](std::shared_ptr<SkCanvas> canvas) {
-        auto rosenRenderContext = weak.Upgrade();
-        CHECK_NULL_VOID(rosenRenderContext);
-        CHECK_NULL_VOID(rosenRenderContext->GetBorderImageGradient());
-        auto gradient = rosenRenderContext->GetBorderImageGradient().value();
-        if (!gradient.IsValid()) {
-            LOGE("Gradient not valid");
-            return;
-        }
-        // TODO: PaintBorderImageGradient
+    CHECK_NULL_VOID(GetBorderImage());
+    CHECK_NULL_VOID(GetBorderImageGradient());
+    auto gradient = GetBorderImageGradient().value();
+    if (!gradient.IsValid()) {
+        LOGE("Gradient not valid");
+        return;
+    }
+    auto paintSize = GetPaintRectWithoutTransform().GetSize();
+    if (NearZero(paintSize.Width()) || NearZero(paintSize.Height())) {
+        return;
+    }
+    auto layoutProperty = GetHost()->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto borderImageProperty = *GetBdImage();
+    auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
+                                    ? (*layoutProperty->GetBorderWidthProperty())
+                                    : BorderWidthProperty();
+    bool hasBorderWidthProperty = layoutProperty->GetBorderWidthProperty() != nullptr;
+    auto paintTask = [paintSize, borderImageProperty, borderWidthProperty, hasBorderWidthProperty](
+                         const NG::Gradient& gradient, RSCanvas& rsCanvas) mutable {
+        auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
+        BorderImagePainter borderImagePainter(hasBorderWidthProperty,
+            borderImageProperty, borderWidthProperty, paintSize, rsImage,
+            NG::PipelineContext::GetCurrentContext()->GetDipScale());
+        borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
-    rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE, PaintBorderImageGradientTask);
+    if (!borderImageModifier_) {
+        borderImageModifier_ = std::make_shared<BorderImageModifier>();
+        borderImageModifier_->SetPaintTask(std::move(paintTask));
+        rsNode_->AddModifier(borderImageModifier_);
+    }
+    borderImageModifier_->SetCustomData(gradient);
 }
 
 void RosenRenderContext::OnModifyDone()

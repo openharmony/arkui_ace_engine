@@ -171,14 +171,6 @@ void LayoutProperty::CheckAspectRatio()
         selfWidth = selfHeight.value() * aspectRatio;
     }
 
-    if (selfWidth.value_or(0) > maxWidth) {
-        selfWidth = maxWidth;
-        selfHeight = selfWidth.value() / aspectRatio;
-    }
-    if (selfHeight.value_or(0) > maxHeight) {
-        selfHeight = maxHeight;
-        selfWidth = selfHeight.value() * aspectRatio;
-    }
     if (selfHeight) {
         layoutConstraint_->selfIdealSize.SetHeight(selfHeight);
     }

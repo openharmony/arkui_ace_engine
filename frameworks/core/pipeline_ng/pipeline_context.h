@@ -226,6 +226,8 @@ public:
     {
         taskScheduler_.FlushTask();
     }
+    // end pipeline, exit app
+    void Finish(bool autoFinish) const override;
 
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;

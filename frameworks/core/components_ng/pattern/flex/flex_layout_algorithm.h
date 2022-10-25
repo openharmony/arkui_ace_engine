@@ -78,7 +78,6 @@ private:
     void PlaceChildren(
         LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace, const OffsetF& paddingOffset);
     FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
-    TextDirection AdjustTextDirectionByDir() const;
     float GetStretchCrossAxisLimit() const;
     void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
     void MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties);

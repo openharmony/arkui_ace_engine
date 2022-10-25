@@ -98,9 +98,9 @@ public:
         return badgeFontSize_;
     }
 
-    static const Dimension& GetBadgeCircleSize()
+    const Dimension& GetBadgeCircleSize()
     {
-        return 16.0_vp;
+        return badgeSize_;
     }
 
 protected:
@@ -113,6 +113,7 @@ private:
     BadgePosition badgePosition_;
     bool showMessage_;
     Dimension badgeFontSize_;
+    Dimension badgeSize_ = 16.0_vp;
 };
 
 } // namespace OHOS::Ace

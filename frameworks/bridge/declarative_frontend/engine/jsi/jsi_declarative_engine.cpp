@@ -17,6 +17,7 @@
 
 #include <optional>
 #include <unistd.h>
+
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
@@ -55,8 +56,8 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
-#include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
+#include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
@@ -321,7 +322,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
 
-    //preload getContext
+    // preload getContext
     JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
 
     // preload perfutil
@@ -970,7 +971,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
     return true;
 }
 
-bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string &fileName, uint64_t cardId)
+bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, uint64_t cardId)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
@@ -1258,7 +1259,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
 {
     CHECK_RUN_ON(JS);
     if (Container::IsCurrentUseNewPipeline()) {
-        InitXComponent(componentId);
+        ACE_DCHECK(engineInstance_);
         auto xcFrameNode = NG::FrameNode::GetFrameNode(V2::XCOMPONENT_ETS_TAG, static_cast<int32_t>(nodeId));
         if (!xcFrameNode) {
             LOGE("FireExternalEvent xcFrameNode is null.");
@@ -1271,12 +1272,19 @@ void JsiDeclarativeEngine::FireExternalEvent(
 
         nativeWindow = xcPattern->GetNativeWindow();
 
+        OH_NativeXComponent* nativeXComponent = nullptr;
+        RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
+
+        std::tie(nativeXComponentImpl, nativeXComponent) = xcPattern->GetNativeXComponent();
+        CHECK_NULL_VOID(nativeXComponent);
+        CHECK_NULL_VOID(nativeXComponentImpl);
+
         if (!nativeWindow) {
             LOGE("FireExternalEvent nativeWindow invalid");
             return;
         }
-        nativeXComponentImpl_->SetSurface(nativeWindow);
-        nativeXComponentImpl_->SetXComponentId(componentId);
+        nativeXComponentImpl->SetSurface(nativeWindow);
+        nativeXComponentImpl->SetXComponentId(componentId);
 
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
@@ -1285,8 +1293,9 @@ void JsiDeclarativeEngine::FireExternalEvent(
         }
 
         std::string arguments;
+        auto soPath = xcPattern->GetSoPath().value_or("");
         auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName(), true, arguments,
-            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
+            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent), soPath);
 
         auto runtime = engineInstance_->GetJsRuntime();
         shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
@@ -1317,8 +1326,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
             auto bridge = weak.Upgrade();
             if (bridge) {
 #ifdef XCOMPONENT_SUPPORTED
-                pattern->NativeXComponentInit(
-                    bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+                pattern->NativeXComponentInit();
 #endif
             }
         };
@@ -1378,8 +1386,9 @@ void JsiDeclarativeEngine::FireExternalEvent(
     }
 
     std::string arguments;
+    auto soPath = xcomponent->GetSoPath().value_or("");
     auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
-        OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
+        OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_), soPath);
 
     auto runtime = engineInstance_->GetJsRuntime();
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);

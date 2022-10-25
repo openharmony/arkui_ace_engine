@@ -21,10 +21,12 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/vector.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -522,6 +524,40 @@ public:
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override
     {
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
+    }
+
+    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override
+    {
+        auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                             const std::string& extraParams) -> DragDropInfo {
+            auto dragInfo = dragStartFunc(event, extraParams);
+            DragDropInfo info;
+            info.extraInfo = dragInfo.extraInfo;
+            info.pixelMap = dragInfo.pixelMap;
+            info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
+            return info;
+        };
+        ViewAbstract::SetOnDragStart(std::move(dragStart));
+    }
+
+    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override
+    {
+        ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
+    }
+
+    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override
+    {
+        ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
+    }
+
+    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override
+    {
+        ViewAbstract::SetOnDragMove(std::move(onDragMove));
+    }
+
+    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override
+    {
+        ViewAbstract::SetOnDrop(std::move(onDrop));
     }
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override
