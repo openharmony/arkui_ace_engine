@@ -258,7 +258,11 @@ void WebPattern::HandleFocusEvent()
         LOGE("handle focus delegate_ is nullptr");
         return;
     }
-    delegate_->OnFocus();
+    if (needOnFocus_) {
+        delegate_->OnFocus();
+    } else {
+        needOnFocus_ = true;
+    }
 }
 
 void WebPattern::HandleBlurEvent()
