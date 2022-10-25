@@ -124,6 +124,9 @@ public:
     static void MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
     static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
         std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder);
+    static bool BuildImageObject(const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo,
+        const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks,
+        RefPtr<ImageObject>& imageObj);
 
 protected:
     static void WrapTaskAndPostTo(
