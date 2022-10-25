@@ -119,7 +119,7 @@ void ViewStackProcessor::Pop()
     if (currentFrameNode) {
         currentFrameNode->OnMountToParentDone();
     }
-    LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
+    LOGD("ViewStackProcessor Pop size %{public}d", static_cast<int32_t>(elementsStack_.size()));
 }
 
 void ViewStackProcessor::PopContainer()
