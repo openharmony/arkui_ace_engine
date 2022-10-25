@@ -96,7 +96,6 @@ RefPtr<RosenRenderShape> RosenRenderShapeContainer::GetShapeChild(const RefPtr<R
 
 void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset& offset)
 {
-    auto pipelineContext = GetContext().Upgrade();
 
     auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
