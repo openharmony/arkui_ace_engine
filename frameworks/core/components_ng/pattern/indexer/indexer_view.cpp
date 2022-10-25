@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -58,7 +59,7 @@ void IndexerView::Create(const std::vector<std::string>& arrayValue, int32_t sel
         textLayoutProperty->UpdateContent(arrayValue[index]);
         frameNode->AddChild(indexerChildNode);
     }
-    auto indexerPopupNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    auto indexerPopupNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<ListPattern>());
     CHECK_NULL_VOID(indexerPopupNode);
     frameNode->AddChild(indexerPopupNode);
     
