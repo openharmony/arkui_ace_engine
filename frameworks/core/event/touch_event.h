@@ -64,6 +64,9 @@ struct TouchPoint final {
     TimeStamp downTime;
     double size = 0.0;
     float force = 0.0f;
+    std::optional<float> tiltX;
+    std::optional<float> tiltY;
+    SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
 };
 
@@ -84,8 +87,11 @@ struct TouchEvent final {
     TimeStamp time;
     double size = 0.0;
     float force = 0.0f;
+    std::optional<float> tiltX;
+    std::optional<float> tiltY;
     int64_t deviceId = 0;
     SourceType sourceType = SourceType::NONE;
+    SourceTool sourceTool = SourceTool::UNKNOWN;
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
@@ -103,7 +109,8 @@ struct TouchEvent final {
     TouchEvent CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, screenX, screenY, type, time, size, force, deviceId, sourceType, pointers };
+            return { id, x, y, screenX, screenY, type, time, size, force, tiltX, tiltY, deviceId, sourceType,
+                sourceTool, pointers };
         }
         auto temp = pointers;
         std::for_each(temp.begin(), temp.end(), [scale](auto&& point) {
@@ -112,8 +119,8 @@ struct TouchEvent final {
             point.screenX = point.screenX / scale;
             point.screenY = point.screenY / scale;
         });
-        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, time, size, force, deviceId,
-            sourceType, temp };
+        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, time, size, force, tiltX, tiltY,
+            deviceId, sourceType, sourceTool, temp };
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
@@ -127,7 +134,7 @@ struct TouchEvent final {
                 point.screenY = point.screenY - offsetY;
             });
             return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, time, size, force,
-                deviceId, sourceType, temp };
+                tiltX, tiltY, deviceId, sourceType, sourceTool, temp };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -137,7 +144,8 @@ struct TouchEvent final {
             point.screenY = (point.screenY - offsetY) / scale;
         });
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
-            (screenY - offsetY) / scale, type, time, size, force, deviceId, sourceType, temp };
+            (screenY - offsetY) / scale, type, time, size, force, tiltX, tiltY, deviceId, sourceType, sourceTool,
+            temp };
     }
 
     TouchEvent UpdatePointers() const
@@ -222,30 +230,24 @@ public:
     {
         return time_;
     }
-    void SetForce(float force)
-    {
-        force_ = force;
-    }
-    float GetForce() const
-    {
-        return force_;
-    }
 
 private:
     float screenX_ = 0.0f;
     float screenY_ = 0.0f;
     float localX_ = 0.0f;
     float localY_ = 0.0f;
-    float force_ = 0.0f;
     TouchType touchType_ = TouchType::UNKNOWN;
     TimeStamp time_;
 };
 
-class TouchLocationInfo : public virtual TypeInfoBase {
+class TouchLocationInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(TouchLocationInfo, TypeInfoBase);
 
 public:
-    explicit TouchLocationInfo(int32_t fingerId) : fingerId_(fingerId) {}
+    explicit TouchLocationInfo(const std::string& type, int32_t fingerId) : BaseEventInfo(type)
+    {
+        fingerId_ = fingerId;
+    }
     ~TouchLocationInfo() override = default;
 
     TouchLocationInfo& SetGlobalLocation(const Offset& globalLocation)
@@ -303,14 +305,6 @@ public:
         return touchDeviceId_;
     }
 
-    void SetForce(float force)
-    {
-        force_ = force;
-    }
-    float GetForce() const
-    {
-        return force_;
-    }
     TouchType GetTouchType() const
     {
         return touchType_;
@@ -338,9 +332,6 @@ private:
 
     // input device id
     int64_t touchDeviceId_ = 0;
-
-    // touch pressure
-    float force_ = 0.0f;
 
     // touch type
     TouchType touchType_ = TouchType::UNKNOWN;

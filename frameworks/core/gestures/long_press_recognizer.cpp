@@ -255,6 +255,14 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         info.SetScreenLocation(trackPoint.GetScreenOffset());
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetForce(trackPoint.force);
+        if (trackPoint.tiltX.has_value()) {
+            info.SetTiltX(trackPoint.tiltX.value());
+        }
+        if (trackPoint.tiltY.has_value()) {
+            info.SetTiltY(trackPoint.tiltY.value());
+        }
+        info.SetSourceTool(trackPoint.sourceTool);
         (*callback)(info);
     }
 }

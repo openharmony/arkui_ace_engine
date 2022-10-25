@@ -59,6 +59,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (state_ == DetectState::READY) {
         AddToReferee(event.id, AceType::Claim(this));
         touchPoints_[event.id] = event;
+        lastTouchEvent_ = event;
         if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
             initialDev_ = ComputeAverageDeviation();
             pinchCenter_ = ComputePinchCenter();
@@ -88,6 +89,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
+    lastTouchEvent_ = event;
     touchPoints_.erase(itr);
 
     if (state_ != DetectState::DETECTED) {
@@ -133,6 +135,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
 
     touchPoints_[event.id] = event;
+    lastTouchEvent_ = event;
     currentDev_ = ComputeAverageDeviation();
     time_ = event.time;
 
@@ -267,6 +270,14 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetForce(lastTouchEvent_.force);
+        if (lastTouchEvent_.tiltX.has_value()) {
+            info.SetTiltX(lastTouchEvent_.tiltX.value());
+        }
+        if (lastTouchEvent_.tiltY.has_value()) {
+            info.SetTiltY(lastTouchEvent_.tiltY.value());
+        }
+        info.SetSourceTool(lastTouchEvent_.sourceTool);
         (*callback)(info);
     }
 }

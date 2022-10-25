@@ -83,6 +83,14 @@ void ClickRecognizer::OnAccepted()
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetForce(touchPoint.force);
+        if (touchPoint.tiltX.has_value()) {
+            info.SetTiltX(touchPoint.tiltX.value());
+        }
+        if (touchPoint.tiltY.has_value()) {
+            info.SetTiltY(touchPoint.tiltY.value());
+        }
+        info.SetSourceTool(touchPoint.sourceTool);
         onClick_(info);
     }
 
@@ -309,6 +317,14 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetForce(touchPoint.force);
+        if (touchPoint.tiltX.has_value()) {
+            info.SetTiltX(touchPoint.tiltX.value());
+        }
+        if (touchPoint.tiltY.has_value()) {
+            info.SetTiltY(touchPoint.tiltY.value());
+        }
+        info.SetSourceTool(touchPoint.sourceTool);
         (*onAction)(info);
     }
 }
