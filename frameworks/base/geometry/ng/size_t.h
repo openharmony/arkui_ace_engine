@@ -259,6 +259,15 @@ public:
         return *this;
     }
 
+    void DivideScale(float scale)
+    {
+        if (NearZero(scale)) {
+            return;
+        }
+        width_ /= scale;
+        height_ /= scale;
+    }
+
     void ApplyScale(double scale)
     {
         width_ *= scale;
