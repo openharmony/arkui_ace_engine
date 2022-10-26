@@ -32,6 +32,9 @@ public:
 
     void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) override;
 
+    static RefPtr<PixelMapImageObject> Create(
+        const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data);
+
 private:
     RefPtr<PixelMap> pixmap_;
 };
