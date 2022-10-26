@@ -23,9 +23,12 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -39,6 +42,11 @@ namespace OHOS::Ace {
 
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
+
+enum class ResponseType : int32_t {
+    RIGHT_CLICK = 0,
+    LONGPRESS,
+};
 
 class ACE_EXPORT ViewAbstractModel {
 public:
@@ -168,6 +176,11 @@ public:
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
+    virtual void SetOnVisibleChange(
+        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
+    virtual void SetOnAreaChanged(
+        std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
+            onAreaChanged) = 0;
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
@@ -184,6 +197,11 @@ public:
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
+
+    // popup and menu
+    virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
+    virtual void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) = 0;
+    virtual void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;

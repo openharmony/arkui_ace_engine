@@ -660,16 +660,12 @@ void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runti
 void JsiDeclarativeEngineInstance::TriggerPageUpdate(const shared_ptr<JsRuntime>& runtime)
 {
     LOGD("TriggerPageUpdate");
-    if (runtime == nullptr) {
-        LOGE("jsRuntime is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(runtime);
     auto engineInstance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
-    if (engineInstance == nullptr) {
-        LOGE("engineInstance is nullptr");
-        return;
-    }
-    engineInstance->GetDelegate()->TriggerPageUpdate(engineInstance->GetRunningPage()->GetPageId());
+    CHECK_NULL_VOID(engineInstance);
+    auto page = engineInstance->GetRunningPage();
+    CHECK_NULL_VOID(page);
+    engineInstance->GetDelegate()->TriggerPageUpdate(page->GetPageId());
 }
 
 RefPtr<PipelineBase> JsiDeclarativeEngineInstance::GetPipelineContext(const shared_ptr<JsRuntime>& runtime)
