@@ -41,7 +41,7 @@ struct TabBarParam : public virtual Referenced {
         return builder != nullptr;
     }
     explicit TabBarParam(const std::string& textParam, const std::string& iconParam,
-        TabBarBuilderFunc builderParam): text(textParam), icon(iconParam)
+        TabBarBuilderFunc&& builderParam): text(textParam), icon(iconParam), builder(std::move(builderParam))
         {};
 };
 

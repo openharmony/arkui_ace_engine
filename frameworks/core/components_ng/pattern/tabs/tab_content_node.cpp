@@ -23,9 +23,7 @@ namespace OHOS::Ace::NG {
 void TabContentNode::OnAttachToMainTree()
 {
     auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
-    if (!tabs) {
-        return;
-    }
+    CHECK_NULL_VOID(tabs);
 
     auto swiper = tabs? tabs->GetTabs() : nullptr;
     auto myIndex = swiper ? swiper->GetChildFlatIndex(GetId()).second : 0;
@@ -40,14 +38,11 @@ void TabContentNode::OnDetachFromMainTree()
 
     auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
 
-    if (!tabs) {
-        LOGE("Tabs  not found");
-        return;
-    }
+    CHECK_NULL_VOID(tabs);
 
     // Change focus to the other tab if current is being deleted
     auto swiper = tabs? tabs->GetTabs() : nullptr;
-    auto pattern = swiper ? AceType::DynamicCast<FrameNode>(swiper)->GetPattern():nullptr;
+    auto pattern = swiper? AceType::DynamicCast<FrameNode>(swiper)->GetPattern() : nullptr;
     auto swiperPattern = pattern? AceType::DynamicCast<SwiperPattern>(pattern) : nullptr;
 
     auto deletedIdx = swiper->GetChildFlatIndex(GetId()).second;
@@ -65,7 +60,7 @@ void TabContentNode::OnDetachFromMainTree()
         if (currentIdx > deletedIdx) {
             LOGD( "RE-activate TAB with new IDX %{public}d from idx %{public}d",
                 currentIdx-1, deletedIdx);
-            swiperPattern->GetSwiperController()->SwipeTo(currentIdx-1);
+            swiperPattern->GetSwiperController()->SwipeTo(currentIdx - 1);
         }
     }
 }
@@ -83,6 +78,7 @@ RefPtr<TabContentNode> TabContentNode::GetOrCreateTabContentNode(
 
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
     tabContentNode = AceType::MakeRefPtr<TabContentNode>(tag, nodeId, pattern, false);
+    tabContentNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(tabContentNode);
     return tabContentNode;
 }

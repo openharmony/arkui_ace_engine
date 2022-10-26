@@ -55,7 +55,7 @@ public:
         tabBarParam_ = MakeRefPtr<TabBarParam>(text, icon, std::move(builder));
     }
 
-    RefPtr<TabBarParam> GetTabBarParam()
+    const RefPtr<TabBarParam>& GetTabBarParam()
     {
         return tabBarParam_;
     }

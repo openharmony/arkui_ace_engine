@@ -103,8 +103,7 @@ void ForEachNode::CompareAndUpdateChildren()
 
     for (const auto& oldId : oldIdsSet) {
         auto iter = oldNodeByIdMap.find(oldId);
-        if (iter != oldNodeByIdMap.end())
-        {
+        if (iter != oldNodeByIdMap.end()) {
             // Adding silently, so that upon removal
             // node is a part the tree.
             // OnDetachFromMainTree to be called while node
