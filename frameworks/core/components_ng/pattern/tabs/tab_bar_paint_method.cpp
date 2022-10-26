@@ -23,17 +23,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-void PaintIndicator(RSCanvas& canvas, PaintWrapper* paintWrapper)
+void PaintIndicator(RSCanvas& canvas, RectF indicator)
 {
-    auto paintProperty = AceType::DynamicCast<TabBarPaintProperty>(paintWrapper->GetPaintProperty());
-    if (!paintProperty->GetIndicator()) {
-        return;
-    }
-
-    RectF indicator = paintProperty->GetIndicatorValue();
     indicator.SetHeight(Dimension(4, DimensionUnit::VP).ConvertToPx());
-
-    // draw line
     RSBrush brush;
     brush.SetColor(ToRSColor(Color(0xFF254ff7)));
     brush.SetBlendMode(RSBlendMode::SRC_OVER);
@@ -45,7 +37,12 @@ void PaintIndicator(RSCanvas& canvas, PaintWrapper* paintWrapper)
 
 CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
-    auto paintFunc = [paintWrapper](RSCanvas& canvas) { PaintIndicator(canvas, paintWrapper); };
+    auto paintProperty = AceType::DynamicCast<TabBarPaintProperty>(paintWrapper->GetPaintProperty());
+    if (!paintProperty->GetIndicator()) {
+        return nullptr;
+    }
+    auto paintFunc = [indicator = paintProperty->GetIndicatorValue()](
+                         RSCanvas& canvas) { PaintIndicator(canvas, indicator); };
 
     return paintFunc;
 }

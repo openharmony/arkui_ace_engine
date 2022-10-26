@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
+
 namespace OHOS::Ace::NG {
 
 class TabBarPaintProperty : public PaintProperty {

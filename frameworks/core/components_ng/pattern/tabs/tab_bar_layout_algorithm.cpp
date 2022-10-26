@@ -129,7 +129,6 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     tabItemOffset_.emplace_back(childOffset);
-    SetIndicator(layoutWrapper);
 }
 
 Axis TabBarLayoutAlgorithm::GetAxis(LayoutWrapper* layoutWrapper) const
@@ -139,16 +138,16 @@ Axis TabBarLayoutAlgorithm::GetAxis(LayoutWrapper* layoutWrapper) const
     return layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
 }
 
-void TabBarLayoutAlgorithm::SetIndicator(LayoutWrapper* layoutWrapper) const
+RectF TabBarLayoutAlgorithm::GetIndicatorRect(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, RectF());
     int32_t indicator = layoutProperty->GetIndicatorValue(0);
 
     auto childColumn = layoutWrapper->GetOrCreateChildByIndex(indicator);
-    CHECK_NULL_VOID(childColumn);
+    CHECK_NULL_RETURN(childColumn, RectF());
     auto grandChildren = childColumn->GetOrCreateChildByIndex(childColumn->GetTotalChildCount() - 1);
-    CHECK_NULL_VOID(grandChildren);
+    CHECK_NULL_RETURN(grandChildren, RectF());
     auto grandChildGeometryNode = grandChildren->GetGeometryNode();
     RectF indicatorRect = grandChildGeometryNode->GetFrameRect();
 
@@ -156,10 +155,7 @@ void TabBarLayoutAlgorithm::SetIndicator(LayoutWrapper* layoutWrapper) const
     auto childColumnRect = childColumn->GetGeometryNode()->GetFrameRect();
     indicatorRect.SetLeft(indicatorRect.GetX() + childColumnRect.GetX());
     indicatorRect.SetTop(indicatorRect.Bottom() + childColumnRect.GetY());
-
-    auto paintProperty = layoutWrapper->GetHostNode()->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateIndicator(indicatorRect);
+    return indicatorRect;
 }
 
 } // namespace OHOS::Ace::NG

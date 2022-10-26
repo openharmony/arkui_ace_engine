@@ -64,17 +64,17 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        auto paintProperty = MakeRefPtr<TabBarPaintProperty>();
-        return paintProperty;
+        return MakeRefPtr<TabBarPaintProperty>();
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paintMethod = MakeRefPtr<TabBarPaintMethod>();
-        return paintMethod;
+        return MakeRefPtr<TabBarPaintMethod>();
     }
 
     void UpdateCurrentOffset(float offset);
+
+    void UpdateIndicator(int32_t indicator);
 
 private:
     void OnModifyDone() override;
