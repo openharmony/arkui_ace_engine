@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -370,6 +371,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
         };
         auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         iconProps->UpdatePadding(imagePadding);
+        LOGD("item icon src = %s", item.icon.c_str());
         auto imageSrc = ImageSourceInfo(item.icon, SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE);
         iconProps->UpdateImageSourceInfo(imageSrc);
 
