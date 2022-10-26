@@ -21,7 +21,6 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/singleton.h"
-#include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
 
@@ -73,10 +72,9 @@ private:
 
 class GestureReferee : public virtual AceType {
     DECLARE_ACE_TYPE(GestureReferee, AceType);
-
 public:
     GestureReferee() = default;
-    ~GestureReferee() override = default;
+    ~GestureReferee() = default;
 
     // Each gesture recognizer should add itself to the gesture scope at the beginning of the gesture sequence
     // (touch down event) for gesture adjudicating.

@@ -30,6 +30,7 @@
 #include "core/common/settings.h"
 #include "core/common/window.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 
 namespace OHOS::Ace {
 

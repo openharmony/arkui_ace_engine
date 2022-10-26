@@ -17,14 +17,14 @@ import(
 build_component_ng("gestures_ng") {
   sources = [
     # gestures
-    "gesture_group.cpp",
-    "gesture_referee.cpp",
-    "long_press_gesture.cpp",
-    "pan_gesture.cpp",
-    "pinch_gesture.cpp",
-    "rotation_gesture.cpp",
-    "swipe_gesture.cpp",
-    "tap_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/gesture_group.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/gesture_referee.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/long_press_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/pan_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/pinch_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/rotation_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/swipe_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/tap_gesture.cpp",
 
     # recognizers
     "recognizers/click_recognizer.cpp",
@@ -35,7 +35,6 @@ build_component_ng("gestures_ng") {
     "recognizers/pan_recognizer.cpp",
     "recognizers/parallel_recognizer.cpp",
     "recognizers/pinch_recognizer.cpp",
-    "recognizers/recognizer_group.cpp",
     "recognizers/rotation_recognizer.cpp",
     "recognizers/sequenced_recognizer.cpp",
     "recognizers/swipe_recognizer.cpp",

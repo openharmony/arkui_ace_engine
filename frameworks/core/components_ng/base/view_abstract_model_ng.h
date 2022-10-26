@@ -710,7 +710,7 @@ public:
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
-            hub->SetLongPressEvent(longPress);
+            hub->AddLongPressEvent(longPress);
         } else {
             LOGE("The arg responseType is invalid.");
             return;

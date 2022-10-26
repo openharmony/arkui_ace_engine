@@ -16,53 +16,68 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_EXCLUSIVE_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_EXCLUSIVE_RECOGNIZER_H
 
+#include <functional>
+#include <set>
+#include <type_traits>
+
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/gesture_info.h"
-#include "core/components_ng/gestures/recognizers/recognizer_group.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
 // ExclusiveRecognizer identifies gesture exclusive.
-class ACE_EXPORT ExclusiveRecognizer : public RecognizerGroup {
-    DECLARE_ACE_TYPE(ExclusiveRecognizer, RecognizerGroup);
+class ACE_EXPORT ExclusiveRecognizer : public MultiFingersRecognizer {
+    DECLARE_ACE_TYPE(ExclusiveRecognizer, MultiFingersRecognizer);
 
 public:
     explicit ExclusiveRecognizer(const std::vector<RefPtr<GestureRecognizer>>& recognizers)
-        : RecognizerGroup(recognizers)
-    {}
+    {
+        for (const auto& recognizer : recognizers) {
+            recognizer->SetGestureGroup(AceType::WeakClaim(this));
+            recognizers_.emplace_back(recognizer);
+        }
+    }
 
     explicit ExclusiveRecognizer(std::list<RefPtr<GestureRecognizer>>&& recognizers)
-        : RecognizerGroup(std::move(recognizers))
-    {}
+    {
+        recognizers_.swap(recognizers);
+        for (auto& recognizer : recognizers_) {
+            LOGE("ExclusiveRecognizer combine: %{public}s, %{public}p, %{public}zu", AceType::TypeName(recognizer),
+                AceType::RawPtr(recognizer), recognizers_.size());
+            recognizer->SetGestureGroup(AceType::WeakClaim(this));
+        }
+    }
 
     ~ExclusiveRecognizer() override = default;
-
-    void OnAccepted() override;
-    void OnRejected() override;
-    void OnPending() override;
-    void OnBlocked() override;
-
+    void OnAccepted(size_t touchId) override;
+    void OnRejected(size_t touchId) override;
+    void OnPending(size_t touchId) override;
     bool HandleEvent(const TouchEvent& point) override;
     bool HandleEvent(const AxisEvent& event) override;
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
+    void ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers);
 
 private:
-    bool CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer);
     void HandleTouchDownEvent(const TouchEvent& event) override {};
     void HandleTouchUpEvent(const TouchEvent& event) override {};
     void HandleTouchMoveEvent(const TouchEvent& event) override {};
     void HandleTouchCancelEvent(const TouchEvent& event) override {};
-    void BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal) override;
-    void HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    RefPtr<GestureRecognizer> UnBlockGesture();
-
+    void BatchAdjudicate(const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer,
+        GestureDisposal disposal) override;
+    void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
-    void OnResetStatus() override;
+    bool CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer);
+    void AcceptSubGesture(const RefPtr<GestureRecognizer>& recognizer);
+    bool CheckAllFailed();
+    void Reset();
+    void ResetStatus();
 
+    std::list<RefPtr<GestureRecognizer>> recognizers_;
     RefPtr<GestureRecognizer> activeRecognizer_;
+
+    bool pendingReset_ = false;
 };
 
 } // namespace OHOS::Ace::NG

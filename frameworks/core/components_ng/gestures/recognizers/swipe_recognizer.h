@@ -18,11 +18,9 @@
 
 #include <cmath>
 #include <functional>
-#include <optional>
+#include <map>
 
-#include "base/utils/type_definition.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,14 +29,22 @@ class SwipeRecognizer : public MultiFingersRecognizer {
 
 public:
     SwipeRecognizer(int32_t fingers, const SwipeDirection& direction, double speed)
-        : MultiFingersRecognizer(fingers), direction_(direction), speed_(speed)
-    {}
+        : direction_(direction), speed_(speed), newFingers_(fingers_), newSpeed_(speed_), newDirection_(direction_)
+    {
+        fingers_ = fingers;
+    }
+
     ~SwipeRecognizer() override = default;
 
     void OnAccepted() override;
     void OnRejected() override;
 
 private:
+    enum class GestureAcceptResult {
+        ACCEPT,
+        REJECT,
+        DETECTING,
+    };
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
     void HandleTouchMoveEvent(const TouchEvent& event) override;
@@ -48,30 +54,48 @@ private:
     void HandleTouchMoveEvent(const AxisEvent& event) override;
     void HandleTouchCancelEvent(const AxisEvent& event) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
-
-    void OnResetStatus() override;
-
+    GestureAcceptResult ParseFingersOffset() const;
+    GestureAcceptResult ParseAxisOffset() const;
+    void Reset();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    void ChangeFingers(int32_t fingers);
+    void ChangeDirection(const SwipeDirection& direction);
+    void ChangeSpeed(double speed);
+    double ComputeAngle();
+    double ComputeAngle(AxisEvent event);
 
-    bool CheckAngle(double angle);
+    const TouchRestrict& GetTouchRestrict() const
+    {
+        return touchRestrict_;
+    }
 
     SwipeDirection direction_;
     double speed_ = 0.0;
+    WeakPtr<PipelineBase> context_;
+    std::map<int32_t, TouchEvent> touchPoints_;
+    std::map<int32_t, Offset> fingersDistance_;
     TouchEvent lastTouchEvent_;
-    std::map<int32_t, TouchEvent> downEvents_;
-
     AxisEvent axisEventStart_;
     double axisVerticalTotal_ = 0.0;
     double axisHorizontalTotal_ = 0.0;
-
     TimeStamp time_;
     TimeStamp touchDownTime_;
-
+    bool slidingEnd_ = false;
+    bool slidingCancel_ = false;
     Point globalPoint_;
+    OnSwipeFingersFunc onChangeFingers_;
+    OnSwipeDirectionFunc onChangeDirection_;
+    OnSwipeSpeedFunc onChangeSpeed_;
+    int32_t newFingers_ = 1;
 
-    std::optional<double> prevAngle_;
-
+    double angle_ = 0.0;
+    double initialAngle_ = 0.0;
+    double currentAngle_ = 0.0;
+    double resultAngle_ = 0.0;
     double resultSpeed_ = 0.0;
+
+    double newSpeed_ = 0.0;
+    SwipeDirection newDirection_;
 };
 
 } // namespace OHOS::Ace::NG

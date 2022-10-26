@@ -27,9 +27,10 @@ void GestureScope::AddMember(const RefPtr<GestureRecognizer>& recognizer)
     }
 
     if (Existed(recognizer)) {
-        LOGW("gesture recognizer has already been added.");
+        LOGE("gesture recognizer has already been added.");
         return;
     }
+
 
     recognizer->SetRefereeState(RefereeState::DETECTING);
 

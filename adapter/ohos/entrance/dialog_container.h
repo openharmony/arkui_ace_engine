@@ -25,7 +25,6 @@
 #include "core/common/container.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/window.h"
-#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 
 namespace OHOS::Ace::Platform {
@@ -97,7 +96,7 @@ public:
     {
         return aceView_;
     }
-
+    
     void* GetView() const override
     {
         return static_cast<void*>(aceView_);
@@ -143,8 +142,8 @@ public:
     static void ShowDialog(int32_t instanceId, const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);
-    static void ShowActionMenu(int32_t instanceId, const std::string& title, const std::vector<ButtonInfo>& button,
-        std::function<void(int32_t, int32_t)>&& callback);
+    static void ShowActionMenu(int32_t instanceId, const std::string& title,
+        const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback);
 
     static bool ShowToastDialogWindow(
         int32_t instanceId, int32_t posX, int32_t posY, int32_t width, int32_t height, bool isToast = false);
@@ -156,15 +155,15 @@ public:
 
     static void DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback = nullptr);
     static RefPtr<DialogContainer> GetContainer(int32_t instanceId);
-    static void SetView(
-        AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow);
+    static void SetView(AceView* view, double density, int32_t width, int32_t height,
+        sptr<OHOS::Rosen::Window>& rsWindow);
     static void SetViewNew(
         AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow);
     static bool OnBackPressed(int32_t instanceId);
 
 private:
-    void InitPipelineContext(std::unique_ptr<Window> window, int32_t instanceId, double density, int32_t width,
-        int32_t height, uint32_t windowId);
+    void InitPipelineContext(std::unique_ptr<Window> window, int32_t instanceId,
+        double density, int32_t width, int32_t height, uint32_t windowId);
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTouchEventCallback();

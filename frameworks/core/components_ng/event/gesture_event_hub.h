@@ -196,13 +196,21 @@ public:
 
     bool ActLongClick();
 
-    void SetLongPressEvent(const RefPtr<LongPressEvent>& event)
+    void AddLongPressEvent(const RefPtr<LongPressEvent>& event)
     {
         if (!longPressEventActuator_) {
             longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
             longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
         }
-        longPressEventActuator_->SetLongPressEvent(event);
+        longPressEventActuator_->AddLongPressEvent(event);
+    }
+
+    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& event)
+    {
+        if (!longPressEventActuator_) {
+            return;
+        }
+        longPressEventActuator_->RemoveLongPressEvent(event);
     }
 
     // Set by user define, which will replace old one.
@@ -237,6 +245,22 @@ public:
             dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
         }
         dragEventActuator_->ReplaceDragEvent(dragEvent);
+    }
+
+    void AddDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
+    {
+        if (!dragEventActuator_ || direction.type != dragEventActuator_->GetDirection().type) {
+            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
+        }
+        dragEventActuator_->AddDragEvent(dragEvent);
+    }
+
+    void RemoveDragEvent(const RefPtr<DragEvent>& dragEvent)
+    {
+        if (!dragEventActuator_) {
+            return;
+        }
+        dragEventActuator_->RemoveDragEvent(dragEvent);
     }
 
     // the return value means prevents event bubbling.
@@ -317,7 +341,6 @@ private:
     RefPtr<DragEventActuator> dragEventActuator_;
     RefPtr<ExclusiveRecognizer> innerExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> nodeExclusiveRecognizer_;
-    RefPtr<ParallelRecognizer> nodeParallelRecognizer_;
     std::vector<RefPtr<ExclusiveRecognizer>> externalExclusiveRecognizer_;
     std::vector<RefPtr<ParallelRecognizer>> externalParallelRecognizer_;
     RefPtr<DragDropProxy> dragDropProxy_;

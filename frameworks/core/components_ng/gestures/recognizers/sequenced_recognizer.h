@@ -19,43 +19,57 @@
 #include <functional>
 
 #include "base/thread/cancelable_callback.h"
-#include "core/components_ng/gestures/recognizers/recognizer_group.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
 // SequencedRecognizer identifies only single click events.
 // For long press and double click, see: LongPressRecognizer and DoubleClickRecognizer.
-class ACE_EXPORT SequencedRecognizer : public RecognizerGroup {
-    DECLARE_ACE_TYPE(SequencedRecognizer, RecognizerGroup);
+class ACE_EXPORT SequencedRecognizer : public MultiFingersRecognizer {
+    DECLARE_ACE_TYPE(SequencedRecognizer, MultiFingersRecognizer);
 
 public:
     explicit SequencedRecognizer(const std::vector<RefPtr<GestureRecognizer>>& recognizers)
-        : RecognizerGroup(recognizers)
-    {}
+    {
+        for (const auto& recognizer : recognizers) {
+            recognizer->SetGestureGroup(AceType::WeakClaim(this));
+            recognizers_.emplace_back(recognizer);
+        }
+    }
     ~SequencedRecognizer() override = default;
-
     void OnAccepted() override;
     void OnRejected() override;
-    void OnPending() override;
-    void OnBlocked() override;
-
     bool HandleEvent(const TouchEvent& point) override;
+    void OnPending(size_t touchId) override;
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
+
+    void ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers)
+    {
+        // TODO: add state adjustment.
+        recognizers_.clear();
+        std::swap(recognizers_, recognizers);
+        for (auto& recognizer : recognizers_) {
+            recognizer->SetGestureGroup(AceType::WeakClaim(this));
+        }
+    }
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};
     void HandleTouchUpEvent(const TouchEvent& event) override {};
     void HandleTouchMoveEvent(const TouchEvent& event) override {};
     void HandleTouchCancelEvent(const TouchEvent& event) override {};
-
-    void BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal) override;
-
+    void BatchAdjudicate(const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer,
+        GestureDisposal disposal) override;
+    void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
-    void OnResetStatus() override;
+    void Reset();
     void DeadlineTimer();
     void HandleOverdueDeadline();
-    void UpdateCurrentIndex();
 
-    int32_t currentIndex_ = 0;
+    std::list<RefPtr<GestureRecognizer>> recognizers_;
+    std::map<int32_t, TouchEvent> curPoints_;
+    size_t activeIndex = 0;
     CancelableCallback<void()> deadlineTimer_;
 };
 

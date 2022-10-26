@@ -28,7 +28,10 @@ class RotationRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(RotationRecognizer, MultiFingersRecognizer);
 
 public:
-    RotationRecognizer(int32_t fingers, double angle) : MultiFingersRecognizer(fingers), angle_(angle) {}
+    RotationRecognizer(int32_t fingers, double angle) : angle_(angle)
+    {
+        fingers_ = fingers;
+    }
     ~RotationRecognizer() override = default;
 
     void OnAccepted() override;
@@ -39,10 +42,9 @@ private:
     void HandleTouchUpEvent(const TouchEvent& event) override;
     void HandleTouchMoveEvent(const TouchEvent& event) override;
     void HandleTouchCancelEvent(const TouchEvent& event) override;
-
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     double ComputeAngle();
-    void OnResetStatus() override;
+    void Reset();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     static double ChangeValueRange(double value);
 
@@ -51,6 +53,9 @@ private:
     double currentAngle_ = 0.0;
     double resultAngle_ = 0.0;
     TimeStamp time_;
+    std::map<int32_t, TouchEvent> touchPoints_;
+    bool pendingEnd_ = false;
+    bool pendingCancel_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -30,7 +30,7 @@ LongPressEventActuator::LongPressEventActuator(const WeakPtr<GestureEventHub>& g
 void LongPressEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    if (!longPressEvent_) {
+    if (longPressEvents_.empty()) {
         return;
     }
     auto gestureHub = gestureEventHub_.Upgrade();
@@ -53,8 +53,10 @@ GestureEventFunc LongPressEventActuator::GetGestureEventFunc()
     auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        if (actuator->longPressEvent_) {
-            (*actuator->longPressEvent_)(info);
+        for (const auto& callback : actuator->longPressEvents_) {
+            if (callback) {
+                (*callback)(info);
+            }
         }
         if (actuator->onAccessibilityEventFunc_) {
             actuator->onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);

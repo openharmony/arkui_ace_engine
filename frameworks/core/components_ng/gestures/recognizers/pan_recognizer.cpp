@@ -18,8 +18,6 @@
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/event/axis_event.h"
 
 namespace OHOS::Ace::NG {
@@ -32,68 +30,25 @@ constexpr int32_t AXIS_PAN_FINGERS = 1;
 
 } // namespace
 
-PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    uint32_t directNum = panGestureOption->GetDirection().type;
-    double distanceNumber = panGestureOption->GetDistance();
-    int32_t fingersNumber = panGestureOption->GetFingers();
-
-    double distance = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : distanceNumber;
-    distance_ = context->NormalizeToPx(Dimension(distance, DimensionUnit::VP));
-    fingers_ = fingersNumber <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingersNumber;
-
-    if (directNum >= PanDirection::NONE && directNum <= PanDirection::ALL) {
-        direction_.type = directNum;
-    }
-
-    newFingers_ = fingers_;
-    newDistance_ = distance_;
-    newDirection_ = direction_;
-
-    PanFingersFuncType changeFingers = [weak = AceType::WeakClaim(this)](int32_t fingers) {
-        auto panRecognizer = weak.Upgrade();
-        if (!panRecognizer) {
-            return;
-        }
-        panRecognizer->ChangeFingers(fingers);
-    };
-    onChangeFingers_ = OnPanFingersFunc(changeFingers);
-    panGestureOption_->SetOnPanFingersId(onChangeFingers_);
-
-    PanDirectionFuncType changeDirection = [weak = AceType::WeakClaim(this)](const PanDirection& direction) {
-        auto panRecognizer = weak.Upgrade();
-        if (!panRecognizer) {
-            return;
-        }
-        panRecognizer->ChangeDirection(direction);
-    };
-    onChangeDirection_ = OnPanDirectionFunc(changeDirection);
-    panGestureOption_->SetOnPanDirectionId(onChangeDirection_);
-
-    PanDistanceFuncType changeDistance = [weak = AceType::WeakClaim(this)](double distance) {
-        auto panRecognizer = weak.Upgrade();
-        if (!panRecognizer) {
-            return;
-        }
-        panRecognizer->ChangeDistance(distance);
-    };
-    onChangeDistance_ = OnPanDistanceFunc(changeDistance);
-    panGestureOption_->SetOnPanDistanceId(onChangeDistance_);
-}
-
 void PanRecognizer::OnAccepted()
 {
-    refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
     SendCallbackMsg(onActionUpdate_);
+
+    if (pendingEnd_) {
+        LOGD("pan gesture recognizer has pending end event when waiting to be accepted");
+        SendCallbackMsg(onActionEnd_);
+        Reset();
+    } else if (pendingCancel_) {
+        SendCancelMsg();
+        Reset();
+    }
 }
 
 void PanRecognizer::OnRejected()
 {
     LOGD("pan gesture has been rejected!");
-    refereeState_ = RefereeState::FAIL;
+    Reset();
 }
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
@@ -103,18 +58,11 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     distance_ = newDistance_;
     direction_ = newDirection_;
 
-    if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
-        return;
-    }
-
     if (fingers_ > MAX_PAN_FINGERS) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (direction_.type == PanDirection::NONE) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
@@ -124,38 +72,24 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     inputEventType_ = InputEventType::TOUCH_SCREEN;
 
-    auto fingerNum = static_cast<int32_t>(touchPoints_.size());
-
-    if (fingerNum > fingers_) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
-
-    if (fingerNum == fingers_) {
-        velocityTracker_.Reset();
-        velocityTracker_.UpdateTouchPoint(event);
-        refereeState_ = RefereeState::DETECTING;
+    if (state_ == DetectState::READY) {
+        AddToReferee(event.id, AceType::Claim(this));
+        if (static_cast<int32_t>(refereePointers_.size()) == fingers_) {
+            velocityTracker_.Reset();
+            velocityTracker_.UpdateTouchPoint(event);
+            state_ = DetectState::DETECTING;
+        }
     }
 }
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
     LOGD("pan recognizer receives axis start event, begin to detect pan event");
-    fingers_ = newFingers_;
-    distance_ = newDistance_;
-    direction_ = newDirection_;
-
-    if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
-        return;
-    }
     if (fingers_ != AXIS_PAN_FINGERS) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (direction_.type == PanDirection::NONE) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
@@ -163,25 +97,57 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     deviceType_ = event.sourceType;
     lastAxisEvent_ = event;
     inputEventType_ = InputEventType::AXIS;
-    refereeState_ = RefereeState::DETECTING;
+
+    if (state_ == DetectState::READY) {
+        AddToReferee(0, AceType::Claim(this));
+        velocityTracker_.Reset();
+        state_ = DetectState::DETECTING;
+    }
 }
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch up event");
+    auto itr = touchPoints_.find(event.id);
+    if (itr == touchPoints_.end()) {
+        return;
+    }
+
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
+    touchPoints_.erase(itr);
     velocityTracker_.UpdateTouchPoint(event, true);
 
-    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+    if (state_ == DetectState::READY) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED) {
-        if (static_cast<int32_t>(touchPoints_.size()) == 1) {
-            // last one to fire end.
+    if (state_ == DetectState::DETECTING) {
+        size_t inRefereeNum = refereePointers_.size();
+        bool inReferee = IsInReferee(static_cast<size_t>(event.id));
+        if (inReferee) {
+            inRefereeNum--;
+        }
+
+        if (static_cast<int32_t>(touchPoints_.size()) < fingers_ || inRefereeNum < 1) {
+            LOGD("this gesture is not pan, try to reject it");
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return;
+        }
+
+        if (inReferee) {
+            DelFromReferee(event.id, AceType::Claim(this));
+        }
+        return;
+    }
+
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        if (refereeState_ == RefereeState::SUCCEED) {
             SendCallbackMsg(onActionEnd_);
+            Reset();
+        } else {
+            pendingEnd_ = true;
         }
     }
 }
@@ -189,23 +155,58 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     LOGD("pan recognizer receives axis end event");
+    if (fingers_ != AXIS_PAN_FINGERS) {
+        return;
+    }
     globalPoint_ = Point(event.x, event.y);
-    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+
+    if (state_ == DetectState::READY) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
+    if (state_ == DetectState::DETECTING) {
+        size_t inRefereeNum = refereePointers_.size();
+        bool inReferee = IsInReferee(0);
+        if (inReferee) {
+            inRefereeNum--;
+        }
+
+        if (inRefereeNum < 1) {
+            LOGD("this gesture is not pan, try to reject it");
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return;
+        }
+
+        if (inReferee) {
+            DelFromReferee(0, AceType::Claim(this));
+        }
+        return;
+    }
+
     if (refereeState_ == RefereeState::SUCCEED) {
-        // AxisEvent is single one.
         SendCallbackMsg(onActionEnd_);
+        Reset();
+    } else {
+        pendingEnd_ = true;
     }
 }
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch move event");
+    auto itr = touchPoints_.find(event.id);
+    if (itr == touchPoints_.end()) {
+        return;
+    }
+
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
+    if (state_ == DetectState::READY) {
+        touchPoints_[event.id] = event;
+        return;
+    }
+
     delta_ = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
     mainDelta_ = GetMainAxisDelta();
     velocityTracker_.UpdateTouchPoint(event);
@@ -213,20 +214,22 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     time_ = event.time;
 
-    if (refereeState_ == RefereeState::DETECTING) {
+    if (state_ == DetectState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
+            state_ = DetectState::DETECTED;
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         } else if (result == GestureAcceptResult::REJECT) {
             LOGW("pan recognizer reject");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
-    } else if (refereeState_ == RefereeState::SUCCEED) {
+    } else if (state_ == DetectState::DETECTED && refereeState_ == RefereeState::SUCCEED) {
         if ((direction_.type & PanDirection::VERTICAL) == 0) {
             averageDistance_.SetY(0.0);
         } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
             averageDistance_.SetX(0.0);
         }
+
         LOGD("pan recognizer detected successful");
         if (isFlushTouchEventsEnd_) {
             SendCallbackMsg(onActionUpdate_);
@@ -251,6 +254,11 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
     globalPoint_ = Point(event.x, event.y);
+    if (state_ == DetectState::READY) {
+        lastAxisEvent_ = event;
+        return;
+    }
+
     if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
         // PanRecognizer Direction: Vertical
         delta_ =
@@ -270,15 +278,16 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     lastAxisEvent_ = event;
     time_ = event.time;
 
-    if (refereeState_ == RefereeState::DETECTING) {
+    if (state_ == DetectState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
+            state_ = DetectState::DETECTED;
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         } else if (result == GestureAcceptResult::REJECT) {
             LOGW("pan recognizer reject");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
-    } else if (refereeState_ == RefereeState::SUCCEED) {
+    } else if (state_ == DetectState::DETECTED && refereeState_ == RefereeState::SUCCEED) {
         if ((direction_.type & PanDirection::VERTICAL) == 0) {
             averageDistance_.SetY(0.0);
         } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
@@ -290,30 +299,37 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     }
 }
 
-void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
+void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch cancel event");
-    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+    if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
+        LOGD("cancel pan gesture detect, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        // AxisEvent is single one.
         SendCancelMsg();
+        Reset();
+    } else {
+        pendingCancel_ = true;
     }
 }
 
-void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& /*event*/)
+void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
     LOGD("pan recognizer receives touch cancel event");
-    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+    if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
+        LOGD("cancel pan gesture detect, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCancelMsg();
+        Reset();
+    } else {
+        pendingCancel_ = true;
     }
 }
 
@@ -360,11 +376,13 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     }
 }
 
-void PanRecognizer::OnResetStatus()
+void PanRecognizer::Reset()
 {
-    MultiFingersRecognizer::OnResetStatus();
     touchPoints_.clear();
     averageDistance_.Reset();
+    state_ = DetectState::READY;
+    pendingEnd_ = false;
+    pendingCancel_ = false;
 }
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
@@ -409,12 +427,12 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
 {
     RefPtr<PanRecognizer> curr = AceType::DynamicCast<PanRecognizer>(recognizer);
     if (!curr) {
-        ResetStatus();
+        Reset();
         return false;
     }
 
     if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
-        ResetStatus();
+        Reset();
         return false;
     }
 
@@ -449,7 +467,7 @@ void PanRecognizer::ChangeDirection(const PanDirection& direction)
 void PanRecognizer::ChangeDistance(double distance)
 {
     if (distance_ != distance) {
-        if (refereeState_ == RefereeState::READY || refereeState_ == RefereeState::DETECTING) {
+        if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
             distance_ = distance;
         }
         newDistance_ = distance;

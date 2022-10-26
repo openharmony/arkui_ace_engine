@@ -19,121 +19,170 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
-void ParallelRecognizer::OnAccepted()
+void ParallelRecognizer::OnAccepted(size_t touchId)
 {
-    LOGD("%{public}p parallel gesture recognizer has been accepted", this);
-    refereeState_ = RefereeState::SUCCEED;
-    if (currentBatchRecognizer_) {
-        currentBatchRecognizer_->SetCoordinateOffset(coordinateOffset_);
-        currentBatchRecognizer_->OnAccepted();
-        currentBatchRecognizer_.Reset();
-    }
-}
-
-void ParallelRecognizer::OnRejected()
-{
-    LOGD("%{public}p the parallel gesture recognizer has been rejected!", this);
-    refereeState_ = RefereeState::FAIL;
-}
-
-void ParallelRecognizer::OnPending()
-{
-    refereeState_ = RefereeState::PENDING;
-    LOGD("the parallel gesture recognizer is pending!");
-    if (currentBatchRecognizer_) {
-        currentBatchRecognizer_->SetCoordinateOffset(coordinateOffset_);
-        currentBatchRecognizer_->OnPending();
-        currentBatchRecognizer_.Reset();
-    }
-}
-
-void ParallelRecognizer::OnBlocked()
-{
-    if (disposal_ == GestureDisposal::ACCEPT) {
-        refereeState_ = RefereeState::SUCCEED_BLOCKED;
-        if (currentBatchRecognizer_) {
-            currentBatchRecognizer_->OnBlocked();
-            currentBatchRecognizer_.Reset();
-        }
+    if (refereePointers_.find(touchId) == refereePointers_.end()) {
         return;
     }
-    if (disposal_ == GestureDisposal::PENDING) {
-        refereeState_ = RefereeState::PENDING_BLOCKED;
-        if (currentBatchRecognizer_) {
-            currentBatchRecognizer_->OnBlocked();
-            currentBatchRecognizer_.Reset();
+    refereePointers_.erase(touchId);
+
+    LOGD("the parallel gesture recognizer has been accepted, touch id %{public}zu", touchId);
+    for (auto& recognizer : recognizers_) {
+        if (recognizer->GetDetectState() == DetectState::DETECTED) {
+            recognizer->SetCoordinateOffset(coordinateOffset_);
+            recognizer->OnAccepted(touchId);
+            recognizer->SetRefereeState(RefereeState::SUCCEED);
+        }
+    }
+}
+
+void ParallelRecognizer::OnRejected(size_t touchId)
+{
+    if (refereePointers_.find(touchId) == refereePointers_.end()) {
+        return;
+    }
+    refereePointers_.erase(touchId);
+
+    LOGD("the parallel gesture recognizer has been rejected! the touch id is %{public}zu", touchId);
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnRejected(touchId);
+        if (recognizer->GetDetectState() == DetectState::READY) {
+            recognizer->SetRefereeState(RefereeState::FAIL);
+        }
+    }
+}
+
+void ParallelRecognizer::OnPending(size_t touchId)
+{
+    if (refereePointers_.find(touchId) == refereePointers_.end()) {
+        return;
+    }
+
+    LOGD("the parallel gesture recognizer is pending! the touch id is %{public}zu", touchId);
+    for (auto& recognizer : recognizers_) {
+        if (recognizer->GetRefereeState() == RefereeState::PENDING) {
+            recognizer->OnPending(touchId);
         }
     }
 }
 
 bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
 {
-    if (refereeState_ == RefereeState::READY) {
-        refereeState_ = RefereeState::DETECTING;
+    if (point.type == TouchType::UNKNOWN) {
+        LOGW("unknown touch type");
+        return true;
     }
-    for (const auto& recognizer : recognizers_) {
-        if (recognizer) {
+
+    if (point.type == TouchType::DOWN) {
+        bool allRecognizeEnd = true;
+        for (auto& recognizer : recognizers_) {
+            if (!IsRecognizeEnd(recognizer)) {
+                allRecognizeEnd = false;
+                break;
+            }
+        }
+
+        if (allRecognizeEnd) {
+            LOGD("all sub gestures recognize finish, change the parallel state to be ready");
+            Reset();
+        }
+    }
+
+    for (auto& recognizer : recognizers_) {
+        if (recognizer->GetRefereeState() != RefereeState::FAIL) {
             recognizer->HandleEvent(point);
         }
     }
+
     return true;
 }
 
-void ParallelRecognizer::BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+void ParallelRecognizer::OnFlushTouchEventsBegin()
 {
-    CHECK_NULL_VOID(recognizer);
-    if (disposal == GestureDisposal::ACCEPT) {
-        if (recognizer->GetRefereeState() == RefereeState::SUCCEED) {
-            return;
-        }
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsBegin();
+    }
+}
 
-        if (refereeState_ == RefereeState::SUCCEED) {
+void ParallelRecognizer::OnFlushTouchEventsEnd()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsEnd();
+    }
+}
+
+bool ParallelRecognizer::IsRecognizeEnd(const RefPtr<GestureRecognizer>& recognizer)
+{
+    DetectState currState = recognizer->GetDetectState();
+    RefereeState refereeState = recognizer->GetRefereeState();
+    return (refereeState == RefereeState::SUCCEED && currState != DetectState::DETECTED) ||
+           (refereeState == RefereeState::FAIL);
+}
+
+void ParallelRecognizer::BatchAdjudicate(
+    const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+{
+    if (disposal == GestureDisposal::ACCEPT) {
+        if (state_ == DetectState::DETECTING) {
+            LOGD("the sub gesture recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
+            state_ = DetectState::DETECTED;
+            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+        } else if (refereeState_ == RefereeState::SUCCEED) {
             LOGD("the sub gesture recognizer %{public}s is accepted because referee succeed",
                 AceType::TypeName(recognizer));
-            recognizer->OnAccepted();
-        } else if ((refereeState_ == RefereeState::PENDING_BLOCKED) ||
-                   (refereeState_ == RefereeState::SUCCEED_BLOCKED)) {
-            recognizer->OnBlocked();
-        } else {
-            LOGD("the sub gesture recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
-            currentBatchRecognizer_ = recognizer;
-            GroupAdjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+            for (auto touchId : touchIds) {
+                recognizer->OnAccepted(touchId);
+            }
+            recognizer->SetRefereeState(RefereeState::SUCCEED);
         }
-        return;
-    }
-    if (disposal == GestureDisposal::REJECT) {
-        if (recognizer->GetRefereeState() == RefereeState::FAIL) {
-            return;
+    } else if (disposal == GestureDisposal::REJECT) {
+        for (auto touchId : touchIds) {
+            recognizer->OnRejected(touchId);
         }
-        recognizer->OnRejected();
-        if (CheckAllFailed()) {
-            GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        }
-        return;
-    }
-    if (disposal == GestureDisposal::PENDING) {
-        if (recognizer->GetRefereeState() == RefereeState::PENDING) {
-            return;
+        recognizer->SetRefereeState(RefereeState::FAIL);
+
+        LOGD("the sub gesture recognizer %{public}s ask for reject", AceType::TypeName(recognizer));
+        bool needReject = true;
+        for (auto& tmpRecognizer : recognizers_) {
+            if (tmpRecognizer->GetRefereeState() != RefereeState::FAIL) {
+                needReject = false;
+                break;
+            }
         }
 
-        if ((refereeState_ == RefereeState::SUCCEED) || (refereeState_ == RefereeState::PENDING)) {
-            LOGD("the sub gesture recognizer %{public}s is pending because referee is in current state",
-                AceType::TypeName(recognizer));
-            recognizer->OnPending();
-        } else if ((refereeState_ == RefereeState::PENDING_BLOCKED) ||
-                   (refereeState_ == RefereeState::SUCCEED_BLOCKED)) {
-            recognizer->OnBlocked();
-        } else {
-            LOGD("the sub gesture recognizer %{public}s ask for pending", AceType::TypeName(recognizer));
-            currentBatchRecognizer_ = recognizer;
-            GroupAdjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+        if (needReject) {
+            LOGD("all gesture recognizers are rejected, adjudicate reject");
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
+    } else {
+        if (state_ == DetectState::DETECTING) {
+            recognizer->SetRefereeState(RefereeState::PENDING);
+            Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+        }
+    }
+}
+
+void ParallelRecognizer::AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
+{
+    recognizer->SetRefereeState(RefereeState::DETECTING);
+    if (state_ == DetectState::READY) {
+        state_ = DetectState::DETECTING;
+    }
+
+    if (state_ == DetectState::DETECTING) {
+        MultiFingersRecognizer::AddToReferee(touchId, AceType::Claim(this));
+    }
+}
+
+void ParallelRecognizer::Reset()
+{
+    state_ = DetectState::READY;
+    for (auto& recognizer : recognizers_) {
+        recognizer->SetRefereeState(RefereeState::DETECTING);
     }
 }
 
@@ -141,22 +190,20 @@ bool ParallelRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recogniz
 {
     RefPtr<ParallelRecognizer> curr = AceType::DynamicCast<ParallelRecognizer>(recognizer);
     if (!curr) {
-        ResetStatus();
+        Reset();
         return false;
     }
 
     if (recognizers_.size() != curr->recognizers_.size() || curr->priorityMask_ != priorityMask_) {
-        ResetStatus();
+        Reset();
         return false;
     }
 
     auto currIter = curr->recognizers_.begin();
 
     for (auto iter = recognizers_.begin(); iter != recognizers_.end(); iter++, currIter++) {
-        auto child = *iter;
-        auto newChild = *currIter;
-        if (!child || !child->ReconcileFrom(newChild)) {
-            ResetStatus();
+        if (!(*iter)->ReconcileFrom(*currIter)) {
+            Reset();
             return false;
         }
     }

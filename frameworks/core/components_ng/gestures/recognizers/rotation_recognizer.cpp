@@ -18,7 +18,6 @@
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,85 +29,110 @@ constexpr int32_t MAX_ROTATION_FINGERS = 5;
 
 void RotationRecognizer::OnAccepted()
 {
-    LOGD("rotation gesture has been accepted!");
-    refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
+
+    if (pendingEnd_) {
+        SendCallbackMsg(onActionEnd_);
+        Reset();
+    } else if (pendingCancel_) {
+        SendCancelMsg();
+        Reset();
+    }
 }
 
 void RotationRecognizer::OnRejected()
 {
     LOGD("rotation gesture has been rejected!");
-    refereeState_ = RefereeState::FAIL;
+    Reset();
 }
 
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch down event, begin to detect rotation event");
     if (fingers_ > MAX_ROTATION_FINGERS) {
-        LOGW("the finger is larger than the max fingers");
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
-    touchPoints_[event.id] = event;
-
-    if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
-        LOGW("the finger is larger than the defined fingers");
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
-
-    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
-        initialAngle_ = ComputeAngle();
-        refereeState_ = RefereeState::DETECTING;
+    if (state_ == DetectState::READY) {
+        AddToReferee(event.id, AceType::Claim(this));
+        touchPoints_[event.id] = event;
+        if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+            initialAngle_ = ComputeAngle();
+            state_ = DetectState::DETECTING;
+        }
     }
 }
 
-void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
+void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch up event");
-    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+    auto itr = touchPoints_.find(event.id);
+    if (itr == touchPoints_.end()) {
+        return;
+    }
+
+    touchPoints_.erase(itr);
+
+    if (state_ != DetectState::DETECTED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
+    GestureEvent info;
+    info.SetTimeStamp(time_);
+    info.SetAngle(resultAngle_);
     if (refereeState_ == RefereeState::SUCCEED) {
-        GestureEvent info;
-        info.SetTimeStamp(time_);
-        info.SetAngle(resultAngle_);
         SendCallbackMsg(onActionEnd_);
+        Reset();
+    } else {
+        pendingEnd_ = true;
     }
 }
 
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch move event");
+    auto itr = touchPoints_.find(event.id);
+    if (itr == touchPoints_.end()) {
+        return;
+    }
+
+    if (state_ == DetectState::READY) {
+        touchPoints_[event.id] = event;
+        return;
+    }
+
     touchPoints_[event.id] = event;
     currentAngle_ = ComputeAngle();
     time_ = event.time;
 
-    if (refereeState_ == RefereeState::DETECTING) {
+    if (state_ == DetectState::DETECTING) {
         double diffAngle = fabs((currentAngle_ - initialAngle_));
         if (GreatOrEqual(diffAngle, angle_)) {
             resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
+            state_ = DetectState::DETECTED;
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
-    } else if (refereeState_ == RefereeState::SUCCEED) {
+    } else if (state_ == DetectState::DETECTED && refereeState_ == RefereeState::SUCCEED) {
         resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
         SendCallbackMsg(onActionUpdate_);
     }
 }
 
-void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
+void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch cancel event");
-    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+    if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
+        LOGD("cancel rotation gesture detect, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCancelMsg();
+        Reset();
+    } else {
+        pendingCancel_ = true;
     }
 }
 
@@ -137,11 +161,12 @@ double RotationRecognizer::ChangeValueRange(double value)
     return result;
 }
 
-void RotationRecognizer::OnResetStatus()
+void RotationRecognizer::Reset()
 {
-    initialAngle_ = 0.0;
-    currentAngle_ = 0.0;
-    resultAngle_ = 0.0;
+    touchPoints_.clear();
+    state_ = DetectState::READY;
+    pendingEnd_ = false;
+    pendingCancel_ = false;
 }
 
 void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
@@ -173,12 +198,12 @@ bool RotationRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recogniz
 {
     RefPtr<RotationRecognizer> curr = AceType::DynamicCast<RotationRecognizer>(recognizer);
     if (!curr) {
-        ResetStatus();
+        Reset();
         return false;
     }
 
     if (curr->fingers_ != fingers_ || !NearEqual(curr->angle_, angle_) || curr->priorityMask_ != priorityMask_) {
-        ResetStatus();
+        Reset();
         return false;
     }
 
