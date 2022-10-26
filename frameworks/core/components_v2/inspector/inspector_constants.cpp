@@ -79,6 +79,12 @@ const char TAB_CONTENT_ITEM_ETS_TAG[] = "TabContent";
 const char NAVIGATION_VIEW_COMPONENT_TAG[] = "NavigationContainerComponent";
 const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
 
+// navigation title view
+const char NAVIGATION_TITLE_COMPONENT_TAG[] = "NavigationTitle";
+
+// navigation menus view
+const char NAVIGATION_MENUS_COMPONENT_TAG[] = "NavigationMenus";
+
 // row split
 const char ROW_SPLIT_COMPONENT_TAG[] = "RowSplitComponent";
 const char ROW_SPLIT_ETS_TAG[] = "RowSplit";
