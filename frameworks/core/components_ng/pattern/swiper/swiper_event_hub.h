@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/swiper/swiper_component.h"
+#include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
@@ -30,7 +31,7 @@ enum class Direction {
     PRE = 0,
     NEXT,
 };
-
+using ChangeIndicatorEvent = std::function<void(const BaseEventInfo* info)>;
 using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeDoneEvent = std::function<void()>;
@@ -46,6 +47,11 @@ public:
     void AddOnChangeEvent(const ChangeEventPtr& changeEvent)
     {
         changeEvents_.emplace_back(changeEvent);
+    }
+
+    void SetIndicatorOnChange(ChangeIndicatorEvent&& changeEvent)
+    {
+        changeIndicatorEvent_ = std::move(changeEvent);
     }
 
     void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
@@ -73,6 +79,13 @@ public:
         }
     }
 
+    void FireIndicatorChangeEvent(int32_t index) const
+    {
+        if (changeIndicatorEvent_) {
+            changeIndicatorEvent_(std::make_shared<SwiperChangeEvent>(index).get());
+        }
+    }
+
     Direction GetDirection()
     {
         return direction_;
@@ -82,6 +95,7 @@ private:
     Direction direction_;
     std::list<ChangeEventPtr> changeEvents_;
     ChangeDoneEvent changeDoneEvent_;
+    ChangeIndicatorEvent changeIndicatorEvent_;
 };
 
 } // namespace OHOS::Ace::NG

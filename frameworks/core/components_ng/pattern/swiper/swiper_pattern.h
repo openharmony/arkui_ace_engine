@@ -88,12 +88,16 @@ public:
         swiperController_ = swiperController;
     }
 
-    int GetCurrentIndex() const
+    int32_t GetCurrentIndex() const
     {
         return currentIndex_;
     }
 
     void UpdateCurrentOffset(float offset);
+
+    int32_t TotalCount() const;
+
+    Axis GetDirection() const;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -163,7 +167,6 @@ private:
     void CalculateCacheRange();
 
     float GetItemSpace() const;
-    Axis GetDirection() const;
     int32_t CurrentIndex() const;
     int32_t GetDisplayCount() const;
     int32_t GetDuration() const;
@@ -173,7 +176,6 @@ private:
     bool IsAutoPlay() const;
     bool IsLoop() const;
     bool IsDisableSwipe() const;
-    int32_t TotalCount() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

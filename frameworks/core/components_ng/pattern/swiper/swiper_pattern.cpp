@@ -158,6 +158,7 @@ void SwiperPattern::FireChangeEvent() const
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireChangeEvent(currentIndex_);
+    swiperEventHub->FireIndicatorChangeEvent(currentIndex_);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
 }
 
@@ -211,6 +212,9 @@ void SwiperPattern::ShowNext()
     if (childrenSize > 0 && GetDisplayCount() != 0) {
         PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize, true);
     }
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    swiperEventHub->FireIndicatorChangeEvent(currentIndex_);
 }
 
 void SwiperPattern::ShowPrevious()
@@ -228,6 +232,9 @@ void SwiperPattern::ShowPrevious()
         PlayTranslateAnimation(
             0, MainSize() / GetDisplayCount(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
     }
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    swiperEventHub->FireIndicatorChangeEvent(currentIndex_);
 }
 
 void SwiperPattern::FinishAnimation()
