@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
-    return MakeRefPtr<ListItemGroupLayoutAlgorithm>();
+    return MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
 }
 
 } // namespace OHOS::Ace::NG
