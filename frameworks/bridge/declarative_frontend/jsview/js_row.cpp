@@ -64,8 +64,6 @@ void JSRow::Create(const JSCallbackInfo& info)
     }
 
     RowModel::GetInstance()->Create(space, declaration, "");
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
 }
 
 void JSRow::CreateWithWrap(const JSCallbackInfo& info)
