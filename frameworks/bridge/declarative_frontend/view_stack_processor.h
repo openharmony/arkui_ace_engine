@@ -264,6 +264,7 @@ public:
         // normally already set like this, but just in case
         reservedElementId_ = ElementRegister::UndefinedElementId;
     }
+    RefPtr<ComposedComponent> CreateInspectorWrapper(const std::string& inspectorTag);
 
 private:
     ViewStackProcessor();

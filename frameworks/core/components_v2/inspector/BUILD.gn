@@ -54,6 +54,8 @@ build_component("inspector_v2") {
     "marquee_composed_element.cpp",
     "menu_composed_element.cpp",
     "navigation_composed_element.cpp",
+    "navigation_menus_composed_element.cpp",
+    "navigation_title_composed_element.cpp",
     "navigator_composed_element.cpp",
     "panel_composed_element.cpp",
     "pattern_lock_composed_element.cpp",
