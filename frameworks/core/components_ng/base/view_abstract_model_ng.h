@@ -354,7 +354,11 @@ public:
         ViewAbstract::SetVisibility(visible);
     }
 
-    void SetSharedTransition(const SharedTransitionOption& option) override {}
+    void SetSharedTransition(
+        const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override
+    {
+        ViewAbstract::SetSharedTransition(shareId, option);
+    }
 
     void SetGeometryTransition(const std::string& id) override {}
 

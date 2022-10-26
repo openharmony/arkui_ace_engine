@@ -1413,12 +1413,12 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         LOGE("JsSharedTransition: id is empty.");
         return;
     }
-    SharedTransitionOption option;
-    option.id = id;
+    std::shared_ptr<SharedTransitionOption> sharedOption;
 
     // options
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto optionsArgs = JsonUtil::ParseJsonString(info[1]->ToString());
+        sharedOption = std::make_shared<SharedTransitionOption>();
         // default: duration: 1000; if not specify: duration: 0
         int32_t duration = 0;
         auto durationValue = optionsArgs->GetValue("duration");
@@ -1428,13 +1428,13 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
                 duration = DEFAULT_DURATION;
             }
         }
-        option.duration = duration;
+        sharedOption->duration = duration;
         // default: delay: 0
         auto delay = optionsArgs->GetInt("delay", 0);
         if (delay < 0) {
             delay = 0;
         }
-        option.delay = delay;
+        sharedOption->delay = delay;
         // default: LinearCurve
         RefPtr<Curve> curve;
         auto curveArgs = optionsArgs->GetValue("curve");
@@ -1449,12 +1449,12 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         } else {
             curve = AceType::MakeRefPtr<LinearCurve>();
         }
-        option.curve = curve;
+        sharedOption->curve = curve;
         // motionPath
         if (optionsArgs->Contains("motionPath")) {
             MotionPathOption motionPathOption;
             if (ParseMotionPath(optionsArgs->GetValue("motionPath"), motionPathOption)) {
-                option.motionPathOption = motionPathOption;
+                sharedOption->motionPathOption = motionPathOption;
             }
         }
         // zIndex
@@ -1462,16 +1462,16 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         if (optionsArgs->Contains("zIndex")) {
             zIndex = optionsArgs->GetInt("zIndex", 0);
         }
-        option.zIndex = zIndex;
+        sharedOption->zIndex = zIndex;
         // type
         SharedTransitionEffectType type = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
         if (optionsArgs->Contains("type")) {
             type = static_cast<SharedTransitionEffectType>(
                 optionsArgs->GetInt("type", static_cast<int32_t>(SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE)));
         }
-        option.type = type;
+        sharedOption->type = type;
     }
-    ViewAbstractModel::GetInstance()->SetSharedTransition(option);
+    ViewAbstractModel::GetInstance()->SetSharedTransition(id, sharedOption);
 }
 
 void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)

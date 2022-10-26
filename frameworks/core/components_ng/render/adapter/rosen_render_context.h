@@ -139,6 +139,9 @@ public:
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const override;
 
+    void SetSharedTranslate(float xTranslate, float yTranslate) override;
+    void ResetSharedTranslate() override;
+
     static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren);
 
@@ -248,6 +251,7 @@ private:
     std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
+    std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };
