@@ -29,6 +29,7 @@ ohos_unittest("qrcode_pattern_test_ng") {
   configs = [
     ":config_qrcode_test",
     "$ace_root:ace_config",
+    "$ace_root:ace_test_coverage_config",
   ]
 }
 
