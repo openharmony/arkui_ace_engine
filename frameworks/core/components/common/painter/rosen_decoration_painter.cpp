@@ -743,7 +743,7 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
 }
 
 void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize,
-    const Offset& position, const Offset& extraOffset, SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale)
+    const Offset& position, SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale)
 {
     if (!decoration->GetHasBorderImageSource() && !decoration->GetHasBorderImageGradient()) {
         return;
@@ -756,10 +756,9 @@ void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& dec
             return;
         }
         canvas->save();
-        
+
         BorderImagePainter borderImagePainter(paintSize, decoration, image, dipScale);
         borderImagePainter.InitPainter();
-        borderImagePainter.UpdateExtraOffsetToPaintSize(extraOffset);
         borderImagePainter.PaintBorderImage(position, canvas, paint);
         canvas->restore();
     }
@@ -788,7 +787,6 @@ void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& dec
 
         BorderImagePainter borderImagePainter(paintSize, decoration, skImage, dipScale);
         borderImagePainter.InitPainter();
-        borderImagePainter.UpdateExtraOffsetToPaintSize(extraOffset);
         borderImagePainter.PaintBorderImage(position, canvas, paint);
         paint.setShader(nullptr);
         canvas->restore();
