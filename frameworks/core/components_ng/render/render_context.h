@@ -190,6 +190,8 @@ public:
         return sharedTransitionOption_ != nullptr;
     }
 
+    virtual void PaintAccessibilityFocus() {};
+
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 
@@ -275,6 +277,9 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Motion, MotionPathProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
 
+    // accessibility
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -329,6 +334,7 @@ protected:
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
+    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {}
 
 private:
     std::function<void()> requestFrame_;

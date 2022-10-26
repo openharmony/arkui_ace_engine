@@ -46,7 +46,7 @@ public:
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
-    void SyncGeometryProperties(const RectF& rectF) override;
+    void SyncGeometryProperties(const RectF& paintRect) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
@@ -163,6 +163,9 @@ public:
         const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
+
+    void PaintAccessibilityFocus() override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
@@ -212,6 +215,8 @@ private:
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
+
+    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
