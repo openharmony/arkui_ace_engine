@@ -54,7 +54,7 @@ void GridEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto dragEvent = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)

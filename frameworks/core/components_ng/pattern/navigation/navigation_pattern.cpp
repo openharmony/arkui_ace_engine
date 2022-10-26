@@ -53,39 +53,6 @@ void NavigationPattern::OnModifyDone()
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountNavBar(hostNode);
-
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto navBarContentNode = navBarNode->GetNavBarContentNode();
-    CHECK_NULL_VOID(navBarContentNode);
-    for (const auto& child : navBarContentNode->GetChildren()) {
-        AddBackButtonIconToNavDestination(child, hostNode);
-    }
-}
-
-void NavigationPattern::AddBackButtonIconToNavDestination(const RefPtr<UINode>& child,
-    const RefPtr<NavigationGroupNode>& hostNode)
-{
-    auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
-    auto navRouter = AceType::DynamicCast<NavRouterGroupNode>(child);
-    CHECK_NULL_VOID(navRouter);
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navRouter->GetNavDestinationNode());
-    CHECK_NULL_VOID(navDestination);
-    auto navDestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-
-    // back button icon
-    if (navigationLayoutProperty->HasNoPixMap()) {
-        if (navigationLayoutProperty->HasImageSource()) {
-            navDestinationLayoutProperty->UpdateImageSource(navigationLayoutProperty->GetImageSourceValue());
-        }
-        if (navigationLayoutProperty->HasPixelMap()) {
-            navDestinationLayoutProperty->UpdatePixelMap(navigationLayoutProperty->GetPixelMapValue());
-        }
-        navDestinationLayoutProperty->UpdateNoPixMap(navigationLayoutProperty->GetNoPixMapValue());
-    }
-    navDestination->MarkModifyDone();
 }
 
 } // namespace OHOS::Ace::NG

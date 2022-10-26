@@ -34,6 +34,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
@@ -525,6 +526,45 @@ void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
         static_cast<uint32_t>(value.styleRight.value_or(BorderStyle::SOLID)),
         static_cast<uint32_t>(value.styleBottom.value_or(BorderStyle::SOLID)));
     RequestNextFrame();
+}
+
+void RosenRenderContext::OnAccessibilityFocusUpdate(bool /* isAccessibilityFocus */)
+{
+    auto uiNode = GetHost();
+    CHECK_NULL_VOID(uiNode);
+    uiNode->MarkDirtyNode(false, true, PROPERTY_UPDATE_RENDER);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::PaintAccessibilityFocus()
+{
+    CHECK_NULL_VOID(rsNode_);
+    constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
+    constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
+    constexpr double ACCESSIBILITY_FOCUS_RADIUS_X = 2.0;
+    constexpr double ACCESSIBILITY_FOCUS_RADIUS_Y = 2.0;
+
+    auto paintAccessibilityFocusTask = [weak = WeakClaim(this)](std::shared_ptr<SkCanvas> canvas) {
+        auto rosenRenderContext = weak.Upgrade();
+        CHECK_NULL_VOID(rosenRenderContext);
+        auto paintRect = rosenRenderContext->GetPaintRectWithoutTransform();
+        if (NearZero(paintRect.Width()) || NearZero(paintRect.Height())) {
+            LOGE("PaintAccessibilityFocus return");
+            return;
+        }
+        RSCanvas rsCanvas(&canvas);
+        RSPen pen;
+        pen.SetAntiAlias(true);
+        pen.SetColor(ACCESSIBILITY_FOCUS_COLOR);
+        pen.SetWidth(ACCESSIBILITY_FOCUS_WIDTH);
+        rsCanvas.AttachPen(pen);
+        rsCanvas.Save();
+        RSRect rect(0, 0, paintRect.Width(), paintRect.Height());
+        RSRoundRect rrect(rect, ACCESSIBILITY_FOCUS_RADIUS_X, ACCESSIBILITY_FOCUS_RADIUS_Y);
+        rsCanvas.DrawRoundRect(rrect);
+        rsCanvas.Restore();
+    };
+    rsNode_->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE, paintAccessibilityFocusTask);
 }
 
 void RosenRenderContext::PaintBorderImage()
@@ -1452,6 +1492,25 @@ void RosenRenderContext::OnMotionPathUpdate(const MotionPathOption& motionPath)
     motionOption.SetPathNeedAddOrigin(true);
     rsNode_->SetMotionPathOption(std::make_shared<Rosen::RSMotionPathOption>(motionOption));
     RequestNextFrame();
+}
+
+void RosenRenderContext::SetSharedTranslate(float xTranslate, float yTranslate)
+{
+    if (!sharedTransitionModifier_) {
+        sharedTransitionModifier_ = std::make_unique<SharedTransitionModifier>();
+    }
+    AddOrChangeTranslateModifier(rsNode_, sharedTransitionModifier_->translateXY,
+        sharedTransitionModifier_->translateXYValue, { xTranslate, yTranslate });
+}
+
+void RosenRenderContext::ResetSharedTranslate()
+{
+    if (!sharedTransitionModifier_ || !sharedTransitionModifier_->translateXY || !rsNode_) {
+        return;
+    }
+    rsNode_->RemoveModifier(sharedTransitionModifier_->translateXY);
+    sharedTransitionModifier_->translateXYValue = nullptr;
+    sharedTransitionModifier_->translateXY = nullptr;
 }
 
 void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, int index)

@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
 class ShapeModel {
@@ -33,6 +34,17 @@ public:
     virtual void SetViewPort(
         const Dimension& dimLeft, const Dimension& dimTop, const Dimension& dimWidth, const Dimension& dimHeight);
     virtual void InitBox(RefPtr<PixelMap>& pixMap);
+    virtual void SetStroke(const Color& color);
+    virtual void SetFill(const Color& color);
+    virtual void SetStrokeDashOffset(const Ace::Dimension& dashOffset);
+    virtual void SetStrokeLineCap(int lineCapStyle);
+    virtual void SetStrokeLineJoin(int lineJoinStyle);
+    virtual void SetStrokeMiterLimit(double miterLimit);
+    virtual void SetStrokeOpacity(double opacity);
+    virtual void SetFillOpacity(double opacity);
+    virtual void SetStrokeWidth(const Ace::Dimension& lineWidth);
+    virtual void SetStrokeDashArray(const std::vector<Ace::Dimension>& dashArray);
+    virtual void SetAntiAlias(bool antiAlias);
     virtual void SetWidth();
     virtual void SetHeight();
 

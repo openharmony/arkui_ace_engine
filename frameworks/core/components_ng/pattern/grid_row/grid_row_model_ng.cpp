@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "grid_row_view.h"
+#include "grid_row_model_ng.h"
 
 #include "grid_row_layout_pattern.h"
 
@@ -23,7 +23,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void GridRowView::Create()
+void GridRowModelNG::Create()
 {
     auto col = Referenced::MakeRefPtr<V2::GridContainerSize>();
     auto gutter = Referenced::MakeRefPtr<V2::Gutter>();
@@ -32,7 +32,7 @@ void GridRowView::Create()
     Create(col, gutter, breakpoints, direction);
 }
 
-void GridRowView::Create(const RefPtr<V2::GridContainerSize>& col, const RefPtr<V2::Gutter>& gutter,
+void GridRowModelNG::Create(const RefPtr<V2::GridContainerSize>& col, const RefPtr<V2::Gutter>& gutter,
     const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -47,7 +47,7 @@ void GridRowView::Create(const RefPtr<V2::GridContainerSize>& col, const RefPtr<
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction);
 }
 
-void GridRowView::SetOnBreakPointChange(std::function<void(const std::string)>&& onChange)
+void GridRowModelNG::SetOnBreakPointChange(std::function<void(const std::string)>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

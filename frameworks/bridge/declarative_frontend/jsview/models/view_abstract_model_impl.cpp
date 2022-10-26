@@ -754,21 +754,25 @@ void ViewAbstractModelImpl::SetVisibility(VisibleType visible, std::function<voi
     display->SetVisibleChangeEvent(eventMarker);
 }
 
-void ViewAbstractModelImpl::SetSharedTransition(const SharedTransitionOption& option)
+void ViewAbstractModelImpl::SetSharedTransition(
+    const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option)
 {
     auto sharedTransitionComponent = ViewStackProcessor::GetInstance()->GetSharedTransitionComponent();
-    sharedTransitionComponent->SetShareId(option.id);
+    sharedTransitionComponent->SetShareId(shareId);
+    if (!option) {
+        return;
+    }
     TweenOption tweenOption;
-    tweenOption.SetCurve(option.curve);
-    tweenOption.SetDuration(option.duration);
-    tweenOption.SetDelay(option.delay);
-    tweenOption.SetMotionPathOption(option.motionPathOption);
+    tweenOption.SetCurve(option->curve);
+    tweenOption.SetDuration(option->duration);
+    tweenOption.SetDelay(option->delay);
+    tweenOption.SetMotionPathOption(option->motionPathOption);
     auto sharedTransitionEffect =
-        SharedTransitionEffect::GetSharedTransitionEffect(option.type, sharedTransitionComponent->GetShareId());
+        SharedTransitionEffect::GetSharedTransitionEffect(option->type, sharedTransitionComponent->GetShareId());
     sharedTransitionComponent->SetEffect(sharedTransitionEffect);
     sharedTransitionComponent->SetOption(tweenOption);
-    if (option.zIndex != 0) {
-        sharedTransitionComponent->SetZIndex(option.zIndex);
+    if (option->zIndex != 0) {
+        sharedTransitionComponent->SetZIndex(option->zIndex);
     }
 }
 

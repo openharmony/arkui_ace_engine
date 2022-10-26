@@ -25,13 +25,12 @@
 namespace OHOS::Ace {
 
 struct SharedTransitionOption {
-    std::string id;
     int32_t duration = 0;
     int32_t delay = 0;
     int32_t zIndex = 0;
     RefPtr<Curve> curve;
     MotionPathOption motionPathOption;
-    SharedTransitionEffectType type;
+    SharedTransitionEffectType type = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
 };
 
 } // namespace OHOS::Ace

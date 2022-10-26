@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
+#include <functional>
+#include <memory>
+
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -109,13 +112,17 @@ void SwiperModelNG::SetCurve(const RefPtr<Curve>& curve)
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, Curve, curve);
 }
 
-void SwiperModelNG::SetOnChange(ChangeEvent&& onChange)
+void SwiperModelNG::SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChange(std::move(onChange));
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    pattern->UpdateChangeEvent([event = std::move(onChange)](int32_t index) {
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
 }
 
 void SwiperModelNG::SetRemoteMessageEventId(RemoteCallback&& remoteCallback) {}

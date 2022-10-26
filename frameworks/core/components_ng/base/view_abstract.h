@@ -28,9 +28,14 @@
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/clip_path.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -176,6 +181,8 @@ public:
     static void SetInspectorId(const std::string& inspectorId);
     // transition
     static void SetTransition(const TransitionOptions& options);
+    // sharedTransition
+    static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape>& basicShape);
     static void SetClipEdge(bool isClip);

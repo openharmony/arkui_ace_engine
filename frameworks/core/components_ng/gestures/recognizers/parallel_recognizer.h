@@ -20,63 +20,50 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/gestures/gesture_info.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
 
 // ParallelRecognizer identifies events in parallel recognizers.
 // For long press and double click, see: LongPressRecognizer and DoubleClickRecognizer.
-class ACE_EXPORT ParallelRecognizer : public MultiFingersRecognizer {
-    DECLARE_ACE_TYPE(ParallelRecognizer, MultiFingersRecognizer);
+class ACE_EXPORT ParallelRecognizer : public RecognizerGroup {
+    DECLARE_ACE_TYPE(ParallelRecognizer, RecognizerGroup);
 
 public:
     explicit ParallelRecognizer(const std::vector<RefPtr<GestureRecognizer>>& recognizers)
-    {
-        for (const auto& recognizer : recognizers) {
-            recognizer->SetGestureGroup(AceType::WeakClaim(this));
-            recognizers_.emplace_back(recognizer);
-        }
-    }
+        : RecognizerGroup(recognizers)
+    {}
 
     explicit ParallelRecognizer(std::list<RefPtr<GestureRecognizer>>&& recognizers)
-    {
-        for (const auto& recognizer : recognizers) {
-            recognizer->SetGestureGroup(AceType::WeakClaim(this));
-            recognizers_.emplace_back(recognizer);
-        }
-    }
+        : RecognizerGroup(std::move(recognizers))
+    {}
 
     ~ParallelRecognizer() override = default;
-    void OnAccepted(size_t touchId) override;
-    void OnRejected(size_t touchId) override;
-    void OnPending(size_t touchId) override;
+
+    void OnAccepted() override;
+    void OnRejected() override;
+    void OnPending() override;
+    void OnBlocked() override;
+
     bool HandleEvent(const TouchEvent& point) override;
-    void OnFlushTouchEventsBegin() override;
-    void OnFlushTouchEventsEnd() override;
-    void ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers)
-    {
-        // TODO: add state adjustment.
-        recognizers_.clear();
-        std::swap(recognizers_, recognizers);
-        for (auto& recognizer : recognizers_) {
-            recognizer->SetGestureGroup(AceType::WeakClaim(this));
-        }
-    }
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};
     void HandleTouchUpEvent(const TouchEvent& event) override {};
     void HandleTouchMoveEvent(const TouchEvent& event) override {};
     void HandleTouchCancelEvent(const TouchEvent& event) override {};
-    void BatchAdjudicate(const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer,
-        GestureDisposal disposal) override;
-    void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer) override;
-    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
-    void Reset();
-    void DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer) override {}
-    bool IsRecognizeEnd(const RefPtr<GestureRecognizer>& recognizer);
 
-    std::list<RefPtr<GestureRecognizer>> recognizers_;
+    void BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal) override;
+
+    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
+
+    void OnResetStatus() override
+    {
+        RecognizerGroup::OnResetStatus();
+        currentBatchRecognizer_.Reset();
+    }
+
+    RefPtr<GestureRecognizer> currentBatchRecognizer_;
 };
 
 } // namespace OHOS::Ace::NG

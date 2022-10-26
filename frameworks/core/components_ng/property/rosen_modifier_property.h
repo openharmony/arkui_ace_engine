@@ -50,6 +50,12 @@ struct TransformMatrixModifier {
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> scaleXYValue;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Quaternion>> quaternionValue;
 };
+
+struct SharedTransitionModifier {
+    std::shared_ptr<Rosen::RSTranslateModifier> translateXY;
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> translateXYValue;
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ROSEN_MODIFIER_PROPERTY_H

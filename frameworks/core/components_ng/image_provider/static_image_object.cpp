@@ -24,4 +24,11 @@ void StaticImageObject::MakeCanvasImage(const LoadCallbacks& loadCallbacks, cons
     ImageProvider::MakeCanvasImage(WeakClaim(this), loadCallbacks, resizeTarget, renderTaskHolder, forceResize);
 }
 
+RefPtr<StaticImageObject> StaticImageObject::Create(
+    const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data)
+{
+    return AceType::MakeRefPtr<NG::StaticImageObject>(
+        sourceInfo, encodedInfo->GetImageSize(), encodedInfo->GetFrameCount(), data);
+}
+
 } // namespace OHOS::Ace::NG

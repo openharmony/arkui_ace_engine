@@ -122,7 +122,8 @@ public:
     virtual void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) = 0;
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
-    virtual void SetSharedTransition(const SharedTransitionOption& option) = 0;
+    virtual void SetSharedTransition(
+        const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
     virtual void SetGeometryTransition(const std::string& id) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
 

@@ -21,6 +21,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
@@ -128,6 +129,12 @@ void SwiperPattern::CalculateCacheRange()
     auto cacheCount = layoutProperty->GetCachedCount().value_or(1);
     auto loadCount = cacheCount * 2 + displayCount;
     auto totalCount = TotalCount();
+
+    if (totalCount <= 0) {
+        LOGE("Total count of swiper children is not positive.");
+        return;
+    }
+
     if (loadCount >= totalCount) { // Load all items.
         startIndex_ = 0;
         endIndex_ = totalCount - 1;
@@ -434,6 +441,11 @@ void SwiperPattern::Tick(uint64_t duration)
     CHECK_NULL_VOID(host);
 
     auto childrenSize = TotalCount();
+    auto displayCount = GetDisplayCount();
+    if (childrenSize <= 0 || displayCount <= 0) {
+        return;
+    }
+
     elapsedTime_ += duration;
     if (elapsedTime_ >= static_cast<uint64_t>(GetInterval())) {
         if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
@@ -442,7 +454,7 @@ void SwiperPattern::Tick(uint64_t duration)
                 scheduler_->Stop();
             }
         } else {
-            PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize);
+            PlayTranslateAnimation(0, -MainSize() / displayCount, (currentIndex_ + 1) % childrenSize);
         }
         elapsedTime_ = 0;
     }
@@ -510,6 +522,10 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart()
 {
+#ifdef OHOS_PLATFORM
+    // Increase the cpu frequency when sliding.
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
     currentOffset_ = std::fmod(currentOffset_, MainSize());
 }
 
@@ -569,8 +585,16 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         }
     }
 
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
     // Play translate animation.
-    auto mainSize = MainSize() / GetDisplayCount();
+    auto mainSize = MainSize() / std::max(GetDisplayCount(), 1);
+    if (LessOrEqual(mainSize, 0)) {
+        LOGE("Main size is not positive.");
+        return;
+    }
+
     int32_t nextIndex = currentIndex_;
     float start = currentOffset_;
     float end = 0.0f;
@@ -588,7 +612,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     if (IsLoop()) {
         if (nextIndex < 0) {
             nextIndex = childrenSize + nextIndex;
-        } else if (nextIndex >= childrenSize) {
+        } else if (nextIndex >= childrenSize && childrenSize > 0) {
             nextIndex = nextIndex % childrenSize;
         }
     }
@@ -659,6 +683,12 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     springController_->ClearStopListeners();
     springController_->ClearInterpolators();
 
+    auto mainSize = MainSize();
+    if (LessOrEqual(mainSize, 0)) {
+        LOGE("Main size is not positive.");
+        return;
+    }
+
     // TODO use theme.
     constexpr float SPRING_SCROLL_MASS = 0.5f;
     constexpr float SPRING_SCROLL_STIFFNESS = 100.0f;
@@ -666,7 +696,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
         AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
     ExtentPair extentPair = ExtentPair(0.0, 0.0);
-    float friction = CalculateFriction(std::abs(currentOffset_) / MainSize());
+    float friction = CalculateFriction(std::abs(currentOffset_) / mainSize);
     auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
         currentOffset_, dragVelocity * friction, extentPair, extentPair, DEFAULT_OVER_SPRING_PROPERTY);
     scrollMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {

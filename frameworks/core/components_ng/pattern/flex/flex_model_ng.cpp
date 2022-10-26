@@ -37,7 +37,7 @@ void FlexModelNG::CreateFlexRow()
 
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, FlexDirection::ROW);
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, FlexAlign::FLEX_START);
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, FlexAlign::STRETCH);
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, FlexAlign::FLEX_START);
 }
 
 void FlexModelNG::CreateWrap()
@@ -49,7 +49,7 @@ void FlexModelNG::CreateWrap()
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, WrapDirection, WrapDirection::HORIZONTAL);
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, WrapAlignment::START);
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, WrapAlignment::STRETCH);
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, WrapAlignment::START);
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, WrapAlignment::START);
 }
 

@@ -46,7 +46,7 @@ public:
     void SetShowIndicator(bool showIndicator) override;
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
-    void SetOnChange(ChangeEvent&& onChange) override;
+    void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
 
     void SetRemoteMessageEventId(RemoteCallback&& remoteCallback) override;
     void SetDigital(bool digitalIndicator) override;

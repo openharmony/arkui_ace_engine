@@ -21,5 +21,7 @@ build_component_ng("manager_ng") {
     "full_screen/full_screen_manager.cpp",
     "select_overlay/select_overlay_manager.cpp",
     "select_overlay/select_overlay_proxy.cpp",
+    "shared_overlay/shared_overlay_manager.cpp",
+    "shared_overlay/shared_transition_effect.cpp",
   ]
 }
