@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
@@ -24,4 +25,30 @@ RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
     return MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
 }
 
+RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
+{
+    auto listLayoutProperty = GetHost()->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    V2::ItemDivider itemDivider;
+    auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    auto lanes = listLayoutProperty->GetLanes().value_or(1);
+    auto drawVertical = (axis == Axis::HORIZONTAL);
+    return MakeRefPtr<ListItemGroupPaintMethod>(divider, drawVertical, lanes, itemPosition_);
+}
+
+bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (config.skipMeasure && config.skipLayout) {
+        return false;
+    }
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto layoutAlgorithm = DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
+    itemPosition_ = layoutAlgorithm->GetItemPosition();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
+}
 } // namespace OHOS::Ace::NG

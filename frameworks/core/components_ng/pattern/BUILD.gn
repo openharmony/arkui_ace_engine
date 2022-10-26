@@ -112,6 +112,7 @@ build_component_ng("pattern_ng") {
     "linear_split/linear_split_pattern.cpp",
     "list/list_item_group_layout_algorithm.cpp",
     "list/list_item_group_model_ng.cpp",
+    "list/list_item_group_paint_method.cpp",
     "list/list_item_group_pattern.cpp",
     "list/list_item_model_ng.cpp",
     "list/list_layout_algorithm.cpp",

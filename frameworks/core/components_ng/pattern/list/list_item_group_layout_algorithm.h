@@ -36,6 +36,11 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    const PositionMap& GetItemPosition() const
+    {
+        return itemPosition_;
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
