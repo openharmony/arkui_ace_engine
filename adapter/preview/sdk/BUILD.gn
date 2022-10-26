@@ -92,6 +92,19 @@ if (is_standard_system) {
       module_source_dir = target_out_dir + "/previewer/common/bin/module/data/"
       module_install_name = ""
     }
+
+    ohos_copy("copy_distributedkvstore_library") {
+      out_path = get_label_info(
+              "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributedkvstore:distributedkvstore",
+              "root_out_dir")
+      deps = [ "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributedkvstore:distributedkvstore" ]
+      sources = [ "${out_path}/distributeddatamgr/kv_store/libdistributedkvstore${dylib_suffix}" ]
+
+      outputs = [ target_out_dir +
+                  "/previewer/common/bin/module/data/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/previewer/common/bin/module/data/"
+      module_install_name = ""
+    }
   }
 
   # All dynamic libraries to be copied to the path "/previewer/common/bin/",
