@@ -14,6 +14,7 @@
 group("pattern_unittest") {
   testonly = true
   deps = [
+    "badge:badge_pattern_unit_test",
     "button:button_pattern_unit_test",
     "custom_paint:custom_paint_pattern_test_ng",
     "flex:flex_pattern_unit_test",
