@@ -21,7 +21,9 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -134,6 +136,26 @@ Axis TabBarLayoutAlgorithm::GetAxis(LayoutWrapper* layoutWrapper) const
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, Axis::HORIZONTAL);
     return layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+}
+
+RectF TabBarLayoutAlgorithm::GetIndicatorRect(const RefPtr<LayoutWrapper>& layoutWrapper) const
+{
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, RectF());
+    int32_t indicator = layoutProperty->GetIndicatorValue(0);
+
+    auto childColumn = layoutWrapper->GetOrCreateChildByIndex(indicator);
+    CHECK_NULL_RETURN(childColumn, RectF());
+    auto grandChildren = childColumn->GetOrCreateChildByIndex(childColumn->GetTotalChildCount() - 1);
+    CHECK_NULL_RETURN(grandChildren, RectF());
+    auto grandChildGeometryNode = grandChildren->GetGeometryNode();
+    RectF indicatorRect = grandChildGeometryNode->GetFrameRect();
+
+    /* Set indicatorRect at the bottom of columnNode's last child */
+    auto childColumnRect = childColumn->GetGeometryNode()->GetFrameRect();
+    indicatorRect.SetLeft(indicatorRect.GetX() + childColumnRect.GetX());
+    indicatorRect.SetTop(indicatorRect.Bottom() + childColumnRect.GetY());
+    return indicatorRect;
 }
 
 } // namespace OHOS::Ace::NG
