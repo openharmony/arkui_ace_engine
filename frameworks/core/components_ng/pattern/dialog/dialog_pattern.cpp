@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -32,6 +33,7 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -42,6 +44,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -228,8 +231,23 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(std::string& data, const DialogPrope
     titlePadding.top = CalcLength(paddingInTheme.Top());
     titlePadding.bottom = CalcLength(paddingInTheme.Bottom());
     titleProp->UpdatePadding(titlePadding);
+
     // XTS inspector value
     title_ = dialogProperties.title;
+
+    // actionSheet title needs to align flex start
+    if (dialogProperties.type == DialogType::ACTION_SHEET) {
+        auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(row, nullptr);
+        auto rowProps = row->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(rowProps, nullptr);
+        rowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+        rowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        title->MountToParent(row);
+        return row;
+    }
+
     return title;
 }
 
@@ -353,7 +371,6 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     CHECK_NULL_RETURN(itemRow, nullptr);
     auto layoutProps = itemRow->GetLayoutProperty<LinearLayoutProperty>();
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    layoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
 
     // mount icon
