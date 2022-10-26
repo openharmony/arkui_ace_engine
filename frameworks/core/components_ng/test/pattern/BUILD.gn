@@ -18,6 +18,7 @@ group("pattern_unittest") {
     "flex:flex_pattern_unit_test",
     "qrcode:qrcode_pattern_test_ng",
     "relative_container:relative_container_pattern_test_ng",
+    "stepper:stepper_pattern_test_ng",
     "text:text_pattern_test_ng",
   ]
 }
