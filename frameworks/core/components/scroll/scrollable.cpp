@@ -22,6 +22,7 @@
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
+#include "core/common/container.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
@@ -105,10 +106,8 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     } else {
         panDirection.type = PanDirection::HORIZONTAL;
     }
-    panRecognizer_ =
-        AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
 
-    panRecognizer_->SetOnActionStart([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
+    auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             // Send event to accessibility when scroll start.
@@ -121,14 +120,16 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
             }
             scroll->HandleDragStart(info);
         }
-    });
-    panRecognizer_->SetOnActionUpdate([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
+    };
+
+    auto actionUpdate = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->HandleDragUpdate(info);
         }
-    });
-    panRecognizer_->SetOnActionEnd([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
+    };
+
+    auto actionEnd = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->HandleDragEnd(info);
@@ -141,8 +142,9 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
                 context->SendEventToAccessibility(scrollEvent);
             }
         }
-    });
-    panRecognizer_->SetOnActionCancel([weakScroll = AceType::WeakClaim(this)]() {
+    };
+
+    auto actionCancel = [weakScroll = AceType::WeakClaim(this)]() {
         auto scroll = weakScroll.Upgrade();
         if (!scroll) {
             return;
@@ -150,7 +152,24 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
         }
-    });
+    };
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        panRecognizerNG_ =
+            AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+
+        panRecognizerNG_->SetOnActionStart(actionStart);
+        panRecognizerNG_->SetOnActionUpdate(actionUpdate);
+        panRecognizerNG_->SetOnActionEnd(actionEnd);
+        panRecognizerNG_->SetOnActionCancel(actionCancel);
+    } else {
+        panRecognizer_ =
+            AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+        panRecognizer_->SetOnActionStart(actionStart);
+        panRecognizer_->SetOnActionUpdate(actionUpdate);
+        panRecognizer_->SetOnActionEnd(actionEnd);
+        panRecognizer_->SetOnActionCancel(actionCancel);
+    }
 
     // use RawRecognizer to receive next touch down event to stop animation.
     rawRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
