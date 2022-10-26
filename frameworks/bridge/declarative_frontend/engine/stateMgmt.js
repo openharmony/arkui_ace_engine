@@ -2158,7 +2158,7 @@ class View extends NativeViewFullUpdate {
         this.localStoragebackStore_ = undefined;
         if (parent) {
             // this View is not a top-level View
-            
+
             this.localStorage_ = parent.localStorage_;
         }
         else if (localStorage) {
@@ -2907,7 +2907,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.localStoragebackStore_ = undefined;
         if (parent) {
             // this View is not a top-level View
-            
+
             this.localStorage_ = parent.localStorage_;
         }
         else if (localStorage) {

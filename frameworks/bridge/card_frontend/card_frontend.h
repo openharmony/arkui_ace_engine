@@ -176,7 +176,7 @@ public:
         cardWindowConfig_ = cardWindowConfig;
     }
 
-    void SetRunningCardId(uint64_t cardId)
+    void SetRunningCardId(int64_t cardId)
     {
         cardId_ = cardId;
     }

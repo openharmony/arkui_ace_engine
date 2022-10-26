@@ -301,7 +301,7 @@ void AceContainer::OnShow(int32_t instanceId)
         front->UpdateState(Frontend::State::ON_SHOW);
         front->OnShow();
     }
-    std::unordered_map<uint64_t, WeakPtr<Frontend>> cardFrontendMap;
+    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
     container->GetCardFrontendMap(cardFrontendMap);
     for (const auto& [_, weakCardFront] : cardFrontendMap) {
         auto cardFront = weakCardFront.Upgrade();
@@ -348,7 +348,7 @@ void AceContainer::OnHide(int32_t instanceId)
             taskExecutor->PostTask([front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
         }
     }
-    std::unordered_map<uint64_t, WeakPtr<Frontend>> cardFrontendMap;
+    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
     container->GetCardFrontendMap(cardFrontendMap);
     for (const auto& [_, weakCardFront] : cardFrontendMap) {
         auto cardFront = weakCardFront.Upgrade();

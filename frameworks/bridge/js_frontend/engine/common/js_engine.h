@@ -83,7 +83,7 @@ public:
     // Load script in JS engine, and execute in corresponding context.
     virtual void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) = 0;
     // Load ets card script in JS engine, and execute in corresponding context.
-    virtual bool LoadCard(const std::string& url, uint64_t cardId)
+    virtual bool LoadCard(const std::string& url, int64_t cardId)
     {
         return false;
     }

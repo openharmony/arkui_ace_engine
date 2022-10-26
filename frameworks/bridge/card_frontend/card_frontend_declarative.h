@@ -79,7 +79,7 @@ public:
 
     void SetLoadCardCallBack(WeakPtr<PipelineBase> outSidePipelineContext) override
     {
-        const auto& loadCallback = [outSidePipelineContext](const std::string& url, uint64_t cardId) -> bool {
+        const auto& loadCallback = [outSidePipelineContext](const std::string& url, int64_t cardId) -> bool {
             auto context = outSidePipelineContext.Upgrade();
             if (!context) {
                 LOGE("Load card callback failed, host pipeline nullptr");

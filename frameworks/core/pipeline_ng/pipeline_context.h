@@ -99,8 +99,6 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void OnActionEvent(const std::string& action) override {}
-
     void SetBuildAfterCallback(const std::function<void()>& callback) override {}
 
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}

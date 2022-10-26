@@ -98,6 +98,16 @@ public:
         jsViewFunction_->SetContext(context);
     }
 
+    void SetCardId(int64_t cardId)
+    {
+        cardId_ = cardId;
+    }
+
+    int64_t GetCardId() const
+    {
+        return cardId_;
+    }
+
     // Used by full update variant only from js_lazy_foreach.cpp
     virtual void RemoveChildGroupById(const std::string& viewId) {}
     virtual void MarkLazyForEachProcess(const std::string& groudId) {}
@@ -117,6 +127,8 @@ protected:
     // view id for custom view itself
     std::string viewId_;
 
+    // card id for eTS Card
+    int64_t cardId_ = -1;
 private:
     int32_t instanceId_ = -1;
     int32_t restoreInstanceId_ = -1;

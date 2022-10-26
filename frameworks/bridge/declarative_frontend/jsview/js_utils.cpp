@@ -123,15 +123,11 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
         return nullptr;
     }
     auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
-        LOGE("CreateWantWrapFromNapiValue engine is null");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(engine, nullptr);
+
     NativeEngine* nativeEngine = engine->GetNativeEngine();
-    if (nativeEngine == nullptr) {
-        LOGE("nativeEngine is nullptr.");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+
 #ifdef USE_V8_ENGINE
     v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
 #elif USE_QUICKJS_ENGINE

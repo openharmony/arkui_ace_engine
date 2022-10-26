@@ -72,7 +72,7 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     LoadPage(GenerateNextPageId(), info, params);
 }
 
-void PageRouterManager::RunCard(const std::string& url, const std::string& params, uint64_t cardId)
+void PageRouterManager::RunCard(const std::string& url, const std::string& params, int64_t cardId)
 {
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url };
@@ -567,7 +567,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
 }
 
 void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
-    uint64_t cardId, bool /*isRestore*/, bool needHideLast)
+    int64_t cardId, bool /*isRestore*/, bool needHideLast)
 {
     CHECK_RUN_ON(JS);
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, params);
@@ -722,7 +722,7 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
 }
 
 bool PageRouterManager::OnPageReady(
-    const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition, bool isCardRouter, uint64_t cardId)
+    const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition, bool isCardRouter, int64_t cardId)
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);

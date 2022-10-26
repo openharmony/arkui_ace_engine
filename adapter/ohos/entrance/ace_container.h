@@ -70,13 +70,13 @@ public:
         return frontend_;
     }
 
-    void SetCardFrontend(WeakPtr<Frontend> frontend, uint64_t cardId) override
+    void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) override
     {
         std::lock_guard<std::mutex> lock(cardFrontMutex_);
         cardFrontendMap_.try_emplace(cardId, frontend);
     }
 
-    WeakPtr<Frontend> GetCardFrontend(uint64_t cardId) const override
+    WeakPtr<Frontend> GetCardFrontend(int64_t cardId) const override
     {
         std::lock_guard<std::mutex> lock(cardFrontMutex_);
         auto it = cardFrontendMap_.find(cardId);
@@ -86,13 +86,13 @@ public:
         return nullptr;
     }
 
-    void SetCardPipeline(WeakPtr<PipelineBase> pipeline, uint64_t cardId) override
+    void SetCardPipeline(WeakPtr<PipelineBase> pipeline, int64_t cardId) override
     {
         std::lock_guard<std::mutex> lock(cardPipelineMutex_);
         cardPipelineMap_.try_emplace(cardId, pipeline);
     }
 
-    WeakPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const override
+    WeakPtr<PipelineBase> GetCardPipeline(int64_t cardId) const override
     {
         std::lock_guard<std::mutex> lock(cardPipelineMutex_);
         auto it = cardPipelineMap_.find(cardId);
@@ -350,7 +350,7 @@ public:
         return useStageModel_;
     }
 
-    void GetCardFrontendMap(std::unordered_map<uint64_t, WeakPtr<Frontend>>& cardFrontendMap) const override
+    void GetCardFrontendMap(std::unordered_map<int64_t, WeakPtr<Frontend>>& cardFrontendMap) const override
     {
         cardFrontendMap = cardFrontendMap_;
     }
@@ -373,8 +373,8 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
-    std::unordered_map<uint64_t, WeakPtr<Frontend>> cardFrontendMap_;
-    std::unordered_map<uint64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
+    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap_;
+    std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
 
     FrontendType type_ = FrontendType::JS;
     bool isArkApp_ = false;

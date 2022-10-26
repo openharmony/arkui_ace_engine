@@ -306,7 +306,6 @@ void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) co
 
 void FormPattern::OnActionEvent(const std::string& action) const
 {
-    LOGI("OnActionEvent action: %{public}s", action.c_str());
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         LOGE("get event action failed");
