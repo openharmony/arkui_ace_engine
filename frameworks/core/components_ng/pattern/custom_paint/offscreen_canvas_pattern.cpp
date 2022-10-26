@@ -168,6 +168,11 @@ void OffscreenCanvasPattern::PutImageData(const Ace::ImageData& imageData)
     offscreenPaintMethod_->PutImageData(nullptr, imageData);
 }
 
+void OffscreenCanvasPattern::SetAntiAlias(bool isEnabled)
+{
+    offscreenPaintMethod_->SetAntiAlias(isEnabled);
+}
+
 void OffscreenCanvasPattern::SetFillColor(const Color& color)
 {
     offscreenPaintMethod_->SetFillColor(color);

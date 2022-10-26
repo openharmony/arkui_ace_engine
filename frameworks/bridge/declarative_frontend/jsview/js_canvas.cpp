@@ -30,6 +30,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
             JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
             if (jsContext) {
                 jsContext->SetCustomPaintPattern(pattern);
+                jsContext->SetAntiAlias();
             }
         }
         return;

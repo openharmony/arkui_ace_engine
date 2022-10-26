@@ -69,7 +69,7 @@ public:
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
-    void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
+    void TransferFromImageBitmap(PaintWrapper* paintWrapper, const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
     std::string ToDataURL(const std::string& args);
 
     void FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y);
