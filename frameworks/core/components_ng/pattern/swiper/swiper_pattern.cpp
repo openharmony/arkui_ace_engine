@@ -21,6 +21,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
@@ -510,6 +511,10 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart()
 {
+#ifdef OHOS_PLATFORM
+    // Increase the cpu frequency when sliding.
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
     currentOffset_ = std::fmod(currentOffset_, MainSize());
 }
 
@@ -569,6 +574,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         }
     }
 
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
     // Play translate animation.
     auto mainSize = MainSize() / GetDisplayCount();
     int32_t nextIndex = currentIndex_;
