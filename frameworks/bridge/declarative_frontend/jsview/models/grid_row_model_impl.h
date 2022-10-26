@@ -13,21 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GRID_ROW_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GRID_ROW_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_GRID_ROW_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_GRID_ROW_MODEL_IMPL_H
 
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
-#include "core/components/common/layout/grid_container_info.h"
+#include "core/components_ng/pattern/grid_row/grid_row_model.h"
 
 namespace OHOS::Ace::Framework {
-class JSGridRow : public JSContainerBase {
+class GridRowModelImpl : public GridRowModel {
 public:
-    static void JSBind(BindingTarget globalObj);
-    static void Create(const JSCallbackInfo& info);
-    static void JsBreakpointEvent(const JSCallbackInfo& info);
-    static void Height(const JSCallbackInfo& info);
-
+    void Create() override;
+    void Create(const RefPtr<V2::GridContainerSize>& col, const RefPtr<V2::Gutter>& gutter,
+        const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction) override;
+    void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange) override;
+    void SetHeight() override;
 };
-
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GRID_ROW_H
+
+#endif
