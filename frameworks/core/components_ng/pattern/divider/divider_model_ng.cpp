@@ -30,7 +30,6 @@ void DividerModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
     stack->Push(frameNode);
-    LoadTheme(frameNode);
 }
 
 void DividerModelNG::Vertical(bool value)
@@ -51,19 +50,6 @@ void DividerModelNG::StrokeWidth(const Dimension& value)
 void DividerModelNG::LineCap(const Ace::LineCap& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, LineCap, value);
-}
-
-void DividerModelNG::LoadTheme(const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<DividerTheme>();
-    CHECK_NULL_VOID(theme);
-    auto castDividerRenderProperty = frameNode->GetLayoutProperty<DividerRenderProperty>();
-    if (castDividerRenderProperty) {
-        castDividerRenderProperty->UpdateDividerColor(theme->GetColor());
-    }
 }
 
 } // namespace OHOS::Ace::NG
