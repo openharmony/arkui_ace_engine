@@ -18,7 +18,6 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/models/shape_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/shape/shape_component.h"
 #include "core/components/shape/shape_container_component.h"
 
 namespace OHOS::Ace::Framework {
@@ -100,6 +99,137 @@ void ShapeModelImpl::InitBox(RefPtr<PixelMap>& pixMap)
     box->SetClipPath(clipPath);
     if (pixMap) {
         box->SetPixelMap(pixMap);
+    }
+}
+
+void ShapeModelImpl::SetStroke(const Color& color)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (component) {
+        AnimationOption option = stack->GetImplicitAnimationOption();
+        component->SetStroke(color, option);
+    }
+}
+
+void ShapeModelImpl::SetFill(const Color& color)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("component is null");
+        return;
+    }
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    component->SetFill(color, option);
+}
+
+void ShapeModelImpl::SetStrokeDashOffset(const Ace::Dimension& dashOffset)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (component) {
+        AnimationOption option = stack->GetImplicitAnimationOption();
+        component->SetStrokeDashOffset(dashOffset, option);
+    }
+}
+
+void ShapeModelImpl::SetStrokeLineCap(int lineCapStyle)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("ShapeComponent is null");
+        return;
+    }
+    if (static_cast<int>(LineCapStyle::SQUARE) == lineCapStyle) {
+        component->SetStrokeLineCap(LineCapStyle::SQUARE);
+    } else if (static_cast<int>(LineCapStyle::ROUND) == lineCapStyle) {
+        component->SetStrokeLineCap(LineCapStyle::ROUND);
+    } else {
+        component->SetStrokeLineCap(LineCapStyle::BUTT);
+    }
+}
+
+void ShapeModelImpl::SetStrokeLineJoin(int lineJoinStyle)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("ShapeComponent is null");
+        return;
+    }
+    if (static_cast<int>(LineJoinStyle::BEVEL) == lineJoinStyle) {
+        component->SetStrokeLineJoin(LineJoinStyle::BEVEL);
+    } else if (static_cast<int>(LineJoinStyle::ROUND) == lineJoinStyle) {
+        component->SetStrokeLineJoin(LineJoinStyle::ROUND);
+    } else {
+        component->SetStrokeLineJoin(LineJoinStyle::MITER);
+    }
+}
+
+void ShapeModelImpl::SetStrokeMiterLimit(double miterLimit)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("ShapeComponent is null");
+        return;
+    }
+    component->SetStrokeMiterLimit(miterLimit);
+}
+
+void ShapeModelImpl::SetStrokeOpacity(double opacity)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (component) {
+        AnimationOption option = stack->GetImplicitAnimationOption();
+        component->SetStrokeOpacity(opacity, option);
+    }
+}
+
+void ShapeModelImpl::SetFillOpacity(double opacity)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (component) {
+        AnimationOption option = stack->GetImplicitAnimationOption();
+        component->SetFillOpacity(opacity, option);
+    }
+}
+
+void ShapeModelImpl::SetStrokeWidth(const Ace::Dimension& lineWidth)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("ShapeComponent is null");
+        return;
+    }
+    if (GreatOrEqual(lineWidth.Value(), 0.0)) {
+        AnimationOption option = stack->GetImplicitAnimationOption();
+        component->SetStrokeWidth(lineWidth, option);
+    }
+}
+
+void ShapeModelImpl::SetStrokeDashArray(const std::vector<Ace::Dimension>& dashArray)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("component is null");
+        return;
+    }
+    component->SetStrokeDashArray(dashArray);
+}
+
+void ShapeModelImpl::SetAntiAlias(bool antiAlias)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (component) {
+        component->SetAntiAlias(antiAlias);
     }
 }
 
