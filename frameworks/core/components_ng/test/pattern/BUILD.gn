@@ -16,6 +16,7 @@ group("pattern_unittest") {
   deps = [
     "button:button_pattern_unit_test",
     "qrcode:qrcode_pattern_test_ng",
+    "rating:rating_pattern_test_ng",
     "relative_container:relative_container_pattern_test_ng",
     "text:text_pattern_test_ng",
   ]
