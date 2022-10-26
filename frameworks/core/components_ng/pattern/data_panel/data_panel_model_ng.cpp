@@ -38,7 +38,7 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
 
 void DataPanelModelNG::SetEffect(bool isCloseEffect)
 {
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Effect, isCloseEffect);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Effect, !isCloseEffect);
 }
 
 } // namespace OHOS::Ace::NG

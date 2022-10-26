@@ -15,42 +15,48 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DATA_PANEL_DATA_PANEL_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DATA_PANEL_DATA_PANEL_PAINT_METHOD_H
+
+#include "core/components_ng/pattern/data_panel/data_panel_modifer.h"
+#include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
-struct ArcData {
-    Offset center;
-    float progress = 0.0f;
-    float radius = 0.0f;
-    float thickness = 0.0f;
-    double maxValue = 0.0;
-    Color startColor;
-    Color endColor;
-
-    float wholeAngle = 360.0f;
-    float startAngle = 0.0f;
-};
-
 class ACE_EXPORT DataPanelPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(DataPanelPaintMethod, NodePaintMethod)
 public:
-    DataPanelPaintMethod() = default;
+    explicit DataPanelPaintMethod(const RefPtr<DataPanelModifier>& dataPanelModifier)
+        : dataPanelModifier_(dataPanelModifier)
+    {}
     ~DataPanelPaintMethod() override = default;
 
-    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(dataPanelModifier_, nullptr);
+        return dataPanelModifier_;
+    }
+
+    void UpdateModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(dataPanelModifier_);
+        auto paintProperty = DynamicCast<DataPanelPaintProperty>(paintWrapper->GetPaintProperty());
+
+        auto values_ = paintProperty->GetValues().value();
+        auto max_ = paintProperty->GetMax().value_or(100);
+        auto dataPanelType_ = paintProperty->GetDataPanelType().value_or(0);
+        auto effect_ = paintProperty->GetEffect().value_or(false);
+        auto offset_ = paintWrapper->GetContentOffset();
+        dataPanelModifier_->SetDate(1);
+        dataPanelModifier_->SetValues(values_);
+        dataPanelModifier_->SetMax(max_);
+        dataPanelModifier_->SetDataPanelType(dataPanelType_);
+        dataPanelModifier_->SetEffect(effect_);
+        dataPanelModifier_->SetOffset(offset_);
+    }
 
 private:
-    void Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    void PaintLinearProgress(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    void PaintBackground(RSCanvas& canvas, PaintWrapper* paintWrapper, float totalWidth, float height) const;
-    void PaintColorSegment(RSCanvas& canvas, PaintWrapper* paintWrapper, float segmentWidth, float xSpace,
-        float height, const Color segmentStartColor, const Color segmentEndColor) const;
-    void PaintSpace(
-        RSCanvas& canvas, PaintWrapper* paintWrapper, float spaceWidth, float xSpace, float height) const;
-    void PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const;
-    void PaintProgress(RSCanvas& canvas, ArcData arcData, bool useEffect = false, bool useAnimator = false,
-        float percent = 0.0f) const;
+    RefPtr<DataPanelModifier> dataPanelModifier_;
+    ACE_DISALLOW_COPY_AND_MOVE(DataPanelPaintMethod);
 };
 
 } // namespace OHOS::Ace::NG
