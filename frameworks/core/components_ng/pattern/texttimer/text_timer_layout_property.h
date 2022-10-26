@@ -50,6 +50,8 @@ public:
         ResetInputCount();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Format, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCountDown, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputCount, double, PROPERTY_UPDATE_MEASURE);

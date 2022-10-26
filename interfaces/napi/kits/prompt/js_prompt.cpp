@@ -15,11 +15,10 @@
 
 #include <string>
 
+#include "interfaces/napi/kits/utils/napi_utils.h"
 #include "napi/native_api.h"
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
-
-#include "interfaces/napi/kits/utils/napi_utils.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -141,14 +140,22 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
     }
 #ifdef OHOS_STANDARD_SYSTEM
-    if (SubwindowManager::GetInstance() != nullptr) {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto delegate = EngineHelper::GetCurrentDelegate();
+        if (!delegate) {
+            LOGE("can not get delegate.");
+            NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            return nullptr;
+        }
+        delegate->ShowToast(messageString, duration, bottomString);
+    } else if (SubwindowManager::GetInstance() != nullptr) {
         SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
-        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->ShowToast(messageString, duration, bottomString);
@@ -338,7 +345,35 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 delete asyncContext;
             };
 #ifdef OHOS_STANDARD_SYSTEM
-            if (SubwindowManager::GetInstance() != nullptr) {
+            // NG
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto delegate = EngineHelper::GetCurrentDelegate();
+                if (delegate) {
+                    delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
+                        asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+                } else {
+                    LOGE("delegate is null");
+                    // throw internal error
+                    napi_value code = nullptr;
+                    std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+                    napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+                    napi_value msg = nullptr;
+                    std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+                    napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
+                    napi_value error = nullptr;
+                    napi_create_error(env, code, msg, &error);
+
+                    if (asyncContext->deferred) {
+                        napi_reject_deferred(env, asyncContext->deferred, error);
+                    } else {
+                        napi_value ret1;
+                        napi_value callback = nullptr;
+                        napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+                        napi_call_function(env, nullptr, callback, 1, &error, &ret1);
+                        napi_delete_reference(env, asyncContext->callbackRef);
+                    }
+                }
+            } else if (SubwindowManager::GetInstance() != nullptr) {
                 SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
                     asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
             }
@@ -354,7 +389,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
                 napi_value msg = nullptr;
-                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
+                    + "UI execution context not found.";
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
                 napi_value error = nullptr;
                 napi_create_error(env, code, msg, &error);
@@ -543,9 +579,34 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 delete asyncContext;
             };
 #ifdef OHOS_STANDARD_SYSTEM
-            if (SubwindowManager::GetInstance() != nullptr) {
-                SubwindowManager::GetInstance()->ShowActionMenu(asyncContext->titleString,
-                    asyncContext->buttons, std::move(callBack));
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto delegate = EngineHelper::GetCurrentDelegate();
+                if (delegate) {
+                    delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+                } else {
+                    LOGE("delegate is null");
+                    napi_value code = nullptr;
+                    std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+                    napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+                    napi_value msg = nullptr;
+                    std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+                    napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
+                    napi_value error = nullptr;
+                    napi_create_error(env, code, msg, &error);
+
+                    if (asyncContext->deferred) {
+                        napi_reject_deferred(env, asyncContext->deferred, error);
+                    } else {
+                        napi_value ret1;
+                        napi_value callback = nullptr;
+                        napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+                        napi_call_function(env, nullptr, callback, 1, &error, &ret1);
+                        napi_delete_reference(env, asyncContext->callbackRef);
+                    }
+                }
+            } else if (SubwindowManager::GetInstance() != nullptr) {
+                SubwindowManager::GetInstance()->ShowActionMenu(
+                    asyncContext->titleString, asyncContext->buttons, std::move(callBack));
             }
 #else
             auto delegate = EngineHelper::GetCurrentDelegate();
@@ -557,7 +618,8 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
                 napi_value msg = nullptr;
-                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
+                    + "UI execution context not found.";
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
                 napi_value error = nullptr;
                 napi_create_error(env, code, msg, &error);

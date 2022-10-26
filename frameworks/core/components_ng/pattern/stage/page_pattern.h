@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 
+#include <functional>
+
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
@@ -25,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
+using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<FrameNode>>;
 // PagePattern is the base class for page root render node.
 class ACE_EXPORT PagePattern : public Pattern {
     DECLARE_ACE_TYPE(PagePattern, Pattern);
@@ -80,16 +83,28 @@ public:
         return MakeRefPtr<PageEventHub>();
     }
 
-    bool TriggerPageTransition(PageTransitionType type) const;
+    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const;
 
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
     }
 
+    const SharedTransitionMap& GetSharedTransitionMap() const
+    {
+        return sharedTransitionMap_;
+    }
+
+    void BuildSharedTransitionMap();
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
+
+    // Mark current page node inactive state to show in render tree.
+    void ProcessHideState();
+    // Mark current page node active state to show in render tree.
+    void ProcessShowState();
 
     RefPtr<PageInfo> pageInfo_;
 
@@ -99,6 +114,8 @@ private:
 
     bool isOnShow_ = false;
     bool isLoaded_ = false;
+
+    SharedTransitionMap sharedTransitionMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

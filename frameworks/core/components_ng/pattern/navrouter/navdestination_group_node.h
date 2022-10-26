@@ -77,6 +77,16 @@ public:
         return contentNode_;
     }
 
+    void SetPreNode(const RefPtr<UINode>& preNode)
+    {
+        preNode_ = preNode;
+    }
+
+    const RefPtr<UINode>& GetPreNode() const
+    {
+        return preNode_;
+    }
+
     // custom node checking
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
     void OnPrevTitleIsCustomUpdate(bool value) {}
@@ -92,6 +102,7 @@ private:
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
+    RefPtr<UINode> preNode_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -54,6 +54,16 @@ public:
         return viewPortLength_;
     }
 
+    const SizeF& GetViewPortSize() const
+    {
+        return viewPort_;
+    }
+
+    const SizeF& GetViewPortExtent() const
+    {
+        return viewPortExtent_;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -62,6 +72,8 @@ private:
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;
+    SizeF viewPort_;
+    SizeF viewPortExtent_;
 };
 
 } // namespace OHOS::Ace::NG

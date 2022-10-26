@@ -184,7 +184,6 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     validSizeCount_ = 0;
     realSize_.Reset();
     isInfiniteLayout_ = false;
-    layoutWrapper_ = layoutWrapper;
     auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     space_ = static_cast<float>(layoutProperty->GetSpaceValue({}).ConvertToPx());
@@ -198,7 +197,6 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     if (textDir_ == TextDirection::AUTO) {
         textDir_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
-    textDir_ = AdjustTextDirectionByDir();
     TravelChildrenFlexProps(layoutWrapper);
 }
 
@@ -474,7 +472,8 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
     }
 }
 
-void FlexLayoutAlgorithm::SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties)
+void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
+    FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper)
 {
     float remainSpace = mainAxisSize_ - allocatedSize_;
     float spacePerFlex = 0;
@@ -507,7 +506,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(FlexItemProperties& flexIte
     /**
      * get the real cross axis size.
      */
-    auto padding = layoutWrapper_->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto paddingLeft = padding.left.value_or(0.0f);
     auto paddingRight = padding.right.value_or(0.0f);
     auto paddingTop = padding.top.value_or(0.0f);
@@ -631,7 +630,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     /**
      * secondary measure
      */
-    SecondaryMeasureByProperty(flexItemProperties);
+    SecondaryMeasureByProperty(flexItemProperties, layoutWrapper);
 
     /**
      *  position property measure.
@@ -672,6 +671,7 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
         return;
     }
     allocatedSize_ = 0.0f;
+    allocatedSize_ += space_ * (children.size() - 1);
     for (const auto& child : children) {
         if (child->IsOutOfLayout()) {
             continue;
@@ -716,9 +716,6 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void FlexLayoutAlgorithm::CalculateSpace(float remainSpace, float& frontSpace, float& betweenSpace) const
 {
-    if (NearZero(remainSpace) && mainAxisAlign_ != FlexAlign::SPACE_CUSTOMIZATION) {
-        return;
-    }
     switch (mainAxisAlign_) {
         case FlexAlign::FLEX_START:
             frontSpace = 0.0f;
@@ -743,10 +740,6 @@ void FlexLayoutAlgorithm::CalculateSpace(float remainSpace, float& frontSpace, f
         case FlexAlign::SPACE_EVENLY:
             betweenSpace = validSizeCount_ > 0 ? remainSpace / static_cast<float>(validSizeCount_ + 1) : 0.0f;
             frontSpace = betweenSpace;
-            break;
-        case FlexAlign::SPACE_CUSTOMIZATION:
-            betweenSpace = space_;
-            frontSpace = 0.0f;
             break;
         default:
             break;
@@ -823,15 +816,6 @@ FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutW
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
     return flexItemProperty ? flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) : crossAxisAlign_;
-}
-
-TextDirection FlexLayoutAlgorithm::AdjustTextDirectionByDir() const
-{
-    auto textDir = textDir_;
-    if (direction_ == FlexDirection::ROW_REVERSE) {
-        textDir = (textDir == TextDirection::RTL) ? TextDirection::LTR : TextDirection::RTL;
-    }
-    return textDir;
 }
 
 } // namespace OHOS::Ace::NG

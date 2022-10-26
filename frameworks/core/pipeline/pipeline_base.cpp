@@ -22,6 +22,7 @@
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
@@ -63,7 +64,7 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId,
     RefPtr<PlatformResRegister> platformResRegister)
     : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
-      weakFrontend_(frontend), instanceId_(instanceId),platformResRegister_(std::move(platformResRegister))
+      weakFrontend_(frontend), instanceId_(instanceId), platformResRegister_(std::move(platformResRegister))
 {
     CHECK_NULL_VOID(frontend);
     frontendType_ = frontend->GetType();
@@ -396,6 +397,7 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         EventReport::SendEvent(eventInfo);
         return true;
     }
+    ContainerScope scope(instanceId_);
     return OnDumpInfo(params);
 }
 
@@ -538,6 +540,26 @@ Rect PipelineBase::GetCurrentWindowRect() const
         return window_->GetCurrentWindowRect();
     }
     return {};
+}
+
+RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
+{
+    auto frontend = weakFrontend_.Upgrade();
+    if (!frontend) {
+        LOGE("frontend is nullptr");
+        EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
+        return nullptr;
+    }
+    return frontend->GetAccessibilityManager();
+}
+
+void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent)
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    if (!accessibilityManager) {
+        return;
+    }
+    accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
 } // namespace OHOS::Ace

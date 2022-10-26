@@ -28,13 +28,19 @@
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/clip_path.h"
+#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/clip_path.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
@@ -107,7 +113,7 @@ public:
     static void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules);
     static void SetVisibility(VisibleType visible);
     static void SetGrid(
-        std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
+        std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
 
     // position
     static void SetPosition(const OffsetT<Dimension>& value);
@@ -159,7 +165,7 @@ public:
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
 
     // flex properties
-    static void SetAlignSelf(int32_t value);
+    static void SetAlignSelf(FlexAlign value);
     static void SetFlexShrink(float value);
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);
@@ -168,16 +174,23 @@ public:
     // Bind properties
     static void BindPopup(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
-    static void BindMenuWithItems(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& targetNode);
+    static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode);
     static void ShowMenu(int32_t targetId);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
     // transition
     static void SetTransition(const TransitionOptions& options);
-    // clip
-    static void SetClipPath(const ClipPathNG& clipPath);
-    static void SetEdgeClip(bool isClip);
+    // sharedTransition
+    static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
+    // clip and mask
+    static void SetClipShape(const RefPtr<BasicShape>& basicShape);
+    static void SetClipEdge(bool isClip);
+    static void SetMask(const RefPtr<BasicShape>& basicShape);
+    // overlay
+    static void SetOverlay(const NG::OverlayOptions& overlay);
+    // motionPath
+    static void SetMotionPath(const MotionPathOption& motionPath);
 
     static void Pop();
 

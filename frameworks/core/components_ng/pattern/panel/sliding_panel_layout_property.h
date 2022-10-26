@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_SLIDING_PANEL_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_SLIDING_PANEL_LAYOUT_PROPERTY_H
 
+#include <string>
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
@@ -36,7 +38,6 @@ public:
     {
         auto value = MakeRefPtr<SlidingPanelLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propShow_ = CloneShow();
         value->propPanelType_ = ClonePanelType();
         value->propPanelMode_ = ClonePanelMode();
         value->propHasDragBar_ = CloneHasDragBar();
@@ -49,7 +50,6 @@ public:
     void Reset() override
     {
         LayoutProperty::Reset();
-        ResetShow();
         ResetPanelType();
         ResetPanelMode();
         ResetHasDragBar();
@@ -58,7 +58,6 @@ public:
         ResetFullHeight();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Show, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PanelType, PanelType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PanelMode, PanelMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasDragBar, bool, PROPERTY_UPDATE_MEASURE);

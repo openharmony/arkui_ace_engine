@@ -26,6 +26,7 @@
 namespace OHOS::Ace {
 
 RSColor ToRSColor(const Color& color);
+RSColor ToRSColor(const LinearColor& color);
 RSRect ToRSRect(const NG::RectF& rect);
 RSPoint ToRSPonit(const NG::PointF& point);
 RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);

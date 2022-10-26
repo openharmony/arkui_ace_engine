@@ -34,6 +34,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -123,6 +124,12 @@ public:
     RefPtr<T> GetPattern() const
     {
         return DynamicCast<T>(pattern_);
+    }
+
+    template<typename T>
+    RefPtr<T> GetAccessibilityProperty() const
+    {
+        return DynamicCast<T>(accessibilityProperty_);
     }
 
     template<typename T>
@@ -218,10 +225,7 @@ public:
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
-    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
-
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
@@ -249,12 +253,31 @@ public:
 
     OffsetF GetOffsetRelativeToWindow() const;
 
-    bool IsOnMainTree() const
+    void SetActive(bool active) override;
+
+    bool IsActive() const
     {
-        return onMainTree_;
+        return isActive_;
     }
 
+    bool IsInternal() const
+    {
+        return isInternal_;
+    }
+
+    void SetInternal()
+    {
+        isInternal_ = true;
+    }
+
+    void OnAccessibilityEvent(AccessibilityEventType eventType) const;
+    void MarkNeedRenderOnly();
+
+    void OnDetachFromMainTree() override;
+    void OnAttachToMainTree() override;
+
 private:
+    void MarkNeedRender(bool isRenderBoundary);
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
 
@@ -270,9 +293,6 @@ private:
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
-
-    void OnDetachFromMainTree() override;
-    void OnAttachToMainTree() override;
 
     // dump self info.
     void DumpInfo() override;
@@ -295,6 +315,7 @@ private:
     std::multiset<RefPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
+    RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
@@ -310,6 +331,10 @@ private:
 
     bool isActive_ = false;
     bool isResponseRegion_ = false;
+
+    // internal node such as Text in Button CreateWithLabel
+    // should not seen by preview inspector or accessibility
+    bool isInternal_ = false;
 
     std::string nodeName_;
 

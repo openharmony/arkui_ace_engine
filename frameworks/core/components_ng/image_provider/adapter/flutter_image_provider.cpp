@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/image_provider/adapter/flutter_image_provider.h"
+
 #include <utility>
 
 #include "flutter/fml/memory/ref_counted.h"
@@ -41,22 +43,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-
-struct FlutterRenderTaskHolder : public RenderTaskHolder {
-    DECLARE_ACE_TYPE(FlutterRenderTaskHolder, RenderTaskHolder);
-
-public:
-    FlutterRenderTaskHolder(fml::RefPtr<flutter::SkiaUnrefQueue> queue, fml::WeakPtr<flutter::IOManager> manager,
-        fml::RefPtr<fml::TaskRunner> taskRunner)
-        : unrefQueue(queue), ioManager(manager), ioTaskRunner(taskRunner)
-    {}
-    ~FlutterRenderTaskHolder() override = default;
-
-    fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue;
-    // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
-    fml::WeakPtr<flutter::IOManager> ioManager;
-    fml::RefPtr<fml::TaskRunner> ioTaskRunner;
-};
 
 static sk_sp<SkImage> ApplySizeToSkImage(
     const sk_sp<SkImage>& rawImage, int32_t dstWidth, int32_t dstHeight, const std::string& srcKey)
@@ -128,7 +114,7 @@ static sk_sp<SkImage> ResizeSkImage(
 
 } // namespace
 
-RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfo(const RefPtr<NG::ImageData>& data)
+RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForStaticImage(const RefPtr<NG::ImageData>& data)
 {
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
@@ -152,7 +138,7 @@ RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfo(const RefPtr<N
     return MakeRefPtr<ImageEncodedInfo>(imageSize, totalFrames);
 }
 
-RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateSvgEncodedInfo(const RefPtr<NG::ImageData>& data)
+RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForSvg(const RefPtr<NG::ImageData>& data)
 {
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);

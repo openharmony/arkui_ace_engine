@@ -18,13 +18,16 @@
 
 #include <functional>
 #include <memory>
+#include <vector>
 
 #include "include/core/SkCanvas.h"
+#include "modifier/rs_property.h"
 #include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_modifier.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
@@ -42,64 +45,28 @@ using RSAnimatableArithmetic = Rosen::RSAnimatableArithmetic<T>;
 using RSContentStyleModifier = Rosen::RSContentStyleModifier;
 using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;
 using RSDrawingContext = Rosen::RSDrawingContext;
+using RSPropertyBase = Rosen::RSPropertyBase;
 
-template<typename T>
 class ContentModifierAdapter : public RSContentStyleModifier {
 public:
     ContentModifierAdapter() = default;
-    ContentModifierAdapter(
-        const RefPtr<ContentModifier<T>>& modifier, const std::shared_ptr<RSAnimatableProperty<T>>& property)
-        : Rosen::RSContentStyleModifier(), modifier_(modifier), property_(property)
-    {
-        if (modifier) {
-            modifier->SetUpdateFunc(
-                [this](const AnimateConfig& config, const T& propValue) { UpdateModifier(config, propValue); });
-        }
-    }
+    explicit ContentModifierAdapter(const RefPtr<Modifier>& modifier)
+        : modifier_(AceType::DynamicCast<ContentModifier>(modifier))
+    {}
     ~ContentModifierAdapter() override = default;
 
-    void Draw(RSDrawingContext& context) const override
-    {
-        // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
-        std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
-        RSCanvas canvas(&skCanvas);
-        if (modifier_ && property_) {
-            DrawingContext context_ = { canvas, context.width, context.height };
-            modifier_->onDraw(context_, property_->Get());
-        }
-    }
+    void Draw(RSDrawingContext& context) const override;
 
-    void UpdateModifier(const AnimateConfig& config, const T& propValue)
-    {
-        std::shared_ptr<RSAnimatableProperty<T>> property = property_;
-        RSAnimationTimingProtocol protocol;
-        protocol.SetSpeed(config.speed);
-        protocol.SetAutoReverse(config.autoReverse);
-        protocol.SetRepeatCount(config.repeatTimes);
-        RSNode::Animate(
-            protocol, RSAnimationTimingCurve::LINEAR, [property, propValue]() { property->Set(propValue); }, []() {});
-    }
+    void AttachProperties();
 
 private:
-    RefPtr<ContentModifier<T>> modifier_;
-    std::shared_ptr<RSAnimatableProperty<T>> property_;
+    RefPtr<ContentModifier> modifier_;
+    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
 
-#define CONVERT_MODIFIER(modifier, srcType, dstType, propertyType)                                             \
-    if (AceType::InstanceOf<srcType>(modifier)) {                                                              \
-        auto castModifier = AceType::DynamicCast<srcType>(modifier);                                           \
-        return std::make_shared<dstType<propertyType>>(                                                        \
-            castModifier, std::make_shared<RSAnimatableProperty<propertyType>>(castModifier->GetInitValue())); \
-    }
-
-inline std::shared_ptr<RSModifier> ConvertModifier(const RefPtr<Modifier>& modifier)
-{
-    // should manually add convert type here
-    CONVERT_MODIFIER(modifier, ContentModifierFloat, ContentModifierAdapter, float);
-    return nullptr;
-}
+std::shared_ptr<RSModifier> ConvertModifier(const RefPtr<Modifier>& modifier);
 
 } // namespace OHOS::Ace::NG
 

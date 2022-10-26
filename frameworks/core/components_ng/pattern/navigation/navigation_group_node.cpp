@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
@@ -61,39 +62,6 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
         navBar->AddChild(contentNode);
     }
     contentNode->AddChild(child);
-
-    auto onDestinationChange = [child = child, navigation = this]() {
-        navigation->AddNavDestinationToNavigation(child);
-    };
-    auto navRouter = AceType::DynamicCast<NavRouterGroupNode>(child);
-    CHECK_NULL_VOID(navRouter);
-    auto eventHub = navRouter->GetEventHub<NavRouterEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDestinationChange(onDestinationChange);
-
-    AddNavDestinationToNavigation(child);
-}
-
-void NavigationGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& child)
-{
-    auto navRouter = AceType::DynamicCast<NavRouterGroupNode>(child);
-    CHECK_NULL_VOID(navRouter);
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navRouter->GetNavDestinationNode());
-    if (navDestination) {
-        auto navigationContentNode = GetContentNode();
-        if (!navigationContentNode) {
-            auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            navigationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
-                nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-            SetContentNode(navigationContentNode);
-            auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            AddChild(navigationContentNode);
-        }
-        navigationContentNode->Clean();
-        navigationContentNode->AddChild(navDestination);
-        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
 }
 
 } // namespace OHOS::Ace::NG

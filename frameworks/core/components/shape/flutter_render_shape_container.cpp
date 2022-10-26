@@ -15,8 +15,8 @@
 
 #include "frameworks/core/components/shape/flutter_render_shape_container.h"
 
-#include "commonlibrary/c_utils/base/include/securec.h"
 #include "flutter/lib/ui/painting/picture.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 
 #include "frameworks/core/components/transform/flutter_render_transform.h"
 #include "frameworks/core/pipeline/base/flutter_render_context.h"
@@ -41,8 +41,6 @@ inline std::multiset<RefPtr<RenderNode>, ZIndexComparator> SortChildrenByZIndex(
 
 using namespace Flutter;
 
-
-
 RenderLayer FlutterRenderShapeContainer::GetRenderLayer()
 {
     if (!transformLayer_) {
@@ -53,38 +51,29 @@ RenderLayer FlutterRenderShapeContainer::GetRenderLayer()
 
 void FlutterRenderShapeContainer::Paint(RenderContext& context, const Offset& offset)
 {
-    double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
-    double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
-    double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
-    double viewBoxTop = NormalizePercentToPx(viewBox_.Top(), true);
-    if (!GetLayoutSize().IsInfinite() && GreatNotEqual(viewBoxWidth, 0.0) && GreatNotEqual(viewBoxHeight, 0.0)) {
-        double scale = std::min(GetLayoutSize().Width() / viewBoxWidth,
-            GetLayoutSize().Height() / viewBoxHeight);
-        double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
-        double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
-        auto transform = Matrix4::CreateScale(static_cast<float>(scale), static_cast<float>(scale), 1.0f);
-        transform = FlutterRenderTransform::GetTransformByOffset(transform, GetGlobalOffset());
-        transform = Matrix4::CreateTranslate(static_cast<float>(tx), static_cast<float>(ty), 0.0f) * transform;
-        transformLayer_->Update(transform);
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    skCanvas_ = canvas->canvas();
+    if (!skCanvas_) {
+        return;
     }
-    RenderNode::Paint(context, offset);
+    BitmapMesh(context, offset);
 }
 
-RefPtr<FlutterRenderShape> FlutterRenderShapeContainer::GetShapeChild(const RefPtr<RenderNode>& node)
+RefPtr<FlutterRenderShape> FlutterRenderShapeContainer::GetShapeChild(const RefPtr<RenderNode>& node, Offset& offset)
 {
+    offset += node->GetPosition();
+    if (auto renderShape = AceType::DynamicCast<FlutterRenderShape>(node)) {
+        return renderShape;
+    }
     const auto& children = node->GetChildren();
     for (const auto& item : SortChildrenByZIndex(children)) {
-        RefPtr<FlutterRenderShape> renderShape = AceType::DynamicCast<FlutterRenderShape>(item);
-        if (renderShape) {
-            return renderShape;
-        } else {
-            RefPtr<FlutterRenderShape> temp = GetShapeChild(item);
-            if (temp) {
-                return temp;
-            }
+        RefPtr<FlutterRenderShape> temp = GetShapeChild(item, offset);
+        if (temp) {
+            return temp;
         }
     }
-
+    offset = offset - node->GetPosition();
     return nullptr;
 }
 
@@ -100,23 +89,29 @@ void FlutterRenderShapeContainer::BitmapMesh(RenderContext& context, const Offse
     skOffCanvas_ = std::make_unique<SkCanvas>(skOffBitmap_);
 
     // for the child
-    const auto& children = GetChildren();
-    for (const auto& item : SortChildrenByZIndex(children)) {
-        RefPtr<FlutterRenderShape> renderShape = GetShapeChild(item);
-        if (renderShape) {
-        } else {
-            continue;
-        }
-        renderShape->PaintOnCanvas(skOffCanvas_.get(), Offset(renderShape->GetPosition().GetX() + offset.GetX(),
-            renderShape->GetPosition().GetY() + offset.GetY()));
+    double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
+    double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
+    double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
+    double viewBoxTop = NormalizePercentToPx(viewBox_.Top(), true);
+    if (!GetLayoutSize().IsInfinite() && GreatNotEqual(viewBoxWidth, 0.0) && GreatNotEqual(viewBoxHeight, 0.0)) {
+        double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
+        double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
+        double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
+        auto transform = Matrix4::CreateScale(static_cast<float>(scale), static_cast<float>(scale), 1.0f);
+        transform = FlutterRenderTransform::GetTransformByOffset(transform, GetGlobalOffset());
+        transform = Matrix4::CreateTranslate(static_cast<float>(tx), static_cast<float>(ty), 0.0f) * transform;
+        transformLayer_->Update(transform);
     }
 
-    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
-    flutter::Canvas* canvas = renderContext->GetCanvas();
-    if (!canvas) {
-        return;
+    const auto& children = GetChildren();
+    for (const auto& item : SortChildrenByZIndex(children)) {
+        Offset childOffset = offset;
+        RefPtr<FlutterRenderShape> renderShape = GetShapeChild(item, childOffset);
+        if (renderShape) {
+            renderShape->PaintOnCanvas(skOffCanvas_.get(), childOffset);
+        }
     }
-    skCanvas_ = canvas->canvas();
+
     if (column_ == 0 && row_ == 0) {
         skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
         return;
@@ -129,8 +124,8 @@ void FlutterRenderShapeContainer::BitmapMesh(RenderContext& context, const Offse
     DrawBitmapMesh(skOffBitmap_, column_, row_, verts, 0, nullptr);
 }
 
-void FlutterRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, int row,
-    const float* vertices, const int* colors, const SkPaint* paint)
+void FlutterRenderShapeContainer::DrawBitmapMesh(
+    SkBitmap& bitmap, int column, int row, const float* vertices, const int* colors, const SkPaint* paint)
 {
     const int vertCounts = (column + 1) * (row + 1);
     int32_t size = 6;
@@ -168,7 +163,7 @@ void FlutterRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, i
     SkScalar y = 0;
     for (int i = 0; i <= row; i++) {
         if (i == row) {
-            y = height;  // to ensure numerically we hit h exactly
+            y = height; // to ensure numerically we hit h exactly
         }
         SkScalar x = 0;
         for (int j = 0; j < column; j++) {

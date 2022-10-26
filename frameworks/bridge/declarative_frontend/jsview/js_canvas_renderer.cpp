@@ -271,10 +271,18 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::SetAntiAlias()
 {
-    if (isOffscreen_) {
-        offscreenCanvas_->SetAntiAlias(anti_);
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            offscreenCanvasPattern_->SetAntiAlias(anti_);
+        } else {
+            customPaintPattern_->SetAntiAlias(anti_);
+        }
     } else {
-        pool_->SetAntiAlias(anti_);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetAntiAlias(anti_);
+        } else {
+            pool_->SetAntiAlias(anti_);
+        }
     }
 }
 
@@ -408,7 +416,11 @@ void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
             lineDash = customPaintPattern_->GetLineDash().lineDash;
         }
     } else {
-        lineDash = pool_->GetLineDash();
+        if (isOffscreen_) {
+            lineDash = offscreenCanvas_->GetLineDash().lineDash;
+        } else {
+            lineDash = pool_->GetLineDash().lineDash;
+        }
     }
     JSRef<JSObject> lineDashObj = JSRef<JSObject>::New();
     for (int i = 0; i < lineDash.size(); i++) {
@@ -1060,7 +1072,29 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsSetPixelMap(const JSCallbackInfo& info)
 {
-    return;
+    if (info.Length() != 1) {
+        LOGE("The argv is wrong, it is supposed to have 1 argument");
+        return;
+    }
+    CanvasImage image;
+    RefPtr<PixelMap> pixelMap = nullptr;
+    if (info[0]->IsObject()) {
+#if !defined(PREVIEW)
+        pixelMap = CreatePixelMapFromNapiValue(info[0]);
+#endif
+        if (!pixelMap) {
+            LOGE("pixelMap is null");
+            return;
+        }
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            isOffscreen_ ? offscreenCanvasPattern_->DrawPixelMap(pixelMap, image)
+                : customPaintPattern_->DrawPixelMap(pixelMap, image);
+        } else {
+            isOffscreen_ ? offscreenCanvas_->DrawPixelMap(pixelMap, image)
+                : pool_->DrawPixelMap(pixelMap, image);
+        }
+    }
 }
 
 void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
@@ -1104,7 +1138,6 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsFilter(const JSCallbackInfo& info)
 {
-
     return;
 }
 
@@ -1204,7 +1237,7 @@ void JSCanvasRenderer::JsSetLineJoin(const JSCallbackInfo& info)
             } else {
                 customPaintPattern_->UpdateLineJoin(lineJoin);
             }
-        } else {            
+        } else {
             if (isOffscreen_) {
                 offscreenCanvas_->SetLineJoin(lineJoin);
             } else {
@@ -1226,7 +1259,7 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
             } else {
                 customPaintPattern_->UpdateMiterLimit(limit);
             }
-        } else {            
+        } else {
             if (isOffscreen_) {
                 offscreenCanvas_->SetMiterLimit(limit);
             } else {
@@ -1248,7 +1281,7 @@ void JSCanvasRenderer::JsSetLineWidth(const JSCallbackInfo& info)
             } else {
                 customPaintPattern_->UpdateLineWidth(lineWidth);
             }
-        } else {            
+        } else {
             if (isOffscreen_) {
                 offscreenCanvas_->SetLineWidth(lineWidth);
             } else {
@@ -1568,7 +1601,8 @@ void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
         param.y = SystemProperties::Vp2Px(param.y);
 
         if (Container::IsCurrentUseNewPipeline()) {
-            isOffscreen_ ? offscreenCanvasPattern_->QuadraticCurveTo(param) : customPaintPattern_->QuadraticCurveTo(param);
+            isOffscreen_ ? offscreenCanvasPattern_->QuadraticCurveTo(param)
+                         : customPaintPattern_->QuadraticCurveTo(param);
             return;
         }
         isOffscreen_ ? offscreenCanvas_->QuadraticCurveTo(param) : pool_->QuadraticCurveTo(param);

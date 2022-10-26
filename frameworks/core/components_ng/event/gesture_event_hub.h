@@ -78,7 +78,17 @@ enum class HitTestResult {
     SELF_TRANSPARENT,
 };
 
+struct DragDropBaseInfo {
+    RefPtr<AceType> node;
+    RefPtr<PixelMap> pixelMap;
+    std::string extraInfo;
+};
+
+using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+
 struct DragDropInfo {
+    RefPtr<UINode> customNode;
     RefPtr<PixelMap> pixelMap;
     std::string extraInfo;
 };
@@ -159,26 +169,17 @@ public:
 
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
 
+    bool IsClickable() const
+    {
+        return clickEventActuator_ != nullptr;
+    }
+
+    bool ActClick();
+
     // Set by user define, which will replace old one.
-    void SetClickEvent(GestureEventFunc&& clickEvent)
-    {
-        if (!clickEventActuator_) {
-            clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
-        }
-        clickEventActuator_->ReplaceClickEvent(std::move(clickEvent));
+    void SetClickEvent(GestureEventFunc&& clickEvent);
 
-        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
-    }
-
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
-    {
-        if (!clickEventActuator_) {
-            clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
-        }
-        clickEventActuator_->AddClickEvent(clickEvent);
-
-        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
-    }
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
@@ -188,20 +189,20 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
-    void AddLongPressEvent(const RefPtr<LongPressEvent>& event)
+    bool IsLongClickable() const
+    {
+        return longPressEventActuator_ != nullptr;
+    }
+
+    bool ActLongClick();
+
+    void SetLongPressEvent(const RefPtr<LongPressEvent>& event)
     {
         if (!longPressEventActuator_) {
             longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
+            longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
         }
-        longPressEventActuator_->AddLongPressEvent(event);
-    }
-
-    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& event)
-    {
-        if (!longPressEventActuator_) {
-            return;
-        }
-        longPressEventActuator_->RemoveLongPressEvent(event);
+        longPressEventActuator_->SetLongPressEvent(event);
     }
 
     // Set by user define, which will replace old one.
@@ -236,22 +237,6 @@ public:
             dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
         }
         dragEventActuator_->ReplaceDragEvent(dragEvent);
-    }
-
-    void AddDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
-    {
-        if (!dragEventActuator_ || direction.type != dragEventActuator_->GetDirection().type) {
-            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
-        }
-        dragEventActuator_->AddDragEvent(dragEvent);
-    }
-
-    void RemoveDragEvent(const RefPtr<DragEvent>& dragEvent)
-    {
-        if (!dragEventActuator_) {
-            return;
-        }
-        dragEventActuator_->RemoveDragEvent(dragEvent);
     }
 
     // the return value means prevents event bubbling.
@@ -321,6 +306,8 @@ private:
     // old path.
     void UpdateExternalGestureRecognizer();
 
+    OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
+
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
@@ -330,6 +317,7 @@ private:
     RefPtr<DragEventActuator> dragEventActuator_;
     RefPtr<ExclusiveRecognizer> innerExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> nodeExclusiveRecognizer_;
+    RefPtr<ParallelRecognizer> nodeParallelRecognizer_;
     std::vector<RefPtr<ExclusiveRecognizer>> externalExclusiveRecognizer_;
     std::vector<RefPtr<ParallelRecognizer>> externalParallelRecognizer_;
     RefPtr<DragDropProxy> dragDropProxy_;

@@ -132,7 +132,8 @@ EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
 
         // step2: calculate resize target
         auto resizeTarget = imageLoadingContext->GetImageSize();
-        if (imageLoadingContext->needResize_) {
+        bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == imageLoadingContext->GetSourceInfo().GetSrcType());
+        if (imageLoadingContext->needResize_ && !isPixelMapResource) {
             resizeTarget = ImageLoadingContext::CalculateResizeTarget(imageLoadingContext->srcRect_.GetSize(),
                 imageLoadingContext->dstRect_.GetSize(),
                 imageLoadingContext->GetSourceSize().value_or(imageLoadingContext->GetImageSize()));
@@ -258,23 +259,24 @@ void ImageLoadingContext::LoadImageData()
 }
 
 void ImageLoadingContext::MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
-    bool incomingNeedResize, ImageFit incommingImageFit,
-    const std::optional<std::pair<Dimension, Dimension>>& sourceSize)
+    bool incomingNeedResize, ImageFit incommingImageFit, const std::optional<SizeF>& sourceSize)
 {
     CHECK_NULL_VOID(loadingCtx);
     bool needMakeCanvasImage = incomingNeedResize != loadingCtx->GetNeedResize() ||
-                               dstSize != loadingCtx->GetDstSize() || incommingImageFit != loadingCtx->GetImageFit();
+                               dstSize != loadingCtx->GetDstSize() || incommingImageFit != loadingCtx->GetImageFit() ||
+                               sourceSize != loadingCtx->GetSourceSize();
     // do [MakeCanvasImage] only when:
     // 1. [autoResize] changes
     // 2. component size (aka [dstSize] here) changes.
     // 3. [ImageFit] changes
+    // 4. [sourceSize] changes
     if (needMakeCanvasImage) {
         loadingCtx->MakeCanvasImage(dstSize, incomingNeedResize, incommingImageFit, sourceSize);
     }
 }
 
-void ImageLoadingContext::MakeCanvasImage(const SizeF& dstSize, bool needResize, ImageFit imageFit,
-    const std::optional<std::pair<Dimension, Dimension>>& sourceSize)
+void ImageLoadingContext::MakeCanvasImage(
+    const SizeF& dstSize, bool needResize, ImageFit imageFit, const std::optional<SizeF>& sourceSize)
 {
     // Because calling of this interface does not guarantee the excution of [MakeCanvasImage], so in order to avoid
     // updating params before they are not actually used, caputure the params in a function. This funtion will only run
@@ -326,10 +328,10 @@ bool ImageLoadingContext::GetNeedResize() const
     return needResize_;
 }
 
-void ImageLoadingContext::SetSourceSize(const std::optional<std::pair<Dimension, Dimension>>& sourceSize)
+void ImageLoadingContext::SetSourceSize(const std::optional<SizeF>& sourceSize)
 {
     if (sourceSize.has_value()) {
-        sourceSizePtr_ = std::make_unique<std::pair<Dimension, Dimension>>(sourceSize.value());
+        sourceSizePtr_ = std::make_unique<SizeF>(sourceSize.value());
     }
 }
 
@@ -338,8 +340,11 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
     if (sourceSizePtr_ == nullptr) {
         return std::nullopt;
     }
-    return std::optional<SizeF>(SizeF(static_cast<float>(sourceSizePtr_->first.ConvertToPx()),
-        static_cast<float>(sourceSizePtr_->second.ConvertToPx())));
+    if (sourceSizePtr_->Width() <= 0.0 || sourceSizePtr_->Height() <= 0.0) {
+        LOGW("Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
+        return std::nullopt;
+    }
+    return std::optional<SizeF>(*sourceSizePtr_);
 }
 
 bool ImageLoadingContext::NeedAlt() const

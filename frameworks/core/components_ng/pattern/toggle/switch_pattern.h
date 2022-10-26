@@ -72,12 +72,23 @@ private:
     void OnChange();
     float GetSwitchWidth() const;
 
+    // Init pan recognizer to move items when drag update, play translate animation when drag end.
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd();
+
+    bool IsOutOfBoundary(double mainOffset) const;
+
     void OnClick();
+
+    RefPtr<PanEvent> panEvent_;
 
     RefPtr<Animator> controller_;
     RefPtr<ClickEvent> clickListener_;
     RefPtr<CurveAnimation<double>> translate_;
     std::optional<bool> isOn_;
+    bool changeFlag_ = false;
     float currentOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);

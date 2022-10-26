@@ -151,7 +151,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
 
     if (cardType_ == FrontendType::ETS_CARD) {
         frontend_ = AceType::MakeRefPtr<CardFrontendDeclarative>();
-    } else if (cardType_ == FrontendType::JS_CARD){
+    } else if (cardType_ == FrontendType::JS_CARD) {
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else {
         LOGE("Run Card failed, card type unknown");
@@ -293,7 +293,8 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             LOGE("ETS Card not support old pipeline");
             return;
         }
-    } else if (cardType_ == FrontendType::JS_CARD) { // JS Card : API9 only support Old Pipeline JSCard, Host can be NG or Old
+    } else if (cardType_ == FrontendType::JS_CARD) { 
+        // JS Card : API9 only support Old Pipeline JSCard, Host can be NG or Old
         if (Container::IsCurrentUseNewPipeline()) {
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);

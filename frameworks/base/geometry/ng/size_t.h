@@ -259,6 +259,15 @@ public:
         return *this;
     }
 
+    void DivideScale(float scale)
+    {
+        if (NearZero(scale)) {
+            return;
+        }
+        width_ /= scale;
+        height_ /= scale;
+    }
+
     void ApplyScale(double scale)
     {
         width_ *= scale;
@@ -563,16 +572,36 @@ public:
 
     void Constrain(const SizeT<T>& minSize, const SizeT<T>& maxSize)
     {
-        if (NonNegative(minSize.Width())) {
+        if (NonNegative(minSize.Width()) && width_) {
             width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
         }
-        if (NonNegative(minSize.Height())) {
+        if (NonNegative(minSize.Height()) && height_) {
             height_ = height_.value_or(0) > minSize.Height() ? height_ : minSize.Height();
         }
-        if (NonNegative(maxSize.Width())) {
+        if (NonNegative(maxSize.Width()) && width_) {
             width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
         }
-        if (NonNegative(maxSize.Height())) {
+        if (NonNegative(maxSize.Height()) && height_) {
+            height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
+        }
+    }
+
+    void ConstrainFloat(const SizeT<T>& minSize, const SizeT<T>& maxSize, bool isWidth)
+    {
+        if (isWidth) {
+            if (NonNegative(minSize.Width()) && width_) {
+                width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
+            }
+
+            if (NonNegative(maxSize.Width()) && width_) {
+                width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
+            }
+            return;
+        }
+        if (NonNegative(minSize.Height()) && height_) {
+            height_ = height_.value_or(0) > minSize.Height() ? height_ : minSize.Height();
+        }
+        if (NonNegative(maxSize.Height()) && height_) {
             height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
         }
     }

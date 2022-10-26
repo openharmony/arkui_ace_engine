@@ -44,8 +44,8 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     auto contentNode = GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        contentNode = FrameNode::GetOrCreateFrameNode(
-            V2::NAVDESTINATION_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG,
+            nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         SetContentNode(contentNode);
         auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);

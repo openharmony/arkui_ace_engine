@@ -25,6 +25,7 @@ class ImageModelImpl : public OHOS::Ace::ImageModel {
 public:
     void SetAlt(const std::string& src) override;
     void SetBorder(const Border& border) override;
+    void SetBackBorder() override;
     void SetBlur(double blur) override;
     void SetImageFit(int32_t value) override;
     void SetMatchTextDirection(bool value) override;
@@ -42,11 +43,11 @@ public:
     void SetAutoResize(bool autoResize) override;
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float>& matrix) override;
-    void SetOnDragStartId(const OnDragFunc& onDragStartId) override;
-    void SetOnDragEnterId(const OnDropFunc&  onDragStartId) override;
-    void SetOnDragLeaveId(const OnDropFunc& onDragStartId) override;
-    void SetOnDragMoveId(const OnDropFunc& onDragMoveId) override;
-    void SetOnDropId(const OnDropFunc& onDropId) override;
+    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnDragEnter(NG::OnDragDropFunc&&  onDragEnter) override;
+    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
+    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
+    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetCopyOption(const CopyOptions& copyOption) override;
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
 };

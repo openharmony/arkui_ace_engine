@@ -56,7 +56,9 @@ public:
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
-    void UpdateCachedItems(int32_t newStartIndex, int32_t newEndIndex, std::list<std::optional<std::string>>&& nodeIds);
+    void UpdateLazyForEachItems(int32_t newStartIndex, int32_t newEndIndex,
+        std::list<std::optional<std::string>>&& nodeIds,
+        std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems);
 
     void OnDataReloaded() override;
     void OnDataAdded(size_t index) override;

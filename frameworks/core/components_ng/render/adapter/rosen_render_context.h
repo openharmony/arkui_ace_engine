@@ -35,17 +35,18 @@
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+class BorderImageModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;
 
-    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) override;
+    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
-    void SyncGeometryProperties(const RectF& rectF) override;
+    void SyncGeometryProperties(const RectF& paintRect) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
@@ -70,10 +71,7 @@ public:
 
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
-    void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode)
-    {
-        rsNode_ = rsNode;
-    }
+    void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
 
     void StartRecording() override;
 
@@ -89,23 +87,26 @@ public:
 
     void SetDrawContentAtLast(bool useDrawContentLastOrder) override
     {
-        if (rsNode_) {
-            rsNode_->SetPaintOrder(useDrawContentLastOrder);
-        }
+        CHECK_NULL_VOID(rsNode_);
+        rsNode_->SetPaintOrder(useDrawContentLastOrder);
     }
 
     void SetClipToFrame(bool useClip) override
     {
-        if (rsNode_) {
-            rsNode_->SetClipToFrame(useClip);
-        }
+        CHECK_NULL_VOID(rsNode_);
+        rsNode_->SetClipToFrame(useClip);
     }
 
     void SetClipToBounds(bool useClip) override
     {
-        if (rsNode_) {
-            rsNode_->SetClipToBounds(useClip);
-        }
+        CHECK_NULL_VOID(rsNode_);
+        rsNode_->SetClipToBounds(useClip);
+    }
+
+    void SetVisible(bool visible) override
+    {
+        CHECK_NULL_VOID(rsNode_);
+        rsNode_->SetVisible(visible);
     }
 
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
@@ -122,18 +123,24 @@ public:
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
+
     void UpdateTransition(const TransitionOptions& options) override;
     bool HasAppearingTransition() const
     {
-        return transitionAppearingEffect_ != nullptr;
+        return propTransitionAppearing_ != nullptr;
     }
     bool HasDisappearingTransition() const
     {
-        return transitionDisappearingEffect_ != nullptr;
+        return propTransitionDisappearing_ != nullptr;
     }
+    void OnNodeAppear() override;
+    void OnNodeDisappear(FrameNode* host) override;
     void ClipWithRect(const RectF& rectF) override;
 
-    bool TriggerPageTransition(PageTransitionType type) const override;
+    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const override;
+
+    void SetSharedTranslate(float xTranslate, float yTranslate) override;
+    void ResetSharedTranslate() override;
 
     static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren);
@@ -154,6 +161,10 @@ public:
 
     void NotifyTransition(
         const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) override;
+
+    void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
+
+    void PaintAccessibilityFocus() override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -185,8 +196,9 @@ private:
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
 
-    void OnClipShapeUpdate(const ClipPathNG& clipPath) override;
+    void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) override;
     void OnClipEdgeUpdate(bool isClip) override;
+    void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) override;
 
     void OnLinearGradientUpdate(const NG::Gradient& value) override;
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
@@ -201,16 +213,23 @@ private:
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
 
+    void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
+    void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
+
+    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
-    bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
-        std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
-        std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex);
+
+    void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
+    void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
+    void SetPivot(float xPivot, float yPivot);
 
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);
     void PaintGradient(const SizeF& frameSize);
     void PaintGraphics();
     void OnPaintGraphics();
+    void PaintOverlayText();
 
     RectF AdjustPaintRect();
 
@@ -230,12 +249,14 @@ private:
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
+    bool firstTransitionIn_ = false;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
-    std::shared_ptr<Rosen::RSTransitionEffect> transitionAppearingEffect_ = nullptr;
-    std::shared_ptr<Rosen::RSTransitionEffect> transitionDisappearingEffect_ = nullptr;
 
+    std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
+    std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
+    std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

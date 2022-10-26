@@ -37,6 +37,7 @@
 #include "core/common/window.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -124,8 +125,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     }
 
     decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
-    for (const auto& weakNode : dirtyNodes) {
-        auto node = weakNode.Upgrade();
+    for (const auto& node : dirtyNodes) {
         if (AceType::InstanceOf<NG::CustomNode>(node)) {
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
             customNode->Update();
@@ -302,6 +302,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
 
@@ -477,6 +478,14 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     ACE_DCHECK(!params.empty());
 
     if (params[0] == "-element") {
+        if (params.size() > 1 && params[1] == "-lastpage") {
+            auto lastPage = stageManager_->GetLastPage();
+            if (lastPage) {
+                lastPage->DumpTree(0);
+            }
+        } else {
+            rootNode_->DumpTree(0);
+        }
     } else if (params[0] == "-render") {
     } else if (params[0] == "-focus") {
         if (rootNode_->GetFocusHub()) {
@@ -488,7 +497,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-multimodal") {
 #endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
-        rootNode_->DumpTree(0);
+        auto accessibilityManager = GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->OnDumpInfo(params);
+        }
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {
@@ -541,7 +553,6 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
         auto touchPoint = event.CreateTouchPoint();
-        LOGD("Mouse event to touch: button is %{public}d, action is %{public}d", event.button, event.action);
         OnTouchEvent(touchPoint);
     }
 
@@ -664,6 +675,48 @@ void PipelineContext::WindowFocus(bool isFocus)
         OnVirtualKeyboardAreaChange(Rect());
     }
     FlushWindowFocusChangedCallback(isFocus);
+}
+
+void PipelineContext::ShowContainerTitle(bool isShow)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("ShowContainerTitle failed, Window modal is not container.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow);
+}
+
+void PipelineContext::SetAppBgColor(const Color& color)
+{
+    appBgColor_ = color;
+    CHECK_NULL_VOID(rootNode_);
+    auto rootPattern = rootNode_->GetPattern<RootPattern>();
+    CHECK_NULL_VOID(rootPattern);
+    rootPattern->SetAppBgColor(appBgColor_, windowModal_ == WindowModal::CONTAINER_MODAL);
+}
+
+void PipelineContext::SetAppTitle(const std::string& title)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("SetAppTitle failed, Window modal is not container.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    containerNode->GetPattern<ContainerModalPattern>()->SetAppTitle(title);
+}
+
+void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("SetAppIcon failed, Window modal is not container.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    containerNode->GetPattern<ContainerModalPattern>()->SetAppIcon(icon);
 }
 
 void PipelineContext::Destroy()
@@ -796,6 +849,17 @@ void PipelineContext::OnIdle(int64_t deadline)
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_.FlushPredictTask(deadline - TIME_THRESHOLD);
+}
+
+void PipelineContext::Finish(bool /*autoFinish*/) const
+{
+    CHECK_RUN_ON(UI);
+    if (finishEventHandler_) {
+        LOGI("call finishEventHandler");
+        finishEventHandler_();
+    } else {
+        LOGE("fail to finish current context due to handler is nullptr");
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -334,7 +334,7 @@ public:
 
     void RefreshStageFocus();
 
-    void ShowContainerTitle(bool isShow);
+    void ShowContainerTitle(bool isShow) override;
 
     void BlurWindowWithDrag(bool isBlur);
 
@@ -355,10 +355,6 @@ public:
     bool RequestFocus(const RefPtr<Element>& targetElement);
     bool RequestFocus(const std::string& targetNodeId) override;
     bool RequestDefaultFocus();
-
-    RefPtr<AccessibilityManager> GetAccessibilityManager() const override;
-
-    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) override;
 
     BaseId::IdType AddPageTransitionListener(const PageTransitionListenable::CallbackFuncType& funcObject);
 
@@ -835,8 +831,13 @@ public:
         SetRootSizeWithWidthHeight(width, height, offset);
     }
 
-    void SetAppTitle(const std::string& title);
-    void SetAppIcon(const RefPtr<PixelMap>& icon);
+    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
+    {
+        parentPipeline_ = pipeline;
+    }
+
+    void SetAppTitle(const std::string& title) override;
+    void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;
 
 protected:
@@ -1045,6 +1046,7 @@ private:
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     bool isSubPipeline_ = false;
+    WeakPtr<PipelineBase> parentPipeline_;
     bool isForegroundCalled_ = false;
 
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;

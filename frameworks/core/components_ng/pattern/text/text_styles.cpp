@@ -38,6 +38,7 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
         UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
         UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);
+        UPDATE_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
@@ -46,7 +47,6 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);
         UPDATE_TEXT_STYLE(textLineStyle, TextAlign, SetTextAlign);
         UPDATE_TEXT_STYLE(textLineStyle, MaxLines, SetMaxLines);
-        UPDATE_TEXT_STYLE(textLineStyle, LetterSpacing, SetLetterSpacing);
     }
     return textStyle;
 }

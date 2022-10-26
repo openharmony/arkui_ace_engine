@@ -115,7 +115,13 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             AddPaddingToSize(padding, childFrame);
             frameSize.UpdateIllegalSizeWithCheck(childFrame);
         }
-        frameSize.Constrain(minSize, maxSize);
+        if (layoutConstraint->selfIdealSize.Width()) {
+            frameSize.ConstrainFloat(minSize, maxSize, false);
+        } else if (layoutConstraint->selfIdealSize.Height()) {
+            frameSize.ConstrainFloat(minSize, maxSize, true);
+        } else {
+            frameSize.Constrain(minSize, maxSize);
+        }
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
 

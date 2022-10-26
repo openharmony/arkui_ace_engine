@@ -20,78 +20,77 @@
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
 
-void ExclusiveRecognizer::OnAccepted(size_t touchId)
+void ExclusiveRecognizer::OnAccepted()
 {
-    LOGI("the exclusive gesture recognizer has been accepted, touch id %{public}zu", touchId);
-    if (refereePointers_.find(touchId) == refereePointers_.end()) {
-        LOGE("the exclusive gesture refereePointers_ can not find current touch id");
-        return;
+    LOGD("the %{public}p exclusive gesture recognizer has been accepted, active recognizer: %{public}s", this,
+        AceType::TypeName(activeRecognizer_));
+    refereeState_ = RefereeState::SUCCEED;
+    if (activeRecognizer_) {
+        activeRecognizer_->SetCoordinateOffset(coordinateOffset_);
+        activeRecognizer_->OnAccepted();
+    } else {
+        LOGW("the active recognizer is null");
     }
 
-    refereePointers_.erase(touchId);
-
-    if (!activeRecognizer_) {
-        LOGE("the activeRecognizer is nullptr");
-        return;
-    }
-
-    activeRecognizer_->SetCoordinateOffset(coordinateOffset_);
-    activeRecognizer_->OnAccepted(touchId);
-    activeRecognizer_->SetRefereeState(RefereeState::SUCCEED);
-
-    for (auto& recognizer : recognizers_) {
-        if (recognizer != activeRecognizer_) {
+    for (const auto& recognizer : recognizers_) {
+        if (recognizer && (recognizer != activeRecognizer_)) {
             LOGD("the sub gesture %{public}s is rejected because %{public}s is accepted", AceType::TypeName(recognizer),
                 AceType::TypeName(activeRecognizer_));
-            recognizer->OnRejected(touchId);
-            recognizer->SetRefereeState(RefereeState::FAIL);
+            recognizer->OnRejected();
         }
-    }
-
-    if (AceType::InstanceOf<ClickRecognizer>(activeRecognizer_)) {
-        pendingReset_ = true;
     }
 }
 
-void ExclusiveRecognizer::OnRejected(size_t touchId)
+void ExclusiveRecognizer::OnRejected()
 {
-    pendingReset_ = true;
-    if (refereePointers_.find(touchId) == refereePointers_.end()) {
-        return;
-    }
-
-    refereePointers_.erase(touchId);
-
-    LOGD("the exclusive gesture recognizer has been rejected! the touch id is %{public}zu", touchId);
-    for (auto& recognizer : recognizers_) {
+    LOGD("the %{public}p exclusive gesture recognizer has been rejected!", this);
+    refereeState_ = RefereeState::FAIL;
+    for (const auto& recognizer : recognizers_) {
+        if (!recognizer) {
+            continue;
+        }
         if (recognizer->GetRefereeState() == RefereeState::FAIL) {
-            LOGD("the %{public}s gesture recognizer already failed", AceType::TypeName(recognizer));
+            LOGE("the %{public}s gesture recognizer already failed", AceType::TypeName(recognizer));
             continue;
         }
 
         LOGD("the %{public}s gesture recognizer call on reject", AceType::TypeName(recognizer));
-        recognizer->OnRejected(touchId);
-        if (recognizer->GetDetectState() == DetectState::READY) {
-            recognizer->SetRefereeState(RefereeState::FAIL);
-        }
+        recognizer->OnRejected();
     }
 }
 
-void ExclusiveRecognizer::OnPending(size_t touchId)
+void ExclusiveRecognizer::OnPending()
 {
-    if (refereePointers_.find(touchId) == refereePointers_.end()) {
+    LOGD("the %{public}p exclusive gesture recognizer is pending!", this);
+    refereeState_ = RefereeState::PENDING;
+    if (activeRecognizer_) {
+        activeRecognizer_->OnPending();
+    }
+}
+
+void ExclusiveRecognizer::OnBlocked()
+{
+    if (disposal_ == GestureDisposal::ACCEPT) {
+        refereeState_ = RefereeState::SUCCEED_BLOCKED;
+        if (activeRecognizer_) {
+            activeRecognizer_->OnBlocked();
+        }
         return;
     }
-
-    LOGD("the exclusive gesture recognizer is pending! the touch id is %{public}zu", touchId);
-    for (auto& recognizer : recognizers_) {
-        if (recognizer->GetRefereeState() == RefereeState::PENDING) {
-            recognizer->OnPending(touchId);
+    if (disposal_ == GestureDisposal::PENDING) {
+        refereeState_ = RefereeState::PENDING_BLOCKED;
+        if (activeRecognizer_) {
+            activeRecognizer_->OnBlocked();
         }
     }
 }
@@ -102,24 +101,21 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
         case TouchType::MOVE:
         case TouchType::DOWN:
         case TouchType::UP:
-        case TouchType::CANCEL:
+        case TouchType::CANCEL: {
             if (activeRecognizer_) {
                 activeRecognizer_->HandleEvent(point);
             } else {
-                for (auto& recognizer : recognizers_) {
-                    recognizer->HandleEvent(point);
+                for (const auto& recognizer : recognizers_) {
+                    if (recognizer) {
+                        recognizer->HandleEvent(point);
+                    }
                 }
             }
             break;
+        }
         default:
             LOGW("exclusive recognizer received unknown touch type");
             break;
-    }
-
-    if ((activeRecognizer_ && (activeRecognizer_->GetDetectState() != DetectState::DETECTED)) || pendingReset_) {
-        LOGD("sub detected gesture has finished, change the exclusive recognizer to be ready");
-        Reset();
-        pendingReset_ = false;
     }
 
     return true;
@@ -131,176 +127,156 @@ bool ExclusiveRecognizer::HandleEvent(const AxisEvent& event)
         case AxisAction::BEGIN:
         case AxisAction::UPDATE:
         case AxisAction::END:
-        case AxisAction::NONE:
+        case AxisAction::NONE: {
             if (activeRecognizer_) {
                 activeRecognizer_->HandleEvent(event);
             } else {
-                for (auto& recognizer : recognizers_) {
-                    recognizer->HandleEvent(event);
+                for (const auto& recognizer : recognizers_) {
+                    if (recognizer) {
+                        recognizer->HandleEvent(event);
+                    }
                 }
             }
             break;
+        }
         default:
             LOGW("exclusive recognizer received unknown touch type");
             break;
     }
 
-    if ((activeRecognizer_ && (activeRecognizer_->GetDetectState() != DetectState::DETECTED)) || pendingReset_) {
-        LOGD("sub detected gesture has finished, change the exclusive recognizer to be ready");
-        Reset();
-    }
-
     return true;
-}
-
-void ExclusiveRecognizer::ReplaceChildren(std::list<RefPtr<GestureRecognizer>>& recognizers)
-{
-    // TODO: add state adjustment.
-    bool needReset_ = true;
-    for (auto& recognizer : recognizers) {
-        if (activeRecognizer_ == recognizer) {
-            needReset_ = false;
-        }
-    }
-    if (needReset_) {
-        ResetStatus();
-    }
-    std::swap(recognizers_, recognizers);
-    for (auto& recognizer : recognizers_) {
-        recognizer->SetGestureGroup(AceType::WeakClaim(this));
-    }
-}
-
-void ExclusiveRecognizer::OnFlushTouchEventsBegin()
-{
-    for (auto& recognizer : recognizers_) {
-        recognizer->OnFlushTouchEventsBegin();
-    }
-}
-
-void ExclusiveRecognizer::OnFlushTouchEventsEnd()
-{
-    for (auto& recognizer : recognizers_) {
-        recognizer->OnFlushTouchEventsEnd();
-    }
-}
-
-void ExclusiveRecognizer::BatchAdjudicate(
-    const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
-{
-    // any sub recognizer accept itself will drive to detected state
-    if (state_ == DetectState::DETECTED) {
-        LOGD("exclusive gesture recognizer is in detected state, do not process disposal");
-        return;
-    }
-
-    if (disposal == GestureDisposal::ACCEPT) {
-        AcceptSubGesture(recognizer);
-        return;
-    }
-
-    if (disposal == GestureDisposal::PENDING) {
-        if (CheckNeedBlocked(recognizer)) {
-            recognizer->SetRefereeState(RefereeState::BLOCKED);
-        } else {
-            recognizer->SetRefereeState(RefereeState::PENDING);
-            MultiFingersRecognizer::Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
-        }
-        return;
-    }
-
-    // process reject disposal
-    LOGD("sub gesture recognizer %{public}s ask for reject", AceType::TypeName(recognizer));
-    RefereeState prevState = recognizer->GetRefereeState();
-    for (auto touchId : touchIds) {
-        recognizer->OnRejected(touchId);
-    }
-    recognizer->SetRefereeState(RefereeState::FAIL);
-
-    if (prevState == RefereeState::PENDING) {
-        for (auto& tmpRecognizer : recognizers_) {
-            if (tmpRecognizer->GetRefereeState() == RefereeState::BLOCKED &&
-                tmpRecognizer->GetDetectState() == DetectState::DETECTED) {
-                activeRecognizer_ = tmpRecognizer;
-                state_ = DetectState::DETECTED;
-                MultiFingersRecognizer::Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
-                break;
-            }
-        }
-    }
-
-    if (CheckAllFailed()) {
-        LOGD("all gesture recognizers are rejected, adjudicate reject");
-        MultiFingersRecognizer::Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-    }
-}
-
-void ExclusiveRecognizer::AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
-{
-    recognizer->SetRefereeState(RefereeState::DETECTING);
-
-    if (state_ == DetectState::READY) {
-        state_ = DetectState::DETECTING;
-    }
-
-    if (state_ == DetectState::DETECTING) {
-        MultiFingersRecognizer::AddToReferee(touchId, AceType::Claim(this));
-    }
 }
 
 bool ExclusiveRecognizer::CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer)
 {
-    auto pendingMember = std::find_if(
-        std::begin(recognizers_), std::end(recognizers_), [recognizer](const RefPtr<GestureRecognizer>& member) {
-            return (member != recognizer) && (member->GetRefereeState() == RefereeState::PENDING);
-        });
-    if (pendingMember != recognizers_.end()) {
-        LOGD("exclusive gesture recognizer detected pending gesture in members");
-        return true;
-    }
+    for (const auto& child : recognizers_) {
+        if (child == recognizer) {
+            return false;
+        }
 
+        if (child && child->GetRefereeState() == RefereeState::PENDING) {
+            return true;
+        }
+    }
     return false;
 }
 
-void ExclusiveRecognizer::AcceptSubGesture(const RefPtr<GestureRecognizer>& recognizer)
+RefPtr<GestureRecognizer> ExclusiveRecognizer::UnBlockGesture()
 {
-    LOGD("sub gesture recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
-    if (CheckNeedBlocked(recognizer)) {
-        recognizer->SetRefereeState(RefereeState::BLOCKED);
+    auto iter =
+        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const RefPtr<GestureRecognizer>& member) {
+            return member && ((member->GetRefereeState() == RefereeState::PENDING_BLOCKED) ||
+                                 (member->GetRefereeState() == RefereeState::SUCCEED_BLOCKED));
+        });
+    if (iter == recognizers_.end()) {
+        LOGD("no blocked gesture in recognizers");
+        return nullptr;
+    }
+    return *iter;
+}
+
+void ExclusiveRecognizer::BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+{
+    CHECK_NULL_VOID(recognizer);
+
+    if (IsRefereeFinished()) {
+        LOGW("the exclusiveRecognizer has already finished referee");
+        recognizer->OnRejected();
         return;
     }
 
-    activeRecognizer_ = recognizer;
-    state_ = DetectState::DETECTED;
-    MultiFingersRecognizer::Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
-}
-
-bool ExclusiveRecognizer::CheckAllFailed()
-{
-    auto notFailMember = std::find_if(std::begin(recognizers_), std::end(recognizers_),
-        [](const RefPtr<GestureRecognizer>& member) { return member->GetRefereeState() != RefereeState::FAIL; });
-
-    return notFailMember == recognizers_.end();
-}
-
-void ExclusiveRecognizer::Reset()
-{
-    ResetStatus();
-    recognizers_.clear();
-}
-
-void ExclusiveRecognizer::ResetStatus()
-{
-    state_ = DetectState::READY;
-    activeRecognizer_ = nullptr;
-    for (auto& recognizer : recognizers_) {
-        recognizer->SetRefereeState(RefereeState::DETECTING);
+    switch (disposal) {
+        case GestureDisposal::ACCEPT:
+            HandleAcceptDisposal(recognizer);
+            break;
+        case GestureDisposal::PENDING:
+            HandlePendingDisposal(recognizer);
+            break;
+        case GestureDisposal::REJECT:
+            HandleRejectDisposal(recognizer);
+            break;
+        default:
+            LOGW("handle known gesture disposal %{public}d", disposal);
+            break;
     }
+}
+
+void ExclusiveRecognizer::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer)
+{
+    CHECK_NULL_VOID(recognizer);
+
+    if (recognizer->GetRefereeState() == RefereeState::SUCCEED) {
+        return;
+    }
+
+    if (CheckNeedBlocked(recognizer)) {
+        LOGD("%{public}s recognizer has to be blocked", AceType::TypeName(recognizer));
+        recognizer->OnBlocked();
+        return;
+    }
+    activeRecognizer_ = recognizer;
+    GroupAdjudicate(Claim(this), GestureDisposal::ACCEPT);
+}
+
+void ExclusiveRecognizer::HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer)
+{
+    CHECK_NULL_VOID(recognizer);
+
+    if (recognizer->GetRefereeState() == RefereeState::PENDING) {
+        return;
+    }
+
+    if (CheckNeedBlocked(recognizer)) {
+        recognizer->OnBlocked();
+        return;
+    }
+    activeRecognizer_ = recognizer;
+    GroupAdjudicate(Claim(this), GestureDisposal::PENDING);
+}
+
+void ExclusiveRecognizer::HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer)
+{
+    CHECK_NULL_VOID(recognizer);
+
+    if (recognizer->GetRefereeState() == RefereeState::FAIL) {
+        return;
+    }
+
+    auto prevState = recognizer->GetRefereeState();
+    recognizer->OnRejected();
+    if ((prevState == RefereeState::PENDING) && (refereeState_ == RefereeState::PENDING)) {
+        auto newBlockRecognizer = UnBlockGesture();
+        if (!newBlockRecognizer) {
+            // ask parent or global referee to unlock pending.
+            GroupAdjudicate(Claim(this), GestureDisposal::REJECT);
+            return;
+        }
+        activeRecognizer_ = newBlockRecognizer;
+        if (newBlockRecognizer->GetRefereeState() == RefereeState::PENDING_BLOCKED) {
+            // current exclusive recognizer is pending, no need to ask referee again.
+            newBlockRecognizer->OnPending();
+            return;
+        }
+        if (newBlockRecognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED) {
+            // ask parent or global referee to unlock pending.
+            GroupAdjudicate(Claim(this), GestureDisposal::ACCEPT);
+        }
+    } else {
+        if (CheckAllFailed()) {
+            GroupAdjudicate(Claim(this), GestureDisposal::REJECT);
+        }
+    }
+}
+
+void ExclusiveRecognizer::OnResetStatus()
+{
+    RecognizerGroup::OnResetStatus();
+    activeRecognizer_ = nullptr;
 }
 
 bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
 {
-    RefPtr<ExclusiveRecognizer> curr = AceType::DynamicCast<ExclusiveRecognizer>(recognizer);
+    auto curr = AceType::DynamicCast<ExclusiveRecognizer>(recognizer);
     if (!curr) {
         ResetStatus();
         return false;
@@ -314,7 +290,9 @@ bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recogni
     auto currIter = curr->recognizers_.begin();
 
     for (auto iter = recognizers_.begin(); iter != recognizers_.end(); iter++, currIter++) {
-        if (!(*iter)->ReconcileFrom(*currIter)) {
+        auto child = *iter;
+        auto newChild = *currIter;
+        if (!child || !child->ReconcileFrom(newChild)) {
             ResetStatus();
             return false;
         }

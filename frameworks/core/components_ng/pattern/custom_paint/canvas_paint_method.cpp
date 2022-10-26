@@ -97,10 +97,10 @@ CanvasDrawFunction CanvasPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     SkCanvas* skCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
-    auto contentSize = paintWrapper->GetContentSize();
-    if (lastLayoutSize_ != contentSize) {
-        CreateBitmap(contentSize);
-        lastLayoutSize_.SetSizeT(contentSize);
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    if (lastLayoutSize_ != frameSize) {
+        CreateBitmap(frameSize);
+        lastLayoutSize_.SetSizeT(frameSize);
     }
     auto viewScale = context_->GetViewScale();
     skCanvas_->scale(viewScale, viewScale);
@@ -118,10 +118,10 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
     skCanvas->restore();
 }
 
-void CanvasPaintMethod::CreateBitmap(SizeF contentSize)
+void CanvasPaintMethod::CreateBitmap(SizeF frameSize)
 {
     auto viewScale = context_->GetViewScale();
-    auto imageInfo = SkImageInfo::Make(contentSize.Width() * viewScale, contentSize.Height() * viewScale,
+    auto imageInfo = SkImageInfo::Make(frameSize.Width() * viewScale, frameSize.Height() * viewScale,
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     canvasCache_.reset();
     cacheBitmap_.reset();
@@ -169,7 +169,6 @@ void CanvasPaintMethod::DrawImage(
     }
 
     auto image = GetImage(canvasImage.src);
-
     if (!image) {
         LOGE("image is null");
         return;
@@ -313,13 +312,14 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     return imageData;
 }
 
-void CanvasPaintMethod::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas)
+void CanvasPaintMethod::TransferFromImageBitmap(PaintWrapper* paintWrapper,
+    const RefPtr<OffscreenCanvasPattern>& offscreenCanvas)
 {
     std::unique_ptr<Ace::ImageData> imageData =
         offscreenCanvas->GetImageData(0, 0, offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
     Ace::ImageData* imageDataPtr = imageData.get();
     if (imageData != nullptr) {
-        PutImageData(nullptr, *imageDataPtr);
+        PutImageData(paintWrapper, *imageDataPtr);
     }
 }
 
@@ -327,31 +327,31 @@ void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& 
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
-    auto contentSize = paintWrapper->GetContentSize();
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
     if (!UpdateParagraph(offset, text, false)) {
         return;
     }
-    PaintText(offset, contentSize, x, y, false);
+    PaintText(offset, frameSize, x, y, false);
 }
 
 void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
-    auto contentSize = paintWrapper->GetContentSize();
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
     if (HasShadow()) {
         if (!UpdateParagraph(offset, text, true, true)) {
             return;
         }
-        PaintText(offset, contentSize, x, y, true);
+        PaintText(offset, frameSize, x, y, true);
     }
 
     if (!UpdateParagraph(offset, text, true)) {
         return;
     }
-    PaintText(offset, contentSize, x, y, true);
+    PaintText(offset, frameSize, x, y, true);
 }
 
 double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -431,10 +431,10 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
 }
 
 void CanvasPaintMethod::PaintText(
-    const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow)
+    const OffsetF& offset, const SizeF& frameSize, double x, double y, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(contentSize.Width());
-    if (contentSize.Width() > paragraph_->GetMaxIntrinsicWidth()) {
+    paragraph_->Layout(frameSize.Width());
+    if (frameSize.Width() > paragraph_->GetMaxIntrinsicWidth()) {
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();

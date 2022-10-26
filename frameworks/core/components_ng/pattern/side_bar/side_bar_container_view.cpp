@@ -24,11 +24,6 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-} // namespace
-
 void SideBarContainerView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -36,7 +31,9 @@ void SideBarContainerView::Create()
     auto sideBarContainerNode = FrameNode::GetOrCreateFrameNode(
         V2::SIDE_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SideBarContainerPattern>(); });
 
-    ViewStackProcessor::GetInstance()->Push(sideBarContainerNode);
+    CHECK_NULL_VOID(sideBarContainerNode);
+
+    stack->Push(sideBarContainerNode);
 }
 
 void SideBarContainerView::Pop()
@@ -47,6 +44,13 @@ void SideBarContainerView::Pop()
     auto children = sideBarContainerNode->GetChildren();
     if (children.empty()) {
         LOGE("SideBarContainerView::Pop children is null.");
+        return;
+    }
+
+    auto pattern = sideBarContainerNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    if (pattern->HasControlButton()) {
         return;
     }
 
@@ -78,32 +82,24 @@ void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& 
         }
     }
 
-    auto imgWidth = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
-    auto imgHeight = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
-    info.SetDimension(imgWidth, imgHeight);
-
     int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imgNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imgNodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imgNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
 
     auto imgHub = imgNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(imgHub);
     auto gestureHub = imgHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     auto parentPattern = parentNode->GetPattern<SideBarContainerPattern>();
+    parentPattern->SetHasControlButton(true);
     parentPattern->InitControlButtonTouchEvent(gestureHub);
 
     auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateImageSourceInfo(info);
-    auto showControlButton = layoutProperty->GetShowControlButton().value_or(true);
-    if (!showControlButton) {
-        imageLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    }
-
-    auto imgRenderContext = imgNode->GetRenderContext();
-    imgRenderContext->UpdateBackgroundColor(Color::RED);
 
     imgNode->MountToParent(parentNode);
+    imgNode->MarkModifyDone();
 }
 
 void SideBarContainerView::SetSideBarContainerType(SideBarContainerType type)

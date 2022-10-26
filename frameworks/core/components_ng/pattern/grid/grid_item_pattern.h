@@ -93,6 +93,13 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        json->Put("forceRebuild", forceRebuild_ ? "true" : "false");
+        json->Put("selectable", selectable_ ? "true" : "false");
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;

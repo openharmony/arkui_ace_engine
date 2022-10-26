@@ -127,7 +127,7 @@ public:
 
     virtual void FlushAnimation(uint64_t nanoTimestamp) = 0;
 
-    virtual void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) = 0;
+    virtual void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent);
 
     virtual void SaveExplicitAnimationOption(const AnimationOption& option) = 0;
 
@@ -144,6 +144,8 @@ public:
     virtual void OnHide() = 0;
 
     virtual void WindowFocus(bool isFocus) = 0;
+
+    virtual void ShowContainerTitle(bool isShow) = 0;
 
     virtual void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
@@ -199,6 +201,10 @@ public:
         return appBgColor_;
     }
 
+    virtual void SetAppTitle(const std::string& title) = 0;
+
+    virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
+
     virtual void RefreshRootBgColor() const {}
 
     virtual void PostponePageTransition() {}
@@ -206,10 +212,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const
-    {
-        return nullptr;
-    }
+    virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
     void SetRootSize(double density, int32_t width, int32_t height);
 
@@ -652,6 +655,8 @@ public:
     }
     virtual void FlushMessages() = 0;
 
+    virtual void FlushUITasks() = 0;
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -660,7 +665,7 @@ protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
-    virtual void FlushUITasks() = 0;
+
     virtual void OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);

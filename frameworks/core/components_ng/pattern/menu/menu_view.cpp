@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text/span_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -52,13 +51,12 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& ta
 }
 
 // create menu with menuItems
-RefPtr<FrameNode> MenuView::Create(
-    const std::vector<OptionParam>& params, const std::string& targetTag, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, const std::string& targetTag, int32_t targetId)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::Create(params[i].first, params[i].second, targetId, i);
+        auto optionNode = OptionView::CreateMenuOption(params[i].first, std::move(params[i].second), targetId, i);
         // first node never paints divider
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
@@ -85,6 +83,22 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, const std::
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
 
+    return wrapperNode;
+}
+
+RefPtr<FrameNode> MenuView::Create(
+    const std::vector<SelectParam>& params, const std::string& targetTag, int32_t targetId)
+{
+    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
+    for (size_t i = 0; i < params.size(); ++i) {
+        auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, targetId, i);
+        // first node never paints divider
+        if (i == 0) {
+            auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
+            props->UpdateNeedDivider(false);
+        }
+        optionNode->MountToParent(menuNode);
+    }
     return wrapperNode;
 }
 

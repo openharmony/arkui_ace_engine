@@ -16,6 +16,8 @@ import(
 
 build_component_ng("render_ng") {
   sources = [
+    "adapter/mock_animation_utils.cpp",
+    "adapter/mock_modifier_adapter.cpp",
     "adapter/skia_canvas.cpp",
     "adapter/skia_canvas_image.cpp",
     "adapter/skia_color_filter.cpp",
@@ -55,6 +57,7 @@ build_component_ng("render_ng") {
   rosen_sources = [
     "adapter/rosen_animation_utils.cpp",
     "adapter/rosen_media_player.cpp",
+    "adapter/rosen_modifier_adapter.cpp",
     "adapter/rosen_render_context.cpp",
     "adapter/rosen_render_surface.cpp",
     "adapter/rosen_window.cpp",

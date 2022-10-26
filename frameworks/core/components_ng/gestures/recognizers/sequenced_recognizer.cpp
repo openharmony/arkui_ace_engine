@@ -18,97 +18,137 @@
 #include <iterator>
 #include <vector>
 
+#include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/gestures/gesture_referee.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 constexpr int32_t SEQUENCE_GESTURE_TIMEOUT = 300;
-}
+} // namespace
 
 void SequencedRecognizer::OnAccepted()
 {
-    LOGD("the sequenced gesture recognizer has been accepted.");
-    if (activeIndex >= recognizers_.size()) {
-        return;
-    }
+    LOGD("%{public}p sequenced gesture recognizer has been accepted.", this);
+    refereeState_ = RefereeState::SUCCEED;
 
     auto iter = recognizers_.begin();
-    std::advance(iter, activeIndex);
-    for (size_t touchId : refereePointers_) {
-        (*iter)->SetCoordinateOffset(coordinateOffset_);
-        (*iter)->OnAccepted(touchId);
+    std::advance(iter, currentIndex_);
+    if (iter != recognizers_.end()) {
+        auto activeRecognizer = *iter;
+        if (activeRecognizer) {
+            activeRecognizer->SetCoordinateOffset(coordinateOffset_);
+            activeRecognizer->OnAccepted();
+            UpdateCurrentIndex();
+        }
     }
-    (*iter)->SetRefereeState(RefereeState::SUCCEED);
 }
 
 void SequencedRecognizer::OnRejected()
 {
-    LOGD("the sequenced gesture recognizer has been rejected!");
-    if (activeIndex >= recognizers_.size()) {
-        return;
-    }
+    LOGD("%{public}p the sequenced gesture recognizer has been rejected!", this);
+    refereeState_ = RefereeState::FAIL;
 
     auto iter = recognizers_.begin();
-    std::advance(iter, activeIndex);
-    for (size_t touchId : refereePointers_) {
-        auto recognizer = AceType::DynamicCast<MultiFingersRecognizer>(*iter);
-        if (recognizer && recognizer->GetRefereeState() == RefereeState::SUCCEED) {
-            recognizer->SetRefereePointer(touchId);
-        }
-        (*iter)->OnRejected(touchId);
-    }
-    (*iter)->SetRefereeState(RefereeState::FAIL);
+    std::advance(iter, currentIndex_);
 
-    if (activeIndex != 0) {
+    while (iter != recognizers_.end()) {
+        auto recognizer = *iter;
+        if (recognizer) {
+            recognizer->OnRejected();
+        }
+        ++iter;
+    }
+
+    if (currentIndex_ != -1) {
         SendCancelMsg();
     }
-
-    Reset();
 }
 
-void SequencedRecognizer::OnPending(size_t touchId)
+void SequencedRecognizer::OnPending()
 {
-    LOGD("the sequenced gesture recognizer is in pending! the touch id is %{public}zu", touchId);
-    if (activeIndex >= recognizers_.size()) {
+    LOGD("%{public}p the sequenced gesture recognizer is in pending!", this);
+    refereeState_ = RefereeState::PENDING;
+    auto iter = recognizers_.begin();
+    std::advance(iter, currentIndex_);
+    if (iter != recognizers_.end()) {
+        auto activeRecognizer = *iter;
+        if (!activeRecognizer) {
+            return;
+        }
+        if (activeRecognizer->GetGestureDisposal() == GestureDisposal::ACCEPT) {
+            activeRecognizer->SetCoordinateOffset(coordinateOffset_);
+            activeRecognizer->OnAccepted();
+            UpdateCurrentIndex();
+        }
+        if (activeRecognizer->GetGestureDisposal() == GestureDisposal::PENDING) {
+            activeRecognizer->SetCoordinateOffset(coordinateOffset_);
+            activeRecognizer->OnPending();
+        }
+    }
+}
+
+void SequencedRecognizer::OnBlocked()
+{
+    RefPtr<GestureRecognizer> activeRecognizer;
+    auto iter = recognizers_.begin();
+    std::advance(iter, currentIndex_);
+    if (iter != recognizers_.end()) {
+        activeRecognizer = *iter;
+    }
+    if (disposal_ == GestureDisposal::ACCEPT) {
+        refereeState_ = RefereeState::SUCCEED_BLOCKED;
+        if (activeRecognizer) {
+            activeRecognizer->OnBlocked();
+        }
         return;
     }
-    auto iter = recognizers_.begin();
-    std::advance(iter, activeIndex);
-    if ((*iter)->GetDetectState() == DetectState::DETECTED) {
-        (*iter)->OnAccepted(touchId);
-        (*iter)->SetRefereeState(RefereeState::SUCCEED);
-    } else {
-        (*iter)->OnPending(touchId);
+    if (disposal_ == GestureDisposal::PENDING) {
+        refereeState_ = RefereeState::PENDING_BLOCKED;
+        if (activeRecognizer) {
+            activeRecognizer->OnBlocked();
+        }
     }
 }
 
 bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
     auto iter = recognizers_.begin();
-    std::advance(iter, activeIndex);
+    std::advance(iter, currentIndex_);
     RefPtr<GestureRecognizer> curRecognizer = *iter;
-    LOGD("dispatch to the %{public}zu gesture recognizer, event type is %{public}zu", activeIndex, point.type);
+    LOGD("%{public}p dispatch to the %{public}d gesture recognizer, event type is %{public}d", this, currentIndex_,
+        static_cast<int32_t>(point.type));
+    if (!curRecognizer) {
+        LOGE("curRecognizer is nullptr");
+        GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return true;
+    }
+    touchPoints_[point.id] = point;
+    if (currentIndex_ > 0) {
+        auto prevState = curRecognizer->GetRefereeState();
+        if (prevState == RefereeState::READY) {
+            // the prevState is ready, need to pase down event to the new coming recognizer.
+            for (auto& item : touchPoints_) {
+                item.second.type = TouchType::DOWN;
+                curRecognizer->HandleEvent(item.second);
+            }
+        }
+    }
     switch (point.type) {
-        case TouchType::MOVE:
-            curPoints_[point.id] = point;
-            curRecognizer->HandleEvent(point);
-            break;
         case TouchType::DOWN:
-            if (curPoints_.empty()) {
+            if (touchPoints_.size() == 1) {
                 deadlineTimer_.Cancel();
             }
-            curPoints_[point.id] = point;
-            curRecognizer->HandleEvent(point);
-            break;
+            [[fallthrough]];
+        case TouchType::MOVE:
         case TouchType::UP:
-            curPoints_.erase(point.id);
-            curRecognizer->HandleEvent(point);
-            break;
         case TouchType::CANCEL:
-            curPoints_.erase(point.id);
             curRecognizer->HandleEvent(point);
             break;
         default:
@@ -116,84 +156,69 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
             break;
     }
 
-    DetectState currState = curRecognizer->GetDetectState();
-    if (curRecognizer->GetRefereeState() == RefereeState::SUCCEED && currState != DetectState::DETECTED) {
-        // The current recognizer has already been detected, but the touch event destroy the state.
-        // Should pass the touch point to the next recognizer.
-        activeIndex++;
-        if (activeIndex >= recognizers_.size()) {
-            LOGD("gesture reset to the initial state ");
-            Reset();
-            return true;
-        }
-
-        if (curPoints_.empty()) {
-            DeadlineTimer();
-        } else {
-            auto recognizerIter = recognizers_.begin();
-            std::advance(recognizerIter, activeIndex);
-            auto iter = curPoints_.begin();
-            while (iter != curPoints_.end()) {
-                iter->second.type = TouchType::DOWN;
-                (*recognizerIter)->HandleEvent(iter->second);
-                iter++;
-            }
-        }
+    if ((point.type == TouchType::UP) && (refereeState_ == RefereeState::PENDING)) {
+        DeadlineTimer();
     }
     return true;
 }
 
-void SequencedRecognizer::OnFlushTouchEventsBegin()
-{
-    for (auto& recognizer : recognizers_) {
-        recognizer->OnFlushTouchEventsBegin();
-    }
-}
-
-void SequencedRecognizer::OnFlushTouchEventsEnd()
-{
-    for (auto& recognizer : recognizers_) {
-        recognizer->OnFlushTouchEventsEnd();
-    }
-}
-
-void SequencedRecognizer::BatchAdjudicate(
-    const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+void SequencedRecognizer::BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     if (disposal == GestureDisposal::ACCEPT) {
-        LOGD("the sub recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
-        if (activeIndex == (recognizers_.size() - 1)) {
-            state_ = DetectState::DETECTED;
-            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
-        } else {
-            Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+        if (recognizer->GetRefereeState() == RefereeState::SUCCEED) {
+            return;
         }
-    } else if (disposal == GestureDisposal::REJECT) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        LOGD("the sub recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
+        if (currentIndex_ == static_cast<int32_t>((recognizers_.size() - 1))) {
+            GroupAdjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+        } else {
+            if (refereeState_ == RefereeState::PENDING) {
+                UpdateCurrentIndex();
+                recognizer->OnAccepted();
+            } else {
+                GroupAdjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+            }
+        }
+        return;
+    }
+    if (disposal == GestureDisposal::REJECT) {
+        if (recognizer->GetRefereeState() == RefereeState::FAIL) {
+            return;
+        }
+        if (refereeState_ == RefereeState::FAIL) {
+            recognizer->OnRejected();
+        } else {
+            GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+        return;
+    }
+
+    if (recognizer->GetRefereeState() == RefereeState::PENDING) {
+        return;
+    }
+
+    if (refereeState_ == RefereeState::PENDING) {
+        recognizer->OnPending();
     } else {
-        Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+        GroupAdjudicate(AceType::Claim(this), GestureDisposal::PENDING);
     }
 }
 
-void SequencedRecognizer::AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
+void SequencedRecognizer::UpdateCurrentIndex()
 {
-    if (state_ == DetectState::READY) {
-        state_ = DetectState::DETECTING;
+    if (currentIndex_ == static_cast<int32_t>((recognizers_.size() - 1))) {
+        // the last one.
+        return;
     }
-
-    recognizer->SetRefereeState(RefereeState::DETECTING);
-    MultiFingersRecognizer::AddToReferee(touchId, AceType::Claim(this));
+    currentIndex_++;
 }
 
-void SequencedRecognizer::Reset()
+void SequencedRecognizer::OnResetStatus()
 {
-    activeIndex = 0;
-    state_ = DetectState::READY;
-
-    for (auto& recognizer : recognizers_) {
-        recognizer->SetRefereeState(RefereeState::DETECTING);
-    }
-    curPoints_.clear();
+    LOGD("%{public}p SequencedRecognizer OnResetStatus", this);
+    RecognizerGroup::OnResetStatus();
+    currentIndex_ = 0;
+    deadlineTimer_.Cancel();
 }
 
 void SequencedRecognizer::DeadlineTimer()
@@ -201,7 +226,7 @@ void SequencedRecognizer::DeadlineTimer()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
-    auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
+    auto callback = [weakPtr = AceType::WeakClaim(this)]() {
         auto refPtr = weakPtr.Upgrade();
         if (refPtr) {
             refPtr->HandleOverdueDeadline();
@@ -218,31 +243,35 @@ void SequencedRecognizer::DeadlineTimer()
 void SequencedRecognizer::HandleOverdueDeadline()
 {
     LOGI("sequence gesture recognizer does not receive touch down in time");
-    Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+    if (refereeState_ == RefereeState::PENDING) {
+        GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+    }
 }
 
 bool SequencedRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
 {
     RefPtr<SequencedRecognizer> curr = AceType::DynamicCast<SequencedRecognizer>(recognizer);
     if (!curr) {
-        Reset();
+        ResetStatus();
         return false;
     }
 
     if (recognizers_.size() != curr->recognizers_.size() || priorityMask_ != curr->priorityMask_) {
-        Reset();
+        ResetStatus();
         return false;
     }
 
-    auto newRecognizer = recognizers_.begin();
-    auto curRecognizer = curr->recognizers_.begin();
+    auto iter = recognizers_.begin();
+    auto currIter = curr->recognizers_.begin();
     for (size_t i = 0; i < recognizers_.size(); i++) {
-        if (!(*newRecognizer)->ReconcileFrom(*curRecognizer)) {
-            Reset();
+        auto child = *iter;
+        auto newChild = *currIter;
+        if (!child || !child->ReconcileFrom(newChild)) {
+            ResetStatus();
             return false;
         }
-        ++newRecognizer;
-        ++curRecognizer;
+        ++iter;
+        ++currIter;
     }
 
     onActionCancel_ = std::move(curr->onActionCancel_);

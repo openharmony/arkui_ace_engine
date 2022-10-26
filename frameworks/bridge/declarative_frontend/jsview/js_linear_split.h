@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LINEAR_SPLIT_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LINEAR_SPLIT_H
+
 #include "bridge/declarative_frontend/jsview/models/linear_split_model_impl.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -38,3 +41,4 @@ LinearSplitModel* LinearSplitModel::GetInstance()
 }
 
 } // namespace OHOS::Ace
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LINEAR_SPLIT_H

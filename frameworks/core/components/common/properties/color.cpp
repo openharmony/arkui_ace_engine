@@ -39,6 +39,10 @@ constexpr double GAMMA_FACTOR = 2.2;
 constexpr float MAX_ALPHA = 255.0f;
 constexpr char HEX[] = "0123456789ABCDEF";
 constexpr uint8_t BIT_LENGTH_INT32 = 8;
+constexpr uint8_t MIN_RGB_VALUE = 0;
+constexpr uint8_t MAX_RGB_VALUE = 255;
+constexpr double MIN_RGBA_OPACITY = 0.0;
+constexpr double MAX_RGBA_OPACITY = 1.0;
 
 } // namespace
 
@@ -49,6 +53,14 @@ const Color Color::RED = Color(0xffff0000);
 const Color Color::GREEN = Color(0xff00ff00);
 const Color Color::BLUE = Color(0xff0000ff);
 const Color Color::GRAY = Color(0xffc0c0c0);
+
+const LinearColor LinearColor::TRANSPARENT = LinearColor(0x00000000);
+const LinearColor LinearColor::WHITE = LinearColor(0xffffffff);
+const LinearColor LinearColor::BLACK = LinearColor(0xff000000);
+const LinearColor LinearColor::RED = LinearColor(0xffff0000);
+const LinearColor LinearColor::GREEN = LinearColor(0xff00ff00);
+const LinearColor LinearColor::BLUE = LinearColor(0xff0000ff);
+const LinearColor LinearColor::GRAY = LinearColor(0xffc0c0c0);
 
 Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
 {
@@ -134,6 +146,20 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
 
     // Default color.
     return Color::BLACK;
+}
+
+bool Color::ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha)
+{
+    if (colorStr.empty()) {
+        return false;
+    }
+
+    // Remove all " ".
+    colorStr.erase(std::remove(colorStr.begin(), colorStr.end(), ' '), colorStr.end());
+
+    return (MatchColorWithMagic(colorStr, maskAlpha, color) || MatchColorWithMagicMini(colorStr, maskAlpha, color) ||
+            MatchColorWithRGB(colorStr, color) || MatchColorWithRGBA(colorStr, color) ||
+            MatchColorSpecialString(colorStr, color) || ParseUintColorString(colorStr, color));
 }
 
 std::string Color::ColorToString() const
@@ -326,6 +352,143 @@ Color Color::ConvertLinearToGamma(double alpha, double linearRed, double linearG
     uint8_t gammaAlpha = std::clamp(static_cast<int32_t>(alpha), 0, UINT8_MAX);
 
     return FromARGB(gammaAlpha, gammaRed, gammaGreen, gammaBlue);
+}
+
+bool Color::MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color& color)
+{
+    std::smatch matches;
+    // Regex match for #909090 or #90909090.
+    if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC)) {
+        colorStr.erase(0, 1);
+        auto value = stoul(colorStr, nullptr, COLOR_STRING_BASE);
+        if (colorStr.length() < COLOR_STRING_SIZE_STANDARD) {
+            // no alpha specified, set alpha to 0xff
+            value |= maskAlpha;
+        }
+        color = Color(value);
+        return true;
+    }
+
+    return false;
+}
+
+bool Color::MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, Color& color)
+{
+    std::smatch matches;
+    if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC_MINI)) {
+        colorStr.erase(0, 1);
+        std::string newColorStr;
+        // translate #rgb or #rgba to #rrggbb or #rrggbbaa
+        for (auto& c : colorStr) {
+            newColorStr += c;
+            newColorStr += c;
+        }
+        auto value = stoul(newColorStr, nullptr, COLOR_STRING_BASE);
+        if (newColorStr.length() < COLOR_STRING_SIZE_STANDARD) {
+            // no alpha specified, set alpha to 0xff
+            value |= maskAlpha;
+        }
+        color = Color(value);
+        return true;
+    }
+
+    return false;
+}
+
+bool Color::MatchColorWithRGB(const std::string& colorStr, Color& color)
+{
+    std::smatch matches;
+    if (std::regex_match(colorStr, matches, COLOR_WITH_RGB)) {
+        if (matches.size() == RGB_SUB_MATCH_SIZE) {
+            auto redInt = std::stoi(matches[1]);
+            auto greenInt = std::stoi(matches[2]);
+            auto blueInt = std::stoi(matches[3]);
+
+            if (!IsRGBValid(redInt) || !IsRGBValid(greenInt) || !IsRGBValid(blueInt)) {
+                return false;
+            }
+
+            auto red = static_cast<uint8_t>(redInt);
+            auto green = static_cast<uint8_t>(greenInt);
+            auto blue = static_cast<uint8_t>(blueInt);
+            color = FromRGB(red, green, blue);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Color::MatchColorWithRGBA(const std::string& colorStr, Color& color)
+{
+    std::smatch matches;
+    if (std::regex_match(colorStr, matches, COLOR_WITH_RGBA)) {
+        if (matches.size() == RGBA_SUB_MATCH_SIZE) {
+            auto redInt = std::stoi(matches[1]);
+            auto greenInt = std::stoi(matches[2]);
+            auto blueInt = std::stoi(matches[3]);
+            auto opacityDouble = std::stod(matches[4]);
+
+            if (!IsRGBValid(redInt) || !IsRGBValid(greenInt) || !IsRGBValid(blueInt) ||
+                !IsOpacityValid(opacityDouble)) {
+                return false;
+            }
+
+            auto red = static_cast<uint8_t>(redInt);
+            auto green = static_cast<uint8_t>(greenInt);
+            auto blue = static_cast<uint8_t>(blueInt);
+            auto opacity = static_cast<double>(opacityDouble);
+
+            color = FromRGBO(red, green, blue, opacity);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Color::MatchColorSpecialString(const std::string& colorStr, Color& color)
+{
+    static const LinearMapNode<Color> colorTable[] = {
+        { "black", Color(0xff000000) },
+        { "blue", Color(0xff0000ff) },
+        { "gray", Color(0xffc0c0c0) },
+        { "green", Color(0xff00ff00) },
+        { "red", Color(0xffff0000) },
+        { "white", Color(0xffffffff) },
+    };
+
+    int64_t colorIndex = BinarySearchFindIndex(colorTable, ArraySize(colorTable), colorStr.c_str());
+    if (colorIndex != -1) {
+        color = colorTable[colorIndex].value;
+        return true;
+    }
+
+    return false;
+}
+
+bool Color::ParseUintColorString(const std::string& colorStr, Color& color)
+{
+    auto uint32Color = StringUtils::StringToUint(colorStr);
+    if (uint32Color > 0) {
+        if (uint32Color >> COLOR_ALPHA_OFFSET == 0) {
+            color = Color(uint32Color).ChangeAlpha(MAX_ALPHA);
+        } else {
+            color = Color(uint32Color);
+        }
+        return true;
+    }
+
+    return false;
+}
+
+bool Color::IsRGBValid(int value)
+{
+    return value >= MIN_RGB_VALUE && value <= MAX_RGB_VALUE;
+}
+
+bool Color::IsOpacityValid(double value)
+{
+    return value >= MIN_RGBA_OPACITY && value <= MAX_RGBA_OPACITY;
 }
 
 } // namespace OHOS::Ace

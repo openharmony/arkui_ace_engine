@@ -701,6 +701,18 @@ var NavigationMode;
   NavigationMode[NavigationMode["Auto"] = 2] = "Auto";
 })(NavigationMode || (NavigationMode = {}));
 
+var NavBarPosition;
+(function (NavBarPosition) {
+  NavBarPosition[NavBarPosition["Start"] = 0] = "Start";
+  NavBarPosition[NavBarPosition["End"] = 1] = "End";
+})(NavBarPosition || (NavBarPosition = {}));
+
+var TitleHeight;
+(function (TitleHeight) {
+  TitleHeight[TitleHeight["MainOnly"] = 0] = "MainOnly";
+  TitleHeight[TitleHeight["MainWithSub"] = 1] = "MainWithSub";
+})(TitleHeight || (TitleHeight = {}));
+
 var ResponseType;
 (function (ResponseType) {
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
@@ -753,6 +765,13 @@ var SourceType;
   SourceType[SourceType["TouchScreen"] = 2] = "TouchScreen";
   SourceType[SourceType["Keyboard"] = 4] = "Keyboard";
 })(SourceType || (SourceType = {}));
+
+var SourceTool;
+(function (SourceTool) {
+  SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
+  SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
+  SourceTool[SourceTool["PEN"] = 2] = "PEN";
+})(SourceTool || (SourceTool = {}));
 
 var SeekMode;
 (function (SeekMode) {
@@ -809,6 +828,36 @@ var CacheMode;
   CacheMode[CacheMode["Online"] = 2] = "Online";
   CacheMode[CacheMode["Only"] = 3] = "Only";
 })(CacheMode || (CacheMode = {}));
+
+var RenderExitReason;
+(function (RenderExitReason) {
+  RenderExitReason[RenderExitReason["ProcessAbnormalTermination"] = 0] = "ProcessAbnormalTermination";
+  RenderExitReason[RenderExitReason["ProcessWasKilled"] = 1] = "ProcessWasKilled";
+  RenderExitReason[RenderExitReason["ProcessCrashed"] = 2] = "ProcessCrashed";
+  RenderExitReason[RenderExitReason["ProcessOom"] = 3] = "ProcessOom";
+  RenderExitReason[RenderExitReason["ProcessExitUnknown"] = 4] = "ProcessExitUnknown";
+})(RenderExitReason || (RenderExitReason = {}));
+
+var SslError;
+(function (SslError) {
+  SslError[SslError["Invalid"] = 0] = "Invalid";
+  SslError[SslError["HostMismatch"] = 1] = "HostMismatch";
+  SslError[SslError["DateInvalid"] = 2] = "DateInvalid";
+  SslError[SslError["Untrusted"] = 3] = "Untrusted";
+})(SslError || (SslError = {}));
+
+var FileSelectorMode;
+(function (FileSelectorMode) {
+  FileSelectorMode[FileSelectorMode["FileOpenMode"] = 0] = "FileOpenMode";
+  FileSelectorMode[FileSelectorMode["FileOpenMultipleMode"] = 1] = "FileOpenMultipleMode";
+  FileSelectorMode[FileSelectorMode["FileOpenFolderMode"] = 2] = "FileOpenFolderMode";
+  FileSelectorMode[FileSelectorMode["FileSaveMode"] = 3] = "FileSaveMode";
+})(FileSelectorMode || (FileSelectorMode = {}));
+
+var ProtectedResourceType;
+(function (ProtectedResourceType) {
+  ProtectedResourceType["MidiSysex"] = "TYPE_MIDI_SYSEX";
+})(ProtectedResourceType || (ProtectedResourceType = {}));
 
 var ProgressType;
 (function (ProgressType) {

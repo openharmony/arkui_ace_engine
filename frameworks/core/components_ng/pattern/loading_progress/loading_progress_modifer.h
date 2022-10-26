@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
 
+#include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -32,15 +34,16 @@ const float FULL_COUNT = 100.0f;
 const float COUNT = 50.0f;
 const float HALF = 0.5f;
 
-class LoadingProgressModifier : public ContentModifierFloat {
-    DECLARE_ACE_TYPE(LoadingProgressModifier, ContentModifierFloat);
+class LoadingProgressModifier : public ContentModifier {
+    DECLARE_ACE_TYPE(LoadingProgressModifier, ContentModifier);
 
 public:
     LoadingProgressModifier();
     ~LoadingProgressModifier() override = default;
-    void onDraw(DrawingContext& context, const float& date) override
+    void onDraw(DrawingContext& context) override
     {
         float scale_ = 1.0;
+        float date = date_->Get();
         scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + COMET_WIDTH.ConvertToPx())),
                      (context.height /
                         (RING_RADIUS.ConvertToPx() * (1 + RING_MOVEMENT) + RING_WIDTH.ConvertToPx() * HALF))) *
@@ -56,13 +59,33 @@ public:
 
     void DrawRing(DrawingContext& canvas, float date, float scale_) const;
     void DrawOrbit(DrawingContext& canvas, float date, float scale_) const;
-    void SetColor(Color color)
+
+    void SetDate(float date)
     {
-        color_ = color;
-    };
+        if (date_) {
+            AnimationOption option = AnimationOption();
+            RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
+            option.SetDuration(300);
+            option.SetDelay(0);
+            option.SetCurve(curve);
+            option.SetIteration(-1);
+            option.SetTempo(0.2f);
+            AnimationUtils::Animate(option, [&]() {
+                date_->Set(date);
+            });
+        }
+    }
+
+    void SetColor(LinearColor color)
+    {
+        if (color_) {
+            color_->Set(color);
+        }
+    }
 
 private:
-    Color color_ = Color::BLUE;
+    RefPtr<AnimatablePropertyFloat> date_;
+    RefPtr<AnimatablePropertyColor> color_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };

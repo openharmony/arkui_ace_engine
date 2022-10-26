@@ -102,7 +102,7 @@ void ImagePattern::OnImageLoadSuccess()
     lastAltSrcRect_.reset();
     // TODO: only do paint task when the pattern is active
     // figure out why here is always inactive
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::CacheImageObject()
@@ -125,7 +125,10 @@ void ImagePattern::OnImageDataReady()
     LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
         loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
         geometryNode->GetFrameSize().Height(), 0);
-    imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
+    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
+    if (!host->IsActive()) {
+        return;
+    }
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -252,6 +255,9 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        if (!host->IsActive()) {
+            return;
+        }
         const auto& geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         if (!geometryNode->GetContent()) {
@@ -271,6 +277,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->altLoadingCtx_);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {

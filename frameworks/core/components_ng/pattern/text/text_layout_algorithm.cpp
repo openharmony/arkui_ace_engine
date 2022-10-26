@@ -40,10 +40,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    
+
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
-    TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
-        textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    TextStyle textStyle = CreateTextStyleUsingTheme(
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraphAndLayout(textStyle, textLayoutProperty->GetContent().value_or(""), contentConstraint)) {
             return std::nullopt;
@@ -53,12 +53,14 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             return std::nullopt;
         }
     }
-    auto paragraphNewWidth =
-        std::clamp(GetTextWidth(), contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
-    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
-        paragraph_->Layout(std::ceil(paragraphNewWidth));
-    }
 
+    if (!contentConstraint.selfIdealSize.Width()) {
+        auto paragraphNewWidth =
+            std::clamp(GetTextWidth(), contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
+        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+            paragraph_->Layout(std::ceil(paragraphNewWidth));
+        }
+    }
     auto height = static_cast<float>(paragraph_->GetHeight());
     double baselineOffset = 0.0;
     textStyle.GetBaselineOffset().NormalizeToPx(
@@ -111,11 +113,8 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(
         return false;
     }
     CHECK_NULL_RETURN(paragraph_, false);
-    if (contentConstraint.selfIdealSize.Width()) {
-        paragraph_->Layout(contentConstraint.selfIdealSize.Width().value());
-    } else {
-        paragraph_->Layout(contentConstraint.maxSize.Width());
-    }
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
+    paragraph_->Layout(maxSize.Width());
     return true;
 }
 
@@ -145,12 +144,13 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
             contentConstraint.maxSize.Height(), stepSize)) {
         return false;
     }
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
     while (GreatOrEqual(maxFontSize, minFontSize)) {
         textStyle.SetFontSize(Dimension(maxFontSize));
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint)) {
             return false;
         }
-        if (!DidExceedMaxLines(contentConstraint)) {
+        if (!DidExceedMaxLines(maxSize)) {
             break;
         }
         maxFontSize -= stepSize;
@@ -158,13 +158,12 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     return true;
 }
 
-bool TextLayoutAlgorithm::DidExceedMaxLines(const LayoutConstraintF& contentConstraint)
+bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
 {
     CHECK_NULL_RETURN(paragraph_, false);
     bool didExceedMaxLines = paragraph_->DidExceedMaxLines();
-    didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph_->GetHeight(), contentConstraint.maxSize.Height());
-    didExceedMaxLines =
-        didExceedMaxLines || GreatNotEqual(paragraph_->GetLongestLine(), contentConstraint.maxSize.Width());
+    didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph_->GetHeight(), maxSize.Height());
+    didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph_->GetLongestLine(), maxSize.Width());
     return didExceedMaxLines;
 }
 
@@ -199,6 +198,13 @@ const std::shared_ptr<RSParagraph>& TextLayoutAlgorithm::GetParagraph()
 float TextLayoutAlgorithm::GetBaselineOffset() const
 {
     return baselineOffset_;
+}
+
+SizeF TextLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const
+{
+    auto maxSize = contentConstraint.selfIdealSize;
+    maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
+    return maxSize.ConvertToSizeT();
 }
 
 } // namespace OHOS::Ace::NG

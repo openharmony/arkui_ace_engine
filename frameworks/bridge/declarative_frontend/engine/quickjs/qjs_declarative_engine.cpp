@@ -18,13 +18,13 @@
 #include <cstdlib>
 
 #include "native_engine/impl/quickjs/quickjs_native_engine.h"
-
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components/xcomponent/xcomponent_component_client.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
@@ -598,7 +598,7 @@ void QJSDeclarativeEngine::FireExternalEvent(
 #ifndef NG_BUILD
 #ifdef XCOMPONENT_SUPPORTED
     if (isDestroy) {
-        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
+        XComponentComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteFromJsValMapById(componentId);
@@ -608,7 +608,7 @@ void QJSDeclarativeEngine::FireExternalEvent(
         XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(componentId);
 
     RefPtr<XComponentComponent> xcomponent =
-        XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId);
+        XComponentComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;

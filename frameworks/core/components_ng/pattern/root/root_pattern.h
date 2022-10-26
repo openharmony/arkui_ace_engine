@@ -43,6 +43,37 @@ public:
         return false;
     }
 
+    void OnAttachToFrameNode() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    }
+
+    void SetAppBgColor(const Color& color, bool isContainerModal)
+    {
+        auto rootNode = GetHost();
+        CHECK_NULL_VOID(rootNode);
+        RefPtr<FrameNode> stage;
+        if (isContainerModal) {
+            auto container = DynamicCast<FrameNode>(rootNode->GetChildren().front());
+            CHECK_NULL_VOID(container);
+            auto column = DynamicCast<FrameNode>(container->GetChildren().front());
+            CHECK_NULL_VOID(column);
+            stage = DynamicCast<FrameNode>(column->GetChildren().back());
+        } else {
+            stage = DynamicCast<FrameNode>(rootNode->GetChildren().front());
+        }
+        CHECK_NULL_VOID(stage);
+        LOGI("SetAppBgColor in page node successfully, bgColor is %{public}u", color.GetValue());
+        auto pages = stage->GetChildren();
+        for (const auto& page : pages) {
+            auto pageNode = DynamicCast<FrameNode>(page);
+            CHECK_NULL_VOID(pageNode);
+            pageNode->GetRenderContext()->UpdateBackgroundColor(color);
+        }
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RootPattern);
 };

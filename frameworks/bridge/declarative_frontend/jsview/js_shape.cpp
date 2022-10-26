@@ -16,42 +16,53 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 
 #include "base/geometry/ng/image_mesh.h"
-#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/models/shape_model_impl.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/shape/shape_view.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model.h"
+#include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ShapeModel> ShapeModel::instance_ = nullptr;
+
+ShapeModel* ShapeModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ShapeModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ShapeModelNG());
+        } else {
+            instance_.reset(new Framework::ShapeModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 void JSShape::Create(const JSCallbackInfo& info)
 {
-    if(Container::IsCurrentUseNewPipeline()){
-        NG::ShapeView::Create();
-        return;
-    }
-    std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-    RefPtr<OHOS::Ace::ShapeContainerComponent> component =
-        AceType::MakeRefPtr<OHOS::Ace::ShapeContainerComponent>(componentChildren);
-    ViewStackProcessor::GetInstance()->ClaimElementId(component);
-    ViewStackProcessor::GetInstance()->Push(component);
+    ShapeModel::GetInstance()->Create();
     JSInteractableView::SetFocusable(true);
     InitBox(info);
 }
 
 void JSShape::InitBox(const JSCallbackInfo& info)
 {
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOverflow(Overflow::FORCE_CLIP);
-    auto clipPath = AceType::MakeRefPtr<ClipPath>();
-    clipPath->SetGeometryBoxType(GeometryBoxType::BORDER_BOX);
-    box->SetClipPath(clipPath);
+    RefPtr<PixelMap> pixMap = nullptr;
     if (info.Length() == 1 && info[0]->IsObject()) {
 #if !defined(PREVIEW)
-        box->SetPixelMap(CreatePixelMapFromNapiValue(info[0]));
+        pixMap = CreatePixelMapFromNapiValue(info[0]);
 #endif
     }
+    ShapeModel::GetInstance()->InitBox(pixMap);
 }
 
 void JSShape::SetViewPort(const JSCallbackInfo& info)
@@ -66,63 +77,22 @@ void JSShape::SetViewPort(const JSCallbackInfo& info)
         JSRef<JSVal> topValue = obj->GetProperty("y");
         JSRef<JSVal> widthValue = obj->GetProperty("width");
         JSRef<JSVal> heightValue = obj->GetProperty("height");
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ShapeViewBox shapeViewBox;
-            Dimension dimLeft;
-            if (ParseJsDimensionVp(leftValue, dimLeft)) {
-                shapeViewBox.SetLeft(dimLeft);
-            }
-            Dimension dimTop;
-            if (ParseJsDimensionVp(topValue, dimTop)) {
-                shapeViewBox.SetTop(dimTop);
-            }
-            Dimension dimWidth;
-            if (ParseJsDimensionVp(widthValue, dimWidth)) {
-                shapeViewBox.SetWidth(dimWidth);
-            }
-            Dimension dimHeight;
-            if (ParseJsDimensionVp(heightValue, dimHeight)) {
-                shapeViewBox.SetHeight(dimHeight);
-            }
-            NG::ShapeView::SetViewPort(shapeViewBox);
-            info.SetReturnValue(info.This());
-            return;
-        }
-        auto stack = ViewStackProcessor::GetInstance();
-        auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-        if (!component) {
-            LOGE("shape is null");
-            return;
-        }
-        AnimationOption option = stack->GetImplicitAnimationOption();
         ShapeViewBox viewBox;
         Dimension dimLeft;
-        if (ParseJsDimensionVp(leftValue, dimLeft)) {
-            viewBox.SetLeft(dimLeft, option);
-        }
+        ParseJsDimensionVp(leftValue, dimLeft);
         Dimension dimTop;
-        if (ParseJsDimensionVp(topValue, dimTop)) {
-            viewBox.SetTop(dimTop, option);
-        }
+        ParseJsDimensionVp(topValue, dimTop);
         Dimension dimWidth;
-        if (ParseJsDimensionVp(widthValue, dimWidth)) {
-            viewBox.SetWidth(dimWidth, option);
-        }
+        ParseJsDimensionVp(widthValue, dimWidth);
         Dimension dimHeight;
-        if (ParseJsDimensionVp(heightValue, dimHeight)) {
-            viewBox.SetHeight(dimHeight, option);
-        }
-        component->SetViewBox(viewBox);
+        ParseJsDimensionVp(heightValue, dimHeight);
+        ShapeModel::GetInstance()->SetViewPort(dimLeft,dimTop,dimWidth,dimHeight);
     }
     info.SetReturnValue(info.This());
 }
 
 void JSShape::JsWidth(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsWidth(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -133,28 +103,12 @@ void JSShape::JsWidth(const JSCallbackInfo& info)
 
 void JSShape::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    if(Container::IsCurrentUseNewPipeline()){
-        JSViewAbstract::JsWidth(jsValue);
-        return;
-    }
     JSViewAbstract::JsWidth(jsValue);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!box->GetWidth().IsValid()) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetWidthFlag(true);
-    }
+    ShapeModel::GetInstance()->SetWidth();
 }
 
 void JSShape::JsHeight(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsHeight(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -165,20 +119,8 @@ void JSShape::JsHeight(const JSCallbackInfo& info)
 
 void JSShape::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    if(Container::IsCurrentUseNewPipeline()){
-        JSViewAbstract::JsWidth(jsValue);
-        return;
-    }
     JSViewAbstract::JsHeight(jsValue);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!box->GetHeight().IsValid()) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetHeightFlag(true);
-    }
+    ShapeModel::GetInstance()->SetHeight();
 }
 
 void JSShape::JsSize(const JSCallbackInfo& info)
@@ -228,17 +170,7 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
             dashArray.emplace_back(dashArray[i]);
         }
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ShapeView::SetStrokeDashArray(dashArray);
-    } else {
-        auto stack = ViewStackProcessor::GetInstance();
-        auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-        if (!component) {
-            LOGE("component is null");
-            return;
-        }
-        component->SetStrokeDashArray(dashArray);
-    }
+    ShapeModel::GetInstance()->SetStrokeDashArray(dashArray);
     info.SetReturnValue(info.This());
 }
 
@@ -252,16 +184,7 @@ void JSShape::SetStroke(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], strokeColor)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ShapeView::SetStroke(strokeColor);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (component) {
-        AnimationOption option = stack->GetImplicitAnimationOption();
-        component->SetStroke(strokeColor, option);
-    }
+    ShapeModel::GetInstance()->SetStroke(strokeColor);
 }
 
 void JSShape::SetFill(const JSCallbackInfo& info)
@@ -270,23 +193,12 @@ void JSShape::SetFill(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSShapeAbstract::SetNgFill(info);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is null");
-        return;
-    }
-    AnimationOption option = stack->GetImplicitAnimationOption();
     if (info[0]->IsString() && info[0]->ToString() == "none") {
-        component->SetFill(Color::TRANSPARENT, option);
+        ShapeModel::GetInstance()->SetFill(Color::TRANSPARENT);
     } else {
         Color fillColor;
         if (ParseJsColor(info[0], fillColor)) {
-            component->SetFill(fillColor, option);
+            ShapeModel::GetInstance()->SetFill(fillColor);
         }
     }
 }
@@ -301,58 +213,17 @@ void JSShape::SetStrokeDashOffset(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], offset)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ShapeView::SetStrokeDashOffset(offset);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (component) {
-        AnimationOption option = stack->GetImplicitAnimationOption();
-        component->SetStrokeDashOffset(offset, option);
-    }
+    ShapeModel::GetInstance()->SetStrokeDashOffset(offset);
 }
 
 void JSShape::SetStrokeLineCap(int lineCap)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ShapeView::SetStrokeLineCap(lineCap);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("ShapeComponent is null");
-        return;
-    }
-    if (static_cast<int>(LineCapStyle::SQUARE) == lineCap) {
-        component->SetStrokeLineCap(LineCapStyle::SQUARE);
-    } else if (static_cast<int>(LineCapStyle::ROUND) == lineCap) {
-        component->SetStrokeLineCap(LineCapStyle::ROUND);
-    } else {
-        component->SetStrokeLineCap(LineCapStyle::BUTT);
-    }
+    ShapeModel::GetInstance()->SetStrokeLineCap(lineCap);
 }
 
 void JSShape::SetStrokeLineJoin(int lineJoin)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ShapeView::SetStrokeLineJoin(lineJoin);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("ShapeComponent is null");
-        return;
-    }
-    if (static_cast<int>(LineJoinStyle::BEVEL) == lineJoin) {
-        component->SetStrokeLineJoin(LineJoinStyle::BEVEL);
-    } else if (static_cast<int>(LineJoinStyle::ROUND) == lineJoin) {
-        component->SetStrokeLineJoin(LineJoinStyle::ROUND);
-    } else {
-        component->SetStrokeLineJoin(LineJoinStyle::MITER);
-    }
+    ShapeModel::GetInstance()->SetStrokeLineJoin(lineJoin);
 }
 
 void JSShape::SetStrokeMiterLimit(const JSCallbackInfo& info)
@@ -366,17 +237,7 @@ void JSShape::SetStrokeMiterLimit(const JSCallbackInfo& info)
         return;
     }
     if (GreatOrEqual(miterLimit, 1.0)) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ShapeView::SetStrokeMiterLimit(miterLimit);
-            return;
-        }
-        auto stack = ViewStackProcessor::GetInstance();
-        auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-        if (!component) {
-            LOGE("ShapeComponent is null");
-            return;
-        }
-        component->SetStrokeMiterLimit(miterLimit);
+        ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
     }
 }
 
@@ -390,16 +251,7 @@ void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], strokeOpacity)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ShapeView::SetStrokeOpacity(strokeOpacity);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (component) {
-        AnimationOption option = stack->GetImplicitAnimationOption();
-        component->SetStrokeOpacity(strokeOpacity, option);
-    }
+    ShapeModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
 void JSShape::SetFillOpacity(const JSCallbackInfo& info)
@@ -412,16 +264,7 @@ void JSShape::SetFillOpacity(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], fillOpacity)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ShapeView::SetFillOpacity(fillOpacity);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (component) {
-        AnimationOption option = stack->GetImplicitAnimationOption();
-        component->SetFillOpacity(fillOpacity, option);
-    }
+    ShapeModel::GetInstance()->SetFillOpacity(fillOpacity);
 }
 
 void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
@@ -434,33 +277,12 @@ void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], lineWidth)) {
         return;
     }
-    if(Container::IsCurrentUseNewPipeline()){
-        NG::ShapeView::SetStrokeWidth(lineWidth);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("ShapeComponent is null");
-        return;
-    }
-    if (GreatOrEqual(lineWidth.Value(), 0.0)) {
-        AnimationOption option = stack->GetImplicitAnimationOption();
-        component->SetStrokeWidth(lineWidth, option);
-    }
+    ShapeModel::GetInstance()->SetStrokeWidth(lineWidth);
 }
 
 void JSShape::SetAntiAlias(bool antiAlias)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ShapeView::SetAntiAlias(antiAlias);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetAntiAlias(antiAlias);
-    }
+    ShapeModel::GetInstance()->SetAntiAlias(antiAlias);
 }
 
 void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
@@ -498,15 +320,7 @@ void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
     if (!ParseJsInteger(rowValue, row)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ShapeView::SetBitmapMesh(NG::ImageMesh(mesh, (int32_t)column, (int32_t)row));
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetBitmapMesh(mesh, (int32_t)column, (int32_t)row);
-    }
+    ShapeModel::GetInstance()->SetBitmapMesh(mesh,static_cast<int32_t>(column),static_cast<int32_t>(row));
 }
 
 void JSShape::JSBind(BindingTarget globalObj)

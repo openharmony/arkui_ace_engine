@@ -73,6 +73,8 @@ struct SpanItem : public Referenced {
     std::list<RefPtr<SpanItem>> children;
 
     void UpdateParagraph(RSParagraphBuilder* builder);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 class ACE_EXPORT SpanNode : public UINode {
@@ -97,7 +99,7 @@ public:
     void UpdateContent(const std::string& content)
     {
         if (spanItem_->content == content) {
-            LOGD("the =content is same, just ignore");
+            LOGD("the content is same, just ignore");
             return;
         }
         spanItem_->content = content;
@@ -117,6 +119,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
+    DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -129,6 +132,11 @@ public:
     void CleanSpanItemChildren()
     {
         spanItem_->children.clear();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        spanItem_->ToJsonValue(json);
     }
 
 private:

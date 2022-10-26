@@ -26,6 +26,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -100,8 +101,6 @@ public:
 
     void SetBuildAfterCallback(const std::function<void()>& callback) override {}
 
-    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) override {}
-
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 
     void CreateExplicitAnimator(const std::function<void()>& onFinishEvent) override {}
@@ -120,6 +119,14 @@ public:
     void OnHide() override;
 
     void WindowFocus(bool isFocus) override;
+
+    void ShowContainerTitle(bool isShow) override;
+
+    void SetAppBgColor(const Color& color) override;
+
+    void SetAppTitle(const std::string& title) override;
+
+    void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
@@ -167,6 +174,11 @@ public:
         return selectOverlayManager_;
     }
 
+    const RefPtr<SharedOverlayManager>& GetSharedOverlayManager()
+    {
+        return sharedTransitionManager_;
+    }
+
     const RefPtr<DragDropManager>& GetDragDropManager()
     {
         return dragDropManager_;
@@ -185,7 +197,6 @@ public:
     void AddWindowFocusChangedCallback(int32_t nodeId);
 
     void RemoveWindowFocusChangedCallback(int32_t nodeId);
-
 
     bool GetIsFocusingByTab() const
     {
@@ -225,6 +236,13 @@ public:
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
 
+    void FlushUITasks() override
+    {
+        taskScheduler_.FlushTask();
+    }
+    // end pipeline, exit app
+    void Finish(bool autoFinish) const override;
+
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -233,11 +251,6 @@ protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight) override;
-
-    void FlushUITasks() override
-    {
-        taskScheduler_.FlushTask();
-    }
 
 private:
     void FlushWindowStateChangedCallback(bool isShow);
@@ -252,6 +265,9 @@ private:
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
+            if (!nodeLeft || !nodeRight) {
+                return false;
+            }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
             }
@@ -262,24 +278,10 @@ private:
         }
     };
 
-    template<typename T>
-    struct NodeCompareWeak {
-        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak) const
-        {
-            auto nodeLeft = nodeLeftWeak.Upgrade();
-            auto nodeRight = nodeRightWeak.Upgrade();
-            if (!nodeLeft || !nodeRight) {
-                return false;
-            }
-            auto compare = NodeCompare<decltype(nodeLeft)>();
-            return compare(nodeLeft, nodeRight);
-        }
-    };
-
     UITaskScheduler taskScheduler_;
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
-    std::set<WeakPtr<UINode>, NodeCompareWeak<WeakPtr<UINode>>> dirtyNodes_;
+    std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
 
     // window on show or on hide
@@ -299,6 +301,7 @@ private:
     RefPtr<FullScreenManager> fullScreenManager_;
     RefPtr<SelectOverlayManager> selectOverlayManager_;
     RefPtr<DragDropManager> dragDropManager_;
+    RefPtr<SharedOverlayManager> sharedTransitionManager_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;

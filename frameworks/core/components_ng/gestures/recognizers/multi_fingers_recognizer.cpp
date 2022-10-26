@@ -19,68 +19,12 @@
 
 namespace OHOS::Ace::NG {
 
-void MultiFingersRecognizer::OnAccepted(size_t touchId)
+void MultiFingersRecognizer::UpdateFingerListInfo(const Offset& coordinateOffset)
 {
-    if (!IsInReferee(touchId)) {
-        return;
-    }
-
-    acceptedCount_++;
-
-    if (refereePointers_.size() == acceptedCount_) {
-        OnAccepted();
-        refereePointers_.clear();
-        acceptedCount_ = 0;
-    }
-}
-
-void MultiFingersRecognizer::OnRejected(size_t touchId)
-{
-    if (!IsInReferee(touchId)) {
-        return;
-    }
-
-    OnRejected();
-    refereePointers_.clear();
-    acceptedCount_ = 0;
-}
-
-void MultiFingersRecognizer::Adjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
-{
-    if (refereePointers_.empty()) {
-        return;
-    }
-
-    std::set<size_t> copyIds = refereePointers_;
-    GestureRecognizer::BatchAdjudicate(copyIds, recognizer, disposal);
-}
-
-void MultiFingersRecognizer::AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
-{
-    auto result = refereePointers_.emplace(touchId);
-    if (result.second) {
-        GestureRecognizer::AddToReferee(touchId, recognizer);
-    }
-}
-
-void MultiFingersRecognizer::DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
-{
-    refereePointers_.erase(touchId);
-    GestureRecognizer::DelFromReferee(touchId, recognizer);
-}
-
-bool MultiFingersRecognizer::IsInReferee(size_t touchId)
-{
-    return refereePointers_.find(touchId) != refereePointers_.end();
-}
-
-void MultiFingersRecognizer::SetFingerList(
-    const std::map<int32_t, TouchEvent> touchPoints, const Offset& coordinateOffset, std::list<FingerInfo>& fingerList)
-{
-    for (auto& point : touchPoints) {
+    for (const auto& point : touchPoints_) {
         Offset localLocation = point.second.GetOffset() - coordinateOffset;
         FingerInfo fingerInfo = { point.first, point.second.GetOffset(), localLocation };
-        fingerList.emplace_back(fingerInfo);
+        fingerList_.emplace_back(fingerInfo);
     }
 }
 

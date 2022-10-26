@@ -15,9 +15,13 @@
 
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 
+#include <cstdint>
 #include <iterator>
 #include <list>
+#include <map>
+#include <optional>
 #include <string>
+#include <unordered_map>
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
@@ -41,6 +45,7 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     }
     auto host = host_.Upgrade();
     CHECK_NULL_VOID(host);
+
     // check front active flag.
     auto item = childWrappers_.front();
     decltype(nodeIds_) frontNodeIds;
@@ -69,30 +74,42 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     int32_t frontCount = 0;
     int32_t backCount = 0;
     auto totalCount = OnGetTotalCount();
-    std::list<int32_t> cacheItems;
+
+    std::list<int32_t> idleIndexes;
+    std::unordered_map<int32_t, std::optional<std::string>> cacheItems;
     for (int32_t i = 0; i < cacheCount_; i++) {
         if (frontNodeIds.empty()) {
             if (startIndex_.value() - i > 0) {
-                cacheItems.push_back(startIndex_.value() - 1 - i);
+                auto idleIndex = startIndex_.value() - 1 - i;
+                auto cacheInfo = builder_->GetCacheItemInfo(idleIndex);
+                if (!cacheInfo) {
+                    idleIndexes.emplace_back(idleIndex);
+                }
+                cacheItems.try_emplace(idleIndex, std::move(cacheInfo));
             }
         } else {
-            nodeIds_.push_front(frontNodeIds.front());
+            cacheItems.try_emplace(startIndex_.value() - frontCount - 1, frontNodeIds.front());
             frontNodeIds.pop_front();
             frontCount++;
         }
 
         if (backNodeIds.empty()) {
-            if (endIndex_.value() + i < totalCount) {
-                cacheItems.push_back(endIndex_.value() + 1 + i);
+            if (endIndex_.value() + i < (totalCount - 1)) {
+                auto idleIndex = endIndex_.value() + 1 + i;
+                auto cacheInfo = builder_->GetCacheItemInfo(idleIndex);
+                if (!cacheInfo) {
+                    idleIndexes.emplace_back(idleIndex);
+                }
+                cacheItems.try_emplace(idleIndex, std::move(cacheInfo));
             }
         } else {
-            nodeIds_.push_back(backNodeIds.front());
+            cacheItems.try_emplace(endIndex_.value() + 1 + i, backNodeIds.front());
             backNodeIds.pop_front();
             backCount++;
         }
     }
-    host->UpdateCachedItems(startIndex_.value() - frontCount, endIndex_.value() + backCount, std::move(nodeIds_));
-    host->PostIdleTask(std::move(cacheItems));
+    host->UpdateLazyForEachItems(startIndex_.value(), endIndex_.value(), std::move(nodeIds_), std::move(cacheItems));
+    host->PostIdleTask(std::move(idleIndexes));
 }
 
 int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()

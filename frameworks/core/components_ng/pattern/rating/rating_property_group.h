@@ -23,10 +23,8 @@
 
 namespace OHOS::Ace::NG {
 struct RatingPropertyGroup {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(RatingScore, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Indicator, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Stars, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(StepSize, double);
 
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundImageSourceInfo, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SecondaryImageSourceInfo, ImageSourceInfo);

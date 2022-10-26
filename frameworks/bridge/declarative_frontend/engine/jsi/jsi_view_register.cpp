@@ -147,10 +147,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
+#ifdef REMOTE_WINDOW_SUPPORTED
+#include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
+#endif
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #endif
@@ -266,11 +268,34 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
     // We are done, tell to the JSAgePage
     page->SetPageCreated();
-    page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
-    page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
-    page->SetDeclarativeOnBackPressCallback([view]() { return view->FireOnBackPress(); });
-    page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
-    page->SetDeclarativeOnUpdateWithValueParamsCallback([view](const std::string& params) {
+    auto weak = Referenced::WeakClaim(view);
+    page->SetDeclarativeOnPageAppearCallback([weak]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnShow();
+        }
+    });
+    page->SetDeclarativeOnPageDisAppearCallback([weak]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnHide();
+        }
+    });
+    page->SetDeclarativeOnBackPressCallback([weak]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            return view->FireOnBackPress();
+        }
+        return false;
+    });
+    page->SetDeclarativeOnPageRefreshCallback([weak]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->MarkNeedUpdate();
+        }
+    });
+    page->SetDeclarativeOnUpdateWithValueParamsCallback([weak](const std::string& params) {
+        auto view = weak.Upgrade();
         if (view && !params.empty()) {
             view->ExecuteUpdateWithValueParams(params);
         }
@@ -1170,11 +1195,13 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
 #endif
+#ifdef REMOTE_WINDOW_SUPPORTED
+    { "RemoteWindow", JSRemoteWindow::JSBind },
+#endif
 #ifndef WEARABLE_PRODUCT
     { "Camera", JSCamera::JSBind },
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
-    { "RemoteWindow", JSRemoteWindow::JSBind },
     { "Video", JSVideo::JSBind },
 #endif
 #if defined(XCOMPONENT_SUPPORTED)

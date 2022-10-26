@@ -22,14 +22,42 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/models/span_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
+#ifndef NG_BUILD
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#endif
 #include "core/common/container.h"
-#include "core/components/declaration/span/span_declaration.h"
-#include "core/components_ng/pattern/text/span_view.h"
-#include "core/event/ace_event_handler.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/text/span_model.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_model.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<SpanModel> SpanModel::instance_ = nullptr;
+
+SpanModel* SpanModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::TextModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::SpanModelNG());
+        } else {
+            instance_.reset(new Framework::SpanModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -50,48 +78,12 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SpanView::SetFontSize(fontSize);
-        return;
-    }
-
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontSize(fontSize);
-    component->SetTextStyle(textStyle);
-
-    auto declaration = component->GetDeclaration();
-    if (declaration) {
-        declaration->SetHasSetFontSize(true);
-    }
+    SpanModel::GetInstance()->SetFontSize(fontSize);
 }
 
 void JSSpan::SetFontWeight(const std::string& value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SpanView::SetFontWeight(ConvertStrToFontWeight(value));
-        return;
-    }
-
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    component->SetTextStyle(textStyle);
-
-    auto declaration = component->GetDeclaration();
-    if (declaration) {
-        declaration->SetHasSetFontWeight(true);
-    }
+    SpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
@@ -104,51 +96,14 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], textColor)) {
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SpanView::SetTextColor(textColor);
-        return;
-    }
-
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetTextColor(textColor);
-    component->SetTextStyle(textStyle);
-
-    auto declaration = component->GetDeclaration();
-    if (declaration) {
-        declaration->SetHasSetFontColor(true);
-    }
+    SpanModel::GetInstance()->SetTextColor(textColor);
 }
 
 void JSSpan::SetFontStyle(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
         auto style = FONT_STYLES[value];
-
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::SpanView::SetItalicFontStyle(style);
-            return;
-        }
-
-        auto component = GetComponent();
-        if (!component) {
-            LOGE("component is not valid");
-            return;
-        }
-        auto textStyle = component->GetTextStyle();
-        textStyle.SetFontStyle(style);
-        component->SetTextStyle(textStyle);
-
-        auto declaration = component->GetDeclaration();
-        if (declaration) {
-            declaration->SetHasSetFontStyle(true);
-        }
+        SpanModel::GetInstance()->SetItalicFontStyle(style);
     } else {
         LOGE("Text fontStyle(%{public}d) illegal value", value);
     }
@@ -165,26 +120,7 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
         LOGE("Parse FontFamilies failed");
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SpanView::SetFontFamily(fontFamilies);
-        return;
-    }
-
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontFamilies(fontFamilies);
-    component->SetTextStyle(textStyle);
-
-    auto declaration = component->GetDeclaration();
-    if (declaration) {
-        declaration->SetHasSetFontFamily(true);
-    }
+    TextModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
 void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
@@ -197,138 +133,85 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
-
-    // TODO: Add support for NG.
-
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetLetterSpacing(value);
-    component->SetTextStyle(textStyle);
-
-    auto declaration = component->GetDeclaration();
-    if (declaration) {
-        declaration->SetHasSetLetterSpacing(true);
-    }
+    TextModel::GetInstance()->SetLetterSpacing(value);
 }
 
 void JSSpan::SetTextCase(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(TEXT_CASES.size())) {
         auto textCase = TEXT_CASES[value];
-
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::SpanView::SetTextCase(textCase);
-            return;
-        }
-
-        auto component = GetComponent();
-        if (!component) {
-            LOGE("component is not valid");
-            return;
-        }
-        auto textStyle = component->GetTextStyle();
-        textStyle.SetTextCase(textCase);
-        component->SetTextStyle(textStyle);
-
-        auto declaration = component->GetDeclaration();
-        if (declaration) {
-            declaration->SetHasSetTextCase(true);
-        }
+        TextModel::GetInstance()->SetTextCase(textCase);
     } else {
-        LOGE("Text textCase(%d) illegal value", value);
+        LOGE("Text textCase(%{public}d) illegal value", value);
     }
 }
 
 void JSSpan::SetDecoration(const JSCallbackInfo& info)
 {
-    do {
-        if (!info[0]->IsObject()) {
-            LOGE("info[0] not is Object");
-            break;
-        }
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> typeValue = obj->GetProperty("type");
-        JSRef<JSVal> colorValue = obj->GetProperty("color");
+    if (!info[0]->IsObject()) {
+        LOGE("info[0] not is Object");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> typeValue = obj->GetProperty("type");
+    JSRef<JSVal> colorValue = obj->GetProperty("color");
 
-        std::optional<TextDecoration> textDecoration;
-        if (typeValue->IsNumber()) {
-            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
-        }
-        std::optional<Color> colorVal;
-        Color result;
-        if (ParseJsColor(colorValue, result)) {
-            colorVal = result;
-        }
-
-        if (Container::IsCurrentUseNewPipeline()) {
-            if (textDecoration) {
-                NG::SpanView::SetTextDecoration(textDecoration.value());
-            }
-            if (colorVal) {
-                NG::SpanView::SetTextDecorationColor(colorVal.value());
-            }
-            break;
-        }
-
-        auto component = GetComponent();
-        if (!component) {
-            LOGE("component is not valid");
-            break;
-        }
-        auto textStyle = component->GetTextStyle();
-        if (textDecoration) {
-            textStyle.SetTextDecoration(textDecoration.value());
-        }
-        if (colorVal) {
-            textStyle.SetTextDecorationColor(colorVal.value());
-        }
-        component->SetTextStyle(textStyle);
-    } while (false);
-    info.SetReturnValue(info.This());
+    std::optional<TextDecoration> textDecoration;
+    if (typeValue->IsNumber()) {
+        textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+    }
+    std::optional<Color> colorVal;
+    Color result;
+    if (ParseJsColor(colorValue, result)) {
+        colorVal = result;
+    }
+    if (textDecoration) {
+        SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
+    }
+    if (colorVal) {
+        SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
+    }
 }
 
 void JSSpan::JsOnClick(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsOnClick(info);
+        return;
+    }
+#ifndef NG_BUILD
     if (info[0]->IsFunction()) {
         auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-        if (!inspector) {
-            LOGE("fail to get inspector for on click event");
-            return;
-        }
+        CHECK_NULL_VOID(inspector);
         auto impl = inspector->GetInspectorFunctionImpl();
         RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClickId = EventMarker(
-            [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                LOGD("About to call onclick method on js");
-                const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-                auto newInfo = *clickInfo;
-                if (impl) {
-                    impl->UpdateEventInfo(newInfo);
-                }
-                ACE_SCORING_EVENT("Span.onClick");
-                func->Execute(newInfo);
-            });
-        auto component = GetComponent();
-        if (component) {
-            component->SetOnClick(onClickId);
-        }
+        auto clickFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
+                             const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGD("About to call onclick method on js");
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            auto newInfo = *clickInfo;
+            if (impl) {
+                impl->UpdateEventInfo(newInfo);
+            }
+            ACE_SCORING_EVENT("Span.onClick");
+            func->Execute(newInfo);
+        };
+        SpanModel::GetInstance()->SetOnClick(std::move(clickFunc));
     }
+#endif
 }
 
 void JSSpan::JsRemoteMessage(const JSCallbackInfo& info)
 {
+#ifndef NG_BUILD
     RemoteCallback remoteCallback;
     JSInteractableView::JsRemoteMessage(info, remoteCallback);
     EventMarker remoteMessageEventId(std::move(remoteCallback));
     auto* stack = ViewStackProcessor::GetInstance();
     auto textSpanComponent = AceType::DynamicCast<TextSpanComponent>(stack->GetMainComponent());
     textSpanComponent->SetRemoteMessageEventId(remoteMessageEventId);
+#endif
 }
 
 void JSSpan::JSBind(BindingTarget globalObj)
@@ -361,30 +244,7 @@ void JSSpan::Create(const JSCallbackInfo& info)
     if (info.Length() > 0) {
         ParseJsString(info[0], label);
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SpanView::Create(label);
-        return;
-    }
-
-    auto spanComponent = AceType::MakeRefPtr<OHOS::Ace::TextSpanComponent>(label);
-    ViewStackProcessor::GetInstance()->ClaimElementId(spanComponent);
-    ViewStackProcessor::GetInstance()->Push(spanComponent);
-
-    // Init text style, allowScale is not supported in declarative.
-    auto textStyle = spanComponent->GetTextStyle();
-    textStyle.SetAllowScale(false);
-    spanComponent->SetTextStyle(textStyle);
-}
-
-RefPtr<TextSpanComponent> JSSpan::GetComponent()
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    if (!stack) {
-        return nullptr;
-    }
-    auto component = AceType::DynamicCast<TextSpanComponent>(stack->GetMainComponent());
-    return component;
+    SpanModel::GetInstance()->Create(label);
 }
 
 } // namespace OHOS::Ace::Framework

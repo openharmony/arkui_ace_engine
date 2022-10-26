@@ -18,12 +18,12 @@
 #include "base/geometry/axis.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
-#include "core/components_ng/pattern/container_model.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_position_controller.h"
 
 namespace OHOS::Ace {
 
@@ -74,6 +74,27 @@ void JSList::SetCachedCount(int32_t cachedCount)
     ListModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
+void JSList::SetScroller(RefPtr<JSScroller> scroller)
+{
+    if (scroller) {
+        RefPtr<ScrollControllerBase> listController;
+        if (Container::IsCurrentUseNewPipeline()) {
+            listController.Swap(AceType::MakeRefPtr<NG::ListPositionController>());
+        } else {
+            listController.Swap(AceType::MakeRefPtr<V2::ListPositionController>());
+        }
+        scroller->SetController(listController);
+
+        // Init scroll bar proxy.
+        auto proxy = scroller->GetScrollBarProxy();
+        if (!proxy) {
+            proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+            scroller->SetScrollBarProxy(proxy);
+        }
+        ListModel::GetInstance()->SetScroller(listController, proxy);
+    }
+}
+
 void JSList::Create(const JSCallbackInfo& args)
 {
     ListModel::GetInstance()->Create();
@@ -90,7 +111,8 @@ void JSList::Create(const JSCallbackInfo& args)
         JSRef<JSVal> scrollerValue = obj->GetProperty("scroller");
         if (scrollerValue->IsObject()) {
             void* scroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
-            ListModel::GetInstance()->SetScroller(scroller);
+            RefPtr<JSScroller> jsScroller = Referenced::Claim(reinterpret_cast<JSScroller*>(scroller));
+            SetScroller(jsScroller);
         }
     }
 
@@ -252,6 +274,7 @@ void JSList::ItemMoveCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onItemMove = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                               int32_t start, int32_t end) -> bool {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             auto params = ConvertToJSValues(start, end);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return true;
@@ -266,6 +289,7 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                                  const int32_t start, const int32_t end) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(start, end);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
@@ -304,12 +328,12 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
             return nullptr;
         }
         // use another VSP instance while executing the builder function
-        ContainerModel::GetInstance()->NewScope();
+        ViewStackModel::GetInstance()->NewScope();
         {
             ACE_SCORING_EVENT("List.onItemDragStart.builder");
             builderFunc->Execute();
         }
-        return ContainerModel::GetInstance()->Finish();
+        return ViewStackModel::GetInstance()->Finish();
     };
     ListModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
 }

@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT NavRouterGroupNode : public GroupNode {
-    DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode)
+    DECLARE_ACE_TYPE(NavRouterGroupNode, GroupNode)
 public:
     NavRouterGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)
@@ -51,7 +51,20 @@ public:
         return navDestinationNode_;
     }
 
+    void OnDetachFromMainTree() override;
+    void OnAttachToMainTree() override;
+
 private:
+    void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
+    void SetDestinationChangeEvent(const RefPtr<UINode>& parent);
+    void InitNavigationContent(const RefPtr<UINode>& parent);
+    void SetBackButtonEvent(const RefPtr<UINode>& parent);
+    void SetOnStateChangeFalse(const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation);
+    void BackToNavBar(const RefPtr<UINode>& parent);
+    void BackToPreNavDestination(const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation);
+    void AddBackButtonIconToNavDestination(const RefPtr<UINode>& parent);
+    bool CleanNodeInNavigation(const RefPtr<UINode>& parent);
+
     RefPtr<UINode> navDestinationNode_;
 };
 

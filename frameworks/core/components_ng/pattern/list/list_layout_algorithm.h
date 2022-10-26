@@ -24,10 +24,16 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_v2/list/list_component.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
+
+enum class ScrollIndexAlignment {
+    ALIGN_TOP = 0,
+    ALIGN_BUTTON = 1,
+};
 
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
@@ -60,6 +66,11 @@ public:
     void SetIndex(int32_t index)
     {
         jumpIndex_ = index;
+    }
+
+    void SetIndexAlignment(ScrollIndexAlignment align)
+    {
+        scrollIndexAlignment_ = align;
     }
 
     void SetCurrentOffset(float offset)
@@ -97,16 +108,6 @@ public:
         return spaceWidth_;
     }
 
-    void SetIsInitialized(bool isInitialized)
-    {
-        isInitialized_ = isInitialized;
-    }
-
-    bool GetIsInitialized() const
-    {
-        return isInitialized_;
-    }
-
     void SetLanes(int32_t lanes)
     {
         lanes_ = lanes;
@@ -115,6 +116,33 @@ public:
     std::optional<int32_t> GetLanes() const
     {
         return lanes_;
+    }
+
+    float GetEstimateOffset() const
+    {
+        return estimateOffset_;
+    }
+
+    float GetStartPosition() const
+    {
+        if (itemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetStartIndex() == 0) {
+            return itemPosition_.begin()->second.first;
+        }
+        return itemPosition_.begin()->second.first - spaceWidth_;
+    }
+
+    float GetEndPosition() const
+    {
+        if (itemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetEndIndex() == totalItemCount_ - 1) {
+            return itemPosition_.rbegin()->second.second;
+        }
+        return itemPosition_.rbegin()->second.second + spaceWidth_;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -130,6 +158,10 @@ private:
     void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
 
     void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+
+    void RecyclePrevIndex(LayoutWrapper* layoutWrapper);
+
+    void CalculateEstimateOffset();
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
@@ -147,8 +179,11 @@ private:
         int& currentIndex, float& mainLen);
     int LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
         int& currentIndex, float& mainLen);
+    static RefPtr<ListItemGroupLayoutProperty> GetListItemGroup(const RefPtr<LayoutWrapper>&  layoutWrapper);
+    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
 
     std::optional<int32_t> jumpIndex_;
+    ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
 
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;
@@ -158,7 +193,6 @@ private:
     int32_t preEndIndex_ = -1;
 
     float spaceWidth_ = 0.0f;
-    bool isInitialized_ = false;
     bool overScrollFeature_ = false;
 
     int32_t totalItemCount_ = 0;
@@ -168,10 +202,13 @@ private:
     std::optional<float> maxLaneLength_;
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
+    float estimateOffset_ = 0.0f;
+
     bool mainSizeIsDefined_ = false;
     float contentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
+    LayoutConstraintF groupLayoutConstraint_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1228,7 +1229,7 @@ Offset RenderNode::GetGlobalOffset() const
         return globalOffset;
     }
     auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        context->GetWindowManager()->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+        context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         globalOffset = globalOffset + Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
             -CONTAINER_TITLE_HEIGHT.ConvertToPx());
@@ -1314,6 +1315,14 @@ void RenderNode::UpdateAccessibilityPosition()
     accessibilityNode->SetPositionInfo(positionInfo);
 }
 
+void RenderNode::UpdateAccessibilityEnable(bool isEnabled)
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetEnabledState(isEnabled);
+    }
+}
+
 void RenderNode::UpdateAll(const RefPtr<Component>& component)
 {
     if (!component) {
@@ -1323,12 +1332,10 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     hitTestMode_ = component->GetHitTestMode();
     touchable_ = component->IsTouchable();
     disabled_ = component->IsDisabledStatus();
+    UpdateAccessibilityEnable(!disabled_);
     isFirstNode_ = component->IsFirstNode();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-    if (!renderComponent) {
-        LOGE("renderComponent is null");
-        return;
-    }
+    CHECK_NULL_VOID(renderComponent);
     positionParam_ = renderComponent->GetPositionParam();
     motionPathOption_ = renderComponent->GetMotionPathOption();
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2046,8 +2053,7 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail, const RefPtr<Compo
     isTailRenderNode_ = isTail;
 
     // if "UseExternalRSNode" is true, we should find tail component and extract RSNode from it.
-    ProcessExternalRSNode(component);
-    if (rsNode_) {
+    if (ProcessExternalRSNode(component)) {
         return;
     }
 
@@ -2061,32 +2067,30 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail, const RefPtr<Compo
 #endif
 }
 
-void RenderNode::ProcessExternalRSNode(const RefPtr<Component>& component)
+bool RenderNode::ProcessExternalRSNode(const RefPtr<Component>& component)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!isHeadRenderNode_ || component == nullptr || !component->UseExternalRSNode()) {
-        return;
+        return false;
     }
 
     auto tailComponent = component;
-    while (tailComponent != nullptr) {
-        // recursive find tail component.
-        if (!tailComponent->IsTailComponent()) {
-            auto singleChild = AceType::DynamicCast<SingleChild>(tailComponent);
-            if (!singleChild) {
-                return;
-            }
+    // recursively locate tail component.
+    while (tailComponent != nullptr && !tailComponent->IsTailComponent()) {
+        if (auto singleChild = AceType::DynamicCast<SingleChild>(tailComponent)) {
             tailComponent = singleChild->GetChild();
-            continue;
+        } else {
+            return false;
         }
-        // extract RSNode from tail component.
-        auto rsNode = RosenRenderRemoteWindow::ExtractRSNode(tailComponent);
-        if (rsNode != nullptr) {
-            SyncRSNode(rsNode);
-        }
-        return;
     }
+    // extract RSNode from tail component.
+    auto rsNode = RosenRenderRemoteWindow::ExtractRSNode(tailComponent);
+    SyncRSNode(rsNode);
+    // avoid redundant function call.
+    component->MarkUseExternalRSNode(false);
+    return rsNode != nullptr;
 #endif
+    return false;
 }
 
 void RenderNode::SyncRSNode(const std::shared_ptr<RSNode>& rsNode)

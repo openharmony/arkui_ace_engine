@@ -29,28 +29,10 @@
 #include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_v2/grid/grid_event.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
-
-class GridEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(GridEventInfo, BaseEventInfo, EventToJSONStringAdapter);
-
-public:
-    explicit GridEventInfo(int32_t scrollIndex) : BaseEventInfo("grid"), scrollIndex_(scrollIndex) {}
-
-    ~GridEventInfo() = default;
-
-    std::string ToJSONString() const override;
-
-    int32_t GetScrollIndex() const
-    {
-        return scrollIndex_;
-    }
-
-private:
-    int32_t scrollIndex_ = 0;
-};
 
 class RenderGridScroll : public RenderGridLayout, public RenderRefreshTarget {
     DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout, RenderRefreshTarget);
@@ -59,6 +41,7 @@ public:
     using BuildChildByIndex = std::function<bool(int32_t)>;
     using GetChildSpanByIndex = std::function<bool(int32_t, bool, int32_t&, int32_t&, int32_t&, int32_t&)>;
     using DeleteChildByIndex = std::function<void(int32_t)>;
+    using GetItemTotalCountFunc = std::function<int32_t(void)>;
     using OnScrolledFunc = std::function<void(std::shared_ptr<GridEventInfo>&)>;
 
     RenderGridScroll() = default;
@@ -88,6 +71,19 @@ public:
     void SetGetChildSpanByIndex(GetChildSpanByIndex func)
     {
         getChildSpanByIndex_ = std::move(func);
+    }
+
+    void SetGetItemTotalCount(GetItemTotalCountFunc func)
+    {
+        getItemTotalCount_ = std::move(func);
+    }
+
+    int32_t GetItemTotalCount()
+    {
+        if (getItemTotalCount_) {
+            return getItemTotalCount_();
+        }
+        return 0;
     }
 
     void AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode);
@@ -168,6 +164,7 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     bool UpdateScrollPosition(double offset, int32_t source);
+    void CheckJumpToIndex(double offset);
     void RecordLocation();
 
     void InitialGridProp() override;
@@ -201,7 +198,7 @@ protected:
 
     double GetCurrentOffset() const
     {
-        return startMainPos_ + currentOffset_ - firstItemOffset_;
+        return estimatePos_ + startMainPos_ + currentOffset_ + firstItemOffset_;
     }
 
     void SetScrollBarCallback();
@@ -255,10 +252,10 @@ protected:
     double* mainGap_ = &rowGap_;
 
     // used for scrollbar
-    double scrollBarExtent_ = 0.0;
-    double mainScrollExtent_ = 0.0;
     int32_t scrollBarOpacity_ = 0;
     double estimateHeight_ = 0.0;
+    double estimatePos_ = 0.0;
+    double estimateAverageHight_ = 0.0;
     bool totalCountFlag_ = false;
     bool animatorJumpFlag_ = false;
     Color scrollBarColor_;
@@ -270,6 +267,7 @@ protected:
     BuildChildByIndex buildChildByIndex_;
     DeleteChildByIndex deleteChildByIndex_;
     GetChildSpanByIndex getChildSpanByIndex_;
+    GetItemTotalCountFunc getItemTotalCount_;
     OnScrolledFunc scrolledEventFun_;
 
     int32_t lastFirstIndex_ = -1;

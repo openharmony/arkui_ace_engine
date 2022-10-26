@@ -143,6 +143,14 @@ public:
     void SetHostPageId(int32_t id)
     {
         hostPageId_ = id;
+        for (auto& child : children_) {
+            child->SetHostPageId(id);
+        }
+    }
+
+    void SetRemoveSilently(bool removeSilently)
+    {
+        removeSilently_ = removeSilently;
     }
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -190,7 +198,24 @@ public:
 
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
+    virtual void SetActive(bool active);
+
+    bool IsOnMainTree() const
+    {
+        return onMainTree_;
+    }
+
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
+    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+
 protected:
+    std::list<RefPtr<UINode>>& ModifyChildren()
+    {
+        return children_;
+    }
+
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {
         for (const auto& child : children_) {
@@ -206,6 +231,9 @@ protected:
     virtual void OnAttachToMainTree();
     virtual void OnDetachFromMainTree();
 
+private:
+    void OnRemoveFromParent();
+
     std::list<RefPtr<UINode>> children_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
@@ -215,6 +243,7 @@ protected:
     int32_t nodeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
+    bool removeSilently_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

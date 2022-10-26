@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include <utility>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -24,6 +23,7 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
@@ -73,6 +73,8 @@ void ScrollPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = host->GetPaintProperty<ScrollPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
 
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis_ == axis && scrollableEvent_) {
@@ -85,12 +87,12 @@ void ScrollPattern::OnModifyDone()
     auto offsetTask = [weak = WeakClaim(this)](double offset, int32_t source) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                float adjustOffset = static_cast<float>(offset);
-                pattern->AdjustOffset(adjustOffset, source);
-                return pattern->UpdateCurrentOffset(adjustOffset, source);
+            if (!pattern || pattern->GetAxis() == Axis::NONE) {
+                return false;
             }
-            return false;
+            float adjustOffset = static_cast<float>(offset);
+            pattern->AdjustOffset(adjustOffset, source);
+            return pattern->UpdateCurrentOffset(adjustOffset, source);
         }
         return true;
     };
@@ -103,9 +105,10 @@ void ScrollPattern::OnModifyDone()
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
-
     scrollableEvent_->SetScrollPositionCallback(std::move(offsetTask));
+
     RegisterScrollEventTask();
+    RegisterScrollBarEventTask();
     gestureHub->AddScrollEdgeEffect(axis_, scrollEffect_);
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
@@ -128,6 +131,46 @@ void ScrollPattern::RegisterScrollEventTask()
     }
 }
 
+void ScrollPattern::RegisterScrollBarEventTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (touchEvent_) {
+        gestureHub->RemoveTouchEvent(touchEvent_);
+    }
+    touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<ScrollPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto scrollBar = paintProperty->GetScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        CHECK_NULL_VOID(info.GetTouches().size());
+        auto touch = info.GetTouches().front();
+        if (touch.GetTouchType() == TouchType::DOWN) {
+            if (scrollBar->InBarRegion({ touch.GetLocalLocation().GetX(), touch.GetLocalLocation().GetY()})) {
+                scrollBar->SetPressed(true);
+                pattern->SetScrollContent(false);
+            } else {
+                scrollBar->SetPressed(false);
+                pattern->SetScrollContent(true);
+            }
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            scrollBar->SetPressed(false);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+        });
+    gestureHub->AddTouchEvent(touchEvent_);
+}
+
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -140,6 +183,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
     viewPortLength_ = layoutAlgorithm->GetViewPort();
+    viewPort_ = layoutAlgorithm->GetViewPortSize();
+    viewPortExtent_ = layoutAlgorithm->GetViewPortExtent();
+
     return false;
 }
 
@@ -166,6 +212,9 @@ void ScrollPattern::HandleScrollBarOutBoundary() {}
 
 void ScrollPattern::AdjustOffset(float& delta, int32_t source)
 {
+    if (!isScrollContent_) {
+        delta *= -1.0f; // revert if operate scroll bar
+    }
     if (NearZero(delta) || NearZero(viewPortLength_) || source == SCROLL_FROM_ANIMATION ||
         source == SCROLL_FROM_ANIMATION_SPRING) {
         return;
@@ -322,6 +371,14 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (scrollEffect_ && !scrollEffect_->IsRestrictBoundary()) {
         next = true;
     }
+
+    // inner scroll bar
+    auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
+    if (paintProperty && lastOffset_ != currentOffset_) {
+        paintProperty->UpdateScrollBarOffset(currentOffset_, viewPortExtent_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     return next;
 }

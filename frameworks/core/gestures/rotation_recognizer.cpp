@@ -178,6 +178,18 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        TouchEvent touchPoint = {};
+        if (!touchPoints_.empty()) {
+            touchPoint = touchPoints_.begin()->second;
+        }
+        info.SetForce(touchPoint.force);
+        if (touchPoint.tiltX.has_value()) {
+            info.SetTiltX(touchPoint.tiltX.value());
+        }
+        if (touchPoint.tiltY.has_value()) {
+            info.SetTiltY(touchPoint.tiltY.value());
+        }
+        info.SetSourceTool(touchPoint.sourceTool);
         (*callback)(info);
     }
 }

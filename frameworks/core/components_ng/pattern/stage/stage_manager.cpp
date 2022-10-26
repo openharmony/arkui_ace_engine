@@ -16,10 +16,12 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -40,8 +42,10 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     CHECK_NULL_RETURN(node, false);
 
     const auto& children = stageNode_->GetChildren();
+    RefPtr<FrameNode> outPageNode;
     if (!children.empty() && needHideLast) {
         FirePageHide(children.back(), needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
+        outPageNode = AceType::DynamicCast<FrameNode>(children.back());
     }
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
@@ -61,6 +65,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         return true;
     }
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    StartSharedTransition(outPageNode, node, true);
     return true;
 }
 
@@ -78,11 +83,16 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
     stageNode_->RemoveChild(pageNode);
 
+    RefPtr<FrameNode> inPageNode;
     if (needShowNext) {
         const auto& newPageNode = children.back();
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
+        inPageNode = AceType::DynamicCast<FrameNode>(children.back());
     }
+
     stageNode_->RebuildRenderContextTree();
+    auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
+    StartSharedTransition(outPageNode, inPageNode, false);
     pipeline->RequestFrame();
     return true;
 }
@@ -108,6 +118,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     }
 
     bool firstPageTransition = true;
+    auto outPageNode = AceType::DynamicCast<FrameNode>(children.back());
     for (int32_t current = 0; current < popSize; ++current) {
         auto pageNode = children.back();
         FirePageHide(
@@ -116,10 +127,13 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         stageNode_->RemoveChild(pageNode);
     }
 
+    RefPtr<FrameNode> inPageNode;
     if (needShowNext) {
         const auto& newPageNode = children.back();
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
+        inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+    StartSharedTransition(outPageNode, inPageNode, false);
 
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
@@ -178,9 +192,14 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pagePattern->OnHide();
     if (transitionType != PageTransitionType::NONE) {
-        pagePattern->TriggerPageTransition(transitionType);
+        pagePattern->TriggerPageTransition(transitionType, [weak = WeakPtr<PagePattern>(pagePattern)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnHide();
+        });
+    } else {
+        pagePattern->OnHide();
     }
 
     auto pageFocusHub = pageNode->GetFocusHub();
@@ -201,7 +220,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pagePattern);
     pagePattern->OnShow();
     if (transitionType != PageTransitionType::NONE) {
-        pagePattern->TriggerPageTransition(transitionType);
+        pagePattern->TriggerPageTransition(transitionType, nullptr);
     }
 
     auto pageFocusHub = pageNode->GetFocusHub();
@@ -224,6 +243,31 @@ RefPtr<FrameNode> StageManager::GetLastPage()
         return nullptr;
     }
     return DynamicCast<FrameNode>(children.back());
+}
+
+void StageManager::StartSharedTransition(
+    const RefPtr<FrameNode>& outNode, const RefPtr<FrameNode>& inNode, bool needFlush) const
+{
+    if (!inNode || !outNode) {
+        return;
+    }
+    auto inPattern = inNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(inPattern);
+    auto outPattern = outNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(outPattern);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (needFlush) {
+        pipeline->FlushPipelineImmediately();
+    }
+    inPattern->BuildSharedTransitionMap();
+    outPattern->BuildSharedTransitionMap();
+    if (inPattern->GetSharedTransitionMap().empty() || outPattern->GetSharedTransitionMap().empty()) {
+        return;
+    }
+    auto sharedTransitionManager = pipeline->GetSharedOverlayManager();
+    CHECK_NULL_VOID(sharedTransitionManager);
+    sharedTransitionManager->StartSharedTransition(outNode, inNode);
 }
 
 } // namespace OHOS::Ace::NG

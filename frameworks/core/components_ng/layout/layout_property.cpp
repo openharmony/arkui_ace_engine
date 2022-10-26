@@ -114,6 +114,7 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
+    UpdateGridConstraint();
     layoutConstraint_ = parentConstraint;
     if (margin_) {
         // TODO: add margin is negative case.
@@ -170,14 +171,6 @@ void LayoutProperty::CheckAspectRatio()
         selfWidth = selfHeight.value() * aspectRatio;
     }
 
-    if (selfWidth.value_or(0) > maxWidth) {
-        selfWidth = maxWidth;
-        selfHeight = selfWidth.value() / aspectRatio;
-    }
-    if (selfHeight.value_or(0) > maxHeight) {
-        selfHeight = maxHeight;
-        selfWidth = selfHeight.value() * aspectRatio;
-    }
     if (selfHeight) {
         layoutConstraint_->selfIdealSize.SetHeight(selfHeight);
     }
@@ -187,24 +180,41 @@ void LayoutProperty::CheckAspectRatio()
     // TODO: after measure done, need to check AspectRatio again.
 }
 
-void LayoutProperty::UpdateGridConstraint(const RefPtr<FrameNode>& host)
+const std::unique_ptr<GridProperty>& LayoutProperty::GetGridProperty(RefPtr<FrameNode> node)
 {
-    const auto& gridProperty = GetGridProperty();
-    if (!gridProperty) {
-        return;
+    if (gridProperty_ && !gridProperty_->HasContainer()) {
+        BuildGridProperty(node);
     }
-    bool gridflag = false;
+    return gridProperty_;
+}
+
+void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
+{
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
             auto containerLayout = AceType::DynamicCast<FrameNode>(parent)->GetLayoutProperty();
-            gridflag = gridProperty->UpdateContainer(containerLayout, host);
-            break;
+            gridProperty_->UpdateContainer(containerLayout, host);
+            SetHost(host);
+            return;
         }
         parent = parent->GetParent();
     }
-    if (gridflag) {
-        UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty->GetWidth()), std::nullopt));
+}
+
+void LayoutProperty::UpdateGridConstraint()
+{
+    if (gridProperty_ && gridProperty_->HasContainer()) {
+        UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty_->GetWidth()), std::nullopt));
+        auto optOffset = gridProperty_->GetOffset();
+        if (optOffset == UNDEFINED_DIMENSION) {
+            return;
+        }
+        OffsetT<Dimension> offset(optOffset, Dimension());
+        auto target = GetHost()->GetRenderContext();
+        if (target) {
+            target->UpdatePosition(offset);
+        }
     }
 }
 
@@ -298,6 +308,32 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder()
         padding.right.value_or(0) + borderWidth.rightDimen.value_or(0),
         padding.top.value_or(0) + borderWidth.topDimen.value_or(0),
         padding.bottom.value_or(0) + borderWidth.bottomDimen.value_or(0) };
+}
+
+PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault,
+    float paddingVerticalDefault, float borderHorizontalDefault, float borderVerticalDefault)
+{
+    if (layoutConstraint_.has_value()) {
+        auto padding = ConvertToPaddingPropertyF(
+            padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        auto borderWidth = ConvertToBorderWidthPropertyF(
+            borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        return PaddingPropertyF { padding.left.value_or(paddingHorizontalDefault) +
+                                      borderWidth.leftDimen.value_or(borderHorizontalDefault),
+            padding.right.value_or(paddingHorizontalDefault) + borderWidth.rightDimen.value_or(borderHorizontalDefault),
+            padding.top.value_or(paddingVerticalDefault) + borderWidth.topDimen.value_or(borderVerticalDefault),
+            padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
+    }
+    auto padding = ConvertToPaddingPropertyF(
+        padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    auto borderWidth = ConvertToBorderWidthPropertyF(
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+
+    return PaddingPropertyF { padding.left.value_or(paddingHorizontalDefault) +
+                                  borderWidth.leftDimen.value_or(borderHorizontalDefault),
+        padding.right.value_or(paddingHorizontalDefault) + borderWidth.rightDimen.value_or(borderHorizontalDefault),
+        padding.top.value_or(paddingVerticalDefault) + borderWidth.topDimen.value_or(borderVerticalDefault),
+        padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
 }
 
 PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()

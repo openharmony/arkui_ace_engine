@@ -30,6 +30,7 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
 private:
+    ACE_DISALLOW_COPY_AND_MOVE(RosenRenderWaterFlow);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_ROSEN_RENDER_WATER_FLOW_H

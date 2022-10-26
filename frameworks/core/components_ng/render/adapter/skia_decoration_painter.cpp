@@ -20,18 +20,18 @@
 #include <memory>
 
 #include "include/core/SkColor.h"
+#include "include/core/SkColorFilter.h"
+#include "include/core/SkImage.h"
 #include "include/core/SkRRect.h"
 #include "include/core/SkScalar.h"
-#include "include/core/SkColorFilter.h"
-#include "include/utils/SkParsePath.h"
 #include "include/effects/SkGradientShader.h"
+#include "include/utils/SkParsePath.h"
 
-#include "base/utils/utils.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
-
-#include "core/components_ng/property/measure_utils.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -59,7 +59,6 @@ public:
         return begin + (end - begin) * fraction;
     }
 };
-
 
 class GradientShader {
 public:
@@ -473,14 +472,13 @@ private:
         SkPoint center = SkPoint::Make(size.width() / 2.0f, size.height() / 2.0f);
         if (radialGradient->radialCenterX) {
             const auto& value = radialGradient->radialCenterX.value();
-            center.fX = static_cast<float>(value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0 * size.width()
-                                                                                  : value.ConvertToPx());
+            center.fX = static_cast<float>(
+                value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0 * size.width() : value.ConvertToPx());
         }
         if (radialGradient->radialCenterY) {
             const auto& value = radialGradient->radialCenterY.value();
-            center.fY =
-                static_cast<float>(value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0 * size.height()
-                                                                          : value.ConvertToPx());
+            center.fY = static_cast<float>(
+                value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0 * size.height() : value.ConvertToPx());
         }
         return center;
     }
@@ -496,15 +494,14 @@ private:
             circleSize.fHeight = circleSize.fWidth;
             if (radialGradient->radialVerticalSize) {
                 const auto& wValue = radialGradient->radialVerticalSize.value();
-                circleSize.fHeight =
-                    static_cast<float>(wValue.Unit() == DimensionUnit::PERCENT ? wValue.Value() * size.height()
-                                                                               : wValue.ConvertToPx());
+                circleSize.fHeight = static_cast<float>(
+                    wValue.Unit() == DimensionUnit::PERCENT ? wValue.Value() * size.height() : wValue.ConvertToPx());
             }
         } else {
             RadialShapeType shape = NG::RadialShapeType::ELLIPSE;
             if ((radialGradient->radialShape && radialGradient->radialShape.value() == NG::RadialShapeType::CIRCLE) ||
-                (!radialGradient->radialShape && !radialGradient->radialSizeType
-                 && radialGradient->radialHorizontalSize &&!radialGradient->radialVerticalSize)) {
+                (!radialGradient->radialShape && !radialGradient->radialSizeType &&
+                    radialGradient->radialHorizontalSize && !radialGradient->radialVerticalSize)) {
                 shape = NG::RadialShapeType::CIRCLE;
             }
             auto sizeType =
@@ -630,8 +627,7 @@ public:
             center_.fX, center_.fY, &colors[0], &pos[0], colors.size(), tileMode, startAngle_, endAngle_, 0, &matrix);
     }
 
-    static std::unique_ptr<GradientShader> CreateSweepGradient(
-        const NG::Gradient& gradient, const SkSize& size)
+    static std::unique_ptr<GradientShader> CreateSweepGradient(const NG::Gradient& gradient, const SkSize& size)
     {
         auto sweepGradient = gradient.GetSweepGradient();
         if (!sweepGradient) {
@@ -663,15 +659,13 @@ private:
 
         if (sweepGradient->centerX) {
             const auto& value = sweepGradient->centerX.value();
-            center.fX =
-                static_cast<float>(value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0f * size.width()
-                                                                          : value.ConvertToPx());
+            center.fX = static_cast<float>(
+                value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0f * size.width() : value.ConvertToPx());
         }
         if (sweepGradient->centerY) {
             const auto& value = sweepGradient->centerY.value();
-            center.fY =
-                static_cast<float>(value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0f * size.height()
-                                                                          : value.ConvertToPx());
+            center.fY = static_cast<float>(
+                value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0f * size.height() : value.ConvertToPx());
         }
         return center;
     }
@@ -692,8 +686,7 @@ private:
 
 } // namespace
 
-sk_sp<SkShader> SkiaDecorationPainter::CreateGradientShader(
-    const NG::Gradient& gradient, const SizeF& frameSize)
+sk_sp<SkShader> SkiaDecorationPainter::CreateGradientShader(const NG::Gradient& gradient, const SizeF& frameSize)
 {
     auto ptr = std::make_unique<GradientShader>(gradient);
     auto size = SkSize::Make(frameSize.Width(), frameSize.Height());
@@ -719,14 +712,12 @@ float SkiaDecorationPainter::SkiaDimensionToPx(const Dimension& value, const Siz
     if (value.Unit() == DimensionUnit::PERCENT) {
         switch (type) {
             case LengthMode::HORIZONTAL:
-                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(),
-                size.Width()).value();
+                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(), size.Width()).value();
             case LengthMode::VERTICAL:
-                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(),
-                size.Height()).value();
+                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(), size.Height()).value();
             case LengthMode::OTHER:
-                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(),
-                sqrt(size.Width() * size.Height())).value();
+                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(), sqrt(size.Width() * size.Height()))
+                    .value();
             default:
                 return 0.0f;
         }
@@ -744,8 +735,7 @@ float SkiaDecorationPainter::SkiaGetFloatRadiusValue(
     return SkiaDimensionToPx(src, size, type);
 }
 
-SkPath SkiaDecorationPainter::SkiaCreateSkPath(
-    const RefPtr<BasicShape>& basicShape, const SizeF& size)
+SkPath SkiaDecorationPainter::SkiaCreateSkPath(const RefPtr<BasicShape>& basicShape, const SizeF& size)
 {
     OffsetF position;
     SkPath skPath;
@@ -801,14 +791,13 @@ void SkiaDecorationPainter::SkiaCreateInset(
     float topLeftRadiusY = SkiaDimensionToPx(inset->GetTopLeftRadius().GetY(), radiusSize, LengthMode::VERTICAL);
     float topRightRadiusX = SkiaDimensionToPx(inset->GetTopRightRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
     float topRightRadiusY = SkiaDimensionToPx(inset->GetTopRightRadius().GetY(), radiusSize, LengthMode::VERTICAL);
-    float bottomRightRadiusX = SkiaDimensionToPx(
-        inset->GetBottomRightRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
-    float bottomRightRadiusY = SkiaDimensionToPx(
-        inset->GetBottomRightRadius().GetY(), radiusSize, LengthMode::VERTICAL);
-    float bottomLeftRadiusX = SkiaDimensionToPx(
-        inset->GetBottomLeftRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
-    float bottomLeftRadiusY = SkiaDimensionToPx(
-        inset->GetBottomLeftRadius().GetY(), radiusSize, LengthMode::VERTICAL);
+    float bottomRightRadiusX =
+        SkiaDimensionToPx(inset->GetBottomRightRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
+    float bottomRightRadiusY =
+        SkiaDimensionToPx(inset->GetBottomRightRadius().GetY(), radiusSize, LengthMode::VERTICAL);
+    float bottomLeftRadiusX =
+        SkiaDimensionToPx(inset->GetBottomLeftRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
+    float bottomLeftRadiusY = SkiaDimensionToPx(inset->GetBottomLeftRadius().GetY(), radiusSize, LengthMode::VERTICAL);
     const SkVector fRadii[4] = { { topLeftRadiusX, topLeftRadiusY }, { topRightRadiusX, topRightRadiusY },
         { bottomRightRadiusX, bottomRightRadiusY }, { bottomLeftRadiusX, bottomLeftRadiusY } };
     SkRRect roundRect;
@@ -927,11 +916,9 @@ void SkiaDecorationPainter::SkiaCreateRect(
     skPath.addRRect(roundRect);
 }
 
-void SkiaDecorationPainter::PaintGrayScale(
-    const SizeF& frameSize, SkCanvas* canvas, float scale)
+void SkiaDecorationPainter::PaintGrayScale(const SizeF& frameSize, SkCanvas* canvas, float scale)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(
-        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (GreatNotEqual(scale, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
@@ -950,11 +937,9 @@ void SkiaDecorationPainter::PaintGrayScale(
     }
 }
 
-void SkiaDecorationPainter::PaintBrightness(
-    const SizeF& frameSize, SkCanvas* canvas, float bright)
+void SkiaDecorationPainter::PaintBrightness(const SizeF& frameSize, SkCanvas* canvas, float bright)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(
-        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     // brightness range = (0, 2)
     // skip painting when brightness is normal
     if (NearEqual(bright, 1.0)) {
@@ -976,11 +961,9 @@ void SkiaDecorationPainter::PaintBrightness(
     }
 }
 
-void SkiaDecorationPainter::PaintContrast(
-    const SizeF& frameSize, SkCanvas* canvas, float contrasts)
+void SkiaDecorationPainter::PaintContrast(const SizeF& frameSize, SkCanvas* canvas, float contrasts)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(
-        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     // skip painting if contrast is normal
     if (NearEqual(contrasts, 1.0)) {
         return;
@@ -1000,30 +983,27 @@ void SkiaDecorationPainter::PaintContrast(
     }
 }
 
-void SkiaDecorationPainter::PaintColorBlend(
-    const SizeF& frameSize, SkCanvas* canvas, const Color& colorBlend)
+void SkiaDecorationPainter::PaintColorBlend(const SizeF& frameSize, SkCanvas* canvas, const Color& colorBlend)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(
-        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (colorBlend.GetValue() != COLOR_MASK) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-            paint.setColorFilter(SkColorFilters::Blend(SkColorSetARGB(colorBlend.GetAlpha(),
-                colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()), SkBlendMode::kPlus));
+            paint.setColorFilter(SkColorFilters::Blend(
+                SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
+                SkBlendMode::kPlus));
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 
-void SkiaDecorationPainter::PaintSaturate(
-    const SizeF& frameSize, SkCanvas* canvas, float saturates)
+void SkiaDecorationPainter::PaintSaturate(const SizeF& frameSize, SkCanvas* canvas, float saturates)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(
-        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (!NearEqual(saturates, 1.0) && GreatOrEqual(saturates, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
@@ -1045,11 +1025,9 @@ void SkiaDecorationPainter::PaintSaturate(
     }
 }
 
-void SkiaDecorationPainter::PaintSepia(
-    const SizeF& frameSize, SkCanvas* canvas, float sepias)
+void SkiaDecorationPainter::PaintSepia(const SizeF& frameSize, SkCanvas* canvas, float sepias)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(
-        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (sepias > 1.0) {
         sepias = 1.0;
     }
@@ -1079,11 +1057,9 @@ void SkiaDecorationPainter::PaintSepia(
     }
 }
 
-void SkiaDecorationPainter::PaintInvert(
-    const SizeF& frameSize, SkCanvas* canvas, float inverts)
+void SkiaDecorationPainter::PaintInvert(const SizeF& frameSize, SkCanvas* canvas, float inverts)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(
-        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (GreatNotEqual(inverts, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
@@ -1107,11 +1083,9 @@ void SkiaDecorationPainter::PaintInvert(
     }
 }
 
-void SkiaDecorationPainter::PaintHueRotate(
-    const SizeF& frameSize, SkCanvas* canvas, float hueRotate)
+void SkiaDecorationPainter::PaintHueRotate(const SizeF& frameSize, SkCanvas* canvas, float hueRotate)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(
-        SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (GreatNotEqual(hueRotate, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
@@ -1151,6 +1125,33 @@ void SkiaDecorationPainter::PaintHueRotate(
             canvas->saveLayer(slr);
         }
     }
+}
+
+SkPaint SkiaDecorationPainter::CreateMaskSkPaint(const RefPtr<BasicShape>& basicShape)
+{
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setStyle(SkPaint::Style::kFill_Style);
+    paint.setColor(basicShape->GetColor().GetValue());
+    return paint;
+}
+
+RSImage SkiaDecorationPainter::CreateBorderImageGradient(const NG::Gradient& gradient, const SizeF& paintSize)
+{
+    auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, paintSize);
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setShader(std::move(shader));
+
+    auto imageInfo = SkImageInfo::Make(paintSize.Width(), paintSize.Height(),
+        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+    SkBitmap skBitmap;
+    skBitmap.allocPixels(imageInfo);
+
+    std::unique_ptr<SkCanvas> skCanvas = std::make_unique<SkCanvas>(skBitmap);
+    skCanvas->drawPaint(paint);
+    auto skImage = SkImage::MakeFromBitmap(skBitmap);
+    return RSImage(&skImage);
 }
 
 } // namespace OHOS::Ace::NG

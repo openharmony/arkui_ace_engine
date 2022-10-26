@@ -17,14 +17,34 @@
 
 #include <regex>
 #include <string>
-#include <sys/time.h>
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components/text_clock/text_clock_component.h"
-#include "core/components_ng/pattern/text_clock/text_clock_view.h"
+#include "bridge/declarative_frontend/jsview/models/text_clock_model_impl.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<TextClockModel> TextClockModel::instance_ = nullptr;
+
+TextClockModel* TextClockModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::TextClockModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::TextClockModelNG());
+        } else {
+            instance_.reset(new Framework::TextClockModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -34,10 +54,8 @@ const int32_t TWENTY_FOUR_HOUR_BASE = 24;
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
-constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
-constexpr char DEFAULT_FORMAT[] = "hhmmss";
 
-bool IsHoursWestValid(double& hoursWest)
+bool HoursWestIsValid(int32_t hoursWest)
 {
     if (hoursWest < HOURS_WEST_LOWER_LIMIT || hoursWest > HOURS_WEST_UPPER_LIMIT) {
         return false;
@@ -47,73 +65,20 @@ bool IsHoursWestValid(double& hoursWest)
     }
     return true;
 }
-
-bool HoursWestIsValid(int32_t hoursWest)
-{
-    if (hoursWest < HOURS_WEST_LOWER_LIMIT || hoursWest > HOURS_WEST_UPPER_LIMIT) {
-        return false;
-    }
-    return true;
-}
-
-double GetSystemTimeZone()
-{
-    struct timeval currentTime;
-    struct timezone timeZone;
-    gettimeofday(&currentTime, &timeZone);
-    int32_t minutesWest = timeZone.tz_minuteswest;
-    double hoursWest = static_cast<double>(minutesWest) / static_cast<double>(TOTAL_MINUTE_OF_HOUR);
-    return hoursWest;
-}
 } // namespace
 
 void JSTextClock::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto controller = NG::TextClockView::Create();
-        if (info.Length() < 1 || !info[0]->IsObject()) {
-            LOGD("TextClock Info is non-valid");
-        } else {
-            JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
-            JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
-            if (hourWestVal->IsNumber()) {
-                auto hourWest_ = hourWestVal->ToNumber<int32_t>();
-                if (HoursWestIsValid(hourWest_)) {
-                    NG::TextClockView::SetHoursWest(hourWest_);
-                } else {
-                    LOGE("hourWest args is invalid");
-                }
-            } else {
-                LOGE("hourWest args is not number,args is invalid");
-            }
-            auto controllerObj = optionsObject->GetProperty("controller");
-            if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-                auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
-                if (jsController != nullptr) {
-                    if (controller) {
-                        jsController->SetController(controller);
-                    } else {
-                        LOGE("TextClockController is nullptr");
-                    }
-                }
-            } else {
-                LOGE("controllerObj is nullptr or undefined");
-            }
-        }
-        return;
-    }
-
-    double hourWest = GetSystemTimeZone();
-    RefPtr<TextClockComponent> textClockComponent = AceType::MakeRefPtr<TextClockComponent>(std::string(""));
+    auto controller = TextClockModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGD("TextClock Info is non-valid");
     } else {
         JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
         if (hourWestVal->IsNumber()) {
-            double hourWest_ = hourWestVal->ToNumber<double>();
-            if (IsHoursWestValid(hourWest_)) {
-                hourWest = hourWest_;
+            auto hourWest_ = hourWestVal->ToNumber<int32_t>();
+            if (HoursWestIsValid(hourWest_)) {
+                TextClockModel::GetInstance()->SetHoursWest(hourWest_);
             } else {
                 LOGE("hourWest args is invalid");
             }
@@ -122,24 +87,18 @@ void JSTextClock::Create(const JSCallbackInfo& info)
         }
         auto controllerObj = optionsObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            textClockComponent->SetTextClockController(AceType::MakeRefPtr<TextClockController>());
-            JSTextClockController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
+            auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
             if (jsController != nullptr) {
-                auto controller = textClockComponent->GetTextClockController();
                 if (controller) {
                     jsController->SetController(controller);
                 } else {
-                    LOGD("TextClockController is nullptr");
+                    LOGE("TextClockController is nullptr");
                 }
             }
         } else {
-            LOGI("controllerObj is nullptr or undefined");
+            LOGE("controllerObj is nullptr or undefined");
         }
     }
-    textClockComponent->SetHoursWest(hourWest);
-    std::string defaultFormat = DEFAULT_FORMAT;
-    textClockComponent->SetFormat(defaultFormat);
-    ViewStackProcessor::GetInstance()->Push(textClockComponent);
 }
 
 void JSTextClock::JSBind(BindingTarget globalObj)
@@ -180,23 +139,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         LOGE("The arg is wrong, because of format matching error.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextClockView::SetFormat(value);
-        return;
-    }
-
-    auto textClockComponent =
-        AceType::DynamicCast<TextClockComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!textClockComponent) {
-        LOGE("textClockComponent is null.");
-        return;
-    }
-    if (info[0]->IsString()) {
-        textClockComponent->SetFormat(info[0]->ToString());
-    } else {
-        LOGE("arg is not string");
-        return;
-    }
+    TextClockModel::GetInstance()->SetFormat(value);
 }
 
 void JSTextClock::JsOnDateChange(const JSCallbackInfo& info)
@@ -205,22 +148,14 @@ void JSTextClock::JsOnDateChange(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& value) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("TextClock.onDateChange");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::TextClockView::SetOnDateChange(std::move(onChange));
-        return;
-    }
-
-    if (!JSViewBindEvent(&TextClockComponent::SetOnDateChange, info)) {
-        LOGW("failed to bind event");
-    }
-    info.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("TextClock.onDateChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    TextClockModel::GetInstance()->SetOnDateChange(std::move(onChange));
 }
 
 void JSTextClockController::JSBind(BindingTarget globalObj)

@@ -673,7 +673,7 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
         // mark head component, it should use external RSNode stored in tail component.
         components.emplace_back(mainComponent);
         Component::MergeRSNode(components);
-        components.front()->MarkUseExternalRSNode();
+        components.front()->MarkUseExternalRSNode(true);
     } else {
         // by default, mainComponent is placed after other components, they should share the same RSNode.
         //  (head)      (tail)
@@ -871,6 +871,12 @@ RefPtr<Component> ViewStackProcessor::GetScoringComponent() const
         return iter->second;
     }
     return nullptr;
+}
+
+RefPtr<ComposedComponent> ViewStackProcessor::CreateInspectorWrapper(const std::string& inspectorTag)
+{
+    return AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+        V2::InspectorComposedComponent::GenerateId(), inspectorTag);
 }
 
 void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)

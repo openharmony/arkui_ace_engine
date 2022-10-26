@@ -72,7 +72,8 @@ void TextFieldModelNG::CreateNode(
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
-    pattern->SetBasicPadding(static_cast<float>(radius.GetX().ConvertToPx()));
+    // TODO: basic padding check ux
+    pattern->SetBasicPaddingLeft(static_cast<float>(radius.GetX().ConvertToPx() / 2.0f));
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);

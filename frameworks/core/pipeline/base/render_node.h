@@ -1084,7 +1084,7 @@ public:
 
     // mark JSview boundary, create/destroy RSNode if need
     void SyncRSNodeBoundary(bool isHead, bool isTail, const RefPtr<Component>& component = nullptr);
-    void ProcessExternalRSNode(const RefPtr<Component>& component);
+    bool ProcessExternalRSNode(const RefPtr<Component>& component);
     void SyncRSNode(const std::shared_ptr<RSNode>& rsNode);
     const std::shared_ptr<RSNode>& GetRSNode() const
     {
@@ -1206,6 +1206,7 @@ protected:
     double GetFirstChildBaseline(TextBaseline baseline);
     Size GetLargestChildContentSize();
     void UpdateAccessibilityPosition();
+    void UpdateAccessibilityEnable(bool isEnabled);
     void CheckIfNeedUpdateTouchRect();
 
     RefPtr<ThemeManager> GetThemeManager() const

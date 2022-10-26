@@ -39,9 +39,14 @@ const std::vector<VisibleType> PANEL_VISIBLE_TYPES = { VisibleType::GONE, Visibl
 void JSSlidingPanel::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::Create();
+        bool isShow = true;
+        if (info.Length() > 0 && info[0]->IsBoolean()) {
+            isShow = info[0]->ToBoolean();
+        }
+        NG::SlidingPanelView::Create(isShow);
         return;
     }
+
     auto slidingPanel = AceType::MakeRefPtr<SlidingPanelComponentV2>();
     ViewStackProcessor::GetInstance()->ClaimElementId(slidingPanel);
     slidingPanel->SetHasDragBar(true);

@@ -63,11 +63,31 @@ public:
         return contentNode_;
     }
 
-private:
-    void AddNavDestinationToNavigation(const RefPtr<UINode>& child);
+    void SetDividerNode(const RefPtr<UINode>& dividerNode)
+    {
+        dividerNode_ = dividerNode;
+    }
 
+    const RefPtr<UINode>& GetDividerNode() const
+    {
+        return dividerNode_;
+    }
+
+    void MarkIsFirstNavDestination(bool isFirstNavDestination)
+    {
+        isFirstNavDestination_ = isFirstNavDestination;
+    }
+
+    bool IsFirstNavDestination() const
+    {
+        return isFirstNavDestination_;
+    }
+
+private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
+    RefPtr<UINode> dividerNode_;
+    bool isFirstNavDestination_ = true;
 };
 
 } // namespace OHOS::Ace::NG

@@ -59,6 +59,11 @@ public:
         return std::nullopt;
     }
 
+    virtual bool UseExternalRSNode() const
+    {
+        return false;
+    }
+
     void DetachFromFrameNode(FrameNode* frameNode)
     {
         OnDetachFromFrameNode(frameNode);
@@ -72,6 +77,11 @@ public:
         }
         frameNode_ = frameNode;
         OnAttachToFrameNode();
+    }
+
+    virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
+    {
+        return MakeRefPtr<AccessibilityProperty>();
     }
 
     virtual RefPtr<PaintProperty> CreatePaintProperty()
@@ -242,6 +252,9 @@ public:
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
     virtual void OnNotifyMemoryLevel(int32_t level) {}
+
+    // get XTS inspector value
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

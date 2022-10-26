@@ -30,11 +30,17 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ImageSourceInfo imageSourceInfo(src);
+    auto createSourceInfoFunc = [&src, noPixMap, &pixMap]() -> ImageSourceInfo {
+#if defined(PIXEL_MAP_SUPPORTED)
+        return noPixMap ? ImageSourceInfo(src) : ImageSourceInfo(pixMap);
+#else
+        return ImageSourceInfo(src);
+#endif
+    };
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
 
     // register image frame node to pipeline context to receive memory level notification and window state change
     // notification
@@ -49,13 +55,9 @@ void ImageModelNG::SetAlt(const std::string& src)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(src));
 }
 
-void ImageModelNG::SetBorder(const Border& border)
-{
-}
+void ImageModelNG::SetBorder(const Border& border) {}
 
-void ImageModelNG::SetBlur(double blur)
-{
-}
+void ImageModelNG::SetBlur(double blur) {}
 
 void ImageModelNG::SetImageFit(int32_t value)
 {
@@ -90,13 +92,13 @@ void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent& info)
     eventHub->SetOnError(std::move(callback));
 }
 
-void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
-{
-}
+void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback) {}
 
 void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& size)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, size);
+    SizeF sourceSize =
+        SizeF(static_cast<float>(size.first.ConvertToPx()), static_cast<float>(size.second.ConvertToPx()));
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize);
 }
 
 void ImageModelNG::SetImageFill(const Color& color)
@@ -129,38 +131,24 @@ void ImageModelNG::SetAutoResize(bool autoResize)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize);
 }
 
-void ImageModelNG::SetSyncMode(bool syncMode)
-{
-}
+void ImageModelNG::SetSyncMode(bool syncMode) {}
 
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
 }
 
-void ImageModelNG::SetOnDragStartId(const OnDragFunc& onDragStartId)
-{
-}
+void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart) {}
 
-void ImageModelNG::SetOnDragEnterId(const OnDropFunc&  onDragStartId)
-{
-}
+void ImageModelNG::SetOnDragEnter(OnDragDropFunc&& onDragEnter) {}
 
-void ImageModelNG::SetOnDragLeaveId(const OnDropFunc& onDragStartId)
-{
-}
+void ImageModelNG::SetOnDragLeave(OnDragDropFunc&& onDragLeave) {}
 
-void ImageModelNG::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
-{
-}
+void ImageModelNG::SetOnDragMove(OnDragDropFunc&& onDragMove) {}
 
-void ImageModelNG::SetOnDropId(const OnDropFunc& onDropId)
-{
-}
+void ImageModelNG::SetOnDrop(OnDragDropFunc&& onDrop) {}
 
-void ImageModelNG::SetCopyOption(const CopyOptions& copyOption)
-{
-}
+void ImageModelNG::SetCopyOption(const CopyOptions& copyOption) {}
 
 bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)
 {

@@ -58,6 +58,8 @@ private:
     // Map structure: [index, [positionX, positionY]], store position of each item.
     std::map<int32_t, OffsetF> itemsPosition_;
 
+    bool firstLayout_ = true;
+
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutAlgorithm);
 };
 

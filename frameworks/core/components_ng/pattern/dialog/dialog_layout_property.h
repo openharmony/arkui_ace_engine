@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_DIALOG_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_DIALOG_LAYOUT_PROPERTY_H
 
+#include "base/geometry/dimension_offset.h"
 #include "base/geometry/offset.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -53,6 +54,21 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogOffset, DimensionOffset, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GridCount, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseCustom, bool, PROPERTY_UPDATE_MEASURE);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("alignment", DialogAlignmentUtils::ConvertDialogAlignmentToString(
+                                         propDialogAlignment_.value_or(DialogAlignment::BOTTOM))
+                                         .c_str());
+
+        auto offsetValue = JsonUtil::Create(true);
+        offsetValue->Put("dX", propDialogOffset_.value_or(DimensionOffset()).GetX().Value());
+        offsetValue->Put("dY", propDialogOffset_.value_or(DimensionOffset()).GetY().Value());
+        json->Put("offset", offsetValue);
+
+        json->Put("gridCount", std::to_string(propGridCount_.value_or(-1)).c_str());
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutProperty);

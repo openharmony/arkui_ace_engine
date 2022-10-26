@@ -16,15 +16,18 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_ABSTRACT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_ABSTRACT_H
 
+#include <cstdint>
 #include <functional>
 #include <optional>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -36,6 +39,7 @@
 #include "core/components/menu/menu_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/pipeline/base/component.h"
@@ -60,26 +64,14 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
-enum class ResponseType : int32_t {
-    RIGHT_CLICK = 0,
-    LONGPRESS,
-};
-
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 class JSViewAbstract {
 public:
-    static void SetPadding(const Dimension& value);
-    static void SetPaddings(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right);
-    static void SetMargin(const Dimension& value);
-    static void SetMargins(
-        const Dimension& top, const Dimension& bottom, const Dimension& left, const Dimension& right);
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
-    static void ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<MenuComponent> menuComponent);
 
     static void JsScale(const JSCallbackInfo& info);
     static void JsScaleX(const JSCallbackInfo& info);
@@ -94,7 +86,6 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
-    static void ParseAndSetTransitionOption(std::unique_ptr<JsonValue>& transitionArgs);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
@@ -105,29 +96,25 @@ public:
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
-    static void ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
+    static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
-    static void ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
+    static void ParseBorderWidth(const JSRef<JSVal>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
-    static void ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
+    static void ParseBorderRadius(const JSRef<JSVal>& args);
     static void JsBorderStyle(const JSCallbackInfo& info);
-    static void ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
+    static void ParseBorderStyle(const JSRef<JSVal>& args);
     static void JsBorderImage(const JSCallbackInfo& info);
-    static void JsBorderImageForNG(const JSRef<JSObject>& object);
-    static void ParseBorderImageSource(
-        const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage, RefPtr<Decoration>& boxDecoration);
     static void ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageDimension(
         const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension);
-    static void ParseBorderImageLinearGradient(const JSRef<JSVal>& args, RefPtr<Decoration>& backDecoration);
-    static void ParseBorderImageLinearGradientForNG(const JSRef<JSVal>& args);
+    static void ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsColorBlend(const JSCallbackInfo& info);
     static void JsBackdropBlur(const JSCallbackInfo& info);
@@ -146,7 +133,6 @@ public:
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
-    static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
@@ -159,7 +145,6 @@ public:
     // for number and string with no unit, use default dimension unit.
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& result, DimensionUnit defaultUnit);
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, Dimension& result);
-    static bool ParseJsAnimatableDimensionVp(const JSRef<JSVal>& jsValue, AnimatableDimension& result);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, Dimension& result);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, Dimension& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
@@ -204,8 +189,8 @@ public:
     static void Pop();
 
     static void JsOnDragStart(const JSCallbackInfo& info);
-    static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragItemInfo& dragInfo);
-    static RefPtr<Component> ParseDragItemComponent(const JSRef<JSVal>& info);
+    static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo);
+    static RefPtr<AceType> ParseDragNode(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
@@ -256,9 +241,6 @@ public:
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
-    static void JsBindPopupNG(const JSCallbackInfo& info);
-    static void CreateCustomPopup(
-        RefPtr<JsFunction>& builder, const RefPtr<NG::FrameNode>& targetNode, const RefPtr<PopupParam>& popupParam);
 #endif
 
     /**
@@ -266,44 +248,26 @@ public:
      */
     static void JSBind();
 
-    static const RefPtr<PipelineBase> GetPipelineContext()
+    static RefPtr<PipelineBase> GetPipelineContext()
     {
         auto container = Container::Current();
-        if (!container) {
-            LOGW("container is null");
-            return nullptr;
-        }
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipelineContext is null!");
-            return nullptr;
-        }
-        return pipelineContext;
+        CHECK_NULL_RETURN(container, nullptr);
+        return container->GetPipelineContext();
     }
 
     template<typename T>
     static RefPtr<T> GetTheme()
     {
         auto pipelineContext = GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipelineContext is null!");
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto themeManager = pipelineContext->GetThemeManager();
-        if (!themeManager) {
-            LOGE("themeManager is null!");
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(themeManager, nullptr);
         return themeManager->GetTheme<T>();
     }
 
     /**
      * box properties setter
      */
-    static RefPtr<Gesture> GetTapGesture(
-        const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
-    static RefPtr<Decoration> GetFrontDecoration();
-    static RefPtr<Decoration> GetBackDecoration();
     static const Border& GetBorder();
     static void SetMarginTop(const JSCallbackInfo& info);
     static void SetMarginBottom(const JSCallbackInfo& info);
@@ -315,26 +279,15 @@ public:
     static void SetPaddingRight(const JSCallbackInfo& info);
     static void SetBorder(const Border& border);
     static void SetBorderStyle(int32_t style);
-    static void SetBorderRadius(const Dimension& value, const AnimationOption& option);
     static void SetBorderColor(const Color& color, const AnimationOption& option);
     static void SetBorderWidth(const Dimension& value, const AnimationOption& option);
     static void SetBlur(float radius);
     static void SetColorBlend(Color color);
     static void SetBackdropBlur(float radius);
-    static void SetBlurRadius(const RefPtr<Decoration>& decoration, float radius);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
     static RefPtr<ThemeConstants> GetThemeConstants(const JSRef<JSObject>& jsObj = JSRef<JSObject>());
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);
-    static void SetDefaultTransition(TransitionType transitionType);
-    static bool ParseAndSetOpacityTransition(
-        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
-    static bool ParseAndSetRotateTransition(
-        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
-    static bool ParseAndSetScaleTransition(
-        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
-    static bool ParseAndSetTranslateTransition(
-        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
 
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)

@@ -307,4 +307,19 @@ void CalendarPattern::FlushFocus(ObtainedMonth& obtainedMonth)
     }
 }
 
+void CalendarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    json->Put("needSlide", !swiperPaintProperty->GetDisableSwipe().value_or(false) ? "true" : "false");
+    json->Put(
+        "direction", swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "0" : "1");
+}
+
 } // namespace OHOS::Ace::NG

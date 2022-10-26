@@ -54,29 +54,20 @@ public:
     explicit LongPressEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~LongPressEventActuator() override = default;
 
-    void AddLongPressEvent(const RefPtr<LongPressEvent>& event)
+    void SetLongPressEvent(const RefPtr<LongPressEvent>& event)
     {
-        if (longPressEvents_.empty()) {
-            longPressEvents_.emplace_back(event);
-            return;
-        }
-        if (std::find(longPressEvents_.begin(), longPressEvents_.end(), event) == longPressEvents_.end()) {
-            longPressEvents_.emplace_back(event);
-        }
-    }
-
-    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& event)
-    {
-        longPressEvents_.remove(event);
+        longPressEvent_ = event;
     }
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
+    GestureEventFunc GetGestureEventFunc();
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
-    std::list<RefPtr<LongPressEvent>> longPressEvents_;
+    RefPtr<LongPressEvent> longPressEvent_;
 };
 
 } // namespace OHOS::Ace::NG

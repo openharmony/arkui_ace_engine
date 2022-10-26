@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_CLOCK_LAYOUT_PROPERTY_H
 
 #include <string>
+#include <sys/time.h>
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -47,6 +49,8 @@ public:
         ResetFormat();
         ResetHoursWest();
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Format, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoursWest, int32_t, PROPERTY_UPDATE_MEASURE);

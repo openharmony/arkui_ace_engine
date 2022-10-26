@@ -37,6 +37,7 @@ public:
     void ChangeByContent(int32_t index);
     virtual void ChangeByBar(int32_t index, bool isFromController = false);
     virtual void PrepareContent(int32_t index);
+    void IndicatorByContent(double percent, int32_t newIndex, bool needChange);
     void ChangeDispatch(int32_t index);
     RefPtr<Element> GetTabContentChild(int32_t index) const;
 

@@ -61,7 +61,7 @@ public:
     virtual void SetShowIndicator(bool showIndicator);
     virtual void SetItemSpace(const Dimension& itemSpace);
     virtual void SetCachedCount(int32_t cachedCount);
-    virtual void SetOnChange(NG::ChangeEvent&& onChange);
+    virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
 
     virtual void SetDigital(bool digitalIndicator);
     virtual void SetRemoteMessageEventId(RemoteCallback&& remoteCallback);

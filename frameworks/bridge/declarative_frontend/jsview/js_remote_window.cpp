@@ -16,27 +16,31 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 
 #include "core/components/remote_window/remote_window_component.h"
+#include "core/components_ng/pattern/remote_window/remote_window_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 void JSRemoteWindow::Create(const JSCallbackInfo& info)
 {
-    // specialized component should be firstly pushed.
-    auto specializedComponent = AceType::MakeRefPtr<OHOS::Ace::RemoteWindowComponent>();
-    ViewStackProcessor::GetInstance()->Push(specializedComponent);
-
+    std::shared_ptr<Rosen::RSNode> rsNode;
+#ifdef ENABLE_ROSEN_BACKEND
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-
-#ifdef ENABLE_ROSEN_BACKEND
-    auto obj = CreateRSProxyNodeFromNapiValue(info[0]);
-    if (obj) {
-        specializedComponent->SetRSProxyNode(obj);
-    }
+    rsNode = CreateRSNodeFromNapiValue(info[0]);
 #endif
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::RemoteWindowView::Create(rsNode);
+        return;
+    }
+
+    // specialized component should be firstly pushed.
+    auto specializedComponent = AceType::MakeRefPtr<OHOS::Ace::RemoteWindowComponent>();
+    ViewStackProcessor::GetInstance()->Push(specializedComponent);
+    specializedComponent->SetExternalRSNode(rsNode);
 }
 
 void JSRemoteWindow::JSBind(BindingTarget globalObj)

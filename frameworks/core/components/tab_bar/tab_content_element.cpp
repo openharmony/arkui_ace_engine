@@ -43,6 +43,12 @@ RefPtr<RenderNode> TabContentElement::CreateRenderNode()
                 tabContent->PrepareContent(index);
             }
         });
+        tabContent->RegisterIndicatorCallback([weakTabContentElement = AceType::WeakClaim(this)](double percent, int32_t newIndex, bool needChange) {
+            auto tabContent = weakTabContentElement.Upgrade();
+            if (tabContent) {
+                tabContent->IndicatorByContent(percent, newIndex, needChange);
+            }
+        });
     }
     return node;
 }
@@ -59,6 +65,13 @@ void TabContentElement::UpdateLastFocusNode()
         }
     } else {
         itLastFocusNode_ = focusNodes_.end();
+    }
+}
+
+void TabContentElement::IndicatorByContent(double percent, int32_t newIndex, bool needChange)
+{
+    if (controller_) {
+        controller_->SetIndicatorByScrollContent(percent, newIndex, needChange);
     }
 }
 

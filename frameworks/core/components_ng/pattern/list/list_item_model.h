@@ -22,6 +22,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace {
@@ -42,7 +43,7 @@ public:
     virtual void SetSwiperAction(
         std::function<void()>&& startAction, std::function<void()>&& endAction, V2::SwipeEdgeEffect edgeEffect) = 0;
     virtual void SetSelectCallback(OnSelectFunc&& selectCallback) = 0;
-    virtual void SetOnDragStart(OnDragFunc&& onDragStart) = 0;
+    virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
 
 private:
     static std::unique_ptr<ListItemModel> instance_;

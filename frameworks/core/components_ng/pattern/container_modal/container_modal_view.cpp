@@ -87,7 +87,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
         CHECK_NULL_RETURN(touchEventHub, nullptr);
         touchEventHub->SetTouchEvent([windowManager](TouchEventInfo& info) {
             if (windowManager) {
-                windowManager->FireWindowStartMoveCallBack();
+                windowManager->WindowStartMove();
             }
         });
 
@@ -97,7 +97,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
         mouseEventHub->SetMouseEvent([windowManager](MouseInfo& info) {
             if (windowManager && info.GetButton() == MouseButton::LEFT_BUTTON &&
                 info.GetAction() == MouseAction::PRESS) {
-                windowManager->FireWindowStartMoveCallBack();
+                windowManager->WindowStartMove();
             }
         });
     }
@@ -126,6 +126,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetWindowManager()->GetAppLabelId()));
+    textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(TITLE_TEXT_COLOR);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -139,47 +140,45 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
 
     // add leftSplit / maxRecover / minimize / close button
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
-        [windowManager, containerNode](GestureEvent& info) {
-            if (windowManager && containerNode) {
+        [windowManager](GestureEvent& info) {
+            if (windowManager) {
                 LOGI("left split button clicked");
                 windowManager->FireWindowSplitCallBack();
-                containerNode->MarkModifyDone();
             }
         }));
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
-        [windowManager, containerNode](GestureEvent& info) {
-            if (windowManager && containerNode) {
-                auto mode = windowManager->FireWindowGetModeCallBack();
+        [windowManager](GestureEvent& info) {
+            if (windowManager) {
+                auto mode = windowManager->GetWindowMode();
                 if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                     LOGI("recover button clicked");
-                    windowManager->FireWindowRecoverCallBack();
+                    windowManager->WindowRecover();
                 } else {
                     LOGI("maximize button clicked");
-                    windowManager->FireWindowMaximizeCallBack();
+                    windowManager->WindowMaximize();
                 }
-                containerNode->MarkModifyDone();
             }
         }));
     containerTitleRow->AddChild(BuildControlButton(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [windowManager](GestureEvent& info) {
             if (windowManager) {
                 LOGI("minimize button clicked");
-                windowManager->FireWindowMinimizeCallBack();
+                windowManager->WindowMinimize();
             }
         }));
     containerTitleRow->AddChild(BuildControlButton(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, [windowManager](GestureEvent& info) {
             if (windowManager) {
                 LOGI("close button clicked");
-                windowManager->FireWindowCloseCallBack();
+                windowManager->WindowClose();
             }
-        }));
+        }, true));
 
     return containerTitleRow;
 }
 
 RefPtr<FrameNode> ContainerModalView::BuildControlButton(
-    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback)
+    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton)
 {
     // button image icon
     ImageSourceInfo imageSourceInfo;
@@ -198,10 +197,14 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);
 
-    // TODO set click color
+    auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    buttonPattern->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
+
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
-    buttonEventHub->SetClickEvent(std::move(clickCallback));
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    buttonEventHub->AddClickEvent(clickEvent);
 
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
@@ -210,8 +213,9 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
 
     MarginProperty margin;
-    margin.right = CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL);
+    margin.right = CalcLength(isCloseButton ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL);
     buttonLayoutProperty->UpdateMargin(margin);
+    buttonNode->MarkModifyDone();
 
     buttonNode->AddChild(imageIcon);
     return buttonNode;

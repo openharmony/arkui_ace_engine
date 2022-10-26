@@ -19,6 +19,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "base/geometry/rect.h"
+
 namespace OHOS::Ace {
 
 // define accessibility node tags
@@ -60,7 +62,14 @@ extern const char ACCESSIBILITY_TAG_CLOCK[];
 extern const char ACCESSIBILITY_TAG_DIALOG[];
 extern const char ACCESSIBILITY_TAG_SEARCH[];
 
-enum class AccessibilityEventType: size_t {
+extern const int32_t FOCUS_DIRECTION_UP;
+extern const int32_t FOCUS_DIRECTION_DOWN;
+extern const int32_t FOCUS_DIRECTION_LEFT;
+extern const int32_t FOCUS_DIRECTION_RIGHT;
+extern const int32_t FOCUS_DIRECTION_FORWARD;
+extern const int32_t FOCUS_DIRECTION_BACKWARD;
+
+enum class AccessibilityEventType : size_t {
     CLICK = 0x00000001,
     LONG_PRESS = 0x00000002,
     SELECTED = 0x00000004,
@@ -90,6 +99,8 @@ enum class AccessibilityEventType: size_t {
     TOUCH_END = 0x00000400,
     CHANGE = 0x00000800,
     SCROLL_END = 0x00001000,
+    TEXT_SELECTION_UPDATE = 0x000002000,
+    TEXT_MOVE_UNIT = 0x00020000,
     SCROLL_START = 0x01000000,
     UNKNOWN,
 };
@@ -143,6 +154,8 @@ struct AceCollectionItemInfo {
     int32_t row = 0;
     int32_t column = 0;
 };
+
+bool CheckBetterRect(Rect nodeRect, const int direction, Rect itemRect, Rect tempBest);
 
 } // namespace OHOS::Ace
 
