@@ -203,9 +203,6 @@ void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
     if (!ParseJsDimensionVp(jsValue, dimWidth)) {
         return;
     }
-    if (LessNotEqual(dimWidth.Value(), 0.0)) {
-        dimWidth.SetValue(0.0);
-    }
     ShapeAbstractModel::GetInstance()->SetWidth(dimWidth);
 }
 
@@ -224,9 +221,6 @@ void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
     Dimension dimHeight;
     if (!ParseJsDimensionVp(jsValue, dimHeight)) {
         return;
-    }
-    if (LessNotEqual(dimHeight.Value(), 0.0)) {
-        dimHeight.SetValue(0.0);
     }
     ShapeAbstractModel::GetInstance()->SetHeight(dimHeight);
 }
