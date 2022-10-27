@@ -27,7 +27,8 @@ namespace OHOS::Ace::NG {
 
 class GestureEventHub;
 
-class LongPressEvent : public Referenced {
+class LongPressEvent : public virtual AceType {
+    DECLARE_ACE_TYPE(LongPressEvent, AceType)
 public:
     explicit LongPressEvent(GestureEventFunc&& callback) : callback_(std::move(callback)) {}
     ~LongPressEvent() override = default;

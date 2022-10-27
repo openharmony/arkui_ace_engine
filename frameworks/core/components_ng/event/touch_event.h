@@ -25,7 +25,8 @@ namespace OHOS::Ace::NG {
 
 class GestureEventHub;
 
-class TouchEventImpl : public Referenced {
+class TouchEventImpl : public virtual AceType {
+    DECLARE_ACE_TYPE(TouchEventImpl, AceType)
 public:
     explicit TouchEventImpl(TouchEventFunc&& callback) : callback_(std::move(callback)) {}
     ~TouchEventImpl() override = default;

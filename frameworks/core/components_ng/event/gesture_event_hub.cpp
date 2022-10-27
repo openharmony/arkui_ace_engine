@@ -41,7 +41,6 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
-        // TODO: need to change scrollable to be gesture recognizer to make gesture referee works.
         scrollableActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
     if (touchEventActuator_) {
@@ -369,19 +368,14 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
         eventHub->FireOnDrop(event, "");
     }
 
-    pipeline->SetIsDragged(false);
-
     CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->OnDragEnd(info);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
 }
 
 void GestureEventHub::HandleOnDragCancel()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetIsDragged(false);
-
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->onDragCancel();
     dragDropProxy_->DestroyDragWindow();

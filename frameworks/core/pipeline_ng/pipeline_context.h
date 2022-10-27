@@ -218,11 +218,6 @@ public:
         isNeedShowFocus_ = isNeedShowFocus;
     }
 
-    void SetIsDragged(bool isDragged)
-    {
-        isDragged_ = isDragged;
-    }
-
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -308,7 +303,7 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
-    bool isDragged_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

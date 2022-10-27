@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -29,7 +30,8 @@ class GestureEventHub;
 class PanRecognizer;
 class LongPressRecognizer;
 
-class DragEvent : public Referenced {
+class DragEvent : public AceType {
+    DECLARE_ACE_TYPE(DragEvent, AceType)
 public:
     DragEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd,
         GestureEventNoParameter&& actionCancel)
