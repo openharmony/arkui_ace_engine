@@ -127,13 +127,13 @@ void SlidingPanelView::SetBackgroundColor(Color backgroundColor)
     }
 }
 
-void SlidingPanelView::SetOnChange(ChangeEvent&& onChange)
+void SlidingPanelView::SetOnSizeChange(ChangeEvent&& changeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChange(std::move(onChange));
+    eventHub->SetOnSizeChange(std::move(changeEvent));
 }
 
 void SlidingPanelView::SetOnHeightChange(HeightChangeEvent&& onHeightChange)
