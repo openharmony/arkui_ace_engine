@@ -107,12 +107,8 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     wantCache_.SetElementName(info.bundleName, info.abilityName);
 
-    if (!info.want.empty()) {
-        auto wantJson = JsonUtil::ParseJsonString(info.want);
-        auto params = wantJson->GetValue("parameters");
-        LOGI("AddForm: Host want params : %{public}s", params->ToString().c_str());
-        AAFwk::WantParams parameters = AAFwk::WantParamWrapper::ParseWantParams(params->ToString());
-        wantCache_.SetParams(parameters);
+    if (info.wantWrap) {
+        info.wantWrap->SetWantParamsFromWantWrap(reinterpret_cast<void*>(&wantCache_));
     }
 
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, info.id);
@@ -124,7 +120,6 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (info.dimension != -1) {
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
-
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
