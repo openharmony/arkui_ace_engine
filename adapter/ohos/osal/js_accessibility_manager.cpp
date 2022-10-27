@@ -220,7 +220,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     nodeInfo.SetTextLengthLimit(node->GetMaxTextLength());
     nodeInfo.SetSelectedBegin(node->GetTextSelectionStart());
     nodeInfo.SetSelectedEnd(node->GetTextSelectionEnd());
-    nodeInfo.SetVisible(node->GetShown() && node->GetVisible() && (node->GetWidth() != 0 && node->GetHeight() != 0));
+    nodeInfo.SetVisible(node->GetShown() && node->GetVisible());
     nodeInfo.SetHint(node->GetHintText());
     std::string accessibilityLabel = node->GetAccessibilityLabel();
     nodeInfo.SetLabeled(atoi(accessibilityLabel.c_str()));
