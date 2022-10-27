@@ -141,7 +141,13 @@ public:
     int32_t GetId() const;
 
     // Get AnimationScale
-    float GetAnimationScale();
+    float GetAnimationScale() const;
+
+    // Get FillMode
+    FillMode GetFillMode() const;
+
+    // Get Iteration
+    int32_t GetIteration() const;
 
 private:
     // Screen refresh callback. duration is in millisecond.
