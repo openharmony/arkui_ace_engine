@@ -42,6 +42,11 @@ void ListModelNG::SetInitialIndex(int32_t initialIndex)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex);
 }
 
+RefPtr<ScrollControllerBase> ListModelNG::CreateScrollController()
+{
+    return AceType::MakeRefPtr<NG::ListPositionController>();
+}
+
 void ListModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollBarProxy> proxy)
 {
     auto list = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ListPattern>();

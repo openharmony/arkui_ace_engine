@@ -78,12 +78,7 @@ void JSList::SetCachedCount(int32_t cachedCount)
 void JSList::SetScroller(RefPtr<JSScroller> scroller)
 {
     if (scroller) {
-        RefPtr<ScrollControllerBase> listController;
-        if (Container::IsCurrentUseNewPipeline()) {
-            listController.Swap(AceType::MakeRefPtr<NG::ListPositionController>());
-        } else {
-            listController.Swap(AceType::MakeRefPtr<V2::ListPositionController>());
-        }
+        RefPtr<ScrollControllerBase> listController = ListModel::GetInstance()->CreateScrollController();
         scroller->SetController(listController);
 
         // Init scroll bar proxy.

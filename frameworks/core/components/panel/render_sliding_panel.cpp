@@ -25,6 +25,7 @@
 #include "core/animation/spring_animation.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/drag_bar/render_drag_bar.h"
+#include "core/components/panel/sliding_events.h"
 #include "core/components/panel/sliding_panel_component.h"
 #include "core/components/root/render_root.h"
 #include "core/components/stack/stack_element.h"
@@ -70,26 +71,6 @@ RefPtr<T> FindChildOfClass(const RefPtr<RenderNode>& parent)
 }
 
 } // namespace
-
-std::string SlidingPanelSizeChangeEvent::ToJSONString() const
-{
-    auto jsonResult = JsonUtil::Create(false);
-    jsonResult->Put("height", height_);
-    jsonResult->Put("width", width_);
-    auto result = JsonUtil::Create(true);
-    result->Put("size", jsonResult);
-    std::string modeStr;
-    if (mode_ == PanelMode::FULL) {
-        modeStr = "full";
-    } else if (mode_ == PanelMode::HALF) {
-        modeStr = "half";
-    } else {
-        modeStr = "mini";
-    }
-    result->Put("mode", modeStr.c_str());
-
-    return std::string(R"("sizechange",)").append(result->ToString());
-}
 
 RefPtr<RenderNode> RenderSlidingPanel::Create()
 {

@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/panel/sliding_events.h"
 #include "core/components/panel/sliding_panel_component_v2.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -438,7 +439,7 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
         JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(height));
         func->ExecuteJS(1, &param);
     };
-    
+
     if (Container::IsCurrentUseNewPipeline()) {
         NG::SlidingPanelView::SetOnHeightChange(std::move(onHeightChange));
         return;
