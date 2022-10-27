@@ -34,11 +34,13 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
+#include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
@@ -47,6 +49,7 @@
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
@@ -1549,5 +1552,59 @@ void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
     CHECK_NULL_VOID(parentUINode);
     parentUINode->MarkNeedSyncRenderTree();
     parentUINode->RebuildRenderContextTree();
+}
+
+void RosenRenderContext::OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto itemPattern = AceType::DynamicCast<GridItemPattern>(pattern);
+    CHECK_NULL_VOID(itemPattern);
+
+    RectF rect = RectF();
+    if (itemPattern->IsSelected()) {
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        rect = geometryNode->GetFrameRect();
+        rect.SetOffset(OffsetF());
+    }
+
+    UpdateMouseSelectWithRect(rect, fillColor, strokeColor);
+}
+
+void RosenRenderContext::UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor)
+{
+    if (!rect.IsValid()) {
+        LOGE("UpdateMouseSelectWithRect: selected rect not valid");
+        return;
+    }
+    PaintMouseSelectRect(rect, fillColor, strokeColor);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor)
+{
+    if (mouseSelectModifier_) {
+        mouseSelectModifier_->SetSelectRect(rect);
+        return;
+    }
+
+    auto paintTask = [&fillColor, &strokeColor](const RectF& rect, RSCanvas& rsCanvas) mutable {
+        RSBrush brush;
+        brush.SetColor(ToRSColor(fillColor));
+        rsCanvas.AttachBrush(brush);
+        rsCanvas.DrawRect(ToRSRect(rect));
+        rsCanvas.DetachBrush();
+        RSPen pen;
+        pen.SetColor(ToRSColor(strokeColor));
+        rsCanvas.AttachPen(pen);
+        rsCanvas.DrawRect(ToRSRect(rect));
+    };
+
+    mouseSelectModifier_ = std::make_shared<MouseSelectModifier>();
+    mouseSelectModifier_->SetPaintTask(std::move(paintTask));
+    rsNode_->AddModifier(mouseSelectModifier_);
 }
 } // namespace OHOS::Ace::NG
