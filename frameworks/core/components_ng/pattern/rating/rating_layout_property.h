@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RATING_RATING_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RATING_RATING_LAYOUT_PROPERTY_H
 
+#include <string>
+
 #include "base/geometry/dimension.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/rating/rating_property_group.h"
@@ -42,6 +44,13 @@ public:
     {
         LayoutProperty::Reset();
         ResetRatingPropertyGroup();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("indicator", GetIndicator().value_or(false) ? "true" : "false");
+        json->Put("stars", std::to_string(GetStars().value_or(5)).c_str());
     }
 
     ACE_DEFINE_PROPERTY_GROUP(RatingPropertyGroup, RatingPropertyGroup);
