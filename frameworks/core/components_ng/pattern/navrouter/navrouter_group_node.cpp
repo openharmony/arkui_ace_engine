@@ -73,7 +73,7 @@ void NavRouterGroupNode::OnAttachToMainTree()
     auto parent = GetParent();
     while (parent) {
         auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
-        if(navigationNode) {
+        if (navigationNode) {
             break;
         }
         parent = parent->GetParent();

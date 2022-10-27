@@ -128,6 +128,7 @@ void NavDestinationView::SetTitle(const std::string& title)
     textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navDestinationNode->SetTitle(titleNode);
     navDestinationNode->UpdatePrevTitleIsCustom(false);
 }
@@ -169,6 +170,7 @@ void NavDestinationView::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navDestinationNode->SetSubtitle(subtitleNode);
 }
 
