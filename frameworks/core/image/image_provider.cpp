@@ -373,7 +373,8 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
 }
 #endif
 
-void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
+void ImageProvider::UploadImageToGPUForRender(const RefPtr<TaskExecutor>& taskExecutor,
+    const sk_sp<SkImage>& image,
     const sk_sp<SkData>& data,
     const std::function<void(flutter::SkiaGPUObject<SkImage>, sk_sp<SkData>)>&& callback,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
@@ -392,7 +393,7 @@ void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
         callback({ image, renderTaskHolder->unrefQueue }, data);
         return;
     }
-    auto task = [image, callback, renderTaskHolder, src] () {
+    auto task = [taskExecutor, image, callback, renderTaskHolder, src] () {
         if (!renderTaskHolder) {
             LOGW("renderTaskHolder has been released.");
             return;
@@ -428,26 +429,14 @@ void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
             if (ImageCompressor::GetInstance()->CanCompress()) {
                 compressData = ImageCompressor::GetInstance()->GpuCompress(src, pixmap, width, height);
                 ImageCompressor::GetInstance()->WriteToFile(src, compressData, { width, height });
-                renderTaskHolder->ioTaskRunner->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
-                    fml::TimeDelta::FromMilliseconds(ImageCompressor::releaseTimeMs));
+                taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(), TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
             }
-            auto resContext = renderTaskHolder->ioManager->GetResourceContext();
-            if (!resContext) {
-                callback({ image, renderTaskHolder->unrefQueue }, compressData);
-            } else {
-                auto textureImage =
-#ifdef NG_BUILD
-                    SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, true);
-#else
-                    SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, pixmap.colorSpace(), true);
-#endif
-                callback({ textureImage ? textureImage : rasterizedImage, renderTaskHolder->unrefQueue }, compressData);
-            }
+            callback({ rasterizedImage, renderTaskHolder->unrefQueue }, compressData);
             // Trigger purge cpu bitmap resource, after image upload to gpu.
             SkGraphics::PurgeResourceCache();
         }
     };
-    renderTaskHolder->ioTaskRunner->PostTask(std::move(task));
+    BackgroundTaskExecutor::GetInstance().PostTask(task);
 #endif
 }
 

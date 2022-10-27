@@ -110,6 +110,7 @@ public:
 
     // upload image data to gpu context for painting asynchronously.
     static void UploadImageToGPUForRender(
+        const RefPtr<TaskExecutor>& taskExecutor,
         const sk_sp<SkImage>& image,
         const sk_sp<SkData>& data,
         const std::function<void(flutter::SkiaGPUObject<SkImage>, sk_sp<SkData>)>&& callback,

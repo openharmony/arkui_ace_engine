@@ -148,6 +148,7 @@ void ImageCompressor::ReleaseResource()
 sk_sp<SkData> ImageCompressor::GpuCompress(std::string key, SkPixmap& pixmap, int32_t width, int32_t height)
 {
 #ifdef ENABLE_OPENCL
+    std::lock_guard<std::mutex> lock(instanceMutex_);
     if (width <= 0 || height <= 0 || !clOk_ || IsFailedImage(key) || width > maxSize_ || height > maxSize_) {
         return nullptr;
     }
