@@ -92,6 +92,20 @@ public:
         return { FocusType::NODE, true };
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
+        auto value = radioEventHub ? radioEventHub->GetValue() : "";
+        auto group = radioEventHub ? radioEventHub->GetGroup() : "";
+        auto resultJson = JsonUtil::Create(true);
+        resultJson->Put("value", value.c_str());
+        resultJson->Put("group", group.c_str());
+        json->Put("value", resultJson->ToString().c_str());
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

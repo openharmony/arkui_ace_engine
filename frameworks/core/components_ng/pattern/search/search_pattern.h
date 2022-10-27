@@ -17,12 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_layout_algorithm.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_paint_method.h"
-#include "core/components_ng/pattern/search/search_paint_property.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -48,15 +49,9 @@ public:
         return MakeRefPtr<SearchLayoutAlgorithm>();
     }
 
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<SearchPaintProperty>();
-    }
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paintMethod = MakeRefPtr<SearchPaintMethod>(buttonSize_);
-        paintMethod->SetButtonSize(buttonSize_);
+        auto paintMethod = MakeRefPtr<SearchPaintMethod>(buttonSize_, searchButton_);
         return paintMethod;
     }
 
@@ -75,10 +70,13 @@ public:
         return true;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 private:
     void OnModifyDone() override;
     void OnClickButtonAndImage();
 
+    std::string searchButton_;
     SizeF buttonSize_;
     RefPtr<ClickEvent> imageClickListener_;
     RefPtr<ClickEvent> buttonClickListener_;
