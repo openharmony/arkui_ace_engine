@@ -471,6 +471,13 @@ template("declarative_js_engine_ng") {
       # ng jsviews
       "ng/jsview/js_view.cpp",
       "ng/jsview/js_view_abstract.cpp",
+
+      # tmp fixes to make swiper working for ng
+      "jsview/js_foreach.cpp",
+      "jsview/js_if_else.cpp",
+      "jsview/js_tab_content.cpp",
+      "jsview/js_tabs.cpp",
+      "jsview/js_tabs_controller.cpp",
     ]
 
     sources += [

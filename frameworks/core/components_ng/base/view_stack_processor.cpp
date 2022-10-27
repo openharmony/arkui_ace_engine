@@ -56,16 +56,6 @@ void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView
     elementsStack_.push(element);
 }
 
-void ViewStackProcessor::PushTabBar(const TabBarParam& tabBarParam)
-{
-    tabBarParam_ = tabBarParam;
-}
-
-const TabBarParam& ViewStackProcessor::PopTabBar() const
-{
-    return tabBarParam_;
-}
-
 bool ViewStackProcessor::ShouldPopImmediately()
 {
     if (elementsStack_.size() <= 1) {
@@ -114,7 +104,7 @@ void ViewStackProcessor::Pop()
         groupNode->AddChildToGroup(currentNode);
         return;
     }
-    currentNode->MountToParent(parent);
+    currentNode->MountToParent(parent, DEFAULT_NODE_SLOT, AceType::InstanceOf<ForEachNode>(parent));
     auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
     if (currentFrameNode) {
         currentFrameNode->OnMountToParentDone();

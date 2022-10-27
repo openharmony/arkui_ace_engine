@@ -56,6 +56,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        CalculateCacheRange();
         auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>(currentIndex_, startIndex_, endIndex_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetTargetIndex(targetIndex_);
@@ -76,6 +77,11 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<SwiperEventHub>();
+    }
+
+    int32_t GetCurrentShownIndex() const
+    {
+        return currentIndex_;
     }
 
     RefPtr<SwiperController> GetSwiperController() const

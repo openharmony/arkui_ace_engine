@@ -32,10 +32,17 @@
 namespace OHOS::Ace::NG {
 
 using TabBarBuilderFunc = std::function<void()>;
-struct TabBarParam {
+struct TabBarParam : public virtual Referenced {
     std::string text;
     std::string icon;
     TabBarBuilderFunc builder;
+    bool HasBuilder()
+    {
+        return builder != nullptr;
+    }
+    explicit TabBarParam(const std::string& textParam, const std::string& iconParam,
+        TabBarBuilderFunc&& builderParam): text(textParam), icon(iconParam), builder(std::move(builderParam))
+        {};
 };
 
 class TabBarPattern : public Pattern {
