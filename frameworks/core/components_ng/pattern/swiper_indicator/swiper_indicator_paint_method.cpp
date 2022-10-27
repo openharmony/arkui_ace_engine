@@ -39,9 +39,6 @@ constexpr uint32_t GRADIENT_COLOR_SIZE = 3;
 
 CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    scale_ = pipeline->GetDipScale();
     auto paintProperty = DynamicCast<SwiperIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(paintProperty, nullptr);
 
@@ -68,8 +65,8 @@ CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapp
     return paintFunc;
 }
 
-void SwiperIndicatorPaintMethod::PaintMask(RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty,
-    SizeF contentSize, OffsetF contentOffset) const
+void SwiperIndicatorPaintMethod::PaintMask(
+    RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset)
 {
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -173,12 +170,15 @@ void SwiperIndicatorPaintMethod::PaintContent(
 }
 
 SwiperIndicatorPaintMethod::IndicatorProperties SwiperIndicatorPaintMethod::PrepareIndicatorProperties(
-    RefPtr<SwiperIndicatorPaintProperty> paintProperty) const
+    RefPtr<SwiperIndicatorPaintProperty> paintProperty)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    auto swiperTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(pipeline, IndicatorProperties(Offset(0.0, 0.0), Offset(0.0, 0.0), Offset(0.0, 0.0),
                                     Offset(0.0, 0.0), Offset(0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 0.0));
+    auto swiperTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(swiperTheme, IndicatorProperties(Offset(0.0, 0.0), Offset(0.0, 0.0), Offset(0.0, 0.0),
+                                       Offset(0.0, 0.0), Offset(0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 0.0));
+    scale_ = pipeline->GetDipScale();
     uint32_t normalColor = paintProperty->GetColor()->GetValue();
     uint32_t selectedColor = paintProperty->GetSelectedColor()->GetValue();
     double normalPointRadius = pipeline->NormalizeToPx(paintProperty->GetSizeValue(Dimension(0.0))) / 2.0;
