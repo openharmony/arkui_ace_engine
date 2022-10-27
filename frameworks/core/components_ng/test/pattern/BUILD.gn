@@ -16,6 +16,8 @@ group("pattern_unittest") {
   deps = [
     "badge:badge_pattern_unit_test",
     "button:button_pattern_unit_test",
+    "common_view:common_view_test_ng",
+    "container_modal:container_modal_pattern_test_ng",
     "custom_paint:custom_paint_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "qrcode:qrcode_pattern_test_ng",
