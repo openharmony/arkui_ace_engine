@@ -192,6 +192,9 @@ public:
 
     virtual void PaintAccessibilityFocus() {};
 
+    virtual void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) {}
+    virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
+
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 

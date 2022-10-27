@@ -101,6 +101,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    void OnMouseSelectAll();
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -112,6 +114,12 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void InitMouseEvent();
+    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
+    void ClearMultiSelect();
+    void ClearSelectedZone();
+    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
+    void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -119,6 +127,10 @@ private:
     bool multiSelectable_ = false;
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
+    bool isMouseEventInit_ = false;
+
+    OffsetF mouseStartOffset_;
+    OffsetF mouseEndOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };

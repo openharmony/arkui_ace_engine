@@ -36,6 +36,7 @@
 
 namespace OHOS::Ace::NG {
 class BorderImageModifier;
+class MouseSelectModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -166,6 +167,9 @@ public:
 
     void PaintAccessibilityFocus() override;
 
+    void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) override;
+    void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
@@ -239,6 +243,7 @@ private:
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void PaintBorderImage();
     void PaintBorderImageGradient();
+    void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
@@ -254,6 +259,7 @@ private:
     Color hoveredColor_ = Color::TRANSPARENT;
 
     std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
+    std::shared_ptr<MouseSelectModifier> mouseSelectModifier_ = nullptr;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
