@@ -40,6 +40,17 @@ constexpr Dimension SLIDING_PANEL_LAYOUT_PROPERTY_MINI_HEIGHT_3 = 100.0_px;
 const std::vector<Dimension> SLIDING_PANEL_LAYOUT_PROPERTY_MINI_HEIGHT = { SLIDING_PANEL_LAYOUT_PROPERTY_MINI_HEIGHT_1,
     SLIDING_PANEL_LAYOUT_PROPERTY_MINI_HEIGHT_2, SLIDING_PANEL_LAYOUT_PROPERTY_MINI_HEIGHT_3 };
 
+constexpr Dimension SLIDING_PANEL_LAYOUT_PROPERTY_HALF_HEIGHT_1 = 200.0_px;
+constexpr Dimension SLIDING_PANEL_LAYOUT_PROPERTY_HALF_HEIGHT_2 = 300.0_px;
+constexpr Dimension SLIDING_PANEL_LAYOUT_PROPERTY_HALF_HEIGHT_3 = 400.0_px;
+const std::vector<Dimension> SLIDING_PANEL_LAYOUT_PROPERTY_HALF_HEIGHT = { SLIDING_PANEL_LAYOUT_PROPERTY_HALF_HEIGHT_1,
+    SLIDING_PANEL_LAYOUT_PROPERTY_HALF_HEIGHT_2, SLIDING_PANEL_LAYOUT_PROPERTY_HALF_HEIGHT_3 };
+
+constexpr Dimension SLIDING_PANEL_LAYOUT_PROPERTY_FULL_HEIGHT_1 = 400.0_px;
+constexpr Dimension SLIDING_PANEL_LAYOUT_PROPERTY_FULL_HEIGHT_2 = 600.0_px;
+constexpr Dimension SLIDING_PANEL_LAYOUT_PROPERTY_FULL_HEIGHT_3 = 800.0_px;
+const std::vector<Dimension> SLIDING_PANEL_LAYOUT_PROPERTY_FULL_HEIGHT = { SLIDING_PANEL_LAYOUT_PROPERTY_FULL_HEIGHT_1,
+    SLIDING_PANEL_LAYOUT_PROPERTY_FULL_HEIGHT_2, SLIDING_PANEL_LAYOUT_PROPERTY_FULL_HEIGHT_3 };
 } // namespace
 class PanelPropertyTestNg : public testing::Test {
 public:
@@ -126,6 +137,44 @@ HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest005, TestSize.Level1
         EXPECT_FALSE(slidingPanelLayoutProperty == nullptr);
         EXPECT_EQ(slidingPanelLayoutProperty->GetMiniHeight().value_or(Dimension(BLANK_MIN_HEIGHT)).Value(),
             static_cast<int32_t>(miniHeight.Value()));
+    }
+}
+
+/**
+ * @tc.name: SlidingPanelLayoutPropertyTest006
+ * @tc.desc: set a lot of halfHeight values into SlidingPanelLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest006, TestSize.Level1)
+{
+    for (const auto& halfHeight : SLIDING_PANEL_LAYOUT_PROPERTY_HALF_HEIGHT) {
+        SlidingPanelView::Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
+        SlidingPanelView::SetHalfHeight(halfHeight);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
+        EXPECT_FALSE(slidingPanelLayoutProperty == nullptr);
+        EXPECT_EQ(slidingPanelLayoutProperty->GetHalfHeight().value_or(Dimension(400)).Value(),
+            static_cast<int32_t>(halfHeight.Value()));
+    }
+}
+
+/**
+ * @tc.name: SlidingPanelLayoutPropertyTest007
+ * @tc.desc: set a lot of fullHeight values into SlidingPanelLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest007, TestSize.Level1)
+{
+    for (const auto& fullHeight : SLIDING_PANEL_LAYOUT_PROPERTY_FULL_HEIGHT) {
+        SlidingPanelView::Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
+        SlidingPanelView::SetFullHeight(fullHeight);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
+        EXPECT_FALSE(slidingPanelLayoutProperty == nullptr);
+        EXPECT_EQ(slidingPanelLayoutProperty->GetFullHeight().value_or(Dimension(700)).Value(),
+            static_cast<int32_t>(fullHeight.Value()));
     }
 }
 
