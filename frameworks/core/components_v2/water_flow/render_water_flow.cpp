@@ -1089,13 +1089,14 @@ Offset RenderWaterFlow::GetLastMainPos()
     if (mainSideEndPos_.empty() || mainSideEndPos_.size() != crossSideSize_.size()) {
         return pos;
     }
-    pos.SetY(mainSideEndPos_.at(0) - mainGap_);
+    double tempMainSidePos = mainSideEndPos_.at(0);
     for (size_t i = 0; i < mainSideEndPos_.size(); i++) {
-        if (GreatNotEqual(mainSideEndPos_.at(i), pos.GetY())) {
-            pos.SetY(mainSideEndPos_.at(i) - mainGap_);
+        if (GreatNotEqual(mainSideEndPos_.at(i), tempMainSidePos)) {
+            tempMainSidePos = mainSideEndPos_.at(i);
             crossIndex = i;
         }
     }
+    pos.SetY(mainSideEndPos_.at(crossIndex) - mainGap_);
     pos.SetX(GetCrossEndPos(crossIndex));
     return pos;
 }
