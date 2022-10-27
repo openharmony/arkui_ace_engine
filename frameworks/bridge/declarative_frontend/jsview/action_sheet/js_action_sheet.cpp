@@ -18,12 +18,13 @@
 #include <string>
 #include <vector>
 
+#include "base/log/ace_scoring_log.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

@@ -18,6 +18,7 @@
 #include <functional>
 
 #include "base/geometry/animatable_dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"

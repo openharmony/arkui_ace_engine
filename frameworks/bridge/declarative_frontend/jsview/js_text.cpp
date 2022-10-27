@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -353,7 +354,7 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
     CHECK_NULL_VOID(info[0]->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
+                           const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
 

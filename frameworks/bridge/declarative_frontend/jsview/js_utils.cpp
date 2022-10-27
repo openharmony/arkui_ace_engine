@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
+
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
@@ -22,7 +24,6 @@
 #include "base/want/want_wrap.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
@@ -61,8 +62,8 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
         return nullptr;
     }
 
-    void* pixmapPtrAddr = pixelMapNapiEntry(
-        reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
+    void* pixmapPtrAddr =
+        pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
     if (pixmapPtrAddr == nullptr) {
         LOGE("Failed to get pixmap pointer");
         return nullptr;

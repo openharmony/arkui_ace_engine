@@ -18,12 +18,13 @@
 #include <regex>
 #include <string>
 
+#include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_text.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_clock_model_impl.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace {
 

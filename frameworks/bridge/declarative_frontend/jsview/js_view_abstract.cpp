@@ -15,12 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
-#include <algorithm>
-#include <cstdint>
 #include <memory>
 #include <optional>
 #include <regex>
-#include <utility>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -28,8 +25,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/json/json_util.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -42,42 +39,17 @@
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/js_view_register.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
-#include "core/components/box/box_component_helper.h"
-#include "core/components/common/layout/align_declaration.h"
-#include "core/components/common/layout/position_param.h"
-#include "core/components/common/properties/motion_path_option.h"
-#include "core/components/display/display_component.h"
-#include "core/components/menu/menu_component.h"
-#include "core/components/option/option_component.h"
-#include "core/components/split_container/column_split_component.h"
-#include "core/components/split_container/row_split_component.h"
-#include "core/components/split_container/split_container_component.h"
-#include "core/components/text/text_component.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/event/long_press_event.h"
-#include "core/components_ng/property/overlay_property.h"
-#include "core/components_v2/extensions/events/on_area_change_extension.h"
-#include "core/gestures/long_press_gesture.h"
 
 namespace OHOS::Ace {
 

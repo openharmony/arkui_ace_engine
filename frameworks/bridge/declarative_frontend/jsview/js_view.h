@@ -19,11 +19,12 @@
 #include <list>
 #include <string>
 
+#include "base/log/ace_scoring_log.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace {
 

@@ -15,11 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
 
+#include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/marquee_model_impl.h"
 #include "core/components_ng/pattern/marquee/marquee_model.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace {
 
