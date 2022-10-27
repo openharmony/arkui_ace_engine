@@ -28,6 +28,9 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 
 enum class WidthType : uint32_t {
     SIDEBAR_WIDTH = 0,
@@ -50,13 +53,15 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
     if (Container::IsCurrentUseNewPipeline()) {
         switch (widthType) {
             case WidthType::SIDEBAR_WIDTH:
-                NG::SideBarContainerView::SetSideBarWidth(value);
+                NG::SideBarContainerView::SetSideBarWidth(value.IsNonNegative() ? value : DEFAULT_SIDE_BAR_WIDTH);
                 break;
             case WidthType::MIN_SIDEBAR_WIDTH:
-                NG::SideBarContainerView::SetMinSideBarWidth(value);
+                NG::SideBarContainerView::SetMinSideBarWidth(
+                    value.IsNonNegative() ? value : DEFAULT_MIN_SIDE_BAR_WIDTH);
                 break;
             case WidthType::MAX_SIDEBAR_WIDTH:
-                NG::SideBarContainerView::SetMaxSideBarWidth(value);
+                NG::SideBarContainerView::SetMaxSideBarWidth(
+                    value.IsNonNegative() ? value : DEFAULT_MAX_SIDE_BAR_WIDTH);
                 break;
             default:
                 break;
