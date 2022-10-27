@@ -244,6 +244,10 @@ class TouchLocationInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(TouchLocationInfo, TypeInfoBase);
 
 public:
+    explicit TouchLocationInfo(int32_t fingerId) : BaseEventInfo("default")
+    {
+        fingerId_ = fingerId;
+    }
     explicit TouchLocationInfo(const std::string& type, int32_t fingerId) : BaseEventInfo(type)
     {
         fingerId_ = fingerId;
