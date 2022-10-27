@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 
 class PipelineBase;
 
-class ACE_EXPORT Scheduler : public ScheduleTask {
+class ACE_EXPORT_WITH_PREVIEW Scheduler : public ScheduleTask {
     DECLARE_ACE_TYPE(Scheduler, ScheduleTask);
 
 public:

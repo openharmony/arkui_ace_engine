@@ -30,7 +30,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT Animator : public AceType, public StatusListenable {
+class ACE_EXPORT_WITH_PREVIEW Animator : public AceType, public StatusListenable {
     DECLARE_ACE_TYPE(Animator, AceType);
 
 public:
@@ -56,6 +56,7 @@ public:
     ~Animator() override;
 
     void AttachScheduler(const WeakPtr<PipelineBase>& context);
+    void AttachSchedulerOnContainer();
     bool HasScheduler() const;
 
     // Every interpolate animation needs to add itself into animator and use the controller to drive.
