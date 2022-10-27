@@ -178,7 +178,11 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     }
 
     auto container = Container::Current();
-    if (container && container->IsUseNewPipeline()) {
+    if (!container) {
+        LOGE("loadDocument: Container is null");
+        return;
+    }
+    if (container->IsUseNewPipeline()) {
         Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
         auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
         CHECK_NULL_VOID(frontEnd);
