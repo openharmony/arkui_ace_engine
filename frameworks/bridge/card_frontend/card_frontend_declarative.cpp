@@ -203,6 +203,7 @@ void CardFrontendDeclarative::UpdatePageData(const std::string& dataList)
         EventReport::SendFormException(FormExcepType::UPDATE_PAGE_ERR);
         return;
     }
+    delegate_->UpdatePageData(dataList);
 }
 
 void CardFrontendDeclarative::SetColorMode(ColorMode colorMode)

@@ -183,6 +183,8 @@
 
 namespace OHOS::Ace::Framework {
 
+constexpr int FUNC_SET_CREATE_ARG_LEN = 2;
+
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
@@ -306,6 +308,85 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     });
 }
 
+JSRef<JSVal> CreateJsObjectFromJsonValue(const EcmaVM* vm, const std::unique_ptr<JsonValue>& jsonValue)
+{
+    if (jsonValue->IsBool()) {
+        return JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, jsonValue->GetBool()));
+    } else if (jsonValue->IsNumber()) {
+        return JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, jsonValue->GetDouble()));
+    } else if (jsonValue->IsString()) {
+        return JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, jsonValue->GetString()));
+    } else if (jsonValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::New();
+        int32_t size = jsonValue->GetArraySize();
+        for (int32_t i = 0; i < size; ++i) {
+            std::unique_ptr<JsonValue> item = jsonValue->GetArrayItem(i);
+            array->SetValueAt(i, CreateJsObjectFromJsonValue(vm, item));
+        }
+        return array;
+    } else if (jsonValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::New();
+        std::unique_ptr<JsonValue> child = jsonValue->GetChild();
+        while (child && child->IsValid()) {
+            const std::string& key = child->GetKey();
+            object->SetPropertyObject(key.c_str(), CreateJsObjectFromJsonValue(vm, child));
+            child = child->GetNext();
+        }
+        return object;
+    } else if (jsonValue->IsNull()) {
+        return JSRef<JSVal>::Make(panda::JSValueRef::Null(vm));
+    } else {
+        return JSRef<JSVal>::Make(panda::JSValueRef::Undefined(vm));
+    }
+}
+
+void RegisterCardUpdateCallback(
+    const RefPtr<CardFrontendDelegateDeclarative>& delegate, const panda::Local<panda::ObjectRef>& obj)
+{
+    JSRef<JSObject> object = JSRef<JSObject>::Make(obj);
+    JSRef<JSVal> storageValue = object->GetProperty("localStorage_");
+    if (!storageValue->IsObject()) {
+        LOGE("RegisterCardUpdateCallback: can not get property 'localStorage_'!");
+        return;
+    }
+
+    JSRef<JSObject> storage = JSRef<JSObject>::Cast(storageValue);
+
+    JSRef<JSVal> setOrCreateVal = storage->GetProperty("setOrCreate");
+    if (!setOrCreateVal->IsFunction()) {
+        LOGE("RegisterCardUpdateCallback: can not get property 'setOrCreate'!");
+        return;
+    }
+
+    JSRef<JSFunc> setOrCreate = JSRef<JSFunc>::Cast(setOrCreateVal);
+
+    auto id = ContainerScope::CurrentId();
+    delegate->SetUpdateCardDataCallback([storage, setOrCreate, id](const std::string& data) {
+        ContainerScope scope(id);
+        const EcmaVM* vm = storage->GetEcmaVM();
+        CHECK_NULL_VOID(vm);
+        std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
+        CHECK_NULL_VOID(jsonRoot);
+
+        auto child = jsonRoot->GetChild();
+        if (!child || !child->IsValid()) {
+            LOGE("update card data error");
+            return;
+        }
+
+        while (child && child->IsValid()) {
+            const std::string& key = child->GetKey();
+            JSRef<JSVal> args[] = {
+                JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, key)),
+                CreateJsObjectFromJsonValue(vm, child),
+            };
+            setOrCreate->Call(storage, FUNC_SET_CREATE_ARG_LEN, args);
+            child = child->GetNext();
+        }
+    });
+    delegate->UpdatePageDataImmediately();
+}
+
 void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
@@ -322,6 +403,7 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
         auto delegate = frontEnd->GetDelegate();
         CHECK_NULL_VOID(delegate);
+        RegisterCardUpdateCallback(delegate, obj);
 
         auto pageRouterManager = delegate->GetPageRouterManager();
         CHECK_NULL_VOID(pageRouterManager);
