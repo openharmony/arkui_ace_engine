@@ -108,9 +108,9 @@ protected:
 private:
     void PaintContent(
         RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
-    IndicatorProperties PrepareIndicatorProperties(RefPtr<SwiperIndicatorPaintProperty> paintProperty) const;
-    void PaintMask(RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize,
-        OffsetF contentOffset) const;
+    IndicatorProperties PrepareIndicatorProperties(RefPtr<SwiperIndicatorPaintProperty> paintProperty);
+    void PaintMask(
+        RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
     float mainDelta_ = 0.0f;
     const float radiusGap_ = 2.0f;
     double scale_ = 0.0;
