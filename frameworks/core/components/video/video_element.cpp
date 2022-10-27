@@ -315,10 +315,7 @@ void VideoElement::PreparePlayer()
             LOGE("get data provider fail");
             return;
         }
-        auto dataAbilityHelper = dataProvider->GetDataAbilityHelper();
-        if (dataAbilityHelper) {
-            fd = dataAbilityHelper->OpenFile(filePath, "r");
-        }
+        fd = dataProvider->GetDataProviderFile(filePath, "r");
     } else if (!StringUtils::StartWith(filePath, "http")) {
         filePath = GetAssetAbsolutePath(filePath);
         fd = open(filePath.c_str(), O_RDONLY);
