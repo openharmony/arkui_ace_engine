@@ -51,7 +51,7 @@ public:
     void Pause() override
     {
         if (animatedPlayer_) {
-            LOGI("animatied image Paused");
+            LOGI("animated image Paused");
             animatedPlayer_->Pause();
         }
     }
@@ -59,7 +59,7 @@ public:
     void Resume() override
     {
         if (animatedPlayer_) {
-            LOGI("animatied image Resume");
+            LOGI("animated image Resume");
             animatedPlayer_->Resume();
         }
     }
