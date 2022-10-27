@@ -80,6 +80,10 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
     // own seperate recording. In order to accomplish the effect that [divider] is covered by [currentStickyItem_], we
     // should draw it before [currentStickyItem_] being painted.
     rsNode->SetPaintOrder(true);
+    // paint custom effect
+    if (scrollEffect_) {
+        scrollEffect_->Paint(context, viewPort_, offset);
+    }
     PaintDivider(rsNode);
 
     if (currentStickyItem_) {
