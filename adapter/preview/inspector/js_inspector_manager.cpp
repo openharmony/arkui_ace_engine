@@ -106,6 +106,7 @@ void JsInspectorManager::AssembleJSONTree(std::string& jsonStr)
         float scale = context->GetViewScale();
         double rootHeight = context->GetRootHeight();
         double rootWidth = context->GetRootWidth();
+        deviceRect_ = Rect(0, 0, rootWidth * scale, rootHeight * scale);
         jsonNode->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
         jsonNode->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
     }
@@ -386,6 +387,10 @@ std::string JsInspectorManager::UpdateNodeRectStrInfoV2(const RefPtr<Accessibili
     }
     auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement);
     if (inspectorElement) {
+        auto rect = inspectorElement->GetRenderRect();
+        if (!rect.IsIntersectWith(deviceRect_)) {
+            return "0,0,0,0";
+        }
         strRec = inspectorElement->GetRect();
         return strRec;
     }
