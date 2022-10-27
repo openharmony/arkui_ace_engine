@@ -280,14 +280,13 @@ void JSSearch::Create(const JSCallbackInfo& info)
             src = icon;
         }
 
-        JSTextInputController* jsController = nullptr;
+        auto controller = NG::SearchView::Create(key, tip, src);
         auto controllerObj = param->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextInputController>();
-        }
-        auto controller = NG::SearchView::Create(key, tip, src);
-        if (jsController) {
-            jsController->SetController(controller);
+            auto *jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
+            if (jsController) {
+                jsController->SetController(controller);
+            }
         }
         return;
     }
@@ -326,7 +325,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
 
     auto controllerObj = param->GetProperty("controller");
     if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-        JSSearchController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
+        auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
         if (jsController) {
             jsController->SetController(textFieldComponent->GetTextFieldController());
         }
