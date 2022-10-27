@@ -276,6 +276,7 @@ template("declarative_js_engine") {
       "jsview/models/marquee_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
+      "jsview/models/patternlock_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
