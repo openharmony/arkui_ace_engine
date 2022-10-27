@@ -41,7 +41,6 @@ public:
     virtual void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) = 0;
     virtual void SetOnScrollEnd(NG::ScrollEndEvent&& event) = 0;
     virtual void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy) = 0;
-    // debug
     virtual void InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
         const std::pair<bool, Dimension>& width, EdgeEffect effect) = 0;
     virtual void SetDisplayMode(int displayMode) = 0;

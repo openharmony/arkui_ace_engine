@@ -34,34 +34,9 @@ public:
 
     void OnReset() override {}
 
-    void SetCurrentOffset(float offset)
-    {
-        currentOffset_ = offset;
-    }
-
-    float GetCurrentOffset() const
-    {
-        return currentOffset_;
-    }
-
     float GetScrollableDistance() const
     {
         return scrollableDistance_;
-    }
-
-    float GetViewPort() const
-    {
-        return viewPortLength_;
-    }
-
-    const SizeF& GetViewPortSize() const
-    {
-        return viewPort_;
-    }
-
-    const SizeF& GetViewPortExtent() const
-    {
-        return viewPortExtent_;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -71,9 +46,6 @@ public:
 private:
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
-    float viewPortLength_ = 0.0f;
-    SizeF viewPort_;
-    SizeF viewPortExtent_;
 };
 
 } // namespace OHOS::Ace::NG

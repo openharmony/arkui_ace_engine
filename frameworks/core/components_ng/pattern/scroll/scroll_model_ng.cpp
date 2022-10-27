@@ -106,22 +106,15 @@ void ScrollModelNG::SetOnScrollEnd(NG::ScrollEndEvent&& event)
     eventHub->SetOnScrollEnd(std::move(event));
 }
 
-void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy) {
-    LOGE("hhh 1");
+void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
+{
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    LOGE("hhh 2");
     CHECK_NULL_VOID(frameNode);
-    LOGE("hhh 3");
     auto pattern = frameNode->GetPattern<ScrollPattern>();
-    LOGE("hhh 4");
     CHECK_NULL_VOID(pattern);
-    LOGE("hhh 5");
     auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(proxy);
-    LOGE("hhh 6");
     CHECK_NULL_VOID(scrollBarProxy);
-    LOGE("hhh 7");
     pattern->SetScrollBarProxy(scrollBarProxy);
-    LOGE("hhh 8");
 }
 
 void ScrollModelNG::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,

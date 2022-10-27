@@ -62,21 +62,22 @@ float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 
 void ScrollPattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
 {
-    if (scrollBarProxy) {
-        auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source) {
-            if (source != SCROLL_FROM_START) {
-                auto pattern = weak.Upgrade();
-                if (!pattern || pattern->GetAxis() == Axis::NONE) {
-                    return false;
-                }
-                float adjustOffset = static_cast<float>(offset);
-                pattern->AdjustOffset(adjustOffset, source);
-                return pattern->UpdateCurrentOffset(adjustOffset, source);
-            }
-            return true;
-            };
-        scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(this), std::move(scrollFunction) });
+    if (!scrollBarProxy) {
+        return;
     }
+    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source) {
+        if (source != SCROLL_FROM_START) {
+            auto pattern = weak.Upgrade();
+            if (!pattern || pattern->GetAxis() == Axis::NONE) {
+                return false;
+            }
+            float adjustOffset = static_cast<float>(offset);
+            pattern->AdjustOffset(adjustOffset, source);
+            return pattern->UpdateCurrentOffset(adjustOffset, source);
+        }
+        return true;
+        };
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(this), std::move(scrollFunction) });
     scrollBarProxy_ = scrollBarProxy;
 }
 
@@ -317,6 +318,16 @@ bool ScrollPattern::IsCrashBottom() const
     return (scrollUpToReachEnd || scrollDownToReachEnd) && ReachMaxCount();
 }
 
+bool ScrollPattern::IsScrollOutOnEdge(float delta) const
+{
+    if ((IsAtBottom() && delta < 0.0f) || (IsAtTop() && delta > 0.0f)) {
+        if (!scrollEffect_ || scrollEffect_->IsNoneEffect()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ScrollPattern::HandleCrashTop() const
 {
     auto frameNode = GetHost();
@@ -360,10 +371,8 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
         return false;
     }
     // TODO: ignore handle refresh
-    if ((IsAtBottom() && delta < 0.0f) || (IsAtTop() && delta > 0.0f)) {
-        if (!scrollEffect_ || scrollEffect_->IsNoneEffect()) {
-            return false;
-        }
+    if (IsScrollOutOnEdge(delta)) {
+        return false;
     }
     if (!ScrollPageCheck(delta, source)) {
         return false;

@@ -75,50 +75,20 @@ public:
         return currentOffset_;
     }
 
-    Offset GetCurrentOffset() const
-    {
-        if (axis_ == Axis::HORIZONTAL) {
-            return Offset{currentOffset_, 0};
-        }
-        return Offset{0, currentOffset_};
-    }
-
     Axis GetAxis() const
     {
         return axis_;
     }
 
-    // 保留
     float GetScrollableDistance() const
     {
         return scrollableDistance_;
     }
 
-    // bool IsRowReverse() const
-    // {
-    //     // TODO: not consider rightToLeft
-    //     return direction_ == FlexDirection::ROW_REVERSE;
-    // }
-
-    // bool IsColReverse() const
-    // {
-    //     return  direction_ == FlexDirection::COLUMN_REVERSE;
-    // }
-
-    // void SetDirection(FlexDirection direction)
-    // {
-    //     direction_ = direction;
-    // }
-
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
     {
         scrollBarProxy_ = scrollBarProxy;
     }
-
-    // void SetDisplayMode(const DisplayMode& displayMode)
-    // {
-    //     displayMode_ = displayMode;
-    // }
 
     const DisplayMode& GetDisplayMode() const
     {
@@ -147,7 +117,6 @@ private:
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
-    // FlexDirection direction_ { FlexDirection::COLUMN };
 };
 
 } // namespace OHOS::Ace::NG

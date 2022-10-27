@@ -70,21 +70,10 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
     auto parentSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_PARENT);
-    auto parentSize1 = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_PARENT_CROSS_AXIS);
-    auto parentSize2 = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
 
     // Calculate child layout constraint.
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(axis, idealSize, childLayoutConstraint);
-
-    LOGE("hhh axis:%{public}d", axis);
-    if (constraint.has_value()) {
-        LOGE("hhh constraint:%{public}s", constraint.value().ToString().c_str());
-    }
-    LOGE("hhh idealSize:%{public}s", idealSize.ToString().c_str());
-    LOGE("hhh parentSize:%{public}s", parentSize.ToString().c_str());
-    LOGE("hhh parentSize1:%{public}s", parentSize1.ToString().c_str());
-    LOGE("hhh parentSize2:%{public}s", parentSize2.ToString().c_str());
 
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -99,14 +88,11 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateIdealSize(axis, childSize, parentSize, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
-    LOGE("hhh selfSize:%{public}s", selfSize.ToString().c_str());
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
 }
 
 void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    LOGE("hhh ScrollBarLayoutAlgorithm Layout currentOffset_:%{public}lf, addr:%{public}p",
-        currentOffset_, this);
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<ScrollBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -123,9 +109,6 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
     scrollableDistance_ = std::abs(GetMainAxisSize(size, axis) - GetMainAxisSize(childSize, axis));
-    viewPort_ = size;
-    viewPortExtent_ = childSize;
-    viewPortLength_ = GetMainAxisSize(size, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset);
     childWrapper->Layout();

@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_view.h"
 
-
 namespace OHOS::Ace::Framework {
 
 class JSScrollBar : public JSContainerBase {

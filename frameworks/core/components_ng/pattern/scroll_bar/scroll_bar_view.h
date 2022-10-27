@@ -17,12 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_VIEW_H
 
 #include "base/geometry/axis.h"
-// #include "base/memory/referenced.h"
-// #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-// #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-// #include "frameworks/core/components_ng/pattern/scroll/scroll_event_hub.h"
 
 namespace OHOS::Ace::NG {
 

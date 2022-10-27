@@ -165,6 +165,7 @@ private:
 
     bool IsCrashTop() const;
     bool IsCrashBottom() const;
+    bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop() const;
     void HandleCrashBottom() const;
 

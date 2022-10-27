@@ -46,11 +46,6 @@ void ScrollBarView::SetDisplayMode(int displayMode)
     if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
         return;
     }
-    // auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    // CHECK_NULL_VOID(frameNode);
-    // auto pattern = frameNode->GetPattern<ScrollBarPattern>();
-    // CHECK_NULL_VOID(pattern);
-    // pattern->SetDisplayMode(DISPLAY_MODE[displayMode]);
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, DisplayMode, DISPLAY_MODE[displayMode]);
     auto visible = (DISPLAY_MODE[displayMode] == DisplayMode::OFF) ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Visibility, visible);
