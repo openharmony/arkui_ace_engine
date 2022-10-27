@@ -691,6 +691,22 @@ void RenderNode::MarkNeedRender(bool overlay)
     }
 }
 
+void RenderNode::SetVisible(bool visible, bool inRecursion)
+{
+    if (visible_ != visible) {
+        visible_ = visible;
+        AddDirtyRenderBoundaryNode();
+        OnVisibleChanged();
+        CheckIfNeedUpdateTouchRect();
+        if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
+            MarkParentNeedRender();
+        }
+    }
+    for (auto& child : children_) {
+        child->SetVisible(visible, true);
+    }
+}
+
 bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
     TouchTestResult& result)
 {
