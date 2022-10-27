@@ -97,7 +97,11 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
             navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width(),
             geometryNode->GetFrameOffset().GetY());
         geometryNode->SetMarginFrameOffset(navBarOffset);
+        navBarWrapper->Layout();
+        return geometryNode->GetFrameSize().Width();
     }
+    auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
+    geometryNode->SetMarginFrameOffset(navBarOffset);
     navBarWrapper->Layout();
     return geometryNode->GetFrameSize().Width();
 }
@@ -144,6 +148,8 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     }
 
     if (position == NavBarPosition::END) {
+        auto contentOffset = OffsetT<float>(0.0f, 0.0f);
+        geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
     }
