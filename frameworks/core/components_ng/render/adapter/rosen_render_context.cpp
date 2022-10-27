@@ -1097,9 +1097,10 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
     auto pipelineBase = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineBase);
     std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
-    if (backDecoration->HasBlurStyle() && backDecoration->GetBlurStyleValue() != BlurStyle::NoMaterial) {
+    auto blurStyle = GetBackgroundBlurStyleValue(BlurStyle::NoMaterial);
+    if (blurStyle != BlurStyle::NoMaterial) {
         backFilter = Rosen::RSFilter::CreateMaterialFilter(
-            static_cast<int>(backDecoration->GetBlurStyleValue()), pipelineBase->GetDipScale());
+            static_cast<int>(blurStyle), pipelineBase->GetDipScale());
     } else if (radius.IsValid()) {
         float radiusPx = pipelineBase->NormalizeToPx(radius);
         float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);

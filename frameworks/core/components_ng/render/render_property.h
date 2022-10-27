@@ -83,7 +83,6 @@ struct TransformProperty {
 
 struct DecorationProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurRadius, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurStyle, BlurStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
 };
