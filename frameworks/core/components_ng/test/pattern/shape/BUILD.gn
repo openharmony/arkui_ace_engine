@@ -1,0 +1,160 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+
+config("config_shape_test") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "//commonlibrary/c_utils/base/include",
+    "$ace_root",
+    "$ace_root/frameworks",
+  ]
+}
+
+ohos_unittest("circle_pattern_test_ng") {
+  module_out_path = "$test_output_path/shape"
+
+  sources = [
+    "base_shape_pattern_test_ng.cpp",
+    "circle_pattern_test_ng.cpp",
+  ]
+
+  include_dirs = [ "//third_party/googletest/googlemock/include" ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  configs = [
+    ":config_shape_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("ellipse_pattern_test_ng") {
+  module_out_path = "$test_output_path/shape"
+  sources = [
+    "base_shape_pattern_test_ng.cpp",
+    "ellipse_pattern_test_ng.cpp",
+  ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+  configs = [
+    ":config_shape_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("rect_pattern_test_ng") {
+  module_out_path = "$test_output_path/shape"
+  sources = [
+    "base_shape_pattern_test_ng.cpp",
+    "rect_pattern_test_ng.cpp",
+  ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+  configs = [
+    ":config_shape_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("path_pattern_test_ng") {
+  module_out_path = "$test_output_path/shape"
+  sources = [
+    "base_shape_pattern_test_ng.cpp",
+    "path_pattern_test_ng.cpp",
+  ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+  configs = [
+    ":config_shape_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("polygon_pattern_test_ng") {
+  module_out_path = "$test_output_path/shape"
+  sources = [
+    "base_polygon_pattern_test_ng.cpp",
+    "base_shape_pattern_test_ng.cpp",
+    "polygon_pattern_test_ng.cpp",
+  ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+  configs = [
+    ":config_shape_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("polyline_pattern_test_ng") {
+  module_out_path = "$test_output_path/shape"
+  sources = [
+    "base_polygon_pattern_test_ng.cpp",
+    "base_shape_pattern_test_ng.cpp",
+    "polyline_pattern_test_ng.cpp",
+  ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+  configs = [
+    ":config_shape_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("shape_pattern_test_ng") {
+  module_out_path = "$test_output_path/shape"
+  sources = [
+    "base_shape_pattern_test_ng.cpp",
+    "shape_pattern_test_ng.cpp",
+  ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+  configs = [
+    ":config_shape_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+group("shape_pattern_unit_test") {
+  testonly = true
+  deps = [
+    ":circle_pattern_test_ng",
+    ":ellipse_pattern_test_ng",
+    ":path_pattern_test_ng",
+    ":polygon_pattern_test_ng",
+    ":polyline_pattern_test_ng",
+    ":rect_pattern_test_ng",
+    ":shape_pattern_test_ng",
+  ]
+}
