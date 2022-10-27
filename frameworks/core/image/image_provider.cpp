@@ -398,15 +398,8 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<TaskExecutor>& taskEx
             LOGW("renderTaskHolder has been released.");
             return;
         }
-        // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
-        if (!renderTaskHolder->ioManager) {
-            // Shell is closing.
-            callback({ image, renderTaskHolder->unrefQueue }, nullptr);
-            return;
-        }
         ACE_DCHECK(!image->isTextureBacked());
-        bool needRaster = ImageCompressor::GetInstance()->CanCompress()
-            || renderTaskHolder->ioManager->GetResourceContext();
+        bool needRaster = ImageCompressor::GetInstance()->CanCompress();
         if (!needRaster) {
             callback({ image, renderTaskHolder->unrefQueue }, nullptr);
             return;
