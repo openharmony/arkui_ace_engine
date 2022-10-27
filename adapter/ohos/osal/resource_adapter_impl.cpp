@@ -97,6 +97,21 @@ bool IsDirExist(const std::string& path)
     return false;
 }
 
+DimensionUnit ParseDimensionUnit(const std::string& unit)
+{
+    if (unit == "px") {
+        return DimensionUnit::PX;
+    } else if (unit == "fp") {
+        return DimensionUnit::FP;
+    } else if (unit == "lpx") {
+        return DimensionUnit::LPX;
+    } else if (unit == "%") {
+        return DimensionUnit::PERCENT;
+    } else {
+        return DimensionUnit::VP;
+    }
+};
+
 } // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
@@ -181,6 +196,18 @@ Color ResourceAdapterImpl::GetColor(uint32_t resId)
 
 Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        float dimensionFloat = 0.0f;
+        std::string unit;
+        if (resourceManager_) {
+            auto state = resourceManager_->GetFloatById(resId, dimensionFloat, unit);
+            if (state != Global::Resource::SUCCESS) {
+                LOGE("NG: GetDimension error, id=%{public}u", resId);
+            }
+        }
+        return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
+    }
+
     float dimensionFloat = 0.0f;
     if (resourceManager_) {
         auto state = resourceManager_->GetFloatById(resId, dimensionFloat);
