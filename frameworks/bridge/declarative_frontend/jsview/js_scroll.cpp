@@ -61,9 +61,11 @@ void JSScroll::Create(const JSCallbackInfo& info)
             // Init scroll bar proxy.
             auto proxy = jsScroller->GetScrollBarProxy();
             if (!proxy) {
-                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+                // proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+                proxy = ScrollModel::GetInstance()->CreateScrollBarProxy();
                 jsScroller->SetScrollBarProxy(proxy);
             }
+            // TO DO 这里要重新改造适配，重构ACE::ScrollBarProxy的结构
             ScrollModel::GetInstance()->SetScrollBarProxy(proxy);
         }
     }

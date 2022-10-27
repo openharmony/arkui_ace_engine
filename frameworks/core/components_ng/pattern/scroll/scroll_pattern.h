@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 #include "core/components_ng/pattern/scroll/scroll_position_controller.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace::NG {
 
@@ -137,6 +138,8 @@ public:
         isScrollContent_ = isScrollContent;
     }
 
+    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
+
     bool IsAtTop() const;
     bool IsAtBottom() const;
     bool IsOutOfBoundary() const;
@@ -177,6 +180,7 @@ private:
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<TouchEventImpl> touchEvent_;

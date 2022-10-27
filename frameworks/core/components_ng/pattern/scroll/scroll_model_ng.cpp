@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_position_controller.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -56,6 +57,11 @@ RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController()
         pattern->SetScrollPositionController(controller);
     }
     return pattern->GetScrollPositionController();
+}
+
+RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
+{
+    return AceType::MakeRefPtr<ScrollBarProxy>();
 }
 
 void ScrollModelNG::SetAxis(Axis axis)
@@ -100,7 +106,23 @@ void ScrollModelNG::SetOnScrollEnd(NG::ScrollEndEvent&& event)
     eventHub->SetOnScrollEnd(std::move(event));
 }
 
-void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& proxy) {}
+void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy) {
+    LOGE("hhh 1");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    LOGE("hhh 2");
+    CHECK_NULL_VOID(frameNode);
+    LOGE("hhh 3");
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    LOGE("hhh 4");
+    CHECK_NULL_VOID(pattern);
+    LOGE("hhh 5");
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(proxy);
+    LOGE("hhh 6");
+    CHECK_NULL_VOID(scrollBarProxy);
+    LOGE("hhh 7");
+    pattern->SetScrollBarProxy(scrollBarProxy);
+    LOGE("hhh 8");
+}
 
 void ScrollModelNG::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
     const std::pair<bool, Dimension>& width, EdgeEffect effect)

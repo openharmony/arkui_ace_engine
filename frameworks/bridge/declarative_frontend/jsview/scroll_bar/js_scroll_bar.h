@@ -20,6 +20,9 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_view.h"
+
 
 namespace OHOS::Ace::Framework {
 

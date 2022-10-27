@@ -1,0 +1,155 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_PATTERN_H
+
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+
+namespace OHOS::Ace::NG {
+
+class ScrollBarPattern : public Pattern {
+    DECLARE_ACE_TYPE(ScrollBarPattern, Pattern);
+
+public:
+    ScrollBarPattern() = default;
+    ~ScrollBarPattern() override
+    {
+        animator_ = nullptr;
+        scrollBarProxy_ = nullptr;
+        scrollableEvent_ = nullptr;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<ScrollBarLayoutProperty>();
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        auto layoutAlgorithm = MakeRefPtr<ScrollBarLayoutAlgorithm>(currentOffset_);
+        return layoutAlgorithm;
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ScrollEventHub>();
+    }
+
+    void SetCurrentPosition(float currentOffset)
+    {
+        currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
+        if (currentOffset_ == currentOffset || scrollableDistance_ <= 0.0f) {
+            return;
+        }
+        currentOffset_ = currentOffset;
+        auto host = GetHost();
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    }
+
+    float GetCurrentPosition() const
+    {
+        return currentOffset_;
+    }
+
+    Offset GetCurrentOffset() const
+    {
+        if (axis_ == Axis::HORIZONTAL) {
+            return Offset{currentOffset_, 0};
+        }
+        return Offset{0, currentOffset_};
+    }
+
+    Axis GetAxis() const
+    {
+        return axis_;
+    }
+
+    // 保留
+    float GetScrollableDistance() const
+    {
+        return scrollableDistance_;
+    }
+
+    // bool IsRowReverse() const
+    // {
+    //     // TODO: not consider rightToLeft
+    //     return direction_ == FlexDirection::ROW_REVERSE;
+    // }
+
+    // bool IsColReverse() const
+    // {
+    //     return  direction_ == FlexDirection::COLUMN_REVERSE;
+    // }
+
+    // void SetDirection(FlexDirection direction)
+    // {
+    //     direction_ = direction;
+    // }
+
+    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
+    {
+        scrollBarProxy_ = scrollBarProxy;
+    }
+
+    // void SetDisplayMode(const DisplayMode& displayMode)
+    // {
+    //     displayMode_ = displayMode;
+    // }
+
+    const DisplayMode& GetDisplayMode() const
+    {
+        return displayMode_;
+    }
+
+    bool IsAtTop() const;
+    bool IsAtBottom() const;
+    bool UpdateCurrentOffset(float offset, int32_t source);
+
+    // disappear Animator
+    void StartAnimator() {}
+    void StopAnimator() {}
+
+private:
+    void OnModifyDone() override;
+    void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void ValidateOffset(int32_t source);
+
+    RefPtr<Animator> animator_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
+    RefPtr<ScrollableEvent> scrollableEvent_;
+    Axis axis_ = Axis::VERTICAL;
+    DisplayMode displayMode_ { DisplayMode::AUTO };
+    float currentOffset_ = 0.0f;
+    float lastOffset_ = 0.0f;
+    float scrollableDistance_ = 0.0f;
+    // FlexDirection direction_ { FlexDirection::COLUMN };
+};
+
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_PATTERN_H

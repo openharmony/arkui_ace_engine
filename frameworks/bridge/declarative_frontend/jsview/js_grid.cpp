@@ -69,7 +69,7 @@ void JSGrid::Create(const JSCallbackInfo& info)
             jsScroller->SetController(positionController);
 
             // Init scroll bar proxy.
-            scrollBarProxy = jsScroller->GetScrollBarProxy();
+            scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(jsScroller->GetScrollBarProxy());
             if (!scrollBarProxy) {
                 scrollBarProxy = AceType::MakeRefPtr<ScrollBarProxy>();
                 jsScroller->SetScrollBarProxy(scrollBarProxy);

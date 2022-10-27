@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_BAR_SCROLL_BAR_PROXY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_BAR_SCROLL_BAR_PROXY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_PROXY_SCROLL_BAR_PROXY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_PROXY_SCROLL_BAR_PROXY_H
+
+#include <list>
 
 #include "core/components/scroll_bar/scroll_proxy.h"
-#include "core/pipeline/base/render_node.h"
 
-namespace OHOS::Ace {
+namespace OHOS::Ace::NG {
 
+class Pattern;
 struct ScrollableNodeInfo {
-    WeakPtr<RenderNode> scrollableNode;
+    WeakPtr<Pattern> scrollableNode;
     std::function<bool(double, int32_t source)> onPositionChanged;
 
     bool operator==(const ScrollableNodeInfo& info) const
@@ -31,7 +33,7 @@ struct ScrollableNodeInfo {
     }
 };
 
-class RenderScrollBar;
+class ScrollBarPattern;
 class ACE_EXPORT ScrollBarProxy : public ScrollProxy {
     DECLARE_ACE_TYPE(ScrollBarProxy, ScrollProxy);
 
@@ -41,23 +43,23 @@ public:
 
     // Register scrollable node and scroll bar, scrollable node and scroll bar communicate through proxy.
     void RegisterScrollableNode(const ScrollableNodeInfo& scrollableNode);
-    void RegisterScrollBar(const WeakPtr<RenderScrollBar>& scrollBar);
+    void RegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar);
 
     // UnRegister scrollable node and scroll bar.
-    void UnRegisterScrollableNode(const WeakPtr<RenderNode>& scrollableNode);
-    void UnRegisterScrollBar(const WeakPtr<RenderScrollBar>& scrollBar);
+    void UnRegisterScrollableNode(const WeakPtr<Pattern>& scrollableNode);
+    void UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar);
 
     /*
      * Notify scrollable node to update state, called by scroll bar.
      * @param distance absolute distance that scroll bar has scrolled.
      */
-    void NotifyScrollableNode(double distance, const WeakPtr<RenderScrollBar>& weakScrollBar) const;
+    void NotifyScrollableNode(float distance, const WeakPtr<ScrollBarPattern>& weakScrollBar) const;
 
     /*
      * Notify scroll bar to update state, called by scrollable node.
      * @param distance absolute distance that scrollable node has scrolled.
      */
-    void NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNode) const;
+    void NotifyScrollBar(const WeakPtr<Pattern>& weakScrollableNode) const;
 
     /*
      * Start animation of ScrollBar.
@@ -70,17 +72,10 @@ public:
     void StopScrollBarAnimator() const;
 
 private:
-    bool CheckScrollable(const RefPtr<RenderNode>& node) const;
-    Axis GetScrollableAxis(const RefPtr<RenderNode>& node) const;
-    Size GetScrollableChildSize(
-        const RefPtr<RenderNode>& scrollable, const Size& scrollableChildSize, Axis scrollBarAxis) const;
-    void AdjustParam(const RefPtr<RenderNode>& scrollable, Axis scrollBarAxis, Axis& scrollableAxis,
-        Size& scrollableChildSize, Offset& scrollableChildPosition) const;
-
     std::list<ScrollableNodeInfo> scrollableNodes_;  // Scrollable nodes, like list, grid, scroll, etc.
-    std::list<WeakPtr<RenderScrollBar>> scrollBars_; // ScrollBar should effect with scrollable node.
+    std::list<WeakPtr<ScrollBarPattern>> scrollBars_; // ScrollBar should effect with scrollable node.
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_BAR_SCROLL_BAR_PROXY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_PROXY_SCROLL_BAR_PROXY_H

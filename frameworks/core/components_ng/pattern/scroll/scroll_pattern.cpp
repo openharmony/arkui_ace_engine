@@ -60,6 +60,26 @@ float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 
 } // namespace
 
+void ScrollPattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
+{
+    if (scrollBarProxy) {
+        auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source) {
+            if (source != SCROLL_FROM_START) {
+                auto pattern = weak.Upgrade();
+                if (!pattern || pattern->GetAxis() == Axis::NONE) {
+                    return false;
+                }
+                float adjustOffset = static_cast<float>(offset);
+                pattern->AdjustOffset(adjustOffset, source);
+                return pattern->UpdateCurrentOffset(adjustOffset, source);
+            }
+            return true;
+            };
+        scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(this), std::move(scrollFunction) });
+    }
+    scrollBarProxy_ = scrollBarProxy;
+}
+
 void ScrollPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -371,14 +391,16 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (scrollEffect_ && !scrollEffect_->IsRestrictBoundary()) {
         next = true;
     }
-
     // inner scroll bar
     auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
     if (paintProperty && lastOffset_ != currentOffset_) {
         paintProperty->UpdateScrollBarOffset(currentOffset_, viewPortExtent_);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-
+    // outer scrollbar
+    if (source != SCROLL_FROM_BAR && scrollBarProxy_ && lastOffset_ != currentOffset_) {
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     return next;
 }
