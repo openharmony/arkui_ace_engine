@@ -228,6 +228,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     }
     TextStyle style;
     style.SetFontSize(TITLE_TEXT_FONT_SIZE);
+    style.SetMaxLines(1);
     style.SetTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
     style.SetFontWeight(FontWeight::W500);
     style.SetAllowScale(false);

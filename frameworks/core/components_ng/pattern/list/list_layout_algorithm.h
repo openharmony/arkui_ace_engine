@@ -35,12 +35,18 @@ enum class ScrollIndexAlignment {
     ALIGN_BUTTON = 1,
 };
 
+struct ListItemInfo {
+    float startPos;
+    float endPos;
+    bool isGroup;
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    using PositionMap = std::map<int32_t, std::pair<float, float>>;
+    using PositionMap = std::map<int32_t, ListItemInfo>;
 
     ListLayoutAlgorithm(int32_t startIndex, int32_t endIndex) : preStartIndex_(startIndex), preEndIndex_(endIndex) {}
 
@@ -129,9 +135,9 @@ public:
             return 0.0f;
         }
         if (GetStartIndex() == 0) {
-            return itemPosition_.begin()->second.first;
+            return itemPosition_.begin()->second.startPos;
         }
-        return itemPosition_.begin()->second.first - spaceWidth_;
+        return itemPosition_.begin()->second.startPos - spaceWidth_;
     }
 
     float GetEndPosition() const
@@ -140,9 +146,9 @@ public:
             return 0.0f;
         }
         if (GetEndIndex() == totalItemCount_ - 1) {
-            return itemPosition_.rbegin()->second.second;
+            return itemPosition_.rbegin()->second.endPos;
         }
-        return itemPosition_.rbegin()->second.second + spaceWidth_;
+        return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -180,7 +186,7 @@ private:
     int LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
         int& currentIndex, float& mainLen);
     static RefPtr<ListItemGroupLayoutProperty> GetListItemGroup(const RefPtr<LayoutWrapper>&  layoutWrapper);
-    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis);
+    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
 
     std::optional<int32_t> jumpIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
@@ -208,6 +214,7 @@ private:
     float contentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
+    LayoutConstraintF groupLayoutConstraint_;
 };
 } // namespace OHOS::Ace::NG
 

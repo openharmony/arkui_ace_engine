@@ -1050,11 +1050,11 @@ void RosenRenderImage::OnHiddenChanged(bool hidden)
             CancelBackgroundTasks();
         }
     } else {
-        if (imageObj_ && imageObj_->GetFrameCount() > 1) {
+        if (imageObj_ && imageObj_->GetFrameCount() > 1 && GetVisible()) {
             LOGI("Animated image Resume");
             imageObj_->Resume();
-        } else if (backgroundTaskCancled_) {
-            backgroundTaskCancled_ = false;
+        } else if (backgroundTaskCanceled_) {
+            backgroundTaskCanceled_ = false;
             if (sourceInfo_.GetSrcType() == SrcType::MEMORY) {
                 LOGE("memory image: %{public}s should not be notified to resume loading.",
                     sourceInfo_.ToString().c_str());
@@ -1068,10 +1068,10 @@ void RosenRenderImage::OnHiddenChanged(bool hidden)
 void RosenRenderImage::CancelBackgroundTasks()
 {
     if (fetchImageObjTask_) {
-        backgroundTaskCancled_ = fetchImageObjTask_.Cancel(false);
+        backgroundTaskCanceled_ = fetchImageObjTask_.Cancel(false);
     }
     if (imageObj_) {
-        backgroundTaskCancled_ = imageObj_->CancelBackgroundTasks();
+        backgroundTaskCanceled_ = imageObj_->CancelBackgroundTasks();
     }
 }
 
@@ -1368,12 +1368,18 @@ void RosenRenderImage::OnAppShow()
     }
 }
 
+// pause image when not visible
 void RosenRenderImage::OnVisibleChanged()
 {
-    if (imageObj_ && GetVisible()) {
-        imageObj_->Resume();
-    } else if (imageObj_ && !GetVisible()) {
-        imageObj_->Pause();
+    if (imageObj_) {
+        if (GetVisible()) {
+            imageObj_->Resume();
+        } else {
+            imageObj_->Pause();
+            LOGI("pause image when invisible");
+        }
+    } else {
+        LOGD("OnVisibleChanged: imageObj is null");
     }
 }
 

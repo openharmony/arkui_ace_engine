@@ -46,6 +46,8 @@ public:
         ResetBackgroundColor();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     ACE_DEFINE_PROPERTY_GROUP(ProgressPaintDate, ProgressDate);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, MaxValue, double, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, Value, double, PROPERTY_UPDATE_MEASURE);

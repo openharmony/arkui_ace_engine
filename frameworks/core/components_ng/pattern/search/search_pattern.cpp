@@ -14,16 +14,26 @@
  */
 
 #include "core/components_ng/pattern/search/search_pattern.h"
+
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
 
+namespace {
+
+const Color DEFAULT_PLACEHOLD_COLOR = Color::GRAY;
+
+} // namespace
+
 void SearchPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto searchButton = layoutProperty->GetSearchButton();
+    searchButton_ = searchButton.has_value() ? searchButton->value() : "";
     // Image click event
     auto imageFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
     CHECK_NULL_VOID(imageFrameNode);
@@ -70,6 +80,27 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldPattern);
     auto text = textFieldPattern->GetEditingValue();
     searchEventHub->UpdateSubmitEvent(text.text);
+}
+
+void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    Pattern::ToJsonValue(json);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto placeHoldColor = textFieldLayoutProperty->GetPlaceholderTextColor();
+    json->Put("placeholderColor", placeHoldColor.value_or(DEFAULT_PLACEHOLD_COLOR).ColorToString().c_str());
+
+    auto imageFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto icon = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
+    json->Put("icon", icon.c_str());
 }
 
 } // namespace OHOS::Ace::NG

@@ -42,6 +42,10 @@ public:
 
     void DrawLine(RSCanvas& canvas, const OffsetF& offset) const;
 
+    void SetDividerLength(float length)
+    {
+        dividerLength_ = length;
+    }
 private:
     float constrainStrokeWidth_ = 0.0f;
     float dividerLength_ = 0.0f;

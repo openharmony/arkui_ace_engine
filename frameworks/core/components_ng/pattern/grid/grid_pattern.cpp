@@ -24,6 +24,12 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
+constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
+constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
+} // namespace
+
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
@@ -61,6 +67,10 @@ void GridPattern::OnAttachToFrameNode()
 
 void GridPattern::OnModifyDone()
 {
+    if (multiSelectable_ && !isMouseEventInit_) {
+        InitMouseEvent();
+    }
+
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
     gridLayoutInfo_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
@@ -78,6 +88,154 @@ void GridPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+}
+
+void GridPattern::InitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    mouseEventHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEventWithoutKeyboard(info);
+        }
+    });
+    isMouseEventInit_ = true;
+}
+
+void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
+{
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+
+    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            ClearMultiSelect();
+            mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+        } else if (info.GetAction() == MouseAction::MOVE) {
+            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+        } else if (info.GetAction() == MouseAction::RELEASE) {
+            mouseStartOffset_.Reset();
+            mouseEndOffset_.Reset();
+            ClearSelectedZone();
+        }
+    }
+}
+
+void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    for (const auto& item : host->GetChildren()) {
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+
+        if (!itemPattern->Selectable()) {
+            continue;
+        }
+
+        auto itemGeometry = itemFrameNode->GetGeometryNode();
+        CHECK_NULL_VOID(itemGeometry);
+
+        auto itemRect = itemGeometry->GetFrameRect();
+        if (!selectedZone.IsIntersectWith(itemRect)) {
+            itemPattern->MarkIsSelected(false);
+        } else {
+            itemPattern->MarkIsSelected(true);
+        }
+        auto context = itemFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnMouseSelectUpdate(ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    }
+
+    auto hostContext = host->GetRenderContext();
+    CHECK_NULL_VOID(hostContext);
+    hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+void GridPattern::ClearMultiSelect()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    for (const auto& item : host->GetChildren()) {
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        itemPattern->MarkIsSelected(false);
+        auto renderContext = itemFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->OnMouseSelectUpdate(ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    }
+
+    ClearSelectedZone();
+}
+
+void GridPattern::ClearSelectedZone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostContext = host->GetRenderContext();
+    CHECK_NULL_VOID(hostContext);
+    hostContext->UpdateMouseSelectWithRect(RectF(), SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+RectF GridPattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset)
+{
+    RectF selectedZone;
+    if (startOffset.GetX() <= endOffset.GetX()) {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom right
+            selectedZone = RectF(startOffset.GetX(), startOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
+        } else {
+            // top right
+            selectedZone = RectF(startOffset.GetX(), endOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
+        }
+    } else {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom left
+            selectedZone = RectF(endOffset.GetX(), startOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
+        } else {
+            // top left
+            selectedZone = RectF(endOffset.GetX(), endOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
+        }
+    }
+
+    return selectedZone;
+}
+
+void GridPattern::OnMouseSelectAll()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto rect = geometryNode->GetFrameRect();
+    rect.SetOffset(OffsetF());
+
+    MultiSelectWithoutKeyboard(rect);
 }
 
 float GridPattern::GetMainContentSize() const

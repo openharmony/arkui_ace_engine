@@ -136,11 +136,12 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (jumpIndex_) {
         estimateOffset_ = listLayoutAlgorithm->GetEstimateOffset();
         if (!itemPosition_.empty()) {
-            currentOffset_ = itemPosition_.begin()->second.first;
+            currentOffset_ = itemPosition_.begin()->second.startPos;
         }
         jumpIndex_.reset();
     }
     auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
+    spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
     lastOffset_ = currentOffset_;
     currentOffset_ = currentOffset_ - finalOffset;
     currentDelta_ = 0.0f;

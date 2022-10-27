@@ -17,8 +17,13 @@ group("pattern_unittest") {
     "badge:badge_pattern_unit_test",
     "blank:blank_pattern_unit_test",
     "button:button_pattern_unit_test",
+    "custom_paint:custom_paint_pattern_test_ng",
+    "flex:flex_pattern_unit_test",
     "qrcode:qrcode_pattern_test_ng",
+    "rating:rating_pattern_test_ng",
     "relative_container:relative_container_pattern_test_ng",
+    "shape:shape_pattern_unit_test",
+    "stepper:stepper_pattern_test_ng",
     "text:text_pattern_test_ng",
   ]
 }

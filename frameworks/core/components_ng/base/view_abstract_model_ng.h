@@ -354,7 +354,11 @@ public:
         ViewAbstract::SetVisibility(visible);
     }
 
-    void SetSharedTransition(const SharedTransitionOption& option) override {}
+    void SetSharedTransition(
+        const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override
+    {
+        ViewAbstract::SetSharedTransition(shareId, option);
+    }
 
     void SetGeometryTransition(const std::string& id) override {}
 
@@ -706,7 +710,7 @@ public:
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
-            hub->AddLongPressEvent(longPress);
+            hub->SetLongPressEvent(longPress);
         } else {
             LOGE("The arg responseType is invalid.");
             return;

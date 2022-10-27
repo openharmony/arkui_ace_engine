@@ -29,21 +29,43 @@ class ACE_EXPORT ListItemGroupLayoutAlgorithm : public LayoutAlgorithm {
 public:
     using PositionMap = std::map<int32_t, std::pair<float, float>>;
 
+    ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex)
+        :headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex) {}
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
+
+    const PositionMap& GetItemPosition() const
+    {
+        return itemPosition_;
+    }
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     int32_t MeasureALine(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t currentIndex, float& mainLen);
+    float MeasureListItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, float startPos);
+    void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
+    void LayoutIndex(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, int32_t index,
+        float crossSize, float startPos);
+    inline RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index) const
+    {
+        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);
+    }
+
+    int32_t headerIndex_;
+    int32_t footerIndex_;
+    int32_t itemStartIndex_;
 
     PositionMap itemPosition_;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
     V2::ListItemAlign itemAlign_ = V2::ListItemAlign::START;
     float spaceWidth_ = 0.0f;
+
+    float headerMainSize_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

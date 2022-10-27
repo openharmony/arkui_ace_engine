@@ -25,8 +25,8 @@
 #include "core/components/image/image_event.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/stack/stack_element.h"
-#include "core/components/theme/icon_theme.h"
 #include "core/components/text_overlay/text_overlay_component.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -287,8 +287,8 @@ void RenderImage::RegisterCallbacksToOverlay()
         }
     });
 
-    auto callback = [weak = WeakClaim(this), pipelineContext = context_,
-        textOverlay = textOverlay_](const RefPtr<PixelMap>& pixmap) {
+    auto callback = [weak = WeakClaim(this), pipelineContext = context_, textOverlay = textOverlay_](
+                        const RefPtr<PixelMap>& pixmap) {
         auto context = pipelineContext.Upgrade();
         if (!context) {
             return;
@@ -386,8 +386,9 @@ void RenderImage::PerformLayout()
         imageComponentSize_ = maxSize;
         formerMaxSize_ = imageComponentSize_;
     }
-    SetLayoutSize(GetLayoutParam().Constrain(imageComponentSize_.IsValid() && !imageComponentSize_.IsInfinite() ?
-        imageComponentSize_ : CalculateBackupImageSize(pictureSize)));
+    SetLayoutSize(GetLayoutParam().Constrain(imageComponentSize_.IsValid() && !imageComponentSize_.IsInfinite()
+                                                 ? imageComponentSize_
+                                                 : CalculateBackupImageSize(pictureSize)));
     if (rawImageSizeUpdated_) {
         previousLayoutSize_ = GetLayoutSize();
     }
@@ -586,12 +587,12 @@ void RenderImage::FireLoadEvent(const Size& picSize, const std::string& errorMsg
         if (loadImgSuccessEvent_ && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS)) {
             // here the last param of [loadImgSuccessEvent_] is [1],
             // which means the callback is triggered by [OnLoadSuccess]
-            loadImgSuccessEvent_(std::make_shared<LoadImageSuccessEvent>(picSize.Width(), picSize.Height(),
-                GetLayoutSize().Width(), GetLayoutSize().Height(), 1));
+            loadImgSuccessEvent_(std::make_shared<LoadImageSuccessEvent>(
+                picSize.Width(), picSize.Height(), GetLayoutSize().Width(), GetLayoutSize().Height(), 1));
         }
         if (loadImgFailEvent_ && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL)) {
-            loadImgFailEvent_(std::make_shared<LoadImageFailEvent>(
-                GetLayoutSize().Width(), GetLayoutSize().Height(), errorMsg));
+            loadImgFailEvent_(
+                std::make_shared<LoadImageFailEvent>(GetLayoutSize().Width(), GetLayoutSize().Height(), errorMsg));
         }
         return;
     }
@@ -632,9 +633,8 @@ void RenderImage::SetRadius(const Border& border)
 
 bool RenderImage::IsSVG(const std::string& src, InternalResource::ResourceId resourceId)
 {
-    return ImageComponent::IsSvgSuffix(src) ||
-           (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
-               resourceId < InternalResource::ResourceId::SVG_END);
+    return ImageComponent::IsSvgSuffix(src) || (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
+                                                   resourceId < InternalResource::ResourceId::SVG_END);
 }
 
 void RenderImage::PerformLayoutBgImage()
@@ -899,7 +899,7 @@ void RenderImage::ClearRenderObject()
     imageRenderPosition_ = Offset();
     forceResize_ = false;
     forceReload_ = false;
-    imageSizeForEvent_ =  { 0.0, 0.0 };
+    imageSizeForEvent_ = { 0.0, 0.0 };
     retryCnt_ = 0;
 }
 
@@ -1006,7 +1006,7 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
     positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
     SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
     auto updatePosition = [renderBox = AceType::Claim(this)](
-                                const std::function<void(const Dimension&, const Dimension&)>& func) {
+                              const std::function<void(const Dimension&, const Dimension&)>& func) {
         if (!renderBox) {
             return;
         }

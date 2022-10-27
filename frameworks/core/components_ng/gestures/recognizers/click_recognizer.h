@@ -30,10 +30,8 @@ class ClickRecognizer : public MultiFingersRecognizer {
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(int32_t fingers, int32_t count) : count_(count)
-    {
-        fingers_ = fingers;
-    }
+    ClickRecognizer(int32_t fingers, int32_t count) : MultiFingersRecognizer(fingers), count_(count) {}
+
     ~ClickRecognizer() override = default;
 
     void OnAccepted() override;
@@ -60,29 +58,43 @@ private:
     void HandleTouchMoveEvent(const TouchEvent& event) override;
     void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
+
+    void OnResetStatus() override
+    {
+        MultiFingersRecognizer::OnResetStatus();
+        tappedCount_ = 0;
+        equalsToFingers_ = false;
+        focusPoint_ = {};
+        fingerDeadlineTimer_.Cancel();
+        tapDeadlineTimer_.Cancel();
+    }
+
     void HandleOverdueDeadline();
     void DeadlineTimer(CancelableCallback<void()>& deadlineTimer, int32_t time);
     Offset ComputeFocusPoint();
-    void Reset();
+
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     bool ExceedSlop();
     void InitGlobalValue(SourceType deviceId);
 
+    bool CheckNeedReceiveEvent();
+
     int32_t count_ = 1;
-    // number of fingers which put on the screen
-    int32_t pointsCount_ = 0;
+
+    // number of tap action.
     int32_t tappedCount_ = 0;
-    // Check whether the pointsCount_ has reached the configured value
+
+    // Check whether the touch point num has reached the configured value
     bool equalsToFingers_ = false;
     // the time when gesture recognition is successful
     TimeStamp time_;
     Offset focusPoint_;
+
     ClickCallback onClick_;
     ClickCallback remoteMessage_;
     bool useCatchMode_ = true;
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
-    std::map<int32_t, TouchEvent> touchPoints_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -32,7 +32,8 @@ using ScrollEndCallback = std::function<void()>;
 
 class GestureEventHub;
 
-class ScrollableEvent : public Referenced {
+class ScrollableEvent : public AceType {
+    DECLARE_ACE_TYPE(ScrollableEvent, AceType)
 public:
     explicit ScrollableEvent(Axis axis) : axis_(axis) {};
     ~ScrollableEvent() override = default;
