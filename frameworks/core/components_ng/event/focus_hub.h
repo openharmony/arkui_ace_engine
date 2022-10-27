@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
@@ -77,7 +78,8 @@ struct ScopeFocusAlgorithm final {
     GetNextFocusNodeFunc getNextFocusNode;
 };
 
-class ACE_EXPORT FocusCallbackEvents : public AceType {
+class ACE_EXPORT FocusCallbackEvents : public virtual AceType {
+    DECLARE_ACE_TYPE(FocusCallbackEvents, AceType)
 public:
     explicit FocusCallbackEvents() = default;
     ~FocusCallbackEvents() override = default;
@@ -187,14 +189,12 @@ private:
     int32_t tabIndex_ = 0;
 };
 
-class ACE_EXPORT FocusHub : public Referenced {
+class ACE_EXPORT FocusHub : public virtual AceType {
+    DECLARE_ACE_TYPE(FocusHub, AceType)
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
-    {
-        eventHub_ = eventHub;
-        focusType_ = type;
-        focusable_ = focusable;
-    }
+        : eventHub_(eventHub), focusable_(focusable), focusType_(type)
+    {}
     ~FocusHub() override = default;
 
     RefPtr<FrameNode> GetFrameNode() const;
@@ -442,7 +442,7 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    void SetScopeFocusAlgorithm(ScopeFocusAlgorithm focusAlgorithm)
+    void SetScopeFocusAlgorithm(const ScopeFocusAlgorithm& focusAlgorithm)
     {
         focusAlgorithm_ = focusAlgorithm;
     }

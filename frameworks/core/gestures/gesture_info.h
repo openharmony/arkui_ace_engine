@@ -35,14 +35,12 @@
 
 namespace OHOS::Ace {
 
-namespace {
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr double DEFAULT_PAN_DISTANCE = 5.0;
 constexpr double DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 300.0;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 100;
-} // namespace
 
 class GestureRecognizer;
 class PipelineBase;
@@ -117,8 +115,8 @@ class PanGestureOption : public AceType {
     DECLARE_ACE_TYPE(PanGestureOption, AceType);
 
 public:
-    PanGestureOption() {}
-    ~PanGestureOption() = default;
+    PanGestureOption() = default;
+    ~PanGestureOption() override = default;
 
     void SetDirection(PanDirection direction)
     {
@@ -128,7 +126,7 @@ public:
         }
     }
 
-    const PanDirection GetDirection() const
+    const PanDirection& GetDirection() const
     {
         return direction_;
     }
@@ -141,7 +139,7 @@ public:
         }
     }
 
-    double GetDistance()
+    double GetDistance() const
     {
         return distance_;
     }
@@ -154,7 +152,7 @@ public:
         }
     }
 
-    int32_t GetFingers()
+    int32_t GetFingers() const
     {
         return fingers_;
     }
@@ -192,7 +190,7 @@ public:
 private:
     PanDirection direction_;
     double distance_ = DEFAULT_PAN_DISTANCE;
-    int32_t fingers_ = DEFAULT_PAN_FINGER;
+    int32_t fingers_ = 1;
     std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc> onPanFingersIds_;
     std::unordered_map<typename OnPanDirectionFunc::IdType, OnPanDirectionFunc> onPanDirectionIds_;
     std::unordered_map<typename OnPanDistanceFunc::IdType, OnPanDistanceFunc> onPanDistanceIds_;
@@ -217,27 +215,29 @@ class PasteData : public AceType {
     DECLARE_ACE_TYPE(PasteData, AceType);
 
 public:
-    PasteData() {}
-    ~PasteData() = default;
+    PasteData() = default;
+    ~PasteData() override = default;
 
-    void SetPlainText(const std::string plainText)
+    void SetPlainText(const std::string& plainText)
     {
         plainText_ = plainText;
     }
 
-    const std::string GetPlainText() const
+    const std::string& GetPlainText() const
     {
         return plainText_;
     }
 
 private:
-    std::string plainText_ = "";
+    std::string plainText_;
 };
 
 class DragEvent : public AceType {
+    DECLARE_ACE_TYPE(DragEvent, AceType)
+
 public:
-    DragEvent() {}
-    ~DragEvent() = default;
+    DragEvent() = default;
+    ~DragEvent() override = default;
 
     void SetPasteData(const RefPtr<PasteData>& pasteData)
     {
@@ -269,12 +269,12 @@ public:
         y_ = y;
     }
 
-    void SetDescription(const std::string description)
+    void SetDescription(const std::string& description)
     {
         description_ = description;
     }
 
-    const std::string GetDescription() const
+    const std::string& GetDescription() const
     {
         return description_;
     }
@@ -293,7 +293,7 @@ private:
     RefPtr<PasteData> pasteData_;
     double x_ = 0.0;
     double y_ = 0.0;
-    std::string description_ = "";
+    std::string description_;
     RefPtr<PixelMap> pixelMap_;
 };
 
@@ -307,9 +307,11 @@ struct FingerInfo {
 };
 
 class ItemDragInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ItemDragInfo, BaseEventInfo);
+
 public:
     ItemDragInfo() : BaseEventInfo("itemDrag") {}
-    ~ItemDragInfo() = default;
+    ~ItemDragInfo() override = default;
 
     double GetX() const
     {
@@ -337,9 +339,11 @@ private:
 };
 
 class GestureEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(GestureEvent, BaseEventInfo);
+
 public:
     GestureEvent() : BaseEventInfo("gesture") {}
-    ~GestureEvent() = default;
+    ~GestureEvent() override = default;
 
     void SetRepeat(bool repeat)
     {

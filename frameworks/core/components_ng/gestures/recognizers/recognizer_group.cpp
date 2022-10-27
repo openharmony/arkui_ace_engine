@@ -85,6 +85,11 @@ void RecognizerGroup::OnResetStatus()
 {
     MultiFingersRecognizer::OnResetStatus();
     if (!remainChildOnResetStatus_) {
+        for (const auto& child : recognizers_) {
+            if (child) {
+                child->SetGestureGroup(nullptr);
+            }
+        }
         recognizers_.clear();
     }
 }

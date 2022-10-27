@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class ButtonAccessibilityProperty : public AccessibilityProperty {
-    DECLARE_ACE_TYPE(ButtonAccessibility, AccessibilityProperty);
+    DECLARE_ACE_TYPE(ButtonAccessibilityProperty, AccessibilityProperty);
 
 public:
     ButtonAccessibilityProperty() = default;

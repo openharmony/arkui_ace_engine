@@ -792,12 +792,12 @@ void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
 
 void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 {
-    if (isDragged_) {
-        return;
-    }
-
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        LOGI("current context is the source of drag");
+        return;
+    }
 
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);

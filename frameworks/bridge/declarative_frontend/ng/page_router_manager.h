@@ -60,6 +60,7 @@ struct RouterTask {
 };
 
 class PageRouterManager : public AceType {
+    DECLARE_ACE_TYPE(PageRouterManager, AceType)
 public:
     PageRouterManager() = default;
     ~PageRouterManager() override = default;
@@ -118,7 +119,6 @@ public:
     void SetIsCard()
     {
         isCardRouter = true;
-        return;
     }
 
 private:

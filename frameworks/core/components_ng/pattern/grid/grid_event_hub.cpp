@@ -167,8 +167,8 @@ void GridEventHub::HandleOnItemDragEnd(const GestureEvent& info)
     }
 
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->DestroyDragWindow();
     dragDropProxy_->OnItemDragEnd(info, draggedIndex_);
+    dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
     draggedIndex_ = 0;
 }
