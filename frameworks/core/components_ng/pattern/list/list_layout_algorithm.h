@@ -35,12 +35,18 @@ enum class ScrollIndexAlignment {
     ALIGN_BUTTON = 1,
 };
 
+struct ListItemInfo {
+    float startPos;
+    float endPos;
+    bool isGroup;
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    using PositionMap = std::map<int32_t, std::pair<float, float>>;
+    using PositionMap = std::map<int32_t, ListItemInfo>;
 
     ListLayoutAlgorithm(int32_t startIndex, int32_t endIndex) : preStartIndex_(startIndex), preEndIndex_(endIndex) {}
 
@@ -129,9 +135,9 @@ public:
             return 0.0f;
         }
         if (GetStartIndex() == 0) {
-            return itemPosition_.begin()->second.first;
+            return itemPosition_.begin()->second.startPos;
         }
-        return itemPosition_.begin()->second.first - spaceWidth_;
+        return itemPosition_.begin()->second.startPos - spaceWidth_;
     }
 
     float GetEndPosition() const
@@ -140,9 +146,9 @@ public:
             return 0.0f;
         }
         if (GetEndIndex() == totalItemCount_ - 1) {
-            return itemPosition_.rbegin()->second.second;
+            return itemPosition_.rbegin()->second.endPos;
         }
-        return itemPosition_.rbegin()->second.second + spaceWidth_;
+        return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
