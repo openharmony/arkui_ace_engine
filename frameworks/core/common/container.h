@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_H
 
 #include <functional>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
@@ -29,6 +30,7 @@
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -254,6 +256,8 @@ public:
     {
         return IdeDebuggerConnected_;
     }
+
+    virtual void GetCardFrontendMap(std::unordered_map<uint64_t, WeakPtr<Frontend>>& cardFrontendMap) const {}
 
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
