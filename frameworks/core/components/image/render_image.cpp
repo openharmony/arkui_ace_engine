@@ -996,7 +996,7 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
     auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
     positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
     positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
-    SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
+    SetLocalPoint(startPoint_ - GetGlobalOffset());
     auto updatePosition = [renderBox = AceType::Claim(this)](
                                 const std::function<void(const Dimension&, const Dimension&)>& func) {
         if (!renderBox) {
