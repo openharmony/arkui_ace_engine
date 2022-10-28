@@ -64,7 +64,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
     }
-    
+
     auto height = static_cast<float>(paragraph_->GetHeight());
     double baselineOffset = 0.0;
     textStyle.GetBaselineOffset().NormalizeToPx(
