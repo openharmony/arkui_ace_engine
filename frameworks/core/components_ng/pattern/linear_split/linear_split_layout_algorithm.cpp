@@ -55,7 +55,7 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
 
     auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childConstraint.maxSize = maxSize;
+    childConstraint.maxSize = layoutConstraint->selfIdealSize.ConvertToSizeT();
 
     float allocatedSize = 0.0f;
     float crossSize = 0.0f;
