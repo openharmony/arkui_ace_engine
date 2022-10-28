@@ -16,13 +16,37 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components_ng/pattern/grid_row/grid_row_view.h"
+#include "bridge/declarative_frontend/jsview/models/grid_row_model_impl.h"
+#include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
-#include "core/components_v2/grid_layout/grid_row_component.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<GridRowModel> GridRowModel::instance_;
+
+GridRowModel* GridRowModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::GridRowModelNG());
+#else
+        instance_.reset(new NG::GridRowModelNG());
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::GridRowModelNG());
+        } else {
+            instance_.reset(new Framework::GridRowModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::Framework {
 namespace {
 
@@ -111,11 +135,15 @@ void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gut
             gutterOptions[5] = xxlDimension;
         }
         InheritGridRowGutterOption(gutter, gutterOptions, isHorizontal);
-    } else if (gutterObject->IsNumber()) {
+    } else {
+        Dimension dim;
+        if (!JSContainerBase::ParseJsDimensionVp(gutterObject, dim)) {
+            return;
+        }
         if (isHorizontal) {
-            gutter->SetXGutter(Dimension(gutterObject->ToNumber<double>()));
+            gutter->SetXGutter(dim);
         } else {
-            gutter->SetYGutter(Dimension(gutterObject->ToNumber<double>()));
+            gutter->SetYGutter(dim);
         }
     }
 }
@@ -230,47 +258,8 @@ V2::GridRowDirection ParserDirection(const JSRef<JSVal>& jsValue)
 
 } // namespace
 
-void JSGridRow::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSGridRow>::Declare("GridRow");
-    JSClass<JSGridRow>::StaticMethod("create", &JSGridRow::Create, MethodOptions::NONE);
-    JSClass<JSGridRow>::StaticMethod("height", &JSGridRow::Height, MethodOptions::NONE);
-    JSClass<JSGridRow>::StaticMethod("columns", &JSGridRow::Columns, MethodOptions::NONE);
-    JSClass<JSGridRow>::StaticMethod("gutter", &JSGridRow::Gutter, MethodOptions::NONE);
-    JSClass<JSGridRow>::StaticMethod("breakpoints", &JSGridRow::Breakpoints, MethodOptions::NONE);
-    JSClass<JSGridRow>::StaticMethod("direction", &JSGridRow::Direction, MethodOptions::NONE);
-    JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent, MethodOptions::NONE);
-    JSClass<JSGridRow>::Inherit<JSContainerBase>();
-    JSClass<JSGridRow>::Bind<>(globalObj);
-}
-
-void JSGridRow::Height(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    JSViewAbstract::JsHeight(info[0]);
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
-    if (grid) {
-        grid->SetHasContainerHeight(true);
-    }
-}
-
-inline void FillComponent(const RefPtr<V2::GridRowComponent>& component, const RefPtr<V2::GridContainerSize>& col,
-    const RefPtr<V2::Gutter>& gutter, const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction)
-{
-    component->SetTotalCol(col);
-    component->SetGutter(gutter);
-    component->SetBreakPoints(breakpoints);
-    component->SetDirection(direction);
-}
-
 void JSGridRow::Create(const JSCallbackInfo& info)
 {
-    bool isNewPipeline = Container::IsCurrentUseNewPipeline();
-
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto gridRow = JSRef<JSObject>::Cast(info[0]);
         auto columns = gridRow->GetProperty("columns");
@@ -283,89 +272,47 @@ void JSGridRow::Create(const JSCallbackInfo& info)
         auto parsedBreakpoints = ParserBreakpoints(breakpoints);
         auto parsedDirection = ParserDirection(direction);
 
-        if (isNewPipeline) {
-            NG::GridRowView::Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
-        } else {
-            auto component = AceType::MakeRefPtr<V2::GridRowComponent>();
-            ViewStackProcessor::GetInstance()->Push(component);
-            FillComponent(component, parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
-        }
-        return;
-    }
-
-    if (isNewPipeline) {
-        NG::GridRowView::Create();
+        GridRowModel::GetInstance()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
     } else {
-        auto component = AceType::MakeRefPtr<V2::GridRowComponent>();
-        ViewStackProcessor::GetInstance()->Push(component);
-    }
-}
-
-void JSGridRow::Columns(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
-    if (grid) {
-        grid->SetTotalCol(ParserColumns(info[0]));
-    }
-}
-void JSGridRow::Gutter(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
-    if (grid) {
-        grid->SetGutter(ParserGutter(info[0]));
-    }
-}
-
-void JSGridRow::Breakpoints(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
-    if (grid) {
-        grid->SetBreakPoints(ParserBreakpoints(info[0]));
-    }
-}
-
-void JSGridRow::Direction(const JSCallbackInfo& info)
-{
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
-    if (grid) {
-        grid->SetDirection(ParserDirection(info[0]));
+        GridRowModel::GetInstance()->Create();
     }
 }
 
 void JSGridRow::JsBreakpointEvent(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onBreakpointChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                                      const std::string& value) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("GridRow.onBreakpointChange");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::GridRowView::SetOnBreakPointChange(std::move(onBreakpointChange));
-    } else {
-        JSViewBindEvent(&V2::GridRowComponent::SetbreakPointChange, info);
+    if (info.Length() < 1) {
+        LOGW("No breakpoint event info.");
+        return;
     }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onBreakpointChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                  const std::string& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("GridRow.onBreakpointChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    GridRowModel::GetInstance()->SetOnBreakPointChange(onBreakpointChange);
+}
+
+void JSGridRow::Height(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    JSViewAbstract::JsHeight(info[0]);
+    GridRowModel::GetInstance()->SetHeight();
+}
+
+void JSGridRow::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSGridRow>::Declare("GridRow");
+    JSClass<JSGridRow>::StaticMethod("create", &JSGridRow::Create);
+    JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent);
+    JSClass<JSGridRow>::StaticMethod("height", &JSGridRow::Height);
+    JSClass<JSGridRow>::Inherit<JSContainerBase>();
+    JSClass<JSGridRow>::Bind<>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

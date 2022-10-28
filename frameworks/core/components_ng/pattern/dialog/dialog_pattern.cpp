@@ -22,7 +22,6 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"

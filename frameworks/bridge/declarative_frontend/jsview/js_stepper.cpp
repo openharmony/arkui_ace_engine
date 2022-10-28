@@ -15,19 +15,36 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
 
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/box/box_component.h"
-#include "core/components/navigator/navigator_component.h"
+#include "bridge/declarative_frontend/jsview/models/stepper_model_impl.h"
+#include "core/components_ng/pattern/stepper/stepper_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/core/components/stepper/stepper_component.h"
-#include "frameworks/core/components/stepper/stepper_theme.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<StepperModel> StepperModel::instance_ = nullptr;
+
+StepperModel* StepperModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::StepperModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::StepperModelNG());
+        } else {
+            instance_.reset(new Framework::StepperModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 void JSStepper::Create(const JSCallbackInfo& info)
 {
-    std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-    auto stepperComponent = AceType::MakeRefPtr<OHOS::Ace::StepperComponent>(componentChildren);
     uint32_t index = 0;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         index = 0;
@@ -38,30 +55,7 @@ void JSStepper::Create(const JSCallbackInfo& info)
             index = stepperValue->ToNumber<uint32_t>();
         }
     }
-    stepperComponent->SetIndex(index);
-    RefPtr<StepperTheme> theme = GetTheme<StepperTheme>();
-    if (theme) {
-        stepperComponent->SetDefaultPaddingStart(theme->GetDefaultPaddingStart());
-        stepperComponent->SetDefaultPaddingEnd(theme->GetDefaultPaddingEnd());
-        stepperComponent->SetProgressColor(theme->GetProgressColor());
-        stepperComponent->SetProgressDiameter(theme->GetProgressDiameter());
-        stepperComponent->SetArrowWidth(theme->GetArrowWidth());
-        stepperComponent->SetArrowHeight(theme->GetArrowHeight());
-        stepperComponent->SetArrowColor(theme->GetArrowColor());
-        stepperComponent->SetDisabledColor(theme->GetDisabledColor());
-        stepperComponent->SetRadius(theme->GetRadius());
-        stepperComponent->SetButtonPressedColor(theme->GetButtonPressedColor());
-        stepperComponent->SetButtonPressedHeight(theme->GetButtonPressedHeight());
-        stepperComponent->SetControlHeight(theme->GetControlHeight());
-        stepperComponent->SetControlMargin(theme->GetControlMargin());
-        stepperComponent->SetControlPadding(theme->GetControlPadding());
-        stepperComponent->SetFocusColor(theme->GetFocusColor());
-        stepperComponent->SetFocusBorderWidth(theme->GetFocusBorderWidth());
-        stepperComponent->SetMouseHoverColor(theme->GetMouseHoverColor());
-        stepperComponent->SetDisabledAlpha(theme->GetDisabledAlpha());
-    }
-    ViewStackProcessor::GetInstance()->ClaimElementId(stepperComponent);
-    ViewStackProcessor::GetInstance()->Push(stepperComponent);
+    StepperModel::GetInstance()->Create(index);
 }
 
 void JSStepper::JSBind(BindingTarget globalObj)
@@ -80,44 +74,79 @@ void JSStepper::JSBind(BindingTarget globalObj)
     JSClass<JSStepper>::Bind<>(globalObj);
 }
 
-void JSStepper::OnFinish(const JSCallbackInfo& args)
+void JSStepper::OnFinish(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&StepperComponent::SetOnFinish, args)) {
-        LOGW("Failed to bind event");
+    if (info.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
     }
-    args.ReturnSelf();
+    if (!info[0]->IsFunction()) {
+        LOGW("Argument is not a function object");
+        return;
+    }
+    StepperModel::GetInstance()->SetOnFinish(
+        JsEventCallback<void()>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0])));
+    info.ReturnSelf();
 }
 
-void JSStepper::OnSkip(const JSCallbackInfo& args)
+void JSStepper::OnSkip(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&StepperComponent::SetOnSkip, args)) {
-        LOGW("Failed to bind event");
+    if (info.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
     }
-    args.ReturnSelf();
+    if (!info[0]->IsFunction()) {
+        LOGW("Argument is not a function object");
+        return;
+    }
+    StepperModel::GetInstance()->SetOnSkip(
+        JsEventCallback<void()>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0])));
+    info.ReturnSelf();
 }
 
-void JSStepper::OnChange(const JSCallbackInfo& args)
+void JSStepper::OnChange(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&StepperComponent::SetOnChange, args)) {
-        LOGW("Failed to bind event");
+    if (info.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
     }
-    args.ReturnSelf();
+    if (!info[0]->IsFunction()) {
+        LOGW("Argument is not a function object");
+        return;
+    }
+    StepperModel::GetInstance()->SetOnChange(
+        JsEventCallback<void(int32_t, int32_t)>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0])));
+    info.ReturnSelf();
 }
 
-void JSStepper::OnNext(const JSCallbackInfo& args)
+void JSStepper::OnNext(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&StepperComponent::SetOnNext, args)) {
-        LOGW("Failed to bind event");
+    if (info.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
     }
-    args.ReturnSelf();
+    if (!info[0]->IsFunction()) {
+        LOGW("Argument is not a function object");
+        return;
+    }
+    StepperModel::GetInstance()->SetOnNext(
+        JsEventCallback<void(int32_t, int32_t)>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0])));
+    info.ReturnSelf();
 }
 
-void JSStepper::OnPrevious(const JSCallbackInfo& args)
+void JSStepper::OnPrevious(const JSCallbackInfo& info)
 {
-    if (!JSViewBindEvent(&StepperComponent::SetOnPrevious, args)) {
-        LOGW("Failed to bind event");
+    if (info.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
     }
-    args.ReturnSelf();
+    if (!info[0]->IsFunction()) {
+        LOGW("Argument is not a function object");
+        return;
+    }
+    StepperModel::GetInstance()->SetOnPrevious(
+        JsEventCallback<void(int32_t, int32_t)>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0])));
+    info.ReturnSelf();
 }
 
 } // namespace OHOS::Ace::Framework

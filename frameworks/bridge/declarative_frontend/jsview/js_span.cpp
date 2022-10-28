@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -45,7 +46,7 @@ SpanModel* SpanModel::GetInstance()
 {
     if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TextModelNG());
+        instance_.reset(new NG::SpanModelNG());
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::SpanModelNG());
@@ -120,7 +121,7 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
         LOGE("Parse FontFamilies failed");
         return;
     }
-    TextModel::GetInstance()->SetFontFamily(fontFamilies);
+    SpanModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
 void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
@@ -133,14 +134,14 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
-    TextModel::GetInstance()->SetLetterSpacing(value);
+    SpanModel::GetInstance()->SetLetterSpacing(value);
 }
 
 void JSSpan::SetTextCase(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(TEXT_CASES.size())) {
         auto textCase = TEXT_CASES[value];
-        TextModel::GetInstance()->SetTextCase(textCase);
+        SpanModel::GetInstance()->SetTextCase(textCase);
     } else {
         LOGE("Text textCase(%{public}d) illegal value", value);
     }

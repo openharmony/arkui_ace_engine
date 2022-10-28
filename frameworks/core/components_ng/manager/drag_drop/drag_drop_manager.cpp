@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -30,6 +31,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     const RefPtr<PixelMap>& pixelMap, const GestureEvent& info)
 {
     CHECK_NULL_RETURN(pixelMap, nullptr);
+    isDragged_ = true;
 #if !defined(PREVIEW)
     if (dragWindow_) {
         LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
@@ -48,6 +50,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 {
     dragWindowRootNode_ = CreateDragRootNode(customNode);
     CHECK_NULL_RETURN(dragWindowRootNode_, nullptr);
+    isDragged_ = true;
 #if !defined(PREVIEW)
     if (dragWindow_) {
         LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
@@ -67,12 +70,10 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 
 void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height)
 {
+    LOGI("CreateDragWindow");
 #if !defined(PREVIEW)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-
-    pipeline->SetIsDragged(true);
-
     auto rect = pipeline->GetCurrentWindowRect();
     dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
         static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
@@ -437,6 +438,8 @@ void DragDropManager::DestroyDragWindow()
     if (dragWindowRootNode_) {
         dragWindowRootNode_ = nullptr;
     }
+    LOGI("DestroyDragWindow");
+    isDragged_ = false;
     currentId_ = -1;
 }
 

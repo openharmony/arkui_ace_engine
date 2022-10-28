@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"

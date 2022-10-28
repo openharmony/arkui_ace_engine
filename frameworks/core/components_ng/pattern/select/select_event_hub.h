@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_EVENT_HUB_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_EVENT_HUB_H
+
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_EVENT_HUB_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_EVENT_HUB_H
 
 namespace OHOS::Ace::NG {
 
@@ -46,6 +46,8 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectEventHub);
 };
+
 } // namespace OHOS::Ace::NG
-#endif
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_EVENT_HUB_H
  

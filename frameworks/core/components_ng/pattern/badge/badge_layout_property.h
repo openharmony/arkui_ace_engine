@@ -65,7 +65,7 @@ public:
         LEFT,
     };
 
-    BadgePosition& GetBadgePosition()
+    const BadgePosition& GetBadgePosition() const
     {
         return propBadgePosition_;
     }
@@ -83,6 +83,23 @@ public:
     void SetBadgeCircleRadius(const double& badgeCircleRadius)
     {
         badgeCircleRadius_ = badgeCircleRadius;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
+    static std::string GetBadgePositionString(BadgePosition& position)
+    {
+        switch (position) {
+            case BadgePosition::RIGHT_TOP:
+                return "BadgePosition.RightTop";
+            case BadgePosition::RIGHT:
+                return "BadgePosition.Right";
+            case BadgePosition::LEFT:
+                return "BadgePosition.Left";
+            default:
+                break;
+        }
+        return "-";
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeValue, std::string, PROPERTY_UPDATE_MEASURE);

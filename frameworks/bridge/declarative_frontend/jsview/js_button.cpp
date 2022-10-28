@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -226,6 +227,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("backgroundColor", &JSButton::JsBackgroundColor);
     JSClass<JSButton>::StaticMethod("width", &JSButton::JsWidth);
     JSClass<JSButton>::StaticMethod("height", &JSButton::JsHeight);
+    JSClass<JSButton>::StaticMethod("aspectRatio", &JSButton::JsAspectRatio);
     JSClass<JSButton>::StaticMethod("borderRadius", &JSButton::JsRadius);
     JSClass<JSButton>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -450,8 +452,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     auto impl = inspector->GetInspectorFunctionImpl();
 
     RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
-                        GestureEvent& info) {
+    auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         if (impl) {
             impl->UpdateEventInfo(info);
@@ -471,19 +472,18 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     }
 
     RefPtr<JsClickFunction> jsClickEventFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    EventMarker clickEventId([execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](
-                                    const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-        auto newInfo = *clickInfo;
-        if (impl) {
-            impl->UpdateEventInfo(newInfo);
-        }
-        ACE_SCORING_EVENT("Button.onClick");
-        func->Execute(newInfo);
-    });
-    auto buttonComponent =
-        AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    EventMarker clickEventId(
+        [execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            auto newInfo = *clickInfo;
+            if (impl) {
+                impl->UpdateEventInfo(newInfo);
+            }
+            ACE_SCORING_EVENT("Button.onClick");
+            func->Execute(newInfo);
+        });
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (buttonComponent) {
         buttonComponent->SetKeyEnterEventId(clickEventId);
     }
@@ -590,6 +590,29 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
                 AnimatableDimension(buttonComponent->GetHeight(), option), VisualState::NORMAL);
         }
     }
+}
+
+void JSButton::JsAspectRatio(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsAspectRatio(info);
+        return;
+    }
+    JSViewAbstract::JsAspectRatio(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    double value = 0.0;
+    if (!ParseJsDouble(info[0], value)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (!buttonComponent) {
+        return;
+    }
+    buttonComponent->SetAspectRatio(value);
 }
 
 void JSButton::JsSize(const JSCallbackInfo& info)

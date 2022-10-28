@@ -506,6 +506,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
     auto pageNode =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
     auto result = loadJs_(target.path);
     if (!result) {
@@ -529,6 +530,7 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
     auto pageNode =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
 
     if (!loadCard_) {

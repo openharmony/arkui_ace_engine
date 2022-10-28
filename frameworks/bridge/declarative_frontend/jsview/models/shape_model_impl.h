@@ -27,6 +27,17 @@ public:
     void SetViewPort(const Dimension& dimLeft, const Dimension& dimTop, const Dimension& dimWidth,
         const Dimension& dimHeight) override;
     void InitBox(RefPtr<PixelMap>& pixMap) override;
+    void SetStroke(const Color& color) override;
+    void SetFill(const Color& color) override;
+    void SetStrokeDashOffset(const Ace::Dimension& dashOffset) override;
+    void SetStrokeLineCap(int lineCapStyle) override;
+    void SetStrokeLineJoin(int lineJoinStyle) override;
+    void SetStrokeMiterLimit(double miterLimit) override;
+    void SetStrokeOpacity(double opacity) override;
+    void SetFillOpacity(double opacity) override;
+    void SetStrokeWidth(const Ace::Dimension& lineWidth) override;
+    void SetStrokeDashArray(const std::vector<Ace::Dimension>& dashArray) override;
+    void SetAntiAlias(bool antiAlias) override;
     void SetWidth() override;
     void SetHeight() override;
 };

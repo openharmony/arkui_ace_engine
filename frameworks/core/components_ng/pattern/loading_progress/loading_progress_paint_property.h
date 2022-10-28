@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_PAINT_PROPERTY_H
 
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_style.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-    
+
 class ACE_EXPORT LoadingProgressPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(LoadingProgressPaintProperty, PaintProperty);
 
@@ -40,6 +42,18 @@ public:
     {
         PaintProperty::Reset();
         ResetColor();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(progressTheme);
+
+        json->Put("color", propColor_.value_or(progressTheme->GetLoadingColor()).ColorToString().c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);

@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
-#include "grid_col_view.h"
-
-#include "grid_col_layout_pattern.h"
+#include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/grid_col/grid_col_layout_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-void GridColView::Create()
+void GridColModelNG::Create()
 {
     RefPtr<V2::GridContainerSize> span = AceType::MakeRefPtr<V2::GridContainerSize>(1);
     RefPtr<V2::GridContainerSize> offset = AceType::MakeRefPtr<V2::GridContainerSize>(0);
@@ -33,7 +32,7 @@ void GridColView::Create()
     Create(span, offset, order);
 }
 
-void GridColView::Create(const RefPtr<V2::GridContainerSize>& span, const RefPtr<V2::GridContainerSize>& offset,
+void GridColModelNG::Create(const RefPtr<V2::GridContainerSize>& span, const RefPtr<V2::GridContainerSize>& offset,
     const RefPtr<V2::GridContainerSize>& order)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -47,17 +46,17 @@ void GridColView::Create(const RefPtr<V2::GridContainerSize>& span, const RefPtr
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, *order);
 }
 
-void GridColView::SetSpan(const RefPtr<V2::GridContainerSize>& span)
+void GridColModelNG::SetSpan(const RefPtr<V2::GridContainerSize>& span)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, *span);
 }
 
-void GridColView::SetOffset(const RefPtr<V2::GridContainerSize>& offset)
+void GridColModelNG::SetOffset(const RefPtr<V2::GridContainerSize>& offset)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, *offset);
 }
 
-void GridColView::SetOrder(const RefPtr<V2::GridContainerSize>& order)
+void GridColModelNG::SetOrder(const RefPtr<V2::GridContainerSize>& order)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, *order);
 }

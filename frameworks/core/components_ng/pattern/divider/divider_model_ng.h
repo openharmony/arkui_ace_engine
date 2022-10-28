@@ -28,9 +28,6 @@ public:
     void DividerColor(const Color& value) override;
     void StrokeWidth(const Dimension& value) override;
     void LineCap(const enum LineCap& value) override;
-
-private:
-    static void LoadTheme(const RefPtr<FrameNode>& frameNode);
 };
 
 } // namespace OHOS::Ace::NG

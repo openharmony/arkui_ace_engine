@@ -18,21 +18,22 @@
 #include <optional>
 #include <string>
 
+#include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_key_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_web_controller.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_view.h"
 #include "core/pipeline/pipeline_base.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -101,11 +102,9 @@ public:
     static void JSBind(BindingTarget globalObj)
     {
         JSClass<JSFullScreenExitHandler>::Declare("FullScreenExitHandler");
-        JSClass<JSFullScreenExitHandler>::CustomMethod("exitFullScreen",
-            &JSFullScreenExitHandler::ExitFullScreen);
-        JSClass<JSFullScreenExitHandler>::Bind(globalObj,
-            &JSFullScreenExitHandler::Constructor,
-            &JSFullScreenExitHandler::Destructor);
+        JSClass<JSFullScreenExitHandler>::CustomMethod("exitFullScreen", &JSFullScreenExitHandler::ExitFullScreen);
+        JSClass<JSFullScreenExitHandler>::Bind(
+            globalObj, &JSFullScreenExitHandler::Constructor, &JSFullScreenExitHandler::Destructor);
     }
 
     void SetHandler(const RefPtr<FullScreenExitHandler>& handler)
@@ -1340,7 +1339,6 @@ JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& event
     return JSRef<JSVal>::Cast(obj);
 }
 
-
 JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -1516,7 +1514,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         return;
     }
     LOGI("JSWeb::Create src:%{public}s", dstSrc->c_str());
-    
+
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {
         LOGE("web create error, controllerObj is invalid");
@@ -1532,13 +1530,13 @@ void JSWeb::Create(const JSCallbackInfo& info)
     CreateInOldPipeline(controller, setWebIdFunction, dstSrc);
 }
 
-void JSWeb::CreateInNewPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
-    std::optional<std::string> dstSrc)
+void JSWeb::CreateInNewPipeline(
+    JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction, std::optional<std::string> dstSrc)
 {
     if (setWebIdFunction->IsFunction()) {
-        auto setIdCallback = [webviewController = controller,
-            func = JSRef<JSFunc>::Cast(setWebIdFunction)](int32_t webId) {
-            JSRef<JSVal> argv[] = {JSRef<JSVal>::Make(ToJSValue(webId))};
+        auto setIdCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebIdFunction)](
+                                 int32_t webId) {
+            JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
         };
         NG::WebView::Create(dstSrc.value(), std::move(setIdCallback));
@@ -1548,8 +1546,8 @@ void JSWeb::CreateInNewPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebI
     NG::WebView::Create(dstSrc.value(), jsWebController->GetController());
 }
 
-void JSWeb::CreateInOldPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
-    std::optional<std::string> dstSrc)
+void JSWeb::CreateInOldPipeline(
+    JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction, std::optional<std::string> dstSrc)
 {
     RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(dstSrc.value());
@@ -1564,12 +1562,11 @@ void JSWeb::CreateInOldPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebI
     JSInteractableView::SetFocusNode(true);
 }
 
-void JSWeb::CreateWithWebviewController(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
-    RefPtr<WebComponent>& webComponent)
+void JSWeb::CreateWithWebviewController(
+    JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction, RefPtr<WebComponent>& webComponent)
 {
-    auto setIdCallback = [webviewController = controller,
-        func = JSRef<JSFunc>::Cast(setWebIdFunction)](int32_t webId) {
-        JSRef<JSVal> argv[] = {JSRef<JSVal>::Make(ToJSValue(webId))};
+    auto setIdCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebIdFunction)](int32_t webId) {
+        JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
         func->Call(webviewController, 1, argv);
     };
     webComponent->SetSetWebIdCallback(std::move(setIdCallback));
@@ -1860,8 +1857,8 @@ void JSWeb::OnFullScreenExit(const JSCallbackInfo& args)
         return;
     }
 
-    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
-        (const BaseEventInfo* info) {
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto eventInfo = TypeInfoHelper::DynamicCast<FullScreenExitEvent>(info);
             func->Execute(*eventInfo);
@@ -1898,14 +1895,13 @@ void JSWeb::OnFullScreenEnter(const JSCallbackInfo& args)
         NG::WebView::SetOnFullScreenEnterImpl(std::move(uiCallback));
         return;
     }
-    auto jsCallback = [func = std::move(jsFunc)]
-        (const BaseEventInfo* info) -> void {
-            ACE_SCORING_EVENT("OnFullScreenEnter CallBack");
-            CHECK_NULL_VOID(func);
-            auto eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
-            CHECK_NULL_VOID(eventInfo);
-            func->Execute(*eventInfo);
-        };
+    auto jsCallback = [func = std::move(jsFunc)](const BaseEventInfo* info) -> void {
+        ACE_SCORING_EVENT("OnFullScreenEnter CallBack");
+        CHECK_NULL_VOID(func);
+        auto eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
+        func->Execute(*eventInfo);
+    };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetOnFullScreenEnterImpl(std::move(jsCallback));
@@ -2785,10 +2781,9 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto jsProxyFunction = controller->GetProperty("jsProxy");
     if (jsProxyFunction->IsFunction()) {
         LOGI("The controller is WebviewController.");
-        auto jsProxyCallback = [webviewController = controller,
-            func = JSRef<JSFunc>::Cast(jsProxyFunction),
-            object, name, methodList]() {
-            JSRef<JSVal> argv[] = {object, name, methodList};
+        auto jsProxyCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(jsProxyFunction), object,
+                                   name, methodList]() {
+            JSRef<JSVal> argv[] = { object, name, methodList };
             func->Call(webviewController, 3, argv);
         };
         if (Container::IsCurrentUseNewPipeline()) {
@@ -3334,7 +3329,7 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
                 auto component = ParseDragNode(ret);
                 if (component) {
                     LOGI("use custom builder param.");
-                    itemInfo.customComponent =  AceType::DynamicCast<Component>(component);
+                    itemInfo.customComponent = AceType::DynamicCast<Component>(component);
                     return;
                 }
 
@@ -3581,23 +3576,23 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
         NG::WebView::SetWindowNewEvent(std::move(uiCallback));
         return;
     }
-    auto eventMarker =
-        [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::shared_ptr<BaseEventInfo>& info) {
-            ACE_SCORING_EVENT("OnWindowNew CallBack");
-            auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
-            if (!func || !HandleWindowNewEvent(eventInfo)) {
-                return;
-            }
-            auto jsTask = SingleTaskExecutor::Make(Container::CurrentTaskExecutor(), TaskExecutor::TaskType::JS);
-            if (jsTask.IsRunOnCurrentThread()) {
+    auto eventMarker = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
+                           const std::shared_ptr<BaseEventInfo>& info) {
+        ACE_SCORING_EVENT("OnWindowNew CallBack");
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
+        if (!func || !HandleWindowNewEvent(eventInfo)) {
+            return;
+        }
+        auto jsTask = SingleTaskExecutor::Make(Container::CurrentTaskExecutor(), TaskExecutor::TaskType::JS);
+        if (jsTask.IsRunOnCurrentThread()) {
+            func->Execute(*eventInfo);
+        } else {
+            jsTask.PostSyncTask([execCtx, func = func, eventInfo]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Execute(*eventInfo);
-            } else {
-                jsTask.PostSyncTask([execCtx, func = func, eventInfo]() {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    func->Execute(*eventInfo);
-                });
-            }
-        };
+            });
+        }
+    };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetWindowNewEvent(eventMarker);

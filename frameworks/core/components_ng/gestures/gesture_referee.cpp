@@ -14,6 +14,9 @@
  */
 #include "core/components_ng/gestures/gesture_referee.h"
 
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::NG {
@@ -26,65 +29,128 @@ void GestureScope::AddMember(const RefPtr<GestureRecognizer>& recognizer)
     }
 
     if (Existed(recognizer)) {
-        LOGE("gesture recognizer has already been added.");
+        LOGW("gesture recognizer has already been added.");
         return;
     }
 
-
-    recognizer->SetRefereeState(RefereeState::DETECTING);
-
-    switch (recognizer->GetPriority()) {
-        case GesturePriority::Parallel:
-            parallelRecognizers_.emplace_back(recognizer);
-            break;
-        case GesturePriority::High:
-            highRecognizers_.emplace_back(recognizer);
-            break;
-        case GesturePriority::Low:
-            lowRecognizers_.emplace_back(recognizer);
-            break;
-        default:
-            LOGW("Add unknown type member %{public}d to referee", recognizer->GetPriority());
-            break;
-    }
+    recognizer->BeginReferee(static_cast<int32_t>(touchId_));
+    recognizers_.emplace_back(recognizer);
 }
 
-void GestureScope::DelMember(const RefPtr<GestureRecognizer>& recognizer)
+bool GestureScope::Existed(const RefPtr<GestureRecognizer>& recognizer)
 {
     if (!recognizer) {
-        LOGI("gesture recognizer is null, DelMember finish.");
-        return;
+        LOGE("recognizer is null, AddGestureRecognizer failed.");
+        return false;
     }
 
-    if (!Existed(recognizer)) {
-        LOGI("gesture recognizer is not existed when deleted.");
-        return;
+    if (recognizers_.empty()) {
+        return false;
     }
 
-    LOGD("gesture referee ready to delete member of %{public}s", AceType::TypeName(recognizer));
-    RefereeState prevState = recognizer->GetRefereeState();
-    recognizer->SetRefereeState(RefereeState::DETECTING);
-
-    if (recognizer->GetPriority() == GesturePriority::Parallel) {
-        parallelRecognizers_.remove(recognizer);
-        return;
-    }
-
-    RemoveAndUnBlockGesture(prevState == RefereeState::PENDING, recognizer);
+    auto result = std::find(recognizers_.cbegin(), recognizers_.cend(), recognizer);
+    return result != recognizers_.cend();
 }
 
-void GestureScope::HandleGestureDisposal(const RefPtr<GestureRecognizer>& recognizer, const GestureDisposal disposal)
+bool GestureScope::CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer)
 {
-    if (!Existed(recognizer)) {
-        LOGE("can not find the recognizer");
-        return;
-    }
+    for (const auto& weak : recognizers_) {
+        auto member = weak.Upgrade();
+        if (member == recognizer) {
+            return false;
+        }
 
-    GesturePriority priority = recognizer->GetPriority();
-    if (priority == GesturePriority::Parallel) {
-        HandleParallelDisposal(recognizer, disposal);
-        return;
+        if (member && member->GetRefereeState() == RefereeState::PENDING) {
+            return true;
+        }
     }
+    return false;
+}
+
+void GestureScope::OnAcceptGesture(const RefPtr<GestureRecognizer>& recognizer)
+{
+    for (const auto& weak : recognizers_) {
+        auto gesture = weak.Upgrade();
+        if (gesture == recognizer) {
+            continue;
+        }
+        if (gesture) {
+            gesture->OnRejected();
+        }
+    }
+}
+
+RefPtr<GestureRecognizer> GestureScope::UnBlockGesture()
+{
+    auto iter =
+        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const WeakPtr<GestureRecognizer>& member) {
+            auto recognizer = member.Upgrade();
+            return recognizer && ((recognizer->GetRefereeState() == RefereeState::PENDING_BLOCKED) ||
+                                     (recognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED));
+        });
+    if (iter == recognizers_.end()) {
+        LOGD("no blocked gesture in recognizers");
+        return nullptr;
+    }
+    return (*iter).Upgrade();
+}
+
+bool GestureScope::IsPending()
+{
+    auto iter =
+        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const WeakPtr<GestureRecognizer>& member) {
+            auto recognizer = member.Upgrade();
+            return recognizer && ((recognizer->GetRefereeState() == RefereeState::PENDING));
+        });
+    return iter != recognizers_.end();
+}
+
+void GestureScope::Close()
+{
+    LOGD("force close gesture scope of id %{public}d", static_cast<int32_t>(touchId_));
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->FinishReferee(static_cast<int32_t>(touchId_));
+        }
+    }
+}
+
+void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& result)
+{
+    RefPtr<GestureScope> scope;
+    const auto iter = gestureScopes_.find(touchId);
+    if (iter != gestureScopes_.end()) {
+        LOGI("gesture scope of touch id %{public}d already exists.", static_cast<int32_t>(touchId));
+        scope = iter->second;
+    } else {
+        scope = MakeRefPtr<GestureScope>(touchId);
+        gestureScopes_.try_emplace(touchId, scope);
+    }
+    for (const auto& item : result) {
+        if (AceType::InstanceOf<GestureRecognizer>(item)) {
+            scope->AddMember(DynamicCast<GestureRecognizer>(item));
+        }
+    }
+}
+
+void GestureReferee::CleanGestureScope(size_t touchId)
+{
+    const auto iter = gestureScopes_.find(touchId);
+    if (iter != gestureScopes_.end()) {
+        const auto& scope = iter->second;
+        if (scope->IsPending()) {
+            scope->SetDelayClose();
+            return;
+        }
+        scope->Close();
+        gestureScopes_.erase(iter);
+    }
+}
+
+void GestureReferee::Adjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+{
+    CHECK_NULL_VOID(recognizer);
 
     switch (disposal) {
         case GestureDisposal::ACCEPT:
@@ -102,320 +168,107 @@ void GestureScope::HandleGestureDisposal(const RefPtr<GestureRecognizer>& recogn
     }
 }
 
-void GestureScope::HandleParallelDisposal(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+void GestureReferee::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
-    if (disposal == GestureDisposal::REJECT) {
-        parallelRecognizers_.remove(recognizer);
-        recognizer->SetRefereeState(RefereeState::FAIL);
-        recognizer->OnRejected(touchId_);
-    } else if (disposal == GestureDisposal::ACCEPT) {
-        parallelRecognizers_.remove(recognizer);
-        recognizer->SetRefereeState(RefereeState::SUCCEED);
-        recognizer->OnAccepted(touchId_);
-    }
-}
+    CHECK_NULL_VOID(recognizer);
 
-void GestureScope::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer)
-{
-    if (CheckNeedBlocked(recognizer)) {
-        LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
-        recognizer->SetRefereeState(RefereeState::BLOCKED);
+    if (recognizer->GetRefereeState() == RefereeState::SUCCEED) {
         return;
     }
 
-    LOGI("gesture referee accept %{public}s of id %{public}zu", AceType::TypeName(recognizer), touchId_);
-    AcceptGesture(recognizer);
+    bool isBlocked = false;
+    for (const auto& scope : gestureScopes_) {
+        if (scope.second->CheckNeedBlocked(recognizer)) {
+            isBlocked = true;
+            break;
+        }
+    }
+    if (isBlocked) {
+        recognizer->OnBlocked();
+        return;
+    }
+    auto prevState = recognizer->GetRefereeState();
+    recognizer->OnAccepted();
+    std::list<size_t> delayIds;
+    for (const auto& scope : gestureScopes_) {
+        scope.second->OnAcceptGesture(recognizer);
+    }
+    // clean delay task.
+    if (prevState == RefereeState::PENDING) {
+        auto iter = gestureScopes_.begin();
+        while (iter != gestureScopes_.end()) {
+            if (iter->second->IsDelayClosed()) {
+                iter->second->Close();
+                iter = gestureScopes_.erase(iter);
+            } else {
+                ++iter;
+            }
+        }
+    }
 }
 
-void GestureScope::HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer)
+void GestureReferee::HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
-    if (CheckNeedBlocked(recognizer)) {
-        LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
-        recognizer->SetRefereeState(RefereeState::BLOCKED);
+    CHECK_NULL_VOID(recognizer);
+
+    if (recognizer->GetRefereeState() == RefereeState::PENDING) {
         return;
     }
 
-    LOGI("gesture referee ready to notify pending for %{public}s", AceType::TypeName(recognizer));
-    recognizer->SetRefereeState(RefereeState::PENDING);
-    recognizer->OnPending(touchId_);
-}
-
-void GestureScope::HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer)
-{
-    LOGI("gesture referee ready to notify reject for %{public}s", AceType::TypeName(recognizer));
-    RefereeState prevState = recognizer->GetRefereeState();
-    recognizer->SetRefereeState(RefereeState::FAIL);
-    recognizer->OnRejected(touchId_);
-    RemoveAndUnBlockGesture(prevState == RefereeState::PENDING, recognizer);
-}
-
-void GestureScope::RemoveAndUnBlockGesture(bool isPrevPending, const WeakPtr<GestureRecognizer>& weakRecognizer)
-{
-    auto recognizer = weakRecognizer.Upgrade();
-    if (!recognizer) {
+    bool isBlocked = false;
+    for (const auto& scope : gestureScopes_) {
+        if (scope.second->CheckNeedBlocked(recognizer)) {
+            isBlocked = true;
+            break;
+        }
+    }
+    if (isBlocked) {
+        recognizer->OnBlocked();
         return;
     }
-    if (recognizer->GetPriority() == GesturePriority::High) {
-        highRecognizers_.remove(recognizer);
-        if (highRecognizers_.empty()) {
-            UnBlockGesture(lowRecognizers_);
-            return;
-        }
-
-        if (isPrevPending) {
-            UnBlockGesture(highRecognizers_);
-        }
-    } else {
-        lowRecognizers_.remove(recognizer);
-        if (isPrevPending) {
-            UnBlockGesture(lowRecognizers_);
-        }
-    }
+    recognizer->OnPending();
 }
 
-bool GestureScope::Existed(const RefPtr<GestureRecognizer>& recognizer)
+void GestureReferee::HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
-    if (!recognizer) {
-        LOGE("recognizer is null, AddGestureRecognizer failed.");
-        return false;
+    CHECK_NULL_VOID(recognizer);
+
+    if (recognizer->GetRefereeState() == RefereeState::FAIL) {
+        return;
     }
 
-    std::list<WeakPtr<GestureRecognizer>> members = GetMembersByRecognizer(recognizer);
-    if (members.empty()) {
-        return false;
+    auto prevState = recognizer->GetRefereeState();
+    recognizer->OnRejected();
+    if (prevState != RefereeState::PENDING) {
+        return;
     }
-
-    auto result = std::find(members.cbegin(), members.cend(), recognizer);
-    return result != members.cend();
-}
-
-const std::list<WeakPtr<GestureRecognizer>>& GestureScope::GetMembersByRecognizer(
-    const RefPtr<GestureRecognizer>& recognizer)
-{
-    switch (recognizer->GetPriority()) {
-        case GesturePriority::Low:
-            return lowRecognizers_;
-        case GesturePriority::High:
-            return highRecognizers_;
-        case GesturePriority::Parallel:
-            return parallelRecognizers_;
-        default:
-            return lowRecognizers_;
-    }
-}
-
-bool GestureScope::CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer)
-{
-    if (recognizer->GetPriority() == GesturePriority::Low && !highRecognizers_.empty()) {
-        LOGD("self is low priority, high recognizers are not processed");
-        return true;
-    }
-
-    std::list<WeakPtr<GestureRecognizer>> members = GetMembersByRecognizer(recognizer);
-    for (const auto& member : members) {
-        if (member == recognizer) {
-            return false;
-        }
-
-        if (member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING) {
-            return true;
+    RefPtr<GestureRecognizer> newBlockRecognizer;
+    for (const auto& scope : gestureScopes_) {
+        newBlockRecognizer = scope.second->UnBlockGesture();
+        if (newBlockRecognizer) {
+            break;
         }
     }
-
-    return false;
-}
-
-void GestureScope::AcceptGesture(const RefPtr<GestureRecognizer>& recognizer)
-{
-    if (recognizer->GetPriority() == GesturePriority::Low) {
-        for (const auto& rejectedItem : lowRecognizers_) {
-            if (rejectedItem == recognizer) {
-                continue;
-            }
-            auto strongItem = rejectedItem.Upgrade();
-            if (strongItem) {
-                strongItem->OnRejected(touchId_);
-                strongItem->SetRefereeState(RefereeState::FAIL);
-            }
-        }
-    } else {
-        for (const auto& rejectedItem : highRecognizers_) {
-            if (rejectedItem == recognizer) {
-                continue;
-            }
-            auto strongItem = rejectedItem.Upgrade();
-            if (strongItem) {
-                strongItem->OnRejected(touchId_);
-                strongItem->SetRefereeState(RefereeState::FAIL);
-            }
-        }
-
-        for (const auto& rejectedItem : lowRecognizers_) {
-            if (rejectedItem == recognizer) {
-                continue;
-            }
-            auto strongItem = rejectedItem.Upgrade();
-            if (strongItem) {
-                strongItem->OnRejected(touchId_);
-                strongItem->SetRefereeState(RefereeState::FAIL);
+    if (newBlockRecognizer) {
+        if (newBlockRecognizer->GetRefereeState() == RefereeState::PENDING_BLOCKED) {
+            newBlockRecognizer->OnPending();
+        } else if (newBlockRecognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED) {
+            newBlockRecognizer->OnAccepted();
+            for (const auto& scope : gestureScopes_) {
+                scope.second->OnAcceptGesture(newBlockRecognizer);
             }
         }
     }
 
-    recognizer->SetRefereeState(RefereeState::SUCCEED);
-    recognizer->OnAccepted(touchId_);
-    if (recognizer->GetPriority() == GesturePriority::Low) {
-        lowRecognizers_.clear();
-    } else {
-        highRecognizers_.clear();
-        lowRecognizers_.clear();
-    }
-}
-
-void GestureScope::UnBlockGesture(std::list<WeakPtr<GestureRecognizer>>& members)
-{
-    auto weakBlockedMember =
-        std::find_if(std::begin(members), std::end(members), [](const WeakPtr<GestureRecognizer>& member) {
-            return member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::BLOCKED;
-        });
-    if (weakBlockedMember == members.end()) {
-        LOGD("no blocked gesture in recognizers");
-        return;
-    }
-    auto blockedMember = (*weakBlockedMember).Upgrade();
-    if (!blockedMember) {
-        LOGW("BlockedMember not exists.");
-        return;
-    }
-
-    if ((blockedMember)->GetDetectState() == DetectState::DETECTED) {
-        LOGD("unblock and accept this gesture");
-        AcceptGesture(blockedMember);
-        return;
-    }
-
-    LOGD("set the gesture %{public}s to be pending", AceType::TypeName((*blockedMember)));
-    (blockedMember)->SetRefereeState(RefereeState::PENDING);
-    (blockedMember)->OnPending(touchId_);
-}
-
-void GestureScope::ForceClose()
-{
-    LOGD("force close gesture scope of id %{public}zu", touchId_);
-    for (const auto& weakRejectedItem : lowRecognizers_) {
-        auto rejectedItem = weakRejectedItem.Upgrade();
-        if (rejectedItem) {
-            rejectedItem->OnRejected(touchId_);
+    // clean delay task.
+    auto iter = gestureScopes_.begin();
+    while (iter != gestureScopes_.end()) {
+        if (iter->second->IsDelayClosed()) {
+            iter->second->Close();
+            iter = gestureScopes_.erase(iter);
+        } else {
+            ++iter;
         }
-    }
-    lowRecognizers_.clear();
-
-    for (const auto& weakRejectedItem : highRecognizers_) {
-        auto rejectedItem = weakRejectedItem.Upgrade();
-        if (rejectedItem) {
-            rejectedItem->OnRejected(touchId_);
-        }
-    }
-    highRecognizers_.clear();
-
-    for (const auto& weakRejectedItem : parallelRecognizers_) {
-        auto rejectedItem = weakRejectedItem.Upgrade();
-        if (rejectedItem) {
-            rejectedItem->OnRejected(touchId_);
-        }
-    }
-    parallelRecognizers_.clear();
-}
-
-bool GestureScope::IsPending() const
-{
-    auto pendingMember = std::find_if(
-        std::begin(lowRecognizers_), std::end(lowRecognizers_), [](const WeakPtr<GestureRecognizer>& member) {
-            return member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING;
-        });
-    if (pendingMember != lowRecognizers_.end()) {
-        return true;
-    }
-
-    pendingMember = std::find_if(
-        std::begin(highRecognizers_), std::end(highRecognizers_), [](const WeakPtr<GestureRecognizer>& member) {
-            return member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING;
-        });
-    if (pendingMember != highRecognizers_.end()) {
-        return true;
-    }
-
-    pendingMember = std::find_if(
-        std::begin(parallelRecognizers_), std::end(parallelRecognizers_), [](const WeakPtr<GestureRecognizer>& member) {
-            return member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING;
-        });
-    return pendingMember != parallelRecognizers_.end();
-}
-
-void GestureReferee::AddGestureRecognizer(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
-{
-    if (!recognizer) {
-        LOGE("recognizer is null, AddGestureRecognizer failed.");
-        return;
-    }
-    LOGD("add gesture recognizer %{public}s into scope %{public}zu,", AceType::TypeName(recognizer), touchId);
-    const auto iter = gestureScopes_.find(touchId);
-    if (iter != gestureScopes_.end()) {
-        iter->second.AddMember(recognizer);
-    } else {
-        GestureScope gestureScope(touchId);
-        gestureScope.AddMember(recognizer);
-        gestureScopes_.try_emplace(touchId, std::move(gestureScope));
-    }
-}
-
-void GestureReferee::DelGestureRecognizer(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
-{
-    if (!recognizer) {
-        LOGE("recognizer is null, DelGestureRecognizer failed.");
-        return;
-    }
-    LOGD("delete gesture recognizer %{public}s from scope %{public}zu ", AceType::TypeName(recognizer), touchId);
-    const auto iter = gestureScopes_.find(touchId);
-    if (iter == gestureScopes_.end()) {
-        return;
-    }
-
-    iter->second.DelMember(recognizer);
-}
-
-void GestureReferee::CleanGestureScope(size_t touchId)
-{
-    const auto iter = gestureScopes_.find(touchId);
-    if (iter != gestureScopes_.end()) {
-        if (iter->second.IsPending()) {
-            LOGE("gesture scope of touch id %{public}zu is pending, do not clean this.", touchId);
-            return;
-        }
-
-        if (!iter->second.IsEmpty()) {
-            iter->second.ForceClose();
-        }
-        gestureScopes_.erase(iter);
-    }
-}
-
-void GestureReferee::Adjudicate(size_t touchId, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
-{
-    if (!recognizer) {
-        LOGE("recognizer is null, Adjudicate failed.");
-        return;
-    }
-
-    const auto iter = gestureScopes_.find(touchId);
-    if (iter != gestureScopes_.end()) {
-        iter->second.HandleGestureDisposal(recognizer, disposal);
-        if (iter->second.IsEmpty()) {
-            LOGD("clean the gesture referee of %{public}zu", touchId);
-            gestureScopes_.erase(iter);
-        }
-    } else {
-        LOGE("fail to find the gesture scope for %{public}zu session id", touchId);
     }
 }
 

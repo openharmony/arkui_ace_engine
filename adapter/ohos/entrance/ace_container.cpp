@@ -301,6 +301,16 @@ void AceContainer::OnShow(int32_t instanceId)
         front->UpdateState(Frontend::State::ON_SHOW);
         front->OnShow();
     }
+    std::unordered_map<uint64_t, WeakPtr<Frontend>> cardFrontendMap;
+    container->GetCardFrontendMap(cardFrontendMap);
+    for (const auto& [_, weakCardFront] : cardFrontendMap) {
+        auto cardFront = weakCardFront.Upgrade();
+        if (!cardFront) {
+            LOGE("cardFront is null");
+            continue;
+        }
+        cardFront->OnShow();
+    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
@@ -336,6 +346,21 @@ void AceContainer::OnHide(int32_t instanceId)
         auto taskExecutor = container->GetTaskExecutor();
         if (taskExecutor) {
             taskExecutor->PostTask([front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
+        }
+    }
+    std::unordered_map<uint64_t, WeakPtr<Frontend>> cardFrontendMap;
+    container->GetCardFrontendMap(cardFrontendMap);
+    for (const auto& [_, weakCardFront] : cardFrontendMap) {
+        auto cardFront = weakCardFront.Upgrade();
+        if (!cardFront) {
+            LOGE("cardFront is null");
+            continue;
+        }
+        cardFront->OnHide();
+        auto taskExecutor = container->GetTaskExecutor();
+        if (taskExecutor) {
+            taskExecutor->PostTask(
+                [cardFront]() { cardFront->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
         }
     }
     auto taskExecutor = container->GetTaskExecutor();

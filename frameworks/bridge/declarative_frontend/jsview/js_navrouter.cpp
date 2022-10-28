@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navrouter/navrouter_view.h"
 
@@ -38,10 +39,9 @@ void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsFunction()) {
-        auto onStateChangeCallback =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onStateChange = [execCtx = info.GetExecutionContext(),
-                                        func = std::move(onStateChangeCallback)](bool isActivated) {
+        auto onStateChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onStateChange = [execCtx = info.GetExecutionContext(), func = std::move(onStateChangeCallback)](
+                                 bool isActivated) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("OnStateChange");
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(isActivated));

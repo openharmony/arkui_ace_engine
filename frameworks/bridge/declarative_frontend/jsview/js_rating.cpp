@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/models/rating_model_impl.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 
@@ -124,6 +125,8 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
 
     if (getSecondaryUri->IsString()) {
         secondaryUri = getSecondaryUri->ToString();
+    } else {
+        secondaryUri = backgroundUri;
     }
 
     RatingModel::GetInstance()->SetForegroundSrc(foregroundUri);

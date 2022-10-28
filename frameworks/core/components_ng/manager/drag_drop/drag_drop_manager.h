@@ -68,6 +68,11 @@ public:
 
     bool CheckDragDropProxy(int64_t id) const;
 
+    bool IsDragged() const
+    {
+        return isDragged_;
+    }
+
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
     void FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
@@ -91,6 +96,8 @@ private:
     std::string extraInfo_;
 
     int64_t currentId_ = -1;
+
+    bool isDragged_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

@@ -108,9 +108,17 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         } else {
             // use the max child size.
             auto childFrame = SizeF(-1, -1);
+            float maxWidth = 0.0f;
+            float maxHeight = 0.0f;
             for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
                 auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-                childFrame = childFrame > childSize ? childFrame : childSize;
+                if (maxWidth < childSize.Width()) {
+                    maxWidth = childSize.Width();
+                }
+                if (maxHeight < childSize.Height()) {
+                    maxHeight = childSize.Height();
+                }
+                childFrame.SetSizeT(SizeF { maxWidth, maxHeight });
             }
             AddPaddingToSize(padding, childFrame);
             frameSize.UpdateIllegalSizeWithCheck(childFrame);

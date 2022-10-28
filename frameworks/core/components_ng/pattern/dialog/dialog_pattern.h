@@ -73,12 +73,12 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
-    std::string GetTitle()
+    const std::string& GetTitle()
     {
         return title_;
     }
 
-    std::string GetMessage()
+    const std::string& GetMessage()
     {
         return message_;
     }

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
+#include <string>
 
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -161,6 +162,37 @@ void ImageAnimatorPattern::UpdateEventCallback()
     if (cancelEvent != nullptr) {
         animator_->AddIdleListener([cancelEvent] { cancelEvent(); });
     }
+}
+
+void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    Pattern::ToJsonValue(json);
+    static const char* STATUS_MODE[] = { "AnimationStatus.Initial", "AnimationStatus.Running", "AnimationStatus.Paused",
+        "AnimationStatus.Stopped" };
+    json->Put("state", STATUS_MODE[static_cast<int32_t>(status_)]);
+    json->Put("duration", std::to_string(animator_->GetDuration()).c_str());
+    json->Put("reverse", isReverse_ ? "true" : "false");
+    json->Put("fixedSize", fixedSize_ ? "true" : "false");
+    static const char* FILL_MODE[] = { "FillMode.None", "FillMode.Forwards", "FillMode.Backwards", "FillMode.Both" };
+    json->Put("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())]);
+    json->Put("iterations", std::to_string(animator_->GetIteration()).c_str());
+    json->Put("images", ImagesToString().c_str());
+}
+
+std::string ImageAnimatorPattern::ImagesToString() const
+{
+    auto imageArray = JsonUtil::CreateArray(true);
+    for (const auto& image : images_) {
+        auto item = JsonUtil::Create(true);
+        item->Put("src", image.src.c_str());
+        item->Put("left", image.left.ToString().c_str());
+        item->Put("top", image.top.ToString().c_str());
+        item->Put("width", image.width.ToString().c_str());
+        item->Put("height", image.height.ToString().c_str());
+        item->Put("duration", std::to_string(image.duration).c_str());
+        imageArray->Put(item);
+    }
+    return imageArray->ToString();
 }
 
 } // namespace OHOS::Ace::NG

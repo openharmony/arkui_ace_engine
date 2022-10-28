@@ -14,19 +14,20 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_checkbox.h"
+
 #include <optional>
 #include <string>
 
+#include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/checkbox_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "bridge/declarative_frontend/jsview/models/checkbox_model_impl.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
 

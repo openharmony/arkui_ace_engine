@@ -17,33 +17,17 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_ABSTRACT_H
 
 #include <cstdint>
-#include <functional>
 #include <optional>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
 #include "base/json/json_util.h"
-#include "base/log/ace_scoring_log.h"
-#include "base/log/ace_trace.h"
 #include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
-#include "core/components/box/box_component.h"
-#include "core/components/common/properties/border_image.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/popup_param.h"
-#include "core/components/menu/menu_component.h"
 #include "core/components/theme/theme_manager.h"
-#include "core/components/transform/transform_component.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/property/gradient_property.h"
-#include "core/components_ng/property/transition_property.h"
-#include "core/pipeline/base/component.h"
-#include "frameworks/core/gestures/tap_gesture.h"
 
 namespace OHOS::Ace::Framework {
 

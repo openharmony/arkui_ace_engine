@@ -26,14 +26,23 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 
 namespace OHOS::Ace::NG {
 
 using TabBarBuilderFunc = std::function<void()>;
-struct TabBarParam {
+struct TabBarParam : public virtual Referenced {
     std::string text;
     std::string icon;
     TabBarBuilderFunc builder;
+    bool HasBuilder()
+    {
+        return builder != nullptr;
+    }
+    explicit TabBarParam(const std::string& textParam, const std::string& iconParam,
+        TabBarBuilderFunc&& builderParam): text(textParam), icon(iconParam), builder(std::move(builderParam))
+        {};
 };
 
 class TabBarPattern : public Pattern {
@@ -60,7 +69,19 @@ public:
         return layoutAlgorithm;
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<TabBarPaintProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<TabBarPaintMethod>();
+    }
+
     void UpdateCurrentOffset(float offset);
+
+    void UpdateIndicator(int32_t indicator);
 
 private:
     void OnModifyDone() override;

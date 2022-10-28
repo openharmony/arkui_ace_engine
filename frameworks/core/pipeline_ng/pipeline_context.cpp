@@ -302,6 +302,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
 
@@ -552,7 +553,6 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
         auto touchPoint = event.CreateTouchPoint();
-        LOGD("Mouse event to touch: button is %{public}d, action is %{public}d", event.button, event.action);
         OnTouchEvent(touchPoint);
     }
 
@@ -792,12 +792,12 @@ void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
 
 void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 {
-    if (isDragged_) {
-        return;
-    }
-
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        LOGI("current context is the source of drag");
+        return;
+    }
 
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
