@@ -1900,9 +1900,6 @@ void JSViewAbstract::ParseBorderImageDimension(
         auto dimensionValue = object->GetProperty(keys.at(i).c_str());
         if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
             ParseJsDimensionVp(dimensionValue, currentDimension);
-            if (dimensionValue->IsNumber()) {
-                currentDimension.SetUnit(DimensionUnit::PERCENT);
-            }
             auto direction = static_cast<BorderImageDirection>(i);
             switch (direction) {
                 case BorderImageDirection::LEFT:
@@ -2005,9 +2002,6 @@ void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<Bor
     if (args->IsNumber() || args->IsString()) {
         Dimension outsetDimension;
         ParseJsDimensionVp(args, outsetDimension);
-        if (args->IsNumber()) {
-            outsetDimension.SetUnit(DimensionUnit::PERCENT);
-        }
         borderImage->SetEdgeOutset(BorderImageDirection::LEFT, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::TOP, outsetDimension);
@@ -2058,9 +2052,6 @@ void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<Bord
     if (args->IsNumber() || args->IsString()) {
         Dimension widthDimension;
         ParseJsDimensionVp(args, widthDimension);
-        if (args->IsNumber()) {
-            widthDimension.SetUnit(DimensionUnit::PERCENT);
-        }
         borderImage->SetEdgeWidth(BorderImageDirection::LEFT, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::TOP, widthDimension);
