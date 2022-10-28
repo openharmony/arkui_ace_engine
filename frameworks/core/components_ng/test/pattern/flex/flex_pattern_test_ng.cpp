@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -59,6 +60,19 @@ void UpdateWrapProperties(const RefPtr<FlexLayoutProperty>& layoutProperty, cons
     layoutProperty->UpdateAlignment(wrapProperty.wrapAlignment);
     layoutProperty->UpdateMainAlignment(wrapProperty.wrapMainAxisAlignment);
     layoutProperty->UpdateCrossAlignment(wrapProperty.wrapCrossAxisAlignment);
+}
+
+struct FlexProperties {
+    FlexDirection flexDirection = FlexDirection::ROW;
+    FlexAlign flexAlign = FlexAlign::FLEX_START;
+};
+
+void UpdateFlexProperties(const RefPtr<FlexLayoutProperty>& layoutProperty, const FlexProperties& flexProperty)
+{
+    EXPECT_FALSE(layoutProperty == nullptr);
+    layoutProperty->UpdateFlexDirection(flexProperty.flexDirection);
+    layoutProperty->UpdateMainAxisAlign(flexProperty.flexAlign);
+    layoutProperty->UpdateCrossAxisAlign(flexProperty.flexAlign);
 }
 
 /**
@@ -143,5 +157,31 @@ HWTEST_F(FlexPatternTestNg, FlexWrapFrameNodeLayout001, TestSize.Level1)
     auto firstItemOffset = firstGeometryNode->GetFrameOffset();
     EXPECT_EQ(firstItemOffset.GetX(), OFFSET_LEFT);
     EXPECT_EQ(firstItemOffset.GetY(), OFFSET_TOP);
+
+    EXPECT_EQ(firstGeometryNode->GetFrameSize(), SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
 }
+
+/**
+ * @tc.name: FlexPatternTest001
+ * @tc.desc: Test properties set of flex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexPatternTestNg, FlexPatternTest001, TestSize.Level1)
+{
+    FlexProperties flexProperty;
+    FlexModelNG flexModelNG;
+    flexModelNG.CreateFlexRow();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
+    EXPECT_FALSE(flexLayoutProperty == nullptr);
+
+    UpdateFlexProperties(flexLayoutProperty, flexProperty);
+    EXPECT_EQ(flexLayoutProperty->GetFlexDirection(), flexProperty.flexDirection);
+    EXPECT_EQ(flexLayoutProperty->GetMainAxisAlign(), flexProperty.flexAlign);
+    EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), flexProperty.flexAlign);
+}
+
 } // namespace OHOS::Ace::NG
