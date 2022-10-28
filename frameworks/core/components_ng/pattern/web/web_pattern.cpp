@@ -530,11 +530,6 @@ void WebPattern::OnModifyDone()
         }
     }
 
-    // update bgcolor.
-    if (renderContext->HasBackgroundColor()) {
-        delegate_->UpdateBackgroundColor(static_cast<int32_t>(renderContext->GetBackgroundColor()->GetValue()));
-    }
-
     // Initialize events such as keyboard, focus, etc.
     InitEvent();
 }
