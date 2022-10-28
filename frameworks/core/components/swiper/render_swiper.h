@@ -523,6 +523,7 @@ private:
     void LoadLazyItems(bool swipeToNext);
     double CalculateFriction(double gamma);
     void ClearItems(const RefPtr<Component>& lazyForEachComponent, int32_t index);
+    void ResetScrollOffset();
 
     RefPtr<SwiperComponent> swiper_;
 
