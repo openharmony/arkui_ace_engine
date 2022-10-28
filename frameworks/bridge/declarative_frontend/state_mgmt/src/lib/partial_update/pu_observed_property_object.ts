@@ -13,11 +13,16 @@
  * limitations under the License.
  */
 
-/*
-  class that holds an actual property value of type T
-  uses its base class to manage subscribers to this
-  property.
+/**
+ * ObservedPropertyObjectPU
+ *
+ * all definitions in this file are framework internal
+ * 
+ * class that holds an actual property value of type T
+ * uses its base class to manage subscribers to this
+ * property.
 */
+
 class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectAbstractPU<T>
   implements ISinglePropertyChangeSubscriber<T> {
 

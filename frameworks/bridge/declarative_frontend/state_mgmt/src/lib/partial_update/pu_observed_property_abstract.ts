@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * ObservedPropertyAbstractPU aka ObservedPropertyAbstract for partial update
+ * 
+ * all definitions in this file are framework internal
+ */
+
 abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T> {
 
   private dependentElementIds_: Set<number> = new Set<number>();
@@ -23,9 +29,8 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
 
   protected notifyHasChanged(newValue: T) {
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
-    var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
-      var subscriber: IPropertySubscriber = registry!.get(subscribedId)
+      var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
         if ('hasChanged' in subscriber) {
           (subscriber as ISinglePropertyChangeSubscriber<T>).hasChanged(newValue);

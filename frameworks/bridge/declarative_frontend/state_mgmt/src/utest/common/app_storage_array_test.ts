@@ -17,11 +17,11 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
 
   class ArrayChangeSubscriber implements ISinglePropertyChangeSubscriber<number[]> {
 
-    private id_: number = SubscriberManager.Get().MakeId();
+    private id_: number = SubscriberManager. MakeId();
 
     constructor() {
       AppStorage.SubscribeToChangesOf("arr", this);
-      SubscriberManager.Get().add(this);
+      SubscriberManager.Add(this);
     }
 
     // globally unique id
@@ -34,7 +34,7 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     // hence , unsubscribe
     aboutToBeDeleted(owningView?: IPropertySubscriber): void {
       AppStorage.UnsubscribeFromChangesOf("arr", this.id__());
-      SubscriberManager.Get().delete(this.id__());
+      SubscriberManager.Delete(this.id__());
     }
 
     // get informed after the property has changed.
@@ -46,12 +46,12 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
   class ClassPropertyChangeSubscriber<T extends Object>
     implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber {
 
-    private id_: number = SubscriberManager.Get().MakeId();
+    private id_: number = SubscriberManager.MakeId();
     private classInfo_: string;
 
     constructor(classInfo: string) {
       this.classInfo_ = classInfo;
-      SubscriberManager.Get().add(this);
+      SubscriberManager.Add(this);
     }
 
     // globally unique id
@@ -63,7 +63,7 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     // that the subscriber is about to be deleted
     // hence , unsubscribe
     aboutToBeDeleted(owningView?: IPropertySubscriber): void {
-      SubscriberManager.Get().delete(this.id__());
+      SubscriberManager.Delete(this.id__());
     }
 
     // get informed after the property has changed.
@@ -174,7 +174,8 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     test(`Deletion of props form AppStrorage without isuses`, deleteOk);
     test(`AppStrorage has ${AppStorage.Size()} ObservedProperties: >${Array.from(AppStorage.Keys())}<, should be none.`, AppStorage.Size() == 0);
 
-    test(`SubscriberManager num of subscribers us ${SubscriberManager.Get().numberOfSubscrbers()} should be 0 .`, SubscriberManager.Get().numberOfSubscrbers() == 0);
+    test(`SubscriberManager num of subscribers us ${SubscriberManager.NumberOfSubscribers()} should be 0 .`, 
+       SubscriberManager.NumberOfSubscribers() == 0);
 
     // this will do nothing because manual cleanup was done already
     AppStorage.AboutToBeDeleted();

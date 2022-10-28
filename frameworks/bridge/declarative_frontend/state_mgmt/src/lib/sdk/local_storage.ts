@@ -14,6 +14,7 @@
  */
 
 /**
+ * 
  * LocalStorage
  * 
  * Class implements a Map of ObservableObjectBase UI state variables.
@@ -22,6 +23,7 @@
  * AppStorage singleton is sub-class of LocalStorage for
  * UI state of app-wide access and same life cycle as the app.
  * 
+ * @since 9
  */
 
 class LocalStorage extends NativeLocalStorage {
@@ -29,10 +31,12 @@ class LocalStorage extends NativeLocalStorage {
   protected storage_: Map<string, ObservedPropertyAbstract<any>>;
 
   /**
-   * Construct new instance
+   * Construct new instance of LocalStorage
    * initialzie with all properties and their values that Object.keys(params) returns
    * Property values must not be undefined.
-   * @param initializingProperties
+   * @param initializingProperties Object containing keys and values. @see set() for valid values
+   * 
+   * @since 9
    */
   constructor(initializingProperties: Object = {}) {
     super();
@@ -46,6 +50,8 @@ class LocalStorage extends NativeLocalStorage {
   /**
    * clear storage and init with given properties
    * @param initializingProperties 
+   * 
+   * not a public / sdk function
    */
   public initializeProps(initializingProperties: Object = {}) {
     stateMgmtConsole.debug(`${this.constructor.name} initializing with Object keys: [${Object.keys(initializingProperties)}].`)
@@ -56,14 +62,12 @@ class LocalStorage extends NativeLocalStorage {
   }
 
   /**
-   * Use before  deleting (letting it go out of scope) the 
-   * owning Ability, Windows, or service UI.
+   * Use before deleting owning Ability, window, or service UI
+   * (letting it go out of scope).
    * 
-   * Do NO use this method directly of the LocalStorage instance is managed by
-   * LocalStorageLookup.
-   * 
-   * This method orderly closes down a LocalStorage instance
+   * This method orderly closes down a LocalStorage instance by calling @see clear().
    * This requires that no property is left with one or more subscribers.
+   * @see clear() and @see delete()
    * @returns true if all properties could be removed from storage
    */
   public aboutToBeDeleted(): boolean {
@@ -71,10 +75,13 @@ class LocalStorage extends NativeLocalStorage {
   }
 
   /**
+   * Check if LocalStorage has a property with given name
    * return true if prooperty with given name exists
-   * same as Map.has
-   * @param propName 
-   * @returns 
+   * same as ES6 Map.prototype.has()
+   * @param propName searched property
+   * @returns true if property with such name exists in LocalStorage
+   * 
+   * @since 9
    */
   public has(propName: string): boolean {
     return this.storage_.has(propName);
@@ -82,21 +89,24 @@ class LocalStorage extends NativeLocalStorage {
 
 
   /**
-   * return a Map Iterator
-   * same as Map.keys
-   * @param propName 
-   * @returns 
-   */
+   * Provide names of all properties in LocalStorage
+   * same as ES6 Map.prototype.keys()
+   * @returns return a Map Iterator
+   * 
+   * @since 9
+  */
   public keys(): IterableIterator<string> {
     return this.storage_.keys();
   }
 
 
   /**
-   * return number of properties
-   * same as Map.size
+   * Returns number of properties in LocalStorage
+   * same as Map.prototype.size()
    * @param propName 
-   * @returns 
+   * @returns return number of properties
+   * 
+   * @since 9
    */
   public size(): number {
     return this.storage_.size;
@@ -104,10 +114,12 @@ class LocalStorage extends NativeLocalStorage {
 
 
   /**
-   * returns value of given property
+   * Returns value of given property
    * return undefined if no property with this name
    * @param propName 
-   * @returns 
+   * @returns property value if found or undefined
+   * 
+   * @since 9
    */
   public get<T>(propName: string): T | undefined {
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
@@ -116,12 +128,14 @@ class LocalStorage extends NativeLocalStorage {
 
 
   /**
-   * Set value of given property
-   * set nothing and return false if property with this name does not exist
-   * or if newValuye is undefined (undefined value is not allowed for state variables)
+   * Set value of given property in LocalStorage
+   * Methosd sets nothing and returns false if property with this name does not exist
+   * or if newValue is `undefined` or `null` (`undefined`, `null` value are not allowed for state variables).
    * @param propName 
-   * @param newValue 
-   * @returns 
+   * @param newValue must be of type T and must not be undefined or null
+   * @returns true on success, i.e. when above conditions are satisfied, otherwise false
+   * 
+   * @since 9
    */
   public set<T>(propName: string, newValue: T): boolean {
     if (newValue == undefined) {
@@ -139,13 +153,15 @@ class LocalStorage extends NativeLocalStorage {
 
 
   /**
-   * add property if not property with given name
-   * Set value of given property
-   * set nothing and return false if newValuye is undefined 
-   * (undefined value is not allowed for state variables)
+   * Set value of given property, if it exists, @see set() .
+   * Add property if no property with given name and initialize with given value.
+   * Do nothing and return false if newValuue is undefined or null
+   * (undefined, null value is not allowed for state variables)
    * @param propName 
-   * @param newValue 
-   * @returns 
+   * @param newValue must be of type T and must not be undefined or null
+   * @returns true on success, i.e. when above conditions are satisfied, otherwise false
+   * 
+   * @since 9
    */
   public setOrCreate<T>(propName: string, newValue: T): boolean {
     if (newValue == undefined) {
@@ -170,6 +186,8 @@ class LocalStorage extends NativeLocalStorage {
    * caller needs to be all the checking beforehand
    * @param propName 
    * @param value 
+   * 
+   * Not a public / sdk method.
    */
   private addNewPropertyInternal<T>(propName: string, value: T): ObservedPropertyAbstract<T> {
     const newProp = (typeof value === "object") ?
@@ -180,15 +198,20 @@ class LocalStorage extends NativeLocalStorage {
   }
 
   /**
-   * create and return a 'link' (two-way sync) to named property
+   * create and return a two-way sync "(link") to named property
    * @param propName name of source property in LocalStorage
    * @param linkUser IPropertySubscriber to be notified when source changes,
-   * @param subscribersName the linkUser (subscriber) uses this name for the property 
+   * @param subscribersName optional, the linkUser (subscriber) uses this name for the property 
    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
-   * @returns  SynchedPropertyTwoWay{Simple|Object| object with given LocalStoage prop as  its source.
-   * return undefiend if named property does not already exist in LocalStorage
+   * @returns  SynchedPropertyTwoWay{Simple|Object| object with given LocalStoage prop as its source.
+   *           Apps can use SDK functions of base class SubscribedAbstractProperty<S> 
+   *           return undefiend if named property does not already exist in LocalStorage
+   *           Apps can use SDK functions of base class SubscribedPropertyAbstract<S> 
+   *           return undefiend if named property does not already exist in LocalStorage
+   * 
+   * @since 9
    */
-  public link<T>(propName: string, linkUser?: IPropertySubscriber, subscribersName?: string): ObservedPropertyAbstract<T> | undefined {
+  public link<T>(propName: string, linkUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> | undefined {
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
@@ -201,15 +224,19 @@ class LocalStorage extends NativeLocalStorage {
 
 
   /**
-   * Like link(), will create and initialize a new source property in LocalStorge if missing
+   * Like @see link(), but will create and initialize a new source property in LocalStorge if missing
    * @param propName name of source property in LocalStorage
    * @param defaultValue value to be used for initializing if new creating new property in LocalStorage
+   *        default value must be of type S, must not be undefined or null.
    * @param linkUser IPropertySubscriber to be notified when return 'link' changes,
    * @param subscribersName the linkUser (subscriber) uses this name for the property 
    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
    * @returns SynchedPropertyTwoWay{Simple|Object| object with given LocalStoage prop as  its source.
+   *          Apps can use SDK functions of base class SubscribedAbstractProperty<S> 
+   * 
+   * @since 9
    */
-  public setAndLink<T>(propName: string, defaultValue: T, linkUser?: IPropertySubscriber, subscribersName?: string): ObservedPropertyAbstract<T> {
+  public setAndLink<T>(propName: string, defaultValue: T, linkUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> {
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (!p) {
       this.setOrCreate(propName, defaultValue);
@@ -219,15 +246,19 @@ class LocalStorage extends NativeLocalStorage {
 
 
   /**
-   * create and return a 'prop' (one-way sync) to named property
+   * create and return a one-way sync ('prop') to named property
    * @param propName name of source property in LocalStorage
    * @param propUser IPropertySubscriber to be notified when source changes,
    * @param subscribersName the linkUser (subscriber) uses this name for the property 
    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
    * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as  its source.
-   * return undefiend if named property does not already exist in LocalStorage
+   *           Apps can use SDK functions of base class SubscribedAbstractProperty<S> 
+   *           return undefiend if named property does not already exist in LocalStorage.
+   *           Apps can use SDK functions of base class SubscribedPropertyAbstract<S> 
+   *           return undefiend if named property does not already exist in LocalStorage.
+   * @since 9
    */
-  public prop<S>(propName: string, propUser?: IPropertySubscriber, subscribersName?: string): ObservedPropertyAbstract<S> | undefined {
+  public prop<S>(propName: string, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<S> | undefined {
     var p: ObservedPropertyAbstract<S> | undefined = this.storage_.get(propName);
     if (p == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
@@ -239,15 +270,18 @@ class LocalStorage extends NativeLocalStorage {
   }
 
   /**
-   * Like prop(), will create and initialize a new source property in LocalStorage if missing
+   * Like @see prop(), will create and initialize a new source property in LocalStorage if missing
    * @param propName name of source property in LocalStorage
-   * @param defaultValue value to be used for initializing if new creating new property in LocalStorage
+   * @param defaultValue value to be used for initializing if new creating new property in LocalStorage.
+   *        default value must be of type S, must not be undefined or null.
    * @param propUser IPropertySubscriber to be notified when returned 'prop' changes,
    * @param subscribersName the propUser (subscriber) uses this name for the property 
    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
-   * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as  its source.
+   * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as its source.
+   *           Apps can use SDK functions of base class SubscribedAbstractProperty<S> 
+   * @since 9
    */
-  public setAndProp<S>(propName: string, defaultValue: S, propUser?: IPropertySubscriber, subscribersName?: string): ObservedPropertyAbstract<S> {
+  public setAndProp<S>(propName: string, defaultValue: S, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<S> {
     var p: ObservedPropertyAbstract<S> | undefined = this.storage_.get(propName);
 
     if (!p) {
@@ -263,15 +297,24 @@ class LocalStorage extends NativeLocalStorage {
 
   /**
    * Delete property from StorageBase
-   * must only use with caution:
-   * Before deleting a prop from app storage all its subscribers need to
-   * unsubscribe from the property.
+   * Use with caution:
+   * Before deleting a prop from LocalStorage all its subscribers need to
+   * unsubscribe from the property. 
    * This method fails and returns false if given property still has subscribers
    * Another reason for failing is unkmown property.
+   * 
+   * Developer advise:
+   * Subscribers are created with @see link(), @see prop()
+   * and also via @LocalStorageLink and @LocalStorageProp state variable decorators.
+   * That means as long as their is a @Component instance that uses such decorated variable
+   * or a sync relationship with a SubscribedAbstractProperty variable the property can nit
+   * (and also should not!) be deleted from LocalStorage.
    *
    * @param propName
    * @returns false if method failed
-   */
+   * 
+   * @since 9
+  */
   public delete(propName: string): boolean {
     var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
     if (p) {
@@ -290,17 +333,21 @@ class LocalStorage extends NativeLocalStorage {
   }
 
   /**
-   * delete all properties from the StorageBase
-   * precondition is that there are no subscribers anymore
+   * delete all properties from the LocalStorage instance
+   * @see delete().
+   * precondition is that there are no subscribers.
    * method returns false and deletes no poperties if there is any property
    * that still has subscribers
+   * 
+   * @since 9
    */
   protected clear(): boolean {
     for (let propName of this.keys()) {
       var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
       if (p.numberOfSubscrbers()) {
         stateMgmtConsole.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
-          has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
+          has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.
+          Any @Component instance with a @StorageLink/Prop or @LocalStorageLink/Prop is a subscriber.`);
         return false;
       }
     }
@@ -317,11 +364,13 @@ class LocalStorage extends NativeLocalStorage {
    * Any object implementing ISinglePropertyChangeSubscriber interface 
    * and registerign itself to SubscriberManager can register
    * Caution: do remember to unregister, otherwise the property will block 
-   * cleanup, see delete() and clear() 
-   * returns false if named property does not exist
-   * @param propName 
-   * @param subscriber 
-   * @returns 
+   * cleanup, @see delete() and @see clear() 
+   * 
+   * @param propName property in LocalStorage to subscribe to
+   * @param subscriber object that implements ISinglePropertyChangeSubscriber interface 
+   * @returns false if named property does not exist
+   * 
+   * @since 9
    */
   public subscribeToChangesOf<T>(propName: string, subscriber: ISinglePropertyChangeSubscriber<T>): boolean {
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
@@ -333,10 +382,12 @@ class LocalStorage extends NativeLocalStorage {
   }
 
   /**
-   * inverse of subscribeToChangesOf
-   * @param propName 
-   * @param subscriberId 
-   * @returns 
+   * inverse of @see subscribeToChangesOf
+   * @param propName property in LocalStorage to subscribe to
+   * @param subscriberId id of the subscrber passed to @see subscribeToChangesOf
+   * @returns false if named property does not exist
+   * 
+   * @since 9
    */
   public unsubscribeFromChangesOf(propName: string, subscriberId: number): boolean {
     var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
@@ -350,6 +401,8 @@ class LocalStorage extends NativeLocalStorage {
   /** 
    * return number of subscribers to named property
    *  useful for debug purposes
+   * 
+   * Not a public / sdk function
   */
   public numberOfSubscrbersTo(propName: string): number | undefined {
     var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);

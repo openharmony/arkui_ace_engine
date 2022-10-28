@@ -14,6 +14,15 @@
  */
 
 
+/**
+ * ObservedPropertyAbstract base class for the implementation o all state variables
+ * Its base class SubscribedAbstractProperty<T> provides all public / SDK functions.
+ * 
+ * This class and all other definitons in this file are framework 
+ * internal / non-SDK.
+ * 
+ */
+
 type SynchedPropertyFactoryFunc = <T>(source: ObservedPropertyAbstract<T>) => ObservedPropertyAbstract<T>;
 
 /*
@@ -23,15 +32,16 @@ type SynchedPropertyFactoryFunc = <T>(source: ObservedPropertyAbstract<T>) => Ob
    Extended by ObservedProperty, SyncedPropertyOneWay
    and SyncedPropertyTwoWay
 */
-abstract class ObservedPropertyAbstract<T>  {
+abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T> {
   protected subscribers_: Set<number>
   private id_: number;
   protected info_?: PropertyInfo;
 
   constructor(subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
+    super();
     this.subscribers_ = new Set<number>();
-    this.id_ = SubscriberManager.Get().MakeId();
-    SubscriberManager.Get().add(this);
+    this.id_ = SubscriberManager.MakeId();
+    SubscriberManager.Add(this);
     if (subscribeMe) {
       this.subscribers_.add(subscribeMe.id__());
     }
@@ -41,7 +51,7 @@ abstract class ObservedPropertyAbstract<T>  {
   }
 
   aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__())
+    SubscriberManager.Delete(this.id__())
   }
 
   id__(): number {
@@ -51,6 +61,7 @@ abstract class ObservedPropertyAbstract<T>  {
   public info(): PropertyInfo {
     return this.info_;
   }
+
   public setInfo(propName: PropertyInfo) {
     if (propName && propName != "") {
       this.info_ = propName;
@@ -58,7 +69,7 @@ abstract class ObservedPropertyAbstract<T>  {
   }
 
   public abstract get(): T;
-  
+
   // Partial Update "*PU" classes will overwrite
   public getUnmonitored(): T {
     return this.get();
@@ -81,9 +92,8 @@ abstract class ObservedPropertyAbstract<T>  {
 
   protected notifyHasChanged(newValue: T) {
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
-    var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
-      var subscriber: IPropertySubscriber = registry!.get(subscribedId)
+      var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
         if ('hasChanged' in subscriber) {
           (subscriber as ISinglePropertyChangeSubscriber<T>).hasChanged(newValue);
@@ -99,9 +109,8 @@ abstract class ObservedPropertyAbstract<T>  {
 
   protected notifyPropertyRead() {
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`)
-    var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
-      var subscriber: IPropertySubscriber = registry!.get(subscribedId)
+      var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
         if ('propertyRead' in subscriber) {
           (subscriber as IMultiPropertiesReadSubscriber).propertyRead(this.info_);
@@ -133,15 +142,31 @@ abstract class ObservedPropertyAbstract<T>  {
   public abstract createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<T>;
 
-    /**
-     * provide a factory function that creates a SynchedPropertyXXXX of choice
-     * that uses 'this' as source 
-     * @param factoryFunc 
-     * @returns 
-     */
-    public createSync(factoryFunc: SynchedPropertyFactoryFunc): ObservedPropertyAbstract<T> {
-      return factoryFunc<T>(this);
-    }
+  /**
+   * provide a factory function that creates a SynchedPropertyXXXX of choice
+   * that uses 'this' as source 
+   * @param factoryFunc 
+   * @returns 
+   */
+  public createSync(factoryFunc: SynchedPropertyFactoryFunc): ObservedPropertyAbstract<T> {
+    return factoryFunc<T>(this);
+  }
+
+  /**
+   * depreciated SDK function, not used anywhere by the framework
+   */
+  public createTwoWaySync(subscribeMe?: IPropertySubscriber, info?: string): SubscribedAbstractProperty<T> {
+    stateMgmtConsole.warn("Using depreciated method 'createTwoWaySync'!")
+    return this.createLink(subscribeMe, info);
+  }
+
+  /**
+   * depreciated SDK function, not used anywhere by the framework
+   */
+  public createOneWaySync(subscribeMe?: IPropertySubscriber, info?: string): SubscribedAbstractProperty<T> {
+    stateMgmtConsole.warn("Using depreciated method 'createOneWaySync' !")
+    return this.createProp(subscribeMe, info);
+  }
 
   /**
    * factory function for concrete 'object' or 'simple' ObservedProperty object
