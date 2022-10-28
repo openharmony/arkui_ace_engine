@@ -171,6 +171,11 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<p
     panda::Local<panda::ObjectRef> obj = args[0]->ToObject(vm);
     JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
 
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("loadDocument: Container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     JsiDeclarativeEngineInstance::RootViewHandle(obj);
