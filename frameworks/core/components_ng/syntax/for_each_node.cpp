@@ -85,8 +85,7 @@ void ForEachNode::CompareAndUpdateChildren()
 
     int additionalChildIndex = 0;
     for (const auto& newId : ids_) {
-        auto oldIdIt = oldIdsSet.find(newId);
-        if (oldIdIt == oldIdsSet.end()) {
+        if (oldIdsSet.find(newId) == oldIdsSet.end()) {
             // found a newly added ID
             // insert new child item.
             auto newCompsIter = additionalChildComps.begin();
@@ -96,31 +95,9 @@ void ForEachNode::CompareAndUpdateChildren()
         } else {
             auto iter = oldNodeByIdMap.find(newId);
             // the ID was used before, only need to update the child position.
-            AddChild(iter->second, DEFAULT_NODE_SLOT, true);
-            oldIdsSet.erase(oldIdIt);
+            children.emplace_back(iter->second);
         }
     }
-
-    for (const auto& oldId : oldIdsSet) {
-        auto iter = oldNodeByIdMap.find(oldId);
-        if (iter != oldNodeByIdMap.end()) {
-            // Adding silently, so that upon removal
-            // node is a part the tree.
-            // OnDetachFromMainTree to be called while node
-            // still part of the tree, we need to find
-            // posiiton in the tab tab for the tab.
-            AddChild(iter->second, DEFAULT_NODE_SLOT, true);
-            // Remove and trigger all Detach callback.
-            RemoveChild(iter->second);
-        }
-    }
-
-    if (IsOnMainTree()) {
-        for (auto newChild : additionalChildComps) {
-            newChild->AttachToMainTree();
-        }
-    }
-
     tempChildren_.clear();
     tempIds_.clear();
 }

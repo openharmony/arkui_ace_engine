@@ -41,7 +41,7 @@ UINode::~UINode()
     onMainTree_ = false;
 }
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
 {
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
@@ -53,7 +53,14 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
 
     it = children_.begin();
     std::advance(it, slot);
-    DoAddChild(it, child, silently);
+    children_.insert(it, child);
+
+    child->SetParent(Claim(this));
+    child->SetDepth(GetDepth() + 1);
+    if (onMainTree_) {
+        child->AttachToMainTree();
+    }
+    MarkNeedSyncRenderTree();
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
@@ -112,7 +119,13 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     }
 
     auto iter = RemoveChild(oldNode);
-    DoAddChild(iter, newNode);
+    children_.insert(iter, newNode);
+    newNode->SetParent(Claim(this));
+    newNode->SetDepth(GetDepth() + 1);
+    if (onMainTree_) {
+        newNode->AttachToMainTree();
+    }
+    MarkNeedSyncRenderTree();
 }
 
 void UINode::Clean()
@@ -124,10 +137,10 @@ void UINode::Clean()
     MarkNeedSyncRenderTree();
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 {
     CHECK_NULL_VOID(parent);
-    parent->AddChild(AceType::Claim(this), slot, silently);
+    parent->AddChild(AceType::Claim(this), slot);
     if (parent->GetPageId() != 0) {
         SetHostPageId(parent->GetPageId());
     }
@@ -135,21 +148,8 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
 
 void UINode::OnRemoveFromParent()
 {
-    DetachFromMainTree();
     parent_.Reset();
     depth_ = -1;
-}
-
-void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
-{
-    children_.insert(it, child);
-
-    child->SetParent(Claim(this));
-    child->SetDepth(GetDepth() + 1);
-    if (!silently && onMainTree_) {
-        child->AttachToMainTree();
-    }
-    MarkNeedSyncRenderTree();
 }
 
 RefPtr<FrameNode> UINode::GetFocusParent() const
@@ -432,32 +432,6 @@ void UINode::SetActive(bool active)
     for (const auto& child : children_) {
         child->SetActive(active);
     }
-}
-
-std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
-{
-    if (GetId() == id) {
-        return std::pair<bool, int32_t>(true, 0);
-    }
-
-    const auto& node = ElementRegister::GetInstance()->GetUINodeById(id);
-    if (!node) {
-        return std::pair<bool, int32_t>(false, 0);
-    }
-
-    if (node && (node->GetTag() == GetTag())) {
-        return std::pair<bool, int32_t>(false, 1);
-    }
-
-    int32_t count = 0;
-    for (const auto& child : GetChildren()) {
-        auto res = child->GetChildFlatIndex(id);
-        if (res.first) {
-            return std::pair<bool, int32_t>(true, count + res.second);
-        }
-        count += res.second;
-    }
-    return std::pair<bool, int32_t>(false, count);
 }
 
 } // namespace OHOS::Ace::NG
