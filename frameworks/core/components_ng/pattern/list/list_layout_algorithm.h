@@ -181,10 +181,10 @@ private:
     void CalculateLanes(const LayoutConstraintF& layoutConstraint, Axis axis);
     void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
-    int LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
-        int& currentIndex, float& mainLen);
-    int LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
-        int& currentIndex, float& mainLen);
+    int32_t LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& currentIndex, float& mainLen);
+    int32_t LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& currentIndex, float& mainLen);
     static RefPtr<ListItemGroupLayoutProperty> GetListItemGroup(const RefPtr<LayoutWrapper>&  layoutWrapper);
     void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
 

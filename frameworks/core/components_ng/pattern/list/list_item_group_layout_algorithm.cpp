@@ -117,19 +117,19 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
     }
 }
 
-int32_t ListItemGroupLayoutAlgorithm::MeasureALine(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-    int32_t currentIndex, float& mainLen)
+int32_t ListItemGroupLayoutAlgorithm::MeasureALine(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, int32_t currentIndex, float& mainLen)
 {
     int32_t cnt = 0;
     for (int32_t i = 0; i < lanes_; i++) {
         auto wrapper = GetListItem(layoutWrapper, currentIndex + i);
         if (!wrapper) {
-            LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
+            LOGI("the start %{public}d index wrapper is null", currentIndex + i);
             return cnt;
         }
         cnt++;
         {
-            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
+            ACE_SCOPED_TRACE("ListItemGroup::MeasureListItem:%d", currentIndex + i);
             wrapper->Measure(layoutConstraint);
         }
         mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));

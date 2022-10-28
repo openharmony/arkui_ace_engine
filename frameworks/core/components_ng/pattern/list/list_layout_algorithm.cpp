@@ -261,12 +261,12 @@ void ListLayoutAlgorithm::MeasureList(
     }
 }
 
-int ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-    Axis axis, int& currentIndex, float& mainLen)
+int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, Axis axis, int32_t& currentIndex, float& mainLen)
 {
-    int cnt = 0;
-    int lanes = lanes_.has_value() && lanes_.value() > 1 ? lanes_.value() : 1;
-    for (int i = 0; i < lanes; i++) {
+    int32_t cnt = 0;
+    int32_t lanes = lanes_.has_value() && lanes_.value() > 1 ? lanes_.value() : 1;
+    for (int32_t i = 0; i < lanes; i++) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
         if (!wrapper) {
             LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
@@ -278,14 +278,13 @@ int ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper, const 
         }
         cnt++;
         ++currentIndex;
-        {
-            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
-            if (itemGroup) {
-                SetListItemGroupProperty(itemGroup, axis, lanes);
-                wrapper->Measure(groupLayoutConstraint_);
-            } else {
-                wrapper->Measure(layoutConstraint);
-            }
+        if (itemGroup) {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
+            SetListItemGroupProperty(itemGroup, axis, lanes);
+            wrapper->Measure(groupLayoutConstraint_);
+        } else {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
+            wrapper->Measure(layoutConstraint);
         }
         mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
         if (itemGroup) {
@@ -295,12 +294,12 @@ int ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper, const 
     return cnt;
 }
 
-int ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-    Axis axis, int& currentIndex, float& mainLen)
+int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, Axis axis, int32_t& currentIndex, float& mainLen)
 {
-    int cnt = 0;
-    int lanes = lanes_.has_value() && lanes_.value() > 1 ? lanes_.value() : 1;
-    for (int i = 0; i < lanes; i++) {
+    int32_t cnt = 0;
+    int32_t lanes = lanes_.has_value() && lanes_.value() > 1 ? lanes_.value() : 1;
+    for (int32_t i = 0; i < lanes; i++) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
         if (!wrapper) {
             LOGI("the %{public}d wrapper is null", currentIndex - 1);
@@ -312,14 +311,13 @@ int ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper, const
         }
         --currentIndex;
         cnt++;
-        {
-            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
-            if (itemGroup) {
-                SetListItemGroupProperty(itemGroup, axis, lanes);
-                wrapper->Measure(groupLayoutConstraint_);
-            } else {
-                wrapper->Measure(layoutConstraint);
-            }
+        if (itemGroup) {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
+            SetListItemGroupProperty(itemGroup, axis, lanes);
+            wrapper->Measure(groupLayoutConstraint_);
+        } else {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
+            wrapper->Measure(layoutConstraint);
         }
         mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
         if (currentIndex % lanes == 0 || itemGroup) {
@@ -338,12 +336,12 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
     do {
         currentStartPos = currentEndPos;
         float mainLength = 0;
-        int count = LayoutALineForward(layoutWrapper, layoutConstraint, axis, currentIndex, mainLength);
+        int32_t count = LayoutALineForward(layoutWrapper, layoutConstraint, axis, currentIndex, mainLength);
         if (count == 0) {
             break;
         }
         currentEndPos = currentStartPos + mainLength;
-        for (int i = 0; i < count; i++) {
+        for (int32_t i = 0; i < count; i++) {
             itemPosition_[currentIndex - i] = { currentStartPos, currentEndPos };
         }
         if (currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) {
@@ -403,7 +401,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
 }
 
 void ListLayoutAlgorithm::LayoutBackward(
-    LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis, int endIndex, float endPos)
+    LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis, int32_t endIndex, float endPos)
 {
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
@@ -411,13 +409,13 @@ void ListLayoutAlgorithm::LayoutBackward(
     do {
         currentEndPos = currentStartPos;
         float mainLength = 0;
-        int count = LayoutALineBackward(layoutWrapper, layoutConstraint, axis, currentIndex, mainLength);
+        int32_t count = LayoutALineBackward(layoutWrapper, layoutConstraint, axis, currentIndex, mainLength);
         if (count == 0) {
             break;
         }
         currentStartPos = currentEndPos - mainLength;
 
-        for (int i = 0; i < count; i++) {
+        for (int32_t i = 0; i < count; i++) {
             itemPosition_[currentIndex + i] = { currentStartPos, currentEndPos };
         }
 
