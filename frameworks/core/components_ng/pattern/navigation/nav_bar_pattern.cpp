@@ -114,7 +114,6 @@ void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
         titleBarNode->SetBackButton(navBarNode->GetBackButton());
         titleBarNode->AddChild(titleBarNode->GetBackButton());
     } while (false);
-    titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));
     BuildTitle(navBarNode, titleBarNode);
     BuildSubtitle(navBarNode, titleBarNode);
     BuildMenu(navBarNode, titleBarNode);
@@ -133,6 +132,8 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
         navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI)) {
         return;
     }
+    titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));
+    titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue(false));
     BuildTitleBar(hostNode, titleBarNode, navBarLayoutProperty);
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -167,20 +168,6 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
     }
 }
 } // namespace
-
-bool NavBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
-{
-    if (skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
-    }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto navigationLayoutAlgorithm =
-        DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(navigationLayoutAlgorithm, false);
-    // TODO: add scroll effect to title and subtitle
-    return false;
-}
 
 void NavBarPattern::OnModifyDone()
 {

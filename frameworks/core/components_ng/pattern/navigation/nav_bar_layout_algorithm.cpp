@@ -49,10 +49,18 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
 
     // MINI 模式
     if (navBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+        // 有subtitle
+        if (hostNode->GetSubtitle()) {
+            constraint.selfIdealSize =
+                OptionalSizeF(navigationSize.Width(), static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+            titleBarWrapper->Measure(constraint);
+            return static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        }
+
         constraint.selfIdealSize =
-            OptionalSizeF(navigationSize.Width(), static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()));
+            OptionalSizeF(navigationSize.Width(), static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
         titleBarWrapper->Measure(constraint);
-        return static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx());
+        return static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     }
 
     // FREE 和 FULL 模式，有subtitle
@@ -120,6 +128,8 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
+    auto titleBarOffset = OffsetF(0.0f, 0.0f);
+    geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
 }
@@ -134,11 +144,13 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
+        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
     }
+    auto contentOffset = OffsetF(0.0f, 0.0f);
+    geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 }
 
@@ -158,7 +170,7 @@ void LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto toolBarOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - theme->GetHeight().ConvertToPx();
-    auto toolBarOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), static_cast<float>(toolBarOffsetY));
+    auto toolBarOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), static_cast<float>(toolBarOffsetY));
     geometryNode->SetMarginFrameOffset(toolBarOffset);
     toolBarWrapper->Layout();
 }
