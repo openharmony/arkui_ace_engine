@@ -785,26 +785,6 @@ void RenderWaterFlow::SetScrollBarCallback()
     scrollBar_->SetCallBack(scrollCallback, barEndCallback, scrollEndCallback);
 }
 
-bool RenderWaterFlow::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
-{
-    if (!animator_->IsStopped()) {
-        animator_->Stop();
-    }
-    animator_->ClearInterpolators();
-    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(-viewportStartPos_, NormalizeToPx(position), curve);
-    animation->AddListener([weakScroll = AceType::WeakClaim(this)](double value) {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->DoJump(value, SCROLL_FROM_JUMP);
-        }
-    });
-    animator_->AddInterpolator(animation);
-    animator_->SetDuration(static_cast<int32_t>(duration));
-    animator_->ClearStopListeners();
-    animator_->Play();
-    return true;
-}
-
 void RenderWaterFlow::ScrollToIndex(int32_t index, int32_t source)
 {
     if (source != SCROLL_FROM_JUMP) {
@@ -820,12 +800,6 @@ void RenderWaterFlow::ScrollToIndex(int32_t index, int32_t source)
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("context is null");
-        return;
-    }
-
-    auto showItems = GetShowItems();
-    if (showItems.find(index) != showItems.end()) {
-        LOGW("Item show in view port already, not do scrllToIndex.");
         return;
     }
 
