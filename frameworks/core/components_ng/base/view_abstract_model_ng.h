@@ -674,6 +674,7 @@ public:
             event = [builderFunc = std::move(buildFunc), targetNode](const GestureEvent& info) mutable {
                 CreateCustomMenu(builderFunc, targetNode, false, NG::OffsetF(info.GetGlobalLocation().GetX(),
                     info.GetGlobalLocation().GetY()));
+            };
         } else {
             LOGE("empty param or null builder");
             return;
@@ -715,6 +716,7 @@ public:
             auto event = [builder = std::move(buildFunc), targetNode](const GestureEvent& info) mutable {
                 CreateCustomMenu(builder, targetNode, true, NG::OffsetF(info.GetGlobalLocation().GetX(),
                     info.GetGlobalLocation().GetY()));
+            };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
             hub->SetLongPressEvent(longPress);
@@ -745,7 +747,7 @@ private:
         // nullify builder
         buildFunc = nullptr;
     }
-};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_NG_H
