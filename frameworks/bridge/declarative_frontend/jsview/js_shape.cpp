@@ -320,7 +320,7 @@ void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
     if (!ParseJsInteger(rowValue, row)) {
         return;
     }
-    ShapeModel::GetInstance()->SetBitmapMesh(mesh,static_cast<int32_t>(column),static_cast<int32_t>(row));
+    ShapeModel::GetInstance()->SetBitmapMesh(mesh, static_cast<int32_t>(column), static_cast<int32_t>(row));
 }
 
 void JSShape::JSBind(BindingTarget globalObj)

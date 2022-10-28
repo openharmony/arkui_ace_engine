@@ -163,7 +163,6 @@ void ContainerModalPattern::InitContainerEvent()
         if (floatingLayoutProperty->GetVisibilityValue() != VisibleType::VISIBLE) {
             return;
         }
-
         // TODO: transition out animation
         // step4. Touch other area to hide floating title.
         floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);

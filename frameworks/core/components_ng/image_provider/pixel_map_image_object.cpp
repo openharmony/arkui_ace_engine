@@ -46,7 +46,8 @@ RefPtr<PixelMapImageObject> PixelMapImageObject::Create(
             sourceInfo.ToString().c_str());
         return nullptr;
     }
-    return AceType::MakeRefPtr<NG::PixelMapImageObject>(data->GetPixelMapData(), sourceInfo, encodedInfo->GetImageSize());
+    return AceType::MakeRefPtr<NG::PixelMapImageObject>(
+        data->GetPixelMapData(), sourceInfo, encodedInfo->GetImageSize());
 }
 
 } // namespace OHOS::Ace::NG
