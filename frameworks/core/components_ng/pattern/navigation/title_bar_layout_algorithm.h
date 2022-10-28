@@ -38,13 +38,13 @@ private:
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
     void MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
-        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize, float menuWidth);
 
     void MeasureTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
-        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize, float menuWidth);
 
-    void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
-        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
+    float MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
     void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
@@ -54,7 +54,7 @@ private:
 
     void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight);
-    void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode);
+    void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode, float subtitleHeight);
 
     // set variables from theme
     void InitializeTheme();
@@ -62,6 +62,7 @@ private:
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
     Dimension menuHeight_;
+    Dimension iconSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TitleBarLayoutAlgorithm);
 };
