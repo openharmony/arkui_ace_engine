@@ -186,8 +186,6 @@ private:
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void SetRootView(int32_t width, int32_t height, int32_t offset);
     Offset position_;
-    Offset webPoint_;
-    Offset globlePointPosition_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     double offsetFix_ = 0.0;
