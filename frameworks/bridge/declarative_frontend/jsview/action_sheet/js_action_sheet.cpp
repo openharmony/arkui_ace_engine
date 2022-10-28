@@ -52,7 +52,7 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
 
     auto iconVal = obj->GetProperty("icon");
     std::string icon;
-    if (JSActionSheet::ParseJsString(iconVal, icon)) {
+    if (JSActionSheet::ParseJsMedia(iconVal, icon)) {
         sheetInfo.icon = icon;
     }
 

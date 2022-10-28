@@ -73,6 +73,16 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    const std::string& GetTitle()
+    {
+        return title_;
+    }
+
+    const std::string& GetMessage()
+    {
+        return message_;
+    }
+
 private:
     void OnModifyDone() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
