@@ -113,7 +113,8 @@ RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForDecodedPixel
     return MakeRefPtr<ImageEncodedInfo>(SizeF(pixelMap->GetWidth(), pixelMap->GetHeight()), 1);
 }
 
-ImageObjectType ImageProvider::ParseImageObjectType(const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo)
+ImageObjectType ImageProvider::ParseImageObjectType(
+    const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo)
 {
     if (!data) {
         LOGW(

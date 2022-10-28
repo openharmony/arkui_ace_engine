@@ -171,7 +171,7 @@ void RenderTabContent::FireDomChangeEvent(int32_t index) const
 void RenderTabContent::HandContentIndicatorEvent(int32_t newIndex, bool needChange) const
 {
     if (indicatorCallback_) {
-       indicatorCallback_(scrollOffset_ / contentWidth_, newIndex, needChange);
+        indicatorCallback_(scrollOffset_ / contentWidth_, newIndex, needChange);
     }
 }
 
@@ -197,7 +197,7 @@ void RenderTabContent::HandleDragUpdate(double offset)
     
     int32_t newIndex = IsRightToLeft() ? (scrollOffset_ < 0.0 ? GetPrevIndex() : GetNextIndex())
                                        : (scrollOffset_ > 0.0 ? GetPrevIndex() : GetNextIndex());
-    HandContentIndicatorEvent(newIndex,false);
+    HandContentIndicatorEvent(newIndex, false);
 }
 
 void RenderTabContent::HandleDragEnd()
