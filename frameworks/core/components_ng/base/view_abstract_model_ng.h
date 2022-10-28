@@ -747,7 +747,7 @@ private:
         // nullify builder
         buildFunc = nullptr;
     }
-
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_NG_H

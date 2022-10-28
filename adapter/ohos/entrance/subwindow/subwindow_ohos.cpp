@@ -315,7 +315,6 @@ void SubwindowOhos::HideMenuNG(int32_t targetId)
     HideWindow();
 }
 
-
 void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 {
     LOGI("Show the menu");
