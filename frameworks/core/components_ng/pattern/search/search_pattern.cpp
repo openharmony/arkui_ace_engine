@@ -34,6 +34,7 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto searchButton = layoutProperty->GetSearchButton();
     searchButton_ = searchButton.has_value() ? searchButton->value() : "";
+    InitSearchController();
     // Image click event
     auto imageFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
     CHECK_NULL_VOID(imageFrameNode);
@@ -66,6 +67,27 @@ void SearchPattern::OnModifyDone()
     };
     buttonClickListener_ = MakeRefPtr<ClickEvent>(std::move(buttonClickCallback));
     buttonGesture->AddClickEvent(buttonClickListener_);
+}
+
+void SearchPattern::InitSearchController()
+{
+    searchController_->SetCaretPosition([weak = WeakClaim(this)](int32_t caretPosition) {
+        auto search = weak.Upgrade();
+        if (search) {
+            search->HandleCaretPosition(caretPosition);
+        }
+    });
+}
+
+void SearchPattern::HandleCaretPosition(int32_t caretPosition)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->SetCaretPosition(caretPosition);
 }
 
 void SearchPattern::OnClickButtonAndImage()

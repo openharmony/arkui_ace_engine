@@ -23,7 +23,9 @@
 #include "core/components_ng/pattern/search/search_layout_algorithm.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_paint_method.h"
+#include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components/text_field/text_field_controller.h"
 
 namespace OHOS::Ace::NG {
 
@@ -70,16 +72,29 @@ public:
         return true;
     }
 
+    const RefPtr<Ace::TextFieldController>& GetSearchController()
+    {
+        return searchController_;
+    }
+
+    void SetSearchController(const RefPtr<Ace::TextFieldController>& searchController)
+    {
+        searchController_ = searchController;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
 private:
     void OnModifyDone() override;
+    void InitSearchController();
     void OnClickButtonAndImage();
-
+    void HandleCaretPosition(int32_t caretPosition);
     std::string searchButton_;
     SizeF buttonSize_;
     RefPtr<ClickEvent> imageClickListener_;
     RefPtr<ClickEvent> buttonClickListener_;
+
+    RefPtr<Ace::TextFieldController> searchController_;
 };
 
 } // namespace OHOS::Ace::NG
