@@ -1041,29 +1041,35 @@ void FlutterRenderImage::DrawSVGImage(const Offset& offset, ScopedCanvas& canvas
     if (!skiaDom_) {
         return;
     }
-    Size svgContainerSize = GetLayoutSize();
-    if (svgContainerSize.IsInfinite() || !svgContainerSize.IsValid()) {
-        // when layout size is invalid, try the container size of svg
-        svgContainerSize = Size(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-        if (svgContainerSize.IsInfinite() || !svgContainerSize.IsValid()) {
+    Size layoutSize = GetLayoutSize();
+    Size imageSize(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+    if (layoutSize.IsInfinite() || !layoutSize.IsValid()) {
+        if (imageSize.IsInfinite() || !imageSize.IsValid()) {
             LOGE("Invalid layout size: %{private}s, invalid svgContainerSize: %{private}s, stop draw svg. The max size"
-                 " of layout param is %{private}s", GetLayoutSize().ToString().c_str(),
-                 svgContainerSize.ToString().c_str(), GetLayoutParam().GetMaxSize().ToString().c_str());
+                 " of layout param is %{private}s",
+                GetLayoutSize().ToString().c_str(), layoutSize.ToString().c_str(),
+                GetLayoutParam().GetMaxSize().ToString().c_str());
             return;
-        } else {
-            LOGE("Invalid layout size: %{private}s, valid svgContainerSize: %{private}s, use svg container size to draw"
-                 " svg. The max size of layout param is %{private}s", GetLayoutSize().ToString().c_str(),
-                 svgContainerSize.ToString().c_str(), GetLayoutParam().GetMaxSize().ToString().c_str());
         }
+        // when layout size is invalid, use svg's own size
+        layoutSize = imageSize;
     }
+
     canvas->translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
-    double width = svgContainerSize.Width();
-    double height = svgContainerSize.Height();
+
+    auto width = static_cast<float>(layoutSize.Width());
+    auto height = static_cast<float>(layoutSize.Height());
     if (matchTextDirection_ && GetTextDirection() == TextDirection::RTL) {
         canvas.FlipHorizontal(0.0, width);
     }
-    skiaDom_->setContainerSize({ width, height });
     canvas->clipRect(0, 0, width, height, SkClipOp::kIntersect);
+    if (imageSize.IsValid() && !imageSize.IsInfinite()) {
+        // scale svg to layout size
+        float scale = std::min(width / imageSize.Width(), height / imageSize.Height());
+        canvas->scale(scale, scale);
+    } else {
+        skiaDom_->setContainerSize({ width, height });
+    }
     skiaDom_->render(canvas.GetSkCanvas());
 }
 
