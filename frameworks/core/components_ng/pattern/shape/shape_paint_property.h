@@ -85,7 +85,8 @@ public:
         std::vector<Ace::Dimension> strokeDashDimensionArray =
             propStrokeDashArray_.value_or(std::vector<Ace::Dimension>());
         std::vector<int32_t> strokeDashIntArray(strokeDashDimensionArray.size());
-        for (int32_t i = 0; i < strokeDashDimensionArray.size(); i++) {
+        int32_t len = static_cast<int32_t>(strokeDashDimensionArray.size());
+        for (int32_t i = 0; i < len; i++) {
             strokeDashIntArray.emplace_back(strokeDashDimensionArray[i].ConvertToVp());
         }
         json->Put("strokeDashArray", strokeDashIntArray.data());

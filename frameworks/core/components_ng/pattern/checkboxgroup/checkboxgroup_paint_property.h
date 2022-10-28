@@ -22,7 +22,7 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
-// PaintProperty are used to set paint properties.
+
 class CheckBoxGroupPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintProperty, PaintProperty)
 
@@ -75,6 +75,8 @@ public:
     {
         isCheckBoxCallbackDealed_ = true;
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelect, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelectedColor, Color, PROPERTY_UPDATE_RENDER);

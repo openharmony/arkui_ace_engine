@@ -85,6 +85,48 @@ public:
         return isWrap_;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        auto property = GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_VOID(property);
+        static const char* FLEXDIRECTION[] = { "FlexDirection.ROW", "FlexDirection.COLUMN", "FlexDirection.ROW_REVERSE",
+            "FlexDirection.COLUMN_REVERSE" };
+        static const char* FLEXALIGN[] = { "FlexAlign.AUTO", "FlexAlign.FLEX_START", "FlexAlign.CENTER",
+            "FlexAlign.FLEX_END", "FlexAlign.STRETCH", "FlexAlign.BASELINE", "FlexAlign.SPACE_BETWEEN",
+            "FlexAlign.SPACE_AROUND", "FlexAlign.SPACE_EVENLY", "FlexAlign.SPACE_CUSTOMIZATION" };
+        if (!isWrap_) {
+            json->Put("direction",
+                FLEXDIRECTION[static_cast<int32_t>(property->GetFlexDirection().value_or(FlexDirection::ROW))]);
+            json->Put("wrap", "FlexWrap.NoWrap");
+            json->Put("justifyContent",
+                FLEXALIGN[static_cast<int32_t>(property->GetMainAxisAlign().value_or(FlexAlign::FLEX_START))]);
+            json->Put("alignItems",
+                FLEXALIGN[static_cast<int32_t>(property->GetCrossAxisAlign().value_or(FlexAlign::FLEX_START))]);
+            json->Put("alignContent", "FlexAlign.FLEX_START");
+            return;
+        }
+
+        auto direction = property->GetFlexDirection().value_or(FlexDirection::ROW);
+        json->Put("direction", FLEXDIRECTION[static_cast<int32_t>(direction)]);
+        auto wrapDirection = property->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
+        if (static_cast<int32_t>(direction) <= 1) {
+            auto wrap = (static_cast<int32_t>(wrapDirection) - static_cast<int32_t>(direction)) / 2 + 1;
+            json->Put("wrap", wrap == 1 ? "FlexWrap.Wrap" : "FlexWrap.WrapReverse");
+        } else {
+            auto wrap = (static_cast<int32_t>(wrapDirection) + static_cast<int32_t>(direction)) / 2 + 1;
+            json->Put("wrap", wrap == 1 ? "FlexWrap.Wrap" : "FlexWrap.WrapReverse");
+        }
+        static const char* WRAPALIGNMENT[] = { "WrapAlignment.START", "WrapAlignment.CENTER", "WrapAlignment.END",
+            "WrapAlignment.SPACE_AROUND", "WrapAlignment.SPACE_BETWEEN", "WrapAlignment.STRETCH",
+            "WrapAlignment.SPACE_EVENLY", "WrapAlignment.BASELINE" };
+        json->Put("justifyContent",
+            WRAPALIGNMENT[static_cast<int32_t>(property->GetMainAlignment().value_or(WrapAlignment::START))]);
+        json->Put("alignItems",
+            WRAPALIGNMENT[static_cast<int32_t>(property->GetCrossAlignment().value_or(WrapAlignment::START))]);
+        json->Put("alignContent",
+            WRAPALIGNMENT[static_cast<int32_t>(property->GetAlignment().value_or(WrapAlignment::START))]);
+    }
+
 private:
     bool isWrap_ = false;
     bool isDialogStretch_ = false;

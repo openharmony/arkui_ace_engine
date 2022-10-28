@@ -95,6 +95,11 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcId);
     };
     XComponentModel::GetInstance()->SetOnSurfaceDestroyEvent(std::move(surfaceDestroyCallback));
+
+    if (info.Length() > 1 && info[1]->IsString()) {
+        auto soPath = info[1]->ToString();
+        XComponentModel::GetInstance()->SetSoPath(soPath);
+    }
 }
 
 void JSXComponent::JsOnLoad(const JSCallbackInfo& args)

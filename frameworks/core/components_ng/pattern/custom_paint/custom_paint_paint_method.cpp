@@ -336,6 +336,10 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
 
 void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData)
 {
+    auto contentOffset = OffsetF(0.0f, 0.0f);
+    if (!isOffscreen_) {
+        contentOffset = paintWrapper->GetContentOffset();
+    }
     if (imageData.data.empty()) {
         LOGE("PutImageData failed, image data is empty.");
         return;
@@ -354,7 +358,7 @@ void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace:
         SkAlphaType::kOpaque_SkAlphaType);
     skBitmap.allocPixels(imageInfo);
     skBitmap.setPixels(data);
-    skCanvas_->drawBitmap(skBitmap, imageData.x, imageData.y);
+    skCanvas_->drawBitmap(skBitmap, imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
     delete[] data;
 }
 

@@ -126,6 +126,16 @@ private:
     bool GetResourceName(const std::string& uri, std::string& resName) const;
 };
 
+class PixelMapImageLoader : public ImageLoader {
+public:
+    PixelMapImageLoader() = default;
+    ~PixelMapImageLoader() override = default;
+    sk_sp<SkData> LoadImageData(
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+    RefPtr<NG::ImageData> LoadDecodedImageData(
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H

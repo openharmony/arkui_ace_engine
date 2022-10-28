@@ -19,7 +19,9 @@
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/form/form_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
 #if !defined(WEARABLE_PRODUCT)
 #include "frameworks/core/components/form/form_component.h"
 #endif
@@ -57,9 +59,8 @@ void JSForm::Create(const JSCallbackInfo& info)
         fomInfo.dimension = dimension->ToNumber<int32_t>();
     }
     fomInfo.temporary = temporary->ToBoolean();
-
     if (!wantValue->IsNull() && wantValue->IsObject()) {
-        fomInfo.want = wantValue->ToString();
+        fomInfo.wantWrap = CreateWantWrapFromNapiValue(wantValue);
     }
 
     if (Container::IsCurrentUseNewPipeline()) {

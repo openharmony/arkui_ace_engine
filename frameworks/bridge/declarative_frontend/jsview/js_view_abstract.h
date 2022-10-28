@@ -27,6 +27,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -63,11 +64,6 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
-enum class ResponseType : int32_t {
-    RIGHT_CLICK = 0,
-    LONGPRESS,
-};
-
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 class JSViewAbstract {
@@ -76,7 +72,6 @@ public:
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
-    static void ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<MenuComponent> menuComponent);
 
     static void JsScale(const JSCallbackInfo& info);
     static void JsScaleX(const JSCallbackInfo& info);
@@ -138,7 +133,6 @@ public:
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
-    static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
@@ -247,9 +241,6 @@ public:
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
-    static void JsBindPopupNG(const JSCallbackInfo& info);
-    static void CreateCustomPopup(
-        RefPtr<JsFunction>& builder, const RefPtr<NG::FrameNode>& targetNode, const RefPtr<PopupParam>& popupParam);
 #endif
 
     /**
@@ -257,42 +248,26 @@ public:
      */
     static void JSBind();
 
-    static const RefPtr<PipelineBase> GetPipelineContext()
+    static RefPtr<PipelineBase> GetPipelineContext()
     {
         auto container = Container::Current();
-        if (!container) {
-            LOGW("container is null");
-            return nullptr;
-        }
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipelineContext is null!");
-            return nullptr;
-        }
-        return pipelineContext;
+        CHECK_NULL_RETURN(container, nullptr);
+        return container->GetPipelineContext();
     }
 
     template<typename T>
     static RefPtr<T> GetTheme()
     {
         auto pipelineContext = GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipelineContext is null!");
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto themeManager = pipelineContext->GetThemeManager();
-        if (!themeManager) {
-            LOGE("themeManager is null!");
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(themeManager, nullptr);
         return themeManager->GetTheme<T>();
     }
 
     /**
      * box properties setter
      */
-    static RefPtr<Gesture> GetTapGesture(
-        const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
     static const Border& GetBorder();
     static void SetMarginTop(const JSCallbackInfo& info);
     static void SetMarginBottom(const JSCallbackInfo& info);

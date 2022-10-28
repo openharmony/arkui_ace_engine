@@ -17,6 +17,7 @@
 
 #include <cstdint>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_theme.h"
@@ -32,6 +33,10 @@ namespace {
 constexpr float LAYOUT_WEIGHT = 30.0;
 constexpr float PADDING_WEIGHT = 10.0;
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+const int32_t DIVIDER_SIZE = 2;
+const Dimension FONT_SIZE = Dimension(2.0);
+const float TEXT_HEIGHT_NUMBER = 2.0f;
+const float TEXT_WEIGHT_NUMBER = 6.0f;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -46,6 +51,15 @@ void TextPickerPattern::OnAttachToFrameNode()
 
     InitilaScorllEvent();
     host->GetRenderContext()->SetClipToFrame(true);
+}
+
+bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (!config.frameSizeChange) {
+        return false;
+    }
+    CHECK_NULL_RETURN(dirty, false);
+    return true;
 }
 
 void TextPickerPattern::OnModifyDone()
@@ -109,18 +123,22 @@ void TextPickerPattern::FlushCurrentOptions()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    Size optionSize;
-    DimensionUnit optionSizeUnit = DimensionUnit::PX;
+    Size optionSize = { 0, 0 };
     optionSize = pickerTheme->GetOptionSize(textPickerPattern->GetSelected());
     if (!NearZero(
             context->NormalizeToPx(textPickerLayoutProperty->GetDefaultPickerItemHeight().value_or(Dimension(0))))) {
         optionSize.SetHeight(context->NormalizeToPx(textPickerLayoutProperty->GetDefaultPickerItemHeightValue()));
     }
+    auto middleIndex = showCount / 2;
     auto child = host->GetChildren();
     auto iter = child.begin();
     if (child.size() != showCount) {
         return;
     }
+
+    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
 
     for (uint32_t index = 0; index < showCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
@@ -133,9 +151,40 @@ void TextPickerPattern::FlushCurrentOptions()
         CHECK_NULL_VOID(textLayoutProperty);
         // TODO Property Update
         textLayoutProperty->UpdateContent(optionValue);
-        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        textLayoutProperty->UpdateLineHeight(Dimension(optionSize.Height(), optionSizeUnit));
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto height = CalculateHeight();
+        SetDividerHeight(showCount, height);
+        if (index < middleIndex) {
+            if (index == 0) {
+                textLayoutProperty->UpdateFontSize(normalOptionSize);
+            } else {
+                textLayoutProperty->UpdateFontSize(focusOptionSize);
+            }
+            textLayoutProperty->UpdateMaxLines(1);
+            textLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
+            textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+        }
+        if (index == middleIndex) {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+            textLayoutProperty->UpdateMaxLines(1);
+            textLayoutProperty->UpdateFontSize(selectedOptionSize);
+            textLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
+            textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        }
+        if (index > middleIndex) {
+            if (index == showCount - 1) {
+                textLayoutProperty->UpdateFontSize(normalOptionSize);
+            } else {
+                textLayoutProperty->UpdateFontSize(focusOptionSize);
+            }
+            textLayoutProperty->UpdateMaxLines(1);
+            textLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
+            textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+        }
+        textNode->GetRenderContext()->SetClipToFrame(true);
+        textNode->MarkDirtyNode();
         iter++;
     }
     selectedIndex_ = currentIndex;
@@ -146,6 +195,48 @@ void TextPickerPattern::FlushCurrentOptions()
         textPickerEventHub->FireChangeEvent(currentValue, currentIndex);
         textPickerEventHub->FireDialogChangeEvent(GetSelectedObject(true, 1));
     }
+}
+
+void TextPickerPattern::SetDividerHeight(uint32_t showOptionCount, double height)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE) {
+        gradientHeight_ = static_cast<float>(height * TEXT_HEIGHT_NUMBER);
+    } else {
+        gradientHeight_ = static_cast<float>(height);
+    }
+    dividerHeight_ = static_cast<float>(gradientHeight_ + height);
+    dividerSpacingWidth_ = static_cast<float>(pickerTheme->GetDividerSpacing().Value() * TEXT_WEIGHT_NUMBER);
+}
+
+double TextPickerPattern::CalculateHeight()
+{
+    double height = 0.0;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, height);
+    auto textPickerPattern = host->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, height);
+    auto textPickerLayoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_RETURN(textPickerLayoutProperty, height);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, height);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, height);
+    Size optionSize = { 0, 0 };
+    ;
+    optionSize = pickerTheme->GetOptionSize(textPickerPattern->GetSelected());
+    if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
+        auto defaultPickerItemHeightValue =
+            context->NormalizeToPx(textPickerLayoutProperty->GetDefaultPickerItemHeightValue());
+        if (defaultPickerItemHeightValue <= 0) {
+            return height;
+        }
+        height = context->NormalizeToPx(textPickerLayoutProperty->GetDefaultPickerItemHeightValue());
+    } else {
+        height = pickerTheme->GetGradientHeight().Value();
+    }
+    return height;
 }
 
 std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t status) const
@@ -163,13 +254,11 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
     CHECK_NULL_RETURN(context, "");
 
     if (context->GetIsDeclarative()) {
-        return std::string("{\"value\":") + "\"" + value + "\"" +
-            ",\"index\":" + std::to_string(index) +
-            ",\"status\":" + std::to_string(status) + "}";
+        return std::string("{\"value\":") + "\"" + value + "\"" + ",\"index\":" + std::to_string(index) +
+               ",\"status\":" + std::to_string(status) + "}";
     } else {
-        return std::string("{\"newValue\":") + "\"" + value + "\"" +
-            ",\"newSelected\":" + std::to_string(index) +
-            ",\"status\":" + std::to_string(status) + "}";
+        return std::string("{\"newValue\":") + "\"" + value + "\"" + ",\"newSelected\":" + std::to_string(index) +
+               ",\"status\":" + std::to_string(status) + "}";
     }
 }
 

@@ -56,6 +56,21 @@ public:
         return { isVertical_, true, ScopeType::FLEX };
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        auto property = GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(property);
+        static const char* FLEXALIGN[] = { "FlexAlign.AUTO", "FlexAlign.FLEX_START", "FlexAlign.CENTER",
+            "FlexAlign.FLEX_END", "FlexAlign.STRETCH", "FlexAlign.BASELINE", "FlexAlign.SPACE_BETWEEN",
+            "FlexAlign.SPACE_AROUND", "FlexAlign.SPACE_EVENLY", "FlexAlign.SPACE_CUSTOMIZATION" };
+
+        json->Put("space", property->GetSpace().value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("alignItems",
+            FLEXALIGN[static_cast<int32_t>(property->GetCrossAxisAlign().value_or(FlexAlign::FLEX_START))]);
+        json->Put("justifyContent",
+            FLEXALIGN[static_cast<int32_t>(property->GetMainAxisAlign().value_or(FlexAlign::FLEX_START))]);
+    }
+
 private:
     bool isVertical_ = false;
 

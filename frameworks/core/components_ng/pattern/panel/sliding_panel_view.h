@@ -35,7 +35,7 @@ public:
     static void SetHalfHeight(const Dimension& halfHeight);
     static void SetFullHeight(const Dimension& fullHeight);
     static void SetBackgroundColor(Color backgroundColor);
-    static void SetOnChange(ChangeEvent&& onChange);
+    static void SetOnSizeChange(ChangeEvent&& changeEvent);
     static void SetOnHeightChange(HeightChangeEvent&& onHeightChange);
     static void Pop();
 

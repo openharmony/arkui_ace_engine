@@ -492,6 +492,11 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
         paintWrapper->SetNodePaintMethod(paintMethod);
         return paintWrapper;
     }
+    if (renderContext_->GetAccessibilityFocus().value_or(false)) {
+        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_);
+        paintWrapper->SetNodePaintMethod(MakeRefPtr<NodePaintMethod>());
+        return paintWrapper;
+    }
     return nullptr;
 }
 

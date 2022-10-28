@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_PAINT_METHOD_H
 
+#include "core/components/divider/divider_theme.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DividerPaintMethod : public NodePaintMethod {
@@ -30,9 +32,13 @@ public:
     ~DividerPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto theme = pipeline->GetTheme<DividerTheme>();
+        CHECK_NULL_RETURN(theme, nullptr);
         auto dividerRenderProperty = DynamicCast<DividerRenderProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
-        dividerColor_ = dividerRenderProperty->GetDividerColor();
+        dividerColor_ = dividerRenderProperty->GetDividerColor().value_or(theme->GetColor());
         lineCap_ = dividerRenderProperty->GetLineCap();
         auto offset = paintWrapper->GetContentOffset();
         lineCap_ = lineCap_ == LineCap::BUTT ? LineCap::SQUARE : lineCap_;

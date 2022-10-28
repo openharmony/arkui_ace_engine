@@ -55,4 +55,178 @@ const char ACCESSIBILITY_TAG_CLOCK[] = "clock";
 const char ACCESSIBILITY_TAG_DIALOG[] = "dialog";
 const char ACCESSIBILITY_TAG_SEARCH[] = "search";
 
+const int32_t WEIGHTED_VALUE = 13;
+const int32_t FOCUS_DIRECTION_UP = 1;
+const int32_t FOCUS_DIRECTION_DOWN = 1 << 1;
+const int32_t FOCUS_DIRECTION_LEFT = 1 << 2;
+const int32_t FOCUS_DIRECTION_RIGHT = 1 << 3;
+const int32_t FOCUS_DIRECTION_FORWARD = 1 << 4;
+const int32_t FOCUS_DIRECTION_BACKWARD = 1 << 5;
+
+static bool CheckRectBeam(Rect nodeRect, Rect itemRect, const int direction)
+{
+    switch (direction) {
+        case FOCUS_DIRECTION_LEFT:
+        case FOCUS_DIRECTION_RIGHT:
+            return nodeRect.Top() < itemRect.Bottom() && itemRect.Top() < nodeRect.Bottom();
+        case FOCUS_DIRECTION_UP:
+        case FOCUS_DIRECTION_DOWN:
+            return nodeRect.Left() < itemRect.Right() && itemRect.Left() < nodeRect.Right();
+        default:
+            break;
+    }
+    return false;
+}
+
+static bool IsToDirectionOf(Rect nodeRect, Rect itemRect, const int direction)
+{
+    switch (direction) {
+        case FOCUS_DIRECTION_LEFT:
+            return nodeRect.Left() >= itemRect.Right();
+        case FOCUS_DIRECTION_RIGHT:
+            return nodeRect.Right() <= itemRect.Left();
+        case FOCUS_DIRECTION_UP:
+            return nodeRect.Top() >= itemRect.Bottom();
+        case FOCUS_DIRECTION_DOWN:
+            return nodeRect.Bottom() <= itemRect.Top();
+        default:
+            break;
+    }
+    return false;
+}
+
+static double MajorAxisDistanceToFarEdge(Rect nodeRect, Rect itemRect, const int direction)
+{
+    double distance = 0.0;
+    switch (direction) {
+        case FOCUS_DIRECTION_LEFT:
+            distance = nodeRect.Left() - itemRect.Left();
+            break;
+        case FOCUS_DIRECTION_RIGHT:
+            distance = nodeRect.Right() - itemRect.Right();
+            break;
+        case FOCUS_DIRECTION_UP:
+            distance = nodeRect.Top() - itemRect.Top();
+            break;
+        case FOCUS_DIRECTION_DOWN:
+            distance = nodeRect.Bottom() - itemRect.Bottom();
+            break;
+        default:
+            break;
+    }
+
+    return distance > 1.0 ? distance : 1.0;
+}
+
+static double MajorAxisDistance(Rect nodeRect, Rect itemRect, const int direction)
+{
+    double distance = 0.0;
+    switch (direction) {
+        case FOCUS_DIRECTION_LEFT:
+            distance = nodeRect.Left() - itemRect.Right();
+            break;
+        case FOCUS_DIRECTION_RIGHT:
+            distance = nodeRect.Right() - itemRect.Left();
+            break;
+        case FOCUS_DIRECTION_UP:
+            distance = nodeRect.Top() - itemRect.Bottom();
+            break;
+        case FOCUS_DIRECTION_DOWN:
+            distance = nodeRect.Bottom() - itemRect.Top();
+            break;
+        default:
+            break;
+    }
+
+    return distance > 0.0 ? distance : 0.0;
+}
+
+static double MinorAxisDistance(Rect nodeRect, Rect itemRect, const int direction)
+{
+    double distance = 0.0;
+    switch (direction) {
+        case FOCUS_DIRECTION_LEFT:
+        case FOCUS_DIRECTION_RIGHT:
+            distance = (nodeRect.Top() + nodeRect.Bottom()) / 2 - (itemRect.Top() + itemRect.Bottom()) / 2;
+            break;
+        case FOCUS_DIRECTION_UP:
+        case FOCUS_DIRECTION_DOWN:
+            distance = (nodeRect.Left() + nodeRect.Right()) / 2 - (itemRect.Left() + itemRect.Right()) / 2;
+            break;
+        default:
+            break;
+    }
+
+    return distance > 0.0 ? distance : -distance;
+}
+
+static double GetWeightedDistanceFor(double majorAxisDistance, double minorAxisDistance)
+{
+    return WEIGHTED_VALUE * majorAxisDistance * majorAxisDistance + minorAxisDistance * minorAxisDistance;
+}
+
+static bool IsCandidateRect(Rect nodeRect, Rect itemRect, const int direction)
+{
+    switch (direction) {
+        case FOCUS_DIRECTION_LEFT:
+            return nodeRect.Left() > itemRect.Left() && nodeRect.Right() > itemRect.Right();
+        case FOCUS_DIRECTION_RIGHT:
+            return nodeRect.Left() < itemRect.Left() && nodeRect.Right() < itemRect.Right();
+        case FOCUS_DIRECTION_UP:
+            return nodeRect.Top() > itemRect.Top() && nodeRect.Bottom() > itemRect.Bottom();
+        case FOCUS_DIRECTION_DOWN:
+            return nodeRect.Top() < itemRect.Top() && nodeRect.Bottom() < itemRect.Bottom();
+        default:
+            break;
+    }
+    return false;
+}
+
+// Check whether rect1 is outright better than rect2.
+static bool OutrightBetter(Rect nodeRect, const int direction, Rect Rect1, Rect Rect2)
+{
+    bool rect1InSrcBeam = CheckRectBeam(nodeRect, Rect1, direction);
+    bool rect2InSrcBeam = CheckRectBeam(nodeRect, Rect2, direction);
+    if (rect2InSrcBeam || !rect1InSrcBeam) {
+        return false;
+    }
+
+    if (!IsToDirectionOf(nodeRect, Rect2, direction)) {
+        return true;
+    }
+
+    // for direction left or right
+    if (direction == FOCUS_DIRECTION_LEFT || direction == FOCUS_DIRECTION_RIGHT) {
+        return true;
+    }
+
+    return (MajorAxisDistance(nodeRect, Rect1, direction) < MajorAxisDistanceToFarEdge(nodeRect, Rect2, direction));
+}
+
+bool CheckBetterRect(Rect nodeRect, const int direction, Rect itemRect, Rect tempBest)
+{
+    if (!IsCandidateRect(nodeRect, itemRect, direction)) {
+        return false;
+    }
+
+    if (!IsCandidateRect(nodeRect, tempBest, direction)) {
+        return true;
+    }
+
+    // now both of item and tempBest are all at the direction of node.
+    if (OutrightBetter(nodeRect, direction, itemRect, tempBest)) {
+        return true;
+    }
+
+    if (OutrightBetter(nodeRect, direction, tempBest, itemRect)) {
+        return false;
+    }
+
+    // otherwise, do fudge-tastic comparison of the major and minor axis
+    return (GetWeightedDistanceFor(
+                MajorAxisDistance(nodeRect, itemRect, direction), MinorAxisDistance(nodeRect, itemRect, direction)) <
+            GetWeightedDistanceFor(
+                MajorAxisDistance(nodeRect, tempBest, direction), MinorAxisDistance(nodeRect, tempBest, direction)));
+}
+
 }  // namespace OHOS::Ace

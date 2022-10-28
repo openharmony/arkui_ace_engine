@@ -192,7 +192,7 @@ void SwiperModelImpl::SetCurve(const RefPtr<Curve>& curve)
     swiper->SetCurve(curve);
 }
 
-void SwiperModelImpl::SetOnChange(NG::ChangeEvent&& onChange)
+void SwiperModelImpl::SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange)
 {
     auto onChangeEvent = EventMarker(std::move(onChange));
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();

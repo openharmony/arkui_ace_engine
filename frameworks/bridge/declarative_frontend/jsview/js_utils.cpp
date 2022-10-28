@@ -19,6 +19,7 @@
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
+#include "base/want/want_wrap.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -113,5 +114,36 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
     return nullptr;
 #endif
 }
+
+RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
+{
+    if (!obj->IsObject()) {
+        LOGE("invalid object when try CreateWantWrapFromNapiValue");
+        return nullptr;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        LOGE("CreateWantWrapFromNapiValue engine is null");
+        return nullptr;
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    if (nativeEngine == nullptr) {
+        LOGE("nativeEngine is nullptr.");
+        return nullptr;
+    }
+#ifdef USE_V8_ENGINE
+    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
+#elif USE_QUICKJS_ENGINE
+    JSValue value = obj.Get().GetHandle();
+#elif USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+
+    return WantWrap::CreateWantWrap(reinterpret_cast<void*>(nativeEngine),
+                                    reinterpret_cast<void*>(nativeValue));
+}
+
 #endif
 } // namespace OHOS::Ace::Framework

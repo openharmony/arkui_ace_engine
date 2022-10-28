@@ -144,6 +144,7 @@ private:
     double distance_ = 0.0;
     WeakPtr<PipelineBase> context_;
     std::map<int32_t, TouchEvent> touchPoints_;
+    TouchEvent lastTouchEvent_;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
     Offset delta_;

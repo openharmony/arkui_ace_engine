@@ -96,6 +96,7 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
     if (directionVal->IsNumber()) {
         auto direction = directionVal->ToNumber<int32_t>();
         if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
+            FlexModel::GetInstance()->SetDirection(static_cast<FlexDirection>(direction));
             // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
             if (direction <= 1) {
                 direction += 2 * (wrapVal - 1);

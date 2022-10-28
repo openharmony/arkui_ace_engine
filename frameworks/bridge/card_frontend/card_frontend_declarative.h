@@ -52,6 +52,20 @@ public:
     void Destroy() override;
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
+    void OnShow() override
+    {
+        foregroundFrontend_ = true;
+        if (delegate_) {
+            delegate_->OnPageShow();
+        }
+    }
+    void OnHide() override
+    {
+        foregroundFrontend_ = false;
+        if (delegate_) {
+            delegate_->OnPageHide();
+        }
+    }
 
     void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
 

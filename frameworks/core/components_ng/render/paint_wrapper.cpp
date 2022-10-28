@@ -75,6 +75,10 @@ void PaintWrapper::FlushRender()
         renderContext->FlushOverlayDrawFunction(std::move(overlayDraw));
     }
 
+    if (renderContext->GetAccessibilityFocus().value_or(false)) {
+        renderContext->PaintAccessibilityFocus();
+    }
+
     renderContext->StopRecordingIfNeeded();
 }
 } // namespace OHOS::Ace::NG

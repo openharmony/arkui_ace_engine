@@ -101,10 +101,12 @@ void JSTabs::Create(const JSCallbackInfo& info)
         JSRef<JSVal> indexVal = obj->GetProperty("index");
         if (indexVal->IsNumber()) {
             index = indexVal->ToNumber<int32_t>();
+#if !defined(NG_BUILD)
             if (!tabController) {
                 tabController = JSTabsController::CreateController();
             }
             tabController->SetInitialIndex(index);
+#endif
         }
     }
 

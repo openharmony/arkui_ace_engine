@@ -99,6 +99,13 @@ void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
     scheduler_ = SchedulerBuilder::Build(callback, context);
 }
 
+void Animator::AttachSchedulerOnContainer()
+{
+    auto container = Container::Current();
+    auto pipeline = container->GetPipelineContext();
+    AttachScheduler(pipeline);
+}
+
 bool Animator::HasScheduler() const
 {
     return scheduler_ != nullptr;

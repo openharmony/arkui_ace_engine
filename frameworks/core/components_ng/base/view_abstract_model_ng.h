@@ -21,16 +21,20 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/vector.h"
+#include "base/geometry/offset.h"
+#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
@@ -350,7 +354,11 @@ public:
         ViewAbstract::SetVisibility(visible);
     }
 
-    void SetSharedTransition(const SharedTransitionOption& option) override {}
+    void SetSharedTransition(
+        const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override
+    {
+        ViewAbstract::SetSharedTransition(shareId, option);
+    }
 
     void SetGeometryTransition(const std::string& id) override {}
 
@@ -555,6 +563,23 @@ public:
         ViewAbstract::SetOnDragMove(std::move(onDragMove));
     }
 
+    void SetOnVisibleChange(
+        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override
+    {}
+
+    void SetOnAreaChanged(
+        std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
+            onAreaChanged) override
+    {
+        auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
+                                      const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+            areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
+                Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
+                Offset(origin.GetX(), origin.GetY()));
+        };
+        ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+    }
+
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override
     {
         ViewAbstract::SetOnDrop(std::move(onDrop));
@@ -621,10 +646,97 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
+    void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
+    {
+        auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
+    }
+
+    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override
+    {
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        GestureEventFunc event;
+        if (!params.empty()) {
+            event = [params, targetNode](GestureEvent& /*info*/) mutable {
+                // menu already created
+                if (params.empty()) {
+                    NG::ViewAbstract::ShowMenu(targetNode->GetId());
+                    return;
+                }
+                NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode);
+            };
+        } else if (buildFunc) {
+            event = [builderFunc = std::move(buildFunc), targetNode](const GestureEvent& /*info*/) mutable {
+                CreateCustomMenu(builderFunc, targetNode);
+            };
+        } else {
+            LOGE("empty param or null builder");
+            return;
+        }
+        auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+        auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(event));
+        gestureHub->AddClickEvent(onClick);
+
+        // delete menu when target node is removed from render tree
+        auto eventHub = targetNode->GetEventHub<NG::EventHub>();
+        auto destructor = [id = targetNode->GetId()]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->DeleteMenu(id);
+        };
+        eventHub->SetOnDisappear(destructor);
+    }
+
+    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override
+    {
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(targetNode);
+        auto hub = targetNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(hub);
+
+        if (type == ResponseType::RIGHT_CLICK) {
+            OnMouseEventFunc event = [builder = std::move(buildFunc), targetNode](MouseInfo& info) mutable {
+                if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                    CreateCustomMenu(builder, targetNode);
+                }
+            };
+            NG::ViewAbstract::SetOnMouse(std::move(event));
+        } else if (type == ResponseType::LONGPRESS) {
+            // create or show menu on long press
+            auto event = [builder = std::move(buildFunc), targetNode](const GestureEvent& /*info*/) mutable {
+                CreateCustomMenu(builder, targetNode);
+            };
+            auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
+
+            hub->SetLongPressEvent(longPress);
+        } else {
+            LOGE("The arg responseType is invalid.");
+            return;
+        }
+    }
+
     void SetAccessibilityGroup(bool accessible) override {}
     void SetAccessibilityText(const std::string& text) override {}
     void SetAccessibilityDescription(const std::string& description) override {}
     void SetAccessibilityImportance(const std::string& importance) override {}
+
+private:
+    static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode)
+    {
+        // builder already executed, just show menu
+        if (!buildFunc) {
+            NG::ViewAbstract::ShowMenu(targetNode->GetId());
+            return;
+        }
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode);
+        // nullify builder
+        buildFunc = nullptr;
+    }
 };
 } // namespace OHOS::Ace::NG
 

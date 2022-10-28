@@ -92,6 +92,10 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
             }
         }
     }
+    // paint custom effect
+    if (scrollEffect_) {
+        scrollEffect_->Paint(context, viewPort_, offset);
+    }
 }
 
 void FlutterRenderList::PaintDivider(RenderContext& context)

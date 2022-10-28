@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -29,7 +30,8 @@ class GestureEventHub;
 class PanRecognizer;
 class LongPressRecognizer;
 
-class DragEvent : public Referenced {
+class DragEvent : public AceType {
+    DECLARE_ACE_TYPE(DragEvent, AceType)
 public:
     DragEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd,
         GestureEventNoParameter&& actionCancel)
@@ -80,22 +82,6 @@ public:
         userCallback_ = dragEvent;
     }
 
-    void AddDragEvent(const RefPtr<DragEvent>& dragEvent)
-    {
-        if (dragEvents_.empty()) {
-            dragEvents_.emplace_back(dragEvent);
-            return;
-        }
-        if (std::find(dragEvents_.begin(), dragEvents_.end(), dragEvent) == dragEvents_.end()) {
-            dragEvents_.emplace_back(dragEvent);
-        }
-    }
-
-    void RemoveDragEvent(const RefPtr<DragEvent>& dragEvent)
-    {
-        dragEvents_.remove(dragEvent);
-    }
-
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
@@ -106,7 +92,6 @@ public:
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
-    std::list<RefPtr<DragEvent>> dragEvents_;
     RefPtr<DragEvent> userCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;

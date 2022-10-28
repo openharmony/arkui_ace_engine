@@ -82,7 +82,7 @@ public:
                 }
             }
             LOGD("frame cached size: %{private}d", static_cast<int32_t>(cachedFrame_.size()));
-            LOGD("animatied image total duration: %{public}f", totalFrameDuration);
+            LOGD("animated image total duration: %{public}f", totalFrameDuration);
             for (int32_t index = 0; index < frameCount_; index++) {
                 pictureAnimation->AddPicture(
                     static_cast<float>(frameInfos_[index].fDuration) / totalFrameDuration, index);

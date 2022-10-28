@@ -277,6 +277,7 @@ protected:
     LayoutParam MakeInnerLayoutForLane();
     Size SetItemsPosition(double mainSize);
     Size SetItemsPositionForLaneList(double mainSize);
+    bool HandleOverScroll();
     bool UpdateScrollPosition(double offset, int32_t source);
 
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,

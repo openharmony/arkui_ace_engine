@@ -350,6 +350,11 @@ public:
         return useStageModel_;
     }
 
+    void GetCardFrontendMap(std::unordered_map<uint64_t, WeakPtr<Frontend>>& cardFrontendMap) const override
+    {
+        cardFrontendMap = cardFrontendMap_;
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();

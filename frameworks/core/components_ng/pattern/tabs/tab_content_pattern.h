@@ -49,8 +49,20 @@ public:
         return MakeRefPtr<TabContentLayoutProperty>();
     }
 
+    void SetTabBar(const std::string& text, const std::string& icon,
+        TabBarBuilderFunc&& builder)
+    {
+        tabBarParam_ = MakeRefPtr<TabBarParam>(text, icon, std::move(builder));
+    }
+
+    const RefPtr<TabBarParam>& GetTabBarParam()
+    {
+        return tabBarParam_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
+    RefPtr<TabBarParam> tabBarParam_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };

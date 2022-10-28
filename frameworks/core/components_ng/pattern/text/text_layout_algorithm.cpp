@@ -54,13 +54,17 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         }
     }
 
+    double paragraphNewWidth = 0.0;
     if (!contentConstraint.selfIdealSize.Width()) {
-        auto paragraphNewWidth =
+        paragraphNewWidth =
             std::clamp(GetTextWidth(), contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
-        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
-            paragraph_->Layout(std::ceil(paragraphNewWidth));
-        }
+    } else {
+        paragraphNewWidth = GetTextWidth();
     }
+    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+        paragraph_->Layout(std::ceil(paragraphNewWidth));
+    }
+    
     auto height = static_cast<float>(paragraph_->GetHeight());
     double baselineOffset = 0.0;
     textStyle.GetBaselineOffset().NormalizeToPx(

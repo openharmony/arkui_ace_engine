@@ -171,7 +171,7 @@ shared_ptr<JsValue> Scale(const shared_ptr<JsRuntime>& runtime, const shared_ptr
     auto centerYJSValue = argv[0]->GetProperty(runtime, "centerY");
     double centerY = ConvertToDouble(runtime, centerYJSValue, 0.0);
 
-    auto scaleMatrix = Matrix4::CreateScale(dx, dy, dz) * matrix;
+    auto scaleMatrix = Matrix4::CreateScale(dx, dy, dz);
     if (!NearZero(centerX) || !NearZero(centerY)) {
         auto translate1 = Matrix4::CreateTranslate(centerX, centerY, 0.0);
         auto translate2 = Matrix4::CreateTranslate(-centerX, -centerY, 0.0);
