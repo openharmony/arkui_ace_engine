@@ -738,7 +738,7 @@ void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optio
         coverageComponent->SetX(offsetX.value());
     }
     if (offsetY.has_value()) {
-        coverageComponent->SetX(offsetY.value());
+        coverageComponent->SetY(offsetY.value());
     }
 }
 

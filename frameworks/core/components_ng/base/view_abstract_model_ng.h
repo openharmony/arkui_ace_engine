@@ -252,6 +252,10 @@ public:
 
     void SetAspectRatio(float ratio) override
     {
+        if (LessOrEqual(ratio, 0.0)) {
+            LOGW("the %{public}f value is illegal, use default", ratio);
+            ratio = 1.0;
+        }
         ViewAbstract::SetAspectRatio(ratio);
     }
 
@@ -354,8 +358,7 @@ public:
         ViewAbstract::SetVisibility(visible);
     }
 
-    void SetSharedTransition(
-        const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override
+    void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override
     {
         ViewAbstract::SetSharedTransition(shareId, option);
     }
@@ -666,9 +669,8 @@ public:
                 NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode);
             };
         } else if (buildFunc) {
-            event = [builderFunc = std::move(buildFunc), targetNode](const GestureEvent& /*info*/) mutable {
-                CreateCustomMenu(builderFunc, targetNode);
-            };
+            event = [builderFunc = std::move(buildFunc), targetNode](
+                        const GestureEvent& /*info*/) mutable { CreateCustomMenu(builderFunc, targetNode); };
         } else {
             LOGE("empty param or null builder");
             return;
@@ -705,9 +707,8 @@ public:
             NG::ViewAbstract::SetOnMouse(std::move(event));
         } else if (type == ResponseType::LONGPRESS) {
             // create or show menu on long press
-            auto event = [builder = std::move(buildFunc), targetNode](const GestureEvent& /*info*/) mutable {
-                CreateCustomMenu(builder, targetNode);
-            };
+            auto event = [builder = std::move(buildFunc), targetNode](
+                             const GestureEvent& /*info*/) mutable { CreateCustomMenu(builder, targetNode); };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
             hub->SetLongPressEvent(longPress);
