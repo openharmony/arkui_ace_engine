@@ -422,9 +422,10 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<TaskExecutor>& taskEx
             if (ImageCompressor::GetInstance()->CanCompress()) {
                 compressData = ImageCompressor::GetInstance()->GpuCompress(src, pixmap, width, height);
                 ImageCompressor::GetInstance()->WriteToFile(src, compressData, { width, height });
-                taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(), TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+                taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
+                    TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
             }
-            callback({ rasterizedImage, renderTaskHolder->unrefQueue }, compressData);
+            callback({ image, renderTaskHolder->unrefQueue }, compressData);
             // Trigger purge cpu bitmap resource, after image upload to gpu.
             SkGraphics::PurgeResourceCache();
         }
