@@ -13,22 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_ROW_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_ROW_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_ROW_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_ROW_MODEL_H
 
 #include <functional>
+#include <memory>
 
-#include "base/utils/macros.h"
 #include "frameworks/core/components_v2/grid_layout/grid_container_util_class.h"
 
-namespace OHOS::Ace::NG {
-class ACE_EXPORT GridRowView {
+namespace OHOS::Ace {
+class GridRowModel {
 public:
-    static void Create();
-    static void Create(const RefPtr<V2::GridContainerSize>& col, const RefPtr<V2::Gutter>& gutter,
-        const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction);
-    static void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange);
+    static GridRowModel* GetInstance();
+    virtual ~GridRowModel() = default;
+
+    virtual void Create() = 0;
+    virtual void Create(const RefPtr<V2::GridContainerSize>& col, const RefPtr<V2::Gutter>& gutter,
+        const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction) = 0;
+    virtual void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange) = 0;
+    virtual void SetHeight() {}
+
+private:
+    static std::unique_ptr<GridRowModel> instance_;
 };
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
 
 #endif

@@ -35,6 +35,18 @@ enum class SourceType : int32_t {
     KEYBOARD = 4
 };
 
+enum class SourceTool : int32_t {
+    UNKNOWN = 0,
+    FINGER = 1,
+    PEN = 2,
+    RUBBER = 3,
+    BRUSH = 4,
+    PENCIL = 5,
+    AIRBRUSH = 6,
+    MOUSE = 7,
+    LENS = 8,
+};
+
 struct EventTarget final {
     std::string id;
     std::string type;
@@ -52,6 +64,10 @@ public:
     const std::string& GetType() const
     {
         return type_;
+    }
+    void SetType(const std::string& type)
+    {
+        type_ = type;
     }
 
     const TimeStamp& GetTimeStamp() const
@@ -97,6 +113,42 @@ public:
         deviceType_ = deviceType;
     }
 
+    void SetForce(float force)
+    {
+        force_ = force;
+    }
+    float GetForce() const
+    {
+        return force_;
+    }
+
+    void SetTiltX(float tiltX)
+    {
+        tiltX_ = tiltX;
+    }
+    std::optional<float> GetTiltX() const
+    {
+        return tiltX_;
+    }
+
+    void SetTiltY(float tiltY)
+    {
+        tiltY_ = tiltY;
+    }
+    std::optional<float> GetTiltY() const
+    {
+        return tiltY_;
+    }
+
+    void SetSourceTool(SourceTool tool)
+    {
+        sourceTool_ = tool;
+    }
+    SourceTool GetSourceTool() const
+    {
+        return sourceTool_;
+    }
+
     bool IsStopPropagation() const
     {
         return stopPropagation_;
@@ -113,6 +165,10 @@ protected:
     TimeStamp timeStamp_;
     EventTarget target_;
     SourceType deviceType_ = SourceType::NONE;
+    float force_ = 0.0f;
+    std::optional<float> tiltX_;
+    std::optional<float> tiltY_;
+    SourceTool sourceTool_ = SourceTool::UNKNOWN;
     int64_t deviceId_ = 0;
     bool stopPropagation_ = false;
 };

@@ -81,6 +81,16 @@ public:
         isAddToMap_ = isAddToMap;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxGroupEventHub>();
+        auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
+        json->Put("group", group.c_str());
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

@@ -48,6 +48,25 @@ public:
         ResetEffect();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        auto jsonDashArray = JsonUtil::CreateArray(true);
+        for (size_t i = 0; i < propValues_.value().size(); ++i) {
+            auto index = std::to_string(i);
+            double value = propValues_.value()[i];
+            jsonDashArray->Put(index.c_str(), value);
+        }
+        bool closeEffect = true;
+        if(propEffect_.has_value()){
+            closeEffect = !propEffect_.value();
+        }
+        json->Put("max", std::to_string(propMax_.value_or(100)).c_str());
+        json->Put("closeEffect", closeEffect ? "true" : "false");
+        json->Put("type", propDataPanelType_ == 1 ? "DataPanelType.Line" : "DataPanelType.Circle");
+        json->Put("values", jsonDashArray);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Values, std::vector<double>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Max, double, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DataPanelType, size_t, PROPERTY_UPDATE_RENDER);

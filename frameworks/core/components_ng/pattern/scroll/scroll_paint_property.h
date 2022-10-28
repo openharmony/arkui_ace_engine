@@ -48,6 +48,16 @@ public:
         return paintProperty;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        std::unordered_map<DisplayMode, std::string> scrollBarMap = { { DisplayMode::OFF, "BarState.Off" },
+            { DisplayMode::AUTO, "BarState.Auto" }, { DisplayMode::ON, "BarState.On" } };
+        json->Put("scrollBar", scrollBar_ ? scrollBarMap[scrollBar_->GetDisplayMode()].c_str() : "");
+        json->Put("scrollBarColor", scrollBar_ ? scrollBar_->GetForegroundColor().ColorToString().c_str() : "");
+        json->Put("scrollBarWidth", scrollBar_ ? scrollBar_->GetActiveWidth().ToString().c_str() : "");
+    }
+
     void InitScrollBar()
     {
         if (scrollBar_ == nullptr) {

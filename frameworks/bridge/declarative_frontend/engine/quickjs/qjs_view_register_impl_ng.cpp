@@ -23,7 +23,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
@@ -31,6 +33,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
@@ -75,6 +80,11 @@ void JsBindViews(BindingTarget globalObj)
     JSLocalStorage::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
+    JSForEach::JSBind(globalObj);
+    JSIfElse::JSBind(globalObj);
+    JSTabs::JSBind(globalObj);
+    //JSTabsController::JSBind(globalObj);
+    JSTabContent::JSBind(globalObj);
 }
 
 void CreatePageRoot(RefPtr<JsAcePage>& page, JSView* view)

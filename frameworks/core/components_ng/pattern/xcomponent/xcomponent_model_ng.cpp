@@ -35,6 +35,17 @@ void XComponentModelNG::Create(const std::string& id, const std::string& type, c
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, xcomponentType);
 }
+void XComponentModelNG::SetSoPath(const std::string& soPath)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    xcPattern->SetSoPath(soPath);
+}
 void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

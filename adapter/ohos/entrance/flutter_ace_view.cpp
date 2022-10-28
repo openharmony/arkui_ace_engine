@@ -72,19 +72,47 @@ void GetEventDevice(int32_t sourceType, E& event)
     }
 }
 
+SourceTool GetSourceTool(int32_t orgToolType)
+{
+    switch (orgToolType) {
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_FINGER:
+            return SourceTool::FINGER;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_PEN:
+            return SourceTool::PEN;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_RUBBER:
+            return SourceTool::RUBBER;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_BRUSH:
+            return SourceTool::BRUSH;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_PENCIL:
+            return SourceTool::PENCIL;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_AIRBRUSH:
+            return SourceTool::AIRBRUSH;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_MOUSE:
+            return SourceTool::MOUSE;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_LENS:
+            return SourceTool::LENS;
+        default:
+            LOGW("unknown tool type");
+            return SourceTool::UNKNOWN;
+    }
+}
+
 TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
 {
     TouchPoint touchPoint;
     // just get the max of width and height
     touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
-    touchPoint.force = pointerItem.GetPressure();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
     touchPoint.x = pointerItem.GetWindowX();
     touchPoint.y = pointerItem.GetWindowY();
     touchPoint.screenX = pointerItem.GetDisplayX();
     touchPoint.screenY = pointerItem.GetDisplayY();
     touchPoint.isPressed = pointerItem.IsPressed();
+    touchPoint.force = static_cast<float>(pointerItem.GetPressure());
+    touchPoint.tiltX = pointerItem.GetTiltX();
+    touchPoint.tiltY = pointerItem.GetTiltY();
+    touchPoint.sourceTool = GetSourceTool(pointerItem.GetToolType());
     return touchPoint;
 }
 
@@ -116,7 +144,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY,
-        TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, pointerEvent->GetDeviceId() };
+        TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, touchPoint.tiltX, touchPoint.tiltY,
+        pointerEvent->GetDeviceId(), SourceType::NONE, touchPoint.sourceTool };
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -310,15 +339,19 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     auto actionId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
-        LOGD("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d", actionId,
-            item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction());
+        LOGD("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d, pressure: "
+             "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
+            actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(), item.GetPressure(),
+            item.GetTiltX(), item.GetTiltY());
     }
     auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(id, item)) {
-            LOGD("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d", actionId,
-                item.GetWindowX(), item.GetWindowY(), item.IsPressed());
+            LOGD("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
+                 "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(), item.GetTiltX(),
+                item.GetTiltY());
         }
     }
 }

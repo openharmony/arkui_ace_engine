@@ -33,6 +33,8 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t CHILD_COUNT = 2;
+constexpr double DEFAULT_INDICATOR_OFFSET = 16.0;
+constexpr int32_t DEFAULT_FRICTION_RATIO = 42;
 
 } // namespace
 
@@ -44,6 +46,9 @@ void RefreshModelNG::Create()
         V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        RefreshLayoutProperty, IndicatorOffset, Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, DEFAULT_FRICTION_RATIO);
 }
 
 void RefreshModelNG::Pop()

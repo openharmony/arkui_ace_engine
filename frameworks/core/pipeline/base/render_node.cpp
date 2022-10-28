@@ -1229,7 +1229,7 @@ Offset RenderNode::GetGlobalOffset() const
         return globalOffset;
     }
     auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        context->GetWindowManager()->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+        context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         globalOffset = globalOffset + Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
             -CONTAINER_TITLE_HEIGHT.ConvertToPx());

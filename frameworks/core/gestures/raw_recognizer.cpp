@@ -117,34 +117,71 @@ TouchEventInfo RawRecognizer::CreateTouchEventInfo(
     auto useNewVersion = true;
     TouchEventInfo info(type);
     if (useNewVersion) {
-        TouchLocationInfo changedTouchLocationInfo(point.id);
+        TouchLocationInfo changedTouchLocationInfo("onTouch", point.id);
         changedTouchLocationInfo.SetGlobalLocation(point.GetOffset())
             .SetLocalLocation(point.GetOffset() - coordinateOffset_)
             .SetSize(point.size);
         changedTouchLocationInfo.SetForce(point.force);
+        if (point.tiltX.has_value()) {
+            changedTouchLocationInfo.SetTiltX(point.tiltX.value());
+        }
+        if (point.tiltY.has_value()) {
+            changedTouchLocationInfo.SetTiltY(point.tiltY.value());
+        }
+        changedTouchLocationInfo.SetSourceTool(point.sourceTool);
         info.AddChangedTouchLocationInfo(std::move(changedTouchLocationInfo));
         for (auto&& touchPoint : point.pointers) {
-            TouchLocationInfo touchLocationInfo(touchPoint.id);
+            TouchLocationInfo touchLocationInfo("onTouch", touchPoint.id);
             auto offset = Offset(touchPoint.x, touchPoint.y);
             touchLocationInfo.SetGlobalLocation(offset)
                 .SetLocalLocation(offset - coordinateOffset_)
                 .SetSize(touchPoint.size);
             touchLocationInfo.SetForce(touchPoint.force);
+            if (touchPoint.tiltX.has_value()) {
+                touchLocationInfo.SetTiltX(touchPoint.tiltX.value());
+            }
+            if (touchPoint.tiltY.has_value()) {
+                touchLocationInfo.SetTiltY(touchPoint.tiltY.value());
+            }
+            touchLocationInfo.SetSourceTool(touchPoint.sourceTool);
             info.AddTouchLocationInfo(std::move(touchLocationInfo));
         }
         info.SetTimeStamp(point.time);
         info.SetDeviceId(point.deviceId);
+        info.SetForce(point.force);
+        if (point.tiltX.has_value()) {
+            info.SetTiltX(point.tiltX.value());
+        }
+        if (point.tiltY.has_value()) {
+            info.SetTiltY(point.tiltY.value());
+        }
+        info.SetSourceTool(point.sourceTool);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         return info;
     }
     if (!isFirstTrack_) {
-        TouchLocationInfo lastTouchLocationInfo(lastPoint_.id);
+        TouchLocationInfo lastTouchLocationInfo("onTouch", lastPoint_.id);
         lastTouchLocationInfo.SetGlobalLocation(lastPoint_.GetOffset())
             .SetLocalLocation(lastPoint_.GetOffset() - coordinateOffset_)
             .SetSize(lastPoint_.size);
         lastTouchLocationInfo.SetForce(lastPoint_.force);
+        if (lastPoint_.tiltX.has_value()) {
+            lastTouchLocationInfo.SetTiltX(lastPoint_.tiltX.value());
+        }
+        if (lastPoint_.tiltY.has_value()) {
+            lastTouchLocationInfo.SetTiltY(lastPoint_.tiltY.value());
+        }
+        lastTouchLocationInfo.SetSourceTool(lastPoint_.sourceTool);
         info.AddChangedTouchLocationInfo(std::move(lastTouchLocationInfo));
         info.SetDeviceId(lastPoint_.deviceId);
+        info.SetForce(point.force);
+        if (point.tiltX.has_value()) {
+            info.SetTiltX(point.tiltX.value());
+        }
+        if (point.tiltY.has_value()) {
+            info.SetTiltY(point.tiltY.value());
+        }
+        info.SetSourceTool(point.sourceTool);
         if (ignoreCurrent) {
             info.SetTimeStamp(lastPoint_.time);
             return info;
@@ -152,11 +189,26 @@ TouchEventInfo RawRecognizer::CreateTouchEventInfo(
     }
     info.SetTimeStamp(point.time);
     info.SetDeviceId(point.deviceId);
-    TouchLocationInfo currentTouchLocationInfo(point.id);
+    info.SetForce(point.force);
+    if (point.tiltX.has_value()) {
+        info.SetTiltX(point.tiltX.value());
+    }
+    if (point.tiltY.has_value()) {
+        info.SetTiltY(point.tiltY.value());
+    }
+    info.SetSourceTool(point.sourceTool);
+    TouchLocationInfo currentTouchLocationInfo("onTouch", point.id);
     currentTouchLocationInfo.SetGlobalLocation(point.GetOffset())
         .SetLocalLocation(point.GetOffset() - coordinateOffset_)
         .SetSize(point.size);
     currentTouchLocationInfo.SetForce(point.force);
+    if (point.tiltX.has_value()) {
+        currentTouchLocationInfo.SetTiltX(point.tiltX.value());
+    }
+    if (point.tiltY.has_value()) {
+        currentTouchLocationInfo.SetTiltY(point.tiltY.value());
+    }
+    currentTouchLocationInfo.SetSourceTool(point.sourceTool);
     info.AddTouchLocationInfo(std::move(currentTouchLocationInfo));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     return info;

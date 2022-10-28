@@ -56,6 +56,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        CalculateCacheRange();
         auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>(currentIndex_, startIndex_, endIndex_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetTargetIndex(targetIndex_);
@@ -78,6 +79,11 @@ public:
         return MakeRefPtr<SwiperEventHub>();
     }
 
+    int32_t GetCurrentShownIndex() const
+    {
+        return currentIndex_;
+    }
+
     RefPtr<SwiperController> GetSwiperController() const
     {
         return swiperController_;
@@ -88,16 +94,32 @@ public:
         swiperController_ = swiperController;
     }
 
-    int GetCurrentIndex() const
+    int32_t GetCurrentIndex() const
     {
         return currentIndex_;
     }
 
     void UpdateCurrentOffset(float offset);
 
+    int32_t TotalCount() const;
+
+    Axis GetDirection() const;
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
+    }
+
+    void UpdateChangeEvent(ChangeEvent&& event)
+    {
+        if (!changeEvent_) {
+            changeEvent_ = std::make_shared<ChangeEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddOnChangeEvent(changeEvent_);
+        } else {
+            (*changeEvent_).swap(event);
+        }
     }
 
 private:
@@ -151,7 +173,6 @@ private:
     void CalculateCacheRange();
 
     float GetItemSpace() const;
-    Axis GetDirection() const;
     int32_t CurrentIndex() const;
     int32_t GetDisplayCount() const;
     int32_t GetDuration() const;
@@ -161,7 +182,6 @@ private:
     bool IsAutoPlay() const;
     bool IsLoop() const;
     bool IsDisableSwipe() const;
-    int32_t TotalCount() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -192,6 +212,8 @@ private:
     Axis direction_ = Axis::HORIZONTAL;
 
     uint64_t elapsedTime_ = 0; // millisecond.
+
+    ChangeEventPtr changeEvent_;
 };
 } // namespace OHOS::Ace::NG
 

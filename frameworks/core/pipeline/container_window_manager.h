@@ -88,21 +88,21 @@ public:
         windowStartMoveCallback_ = std::move(callback);
     }
 
-    void FireWindowMinimizeCallBack() const
+    void WindowMinimize() const
     {
         if (windowMinimizeCallback_) {
             windowMinimizeCallback_();
         }
     }
 
-    void FireWindowMaximizeCallBack() const
+    void WindowMaximize() const
     {
         if (windowMaximizeCallback_) {
             windowMaximizeCallback_();
         }
     }
 
-    void FireWindowRecoverCallBack() const
+    void WindowRecover() const
     {
         if (windowRecoverCallback_) {
             windowRecoverCallback_();
@@ -116,21 +116,21 @@ public:
         }
     }
 
-    void FireWindowCloseCallBack() const
+    void WindowClose() const
     {
         if (windowCloseCallback_) {
             windowCloseCallback_();
         }
     }
 
-    void FireWindowStartMoveCallBack() const
+    void WindowStartMove() const
     {
         if (windowStartMoveCallback_) {
             windowStartMoveCallback_();
         }
     }
 
-    WindowMode FireWindowGetModeCallBack() const
+    WindowMode GetWindowMode() const
     {
         if (windowGetModeCallback_) {
             return windowGetModeCallback_();

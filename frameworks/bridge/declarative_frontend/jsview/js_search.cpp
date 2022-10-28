@@ -257,18 +257,16 @@ void JSSearch::JSBind(BindingTarget globalObj)
 
 void JSSearch::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("Search create without argument");
-        return;
-    }
-
-    auto param = JSRef<JSObject>::Cast(info[0]);
-
     if (Container::IsCurrentUseNewPipeline()) {
         std::optional<std::string> key;
         std::optional<std::string> tip;
         std::optional<std::string> src;
-
+        if (info.Length() < 1 || !info[0]->IsObject()) {
+            LOGI("Search create without argument");
+            auto controller = NG::SearchView::Create(key, tip, src);
+            return;
+        }
+        auto param = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
         if (ParseJsString(param->GetProperty("placeholder"), placeholder)) {
             tip = placeholder;
@@ -308,6 +306,12 @@ void JSSearch::Create(const JSCallbackInfo& info)
     JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
 
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGI("Search create without argument");
+        return;
+    }
+
+    auto param = JSRef<JSObject>::Cast(info[0]);
     auto value = param->GetProperty("value");
     if (!value->IsUndefined() && value->IsString()) {
         auto key = value->ToString();

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
+#include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 
 namespace OHOS::Ace::NG {
 class TextPickerPattern : public LinearLayoutPattern {
@@ -49,6 +50,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TextPickerLayoutProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<TextPickerPaintMethod>(dividerSpacingWidth_, gradientHeight_, dividerHeight_);
     }
 
     void OnColumnsBuilding();
@@ -147,10 +153,13 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    double CalculateHeight();
+    void SetDividerHeight(uint32_t showOptionCount, double height);
 
     uint32_t selectedIndex_ = 0;
     std::string selectedValue_;
@@ -166,6 +175,9 @@ private:
     Size optionSize_;
     Dimension fixHeight_;
     bool isIndexChanged_ = false;
+    float gradientHeight_;
+    float dividerHeight_;
+    float dividerSpacingWidth_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 };

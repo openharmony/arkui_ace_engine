@@ -43,6 +43,14 @@ void XComponentModelImpl::Create(const std::string& id, const std::string& type,
     ViewStackProcessor::GetInstance()->Push(xcomponentComponent);
 }
 
+void XComponentModelImpl::SetSoPath(const std::string& soPath)
+{
+    auto xcomponentComponent =
+        AceType::DynamicCast<XComponentComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(xcomponentComponent);
+    xcomponentComponent->SetSoPath(soPath);
+}
+
 void XComponentModelImpl::SetOnLoad(LoadEvent&& onLoad)
 {
     auto* stack = ViewStackProcessor::GetInstance();

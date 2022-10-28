@@ -103,6 +103,14 @@ public:
         return calcValue_;
     }
 
+    Dimension GetDimension()
+    {
+        if (!IsValid()) {
+            return Dimension();
+        }
+        return dimension_;
+    }
+
 private:
     std::string calcValue_;
     Dimension dimension_;

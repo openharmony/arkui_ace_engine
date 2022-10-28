@@ -124,6 +124,8 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
 
     if (getSecondaryUri->IsString()) {
         secondaryUri = getSecondaryUri->ToString();
+    } else {
+        secondaryUri = backgroundUri;
     }
 
     RatingModel::GetInstance()->SetForegroundSrc(foregroundUri);

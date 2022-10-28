@@ -766,6 +766,13 @@ var SourceType;
   SourceType[SourceType["Keyboard"] = 4] = "Keyboard";
 })(SourceType || (SourceType = {}));
 
+var SourceTool;
+(function (SourceTool) {
+  SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
+  SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
+  SourceTool[SourceTool["PEN"] = 2] = "PEN";
+})(SourceTool || (SourceTool = {}));
+
 var SeekMode;
 (function (SeekMode) {
   SeekMode[SeekMode["PreviousKeyframe"] = 0] = "PreviousKeyframe";

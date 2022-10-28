@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
+#include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,6 +48,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<LinearLayoutProperty>(isVertical_);
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<TimePickerPaintMethod>(dividerSpacingWidth_, gradientHeight_, dividerHeight_);
     }
 
     void FlushCurrentOptions();
@@ -144,6 +150,8 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void SetDividerHeight(uint32_t showOptionCount);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -160,6 +168,9 @@ private:
     Dimension jumpInterval_;
     uint32_t showCount_ = 0;
     bool isVertical_ = true;
+    float gradientHeight_;
+    float dividerHeight_;
+    float dividerSpacingWidth_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };

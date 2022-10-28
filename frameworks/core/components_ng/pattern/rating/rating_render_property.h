@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RATING_RATING_RENDER_PROPERTY_H
 
 #include <cstdint>
+#include <string>
 
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -45,6 +46,13 @@ public:
         propRatingScore_.reset();
         propStepSize_.reset();
         propTouchStar_.reset();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        json->Put("rating", std::to_string(propRatingScore_.value_or(0.0)).c_str());
+        constexpr double DEFAULT_STEP_SIZE = 0.5;
+        json->Put("stepSize", std::to_string(propStepSize_.value_or(DEFAULT_STEP_SIZE)).c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RatingScore, double, PROPERTY_UPDATE_RENDER);

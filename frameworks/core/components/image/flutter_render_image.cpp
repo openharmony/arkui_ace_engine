@@ -668,7 +668,7 @@ void FlutterRenderImage::CanvasDrawImageRect(
     }
     if (!image_ || !image_->image()) {
         imageDataNotReady_ = true;
-        LOGI("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
+        LOGI("waiting for image data, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
         return;
     }
@@ -973,11 +973,11 @@ void FlutterRenderImage::OnHiddenChanged(bool hidden)
             CancelBackgroundTasks();
         }
     } else {
-        if (imageObj_ && imageObj_->GetFrameCount() > 1) {
+        if (imageObj_ && imageObj_->GetFrameCount() > 1 && GetVisible()) {
             LOGI("Animated image Resume");
             imageObj_->Resume();
-        } else if (backgroundTaskCancled_) {
-            backgroundTaskCancled_ = false;
+        } else if (backgroundTaskCanceled_) {
+            backgroundTaskCanceled_ = false;
             if (sourceInfo_.GetSrcType() == SrcType::MEMORY) {
                 LOGE("memory image: %{public}s should not be notified to resume loading.",
                     sourceInfo_.ToString().c_str());
@@ -991,10 +991,10 @@ void FlutterRenderImage::OnHiddenChanged(bool hidden)
 void FlutterRenderImage::CancelBackgroundTasks()
 {
     if (fetchImageObjTask_) {
-        backgroundTaskCancled_ = fetchImageObjTask_.Cancel(false);
+        backgroundTaskCanceled_ = fetchImageObjTask_.Cancel(false);
     }
     if (imageObj_) {
-        backgroundTaskCancled_ = imageObj_->CancelBackgroundTasks();
+        backgroundTaskCanceled_ = imageObj_->CancelBackgroundTasks();
     }
 }
 
@@ -1289,12 +1289,18 @@ void FlutterRenderImage::OnAppShow()
     }
 }
 
+// pause image when not visible
 void FlutterRenderImage::OnVisibleChanged()
 {
-    if (imageObj_ && GetVisible()) {
-        imageObj_->Resume();
-    } else if (imageObj_ && !GetVisible()) {
-        imageObj_->Pause();
+    if (imageObj_) {
+        if (GetVisible()) {
+            imageObj_->Resume();
+        } else {
+            imageObj_->Pause();
+            LOGI("pause image when invisible");
+        }
+    } else {
+        LOGD("OnVisibleChanged: imageObj is null");
     }
 }
 

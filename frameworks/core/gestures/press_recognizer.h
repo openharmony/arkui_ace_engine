@@ -22,11 +22,11 @@
 
 namespace OHOS::Ace {
 
-class PressInfo : public BaseEventInfo, public TouchLocationInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(PressInfo, BaseEventInfo, TouchLocationInfo);
+class PressInfo : public TouchLocationInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(PressInfo, TouchLocationInfo);
 
 public:
-    explicit PressInfo(int32_t fingerId) : BaseEventInfo("onPress"), TouchLocationInfo(fingerId) {}
+    explicit PressInfo(int32_t fingerId) : TouchLocationInfo("onPress", fingerId) {}
     ~PressInfo() override = default;
 };
 

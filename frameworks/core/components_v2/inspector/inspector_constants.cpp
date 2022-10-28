@@ -90,6 +90,7 @@ const char STACK_ETS_TAG[] = "Stack";
 // swiper
 const char SWIPER_COMPONENT_TAG[] = "SwiperComponent";
 const char SWIPER_ETS_TAG[] = "Swiper";
+const char SWIPER_INDICATOR_ETS_TAG[] = "SwiperIndicator";
 
 // tabs
 const char TABS_COMPONENT_TAG[] = "TabsComponent";

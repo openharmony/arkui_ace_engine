@@ -87,7 +87,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
         CHECK_NULL_RETURN(touchEventHub, nullptr);
         touchEventHub->SetTouchEvent([windowManager](TouchEventInfo& info) {
             if (windowManager) {
-                windowManager->FireWindowStartMoveCallBack();
+                windowManager->WindowStartMove();
             }
         });
 
@@ -97,7 +97,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
         mouseEventHub->SetMouseEvent([windowManager](MouseInfo& info) {
             if (windowManager && info.GetButton() == MouseButton::LEFT_BUTTON &&
                 info.GetAction() == MouseAction::PRESS) {
-                windowManager->FireWindowStartMoveCallBack();
+                windowManager->WindowStartMove();
             }
         });
     }
@@ -140,39 +140,37 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
 
     // add leftSplit / maxRecover / minimize / close button
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
-        [windowManager, containerNode](GestureEvent& info) {
-            if (windowManager && containerNode) {
+        [windowManager](GestureEvent& info) {
+            if (windowManager) {
                 LOGI("left split button clicked");
                 windowManager->FireWindowSplitCallBack();
-                containerNode->MarkModifyDone();
             }
         }));
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
-        [windowManager, containerNode](GestureEvent& info) {
-            if (windowManager && containerNode) {
-                auto mode = windowManager->FireWindowGetModeCallBack();
+        [windowManager](GestureEvent& info) {
+            if (windowManager) {
+                auto mode = windowManager->GetWindowMode();
                 if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                     LOGI("recover button clicked");
-                    windowManager->FireWindowRecoverCallBack();
+                    windowManager->WindowRecover();
                 } else {
                     LOGI("maximize button clicked");
-                    windowManager->FireWindowMaximizeCallBack();
+                    windowManager->WindowMaximize();
                 }
-                containerNode->MarkModifyDone();
             }
         }));
     containerTitleRow->AddChild(BuildControlButton(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [windowManager](GestureEvent& info) {
             if (windowManager) {
                 LOGI("minimize button clicked");
-                windowManager->FireWindowMinimizeCallBack();
+                windowManager->WindowMinimize();
             }
         }));
     containerTitleRow->AddChild(BuildControlButton(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, [windowManager](GestureEvent& info) {
             if (windowManager) {
                 LOGI("close button clicked");
-                windowManager->FireWindowCloseCallBack();
+                windowManager->WindowClose();
             }
         }, true));
 

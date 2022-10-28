@@ -32,6 +32,7 @@ namespace {
 constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
+constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 200;
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? static_cast<int32_t>(NavigationTitleMode::MINI)
@@ -571,6 +572,11 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], navBarWidth)) {
         return;
     }
+
+    if (navBarWidth.Value() <= 0) {
+        navBarWidth.SetValue(DEFAULT_NAV_BAR_WIDTH);
+    }
+
     NG::NavigationView::SetNavBarWidth(navBarWidth);
 }
 

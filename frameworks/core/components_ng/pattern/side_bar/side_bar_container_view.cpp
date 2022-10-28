@@ -119,16 +119,19 @@ void SideBarContainerView::SetShowControlButton(bool showControlButton)
 
 void SideBarContainerView::SetSideBarWidth(const Dimension& sideBarWidth)
 {
+    MarkNeedInitRealSideBarWidth();
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth);
 }
 
 void SideBarContainerView::SetMinSideBarWidth(const Dimension& minSideBarWidth)
 {
+    MarkNeedInitRealSideBarWidth();
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth, minSideBarWidth);
 }
 
 void SideBarContainerView::SetMaxSideBarWidth(const Dimension& maxSideBarWidth)
 {
+    MarkNeedInitRealSideBarWidth();
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth);
 }
 
@@ -184,6 +187,15 @@ void SideBarContainerView::SetOnChange(ChangeEvent&& onChange)
     auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void SideBarContainerView::MarkNeedInitRealSideBarWidth()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->MarkNeedInitRealSideBarWidth(true);
 }
 
 } // namespace OHOS::Ace::NG

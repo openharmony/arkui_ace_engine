@@ -26,6 +26,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -119,6 +120,14 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
+    void ShowContainerTitle(bool isShow) override;
+
+    void SetAppBgColor(const Color& color) override;
+
+    void SetAppTitle(const std::string& title) override;
+
+    void SetAppIcon(const RefPtr<PixelMap>& icon) override;
+
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
     {
@@ -165,6 +174,11 @@ public:
         return selectOverlayManager_;
     }
 
+    const RefPtr<SharedOverlayManager>& GetSharedOverlayManager()
+    {
+        return sharedTransitionManager_;
+    }
+
     const RefPtr<DragDropManager>& GetDragDropManager()
     {
         return dragDropManager_;
@@ -202,11 +216,6 @@ public:
     void SetIsNeedShowFocus(bool isNeedShowFocus)
     {
         isNeedShowFocus_ = isNeedShowFocus;
-    }
-
-    void SetIsDragged(bool isDragged)
-    {
-        isDragged_ = isDragged;
     }
 
     bool RequestDefaultFocus();
@@ -287,13 +296,14 @@ private:
     RefPtr<FullScreenManager> fullScreenManager_;
     RefPtr<SelectOverlayManager> selectOverlayManager_;
     RefPtr<DragDropManager> dragDropManager_;
+    RefPtr<SharedOverlayManager> sharedTransitionManager_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
-    bool isDragged_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

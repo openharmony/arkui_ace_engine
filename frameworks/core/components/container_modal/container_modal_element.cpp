@@ -127,7 +127,7 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, context is null.");
         return;
     }
-    windowMode_ = context->GetWindowManager()->FireWindowGetModeCallBack();
+    windowMode_ = context->GetWindowManager()->GetWindowMode();
 
     // full screen need to hide border and padding.
     auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
@@ -250,7 +250,7 @@ void ContainerModalElement::PerformBuild()
     ChangeTitleIcon();
 
     // The first time it starts up, it needs to hide title if mode as follows.
-    windowMode_ = context_.Upgrade()->GetWindowManager()->FireWindowGetModeCallBack();
+    windowMode_ = context_.Upgrade()->GetWindowManager()->GetWindowMode();
     if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         ShowTitle(false);

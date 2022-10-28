@@ -30,6 +30,7 @@ public:
 
     virtual void Create(const std::string& id, const std::string& type, const std::string& libraryname,
         const RefPtr<XComponentController>& xcomponentController) = 0;
+    virtual void SetSoPath(const std::string& soPath) = 0;
     virtual void SetOnLoad(LoadEvent&& onLoad) = 0;
     virtual void SetOnDestroy(DestroyEvent&& onDestroy) = 0;
     virtual void SetOnSurfaceDestroyEvent(DestroyEvent&& onSurfaceDestroyEvent) = 0;

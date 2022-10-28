@@ -68,7 +68,9 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSOffscreenRenderingContext>::CustomMethod("save", &JSCanvasRenderer::JsSave);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("rotate", &JSCanvasRenderer::JsRotate);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("scale", &JSCanvasRenderer::JsScale);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("getTransform", &JSCanvasRenderer::JsGetTransform);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("setTransform", &JSCanvasRenderer::JsSetTransform);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("resetTransform", &JSCanvasRenderer::JsResetTransform);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("transform", &JSCanvasRenderer::JsTransform);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("translate", &JSCanvasRenderer::JsTranslate);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("setLineDash", &JSCanvasRenderer::JsSetLineDash);
@@ -80,6 +82,9 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSOffscreenRenderingContext>::CustomMethod("getImageData", &JSCanvasRenderer::JsGetImageData);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("getJsonData", &JSCanvasRenderer::JsGetJsonData);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("setPixelMap", &JSCanvasRenderer::JsSetPixelMap);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("filter", &JSCanvasRenderer::JsFilter);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("direction", &JSCanvasRenderer::JsDirection);
 
     JSClass<JSOffscreenRenderingContext>::CustomProperty("fillStyle", &JSCanvasRenderer::JsGetFillStyle,
         &JSCanvasRenderer::JsSetFillStyle);
@@ -161,13 +166,8 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
                 return;
             }
             bool anti = jsContextSetting->GetAntialias();
-
-            if (Container::IsCurrentUseNewPipeline()) {
-                jsRenderContext->SetAnti(anti);
-            } else {
-                jsRenderContext->SetAnti(anti);
-                jsRenderContext->SetAntiAlias();
-            }
+            jsRenderContext->SetAnti(anti);
+            jsRenderContext->SetAntiAlias();
         }
     }
 }

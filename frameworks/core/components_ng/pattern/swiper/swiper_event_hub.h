@@ -16,8 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_EVENT_HUB_H
 
+#include <algorithm>
+#include <memory>
+
 #include "base/memory/ace_type.h"
 #include "core/components/swiper/swiper_component.h"
+#include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
@@ -27,8 +31,9 @@ enum class Direction {
     PRE = 0,
     NEXT,
 };
-
-using ChangeEvent = std::function<void(const BaseEventInfo*)>;
+using ChangeIndicatorEvent = std::function<void(const BaseEventInfo* info)>;
+using ChangeEvent = std::function<void(int32_t index)>;
+using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeDoneEvent = std::function<void()>;
 
 class SwiperEventHub : public EventHub {
@@ -38,9 +43,15 @@ public:
     SwiperEventHub() = default;
     ~SwiperEventHub() override = default;
 
-    void SetOnChange(ChangeEvent&& changeEvent)
+    /* Using shared_ptr to enable event modification without adding again */
+    void AddOnChangeEvent(const ChangeEventPtr& changeEvent)
     {
-        changeEvent_ = std::move(changeEvent);
+        changeEvents_.emplace_back(changeEvent);
+    }
+
+    void SetIndicatorOnChange(ChangeIndicatorEvent&& changeEvent)
+    {
+        changeIndicatorEvent_ = std::move(changeEvent);
     }
 
     void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
@@ -62,8 +73,16 @@ public:
 
     void FireChangeEvent(int32_t index) const
     {
-        if (changeEvent_) {
-            changeEvent_(std::make_shared<SwiperChangeEvent>(index).get());
+        if (!changeEvents_.empty()) {
+            std::for_each(
+                changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& event) { (*event)(index); });
+        }
+    }
+
+    void FireIndicatorChangeEvent(int32_t index) const
+    {
+        if (changeIndicatorEvent_) {
+            changeIndicatorEvent_(std::make_shared<SwiperChangeEvent>(index).get());
         }
     }
 
@@ -74,8 +93,9 @@ public:
 
 private:
     Direction direction_;
-    ChangeEvent changeEvent_;
+    std::list<ChangeEventPtr> changeEvents_;
     ChangeDoneEvent changeDoneEvent_;
+    ChangeIndicatorEvent changeIndicatorEvent_;
 };
 
 } // namespace OHOS::Ace::NG
