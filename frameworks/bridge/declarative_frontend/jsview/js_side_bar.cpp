@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_side_bar.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/log.h"
 #include "core/components/button/button_component.h"
 #include "core/components/side_bar/render_side_bar_container.h"
@@ -194,7 +195,7 @@ void JSSideBar::JsSideBarPosition(const JSCallbackInfo& info)
         LOGE("side bar is null");
         return;
     }
-    
+
     component->SetSideBarPosition(sideBarPosition);
 }
 
@@ -254,7 +255,6 @@ void JSSideBar::OnChange(const JSCallbackInfo& info)
     }
     info.ReturnSelf();
 }
-
 
 void JSSideBar::JsSideBarWidth(const JSCallbackInfo& info)
 {

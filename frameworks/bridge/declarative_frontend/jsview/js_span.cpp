@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"

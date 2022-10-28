@@ -19,7 +19,7 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
-#include "core/components/panel/render_sliding_panel.h"
+#include "core/components/panel/sliding_events.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 

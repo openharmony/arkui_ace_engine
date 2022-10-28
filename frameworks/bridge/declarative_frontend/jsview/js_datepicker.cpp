@@ -17,6 +17,7 @@
 
 #include <utility>
 
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"

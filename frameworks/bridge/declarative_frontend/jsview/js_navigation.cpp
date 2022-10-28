@@ -15,17 +15,18 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/navigation_bar/navigation_bar_component_v2.h"
 #include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/components/option/option_component.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_view.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

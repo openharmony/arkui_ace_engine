@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "bridge/declarative_frontend/jsview/models/video_model_impl.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
