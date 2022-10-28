@@ -13,6 +13,7 @@
   "scripts": {
     "build": "mkdir -p ./dist;\ntsc --build tsconfig.json",
     "build_release": "rm -rf ./distRelease;\n mkdir -p ./distRelease;\ntsc --build tsconfig.release.json;\n node disableLogs.js distRelease/stateMgmt.js",
+    "build_sdk": "rm -rf ./distSdk;\n mkdir -p ./distSdk;\ntsc --build tsconfig.sdk.json",
     "test": "rm -rf ./distTest;\n mkdir -p ./distTest;\n tsc --build tsconfig.test.json;\n node distTest/stateMgmt_test.js"
   },
   "author": "Guido Grassel",

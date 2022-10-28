@@ -13,24 +13,29 @@
  * limitations under the License.
  */
 
+
 /**
+ * DataChangeListener implemented by LazyForEach
+ *
+ * public / SDK API
+ */
+declare interface DataChangeListener {
+  onDataReloaded(): void;
+  onDataAdded(index: number): void;
+  onDataMoved(from: number, to: number): void;
+  onDataDeleted(index: number): void;
+  onDataChanged(index: number): void;
+}
 
- full update ForEach 
-
- all definitions in this file are framework internal
-
- Note: the API for ForEach with partial update and with full update 
- are different. Only this declaration file or the one for partial update
- can be used. Using both would lead to syntax error.
-
-*/
-
-declare class ForEach {
-  static create(compilerGenId: string,
-    owningView: View,
-    arraySource : Array<any>,
-    itemGenFunc: (item : any) => void,
-    idGenfunction?: (iten: any) => string);
-  static pop(): void;
+/**
+ * IDataSource expected by LazyforEach
+ *
+ * public / SDK API
+ */
+declare interface IDataSource {
+  totalCount(): number;
+  getData(index: number): any;
+  registerDataChangeListener(listener: DataChangeListener): void;
+  unregisterDataChangeListener(listener: DataChangeListener): void;
 }
 

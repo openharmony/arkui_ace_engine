@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * ObservedPropertySimpleAbstractPU
+ * 
+ * all definitions in this file are framework internal
+ */
 abstract class ObservedPropertySimpleAbstractPU<T> extends ObservedPropertyAbstractPU<T>  {
 
   constructor(owningView: IPropertySubscriber, propertyName: PropertyInfo) {

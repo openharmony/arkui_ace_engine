@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * SynchedPropertyObjectTwoWayPU
+ * 
+ * all definitions in this file are framework internal
+ */
 class SynchedPropertyObjectTwoWayPU<C extends Object>
   extends ObservedPropertyObjectAbstractPU<C>
   implements ISinglePropertyChangeSubscriber<C> {
