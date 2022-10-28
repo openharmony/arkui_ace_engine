@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
@@ -26,7 +27,6 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -297,7 +297,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         return;
     }
     if (allSelectIsNull) {
-        if (groupPaintProperty->GetCheckBoxGroupSelectValue()) {
+        if (groupPaintProperty->HasCheckBoxGroupSelect() && groupPaintProperty->GetCheckBoxGroupSelectValue()) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
             groupPaintProperty->UpdateCheckBoxGroupSelect(true);
             checkBoxGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -349,7 +349,8 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
     groupPaintProperty->SetIsCheckBoxCallbackDealed(true);
 }
 
-bool CheckBoxPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool CheckBoxPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
 {
     return true;
 }
