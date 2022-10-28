@@ -43,7 +43,10 @@ struct RequestFormInfo {
     {
         std::stringstream paramStream;
         paramStream << bundleName << abilityName << moduleName << cardName << dimension
-            << index << temporary << wantWrap->ToString();
+            << index << temporary;
+        if (wantWrap) {
+            paramStream << wantWrap->ToString();
+        }
         return paramStream.str();
     }
 
