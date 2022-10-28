@@ -38,15 +38,7 @@ public:
             context_, std::bind(&RenderDisplay::OnOpacityAnimationCallback, this));
     }
 
-    void UpdateVisibleType(VisibleType type)
-    {
-        if (visible_ != type) {
-            visible_ = type;
-            SetVisible(visible_ == VisibleType::VISIBLE);
-            MarkNeedLayout();
-            OnVisibleChange(type);
-        }
-    }
+    void UpdateVisibleType(VisibleType type);
 
     void UpdateHidden(bool hidden)
     {
