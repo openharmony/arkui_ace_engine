@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -123,7 +124,8 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::ShowMenu(int32_t targetId, RefPtr<FrameNode> menu)
+void OverlayManager::ShowMenu(int32_t targetId, bool isMenu, const NG::OffsetF& offset, RefPtr<FrameNode> menu,
+    bool isContextMenu)
 {
     if (!menu) {
         // get existing menuNode
@@ -138,6 +140,19 @@ void OverlayManager::ShowMenu(int32_t targetId, RefPtr<FrameNode> menu)
         menuMap_[targetId] = menu;
         LOGI("menuNode %{public}d added to map", targetId);
     }
+    CHECK_NULL_VOID(menu);
+    auto menuChild = menu->GetChildAtIndex(0);
+    CHECK_NULL_VOID(menuChild);
+    auto menuFrameNode = DynamicCast<FrameNode>(menuChild);
+    auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetIsContextMenu(isContextMenu);
+    auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
+    if (isMenu && props) {
+        props->UpdateMenuOffset(offset);
+        menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    CHECK_NULL_VOID(props);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto rootChildren = rootNode->GetChildren();

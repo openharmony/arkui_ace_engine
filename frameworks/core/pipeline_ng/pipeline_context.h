@@ -56,6 +56,8 @@ public:
 
     void SetupRootElement() override;
 
+    void SetupSubRootElement();
+
     const RefPtr<FrameNode>& GetRootElement() const
     {
         return rootNode_;

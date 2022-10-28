@@ -25,6 +25,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
 
@@ -61,6 +62,9 @@ public:
     const RefPtr<Subwindow>& GetCurrentWindow();
 
     void ShowMenu(const RefPtr<Component>& newComponent);
+    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset);
+    void HideMenuNG(int32_t targetId);
+    void HideMenuNG();
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     bool CancelPopup(const std::string& id);
     void CloseMenu();

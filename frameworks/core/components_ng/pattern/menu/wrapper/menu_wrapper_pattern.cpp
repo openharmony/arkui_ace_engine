@@ -42,11 +42,28 @@ void MenuWrapperPattern::OnModifyDone()
             LOGW("MenuWrapper's child is not a Menu! type = %{public}s", menuNode->GetTag().c_str());
             return;
         }
-        auto menuZone = DynamicCast<FrameNode>(menuNode)->GetGeometryNode()->GetFrameRect();
+        auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
+        CHECK_NULL_VOID(menuFrameNode);
+        auto menuGeometryNode = menuFrameNode->GetGeometryNode();
+        CHECK_NULL_VOID(menuGeometryNode);
+        auto menuZone = menuGeometryNode->GetFrameRect();
+        auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+
+        if (menuPattern->IsContextMenu()) {
+            std::vector<Rect> rects;
+            rects.emplace_back(
+                Rect(Offset(menuZone.GetX(), menuZone.GetY()), Size(menuZone.Width(), menuZone.Height())));
+            SubwindowManager::GetInstance()->SetHotAreas(rects);
+        }
 
         auto position = touch.GetGlobalLocation();
         // if DOWN-touched outside the menu region, then hide menu
         if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            if (menuPattern->IsContextMenu()) {
+                SubwindowManager::GetInstance()->HideMenuNG(targetId);
+                return;
+            }
             auto pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();

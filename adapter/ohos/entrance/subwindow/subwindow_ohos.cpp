@@ -145,6 +145,16 @@ void SubwindowOhos::InitContainer()
         }
     }
 #endif
+    if (container->IsCurrentUseNewPipeline()) {
+        auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
+            Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
+        if (!subPipelineContextNG) {
+            LOGE("Get SubPipelineContext failed, pipelineContext is null");
+            return;
+        }
+        subPipelineContextNG->SetupSubRootElement();
+        return;
+    }
     auto subPipelineContext =
         DynamicCast<PipelineContext>(Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
     if (!subPipelineContext) {
@@ -264,6 +274,47 @@ void SubwindowOhos::ClearMenu()
     HideWindow();
     LOGI("Subwindow clear menu end.");
 }
+
+void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
+{
+    ShowWindow();
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->ShowMenu(targetId, true, offset, menuNode, true);
+}
+
+void SubwindowOhos::HideMenuNG()
+{
+    auto targetId = targetId_;
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->HideMenu(targetId);
+    context->FlushPipelineImmediately();
+    HideWindow();
+}
+
+void SubwindowOhos::HideMenuNG(int32_t targetId)
+{
+    targetId_ = targetId;
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->HideMenu(targetId_);
+    context->FlushPipelineImmediately();
+    HideWindow();
+}
+
 
 void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 {

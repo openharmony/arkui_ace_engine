@@ -38,7 +38,7 @@ private:
     float HorizontalLayout(const SizeF& size, float clickPosition);
 
     SizeF screenSize_;
-    OffsetF position_;
+    NG::OffsetF position_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };
