@@ -82,7 +82,7 @@ void JSList::SetScroller(RefPtr<JSScroller> scroller)
         scroller->SetController(listController);
 
         // Init scroll bar proxy.
-        auto proxy = scroller->GetScrollBarProxy();
+        auto proxy = AceType::DynamicCast<ScrollBarProxy>(scroller->GetScrollBarProxy());
         if (!proxy) {
             proxy = AceType::MakeRefPtr<ScrollBarProxy>();
             scroller->SetScrollBarProxy(proxy);
