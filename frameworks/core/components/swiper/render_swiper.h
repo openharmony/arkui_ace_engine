@@ -525,6 +525,7 @@ private:
     double CalculateFriction(double gamma);
     void ClearItems(const RefPtr<Component>& lazyForEachComponent, int32_t index);
     void ApplyRestoreInfo();
+    void ResetScrollOffset();
 
     RefPtr<SwiperComponent> swiper_;
 
