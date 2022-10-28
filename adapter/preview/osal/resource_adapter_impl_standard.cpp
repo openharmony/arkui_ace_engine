@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "adapter/ohos/osal/resource_adapter_impl.h"
-#include "adapter/ohos/osal/resource_convertor.h"
+#include "adapter/preview/osal/resource_adapter_impl_standard.h"
+#include "adapter/preview/osal/resource_convertor.h"
 #include "adapter/preview/entrance/ace_application_info.h"
 
 namespace OHOS::Ace {

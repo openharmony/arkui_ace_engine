@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,42 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
-#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
+#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_RESOURCE_CONVERTOR_H
+#define FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_RESOURCE_CONVERTOR_H
 
 #include "resource_manager.h"
 
-#include "core/components/theme/resource_adapter.h"
+#include "base/utils/utils.h"
+#include "base/utils/resource_configuration.h"
+#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
 
-class ResourceAdapterImpl : public ResourceAdapter {
-    DECLARE_ACE_TYPE(ResourceAdapterImpl, ResourceAdapter);
+constexpr double DPI_BASE = 160.0;
 
-public:
-    ResourceAdapterImpl() = default;
-    ~ResourceAdapterImpl() override = default;
+Global::Resource::DeviceType ConvertDeviceTypeToGlobal(DeviceType type);
+Global::Resource::Direction ConvertDirectionToGlobal(DeviceOrientation orientation);
+Global::Resource::ScreenDensity ConvertDensityToGlobal(double density);
+std::shared_ptr<Global::Resource::ResConfig> ConvertConfigToGlobal(const ResourceConfiguration& config);
 
-    void Init(const ResourceInfo& resourceInfo) override;
-    void UpdateConfig(const ResourceConfiguration& config) override;
+DeviceType ConvertDeviceTypeToAce(Global::Resource::DeviceType type);
+DeviceOrientation ConvertDirectionToAce(Global::Resource::Direction orientation);
+double ConvertDensityToAce(Global::Resource::ScreenDensity density);
 
-    Color GetColor(uint32_t resId) override;
-    Dimension GetDimension(uint32_t resId) override;
-    std::string GetString(uint32_t resId) override;
-    std::string GetPluralString(uint32_t resId, int quantity) override;
-    std::vector<std::string> GetStringArray(uint32_t resId) const override;
-    double GetDouble(uint32_t resId) override;
-    int32_t GetInt(uint32_t resId) override;
-    std::vector<uint32_t> GetIntArray(uint32_t resId) const override;
-    bool GetBoolean(uint32_t resId) const override;
-    std::string GetMediaPath(uint32_t resId) override;
-    std::string GetRawfile(const std::string& fileName) override;
-
-private:
-    std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
-    std::string packagePathStr_;
-    ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImpl);
-};
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
+#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_RESOURCE_CONVERTOR_H
