@@ -303,10 +303,10 @@ void AceContainer::OnShow(int32_t instanceId)
     }
     std::unordered_map<uint64_t, WeakPtr<Frontend>> cardFrontendMap;
     container->GetCardFrontendMap(cardFrontendMap);
-    for (const auto& [cardId, weakCardFront] : cardFrontendMap) {
+    for (const auto& [_, weakCardFront] : cardFrontendMap) {
         auto cardFront = weakCardFront.Upgrade();
         if (!cardFront) {
-            LOGE("cardFront is null, id=%llu", cardId);
+            LOGE("cardFront is null");
             continue;
         }
         cardFront->OnShow();
@@ -350,10 +350,10 @@ void AceContainer::OnHide(int32_t instanceId)
     }
     std::unordered_map<uint64_t, WeakPtr<Frontend>> cardFrontendMap;
     container->GetCardFrontendMap(cardFrontendMap);
-    for (const auto& [cardId, weakCardFront] : cardFrontendMap) {
+    for (const auto& [_, weakCardFront] : cardFrontendMap) {
         auto cardFront = weakCardFront.Upgrade();
         if (!cardFront) {
-            LOGE("cardFront is null, id=%llu", cardId);
+            LOGE("cardFront is null");
             continue;
         }
         cardFront->OnHide();
