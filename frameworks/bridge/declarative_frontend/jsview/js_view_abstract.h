@@ -28,6 +28,9 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::Framework {
 
