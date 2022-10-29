@@ -2411,7 +2411,8 @@ void RenderSwiper::StartIndicatorSpringAnimation(double start, double end)
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->ResetIndicatorSpringStatus();
+            swiper->UpdateIndicatorSpringStatus(SpringStatus::SPRING_STOP);
+            swiper->UpdateIndicatorTailPosition(DRAG_OFFSET_MIN);
         }
     });
 }
