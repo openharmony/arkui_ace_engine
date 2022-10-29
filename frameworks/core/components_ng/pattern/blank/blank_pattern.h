@@ -28,6 +28,8 @@ class BlankPattern : public Pattern {
 public:
     BlankPattern() = default;
     ~BlankPattern() override = default;
+    std::string GetColorString() const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void OnMountToParentDone() override;
 
