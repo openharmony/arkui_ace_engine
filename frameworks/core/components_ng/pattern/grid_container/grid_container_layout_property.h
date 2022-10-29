@@ -55,6 +55,8 @@ public:
         LinearLayoutProperty::Reset();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     void UpdateChild(RefPtr<GridProperty>& child, const GridContainerInfo& info);
     void RegistGridChild(const RefPtr<FrameNode>& child);
     void BuildWidth(float width);
