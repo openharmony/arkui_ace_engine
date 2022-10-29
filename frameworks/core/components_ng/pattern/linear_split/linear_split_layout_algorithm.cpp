@@ -80,8 +80,6 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (!layoutConstraint->selfIdealSize.Height()) {
             realSize.SetHeight(maxSize.Height());
         }
-        if (realSize.Height().has_value()) {
-        }
         layoutWrapper->GetGeometryNode()->SetFrameSize((realSize.ConvertToSizeT()));
     } else if (splitType_ == SplitType::COLUMN_SPLIT) {
         if (!layoutConstraint->selfIdealSize.Height()) {
@@ -90,8 +88,6 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         if (!layoutConstraint->selfIdealSize.Width()) {
             realSize.SetWidth(maxSize.Width());
-        }
-        if (realSize.Height().has_value()) {
         }
         layoutWrapper->GetGeometryNode()->SetFrameSize((realSize.ConvertToSizeT()));
     }

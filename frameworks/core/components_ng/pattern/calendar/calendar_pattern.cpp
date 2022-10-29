@@ -196,13 +196,15 @@ void CalendarPattern::FireRequestData(MonthState monthState)
     auto json = JsonUtil::Create(true);
     if (monthState == MonthState::PRE_MONTH) {
         json->Put("MonthState", 1);
+        json->Put("year", preMonth_.year);
+        json->Put("month", preMonth_.month);
     } else if (monthState == MonthState::NEXT_MONTH) {
         json->Put("MonthState", 2);
+        json->Put("year", nextMonth_.year);
+        json->Put("month", nextMonth_.month);
     }
     json->Put("currentYear", calendarDay_.month.year);
-    json->Put("currentMonth", calendarDay_.month.year);
-    json->Put("year", currentMonth_.year);
-    json->Put("month", currentMonth_.month);
+    json->Put("currentMonth", calendarDay_.month.month);
     onRequest(json->ToString());
 }
 
