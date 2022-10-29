@@ -99,7 +99,7 @@ void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapp
 {
     info->SetProperty<std::string>("name", layoutWrapper->GetHostNode()->GetTag());
     info->SetProperty<std::string>("id", std::to_string(layoutWrapper->GetHostNode()->GetId()));
-    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()));
+    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()));
     info->SetPropertyObject("borderInfo", GenBorderInfo(layoutWrapper));
     info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
 }
