@@ -34,7 +34,6 @@ GridRowModel* GridRowModel::GetInstance()
 #ifdef NG_BUILD
         instance_.reset(new NG::GridRowModelNG());
 #else
-        instance_.reset(new NG::GridRowModelNG());
         if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::GridRowModelNG());
         } else {
