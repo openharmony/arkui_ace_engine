@@ -43,6 +43,11 @@
 extern "C" {
 #endif
 
+#define OH_NATIVE_XCOMPONENT_OBJ ("__NATIVE_XCOMPONENT_OBJ__")
+
+const uint32_t OH_XCOMPONENT_ID_LEN_MAX = 128;
+const uint32_t OH_MAX_TOUCH_POINTS_NUMBER = 10;
+
 /**
  * @brief Enumerates the API access states.
  *
@@ -72,6 +77,52 @@ typedef enum {
 } OH_NativeXComponent_TouchEventType;
 
 /**
+ * @brief Represents the touch point tool type.
+ *
+ * @since 9
+ * @version 1.0
+ */
+typedef enum {
+    /** Indicates invalid tool type. */
+    OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN = 0,
+    /** Indicates a finger. */
+    OH_NATIVEXCOMPONENT_TOOL_TYPE_FINGER,
+    /** Indicates a stylus. */
+    OH_NATIVEXCOMPONENT_TOOL_TYPE_PEN,
+    /** Indicates a eraser. */
+    OH_NATIVEXCOMPONENT_TOOL_TYPE_RUBBER,
+    /** Indicates a brush. */
+    OH_NATIVEXCOMPONENT_TOOL_TYPE_BRUSH,
+    /** Indicates a pencil. */
+    OH_NATIVEXCOMPONENT_TOOL_TYPE_PENCIL,
+    /** Indicates a brush. */
+    OH_NATIVEXCOMPONENT_TOOL_TYPE_AIRBRUSH,
+    /** Indicates a mouse. */
+    OH_NATIVEXCOMPONENT_TOOL_TYPE_MOUSE,
+    /** Indicates a lens. */
+    OH_NATIVEXCOMPONENT_TOOL_TYPE_LENS,
+} OH_NativeXComponent_TouchPointToolType;
+
+/**
+ * @brief Represents the touch event source type.
+ *
+ * @since 9
+ * @version 1.0
+ */
+typedef enum {
+    /** Indicates an unknown input source type. */
+    OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN = 0,
+    /** Indicates that the input source generates a mouse multi-touch event. */
+    OH_NATIVEXCOMPONENT_SOURCE_TYPE_MOUSE,
+    /** Indicates that the input source generates a touchscreen multi-touch event. */
+    OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHSCREEN,
+    /** Indicates that the input source generates a touchpad multi-touch event. */
+    OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHPAD,
+    /** Indicates that the input source generates a joystick multi-touch event. */
+    OH_NATIVEXCOMPONENT_SOURCE_TYPE_JOYSTICK,
+} OH_NativeXComponent_EventSourceType;
+
+/**
  * @brief Represents the mouse event action.
  *
  * @since 9
@@ -98,10 +149,6 @@ typedef enum {
     OH_NATIVEXCOMPONENT_BACK_BUTTON = 0x08,
     OH_NATIVEXCOMPONENT_FORWARD_BUTTON = 0x10,
 } OH_NativeXComponent_MouseEventButton;
-
-#define OH_NATIVE_XCOMPONENT_OBJ ("__NATIVE_XCOMPONENT_OBJ__")
-const uint32_t OH_XCOMPONENT_ID_LEN_MAX = 128;
-const uint32_t OH_MAX_TOUCH_POINTS_NUMBER = 10;
 
 typedef struct {
     /** Unique identifier of a finger. */
@@ -270,6 +317,43 @@ int32_t OH_NativeXComponent_GetXComponentOffset(
  */
 int32_t OH_NativeXComponent_GetTouchEvent(
     OH_NativeXComponent* component, const void* window, OH_NativeXComponent_TouchEvent* touchEvent);
+
+/**
+ * @brief Obtains the touch pointer tool type by the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param pointIndex Indicates the pointer index in the touchPoints.
+ * @param toolType Indicates the tool Type of the pointer.
+ * @return Returns the status code of the execution.
+ * @since 9
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetTouchPointToolType(OH_NativeXComponent* component, uint32_t pointIndex,
+    OH_NativeXComponent_TouchPointToolType* toolType);
+
+/**
+ * @brief Obtains the touch pointer tiltX by the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param pointIndex Indicates the pointer index in the touchPoints.
+ * @param tiltX Indicates the x tilt of the pointer.
+ * @return Returns the status code of the execution.
+ * @since 9
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetTouchPointTiltX(OH_NativeXComponent* component, uint32_t pointIndex, float* tiltX);
+
+/**
+ * @brief Obtains the touch pointer tiltX by the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param pointIndex Indicates the pointer index in the touchPoints.
+ * @param tiltY Indicates the y tilt of the pointer.
+ * @return Returns the status code of the execution.
+ * @since 9
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetTouchPointTiltY(OH_NativeXComponent* component, uint32_t pointIndex, float* tiltY);
 
 /**
  * @brief Obtains the mouse event dispatched by the ArkUI XComponent.

@@ -26,5 +26,17 @@
     {
         "first_introduced": "9",
         "name": "OH_NativeXComponent_RegisterMouseEventCallback"
+    },
+    {
+        "first_introduced": "9",
+        "name": "OH_NativeXComponent_GetTouchPointToolType"
+    },
+    {
+        "first_introduced": "9",
+        "name": "OH_NativeXComponent_GetTouchPointTiltX"
+    },
+    {
+        "first_introduced": "9",
+        "name": "OH_NativeXComponent_GetTouchPointTiltY"
     }
 ]
