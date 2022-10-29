@@ -28,6 +28,8 @@
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/tween/tween_component.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "resource_manager.h"
@@ -49,6 +51,9 @@ public:
 
     void InitContainer() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
+    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
+    void HideMenuNG(int32_t targetId) override;
+    void HideMenuNG() override;
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
@@ -97,6 +102,7 @@ private:
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
+    int32_t targetId_ = -1;
 };
 
 } // namespace OHOS::Ace

@@ -86,6 +86,18 @@ public:
         return { FocusType::NODE, true };
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
+        auto name = checkBoxEventHub ? checkBoxEventHub->GetName() : "";
+        auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
+        json->Put("name", name.c_str());
+        json->Put("group", group.c_str());
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

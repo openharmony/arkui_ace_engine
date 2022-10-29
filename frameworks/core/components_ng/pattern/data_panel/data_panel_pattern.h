@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_PATTERN_H
 
 #include "core/components_ng/pattern/data_panel/data_panel_layout_algorithm.h"
+#include "core/components_ng/pattern/data_panel/data_panel_modifer.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_method.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -32,7 +33,10 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<DataPanelPaintMethod>();
+        if (!dataPanelModifier_) {
+            dataPanelModifier_ = AceType::MakeRefPtr<DataPanelModifier>();
+        }
+        return MakeRefPtr<DataPanelPaintMethod>(dataPanelModifier_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -51,6 +55,7 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
+    RefPtr<DataPanelModifier> dataPanelModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(DataPanelPattern);
 };
 

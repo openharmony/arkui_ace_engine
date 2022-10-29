@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_navdestination.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -45,7 +46,7 @@ bool ParseCommonTitle(const JSRef<JSVal>& jsValue)
     return isCommonTitle;
 }
 
-}
+} // namespace
 
 void JSNavDestination::Create()
 {

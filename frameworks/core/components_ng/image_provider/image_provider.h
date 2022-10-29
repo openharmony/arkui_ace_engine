@@ -29,6 +29,13 @@
 
 namespace OHOS::Ace::NG {
 
+enum class ImageObjectType {
+    UNKNOWN = -1,
+    STATIC_IMAGE_OBJECT,
+    PIXEL_MAP_IMAGE_OBJECT,
+    SVG_IMAGE_OBJECT,
+};
+
 using DataReadyNotifyTask = std::function<void(const ImageSourceInfo& sourceInfo)>;
 using LoadSuccessNotifyTask = std::function<void(const ImageSourceInfo& sourceInfo)>;
 using LoadFailNotifyTask = std::function<void(const ImageSourceInfo& sourceInfo)>;
@@ -75,7 +82,7 @@ public:
     ~ImageEncodedInfo() override = default;
 
     static RefPtr<ImageEncodedInfo> CreateImageEncodedInfo(
-        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo);
+        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo, ImageObjectType imageObjectType);
     static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForStaticImage(const RefPtr<NG::ImageData>& data);
     static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForSvg(const RefPtr<NG::ImageData>& data);
     static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForDecodedPixelMap(
@@ -124,9 +131,11 @@ public:
     static void MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
     static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
         std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder);
-    static bool BuildImageObject(const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo,
-        const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks,
-        RefPtr<ImageObject>& imageObj);
+    static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& sourceInfo,
+        const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
+        const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks, ImageObjectType imageObjectType);
+    static ImageObjectType ParseImageObjectType(
+        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo);
 
 protected:
     static void WrapTaskAndPostTo(

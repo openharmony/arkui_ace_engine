@@ -24,10 +24,6 @@ class JSGridRow : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-    static void Columns(const JSCallbackInfo& info);
-    static void Gutter(const JSCallbackInfo& info);
-    static void Breakpoints(const JSCallbackInfo& info);
-    static void Direction(const JSCallbackInfo& info);
     static void JsBreakpointEvent(const JSCallbackInfo& info);
     static void Height(const JSCallbackInfo& info);
 

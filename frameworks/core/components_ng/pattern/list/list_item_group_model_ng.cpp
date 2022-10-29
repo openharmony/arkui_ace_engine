@@ -44,4 +44,38 @@ void ListItemGroupModelNG::SetDivider(const V2::ItemDivider& divider)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider);
 }
+
+void ListItemGroupModelNG::SetHeader(std::function<void()>&& header)
+{
+    RefPtr<NG::UINode> headerNode;
+    if (header) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        header();
+        headerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    if (headerNode) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->AddHeader(headerNode);
+    }
+}
+
+void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
+{
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    if (footerNode) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->AddFooter(footerNode);
+    }
+}
 } // namespace OHOS::Ace::NG

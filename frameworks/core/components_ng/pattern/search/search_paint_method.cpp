@@ -20,7 +20,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/search/search_paint_property.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -30,8 +29,6 @@ namespace OHOS::Ace::NG {
 
 CanvasDrawFunction SearchPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    auto paintProperty = DynamicCast<SearchPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_RETURN(paintProperty, nullptr);
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto search = weak.Upgrade();
         if (search) {
@@ -43,9 +40,7 @@ CanvasDrawFunction SearchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 
 void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    auto paintProperty = DynamicCast<SearchPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->GetSearchButton().has_value() && !paintProperty->GetSearchButton().value()->empty()) {
+    if (!searchButton_.empty()) {
         constexpr Dimension ICON_HEIGHT = 16.0_vp;
         constexpr double SEARCH_DIVIDER_WIDTH = 1.0;
         constexpr double DIVIDER_SPACE = 7.0;

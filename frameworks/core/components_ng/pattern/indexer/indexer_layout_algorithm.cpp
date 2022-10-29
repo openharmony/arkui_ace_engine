@@ -151,7 +151,7 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto selfIdealSize = layoutConstraint.selfIdealSize;
     constexpr float half = 0.5f;
     if (selfIdealSize.Width().has_value() && selfIdealSize.Width().value() >= size.Width()) {
-       left = left + half * (selfIdealSize.Width().value() - size.Width());
+        left = left + half * (selfIdealSize.Width().value() - size.Width());
     }
     if (selfIdealSize.Height().has_value() && selfIdealSize.Height().value() >= size.Height()) {
         top = top + half * (selfIdealSize.Height().value() - size.Height());

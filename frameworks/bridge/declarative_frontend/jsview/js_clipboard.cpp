@@ -17,6 +17,7 @@
 
 #include <functional>
 
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container.h"

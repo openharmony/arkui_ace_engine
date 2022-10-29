@@ -45,9 +45,10 @@ void RosenRenderTransform::UpdateTransformLayer()
     SyncOriginToRsNode(rsNode);
 
     auto transform = UpdateWithEffectMatrix(transform_);
-    if (transform == previousTransformMatrix_) {
+    if (transform == previousTransformMatrix_ && !firstUpdateTransform_) {
         return;
     }
+    firstUpdateTransform_ = false;
     SyncTransformToRsNode(rsNode, transform);
     previousTransformMatrix_ = transform;
 }

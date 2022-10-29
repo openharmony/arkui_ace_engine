@@ -32,7 +32,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<TextFieldControllerBase> SearchView::Create(
+RefPtr<Ace::TextFieldController> SearchView::Create(
     std::optional<std::string>& value, std::optional<std::string>& placeholder, std::optional<std::string>& icon)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -49,9 +49,9 @@ RefPtr<TextFieldControllerBase> SearchView::Create(
 
     // TextField frameNode
     auto textFieldFrameNode = CreateTextField(frameNode, placeholder, value);
-    auto pattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    textFieldPattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    textFieldPattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto textInputRenderContext = textFieldFrameNode->GetRenderContext();
     textInputRenderContext->UpdateBackgroundColor(TRANSPARENT_COLOR);
     if (!hasTextFieldNode) {
@@ -92,14 +92,14 @@ RefPtr<TextFieldControllerBase> SearchView::Create(
     renderContext->UpdateBorderRadius(borderRadius);
 
     ViewStackProcessor::GetInstance()->Push(frameNode);
-
-    return pattern->GetTextFieldController();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    pattern->SetSearchController(AceType::MakeRefPtr<Ace::TextFieldController>());
+    return pattern->GetSearchController();
 }
 
 void SearchView::SetSearchButton(const std::string& text)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton, text);
-    ACE_UPDATE_PAINT_PROPERTY(SearchPaintProperty, SearchButton, text);
 }
 
 void SearchView::SetPlaceholderColor(const Color& color)
@@ -246,9 +246,11 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
 
 RefPtr<FrameNode> SearchView::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src)
 {
+    constexpr Dimension ICON_HEIGHT = 16.0_vp;
     auto nodeId = parentNode->GetImageId();
     ImageSourceInfo imageSourceInfo(src);
     if (src.empty()) {
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::SEARCH_SVG);
         auto pipeline = parentNode->GetContext();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto themeManager = pipeline->GetThemeManager();
@@ -258,11 +260,17 @@ RefPtr<FrameNode> SearchView::CreateImage(const RefPtr<SearchNode>& parentNode, 
         auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
         imageSourceInfo.SetSrc(iconPath);
     }
-    // else{TODO: Display system picture}
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+
+    CalcSize idealSize = { CalcLength(ICON_HEIGHT), CalcLength(ICON_HEIGHT) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    frameNode->UpdateLayoutConstraint(layoutConstraint);
+
     return frameNode;
 }
 

@@ -27,12 +27,14 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
 
-    auto layoutConstraint = layoutProperty->GetLayoutConstraint().value();
-    UpdateListItemConstraint(contentIdealSize, layoutConstraint);
-
     axis_ = layoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    lanes_ = layoutProperty->GetLanes().value_or(1);
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpace().value_or(Dimension(0));
+
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint().value();
+    auto itemLayoutConstraint = layoutProperty->GetLayoutConstraint().value();
+    UpdateListItemConstraint(contentIdealSize, itemLayoutConstraint);
     spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
     if (layoutProperty->GetDivider().has_value()) {
         auto divider = layoutProperty->GetDivider().value();
@@ -43,27 +45,17 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    itemPosition_.clear();
-    float totalMainSize = 0.0f;
-    auto totalItemCount = layoutWrapper->GetTotalChildCount();
-    int32_t currentIndex = 0;
-    while (currentIndex < totalItemCount) {
-        float mainLength = 0.0f;
-        int32_t cnt = MeasureALine(layoutWrapper, layoutConstraint, currentIndex, mainLength);
-        if (cnt == 0) {
-            break;
-        }
-        float endPos = totalMainSize + mainLength;
-        for (int32_t i = 0; i < cnt; i++) {
-            itemPosition_[currentIndex + i] = { totalMainSize, endPos};
-        }
-        totalMainSize = endPos + spaceWidth_;
-        currentIndex += cnt;
+    if (headerIndex_ >= 0) {
+        auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
+        headerWrapper->Measure(layoutConstraint);
+        headerMainSize_ = GetMainAxisSize(headerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     }
-    if (currentIndex > 0) {
-        totalMainSize -= spaceWidth_;
+    float totalMainSize = MeasureListItem(layoutWrapper, itemLayoutConstraint, headerMainSize_);
+    if (footerIndex_ >= 0) {
+        auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
+        footerWrapper->Measure(layoutConstraint);
+        totalMainSize += GetMainAxisSize(footerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     }
-
     if (axis_ == Axis::HORIZONTAL) {
         contentIdealSize.SetWidth(totalMainSize);
     } else {
@@ -85,30 +77,18 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
     auto paddingOffset = OffsetF(left, top);
+    float crossSize = GetCrossAxisSize(size, axis_);
+
+    if (headerIndex_ >= 0) {
+        LayoutIndex(layoutWrapper, paddingOffset, headerIndex_, crossSize, 0.0f);
+    }
 
     // layout items.
-    for (auto& pos : itemPosition_) {
-        int32_t index = pos.first;
-        auto offset = paddingOffset;
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!wrapper) {
-            LOGI("wrapper is out of boundary");
-            continue;
-        }
+    LayoutListItem(layoutWrapper, paddingOffset, crossSize);
 
-        int32_t laneIndex = index % lanes_;
-        float crossSize = GetCrossAxisSize(size, axis_);
-        float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
-        float laneCrossOffset = CalculateLaneCrossOffset(crossSize / lanes_, childCrossSize);
-        if (axis_ == Axis::VERTICAL) {
-            offset = offset + OffsetF(0, pos.second.first) + OffsetF(laneCrossOffset, 0) +
-                OffsetF(size.Width() / lanes_ * laneIndex, 0);
-        } else {
-            offset = offset + OffsetF(pos.second.first, 0) + OffsetF(laneCrossOffset, 0) +
-                OffsetF(0, size.Height() / lanes_ * laneIndex);
-        }
-        wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
-        wrapper->Layout();
+    if (footerIndex_ >= 0) {
+        float endPos = itemPosition_.empty() ? headerMainSize_ : itemPosition_.rbegin()->second.second;
+        LayoutIndex(layoutWrapper, paddingOffset, footerIndex_, crossSize, endPos);
     }
 }
 
@@ -137,24 +117,95 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
     }
 }
 
-int32_t ListItemGroupLayoutAlgorithm::MeasureALine(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-    int32_t currentIndex, float& mainLen)
+int32_t ListItemGroupLayoutAlgorithm::MeasureALine(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, int32_t currentIndex, float& mainLen)
 {
     int32_t cnt = 0;
     for (int32_t i = 0; i < lanes_; i++) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + i);
+        auto wrapper = GetListItem(layoutWrapper, currentIndex + i);
         if (!wrapper) {
-            LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
+            LOGI("the start %{public}d index wrapper is null", currentIndex + i);
             return cnt;
         }
         cnt++;
         {
-            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
+            ACE_SCOPED_TRACE("ListItemGroup::MeasureListItem:%d", currentIndex + i);
             wrapper->Measure(layoutConstraint);
         }
         mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
     }
     return cnt;
+}
+
+float ListItemGroupLayoutAlgorithm::MeasureListItem(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, float startPos)
+{
+    itemPosition_.clear();
+    float totalMainSize = startPos;
+    auto totalItemCount = layoutWrapper->GetTotalChildCount();
+    int32_t currentIndex = 0;
+    while (currentIndex < totalItemCount) {
+        float mainLength = 0.0f;
+        int32_t cnt = MeasureALine(layoutWrapper, layoutConstraint, currentIndex, mainLength);
+        if (cnt == 0) {
+            break;
+        }
+        float endPos = totalMainSize + mainLength;
+        for (int32_t i = 0; i < cnt; i++) {
+            itemPosition_[currentIndex + i] = { totalMainSize, endPos};
+        }
+        totalMainSize = endPos + spaceWidth_;
+        currentIndex += cnt;
+    }
+    if (currentIndex > 0) {
+        totalMainSize -= spaceWidth_;
+    }
+    return totalMainSize;
+}
+
+void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
+    const OffsetF& paddingOffset, float crossSize)
+{
+    // layout items.
+    for (auto& pos : itemPosition_) {
+        auto wrapper = GetListItem(layoutWrapper, pos.first);
+        if (!wrapper) {
+            LOGI("wrapper is out of boundary");
+            continue;
+        }
+
+        auto offset = paddingOffset;
+        int32_t laneIndex = pos.first % lanes_;
+        float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        float laneCrossOffset = CalculateLaneCrossOffset(crossSize / lanes_, childCrossSize);
+        if (axis_ == Axis::VERTICAL) {
+            offset = offset + OffsetF(0, pos.second.first) + OffsetF(laneCrossOffset, 0) +
+                OffsetF(crossSize / lanes_ * laneIndex, 0);
+        } else {
+            offset = offset + OffsetF(pos.second.first, 0) + OffsetF(laneCrossOffset, 0) +
+                OffsetF(0, crossSize / lanes_ * laneIndex);
+        }
+        wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+        wrapper->Layout();
+    }
+}
+
+void ListItemGroupLayoutAlgorithm::LayoutIndex(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset,
+    int32_t index, float crossSize, float startPos)
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    if (wrapper) {
+        auto offset = paddingOffset;
+        float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
+        if (axis_ == Axis::VERTICAL) {
+            offset = offset + OffsetF(laneCrossOffset, startPos);
+        } else {
+            offset = offset + OffsetF(startPos, laneCrossOffset);
+        }
+        wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+        wrapper->Layout();
+    }
 }
 
 float ListItemGroupLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)

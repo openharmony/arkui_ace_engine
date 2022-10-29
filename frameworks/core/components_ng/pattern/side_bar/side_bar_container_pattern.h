@@ -72,6 +72,11 @@ public:
         return hasControlButton_;
     }
 
+    void MarkNeedInitRealSideBarWidth(bool value)
+    {
+        needInitRealSideBarWidth_ = value;
+    }
+
     void InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UpdateSideBarPosition(float value);
 

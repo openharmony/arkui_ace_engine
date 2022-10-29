@@ -21,6 +21,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
@@ -157,6 +158,7 @@ void SwiperPattern::FireChangeEvent() const
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireChangeEvent(currentIndex_);
+    swiperEventHub->FireIndicatorChangeEvent(currentIndex_);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
 }
 
@@ -210,6 +212,9 @@ void SwiperPattern::ShowNext()
     if (childrenSize > 0 && GetDisplayCount() != 0) {
         PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize, true);
     }
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    swiperEventHub->FireIndicatorChangeEvent(currentIndex_);
 }
 
 void SwiperPattern::ShowPrevious()
@@ -227,6 +232,9 @@ void SwiperPattern::ShowPrevious()
         PlayTranslateAnimation(
             0, MainSize() / GetDisplayCount(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
     }
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    swiperEventHub->FireIndicatorChangeEvent(currentIndex_);
 }
 
 void SwiperPattern::FinishAnimation()
@@ -521,6 +529,10 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart()
 {
+#ifdef OHOS_PLATFORM
+    // Increase the cpu frequency when sliding.
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
     currentOffset_ = std::fmod(currentOffset_, MainSize());
 }
 
@@ -580,6 +592,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         }
     }
 
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
     // Play translate animation.
     auto mainSize = MainSize() / std::max(GetDisplayCount(), 1);
     if (LessOrEqual(mainSize, 0)) {

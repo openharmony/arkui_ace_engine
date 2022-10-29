@@ -302,7 +302,40 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
     LOGI("SetupRootElement success!");
+}
+
+void PipelineContext::SetupSubRootElement()
+{
+    CHECK_RUN_ON(UI);
+    rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
+    rootNode_->SetHostRootId(GetInstanceId());
+    rootNode_->SetHostPageId(-1);
+    CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    rootNode_->UpdateLayoutConstraint(layoutConstraint);
+    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
+    rootFocusHub->SetFocusType(FocusType::SCOPE);
+    rootFocusHub->SetFocusable(true);
+    window_->SetRootFrameNode(rootNode_);
+    rootNode_->AttachToMainTree();
+
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+        rootNode_->AddChild(ContainerModalView::Create(stageNode));
+    } else {
+        rootNode_->AddChild(stageNode);
+    }
+    stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
+    selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    dragDropManager_ = MakeRefPtr<DragDropManager>();
 }
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
@@ -552,7 +585,6 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
         auto touchPoint = event.CreateTouchPoint();
-        LOGD("Mouse event to touch: button is %{public}d, action is %{public}d", event.button, event.action);
         OnTouchEvent(touchPoint);
     }
 
@@ -792,12 +824,12 @@ void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
 
 void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 {
-    if (isDragged_) {
-        return;
-    }
-
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        LOGI("current context is the source of drag");
+        return;
+    }
 
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);

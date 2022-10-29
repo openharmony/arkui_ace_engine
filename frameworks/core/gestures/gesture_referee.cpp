@@ -27,10 +27,9 @@ void GestureScope::AddMember(const RefPtr<GestureRecognizer>& recognizer)
     }
 
     if (Existed(recognizer)) {
-        LOGE("gesture recognizer has already been added.");
+        LOGW("gesture recognizer has already been added.");
         return;
     }
-
 
     recognizer->SetRefereeState(RefereeState::DETECTING);
 
@@ -113,6 +112,9 @@ void GestureScope::HandleParallelDisposal(const RefPtr<GestureRecognizer>& recog
         parallelRecognizers_.remove(recognizer);
         recognizer->SetRefereeState(RefereeState::SUCCEED);
         recognizer->OnAccepted(touchId_);
+    } else if (disposal == GestureDisposal::PENDING) {
+        recognizer->SetRefereeState(RefereeState::PENDING);
+        recognizer->OnPending(touchId_);
     }
 }
 

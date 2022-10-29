@@ -143,6 +143,9 @@ public:
     void SetHostPageId(int32_t id)
     {
         hostPageId_ = id;
+        for (auto& child : children_) {
+            child->SetHostPageId(id);
+        }
     }
 
     void SetRemoveSilently(bool removeSilently)

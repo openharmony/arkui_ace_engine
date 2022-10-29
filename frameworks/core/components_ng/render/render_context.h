@@ -26,6 +26,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
@@ -120,13 +121,18 @@ public:
 
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
+
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void OnNodeDisappear(FrameNode* host) {}
     virtual void OnNodeAppear() {}
+
     virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
     {
         return false;
     }
+
+    virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
+    virtual void ResetSharedTranslate() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
@@ -158,6 +164,36 @@ public:
     virtual void NotifyTransition(
         const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
     {}
+
+    void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
+    {
+        sharedTransitionOption_ = option;
+    }
+    const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const
+    {
+        return sharedTransitionOption_;
+    }
+    void SetShareId(const ShareId& shareId)
+    {
+        shareId_ = shareId;
+    }
+    const ShareId& GetShareId() const
+    {
+        return shareId_;
+    }
+    bool HasSharedTransition() const
+    {
+        return !shareId_.empty();
+    }
+    bool HasSharedTransitionOption() const
+    {
+        return sharedTransitionOption_ != nullptr;
+    }
+
+    virtual void PaintAccessibilityFocus() {};
+
+    virtual void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) {}
+    virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -244,8 +280,13 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Motion, MotionPathProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
 
+    // accessibility
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+
 protected:
     RenderContext() = default;
+    std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
+    ShareId shareId_;
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
@@ -296,6 +337,7 @@ protected:
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
+    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {}
 
 private:
     std::function<void()> requestFrame_;

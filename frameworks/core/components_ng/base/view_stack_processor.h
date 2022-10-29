@@ -30,6 +30,31 @@
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
 
+#define ACE_UPDATE_FIRST_CHILD_LAYOUT_PROPERTY(target, name, value)                         \
+    do {                                                                                    \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();             \
+                                                                                            \
+        CHECK_NULL_VOID(frameNode);                                                         \
+        auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front()); \
+        CHECK_NULL_VOID(childNode);                                                         \
+        auto cast##target = childNode->GetLayoutProperty<target>();                         \
+        if (cast##target) {                                                                 \
+            cast##target->Update##name(value);                                              \
+        }                                                                                   \
+    } while (false)
+
+#define ACE_UPDATE_SECOND_CHILD_LAYOUT_PROPERTY(target, name, value)                       \
+    do {                                                                                   \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();            \
+        CHECK_NULL_VOID(frameNode);                                                        \
+        auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()); \
+        CHECK_NULL_VOID(childNode);                                                        \
+        auto cast##target = childNode->GetLayoutProperty<target>();                        \
+        if (cast##target) {                                                                \
+            cast##target->Update##name(value);                                             \
+        }                                                                                  \
+    } while (false)
+
 #define ACE_UPDATE_LAYOUT_PROPERTY(target, name, value)                         \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
@@ -38,6 +63,30 @@
         if (cast##target) {                                                     \
             cast##target->Update##name(value);                                  \
         }                                                                       \
+    } while (false)
+
+#define ACE_UPDATE_FIRST_CHILD_PAINT_PROPERTY(target, name, value)                          \
+    do {                                                                                    \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();             \
+        CHECK_NULL_VOID(frameNode);                                                         \
+        auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front()); \
+        CHECK_NULL_VOID(childNode);                                                         \
+        auto cast##target = childNode->GetPaintProperty<target>();                          \
+        if (cast##target) {                                                                 \
+            cast##target->Update##name(value);                                              \
+        }                                                                                   \
+    } while (false)
+
+#define ACE_UPDATE_SECOND_CHILD_PAINT_PROPERTY(target, name, value)                        \
+    do {                                                                                   \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();            \
+        CHECK_NULL_VOID(frameNode);                                                        \
+        auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()); \
+        CHECK_NULL_VOID(childNode);                                                        \
+        auto cast##target = childNode->GetPaintProperty<target>();                         \
+        if (cast##target) {                                                                \
+            cast##target->Update##name(value);                                             \
+        }                                                                                  \
     } while (false)
 
 #define ACE_UPDATE_PAINT_PROPERTY(target, name, value)                          \

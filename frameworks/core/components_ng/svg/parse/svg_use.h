@@ -16,12 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_USE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_USE_H
 
-#include "frameworks/core/components_ng/svg/parse/svg_group.h"
+#include "core/components_ng/svg/parse/svg_graphic.h"
 
 namespace OHOS::Ace::NG {
 
-class SvgUse : public SvgGroup {
-    DECLARE_ACE_TYPE(SvgUse, SvgGroup);
+class SvgUse : public SvgGraphic {
+    DECLARE_ACE_TYPE(SvgUse, SvgGraphic);
 
 public:
     SvgUse();

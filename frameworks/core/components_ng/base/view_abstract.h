@@ -26,11 +26,17 @@
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/offset.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/clip_path.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -169,13 +175,17 @@ public:
     // Bind properties
     static void BindPopup(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
-    static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode);
-    static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode);
-    static void ShowMenu(int32_t targetId);
+    static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
+        const NG::OffsetF& offset);
+    static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
+        bool isContextMenu, const NG::OffsetF& offset);
+    static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
     // transition
     static void SetTransition(const TransitionOptions& options);
+    // sharedTransition
+    static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape>& basicShape);
     static void SetClipEdge(bool isClip);

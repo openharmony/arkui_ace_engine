@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
@@ -34,10 +35,10 @@
 
 namespace OHOS::Ace::NG {
 // GeometryNode acts as a physical property of the size and position of the component
-class ACE_EXPORT GeometryNode : public Referenced {
+class ACE_EXPORT GeometryNode : public AceType {
+    DECLARE_ACE_TYPE(GeometryNode, AceType)
 public:
     GeometryNode() = default;
-
     ~GeometryNode() override = default;
 
     void Reset();

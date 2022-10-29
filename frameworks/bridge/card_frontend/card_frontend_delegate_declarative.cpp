@@ -54,9 +54,6 @@ void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
         TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
-void CardFrontendDelegateDeclarative::FireCardEvent(const EventMarker& eventMarker, const std::string& params)
-{
-
-}
+void CardFrontendDelegateDeclarative::FireCardEvent(const EventMarker& eventMarker, const std::string& params) {}
 
 } // namespace OHOS::Ace::Framework

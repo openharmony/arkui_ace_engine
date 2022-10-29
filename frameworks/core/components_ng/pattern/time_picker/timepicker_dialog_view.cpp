@@ -126,8 +126,6 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent("");
     textTitleNode->MountToParent(buttonTitleNode);
-    // }
-
     return buttonTitleNode;
 }
 

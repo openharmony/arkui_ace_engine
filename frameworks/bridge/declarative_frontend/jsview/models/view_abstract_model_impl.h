@@ -90,7 +90,8 @@ public:
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override;
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
-    void SetSharedTransition(const SharedTransitionOption& option) override;
+    void SetSharedTransition(
+        const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
     void SetGeometryTransition(const std::string& id) override;
     void SetMotionPath(const MotionPathOption& option) override;
 

@@ -40,7 +40,7 @@ void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
         const auto& scrollable = event->GetScrollable();
         scrollable->SetGetEventTargetImpl(getEventTargetImpl);
         scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        result.emplace_back(scrollable);
+        scrollable->OnCollectTouchTarget(result);
     }
 }
 

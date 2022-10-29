@@ -85,6 +85,8 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGr
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
+    auto titleBarOffset = OffsetT<float>(0.0f, 0.0f);
+    geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
 }
@@ -99,6 +101,8 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
+        auto contentOffset = OffsetT<float>(0.0f, 0.0f);
+        geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
     }

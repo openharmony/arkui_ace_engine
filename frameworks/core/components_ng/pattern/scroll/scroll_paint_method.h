@@ -21,10 +21,10 @@
 namespace OHOS::Ace::NG {
 
 class ScrollPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(SwiperPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(ScrollPaintMethod, NodePaintMethod)
 
 public:
-    ScrollPaintMethod() {};
+    ScrollPaintMethod() = default;
     ~ScrollPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;

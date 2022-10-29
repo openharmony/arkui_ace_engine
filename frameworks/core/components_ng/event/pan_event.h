@@ -28,12 +28,14 @@ namespace OHOS::Ace::NG {
 class GestureEventHub;
 class PanRecognizer;
 
-class PanEvent : public Referenced {
+class PanEvent : public virtual AceType {
+    DECLARE_ACE_TYPE(PanEvent, AceType)
 public:
-    PanEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate,
-        GestureEventFunc&& actionEnd, GestureEventNoParameter&& actionCancel) : actionStart_(std::move(actionStart)),
-        actionUpdate_(std::move(actionUpdate)), actionEnd_(std::move(actionEnd)),
-        actionCancel_(std::move(actionCancel)) {}
+    PanEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd,
+        GestureEventNoParameter&& actionCancel)
+        : actionStart_(std::move(actionStart)), actionUpdate_(std::move(actionUpdate)),
+          actionEnd_(std::move(actionEnd)), actionCancel_(std::move(actionCancel))
+    {}
     ~PanEvent() override = default;
 
     const GestureEventFunc& GetActionStartEventFunc() const
@@ -66,8 +68,8 @@ private:
 class ACE_EXPORT PanEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(PanEventActuator, GestureEventActuator)
 public:
-    PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub,
-    PanDirection direction, int32_t fingers, float distance);
+    PanEventActuator(
+        const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance);
     ~PanEventActuator() override = default;
 
     void ReplacePanEvent(const RefPtr<PanEvent>& panEvent)

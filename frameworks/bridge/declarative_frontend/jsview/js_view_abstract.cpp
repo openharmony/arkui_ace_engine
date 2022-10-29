@@ -15,12 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
-#include <algorithm>
-#include <cstdint>
 #include <memory>
 #include <optional>
 #include <regex>
-#include <utility>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -28,8 +25,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/json/json_util.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -42,42 +39,17 @@
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/js_view_register.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
-#include "core/components/box/box_component_helper.h"
-#include "core/components/common/layout/align_declaration.h"
-#include "core/components/common/layout/position_param.h"
-#include "core/components/common/properties/motion_path_option.h"
-#include "core/components/display/display_component.h"
-#include "core/components/menu/menu_component.h"
-#include "core/components/option/option_component.h"
-#include "core/components/split_container/column_split_component.h"
-#include "core/components/split_container/row_split_component.h"
-#include "core/components/split_container/split_container_component.h"
-#include "core/components/text/text_component.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/event/long_press_event.h"
-#include "core/components_ng/property/overlay_property.h"
-#include "core/components_v2/extensions/events/on_area_change_extension.h"
-#include "core/gestures/long_press_gesture.h"
 
 namespace OHOS::Ace {
 
@@ -1235,10 +1207,6 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
-    if (LessOrEqual(value, 0.0)) {
-        LOGW("the %{public}f value is illegal, use default", value);
-        value = 1.0;
-    }
 
     ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));
 }
@@ -1413,12 +1381,12 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         LOGE("JsSharedTransition: id is empty.");
         return;
     }
-    SharedTransitionOption option;
-    option.id = id;
+    std::shared_ptr<SharedTransitionOption> sharedOption;
 
     // options
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto optionsArgs = JsonUtil::ParseJsonString(info[1]->ToString());
+        sharedOption = std::make_shared<SharedTransitionOption>();
         // default: duration: 1000; if not specify: duration: 0
         int32_t duration = 0;
         auto durationValue = optionsArgs->GetValue("duration");
@@ -1428,13 +1396,13 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
                 duration = DEFAULT_DURATION;
             }
         }
-        option.duration = duration;
+        sharedOption->duration = duration;
         // default: delay: 0
         auto delay = optionsArgs->GetInt("delay", 0);
         if (delay < 0) {
             delay = 0;
         }
-        option.delay = delay;
+        sharedOption->delay = delay;
         // default: LinearCurve
         RefPtr<Curve> curve;
         auto curveArgs = optionsArgs->GetValue("curve");
@@ -1449,12 +1417,12 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         } else {
             curve = AceType::MakeRefPtr<LinearCurve>();
         }
-        option.curve = curve;
+        sharedOption->curve = curve;
         // motionPath
         if (optionsArgs->Contains("motionPath")) {
             MotionPathOption motionPathOption;
             if (ParseMotionPath(optionsArgs->GetValue("motionPath"), motionPathOption)) {
-                option.motionPathOption = motionPathOption;
+                sharedOption->motionPathOption = motionPathOption;
             }
         }
         // zIndex
@@ -1462,16 +1430,16 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         if (optionsArgs->Contains("zIndex")) {
             zIndex = optionsArgs->GetInt("zIndex", 0);
         }
-        option.zIndex = zIndex;
+        sharedOption->zIndex = zIndex;
         // type
         SharedTransitionEffectType type = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
         if (optionsArgs->Contains("type")) {
             type = static_cast<SharedTransitionEffectType>(
                 optionsArgs->GetInt("type", static_cast<int32_t>(SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE)));
         }
-        option.type = type;
+        sharedOption->type = type;
     }
-    ViewAbstractModel::GetInstance()->SetSharedTransition(option);
+    ViewAbstractModel::GetInstance()->SetSharedTransition(id, sharedOption);
 }
 
 void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
@@ -1928,9 +1896,6 @@ void JSViewAbstract::ParseBorderImageDimension(
         auto dimensionValue = object->GetProperty(keys.at(i).c_str());
         if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
             ParseJsDimensionVp(dimensionValue, currentDimension);
-            if (dimensionValue->IsNumber()) {
-                currentDimension.SetUnit(DimensionUnit::PERCENT);
-            }
             auto direction = static_cast<BorderImageDirection>(i);
             switch (direction) {
                 case BorderImageDirection::LEFT:
@@ -2033,9 +1998,6 @@ void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<Bor
     if (args->IsNumber() || args->IsString()) {
         Dimension outsetDimension;
         ParseJsDimensionVp(args, outsetDimension);
-        if (args->IsNumber()) {
-            outsetDimension.SetUnit(DimensionUnit::PERCENT);
-        }
         borderImage->SetEdgeOutset(BorderImageDirection::LEFT, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::TOP, outsetDimension);
@@ -2086,9 +2048,6 @@ void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<Bord
     if (args->IsNumber() || args->IsString()) {
         Dimension widthDimension;
         ParseJsDimensionVp(args, widthDimension);
-        if (args->IsNumber()) {
-            widthDimension.SetUnit(DimensionUnit::PERCENT);
-        }
         borderImage->SetEdgeWidth(BorderImageDirection::LEFT, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::TOP, widthDimension);

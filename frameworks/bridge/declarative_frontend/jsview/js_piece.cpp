@@ -15,12 +15,13 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
 
+#include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/box/box_component.h"
 #include "core/components/piece/piece_component.h"
 #include "core/components/piece/piece_theme.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 

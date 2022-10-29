@@ -28,10 +28,7 @@ class PinchRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PinchRecognizer, MultiFingersRecognizer);
 
 public:
-    PinchRecognizer(int32_t fingers, double distance) : distance_(distance)
-    {
-        fingers_ = fingers;
-    }
+    PinchRecognizer(int32_t fingers, double distance) : MultiFingersRecognizer(fingers), distance_(distance) {}
     ~PinchRecognizer() override = default;
 
     void OnAccepted() override;
@@ -46,11 +43,14 @@ private:
     void HandleTouchUpEvent(const AxisEvent& event) override;
     void HandleTouchMoveEvent(const AxisEvent& event) override;
     void HandleTouchCancelEvent(const AxisEvent& event) override;
+
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     double ComputeAverageDeviation();
-    void Reset();
+
+    void OnResetStatus() override;
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     Offset ComputePinchCenter();
+
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
@@ -60,10 +60,7 @@ private:
     double scale_ = 1.0;
     Offset pinchCenter_;
     TimeStamp time_;
-    std::map<int32_t, TouchEvent> touchPoints_;
     TouchEvent lastTouchEvent_;
-    bool pendingEnd_ = false;
-    bool pendingCancel_ = false;
     bool isFlushTouchEventsEnd_ = false;
 };
 

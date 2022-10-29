@@ -55,8 +55,19 @@ public:
         return MakeRefPtr<MenuLayoutAlgorithm>();
     }
 
+    void SetIsContextMenu(bool isContextMenu)
+    {
+        isContextMenu_ = isContextMenu;
+    }
+
+    bool IsContextMenu() const
+    {
+        return isContextMenu_;
+    }
+
 private:
     void OnModifyDone() override;
+    bool isContextMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_SEARCH_SEARCH_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_SEARCH_SEARCH_PAINT_METHOD_H
 
+#include <utility>
+
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/render/canvas.h"
@@ -28,25 +30,17 @@ class SearchPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SearchPaintMethod, NodePaintMethod)
 
 public:
-    SearchPaintMethod(SizeF& buttonSize) : buttonSize_(buttonSize) {};
+    SearchPaintMethod(const SizeF& buttonSize, const std::string& searchButton)
+        : buttonSize_(buttonSize), searchButton_(searchButton) {};
     ~SearchPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
-
-    SizeF& GetButtonSize()
-    {
-        return buttonSize_;
-    }
-
-    void SetButtonSize(SizeF& buttonSize)
-    {
-        buttonSize_ = buttonSize;
-    }
 
 private:
     void PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
 
     SizeF buttonSize_;
+    std::string searchButton_;
 };
 
 } // namespace OHOS::Ace::NG

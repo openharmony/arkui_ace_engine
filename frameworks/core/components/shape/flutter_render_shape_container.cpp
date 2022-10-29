@@ -53,6 +53,9 @@ void FlutterRenderShapeContainer::Paint(RenderContext& context, const Offset& of
 {
     const auto renderContext = static_cast<FlutterRenderContext*>(&context);
     flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        return;
+    }
     skCanvas_ = canvas->canvas();
     if (!skCanvas_) {
         return;
@@ -97,10 +100,8 @@ void FlutterRenderShapeContainer::BitmapMesh(RenderContext& context, const Offse
         double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
         double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
         double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
-        auto transform = Matrix4::CreateScale(static_cast<float>(scale), static_cast<float>(scale), 1.0f);
-        transform = FlutterRenderTransform::GetTransformByOffset(transform, GetGlobalOffset());
-        transform = Matrix4::CreateTranslate(static_cast<float>(tx), static_cast<float>(ty), 0.0f) * transform;
-        transformLayer_->Update(transform);
+        skOffCanvas_->scale(scale, scale);
+        skOffCanvas_->translate(tx, ty);
     }
 
     const auto& children = GetChildren();

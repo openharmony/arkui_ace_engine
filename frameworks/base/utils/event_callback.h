@@ -27,7 +27,7 @@ template<class>
 class EventCallback;
 
 template<class R, class... Args>
-class EventCallback<R(Args...)> : public BaseId {
+class ACE_EXPORT_WITH_PREVIEW EventCallback<R(Args...)> : public BaseId {
 public:
     using FunctionType = std::function<R(Args...)>;
 

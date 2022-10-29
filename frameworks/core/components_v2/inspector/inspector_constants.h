@@ -94,6 +94,7 @@ ACE_EXPORT extern const char STACK_ETS_TAG[];
 // swiper
 ACE_EXPORT extern const char SWIPER_COMPONENT_TAG[];
 ACE_EXPORT extern const char SWIPER_ETS_TAG[];
+ACE_EXPORT extern const char SWIPER_INDICATOR_ETS_TAG[];
 
 // tabs
 ACE_EXPORT extern const char TABS_COMPONENT_TAG[];

@@ -30,8 +30,6 @@ namespace OHOS::Ace {
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
-constexpr int32_t DEFAULT_POINT_X = 0;
-constexpr int32_t DEFAULT_POINT_Y = 50;
 constexpr int32_t DEFAULT_NUMS_ONE = 1;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
 RenderWeb::RenderWeb() : RenderNode(true)
@@ -134,15 +132,10 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 
 bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
 {
-    double offsetFix = (height - globlePointPosition_.GetY()) > 100.0 ?
-        keyboard - (height - globlePointPosition_.GetY()) / 2.0 : keyboard;
-    LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f offsetFix=%{public}f",
-        width, height, keyboard, offsetFix);
-    if (globlePointPosition_.GetY() <= (height - keyboard) || offsetFix <= 0.0) {
-        offsetFix = 0.0;
-    }
+    LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f",
+        width, height, keyboard);
     if (delegate_) {
-        offsetFix_ = offsetFix;
+        offsetFix_ = 0;
         if (!isFocus_) {
             if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
                 drawSize_.SetSize(drawSizeCache_);
@@ -161,15 +154,15 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
             drawSizeCache_.SetSize(drawSize_);
-            if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint().GetY() + offsetFix)) {
-                SetRootView(width, height, -offsetFix);
+            if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint().GetY())) {
+                SetRootView(width, height, 0);
                 isVirtualKeyBoardShow_ = VkState::VK_SHOW;
                 return true;
             }
-            drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY() + offsetFix);
+            drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY());
             delegate_->Resize(drawSize_.Width(), drawSize_.Height());
             SyncGeometryProperties();
-            SetRootView(width, height, (NearZero(offsetFix)) ? DEFAULT_NUMS_ONE : -offsetFix);
+            SetRootView(width, height, DEFAULT_NUMS_ONE);
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
         }
     }
@@ -243,14 +236,9 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
     }
 
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
-    if (GetCoordinatePoint().GetY() > 0) {
-        webPoint_ = Offset(DEFAULT_POINT_X, DEFAULT_POINT_Y) +
-            Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    }
     auto context = GetContext().Upgrade();
     if (context && context->GetTextFieldManager()) {
         context->GetTextFieldManager()->SetClickPosition(Offset());
-        globlePointPosition_ = localLocation + webPoint_;
     }
 }
 
@@ -301,6 +289,7 @@ void RenderWeb::PerformLayout()
 
     // render web do not support child.
     drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
+    drawSizeCache_ = drawSize_;
     SetLayoutSize(drawSize_);
     SetNeedLayout(false);
     MarkNeedRender();
@@ -388,14 +377,9 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
     }
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
-    if (GetCoordinatePoint().GetY() > 0) {
-        webPoint_ = Offset(DEFAULT_POINT_X, DEFAULT_POINT_Y) +
-            Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    }
     auto context = GetContext().Upgrade();
     if (context && context->GetTextFieldManager()) {
         context->GetTextFieldManager()->SetClickPosition(Offset());
-        globlePointPosition_ = touchOffset + webPoint_;
     }
 }
 

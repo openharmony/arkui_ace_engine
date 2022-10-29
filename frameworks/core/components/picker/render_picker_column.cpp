@@ -118,7 +118,8 @@ void RenderPickerColumn::OnTouchTestHit(
     if (!panRecognizer_ && context) {
         PanDirection panDirection;
         panDirection.type = PanDirection::VERTICAL;
-        panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+        panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(
+            context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
         panRecognizer_->SetOnActionStart([weak = AceType::WeakClaim(this)](const GestureEvent& event) {
             auto refPtr = weak.Upgrade();
             if (refPtr) {

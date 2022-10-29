@@ -56,6 +56,7 @@ void ButtonView::CreateWithLabel(const std::string& label)
     auto buttonAccessibilityProperty = frameNode->GetAccessibilityProperty<ButtonAccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
     buttonAccessibilityProperty->SetText(label);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, label);
     stack->Push(frameNode);
 }
 
@@ -95,6 +96,7 @@ void ButtonView::SetStateEffect(bool stateEffect)
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->SetStateEffect(stateEffect);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, StateEffect, stateEffect);
 }
 
 void ButtonView::SetFontSize(const Dimension& fontSize)
@@ -108,6 +110,7 @@ void ButtonView::SetFontSize(const Dimension& fontSize)
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     ACE_DCHECK(textLayoutProperty);
     textLayoutProperty->UpdateFontSize(fontSize);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize);
 }
 
 void ButtonView::SetFontWeight(Ace::FontWeight fontWeight)
@@ -121,6 +124,7 @@ void ButtonView::SetFontWeight(Ace::FontWeight fontWeight)
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     ACE_DCHECK(textLayoutProperty);
     textLayoutProperty->UpdateFontWeight(fontWeight);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, fontWeight);
 }
 
 void ButtonView::SetItalicFontStyle(Ace::FontStyle fontStyle)
@@ -160,6 +164,7 @@ void ButtonView::SetTextColor(const Color& textColor)
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     ACE_DCHECK(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(textColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextColor, textColor);
 }
 
 } // namespace OHOS::Ace::NG

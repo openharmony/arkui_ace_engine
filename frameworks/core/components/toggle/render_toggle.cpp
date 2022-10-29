@@ -35,7 +35,6 @@ RenderToggle::RenderToggle()
             toggle->HandleClickEvent();
         }
     });
-
     auto wp = AceType::WeakClaim(this);
     touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
     touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo&) {
@@ -60,6 +59,9 @@ RenderToggle::RenderToggle()
 
 void RenderToggle::HandleClickEvent()
 {
+    if (disabled_) {
+        return;
+    }
     if (onClick_) {
         onClick_();
     }
@@ -82,6 +84,9 @@ void RenderToggle::HandleClickEvent()
 
 void RenderToggle::HandleTouchEvent(bool touched)
 {
+    if (disabled_) {
+        return;
+    }
     isPressed_ = touched;
     if (isPressed_) {
         isMoveEventValid_ = true;
@@ -93,6 +98,9 @@ void RenderToggle::HandleTouchEvent(bool touched)
 
 void RenderToggle::HandleMoveEvent(const TouchEventInfo& info)
 {
+    if (disabled_) {
+        return;
+    }
     if (!isMoveEventValid_ || info.GetTouches().empty()) {
         return;
     }
@@ -240,7 +248,7 @@ void RenderToggle::Update(const RefPtr<Component>& component)
     if (toggleComponent_->GetOnChange()) {
         onChangeToggle_ = *toggleComponent_->GetOnChange();
     }
-
+    disabled_ = toggleComponent_->IsDisabled();
     ApplyRestoreInfo();
     SetAccessibilityClickImpl();
     MarkNeedLayout();

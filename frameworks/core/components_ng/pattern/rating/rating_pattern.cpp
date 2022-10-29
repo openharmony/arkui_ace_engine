@@ -453,6 +453,7 @@ void RatingPattern::OnModifyDone()
     CHECK_NULL_VOID(ratingLayoutProperty);
 
     if (!ratingLayoutProperty->HasForegroundImageSourceInfo()) {
+        isForegroundImageInfoFromTheme_ = true;
         ratingLayoutProperty->UpdateForegroundImageSourceInfo(GetImageSourceInfoFromTheme(0b001));
         singleStarImagePaintConfig_.isSvg = true;
     }
@@ -470,6 +471,7 @@ void RatingPattern::OnModifyDone()
         foregroundImageLoadingCtx_->LoadImageData();
     }
     if (!ratingLayoutProperty->HasSecondaryImageSourceInfo()) {
+        isSecondaryImageInfoFromTheme_ = true;
         ratingLayoutProperty->UpdateSecondaryImageSourceInfo(GetImageSourceInfoFromTheme(0b010));
     }
     ImageSourceInfo secondaryImageSourceInfo =
@@ -485,6 +487,7 @@ void RatingPattern::OnModifyDone()
     }
 
     if (!ratingLayoutProperty->HasBackgroundImageSourceInfo()) {
+        isBackgroundImageInfoFromTheme_ = true;
         ratingLayoutProperty->UpdateBackgroundImageSourceInfo(GetImageSourceInfoFromTheme(0b100));
     }
     ImageSourceInfo backgroundImageSourceInfo =
@@ -508,5 +511,28 @@ void RatingPattern::OnModifyDone()
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
     InitClickEvent(gestureHub);
+}
+// XTS inspector code
+void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    if (isForegroundImageInfoFromTheme_) {
+        json->Put("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+    } else {
+        auto foregroundImageSourceInfo = ratingLayoutProperty->GetForegroundImageSourceInfo();
+        json->Put("foregroundImageSourceInfo", foregroundImageSourceInfo->ToString().c_str());
+    }
+    if (isSecondaryImageInfoFromTheme_) {
+        json->Put("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+    } else {
+        auto secondaryImageSourceInfo = ratingLayoutProperty->GetSecondaryImageSourceInfo();
+        json->Put("foregroundImageSourceInfo", secondaryImageSourceInfo->ToString().c_str());
+    }
+    if (isBackgroundImageInfoFromTheme_) {
+        json->Put("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+    } else {
+        auto backgroundImageSourceInfo = ratingLayoutProperty->GetBackgroundImageSourceInfo();
+        json->Put("foregroundImageSourceInfo", backgroundImageSourceInfo->ToString().c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -54,12 +54,15 @@ public:
         ResetAxis();
     }
 
+    RectF GetIndicatorRect(int32_t index);
+
     ACE_DEFINE_PROPERTY_GROUP(TabBarProperty, TabBarProperty);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TabBarProperty, TabBarMode, TabBarMode, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TabBarProperty, TabBarWidth, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TabBarProperty, TabBarHeight, Dimension, PROPERTY_UPDATE_LAYOUT);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, int32_t, PROPERTY_UPDATE_NORMAL);
 };
 
 } // namespace OHOS::Ace::NG
