@@ -50,12 +50,14 @@ public:
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetOnItemDelete(OnItemDeleteEvent&& onItemDelete) override {}
-    void SetOnItemMove(OnItemMoveEvent&& onItemMove) override {}
-    void SetOnItemDragStart(OnItemDragStartFunc&& onItemDragStart) override {}
-    void SetOnItemDragEnter(OnItemDragEnterFunc&& onItemDragEnter) override {}
-    void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override {}
-    void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override {}
-    void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override {}
+    void SetOnItemMove(OnItemMoveEvent&& onItemMove) override;
+    void SetOnItemDragStart(OnItemDragStartFunc&& onItemDragStart) override;
+    void SetOnItemDragEnter(OnItemDragEnterFunc&& onItemDragEnter) override;
+    void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
+    void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
+    void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+private:
+    void AddDragFrameNodeToManager() const;
 };
 
 } // namespace OHOS::Ace::NG
