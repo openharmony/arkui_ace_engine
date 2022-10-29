@@ -195,6 +195,10 @@ void ListLayoutAlgorithm::RecyclePrevIndex(LayoutWrapper* layoutWrapper)
 
 void ListLayoutAlgorithm::CalculateEstimateOffset()
 {
+    if (itemPosition_.empty()) {
+        estimateOffset_ = 0;
+        return;
+    }
     float itemsHeight = (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) + spaceWidth_;
     auto lines = static_cast<int32_t>(itemPosition_.size());
     if (lanes_.has_value() && lanes_.value() > 1) {
@@ -275,7 +279,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
         if (!wrapper) {
             LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
-            return cnt;
+            break;
         }
         auto itemGroup = GetListItemGroup(wrapper);
         if (itemGroup && cnt > 0) {
@@ -298,9 +302,11 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
             break;
         }
     }
-    endPos = startPos + mainLen;
-    for (int32_t i = 0; i < cnt; i++) {
-        itemPosition_[currentIndex - i] = { startPos, endPos, isGroup };
+    if (cnt > 0) {
+        endPos = startPos + mainLen;
+        for (int32_t i = 0; i < cnt; i++) {
+            itemPosition_[currentIndex - i] = { startPos, endPos, isGroup };
+        }
     }
     return cnt;
 }
@@ -339,9 +345,11 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
             break;
         }
     }
-    startPos = endPos - mainLen;
-    for (int32_t i = 0; i < cnt; i++) {
-        itemPosition_[currentIndex + i] = { startPos, endPos, isGroup };
+    if (cnt > 0) {
+        startPos = endPos - mainLen;
+        for (int32_t i = 0; i < cnt; i++) {
+            itemPosition_[currentIndex + i] = { startPos, endPos, isGroup };
+        }
     }
     return cnt;
 }
