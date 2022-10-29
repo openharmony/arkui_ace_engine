@@ -27,5 +27,6 @@ group("pattern_unittest") {
     "stepper:stepper_pattern_test_ng",
     "text:text_pattern_test_ng",
     "textfield:textfield_pattern_test_ng",
+    "toast:toast_pattern_test_ng",
   ]
 }
