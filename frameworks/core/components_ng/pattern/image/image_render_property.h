@@ -29,6 +29,22 @@ struct ImagePaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorFilter, std::vector<float>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MatchTextDirection, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SvgFillColor, Color);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        static const char* OBJECTREPEATVALUE[] = { "ImageRepeat.NoRepeat", "ImageRepeat.X", "ImageRepeat.Y",
+            "ImageRepeat.XY" };
+        static const char* INTERPOLATIONVALUE[] = { "ImageInterpolation.None", "ImageInterpolation.Low",
+            "ImageInterpolation.Medium", "ImageInterpolation.High" };
+        static const char* RENDERMODEVALUE[] = { "ImageRenderMode.Original", "ImageRenderMode.Template" };
+        json->Put(
+            "objectRepeat", OBJECTREPEATVALUE[static_cast<int32_t>(propImageRepeat.value_or(ImageRepeat::NOREPEAT))]);
+        json->Put("interpolation",
+            INTERPOLATIONVALUE[static_cast<int32_t>(propImageInterpolation.value_or(ImageInterpolation::NONE))]);
+        json->Put("renderMode",
+            RENDERMODEVALUE[static_cast<int32_t>(propImageRenderMode.value_or(ImageRenderMode::ORIGINAL))]);
+        json->Put("matchTextDirection", propMatchTextDirection.value_or(false) ? "true" : "false");
+        json->Put("fillColor", propSvgFillColor.value_or(Color::BLACK).ColorToString().c_str());
+    }
 };
 
 // PaintProperty are used to set render properties.
@@ -55,21 +71,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);
-        static const char* OBJECTREPEATVALUE[] = { "ImageRepeat.NoRepeat", "ImageRepeat.X", "ImageRepeat.Y",
-            "ImageRepeat.XY" };
-        static const char* INTERPOLATIONVALUE[] = { "ImageInterpolation.None", "ImageInterpolation.Low",
-            "ImageInterpolation.Medium", "ImageInterpolation.High" };
-        static const char* RENDERMODEVALUE[] = { "ImageRenderMode.Original", "ImageRenderMode.Template" };
-        json->Put("objectRepeat", OBJECTREPEATVALUE[static_cast<int32_t>(
-                                      propImagePaintStyle_->propImageRepeat.value_or(ImageRepeat::NOREPEAT))]);
-        json->Put(
-            "interpolation", INTERPOLATIONVALUE[static_cast<int32_t>(
-                                 propImagePaintStyle_->propImageInterpolation.value_or(ImageInterpolation::NONE))]);
-        json->Put("renderMode", RENDERMODEVALUE[static_cast<int32_t>(
-                                    propImagePaintStyle_->propImageRenderMode.value_or(ImageRenderMode::ORIGINAL))]);
-        json->Put(
-            "matchTextDirection", propImagePaintStyle_->propMatchTextDirection.value_or(false) ? "true" : "false");
-        json->Put("fillColor", propImagePaintStyle_->propSvgFillColor.value_or(Color::BLACK).ColorToString().c_str());
+        ACE_PROPERTY_TO_JSON_VALUE(propImagePaintStyle_, ImagePaintStyle);
     }
 
     ACE_DEFINE_PROPERTY_GROUP(ImagePaintStyle, ImagePaintStyle);

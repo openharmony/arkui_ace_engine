@@ -26,6 +26,12 @@ struct ImageSizeStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoResize, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SourceSize, SizeF);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FitOriginalSize, bool);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str());
+        json->Put("fitOriginalSize", propFitOriginalSize.value_or(true) ? "true" : "false");
+        json->Put("autoResize", propAutoResize.value_or(true) ? "true" : "false");
+    }
 };
 
 class ACE_EXPORT ImageLayoutProperty : public LayoutProperty {
@@ -69,11 +75,9 @@ public:
             "CopyOptions.Distributed" };
         json->Put("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str());
         json->Put("objectFit", OBJECTFITVALUE[static_cast<int32_t>(propImageFit_.value_or(ImageFit::COVER))]);
-        json->Put("sourceSize", propImageSizeStyle_->propSourceSize.value_or(SizeF()).ToString().c_str());
-        json->Put("fitOriginalSize", propImageSizeStyle_->propFitOriginalSize.value_or(true) ? "true" : "false");
-        json->Put("autoResize", propImageSizeStyle_->propAutoResize.value_or(true) ? "true" : "false");
         json->Put("syncLoad", propSyncMode_.value_or(false) ? "true" : "false");
         json->Put("copyOption", COPYOPTIONSVALUE[static_cast<int32_t>(propCopyOptions_.value_or(CopyOptions::None))]);
+        ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);
