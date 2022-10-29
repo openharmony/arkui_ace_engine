@@ -478,6 +478,8 @@ void RenderSwiper::InitRecognizer(bool catchMode)
         auto pipeline = context_.Upgrade();
         if (!catchMode && pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
             clickRecognizer_->SetUseCatchMode(false);
+        } else if (!showIndicator_) {
+            clickRecognizer_->SetUseCatchMode(false);
         } else {
             clickRecognizer_->SetUseCatchMode(true);
         }
