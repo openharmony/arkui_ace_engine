@@ -48,7 +48,7 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
         if (firstUpdate_) {
             firstUpdate_ = false;
         } else {
-            if (!component_->GetCheckboxList().empty()) {
+            if (!component_->GetCheckboxList().empty() && component_->HasValue()) {
                 bool value = component_->GetValue();
                 component_->SetMember(value);
                 component_->SetGroupValue(value ? CheckableStatus::ALL : CheckableStatus::NONE);
