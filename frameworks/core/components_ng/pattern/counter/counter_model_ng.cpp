@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/counter/counter_view.h"
+#include "core/components_ng/pattern/counter/counter_model_ng.h"
 
-#include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -23,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void CounterView::Create()
+void CounterModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -42,6 +41,7 @@ void CounterView::Create()
     counterNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
     counterNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
     counterNode->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    counterNode->GetRenderContext()->SetClipToFrame(true);
     counterNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
 
     bool hasSubNode = counterPattern->HasSubNode();
@@ -66,7 +66,7 @@ void CounterView::Create()
     stack->Push(counterNode);
 }
 
-RefPtr<FrameNode> CounterView::CreateButtonChild(
+RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
     int32_t id, const std::string& symbol, const RefPtr<CounterTheme>& counterTheme)
 {
     auto buttonNode =
@@ -75,12 +75,12 @@ RefPtr<FrameNode> CounterView::CreateButtonChild(
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->MarkModifyDone();
 
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
-    textNode->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(symbol);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(Color::BLACK);
     textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -92,22 +92,21 @@ RefPtr<FrameNode> CounterView::CreateButtonChild(
     return buttonNode;
 }
 
-RefPtr<FrameNode> CounterView::CreateContentNodeChild(int32_t contentId, const RefPtr<CounterTheme>& counterTheme)
+RefPtr<FrameNode> CounterModelNG::CreateContentNodeChild(int32_t contentId, const RefPtr<CounterTheme>& counterTheme)
 {
     auto contentNode = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     contentNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
-    contentNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(counterTheme->GetContentWidth()), CalcLength(counterTheme->GetHeight())));
+    contentNode->GetLayoutProperty()->UpdateLayoutWeight(1);
     contentNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
     contentNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
     contentNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
-    contentNode->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    contentNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     contentNode->MarkModifyDone();
     return contentNode;
 }
 
-void CounterView::SetOnInc(CounterEventFunc&& onInc)
+void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
 {
     CHECK_NULL_VOID(onInc);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -119,7 +118,7 @@ void CounterView::SetOnInc(CounterEventFunc&& onInc)
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) { clickEvent(); };
     gestureHub->SetClickEvent(std::move(gestureEventFunc));
 }
-void CounterView::SetOnDec(CounterEventFunc&& onDec)
+void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
 {
     CHECK_NULL_VOID(onDec);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -130,6 +129,47 @@ void CounterView::SetOnDec(CounterEventFunc&& onDec)
     auto gestureHub = subNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) { clickEvent(); };
     gestureHub->SetClickEvent(std::move(gestureEventFunc));
+}
+
+void CounterModelNG::SetHeight(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+
+    int32_t subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
+    CHECK_NULL_VOID(subNode);
+    auto subLayoutProperty = subNode->GetLayoutProperty();
+    subLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), CalcLength(value)));
+
+    int32_t addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    CHECK_NULL_VOID(addNode);
+    auto addLayoutProperty = addNode->GetLayoutProperty();
+    addLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), CalcLength(value)));
+}
+void CounterModelNG::SetWidth(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), std::nullopt));
+}
+void CounterModelNG::SetControlWidth(const Dimension& value)
+{
+    LOGE("no support SetControlWidth");
+}
+void CounterModelNG::SetStateChange(bool value)
+{
+    LOGE("no support SetStateChange");
+}
+void CounterModelNG::SetBackgroundColor(const Color& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, value);
 }
 
 } // namespace OHOS::Ace::NG
