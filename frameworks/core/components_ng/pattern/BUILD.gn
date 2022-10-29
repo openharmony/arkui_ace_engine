@@ -97,6 +97,7 @@ build_component_ng("pattern_ng") {
     "grid_container/grid_container_layout_property.cpp",
     "grid_container/grid_container_view.cpp",
     "grid_row/grid_row_layout_algorithm.cpp",
+    "grid_row/grid_row_layout_property.cpp",
     "grid_row/grid_row_model_ng.cpp",
     "image/image_layout_algorithm.cpp",
     "image/image_model_ng.cpp",
