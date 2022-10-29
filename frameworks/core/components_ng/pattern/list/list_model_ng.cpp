@@ -102,7 +102,10 @@ void ListModelNG::SetCachedCount(int32_t cachedCount)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
 }
 
-void ListModelNG::SetSticky(V2::StickyStyle stickyStyle) {}
+void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
+}
 
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
