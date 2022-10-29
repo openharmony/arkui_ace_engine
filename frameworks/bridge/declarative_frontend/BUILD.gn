@@ -255,6 +255,7 @@ template("declarative_js_engine") {
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
       "jsview/models/column_model_impl.cpp",
+      "jsview/models/counter_model_impl.cpp",
       "jsview/models/data_panel_model_impl.cpp",
       "jsview/models/divider_model_impl.cpp",
       "jsview/models/ellipse_model_impl.cpp",
