@@ -243,6 +243,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationTitleComposedElement>(id); } },
     { NAVIGATION_MENUS_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationMenusComposedElement>(id); } },
+    { JS_VIEW_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
 };
 
 } // namespace
@@ -331,6 +333,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { WEB_COMPONENT_TAG, WEB_ETS_TAG },
     { RICH_TEXT_COMPONENT_TAG, RICH_TEXT_ETS_TAG },
     { XCOMPONENT_TAG, XCOMPONENT_ETS_TAG },
+    { JS_VIEW_COMPONENT_TAG, JS_VIEW_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;
