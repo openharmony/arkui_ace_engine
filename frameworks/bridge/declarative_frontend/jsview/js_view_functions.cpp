@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/composed_element.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"

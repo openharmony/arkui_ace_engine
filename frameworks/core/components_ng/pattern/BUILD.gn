@@ -55,6 +55,7 @@ build_component_ng("pattern_ng") {
     "counter/counter_node.cpp",
     "custom/custom_measure_layout_node.cpp",
     "custom/custom_node.cpp",
+    "custom/custom_node_base.cpp",
     "custom/custom_node_layout_algorithm.cpp",
     "custom/custom_node_pattern.cpp",
     "custom_paint/canvas_paint_method.cpp",

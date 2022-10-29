@@ -16,24 +16,59 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/components/grid_layout/grid_layout_item_element.h"
-#include "core/components/ifelse/if_else_element.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/base/view_full_update_model.h"
+#include "core/components_ng/base/view_full_update_model_ng.h"
+#include "core/components_ng/base/view_partial_update_model.h"
+#include "core/components_ng/base/view_partial_update_model_ng.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_v2/common/element_proxy.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ViewFullUpdateModel> ViewFullUpdateModel::instance_ = nullptr;
+std::unique_ptr<ViewPartialUpdateModel> ViewPartialUpdateModel::instance_ = nullptr;
+
+ViewFullUpdateModel* ViewFullUpdateModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ViewFullUpdateModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ViewFullUpdateModelNG());
+        } else {
+            instance_.reset(new Framework::ViewFullUpdateModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ViewPartialUpdateModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ViewPartialUpdateModelNG());
+        } else {
+            instance_.reset(new Framework::ViewPartialUpdateModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -41,30 +76,6 @@ void JSView::JSBind(BindingTarget object)
 {
     JSViewPartialUpdate::JSBind(object);
     JSViewFullUpdate::JSBind(object);
-}
-
-void JSView::MarkNeedUpdate()
-{
-    ACE_DCHECK((!GetElement().Invalid()));
-    ACE_SCOPED_TRACE("JSView::MarkNeedUpdate");
-
-    if (GetElement().Invalid()) {
-        LOGE("Invalid Element weak ref, internal error");
-        return;
-    }
-    needsUpdate_ = true;
-    auto element = GetElement().Upgrade();
-    if (element) {
-        LOGD("Element %{public}d MarkDirty", element->GetElementId());
-        element->MarkDirty();
-    }
-}
-
-RefPtr<PageTransitionComponent> JSView::BuildPageTransitionComponent()
-{
-    auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
-    ViewStackProcessor::GetInstance()->ClearPageTransitionComponent();
-    return pageTransitionComponent;
 }
 
 void JSView::RenderJSExecution()
@@ -80,9 +91,9 @@ void JSView::RenderJSExecution()
     }
     {
         ACE_SCORING_EVENT("Component.Build");
-        ViewStackProcessor::GetInstance()->PushKey(viewId_);
+        ViewStackModel::GetInstance()->PushKey(viewId_);
         jsViewFunction_->ExecuteRender();
-        ViewStackProcessor::GetInstance()->PopKey();
+        ViewStackModel::GetInstance()->PopKey();
     }
     {
         ACE_SCORING_EVENT("Component.OnRenderDone");
@@ -114,109 +125,57 @@ JSViewFullUpdate::~JSViewFullUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<Component> JSViewFullUpdate::CreateComponent()
+RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
 {
-    ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
-    // create component, return new something, need to set proper ID
-
-    std::string key = ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
-    auto composedComponent = AceType::MakeRefPtr<ComposedComponent>(key, "view");
-
-    // add callback for element creation to component, and get pointer reference
-    // to the element on creation. When state of this view changes, mark the
-    // element to dirty.
-    auto renderFunction = [weak = AceType::WeakClaim(this)](const RefPtr<Component>& component) -> RefPtr<Component> {
+    auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
-        return jsView ? jsView->InternalRender(component) : nullptr;
-    };
-
-    auto elementFunction = [weak = AceType::WeakClaim(this), renderFunction](const RefPtr<ComposedElement>& element) {
-        auto jsView = weak.Upgrade();
-        if (!jsView) {
-            LOGE("the js view is nullptr in element function");
-            return;
-        }
-        if (jsView->element_.Invalid()) {
-            ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-            if (jsView->jsViewFunction_) {
-                jsView->jsViewFunction_->ExecuteAppear();
-            }
-        }
-        jsView->element_ = element;
-        // add render function callback to element. when the element rebuilds due
-        // to state update it will call this callback to get the new child component.
-        if (element) {
-            element->SetRenderFunction(std::move(renderFunction));
-            if (jsView->jsViewFunction_ && jsView->jsViewFunction_->HasPageTransition()) {
-                auto pageTransitionFunction = [weak]() -> RefPtr<Component> {
-                    auto jsView = weak.Upgrade();
-                    if (!jsView || !jsView->jsViewFunction_) {
-                        return nullptr;
-                    }
-                    {
-                        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
-                        jsView->jsViewFunction_->ExecuteTransition();
-                    }
-                    return jsView->BuildPageTransitionComponent();
-                };
-                element->SetPageTransitionFunction(std::move(pageTransitionFunction));
-            }
+        CHECK_NULL_VOID(jsView);
+        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
+        if (jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteAppear();
         }
     };
 
-    composedComponent->SetElementFunction(std::move(elementFunction));
-
-    if (IsStatic()) {
-        LOGD("will mark composedComponent as static");
-        composedComponent->SetStatic();
-    }
-    return composedComponent;
-}
-
-RefPtr<NG::UINode> JSViewFullUpdate::CreateUINode()
-{
-    ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
-    // create component, return new something, need to set proper ID
-    std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
-    auto composedNode = NG::CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), key);
-    node_ = composedNode;
-
-    {
-        ACE_SCORING_EVENT("Component[" + viewId_ + "].Appear");
-        if (jsViewFunction_) {
-            jsViewFunction_->ExecuteAppear();
-        }
-    }
-
-    // add callback for element creation to component, and get pointer reference
-    // to the element on creation. When state of this view changes, mark the
-    // element to dirty.
-    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::UINode> {
+    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
         return jsView ? jsView->InternalRender() : nullptr;
     };
 
-    composedNode->SetRenderFunction(std::move(renderFunction));
-    return composedNode;
+    auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
+        auto jsView = weak.Upgrade();
+        if (!jsView || !jsView->jsViewFunction_) {
+            return;
+        }
+        {
+            ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
+            jsView->jsViewFunction_->ExecuteTransition();
+        }
+    };
+
+    auto updateViewNodeFunction = [weak = AceType::WeakClaim(this)](const RefPtr<AceType>& node) {
+        auto jsView = weak.Upgrade();
+        if (jsView) {
+            jsView->viewNode_ = node;
+        }
+    };
+
+    NodeInfo info = { .viewId = viewId_,
+        .appearFunc = std::move(appearFunc),
+        .renderFunc = std::move(renderFunction),
+        .updateNodeFunc = std::move(updateViewNodeFunction),
+        .pageTransitionFunc = std::move(pageTransitionFunction),
+        .isStatic = IsStatic() };
+
+    return ViewFullUpdateModel::GetInstance()->CreateNode(std::move(info));
 }
 
-RefPtr<Component> JSViewFullUpdate::InternalRender(const RefPtr<Component>& parent)
+RefPtr<AceType> JSViewFullUpdate::InternalRender()
 {
     needsUpdate_ = false;
     RenderJSExecution();
     CleanUpAbandonedChild();
     jsViewFunction_->Destroy();
-    auto buildComponent = ViewStackProcessor::GetInstance()->Finish();
-    return buildComponent;
-}
-
-RefPtr<NG::UINode> JSViewFullUpdate::InternalRender()
-{
-    needsUpdate_ = false;
-    RenderJSExecution();
-    CleanUpAbandonedChild();
-    jsViewFunction_->Destroy();
-    return NG::ViewStackProcessor::GetInstance()->Finish();
+    return ViewStackModel::GetInstance()->Finish();
 }
 
 /**
@@ -224,14 +183,8 @@ RefPtr<NG::UINode> JSViewFullUpdate::InternalRender()
  */
 void JSViewFullUpdate::MarkNeedUpdate()
 {
-    ACE_DCHECK((!GetElement().Invalid()));
     ACE_SCOPED_TRACE("JSView::MarkNeedUpdate");
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("not support full update in ng structure");
-        return;
-    }
-    JSView::MarkNeedUpdate();
+    needsUpdate_ = ViewFullUpdateModel::GetInstance()->MarkNeedUpdate(viewNode_);
 }
 
 void JSViewFullUpdate::Destroy(JSView* parentCustomView)
@@ -261,11 +214,7 @@ void JSViewFullUpdate::Create(const JSCallbackInfo& info)
             LOGE("JSView is null");
             return;
         }
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ViewStackProcessor::GetInstance()->Push(view->CreateUINode(), true);
-        } else {
-            ViewStackProcessor::GetInstance()->Push(view->CreateComponent(), true);
-        }
+        ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
     } else {
         LOGE("JSView Object is expected.");
     }
@@ -318,7 +267,6 @@ void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
         }
     }
     LOGE("find child failed %{public}s", viewId.c_str());
-    return;
 }
 
 void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
@@ -415,12 +363,7 @@ void JSViewFullUpdate::CleanUpAbandonedChild()
 
 JSRef<JSObject> JSViewFullUpdate::GetChildById(const std::string& viewId)
 {
-    std::string id;
-    if (Container::IsCurrentUseNewPipeline()) {
-        id = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
-    } else {
-        id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
-    }
+    std::string id = ViewStackModel::GetInstance()->ProcessViewId(viewId);
     auto found = customViewChildren_.find(id);
     if (found != customViewChildren_.end()) {
         ChildAccessedById(id);
@@ -435,12 +378,7 @@ JSRef<JSObject> JSViewFullUpdate::GetChildById(const std::string& viewId)
 
 std::string JSViewFullUpdate::AddChildById(const std::string& viewId, const JSRef<JSObject>& obj)
 {
-    std::string id;
-    if (Container::IsCurrentUsePartialUpdate()) {
-        id = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
-    } else {
-        id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
-    }
+    std::string id = ViewStackModel::GetInstance()->ProcessViewId(viewId);
     JSView* jsView = nullptr;
     if (isLazyForEachProcessed_) {
         auto result = customViewChildrenWithLazy_.try_emplace(id, obj);
@@ -517,113 +455,15 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<Component> JSViewPartialUpdate::CreateComponent()
+RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
 {
-    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
-    // create component, return new something, need to set proper ID
-
-    const auto reservedElementId = ViewStackProcessor::GetInstance()->ClaimElementId();
-    LOGD("Creating ComposedComponent with claimed elmtId %{public}d.", reservedElementId);
-    const std::string key = std::to_string(reservedElementId);
-    auto composedComponent = AceType::MakeRefPtr<ComposedComponent>(key, "view");
-    composedComponent->SetElementId(reservedElementId);
-
-    // Render function lambda to be called from ComposedElement
-    // on 1. render call Initial Render
-    // on 2. render do the Component -> Element updates (all prior steps done already)
-    // 'component' is the (unused) parent component
-    auto renderFunction = [weak = AceType::WeakClaim(this), elmtId = reservedElementId](
-                              const RefPtr<Component>& component) -> RefPtr<Component> {
+    auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string viewId) {
         auto jsView = weak.Upgrade();
-        if (!jsView) {
-            LOGE("Render function lambda - invalid weak ref to JSView in ComposedElement elmtId %{public}d"
-                 " renderFunction, internal error!",
-                elmtId);
-            return nullptr;
-        }
-        if (jsView->isFirstRender_) {
-            LOGD("Initial render function lambda start for ComposedElement elmtId %{public}d - start...", elmtId);
-            jsView->isFirstRender_ = false;
-            return jsView->InitialRender();
-        }
-        if (jsView->needsUpdate_) {
-            // always returns nullptr
-            LOGD("Rerender function lambda start for ComposedElement elmtId %{public}d - start...", elmtId);
-            jsView->jsViewFunction_->ExecuteRerender();
-            jsView->MakeElementUpdatesToCompleteRerender();
-            jsView->needsUpdate_ = false;
-        }
-        return nullptr;
+        CHECK_NULL_VOID(jsView);
+        jsView->viewId_ = viewId;
     };
 
-    // partial update relies on remove function
-    auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
-        LOGD("JSViewPartialUpdate remove function lambda start ...");
-        auto jsView = weak.Upgrade();
-        if (!jsView) {
-            LOGE("invalid weak ref to JSView in renderFunction, internal error!");
-            return;
-        }
-        jsView->Destroy(nullptr);
-        LOGD("JSViewPartialUpdate remove function lambda - done ");
-    };
-
-    auto elementFunction = [weak = AceType::WeakClaim(this), renderFunction, removeFunction](
-                               const RefPtr<ComposedElement>& element) {
-        auto jsView = weak.Upgrade();
-        if (!jsView) {
-            LOGE("the js view is nullptr in element function");
-            return;
-        }
-        if (jsView->element_.Invalid()) {
-            ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-            if (jsView->jsViewFunction_) {
-                jsView->jsViewFunction_->ExecuteAppear();
-            }
-        }
-        jsView->element_ = element;
-        // add render function callback to element. when the element rebuilds due
-        // to state update it will call this callback to get the new child component.
-        if (element) {
-            element->SetRenderFunction(std::move(renderFunction));
-            element->SetRemoveFunction(std::move(removeFunction));
-            if (jsView->jsViewFunction_ && jsView->jsViewFunction_->HasPageTransition()) {
-                auto pageTransitionFunction = [weak]() -> RefPtr<Component> {
-                    auto jsView = weak.Upgrade();
-                    if (!jsView || !jsView->jsViewFunction_) {
-                        return nullptr;
-                    }
-                    {
-                        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
-                        jsView->jsViewFunction_->ExecuteTransition();
-                    }
-                    return jsView->BuildPageTransitionComponent();
-                };
-                element->SetPageTransitionFunction(std::move(pageTransitionFunction));
-            }
-        }
-    };
-
-    composedComponent->SetElementFunction(std::move(elementFunction));
-
-    if (IsStatic()) {
-        LOGD("will mark composedComponent as static");
-        composedComponent->SetStatic();
-    }
-    return composedComponent;
-}
-
-RefPtr<Component> JSViewPartialUpdate::InitialRender()
-{
-    RenderJSExecution();
-    auto buildComponent = ViewStackProcessor::GetInstance()->Finish();
-    needsUpdate_ = false;
-    return buildComponent;
-}
-
-void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> customNode)
-{
-    auto appearFunction = [weak = AceType::WeakClaim(this)]() {
+    auto appearFunc = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
@@ -631,9 +471,8 @@ void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> 
             jsView->jsViewFunction_->ExecuteAppear();
         }
     };
-    customNode->SetAppearFunction(std::move(appearFunction));
 
-    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::UINode> {
+    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
         if (!jsView->isFirstRender_) {
@@ -641,9 +480,8 @@ void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> 
             return nullptr;
         }
         jsView->isFirstRender_ = false;
-        return jsView->InitialUIRender();
+        return jsView->InitialRender();
     };
-    customNode->SetRenderFunction(renderFunction);
 
     auto updateFunction = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
@@ -658,18 +496,46 @@ void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> 
             ACE_SCOPED_TRACE("JSView: ExecuteRerender");
             jsView->jsViewFunction_->ExecuteRerender();
         }
+        for (const UpdateTask& updateTask : jsView->pendingUpdateTasks_) {
+            ViewPartialUpdateModel::GetInstance()->FlushUpdateTask(updateTask);
+        }
+        jsView->pendingUpdateTasks_.clear();
     };
-    customNode->SetUpdateFunction(std::move(updateFunction));
 
-    // partial update relies on remove function
+    auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
+        auto jsView = weak.Upgrade();
+        if (!jsView || !jsView->jsViewFunction_) {
+            return;
+        }
+        {
+            ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
+            jsView->jsViewFunction_->ExecuteTransition();
+        }
+    };
+
     auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
         LOGD("call remove view function");
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         jsView->Destroy(nullptr);
-        jsView->node_.Reset();
+        jsView->viewNode_.Reset();
     };
-    customNode->SetDestroyFunction(std::move(removeFunction));
+
+    auto updateViewNodeFunction = [weak = AceType::WeakClaim(this)](const RefPtr<AceType>& node) {
+        auto jsView = weak.Upgrade();
+        if (jsView) {
+            jsView->viewNode_ = node;
+        }
+    };
+
+    NodeInfoPU info = { .appearFunc = std::move(appearFunc),
+        .renderFunc = std::move(renderFunction),
+        .updateFunc = std::move(updateFunction),
+        .removeFunc = std::move(removeFunction),
+        .updateNodeFunc = std::move(updateViewNodeFunction),
+        .pageTransitionFunc = std::move(pageTransitionFunction),
+        .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
+        .isStatic = IsStatic() };
 
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
@@ -677,7 +543,7 @@ void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> 
         jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
     };
     if (jsViewFunction_->HasMeasure()) {
-        customNode->SetMeasureFunction(std::move(measureFunc));
+        info.measureFunc = std::move(measureFunc);
     }
 
     auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
@@ -686,87 +552,17 @@ void JSViewPartialUpdate::UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> 
         jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
     };
     if (jsViewFunction_->HasLayout()) {
-        customNode->SetLayoutFunction(std::move(layoutFunc));
-    }
-}
-
-void JSViewPartialUpdate::UpdateNormalFrame(RefPtr<NG::CustomNode> customNode)
-{
-    auto appearFunction = [weak = AceType::WeakClaim(this)]() {
-        auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID(jsView);
-        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-        if (jsView->jsViewFunction_) {
-            jsView->jsViewFunction_->ExecuteAppear();
-        }
-    };
-    customNode->SetAppearFunction(std::move(appearFunction));
-
-    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::UINode> {
-        auto jsView = weak.Upgrade();
-        CHECK_NULL_RETURN(jsView, nullptr);
-        if (!jsView->isFirstRender_) {
-            LOGW("the js view has already called initial render");
-            return nullptr;
-        }
-        jsView->isFirstRender_ = false;
-        return jsView->InitialUIRender();
-    };
-    customNode->SetRenderFunction(renderFunction);
-
-    auto updateFunction = [weak = AceType::WeakClaim(this)]() -> void {
-        auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID(jsView);
-        if (!jsView->needsUpdate_) {
-            LOGW("the js view does not need to update");
-            return;
-        }
-        jsView->needsUpdate_ = false;
-        LOGD("Rerender function start for ComposedElement elmtId %{public}s - start...", jsView->viewId_.c_str());
-        {
-            ACE_SCOPED_TRACE("JSView: ExecuteRerender");
-            jsView->jsViewFunction_->ExecuteRerender();
-        }
-    };
-    customNode->SetUpdateFunction(std::move(updateFunction));
-
-    // partial update relies on remove function
-    auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
-        LOGD("call remove view function");
-        auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID(jsView);
-        jsView->Destroy(nullptr);
-        jsView->node_.Reset();
-    };
-    customNode->SetDestroyFunction(std::move(removeFunction));
-}
-
-RefPtr<NG::UINode> JSViewPartialUpdate::CreateUINode()
-{
-    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
-    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
-    viewId_ = std::to_string(viewId);
-    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
-
-    if (jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout()) {
-        auto customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);
-        UpdateCustomFrame(customNode);
-        node_ = customNode;
-        return customNode;
+        info.layoutFunc = std::move(layoutFunc);
     }
 
-    // normal node donot contain onlayout onmeasure
-    auto normalNode = NG::CustomNode::CreateCustomNode(viewId, key);
-    UpdateNormalFrame(normalNode);
-    node_ = normalNode;
-    return normalNode;
+    return ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
 }
 
-RefPtr<NG::UINode> JSViewPartialUpdate::InitialUIRender()
+RefPtr<AceType> JSViewPartialUpdate::InitialRender()
 {
     needsUpdate_ = false;
     RenderJSExecution();
-    return NG::ViewStackProcessor::GetInstance()->Finish();
+    return ViewStackModel::GetInstance()->Finish();
 }
 
 // parentCustomView in not used by PartialUpdate
@@ -796,24 +592,7 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
 
 void JSViewPartialUpdate::MarkNeedUpdate()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto node = node_.Upgrade();
-        if (!node) {
-            LOGE("fail to update due to custom Node is null");
-            return;
-        }
-        if (AceType::InstanceOf<NG::CustomNode>(node)) {
-            auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
-            needsUpdate_ = true;
-            customNode->MarkNeedUpdate();
-        } else if (AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
-            auto customNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
-            needsUpdate_ = true;
-            customNode->MarkNeedUpdate();
-        }
-        return;
-    }
-    JSView::MarkNeedUpdate();
+    ViewPartialUpdateModel::GetInstance()->MarkNeedUpdate(viewNode_);
 }
 
 /**
@@ -832,11 +611,7 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
             LOGE("View is null");
             return;
         }
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ViewStackProcessor::GetInstance()->Push(view->CreateUINode(), true);
-        } else {
-            ViewStackProcessor::GetInstance()->Push(view->CreateComponent(), true);
-        }
+        ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
     } else {
         LOGE("View Object is expected.");
     }
@@ -897,36 +672,13 @@ void JSViewPartialUpdate::DestructorCallback(JSViewPartialUpdate* view)
 
 void JSViewPartialUpdate::JsFinishUpdateFunc(int32_t elmtId)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewStackProcessor::GetInstance()->FlushRerenderTask();
-        return;
-    }
-    auto componentsPair = ViewStackProcessor::GetInstance()->FinishReturnMain();
-    if ((componentsPair.first == nullptr) || (componentsPair.second == nullptr)) {
-        LOGE("outmost wrapping component is null");
-        return;
-    }
-    // chk main component componentsPair.second elmtId
-    ACE_DCHECK(componentsPair.second->GetElementId() == elmtId);
-
-    LOGD("Obtained %{public}s from ViewStackProcessor, to-be update Element has elmtId %{public}d. Adding to "
-         "List of Component -> Element updates on next FlushBuild",
-        AceType::TypeName(componentsPair.second), elmtId);
-
-    // push the result of the update function with elmtId added on the list of pending updates, triple:
-    // 0: elmtId
-    // 1: outmost wrapping Component (most keep reference until localized updates done to avoid smart pointer auto
-    // deletion!) 2: main Component
-    pendingElementUpdates_.emplace_back(std::make_tuple(elmtId, componentsPair.first, componentsPair.second));
-
-    // FlushBuild on UI thread side
-    // will call MakeElementUpdatesToCompleteRerender
-    auto element = GetElement().Upgrade();
-    if (element) {
-        element->MarkDirty();
-    } else {
-        LOGE("Internal error, element is is null");
-    }
+    ViewPartialUpdateModel::GetInstance()->FinishUpdate(
+        viewNode_, elmtId, [weak = AceType::WeakClaim(this)](const UpdateTask& task) {
+            auto jsView = weak.Upgrade();
+            if (jsView) {
+                jsView->pendingUpdateTasks_.push_back(task);
+            }
+        });
 }
 
 void JSViewPartialUpdate::JsGetDeletedElemtIds(const JSCallbackInfo& info)
@@ -952,64 +704,6 @@ void JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& i
     }
 }
 
-void JSViewPartialUpdate::MakeElementUpdatesToCompleteRerender()
-{
-    ACE_SCOPED_TRACE("JSView::MakeElementUpdatesToCompleteRerender");
-
-    LOGD("Component to Element %{public}d localized updates to do - start ....",
-        static_cast<int32_t>(pendingElementUpdates_.size()));
-    // process all pending localized element update tasks from queue
-    for (const UpdateFuncResult& updateFuncResult : pendingElementUpdates_) {
-        ComponentToElementLocalizedUpdate(updateFuncResult);
-    }
-    pendingElementUpdates_.clear();
-    LOGD("Component to Element localized updates - done");
-}
-
-void JSViewPartialUpdate::ComponentToElementLocalizedUpdate(const UpdateFuncResult& updateFuncResult)
-{
-    /* updateFuncResult tuple:
-       0: elmtId
-       1: outmost wrapping Component (most keep reference until localized updates done to avoid smart pointer auto
-          deletion!)
-       2: main Component */
-    const int32_t elmtId = std::get<0>(updateFuncResult);
-    const RefPtr<Component> outmostWrappingComponent = std::get<1>(updateFuncResult); // stop at
-    const RefPtr<Component> mainComponent = std::get<2>(updateFuncResult);            // has elmtId
-
-    ACE_DCHECK(mainComponent != nullptr);
-    ACE_DCHECK(elmtId != ElementRegister::UndefinedElementId);
-
-    RefPtr<Element> element = ElementRegister::GetInstance()->GetElementById(elmtId);
-    if (element != nullptr) {
-        LOGD("Searching for localized update for %{public}s elmtId: %{public}d ...", AceType::TypeName(element),
-            element->GetElementId());
-        // special case, because new IfElement will be created
-        if (AceType::DynamicCast<IfElseElement>(element) != nullptr) {
-            IfElseElement::ComponentToElementLocalizedUpdate(mainComponent, element);
-        } else if (AceType::DynamicCast<GridLayoutItemElement>(element) != nullptr) {
-            // VSP::Finish returns swapped compared to reg
-            AceType::DynamicCast<SoleChildElement>(element)->LocalizedUpdateWithItemComponent(
-                mainComponent, outmostWrappingComponent);
-        } else {
-            element->LocalizedUpdateWithComponent(mainComponent, outmostWrappingComponent);
-        }
-        return;
-    }
-
-    auto elementProxy = ElementRegister::GetInstance()->GetElementProxyById(elmtId);
-    if (elementProxy != nullptr) {
-        elementProxy->LocalizedUpdate(mainComponent, outmostWrappingComponent);
-        return;
-    }
-
-    LOGE("No suitable Element/ElementProxy with elmtId %{public}d found to update from %{public}s,"
-         " elmtId exists in ElementRegister "
-         "'%{public}s'.",
-        elmtId, (mainComponent ? AceType::TypeName(mainComponent) : "no Component error"),
-        (ElementRegister::GetInstance()->Exists(elmtId) ? "exists" : "missing"));
-}
-
 bool JSViewPartialUpdate::JsElementIdExists(int32_t elmtId)
 {
     return ElementRegister::GetInstance()->Exists(elmtId);
@@ -1030,15 +724,8 @@ void JSViewPartialUpdate::JSGetProxiedItemRenderState(const JSCallbackInfo& info
         return;
     }
 
-    // ElementRegister get Proxy
+    // TODO: Check this return value
     auto result = false;
-    auto proxy = ElementRegister::GetInstance()->GetElementProxyById(elmtId);
-    if (proxy != nullptr) {
-        // Get Proxy render status
-        // only Grid/ListItemElementProxy can be in shallow==lazy render state
-        // other proxies always return false
-        result = false;
-    }
 
     // set boolean return value to JS
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
