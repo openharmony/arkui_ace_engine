@@ -92,6 +92,14 @@ void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const s
     pageRouterManager_->Push({ uri }, params);
 }
 
+void FrontendDelegateDeclarativeNG::PushWithCallback(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->PushWithCallback({ uri }, params, errorCallback);
+    OnMediaQueryUpdate();
+}
+
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
@@ -104,6 +112,14 @@ void FrontendDelegateDeclarativeNG::ReplaceWithMode(
     CHECK_NULL_VOID(pageRouterManager_);
     // TODO: router mode support
     pageRouterManager_->Replace({ uri }, params);
+}
+
+void FrontendDelegateDeclarativeNG::ReplaceWithCallback(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->ReplaceWithCallback({ uri }, params, errorCallback);
+    OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::string& params)
