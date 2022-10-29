@@ -407,21 +407,18 @@ void RenderWaterFlow::InitialFlowProp()
 LayoutParam RenderWaterFlow::MakeInnerLayoutParam(size_t itemIndex) const
 {
     LayoutParam innerLayout;
-    double mainSize = 0.0;
     double crossSize = 0.0;
     auto iter = flowMatrix_.find(itemIndex);
     if (iter != flowMatrix_.end()) {
-        mainSize = iter->second.mainSize;
         crossSize = iter->second.crossSize;
     }
-    Size size;
     if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
-        size = Size(crossSize, mainSize);
+        innerLayout.SetMinSize(Size(crossSize, 0));
+        innerLayout.SetMaxSize(Size(crossSize, Size::INFINITE_SIZE));
     } else {
-        size = Size(mainSize, crossSize);
+        innerLayout.SetMinSize(Size(0, crossSize));
+        innerLayout.SetMaxSize(Size(Size::INFINITE_SIZE, crossSize));
     }
-    innerLayout.SetMinSize(size);
-    innerLayout.SetMaxSize(size);
     return innerLayout;
 }
 
@@ -441,9 +438,9 @@ void RenderWaterFlow::SupplyItems(size_t startIndex, double targetPos)
             startIndex++;
             continue;
         }
+        flowItem->SetNeedRender(false);
         flowItem->Layout(GetLayoutParam());
         flowItem->SetVisible(false);
-        flowItem->SetNeedRender(false);
         itemCrossIndex = GetLastMainBlankCross();
         itemFlowStyle.mainPos = GetLastMainBlankPos().GetY();
         itemFlowStyle.crossPos = GetLastMainBlankPos().GetX();
