@@ -49,7 +49,6 @@ public:
         ConfigSurfaceImpl_ = std::move(ConfigSurfaceImpl);
     }
 
-public:
     void AddXComponentController(const RefPtr<XComponentController>& xcomponentController)
     {
         auto it = std::find(controllers_.begin(), controllers_.end(), xcomponentController);
@@ -59,8 +58,6 @@ public:
         }
         controllers_.emplace_back(xcomponentController);
     }
-
-    std::string surfaceId_ = "";
 
     void RemoveXComponentController(const RefPtr<XComponentController>& xcomponentController)
     {
@@ -73,6 +70,8 @@ public:
     {
         controllers_.clear();
     }
+
+    std::string surfaceId_ = "";
 
 private:
     std::list<RefPtr<XComponentController>> controllers_;
