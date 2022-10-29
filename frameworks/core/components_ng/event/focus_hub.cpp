@@ -252,6 +252,12 @@ bool FocusHub::IsFocusable()
     return false;
 }
 
+bool FocusHub::IsEnabled() const
+{
+    auto eventHub = eventHub_.Upgrade();
+    return eventHub ? eventHub->IsEnabled() : true;
+}
+
 bool FocusHub::IsFocusableScope()
 {
     if (!IsFocusableNode()) {
@@ -265,7 +271,9 @@ bool FocusHub::IsFocusableScope()
 
 bool FocusHub::IsFocusableNode()
 {
-    return enabled_ && show_ && focusable_ && parentFocusable_;
+    auto eventHub = eventHub_.Upgrade();
+    auto enabled = eventHub ? eventHub->IsEnabled() : true;
+    return enabled && show_ && focusable_ && parentFocusable_;
 }
 
 void FocusHub::SetFocusable(bool focusable)
@@ -289,7 +297,6 @@ void FocusHub::SetEnabled(bool enabled)
 
 void FocusHub::SetEnabledNode(bool enabled)
 {
-    enabled_ = enabled;
     if (!enabled) {
         RefreshFocus();
     }
@@ -542,10 +549,8 @@ void FocusHub::OnClick(const KeyEvent& event)
         auto info = GestureEvent();
         info.SetTimeStamp(event.timeStamp);
         auto rect = GetGeometryNode()->GetFrameRect();
-        info.SetGlobalLocation(
-            Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
-        info.SetLocalLocation(
-            Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
+        info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
+        info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
         LOGD("FocusHub::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
@@ -770,7 +775,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
     return false;
 }
 
-bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF &rect)
+bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF& rect)
 {
     return IsFocusable();
 }

@@ -200,6 +200,16 @@ public:
         return static_cast<bool>(onDrop_);
     }
 
+    bool IsEnabled() const
+    {
+        return enabled_;
+    }
+
+    void SetEnabled(bool enabled)
+    {
+        enabled_ = enabled;
+    }
+
 private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
@@ -215,6 +225,8 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDragMove_;
     OnDragFunc onDrop_;
+
+    bool enabled_ { true };
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };
