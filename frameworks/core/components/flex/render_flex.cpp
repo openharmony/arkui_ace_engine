@@ -81,9 +81,6 @@ void RenderFlex::Update(const RefPtr<Component>& component)
         inspectorSpace_ = flex->GetSpace();
         useOldLayoutVersion_ = context->GetMinPlatformVersion() <= PLATFORM_VERSION_FIVE;
         isDeclarative_ = context->GetIsDeclarative();
-        if (GreatNotEqual(space_, 0.0)) {
-            mainAxisAlign_ = FlexAlign::SPACE_CUSTOMIZATION;
-        }
     }
     UpdateAccessibilityAttr();
     MarkNeedLayout();
@@ -668,21 +665,18 @@ void RenderFlex::DetermineItemsPosition(const BaselineProperties& baselineProper
 
 void RenderFlex::CalculateSpace(double remainSpace, double& frontSpace, double& betweenSpace) const
 {
-    if (NearZero(remainSpace) && mainAxisAlign_ != FlexAlign::SPACE_CUSTOMIZATION) {
-        return;
-    }
     switch (mainAxisAlign_) {
         case FlexAlign::FLEX_START:
             frontSpace = 0.0;
-            betweenSpace = 0.0;
+            betweenSpace = space_;
             break;
         case FlexAlign::FLEX_END:
             frontSpace = remainSpace;
-            betweenSpace = 0.0;
+            betweenSpace = space_;
             break;
         case FlexAlign::CENTER:
             frontSpace = remainSpace / 2.0;
-            betweenSpace = 0.0;
+            betweenSpace = space_;
             break;
         case FlexAlign::SPACE_BETWEEN:
             frontSpace = 0.0;
@@ -695,10 +689,6 @@ void RenderFlex::CalculateSpace(double remainSpace, double& frontSpace, double& 
         case FlexAlign::SPACE_EVENLY:
             betweenSpace = validSizeCount_ > 0 ? remainSpace / (validSizeCount_ + 1) : 0.0;
             frontSpace = betweenSpace;
-            break;
-        case FlexAlign::SPACE_CUSTOMIZATION:
-            betweenSpace = space_;
-            frontSpace = 0.0;
             break;
         default:
             break;
