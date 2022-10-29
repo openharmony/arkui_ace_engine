@@ -19,6 +19,7 @@ namespace OHOS::Ace {
 
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
 {
+    LOGI("[OnTextChangedListenerImpl] insert value %{private}s", StringUtils::Str16ToStr8(text).c_str());
     if (text.length() <= 0) {
         LOGE("the text is null");
         return;
