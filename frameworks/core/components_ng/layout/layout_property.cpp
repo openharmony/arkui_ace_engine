@@ -28,6 +28,21 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string VisibleTypeToString(VisibleType type)
+{
+    static const LinearEnumMapNode<VisibleType, std::string> visibilityMap[] = {
+        { VisibleType::VISIBLE, "Visibility.Visible" },
+        { VisibleType::INVISIBLE, "Visibility.Hidden" },
+        { VisibleType::GONE, "Visibility.None" },
+    };
+    auto idx = BinarySearchFindIndex(visibilityMap, ArraySize(visibilityMap), type);
+    if (idx >= 0) {
+        return visibilityMap[idx].value;
+    }
+    return "Visibility.Visible";
+}
+} // namespace
 
 void LayoutProperty::Reset()
 {
@@ -50,6 +65,8 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
+
+    json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
 }
 
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
