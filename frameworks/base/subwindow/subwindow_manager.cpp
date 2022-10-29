@@ -154,6 +154,36 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
     return currentSubwindow_;
 }
 
+void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId,
+    const NG::OffsetF& offset)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        LOGI("Subwindow is null, add a new one.");
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    subwindow->ShowMenuNG(menuNode, targetId, offset);
+}
+
+void SubwindowManager::HideMenuNG(int32_t targetId)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->HideMenuNG(targetId);
+    }
+}
+
+void SubwindowManager::HideMenuNG()
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->HideMenuNG();
+    }
+}
+
 void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
 {
     auto containerId = Container::CurrentId();

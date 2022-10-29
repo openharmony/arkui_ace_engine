@@ -29,7 +29,8 @@
 namespace OHOS::Ace::NG {
 
 // create menuWrapper and menu node, update menu props
-std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& targetTag, int32_t targetId)
+std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& targetTag, int32_t targetId,
+    bool isNeedUpdateMenuOffset, const NG::OffsetF& offset = NG::OffsetF())
 {
     auto wrapperId = ElementRegister::GetInstance()->MakeUniqueId();
     // use wrapper to detect click events outside menu
@@ -41,8 +42,9 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& ta
 
     // update menu props
     auto layoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    layoutProps->UpdateTargetId(targetId);
-    layoutProps->UpdateTargetTag(targetTag);
+    if (layoutProps && isNeedUpdateMenuOffset) {
+        layoutProps->UpdateMenuOffset(offset);
+    }
 
     menuNode->MountToParent(wrapperNode);
     menuNode->MarkModifyDone();
@@ -51,9 +53,10 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& ta
 }
 
 // create menu with menuItems
-RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, const std::string& targetTag, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, const std::string& targetTag, int32_t targetId,
+    const NG::OffsetF& offset)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
+    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId, true, offset);
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateMenuOption(params[i].first, std::move(params[i].second), targetId, i);
@@ -69,9 +72,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, const std:
 }
 
 // create menu with custom node from a builder
-RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, const std::string& targetTag, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, const std::string& targetTag, int32_t targetId,
+    const NG::OffsetF& offset)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
+    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId, true, offset);
     // put custom node in a scroll to limit its height
     auto scroll = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
@@ -89,7 +93,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, const std::
 RefPtr<FrameNode> MenuView::Create(
     const std::vector<SelectParam>& params, const std::string& targetTag, int32_t targetId)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
+    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId, false);
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, targetId, i);
         // first node never paints divider

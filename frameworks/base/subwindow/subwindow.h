@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
@@ -33,6 +34,10 @@ public:
 
     virtual void InitContainer() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
+    virtual void ShowMenuNG(
+        const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
+    virtual void HideMenuNG(int32_t targetId) = 0;
+    virtual void HideMenuNG() = 0;
     virtual void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) = 0;
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
