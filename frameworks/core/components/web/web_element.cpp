@@ -60,7 +60,7 @@ void WebElement::OnFocus()
     if (needOnFocus_) {
         renderWeb->GetDelegate()->OnFocus();
     } else {
-        needOnFocus_ = true; 
+        needOnFocus_ = true;
     }
     renderWeb->SetWebIsFocus(true);
     FocusNode::OnFocus();

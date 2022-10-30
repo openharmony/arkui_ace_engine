@@ -109,7 +109,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     // check password image size.
     if (!showPasswordIcon) {
         textRect_.SetSize(SizeF(std::min(static_cast<float>(paragraph_->GetLongestLine()),
-                                    contentConstraint.maxSize.Width() - horizontalPaddingSum),
+            contentConstraint.maxSize.Width() - horizontalPaddingSum),
             height));
         imageRect_.SetSize(SizeF());
         auto contentSize = contentConstraint.maxSize;

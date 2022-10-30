@@ -1795,7 +1795,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_ClearItemsByCrossIndex_001, Te
     EXPECT_EQ(renderNode_->itemsByCrossIndex_.size(), renderNode_->crossCount_);
     EXPECT_TRUE(!renderNode_->itemsByCrossIndex_.empty());
     for (const auto& itemIndex : renderNode_->itemsByCrossIndex_) {
-        EXPECT_TRUE(itemIndex.empty());    
+        EXPECT_TRUE(itemIndex.empty());
     }
 }
 

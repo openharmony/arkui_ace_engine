@@ -19,8 +19,9 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo,
-    const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks)
+RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& sourceInfo,
+    const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
+    const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks)
 {
     auto svgImageObj = AceType::MakeRefPtr<NG::SvgImageObject>(
         sourceInfo, encodedInfo->GetImageSize(), encodedInfo->GetFrameCount(), data);

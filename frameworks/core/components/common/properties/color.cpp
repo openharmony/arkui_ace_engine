@@ -403,7 +403,6 @@ bool Color::MatchColorWithRGB(const std::string& colorStr, Color& color)
             auto redInt = std::stoi(matches[1]);
             auto greenInt = std::stoi(matches[2]);
             auto blueInt = std::stoi(matches[3]);
-
             if (!IsRGBValid(redInt) || !IsRGBValid(greenInt) || !IsRGBValid(blueInt)) {
                 return false;
             }
@@ -427,7 +426,6 @@ bool Color::MatchColorWithRGBA(const std::string& colorStr, Color& color)
             auto greenInt = std::stoi(matches[2]);
             auto blueInt = std::stoi(matches[3]);
             auto opacityDouble = std::stod(matches[4]);
-
             if (!IsRGBValid(redInt) || !IsRGBValid(greenInt) || !IsRGBValid(blueInt) ||
                 !IsOpacityValid(opacityDouble)) {
                 return false;
