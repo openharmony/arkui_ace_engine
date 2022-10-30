@@ -57,6 +57,7 @@ const char STAGE_ETS_TAG[] = "stage";
 const char PAGE_ETS_TAG[] = "page";
 // js custom view
 const char JS_VIEW_ETS_TAG[] = "JsView";
+const char JS_VIEW_COMPONENT_TAG[] = "ProxyComponent";
 // js lazy foreach node
 const char JS_LAZY_FOR_EACH_ETS_TAG[] = "LazyForEach";
 // js lazy foreach node
