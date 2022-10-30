@@ -13,17 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_CONTAINER_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_CONTAINER_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_CONTAINER_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_CONTAINER_MODEL_H
+
+#include <memory>
 
 #include "base/utils/macros.h"
 #include "frameworks/core/components/common/layout/grid_container_info.h"
 
-namespace OHOS::Ace::NG {
-class ACE_EXPORT GridContainerView {
+namespace OHOS::Ace {
+class ACE_EXPORT GridContainerModel {
 public:
-    static void Create(const RefPtr<GridContainerInfo>& containerInfo);
+    static GridContainerModel* GetInstance();
+    virtual ~GridContainerModel() = default;
+
+    virtual void Create(const RefPtr<GridContainerInfo>& containerInfo) = 0;
+    virtual void Pop() {}
+
+private:
+    static std::unique_ptr<GridContainerModel> instance_;
 };
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
 
 #endif

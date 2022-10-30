@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/models/grid_container_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/box/drag_drop_event.h"
@@ -595,9 +596,9 @@ void ViewAbstractModelImpl::SetUseAlign(
     }
 }
 
-void ViewAbstractModelImpl::SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset,
-    const RefPtr<GridContainerInfo>& info, GridSizeType type)
+void ViewAbstractModelImpl::SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
+    auto info = GridContainerModelImpl::GetContainer();
     if (info != nullptr) {
         auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
         builder->SetParent(info);
