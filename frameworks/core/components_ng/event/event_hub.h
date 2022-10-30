@@ -200,6 +200,9 @@ public:
         return static_cast<bool>(onDrop_);
     }
 
+    // get XTS inspector value
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
 private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;

@@ -30,8 +30,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT NavBarNode : public GroupNode {
     DECLARE_ACE_TYPE(NavBarNode, GroupNode)
 public:
-    NavBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-        : GroupNode(tag, nodeId, pattern)
+    NavBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern) : GroupNode(tag, nodeId, pattern)
     {}
     ~NavBarNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child) override;
@@ -121,6 +120,11 @@ public:
     {
         return preToolBarNode_;
     }
+
+    std::string GetTitleString() const;
+    std::string GetSubtitleString() const;
+    std::string GetBarItemsString(bool isMenu) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     // custom node checking
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);

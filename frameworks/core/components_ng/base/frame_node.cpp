@@ -172,6 +172,9 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (pattern_) {
         pattern_->ToJsonValue(json);
     }
+    if (eventHub_) {
+        pattern_->ToJsonValue(json);
+    }
 }
 
 void FrameNode::OnAttachToMainTree()
