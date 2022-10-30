@@ -59,7 +59,7 @@ void BadgePattern::OnModifyDone()
             textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()));
         }
     } else if (badgeCount.has_value() && badgeCount.value() <= 0) {
-        textLayoutProperty->ResetContent();
+        textLayoutProperty->UpdateContent(" ");
     }
 
     if (badgeValue.has_value()) {

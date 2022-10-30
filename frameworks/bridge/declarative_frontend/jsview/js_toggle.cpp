@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <string>
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
 #include "core/common/container.h"

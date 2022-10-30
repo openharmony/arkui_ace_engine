@@ -20,16 +20,17 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/text_field/text_field_controller.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_node.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_field_controller.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT SearchView {
 public:
-    static RefPtr<TextFieldControllerBase> Create(
+    static RefPtr<Ace::TextFieldController> Create(
         std::optional<std::string>& value, std::optional<std::string>& placeholder, std::optional<std::string>& icon);
     static void SetSearchButton(const std::string& text);
     static void SetPlaceholderColor(const Color& color);

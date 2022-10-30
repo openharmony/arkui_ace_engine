@@ -15,21 +15,21 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
-#include "core/common/container.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/image/image_model.h"
-
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
 
 #include "base/image/pixel_map.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
+#include "core/common/container.h"
 #include "core/components/image/image_event.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 
 namespace OHOS::Ace {
 

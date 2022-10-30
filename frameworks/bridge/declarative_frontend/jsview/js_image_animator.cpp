@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/pattern/image_animator/image_animator_view.h"
 

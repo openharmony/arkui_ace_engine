@@ -93,6 +93,7 @@ private:
     void CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue);
     void SetAccessibilityClickImpl();
     void ApplyRestoreInfo();
+    bool disabled_ = false;
 };
 
 } // namespace OHOS::Ace

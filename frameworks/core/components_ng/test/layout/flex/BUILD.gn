@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_unittest("flex_layout_test_ng") {
-  module_out_path = "$test_output_path/flex_row"
+  module_out_path = "$test_output_path/flex_layout"
 
   sources = [ "flex_layout_test_ng.cpp" ]
 
@@ -34,12 +34,12 @@ ohos_unittest("flex_layout_test_ng") {
 
   part_name = ace_engine_part
   configs = [
-    ":config_flex_test",
+    ":config_flex_layout_test",
     "$ace_root:ace_config",
   ]
 }
 
-config("config_flex_test") {
+config("config_flex_layout_test") {
   visibility = [ ":*" ]
   include_dirs = [
     "//commonlibrary/c_utils/base/include",

@@ -32,7 +32,6 @@ GridColModel* GridColModel::GetInstance()
 #ifdef NG_BUILD
         instance_.reset(new NG::GridColModelNG());
 #else
-        instance_.reset(new NG::GridColModelNG());
         if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::GridColModelNG());
         } else {

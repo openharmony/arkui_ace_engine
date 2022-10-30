@@ -1140,6 +1140,7 @@ void RosenRenderImage::DrawSVGImage(const Offset& offset, SkCanvas* canvas)
         canvas->translate(width, 0);
         canvas->scale(-1, 1);
     }
+    canvas->clipRect({ 0, 0, width, height }, SkClipOp::kIntersect, true);
     if (imageSize.IsValid() && !imageSize.IsInfinite()) {
         // scale svg to layout size
         float scale = std::min(width / imageSize.Width(), height / imageSize.Height());
@@ -1147,7 +1148,6 @@ void RosenRenderImage::DrawSVGImage(const Offset& offset, SkCanvas* canvas)
     } else {
         skiaDom_->setContainerSize({ width, height });
     }
-    canvas->clipRect({ 0, 0, width, height }, SkClipOp::kIntersect, true);
     skiaDom_->render(canvas);
 }
 

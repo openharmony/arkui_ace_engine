@@ -128,6 +128,13 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childWrapper->Measure(childLayoutConstraint);
     }
     auto size = SizeF(itemSizeRender_, itemSizeRender_ * itemCount_);
+    auto selfIdealSize = layoutConstraint.selfIdealSize;
+    if (selfIdealSize.Width().has_value() && selfIdealSize.Width().value() >= size.Width()) {
+        size.SetWidth(selfIdealSize.Width().value());
+    }
+    if (selfIdealSize.Height().has_value() && selfIdealSize.Height().value() >= size.Height()) {
+        size.SetHeight(selfIdealSize.Height().value());
+    }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0.0f);
@@ -147,14 +154,12 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
     
-    auto layoutConstraint = indexerLayoutProperty->GetContentLayoutConstraint().value();
-    auto selfIdealSize = layoutConstraint.selfIdealSize;
     constexpr float half = 0.5f;
-    if (selfIdealSize.Width().has_value() && selfIdealSize.Width().value() >= size.Width()) {
-        left = left + half * (selfIdealSize.Width().value() - size.Width());
+    if (size.Width() >= itemSize_) {
+        left = left + half * (size.Width() - itemSize_);
     }
-    if (selfIdealSize.Height().has_value() && selfIdealSize.Height().value() >= size.Height()) {
-        top = top + half * (selfIdealSize.Height().value() - size.Height());
+    if (size.Height() >= itemSize_* itemCount_) {
+        top = top + half * (size.Height() - itemSize_* itemCount_);
     }
     auto paddingOffset = OffsetF(left, top);
 

@@ -36,8 +36,7 @@ public:
     {
         auto value = MakeRefPtr<MenuLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propTargetId_ = CloneTargetId();
-        value->propTargetTag_ = CloneTargetTag();
+        value->propMenuOffset_ = CloneMenuOffset();
 
         return value;
     }
@@ -45,13 +44,11 @@ public:
     void Reset() override
     {
         LayoutProperty::Reset();
-        ResetTargetId();
-        ResetTargetTag();
+        ResetMenuOffset();
     }
 
     // target frameNode that this menu belongs to
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetId, int32_t, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetTag, std::string, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuOffset, NG::OffsetF, PROPERTY_UPDATE_MEASURE);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {

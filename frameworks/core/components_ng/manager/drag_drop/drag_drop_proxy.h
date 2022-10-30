@@ -31,6 +31,12 @@ enum class DragEventType {
     DROP,
 };
 
+enum class DragType {
+    COMMON,
+    GRID,
+    LIST,
+};
+
 class ACE_EXPORT DragDropProxy : public virtual AceType {
     DECLARE_ACE_TYPE(DragDropProxy, AceType);
 
@@ -43,8 +49,8 @@ public:
     void OnDragEnd(const GestureEvent& info);
     void onDragCancel();
     void OnItemDragStart(const GestureEvent& info, const RefPtr<FrameNode>& frameNode);
-    void OnItemDragMove(const GestureEvent& info, int32_t draggedIndex);
-    void OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex);
+    void OnItemDragMove(const GestureEvent& info, int32_t draggedIndex, DragType dragType);
+    void OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex, DragType dragType);
     void onItemDragCancel();
     void DestroyDragWindow();
 

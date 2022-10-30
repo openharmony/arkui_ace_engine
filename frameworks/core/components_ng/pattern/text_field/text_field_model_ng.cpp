@@ -111,7 +111,7 @@ void TextFieldModelNG::SetPlaceholderColor(const Color& value)
 
 void TextFieldModelNG::SetPlaceholderFont(const Font& value)
 {
-    if (value.fontSize) {
+    if (value.fontSize.has_value() && value.fontSize.value().IsNonNegative()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value());
     }
     if (value.fontStyle) {
@@ -152,6 +152,9 @@ void TextFieldModelNG::SetMaxLines(uint32_t value)
 }
 void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
+    if (value.IsNegative()) {
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
 }

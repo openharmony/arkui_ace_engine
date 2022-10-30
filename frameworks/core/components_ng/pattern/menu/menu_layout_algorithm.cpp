@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 
 void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -32,23 +33,8 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 
     // calculate menu position based on target FrameNode
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    std::string tag = props->GetTargetTag().value_or("");
-    int32_t Id = props->GetTargetId().value_or(-1);
-    LOGD("targetId = %{public}d, targetTag = %{public}s", Id, tag.c_str());
-
-    auto targetNode = FrameNode::GetFrameNode(tag, Id);
-    if (!targetNode) {
-        // targetId = -1, set position to center top of the screen
-        position_ = OffsetF(screenSize_.Width() / 2.0, 0);
-        return;
-    }
-
-    SizeF size = targetNode->GetGeometryNode()->GetFrameSize();
-    OffsetF offset = targetNode->GetGeometryNode()->GetFrameOffset();
-    LOGD("offset = %{public}f, %{public}f", offset.GetX(), offset.GetY());
-    // set position to bottom center point of targetNode
-    position_ = offset + OffsetF(size.Width() / 2.0, size.Height());
-    LOGD("menu position set to %{public}f, %{public}f", position_.GetX(), position_.GetY());
+    CHECK_NULL_VOID(props);
+    position_ = props->GetMenuOffset().value();
 }
 
 // Called to perform layout render node and child.
@@ -102,13 +88,12 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     LOGD("MenuLayout: clickPosition = %{public}f, %{public}f", position_.GetX(), position_.GetY());
+    CHECK_NULL_VOID(props);
+
     float x = HorizontalLayout(size, position_.GetX());
     float y = VerticalLayout(size, position_.GetY());
 
-    // set content offset, frame offset remains (0,0)
-    OffsetF parentOffset(x, y);
-    layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(parentOffset);
-    LOGD("Menu Layout: global offset = %{public}f, %{public}f", x, y);
+    layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(NG::OffsetF(x, y));
 
     // translate each option by the height of previous options
     auto outPadding = OUT_PADDING.ConvertToPx();

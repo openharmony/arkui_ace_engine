@@ -112,6 +112,9 @@ void GestureScope::HandleParallelDisposal(const RefPtr<GestureRecognizer>& recog
         parallelRecognizers_.remove(recognizer);
         recognizer->SetRefereeState(RefereeState::SUCCEED);
         recognizer->OnAccepted(touchId_);
+    } else if (disposal == GestureDisposal::PENDING) {
+        recognizer->SetRefereeState(RefereeState::PENDING);
+        recognizer->OnPending(touchId_);
     }
 }
 

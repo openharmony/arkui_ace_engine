@@ -27,12 +27,13 @@ public:
 
     void Create() override;
     RefPtr<ScrollControllerBase> GetOrCreateController() override;
+    RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void SetAxis(Axis axis) override;
     void SetOnScrollBegin(NG::ScrollBeginEvent&& event) override;
     void SetOnScroll(NG::OnScrollEvent&& event) override;
     void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) override;
     void SetOnScrollEnd(NG::ScrollEndEvent&& event) override;
-    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& proxy) override;
+    void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy) override;
     void InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
         const std::pair<bool, Dimension>& width, EdgeEffect effect) override;
     void SetDisplayMode(int displayMode) override;

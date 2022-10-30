@@ -32,7 +32,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<TextFieldControllerBase> SearchView::Create(
+RefPtr<Ace::TextFieldController> SearchView::Create(
     std::optional<std::string>& value, std::optional<std::string>& placeholder, std::optional<std::string>& icon)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -49,9 +49,9 @@ RefPtr<TextFieldControllerBase> SearchView::Create(
 
     // TextField frameNode
     auto textFieldFrameNode = CreateTextField(frameNode, placeholder, value);
-    auto pattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    textFieldPattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    textFieldPattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto textInputRenderContext = textFieldFrameNode->GetRenderContext();
     textInputRenderContext->UpdateBackgroundColor(TRANSPARENT_COLOR);
     if (!hasTextFieldNode) {
@@ -92,8 +92,9 @@ RefPtr<TextFieldControllerBase> SearchView::Create(
     renderContext->UpdateBorderRadius(borderRadius);
 
     ViewStackProcessor::GetInstance()->Push(frameNode);
-
-    return pattern->GetTextFieldController();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    pattern->SetSearchController(AceType::MakeRefPtr<Ace::TextFieldController>());
+    return pattern->GetSearchController();
 }
 
 void SearchView::SetSearchButton(const std::string& text)

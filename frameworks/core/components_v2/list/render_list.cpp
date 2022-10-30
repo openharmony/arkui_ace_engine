@@ -1168,7 +1168,8 @@ bool RenderList::HandleOverScroll()
     if (scrollEffect_ && scrollEffect_->IsFadeEffect() && (reachStart_ || reachEnd_)) {
         double overScroll = scrollEffect_->CalculateOverScroll(prevOffset_, reachEnd_);
         if (!NearZero(overScroll)) {
-            scrollEffect_->HandleOverScroll(Axis::VERTICAL, overScroll, viewPort_);
+            Axis axis = IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
+            scrollEffect_->HandleOverScroll(axis, overScroll, viewPort_);
         }
         return false;
     }

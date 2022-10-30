@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -40,6 +41,11 @@ void ListModelNG::SetSpace(const Dimension& space)
 void ListModelNG::SetInitialIndex(int32_t initialIndex)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex);
+}
+
+RefPtr<ScrollControllerBase> ListModelNG::CreateScrollController()
+{
+    return AceType::MakeRefPtr<NG::ListPositionController>();
 }
 
 void ListModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollBarProxy> proxy)
@@ -97,7 +103,10 @@ void ListModelNG::SetCachedCount(int32_t cachedCount)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
 }
 
-void ListModelNG::SetSticky(V2::StickyStyle stickyStyle) {}
+void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
+}
 
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
@@ -151,5 +160,93 @@ void ListModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachEnd(std::move(onReachEnd));
+}
+
+void ListModelNG::SetOnItemMove(OnItemMoveEvent&& onItemMove)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemMove(std::move(onItemMove));
+
+    AddDragFrameNodeToManager();
+}
+
+void ListModelNG::SetOnItemDragStart(OnItemDragStartFunc&& onItemDragStart)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onDragStart = [func = std::move(onItemDragStart)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<AceType> {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        {
+            return func(dragInfo, index);
+        }
+    };
+    eventHub->SetOnItemDragStart(onDragStart);
+
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    eventHub->InitItemDragEvent(gestureEventHub);
+
+    AddDragFrameNodeToManager();
+}
+
+void ListModelNG::SetOnItemDragEnter(OnItemDragEnterFunc&& onItemDragEnter)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragEnter(std::move(onItemDragEnter));
+
+    AddDragFrameNodeToManager();
+}
+
+void ListModelNG::SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragLeave(std::move(onItemDragLeave));
+
+    AddDragFrameNodeToManager();
+}
+
+void ListModelNG::SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragMove(std::move(onItemDragMove));
+
+    AddDragFrameNodeToManager();
+}
+
+void ListModelNG::SetOnItemDrop(OnItemDropFunc&& onItemDrop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDrop(std::move(onItemDrop));
+
+    AddDragFrameNodeToManager();
+}
+
+void ListModelNG::AddDragFrameNodeToManager() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    dragDropManager->AddListDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 } // namespace OHOS::Ace::NG

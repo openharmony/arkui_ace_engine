@@ -66,10 +66,10 @@ public:
         ShapePaintProperty::ToJsonValue(json);
         if (propShapeViewBox_.has_value()) {
             JsonValue viewBoxJson;
-            viewBoxJson.Put("x", propShapeViewBox_.value().Left().ConvertToVp());
-            viewBoxJson.Put("y", propShapeViewBox_.value().Top().ConvertToVp());
-            viewBoxJson.Put("width", propShapeViewBox_.value().Width().ConvertToVp());
-            viewBoxJson.Put("height", propShapeViewBox_.value().Height().ConvertToVp());
+            viewBoxJson.Put("x", propShapeViewBox_.value().Left().ConvertToPx());
+            viewBoxJson.Put("y", propShapeViewBox_.value().Top().ConvertToPx());
+            viewBoxJson.Put("width", propShapeViewBox_.value().Width().ConvertToPx());
+            viewBoxJson.Put("height", propShapeViewBox_.value().Height().ConvertToPx());
             json->Put("viewPort", viewBoxJson.ToString().c_str());
         }
         if (propImageMesh_.has_value()) {

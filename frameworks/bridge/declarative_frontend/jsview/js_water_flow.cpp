@@ -62,7 +62,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
             jsScroller->SetController(positionController);
             waterflowComponent->SetController(positionController);
             // Init scroll bar proxy.
-            auto proxy = jsScroller->GetScrollBarProxy();
+            auto proxy = AceType::DynamicCast<ScrollBarProxy>(jsScroller->GetScrollBarProxy());
             if (!proxy) {
                 proxy = AceType::MakeRefPtr<ScrollBarProxy>();
                 jsScroller->SetScrollBarProxy(proxy);

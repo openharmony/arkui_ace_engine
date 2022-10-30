@@ -203,7 +203,13 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
 void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
 {
     if (!magicNodes_.empty()) {
-        LOGD("second measure feature");
+        LOGD("second measure feature, only update child layout constraint");
+        const auto& childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        for (auto& [index, children] : magicNodes_) {
+            for (auto& item : children) {
+                item.layoutConstraint = childLayoutConstraint;
+            }
+        }
         return;
     }
     maxDisplayPriority_ = 0;

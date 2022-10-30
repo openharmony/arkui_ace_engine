@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -451,8 +452,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     auto impl = inspector->GetInspectorFunctionImpl();
 
     RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
-                        GestureEvent& info) {
+    auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         if (impl) {
             impl->UpdateEventInfo(info);
@@ -472,19 +472,18 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     }
 
     RefPtr<JsClickFunction> jsClickEventFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    EventMarker clickEventId([execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](
-                                    const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-        auto newInfo = *clickInfo;
-        if (impl) {
-            impl->UpdateEventInfo(newInfo);
-        }
-        ACE_SCORING_EVENT("Button.onClick");
-        func->Execute(newInfo);
-    });
-    auto buttonComponent =
-        AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    EventMarker clickEventId(
+        [execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            auto newInfo = *clickInfo;
+            if (impl) {
+                impl->UpdateEventInfo(newInfo);
+            }
+            ACE_SCORING_EVENT("Button.onClick");
+            func->Execute(newInfo);
+        });
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (buttonComponent) {
         buttonComponent->SetKeyEnterEventId(clickEventId);
     }

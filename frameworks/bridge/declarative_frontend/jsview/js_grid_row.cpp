@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -33,7 +34,6 @@ GridRowModel* GridRowModel::GetInstance()
 #ifdef NG_BUILD
         instance_.reset(new NG::GridRowModelNG());
 #else
-        instance_.reset(new NG::GridRowModelNG());
         if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::GridRowModelNG());
         } else {

@@ -45,6 +45,11 @@ void ListModelImpl::SetInitialIndex(int32_t initialIndex)
     JSViewSetProperty(&V2::ListComponent::SetInitialIndex, initialIndex);
 }
 
+RefPtr<ScrollControllerBase> ListModelImpl::CreateScrollController()
+{
+    return AceType::MakeRefPtr<V2::ListPositionController>();
+}
+
 void ListModelImpl::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollBarProxy> proxy)
 {
     auto listScroller = AceType::DynamicCast<V2::ListPositionController>(scroller);

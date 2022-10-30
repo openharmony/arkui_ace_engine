@@ -49,6 +49,11 @@ RefPtr<ScrollControllerBase> ScrollModelImpl::GetOrCreateController()
     return component->GetScrollPositionController();
 }
 
+RefPtr<ScrollProxy> ScrollModelImpl::CreateScrollBarProxy()
+{
+    return AceType::MakeRefPtr<ScrollBarProxy>();
+}
+
 void ScrollModelImpl::SetAxis(Axis axis)
 {
     JSViewSetProperty(&ScrollComponent::SetAxisDirection, axis);
@@ -101,9 +106,10 @@ void ScrollModelImpl::SetOnScrollEnd(NG::ScrollEndEvent&& event)
     JSViewSetProperty(&ScrollComponent::SetOnScrollEnd, std::move(onScrollEnd));
 }
 
-void ScrollModelImpl::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& proxy)
+void ScrollModelImpl::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
 {
-    JSViewSetProperty(&ScrollComponent::SetScrollBarProxy, proxy);
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(proxy);
+    JSViewSetProperty(&ScrollComponent::SetScrollBarProxy, scrollBarProxy);
 }
 
 void ScrollModelImpl::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,

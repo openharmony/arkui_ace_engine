@@ -544,7 +544,7 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
         return;
     }
 
-    if (!OnPageReady(pageNode, needHideLast, needHideLast, isCardRouter, cardId)) {
+    if (!OnPageReady(pageNode, needHideLast, false, isCardRouter_, cardId)) {
         LOGE("fail to mount page");
         pageRouterStack_.pop_back();
         return;
