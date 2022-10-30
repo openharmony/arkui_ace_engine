@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/device_config.h"
@@ -421,9 +422,21 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition()
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    targetSize_ = targetNode->GetGeometryNode()->GetFrameSize();
-    targetOffset_ =
-        targetNode->GetGeometryNode()->GetParentGlobalOffset() + targetNode->GetGeometryNode()->GetFrameOffset();
+    auto geometryNode = targetNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    targetSize_ = geometryNode->GetFrameSize();
+    
+    auto context = targetNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    if (context->HasPosition()) {
+        OffsetT<Dimension> positionValue = context->GetPosition().value();
+        auto positionX = positionValue.GetX();
+        auto positionY = positionValue.GetY();
+        targetOffset_ = OffsetF(positionX.ConvertToPx(), positionY.ConvertToPx());
+    } else {
+        targetOffset_ = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
+        LOGD("no position set");
+    }
 }
 
 } // namespace OHOS::Ace::NG
