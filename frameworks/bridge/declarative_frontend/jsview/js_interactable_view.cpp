@@ -15,22 +15,24 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_key_function.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "bridge/declarative_frontend/jsview/js_pan_handler.h"
+#include "bridge/declarative_frontend/jsview/js_touch_handler.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/gestures/click_recognizer.h"
+#include "core/pipeline/base/single_child.h"
+
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
-#include "core/components/gesture_listener/gesture_listener_component.h"
-#include "core/gestures/click_recognizer.h"
-#include "core/pipeline/base/single_child.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 

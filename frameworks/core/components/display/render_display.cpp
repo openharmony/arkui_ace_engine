@@ -86,6 +86,8 @@ void RenderDisplay::PerformLayout()
         layoutParam.SetMinSize(Size());
         layoutParam.SetMaxSize(Size());
         SetVisible(false);
+    } else if (visible_ == VisibleType::INVISIBLE) {
+        SetVisible(false);
     }
     Size childSize;
     if (!GetChildren().empty()) {
@@ -256,6 +258,16 @@ void RenderDisplay::OnVisibleChange(VisibleType type)
             default:
                 break;
         }
+    }
+}
+
+void RenderDisplay::UpdateVisibleType(VisibleType type)
+{
+    if (visible_ != type) {
+        visible_ = type;
+        SetVisible(visible_ == VisibleType::VISIBLE);
+        MarkNeedLayout();
+        OnVisibleChange(type);
     }
 }
 

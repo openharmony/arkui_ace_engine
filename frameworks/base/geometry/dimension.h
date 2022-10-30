@@ -107,6 +107,11 @@ public:
         return NonNegative(value_);
     }
 
+    bool IsNegative() const
+    {
+        return !NonNegative(value_);
+    }
+
     // Deprecated: don't use this to covert to px.
     double ConvertToPx(double dipScale) const
     {

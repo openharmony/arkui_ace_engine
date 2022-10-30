@@ -18,6 +18,7 @@
 #include <functional>
 
 #include "base/geometry/animatable_dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -737,7 +738,7 @@ void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optio
         coverageComponent->SetX(offsetX.value());
     }
     if (offsetY.has_value()) {
-        coverageComponent->SetX(offsetY.value());
+        coverageComponent->SetY(offsetY.value());
     }
 }
 

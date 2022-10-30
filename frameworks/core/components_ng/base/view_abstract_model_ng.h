@@ -252,6 +252,10 @@ public:
 
     void SetAspectRatio(float ratio) override
     {
+        if (LessOrEqual(ratio, 0.0)) {
+            LOGW("the %{public}f value is illegal, use default", ratio);
+            ratio = 1.0;
+        }
         ViewAbstract::SetAspectRatio(ratio);
     }
 
@@ -354,8 +358,7 @@ public:
         ViewAbstract::SetVisibility(visible);
     }
 
-    void SetSharedTransition(
-        const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override
+    void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override
     {
         ViewAbstract::SetSharedTransition(shareId, option);
     }
@@ -657,17 +660,20 @@ public:
         auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         GestureEventFunc event;
         if (!params.empty()) {
-            event = [params, targetNode](GestureEvent& /*info*/) mutable {
+            event = [params, targetNode](GestureEvent& info) mutable {
                 // menu already created
                 if (params.empty()) {
-                    NG::ViewAbstract::ShowMenu(targetNode->GetId());
+                    NG::ViewAbstract::ShowMenu(targetNode->GetId(), NG::OffsetF(info.GetGlobalLocation().GetX(),
+                        info.GetGlobalLocation().GetY()));
                     return;
                 }
-                NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode);
+                NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode,
+                    NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
             };
         } else if (buildFunc) {
-            event = [builderFunc = std::move(buildFunc), targetNode](const GestureEvent& /*info*/) mutable {
-                CreateCustomMenu(builderFunc, targetNode);
+            event = [builderFunc = std::move(buildFunc), targetNode](const GestureEvent& info) mutable {
+                CreateCustomMenu(builderFunc, targetNode, false, NG::OffsetF(info.GetGlobalLocation().GetX(),
+                    info.GetGlobalLocation().GetY()));
             };
         } else {
             LOGE("empty param or null builder");
@@ -699,14 +705,17 @@ public:
         if (type == ResponseType::RIGHT_CLICK) {
             OnMouseEventFunc event = [builder = std::move(buildFunc), targetNode](MouseInfo& info) mutable {
                 if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                    CreateCustomMenu(builder, targetNode);
+                    CreateCustomMenu(builder, targetNode, true, NG::OffsetF(info.GetGlobalLocation().GetX(),
+                        info.GetGlobalLocation().GetY()));
                 }
+                info.SetStopPropagation(true);
             };
             NG::ViewAbstract::SetOnMouse(std::move(event));
         } else if (type == ResponseType::LONGPRESS) {
             // create or show menu on long press
-            auto event = [builder = std::move(buildFunc), targetNode](const GestureEvent& /*info*/) mutable {
-                CreateCustomMenu(builder, targetNode);
+            auto event = [builder = std::move(buildFunc), targetNode](const GestureEvent& info) mutable {
+                CreateCustomMenu(builder, targetNode, true, NG::OffsetF(info.GetGlobalLocation().GetX(),
+                    info.GetGlobalLocation().GetY()));
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
@@ -723,17 +732,18 @@ public:
     void SetAccessibilityImportance(const std::string& importance) override {}
 
 private:
-    static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode)
+    static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
+        bool isContextMenu, const NG::OffsetF& offset)
     {
         // builder already executed, just show menu
         if (!buildFunc) {
-            NG::ViewAbstract::ShowMenu(targetNode->GetId());
+            NG::ViewAbstract::ShowMenu(targetNode->GetId(), offset, isContextMenu);
             return;
         }
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode);
+        NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset);
         // nullify builder
         buildFunc = nullptr;
     }

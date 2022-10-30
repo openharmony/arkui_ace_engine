@@ -67,7 +67,7 @@ void SelectPattern::RegisterOnClick()
         CHECK_NULL_VOID(context);
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->ShowMenu(id, menu);
+        overlayManager->ShowMenu(id, false, NG::OffsetF(), menu);
         // menuNode already registered, nullify
         menu.Reset();
     };

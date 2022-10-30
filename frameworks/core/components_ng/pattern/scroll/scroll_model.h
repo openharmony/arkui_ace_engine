@@ -19,7 +19,7 @@
 #include <memory>
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/scroll_bar/scroll_bar_proxy.h"
+#include "core/components/scroll_bar/scroll_proxy.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 
 namespace OHOS::Ace {
@@ -34,12 +34,13 @@ public:
 
     virtual void Create() = 0;
     virtual RefPtr<ScrollControllerBase> GetOrCreateController() = 0;
+    virtual RefPtr<ScrollProxy> CreateScrollBarProxy() = 0;
     virtual void SetAxis(Axis axis) = 0;
     virtual void SetOnScrollBegin(NG::ScrollBeginEvent&& event) = 0;
     virtual void SetOnScroll(NG::OnScrollEvent&& event) = 0;
     virtual void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) = 0;
     virtual void SetOnScrollEnd(NG::ScrollEndEvent&& event) = 0;
-    virtual void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& proxy) = 0;
+    virtual void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy) = 0;
     virtual void InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
         const std::pair<bool, Dimension>& width, EdgeEffect effect) = 0;
     virtual void SetDisplayMode(int displayMode) = 0;

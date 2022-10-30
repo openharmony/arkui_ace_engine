@@ -40,6 +40,7 @@ public:
         copy->propTitleMode_ = CloneTitleMode();
         copy->propHideTitleBar_ = CloneHideTitleBar();
         copy->propHideToolBar_ = CloneHideToolBar();
+        copy->propHideBackButton_ = CloneHideBackButton();
         return copy;
     }
 
@@ -49,11 +50,13 @@ public:
         ResetTitleMode();
         ResetHideTitleBar();
         ResetHideToolBar();
+        ResetHideBackButton();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideToolBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

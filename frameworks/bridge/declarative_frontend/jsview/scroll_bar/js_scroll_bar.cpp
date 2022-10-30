@@ -17,6 +17,9 @@
 
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "core/components/scroll_bar/scroll_bar_component.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_view.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -28,6 +31,36 @@ namespace {
 
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::NONE };
+
+void NGSetScrollControllerAndProxy(RefPtr<NG::ScrollBarPattern>& pattern, const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(pattern);
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[0]);
+        // Parse scroller.
+        auto scrollerValue = obj->GetProperty("scroller");
+        auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
+        if (jsScroller) {
+            auto proxy = AceType::DynamicCast<NG::ScrollBarProxy>(jsScroller->GetScrollBarProxy());
+            if (!proxy) {
+                proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+                jsScroller->SetScrollBarProxy(proxy);
+            }
+            proxy->RegisterScrollBar(pattern);
+            pattern->SetScrollBarProxy(proxy);
+        }
+        // Parse direction.
+        auto directionValue = obj->GetProperty("direction");
+        if (directionValue->IsNumber()) {
+            NG::ScrollBarView::SetAxis(AXIS[directionValue->ToNumber<int32_t>()]);
+        }
+        // Parse state.
+        auto stateValue = obj->GetProperty("state");
+        if (stateValue->IsNumber()) {
+            NG::ScrollBarView::SetDisplayMode(stateValue->ToNumber<int32_t>());
+        }
+    }
+}
 
 } // namespace
 
@@ -52,6 +85,13 @@ void JSScrollBar::JSBind(BindingTarget globalObj)
 
 void JSScrollBar::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto frameNode = NG::ScrollBarView::Create();
+        auto pattern = AceType::DynamicCast<NG::ScrollBarPattern>(frameNode->GetPattern());
+        NGSetScrollControllerAndProxy(pattern, info);
+        return;
+    }
+
     RefPtr<Component> child;
     auto scrollBarComponent = AceType::MakeRefPtr<OHOS::Ace::ScrollBarComponent>(child);
     if (info.Length() > 0 && info[0]->IsObject()) {
@@ -60,7 +100,7 @@ void JSScrollBar::Create(const JSCallbackInfo& info)
         auto scrollerValue = obj->GetProperty("scroller");
         auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
         if (jsScroller) {
-            auto proxy = jsScroller->GetScrollBarProxy();
+            auto proxy = AceType::DynamicCast<ScrollBarProxy>(jsScroller->GetScrollBarProxy());
             if (!proxy) {
                 proxy = AceType::MakeRefPtr<ScrollBarProxy>();
                 jsScroller->SetScrollBarProxy(proxy);

@@ -128,12 +128,14 @@ RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
 void TextPickerDialogView::SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value)
 {
     textPickerPattern->SetSelected(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selected, value);
 }
 
 void TextPickerDialogView::SetRange(
     const RefPtr<TextPickerPattern>& textPickerPattern, const std::vector<std::string>& value)
 {
     textPickerPattern->SetRange(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Range, value);
 }
 
 void TextPickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange)

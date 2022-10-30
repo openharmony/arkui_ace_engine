@@ -81,11 +81,17 @@ void ShapeAbstractModelNG::SetAntiAlias(bool antiAlias)
 
 void ShapeAbstractModelNG::SetWidth(Dimension& width)
 {
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
     ViewAbstract::SetWidth(CalcLength(width));
 }
 
 void ShapeAbstractModelNG::SetHeight(Dimension& height)
 {
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
     ViewAbstract::SetHeight(CalcLength(height));
 }
 

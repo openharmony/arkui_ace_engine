@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_POLYGON_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_POLYGON_PAINT_PROPERTY_H
 
+#include <array>
 #include <string>
+#include <vector>
 #include "core/components/shape/shape_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
@@ -60,12 +62,11 @@ public:
     {
         ShapePaintProperty::ToJsonValue(json);
         if (propPoints_.has_value()) {
-            auto pointSize = propPoints_.value().size() * 2;
-            std::vector<double> point(pointSize);
-            for (int i = 0, j = 0; i < propPoints_.value().size() && j < pointSize; i++) {
-                point[j] = propPoints_.value()[i].first.ConvertToVp();
-                ++j;
-                point[j] = propPoints_.value()[i].second.ConvertToVp();
+            const auto size = static_cast<int32_t>(propPoints_.value().size());
+            std::vector<std::array<float, 2>> point(size);
+            for (int i = 0; i < size; i++) {
+                point[i][0] = propPoints_.value()[i].first.ConvertToPx();
+                point[i][1] = propPoints_.value()[i].second.ConvertToPx();
             }
             json->Put("points", point.data());
         }

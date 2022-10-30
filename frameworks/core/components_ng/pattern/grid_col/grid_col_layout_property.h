@@ -20,8 +20,8 @@
 #include <vector>
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_v2/grid_layout/grid_container_util_class.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_v2/grid_layout/grid_container_util_class.h"
 
 namespace OHOS::Ace::NG {
 
@@ -48,6 +48,8 @@ public:
         LinearLayoutProperty::Reset();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Span, V2::GridContainerSize, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Offset, V2::GridContainerSize, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Order, V2::GridContainerSize, PROPERTY_UPDATE_MEASURE);
@@ -72,31 +74,7 @@ public:
     }
 
 private:
-    int32_t GetPropValue(const V2::GridContainerSize& prop, V2::GridSizeType sizeType) const
-    {
-        switch (sizeType) {
-            case V2::GridSizeType::XS:
-                return prop.xs;
-                break;
-            case V2::GridSizeType::SM:
-                return prop.sm;
-                break;
-            case V2::GridSizeType::MD:
-                return prop.md;
-                break;
-            case V2::GridSizeType::LG:
-                return prop.lg;
-                break;
-            case V2::GridSizeType::XL:
-                return prop.xl;
-                break;
-            case V2::GridSizeType::XXL:
-                return prop.xxl;
-                break;
-            default:
-                return prop.xs;
-        }
-    }
+    static int32_t GetPropValue(const V2::GridContainerSize& prop, V2::GridSizeType sizeType);
 };
 } // namespace OHOS::Ace::NG
 #endif

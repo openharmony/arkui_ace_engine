@@ -147,6 +147,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     currentDelta_ = 0.0f;
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
+    headerGroupNode_ = listLayoutAlgorithm->GetHeaderGroupNode();
+    footerGroupNode_ = listLayoutAlgorithm->GetFooterGroupNode();
     CheckScrollable();
 
     bool indexChanged =
@@ -252,7 +254,14 @@ void ListPattern::UpdateCurrentOffset(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-
+    auto header = headerGroupNode_.Upgrade();
+    if (header) {
+        header->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    auto footer = footerGroupNode_.Upgrade();
+    if (footer) {
+        footer->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     if (!IsOutOfBoundary() || !scrollable_) {
         return;
     }

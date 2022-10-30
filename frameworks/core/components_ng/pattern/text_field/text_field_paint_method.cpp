@@ -93,9 +93,9 @@ void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintW
     auto endOffset =
         std::max(textFieldPattern->GetSelectionBaseOffsetX(), textFieldPattern->GetSelectionDestinationOffsetX());
     auto paintOffset = paintWrapper->GetContentOffset() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
-    RSRect clipInnerRect(paintOffset.GetX(), textFieldPattern->GetFrameRect().GetY(),
+    RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
         paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
-        textFieldPattern->GetFrameRect().GetY() + textFieldPattern->GetFrameRect().Height());
+        paintOffset.GetY() + paintWrapper->GetContentSize().Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
         case InputStyle::DEFAULT:

@@ -39,14 +39,13 @@ private:
     void DrawCheck(const ScopedCanvas& canvas, const Offset& origin, const flutter::Paint& paint,
         const flutter::Paint& shadowPaint) const;
     void DrawActiveBorder(const ScopedCanvas& canvas, const Offset& paintOffset, flutter::Paint& strokePaint) const;
-    void DrawActiveSquare(const ScopedCanvas& canvas, const Offset& paintOffset, flutter::Paint& strokePaint) const;
-    void SetUIStatus(ScopedCanvas& canvas, Offset& paintOffset,
-        flutter::Paint& strokePaint, flutter::Paint& shadowPaint);
+    void DrawPartSelect(const ScopedCanvas& canvas, const Offset& origin, flutter::Paint& paint,
+        const flutter::Paint& shadowPaint) const;
+    void SetUIStatus(
+        ScopedCanvas& canvas, Offset& paintOffset, flutter::Paint& strokePaint, flutter::Paint& shadowPaint);
     void DrawUnselected(
         const ScopedCanvas& canvas, const Offset& origin, uint32_t paintColor, flutter::Paint& paint) const;
     void DrawBorder(
-        const ScopedCanvas& canvas, const Offset& origin, const flutter::Paint& paint, const Size& paintSize) const;
-    void DrawSquare(
         const ScopedCanvas& canvas, const Offset& origin, const flutter::Paint& paint, const Size& paintSize) const;
     void DrawAnimationOffToOn(ScopedCanvas& canvas, const Offset& origin, const flutter::Paint& paint,
         const flutter::Paint& shadowPaint) const;

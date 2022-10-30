@@ -23,7 +23,7 @@ void Animator::SetDurationScale(float scale)
     scale_ = scale;
 }
 
-float Animator::GetAnimationScale()
+float Animator::GetAnimationScale() const
 {
     return scale_;
 }

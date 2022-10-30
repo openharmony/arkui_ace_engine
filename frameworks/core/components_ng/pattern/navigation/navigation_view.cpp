@@ -426,7 +426,7 @@ void NavigationView::SetMenuItems(std::list<BarItem>&& menuItems)
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     auto rowProperty = menuNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
-    rowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
+    rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     for (const auto& menuItem : menuItems) {
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
@@ -578,11 +578,9 @@ void NavigationView::SetHideBackButton(bool hideBackButton)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto titleBarNode = AceType::DynamicCast<NavBarNode>(navBarNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateHideBackButton(hideBackButton);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
 void NavigationView::SetHideToolBar(bool hideToolBar)

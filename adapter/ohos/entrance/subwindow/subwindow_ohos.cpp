@@ -145,6 +145,16 @@ void SubwindowOhos::InitContainer()
         }
     }
 #endif
+    if (container->IsCurrentUseNewPipeline()) {
+        auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
+            Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
+        if (!subPipelineContextNG) {
+            LOGE("Get SubPipelineContext failed, pipelineContext is null");
+            return;
+        }
+        subPipelineContextNG->SetupSubRootElement();
+        return;
+    }
     auto subPipelineContext =
         DynamicCast<PipelineContext>(Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
     if (!subPipelineContext) {
@@ -265,6 +275,46 @@ void SubwindowOhos::ClearMenu()
     LOGI("Subwindow clear menu end.");
 }
 
+void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
+{
+    ShowWindow();
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->ShowMenu(targetId, true, offset, menuNode, true);
+}
+
+void SubwindowOhos::HideMenuNG()
+{
+    auto targetId = targetId_;
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->HideMenu(targetId);
+    context->FlushPipelineImmediately();
+    HideWindow();
+}
+
+void SubwindowOhos::HideMenuNG(int32_t targetId)
+{
+    targetId_ = targetId;
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->HideMenu(targetId_);
+    context->FlushPipelineImmediately();
+    HideWindow();
+}
+
 void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 {
     LOGI("Show the menu");
@@ -334,22 +384,11 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 {
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
+        posX = 0;
+        posY = 0;
+        width = defaultDisplay->GetWidth();
+        height = defaultDisplay->GetHeight();
         density = defaultDisplay->GetVirtualPixelRatio();
-    }
-    auto mainWindow = Platform::AceContainer::GetUIWindow(parentContainerId_);
-    if (!mainWindow) {
-        LOGE("mainWindow is nullptr");
-        if (defaultDisplay) {
-            posX = 0;
-            posY = 0;
-            width = defaultDisplay->GetWidth();
-            height = defaultDisplay->GetHeight();
-        }
-    } else {
-        posX = static_cast<int32_t>(mainWindow->GetRect().posX_);
-        posY = static_cast<int32_t>(mainWindow->GetRect().posY_);
-        width = static_cast<int32_t>(mainWindow->GetRect().width_);
-        height = static_cast<int32_t>(mainWindow->GetRect().height_);
     }
     LOGI("Toast posX: %{public}d, posY: %{public}d, width: %{public}d, height: %{public}d, density: %{public}f",
         posX, posY, width, height, density);
@@ -360,7 +399,7 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
     OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
     windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     windowOption->SetWindowRect({ posX, posY, width, height });
-    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
     int32_t dialogId = gToastDialogId.fetch_add(1, std::memory_order_relaxed);
     std::string windowName = "ARK_APP_SUBWINDOW_TOAST_DIALOG_" + std::to_string(dialogId);
     dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
@@ -368,6 +407,7 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
         LOGI("create window error return");
         return false;
     }
+    dialogWindow_->SetLayoutFullScreen(true);
     LOGI("SubwindowOhos::InitToastDialogWindow end");
     return true;
 }

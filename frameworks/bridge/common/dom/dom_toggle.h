@@ -60,7 +60,6 @@ private:
     Color checkedColor_;
     Color textColor_;
     double blendOpacity_ = 1.0;
-    bool isDisabled_ = false;
     bool colorChanged_ = false;
 };
 

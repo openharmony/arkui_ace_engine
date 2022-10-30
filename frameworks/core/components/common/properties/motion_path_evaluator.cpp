@@ -66,6 +66,7 @@ MotionPathPosition MotionPathEvaluator::Evaluate(float fraction)
         return MotionPathPosition { .offset = startPoint_ * (1.0f - fraction) + endPoint_ * fraction, .rotate = 0.0f };
     }
     auto progress = motionPathOption_.GetBegin() * (1.0f - fraction) + motionPathOption_.GetEnd() * fraction;
+#ifndef NG_BUILD
     MotionPathPosition position;
     if (FlutterSvgPainter::GetMotionPathPosition(motionPathOption_.GetPath(), progress, position)) {
         if (positionType_ == PositionType::PTOFFSET) {
@@ -73,6 +74,7 @@ MotionPathPosition MotionPathEvaluator::Evaluate(float fraction)
         }
         return position;
     }
+#endif
     return MotionPathPosition { .offset = Offset(), .rotate = 0.0f };
 }
 

@@ -214,7 +214,10 @@ public:
         }
 
         ContainerScope scope(instanceId_);
-        taskExecutor->PostTask([] { SubwindowManager::GetInstance()->ClearMenu(); }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask([] {
+            SubwindowManager::GetInstance()->ClearMenu();
+            SubwindowManager::GetInstance()->HideMenuNG();
+        }, TaskExecutor::TaskType::UI);
     }
 
 private:
@@ -1025,12 +1028,21 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     if (isDialog) {
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
     } else {
-        container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
-            runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
-                // Sub-window ,just return.
-                LOGI("Content event callback");
-            }),
-            false, true);
+        if (Container::IsCurrentUseNewPipeline()) {
+            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
+                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                    // Sub-window ,just return.
+                    LOGI("Content event callback");
+                }),
+                false, true, true);
+        } else {
+            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
+                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                    // Sub-window ,just return.
+                    LOGI("Content event callback");
+                }),
+                false, true);
+        }
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);

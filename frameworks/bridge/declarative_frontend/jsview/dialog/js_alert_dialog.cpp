@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "base/log/ace_scoring_log.h"
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components_ng/event/click_event.h"

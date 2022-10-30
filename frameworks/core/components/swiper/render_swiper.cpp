@@ -1307,6 +1307,11 @@ double RenderSwiper::CalculateEndOffset(int32_t fromIndex, int32_t toIndex, bool
     return end;
 }
 
+void RenderSwiper::ResetScrollOffset()
+{
+    scrollOffset_ = 0.0;
+}
+
 void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool reverse)
 {
     if (!swipeToController_ || isIndicatorAnimationStart_ || fromIndex == toIndex) {
@@ -1346,6 +1351,7 @@ void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool r
             swiper->outItemIndex_ = fromIndex;
             swiper->currentIndex_ = toIndex;
             swiper->moveStatus_ = false;
+            swiper->ResetScrollOffset();
             swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
