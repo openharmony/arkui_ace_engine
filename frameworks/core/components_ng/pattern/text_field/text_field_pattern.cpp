@@ -184,12 +184,16 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     } else if (caretUpdateType_ == CaretUpdateType::PRESSED) {
         // caret offset updated by gesture will not cause textRect to change offset
         UpdateCaretPositionByPressOffset();
-        return true;
+        return false;
     } else if (caretUpdateType_ == CaretUpdateType::EVENT || caretUpdateType_ == CaretUpdateType::DEL) {
         UpdateCaretOffsetByEvent();
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
-        caretOffsetX_ = GetPaddingLeft();
-        return true;
+        if (GetEditingValue().text.empty()) {
+            SetCaretOffsetXForEmptyText();
+        } else {
+            caretOffsetX_ = textRect_.GetX() + textRect_.Width();
+        }
+        return false;
     }
     // after new text input or events such as left right key,
     // the procedure will be:
@@ -199,7 +203,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     AdjustTextRectOffsetX();
     AdjustTextAreaOffsetY();
     UpdateSelectionOffset();
-    return true;
+    return false;
 }
 
 bool TextFieldPattern::IsTextArea()
@@ -222,23 +226,28 @@ void TextFieldPattern::UpdateDestinationToCaretByEvent()
 
 void TextFieldPattern::UpdateCaretOffsetByLastTouchOffset()
 {
-    Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX(), 0.0f);
     // simplify calculation when text not filling the textfield yet and touch out of boundary edge case
-    if (textRect_.Width() <= contentRect_.Width() && GreatOrEqual(offset.GetX(), paragraph_->GetLongestLine())) {
-        textEditingValue_.CursorMoveToPosition(static_cast<int32_t>(textEditingValue_.GetWideText().length()));
-        caretOffsetX_ = static_cast<float>(paragraph_->GetLongestLine()) + GetPaddingLeft();
-        return;
+    if (textRect_.Width() <= contentRect_.Width()) {
+        if (GreatOrEqual(GetLastTouchOffset().GetX(), textRect_.GetX() + textRect_.Width())) {
+            textEditingValue_.CursorMoveToPosition(static_cast<int32_t>(textEditingValue_.GetWideText().length()));
+            caretOffsetX_ = textRect_.GetX() + textRect_.Width();
+            return;
+        } else if (LessOrEqual(GetLastTouchOffset().GetX(), textRect_.GetX())) {
+            caretOffsetX_ = textRect_.GetX();
+            return;
+        }
     }
+    Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX() - contentRect_.GetX(), 0.0f);
     auto position = ConvertTouchOffsetToCaretPosition(offset);
     textEditingValue_.CursorMoveToPosition(position);
-    caretOffsetX_ = CalcCursorOffsetXByPosition(position) + GetPaddingLeft();
+    caretOffsetX_ = CalcCursorOffsetXByPosition(position) + textRect_.GetX();
 }
 
 // return bool that caret might move out of content rect and need adjust position
 bool TextFieldPattern::UpdateCaretPositionByMouseMovement()
 {
     if (GetEditingValue().text.empty()) {
-        caretOffsetX_ = GetPaddingLeft();
+        caretOffsetX_ = textRect_.GetX();
         selectionMode_ = SelectionMode::NONE;
         return false;
     }
@@ -255,39 +264,32 @@ bool TextFieldPattern::UpdateCaretPositionByMouseMovement()
         needToShiftCaretAndTextRect = false;
     }
     textSelector_.destinationOffset = textEditingValue_.caretPosition;
-    if (textSelector_.destinationOffset != textSelector_.baseOffset) {
-        selectionMode_ = SelectionMode::SELECT;
-    } else {
-        selectionMode_ = SelectionMode::NONE;
-    }
+    selectionMode_ =
+        textSelector_.destinationOffset == textSelector_.baseOffset ? SelectionMode::NONE : SelectionMode::SELECT;
     return needToShiftCaretAndTextRect;
 }
 
 void TextFieldPattern::UpdateCaretOffsetByEvent()
 {
+    if (textEditingValue_.text.empty()) {
+        SetCaretOffsetXForEmptyText();
+        return;
+    }
     if (isMousePressed_) {
+        // handle mouse event only
         if (!UpdateCaretPositionByMouseMovement()) {
             return;
         }
     }
     // set caret and text rect to basic padding if caret is at position 0 or text not exists
-    if (textEditingValue_.text.empty() || textEditingValue_.caretPosition == 0) {
-        caretOffsetX_ = GetPaddingLeft();
-        textRect_.SetLeft(GetPaddingLeft());
-        return;
-    }
-    // simplify calculation if caret at the end and paragraph length not exceeding content width
-    if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.text.size()) &&
-        LessOrEqual(paragraph_->GetLongestLine(), contentRect_.Width())) {
-        caretOffsetX_ = static_cast<float>(paragraph_->GetLongestLine());
+    if (textEditingValue_.caretPosition == 0) {
+        caretOffsetX_ = textRect_.GetX();
         return;
     }
     // offsetToParagraphBeginning indicates the cursor position to paragraph beginning
     auto offsetToParagraphBeginning = CalcCursorOffsetXByPosition(textEditingValue_.caretPosition);
     // layout caret for the first time to the position by assuming text rect is at basic padding
-    caretOffsetX_ = offsetToParagraphBeginning + contentRect_.GetX();
-    // layout text rect by caret offset - offsetToParagraphBeginning
-    textRect_.SetLeft(caretOffsetX_ - offsetToParagraphBeginning);
+    caretOffsetX_ = offsetToParagraphBeginning + textRect_.GetX();
 }
 
 void TextFieldPattern::UpdateSelectionOffset()
@@ -310,28 +312,41 @@ void TextFieldPattern::UpdateSelectionOffset()
 
 void TextFieldPattern::UpdateCaretPositionByTextEdit()
 {
-    if (textEditingValue_.text.empty() || textEditingValue_.caretPosition == 0) {
-        caretOffsetX_ = GetPaddingLeft();
-        textRect_.SetLeft(GetPaddingLeft());
+    if (textEditingValue_.text.empty()) {
+        SetCaretOffsetXForEmptyText();
         return;
     }
-    // simplify calculation for scene of inserting text to tail when text width not exceeding content width
-    if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.text.size()) &&
-        paragraph_->GetLongestLine() <= contentRect_.Width()) {
-        caretOffsetX_ = static_cast<float>(paragraph_->GetLongestLine()) + GetPaddingLeft();
+    if (textEditingValue_.caretPosition == 0) {
+        caretOffsetX_ = textRect_.GetX();
         return;
     }
-    // scene of insert in the middle
-    // after text insert, selection will update both base and extend offset to the same value
     auto offsetToParagraphBeginning = CalcCursorOffsetXByPosition(textEditingValue_.caretPosition);
-    caretOffsetX_ = offsetToParagraphBeginning + GetPaddingLeft();
-    textRect_.SetLeft(caretOffsetX_ - offsetToParagraphBeginning);
+    caretOffsetX_ = offsetToParagraphBeginning + textRect_.GetX();
+}
+
+void TextFieldPattern::SetCaretOffsetXForEmptyText()
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+        case TextAlign::START:
+            caretOffsetX_ = textRect_.GetX();
+            return;
+        case TextAlign::CENTER:
+            caretOffsetX_ = static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f;
+            return;
+        case TextAlign::END:
+            caretOffsetX_ = static_cast<float>(contentRect_.GetX()) + contentRect_.Width();
+            return;
+        default:
+            caretOffsetX_ = textRect_.GetX();
+            return;
+    }
 }
 
 void TextFieldPattern::UpdateCaretPositionByPressOffset()
 {
     if (GetEditingValue().text.empty()) {
-        caretOffsetX_ = GetPaddingLeft();
+        SetCaretOffsetXForEmptyText();
         return;
     }
     // skip updating caret if touch position is in the left or right half ellipse parts
@@ -963,6 +978,12 @@ void TextFieldPattern::OnModifyDone()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     instanceId_ = context->GetInstanceId();
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (keyboard_ != layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
+        CloseKeyboard(true);
+        keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    }
 #if defined(ENABLE_STANDARD_INPUT)
     UpdateConfiguration();
 #endif
@@ -974,9 +995,9 @@ void TextFieldPattern::OnModifyDone()
     }
     obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     caretHeight_ = GetTextOrPlaceHolderFontSize() + static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f;
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     utilPadding_ = layoutProperty->CreatePaddingAndBorderWithDefault(basicPaddingLeft_, 0.0f, 0.0f, 0.0f);
+    textEditingValue_.text = layoutProperty->GetValueValue("");
+    textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.size());
 }
 
 void TextFieldPattern::InitMouseEvent()
@@ -1099,7 +1120,8 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
             return;
         }
         textEditingValue_.text = textToUpdate;
-        textEditingValue_.CursorMoveRight();
+        textEditingValue_.CursorMoveToPosition(
+            textEditingValue_.caretPosition + static_cast<int32_t>(insertValue.size()));
     }
     // TODO: update obscure pending for password input
     SetEditingValueToProperty(textEditingValue_.text);

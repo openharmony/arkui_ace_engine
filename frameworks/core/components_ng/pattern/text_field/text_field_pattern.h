@@ -213,6 +213,11 @@ public:
         return utilPadding_.left.value_or(basicPaddingLeft_);
     }
 
+    float GetPaddingRight() const
+    {
+        return utilPadding_.right.value_or(basicPaddingLeft_);
+    }
+
     const PaddingPropertyF& GetUtilPadding() const
     {
         return utilPadding_;
@@ -314,6 +319,7 @@ private:
     void StartTwinkling();
     void StopTwinkling();
 
+    void SetCaretOffsetXForEmptyText();
     void UpdateTextFieldManager(const Offset& offset);
     void OnTextInputActionUpdate(TextInputAction value);
 
