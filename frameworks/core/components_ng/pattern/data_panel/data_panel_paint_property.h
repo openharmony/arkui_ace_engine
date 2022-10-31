@@ -58,7 +58,7 @@ public:
             jsonDashArray->Put(index.c_str(), value);
         }
         bool closeEffect = true;
-        if(propEffect_.has_value()){
+        if (propEffect_.has_value()) {
             closeEffect = !propEffect_.value();
         }
         json->Put("max", std::to_string(propMax_.value_or(100)).c_str());

@@ -59,11 +59,11 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);
-        json->Put("value", std::to_string(propValue_.value_or(0)).c_str());
-        json->Put("max", std::to_string(propMax_.value_or(100)).c_str());
-        json->Put("min", std::to_string(propMin_.value_or(0)).c_str());
-        json->Put("startAngle", std::to_string(propStartAngle_.value_or(0)).c_str());
-        json->Put("endAngle", std::to_string(propEndAngle_.value_or(360)).c_str());
+        json->Put("value", StringUtils::DoubleToString(propValue_.value_or(0)).c_str());
+        json->Put("max", StringUtils::DoubleToString(propMax_.value_or(100)).c_str());
+        json->Put("min", StringUtils::DoubleToString(propMin_.value_or(0)).c_str());
+        json->Put("startAngle", StringUtils::DoubleToString(propStartAngle_.value_or(0)).c_str());
+        json->Put("endAngle", StringUtils::DoubleToString(propEndAngle_.value_or(360)).c_str());
         if (propStrokeWidth_.has_value()) {
             json->Put("strokeWidth", propStrokeWidth_.value().ToString().c_str());
         } else {

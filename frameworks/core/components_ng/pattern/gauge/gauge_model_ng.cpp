@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 
-#include <cmath>
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
@@ -46,17 +44,11 @@ void GaugeModelNG::SetValue(float value)
 
 void GaugeModelNG::SetStartAngle(float startAngle)
 {
-    if (std::isnan(startAngle)) {
-        startAngle = DEFAULT_START_DEGREE;
-    }
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, StartAngle, startAngle);
 }
 
 void GaugeModelNG::SetEndAngle(float endAngle)
 {
-    if (std::isnan(endAngle)) {
-        endAngle = DEFAULT_END_DEGREE;
-    }
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, EndAngle, endAngle);
 }
 
