@@ -122,16 +122,17 @@ bool ParseCommonTitle(const JSRef<JSVal>& jsValue)
         return false;
     }
 
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    JSRef<JSVal> title = jsObj->GetProperty("main");
     bool isCommonTitle = false;
-    if (title->IsString()) {
-        NG::NavigationView::SetTitle(title->ToString());
-        isCommonTitle = true;
-    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
     if (subtitle->IsString()) {
         NG::NavigationView::SetSubtitle(subtitle->ToString());
+        isCommonTitle = true;
+    }
+    JSRef<JSVal> title = jsObj->GetProperty("main");
+    if (title->IsString()) {
+        // if no subtitle, title's maxLine = 2
+        NG::NavigationView::SetTitle(title->ToString(), (subtitle->IsString()));
         isCommonTitle = true;
     }
     return isCommonTitle;
