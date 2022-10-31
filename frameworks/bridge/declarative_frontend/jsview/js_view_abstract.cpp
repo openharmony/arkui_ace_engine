@@ -1894,8 +1894,7 @@ void JSViewAbstract::ParseBorderImageDimension(
     for (uint32_t i = 0; i < keys.size(); i++) {
         Dimension currentDimension;
         auto dimensionValue = object->GetProperty(keys.at(i).c_str());
-        if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
-            ParseJsDimensionVp(dimensionValue, currentDimension);
+        if (ParseJsDimensionVp(dimensionValue, currentDimension)) {
             auto direction = static_cast<BorderImageDirection>(i);
             switch (direction) {
                 case BorderImageDirection::LEFT:
@@ -1995,9 +1994,8 @@ void JSViewAbstract::ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<Bor
 
 void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    if (args->IsNumber() || args->IsString()) {
-        Dimension outsetDimension;
-        ParseJsDimensionVp(args, outsetDimension);
+    Dimension outsetDimension;
+    if (ParseJsDimensionVp(args, outsetDimension)) {
         borderImage->SetEdgeOutset(BorderImageDirection::LEFT, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::TOP, outsetDimension);
@@ -2023,8 +2021,7 @@ void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<Bor
 void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
     Dimension sliceDimension;
-    if (args->IsNumber() || args->IsString()) {
-        ParseJsDimensionVp(args, sliceDimension);
+    if (ParseJsDimensionVp(args, sliceDimension)) {
         borderImage->SetEdgeSlice(BorderImageDirection::LEFT, sliceDimension);
         borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, sliceDimension);
         borderImage->SetEdgeSlice(BorderImageDirection::TOP, sliceDimension);
@@ -2036,8 +2033,7 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
     static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
     for (uint32_t i = 0; i < keys.size(); i++) {
         auto dimensionValue = object->GetProperty(keys.at(i).c_str());
-        if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
-            ParseJsDimensionVp(dimensionValue, sliceDimension);
+        if (ParseJsDimensionVp(dimensionValue, sliceDimension)) {
             borderImage->SetEdgeSlice(static_cast<BorderImageDirection>(i), sliceDimension);
         }
     }
@@ -2045,9 +2041,8 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
 
 void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    if (args->IsNumber() || args->IsString()) {
-        Dimension widthDimension;
-        ParseJsDimensionVp(args, widthDimension);
+    Dimension widthDimension;
+    if (ParseJsDimensionVp(args, widthDimension)) {
         borderImage->SetEdgeWidth(BorderImageDirection::LEFT, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::TOP, widthDimension);
