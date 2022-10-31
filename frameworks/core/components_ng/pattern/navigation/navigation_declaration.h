@@ -110,10 +110,9 @@ enum class NavigationTitleMode {
 };
 
 enum class NavigationMode {
-    AUTO = 0,
+    STACK = 0,
     SPLIT,
-    STACK,
-    OVERLAY,
+    AUTO,
 };
 
 enum class NavBarPosition {

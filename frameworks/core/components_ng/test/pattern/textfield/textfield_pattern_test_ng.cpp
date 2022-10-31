@@ -37,6 +37,7 @@ const std::string SINGLE_CHAR = "X";
 const std::string SINGLE_INSERT_TO_HEAD = "XDEFAULT_TEXT";
 const int32_t CARET_POSITION_0 = 0;
 const int32_t CARET_POSITION_1 = 10;
+const int32_t DELETE_LENGTH_1 = 1;
 } // namespace
 class TextFieldPatternTestNg : public testing::Test {
 public:
@@ -88,6 +89,27 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldInsertValue002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextFieldDeleteForwardValue001
+ * @tc.desc: Test deleting value of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldDeleteForwardValue001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->InsertValue(TEXT_VALUE);
+    EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, static_cast<int32_t>(TEXT_VALUE.size()));
+    pattern->DeleteForward(DELETE_LENGTH_1);
+    EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE.substr(0, TEXT_VALUE.size() - DELETE_LENGTH_1));
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, pattern->GetEditingValue().caretPosition - DELETE_LENGTH_1);
+}
+
+/**
  * @tc.name: TextFieldMoveCaret001
  * @tc.desc: Test textfield move caret.
  * @tc.type: FUNC
@@ -102,7 +124,6 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldMoveCaret001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->InsertValue(TEXT_VALUE);
     EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE);
-    EXPECT_EQ(pattern->GetEditingValue().caretPosition, SINGLE_CHAR.size());
     pattern->SetCaretPosition(CARET_POSITION_1);
     // inserting text value length larger than caret position
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, CARET_POSITION_1);
