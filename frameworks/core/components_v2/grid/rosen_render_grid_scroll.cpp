@@ -46,10 +46,11 @@ void RosenRenderGridScroll::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     bool needPaint = false;
-    if (scrollBar_->GetFirstLoad() || scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
+    if (scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
         scrollBarOpacity_ = UINT8_MAX;
         needPaint = true;
     } else {
+        // for DisplayMode::Auto
         if (scrollBarOpacity_ != 0) {
             needPaint = true;
         }
@@ -69,10 +70,6 @@ void RosenRenderGridScroll::Paint(RenderContext& context, const Offset& offset)
     scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), lastOffset, GetEstimatedHeight());
     RefPtr<RosenScrollBarPainter> scrollPainter = AceType::MakeRefPtr<RosenScrollBarPainter>();
     scrollPainter->PaintBar(canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
-    if (scrollBar_->GetFirstLoad()) {
-        scrollBar_->SetFirstLoad(false);
-        scrollBar_->HandleScrollBarEnd();
-    }
 }
 
 } // namespace OHOS::Ace::V2

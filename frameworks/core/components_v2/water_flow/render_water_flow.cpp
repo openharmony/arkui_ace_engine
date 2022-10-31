@@ -171,6 +171,10 @@ void RenderWaterFlow::CreateScrollable()
             if (proxy) {
                 proxy->StartScrollBarAnimator();
             }
+            auto scrollBar = flow->scrollBar_;
+            if (scrollBar) {
+                scrollBar->HandleScrollBarEnd();
+            }
         }
     });
     scrollable_->Initialize(context_);
@@ -694,21 +698,21 @@ void RenderWaterFlow::InitScrollBar()
         return;
     }
 
-    if (!component_->GetController()) {
-        component_->SetScrollBarDisplayMode(DisplayMode::OFF);
+    if (scrollBar_) {
+        scrollBar_->SetDisplayMode(component_->GetScrollBarDisplayMode());
+        scrollBar_->Reset();
+        return;
     }
 
     const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
     if (!theme) {
         return;
     }
-    if (scrollBar_) {
-        scrollBar_->Reset();
-    } else {
-        RefPtr<WaterFlowScrollController> controller = AceType::MakeRefPtr<WaterFlowScrollController>();
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBarDisplayMode(), theme->GetShapeMode());
-        scrollBar_->SetScrollBarController(controller);
-    }
+
+    RefPtr<WaterFlowScrollController> controller = AceType::MakeRefPtr<WaterFlowScrollController>();
+    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBarDisplayMode(), theme->GetShapeMode());
+    scrollBar_->SetScrollBarController(controller);
+
     // set the scroll bar style
     scrollBar_->SetMinHeight(theme->GetMinHeight());
     scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
