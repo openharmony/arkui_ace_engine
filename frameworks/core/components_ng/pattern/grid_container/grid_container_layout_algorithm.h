@@ -38,15 +38,13 @@ public:
         CHECK_NULL_VOID(layoutProperty);
         const auto& gridContainerLayoutProperty = DynamicCast<GridContainerLayoutProperty>(layoutProperty);
         CHECK_NULL_VOID(gridContainerLayoutProperty);
-        gridContainerLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         float width = CreateIdealSize(
-            layoutProperty->GetLayoutConstraint().value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true)
+            layoutProperty->GetLayoutConstraint().value(), Axis::VERTICAL, MeasureType::MATCH_PARENT, true)
                           .Width();
         gridContainerLayoutProperty->BuildWidth(width);
 
         auto curLayoutProp = layoutWrapper->GetHostNode()->GetLayoutProperty<GridContainerLayoutProperty>();
-        curLayoutProp->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        curLayoutProp->BuildWidth(width);
+        curLayoutProp->UpdateContainerInfo(gridContainerLayoutProperty->GetContainerInfoRef());
 
         LinearLayoutAlgorithm::Measure(layoutWrapper);
     }

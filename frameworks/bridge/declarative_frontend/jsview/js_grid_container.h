@@ -24,20 +24,7 @@ class JSGridContainer : public JSColumn {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-    static RefPtr<GridContainerInfo> GetContainer()
-    {
-        return gridContainerStack_.empty() ? nullptr : gridContainerStack_.back();
-    }
     static void Pop();
-
-private:
-    /*
-     * GridContainer layout info is stored in box component in non-declarative_fronted bridge instead of
-     * creating a new component.
-     * Using thread_local stack is a compromise for compatibility, as child node cannot get info from its ancestors.
-     * In NG framework, layout info is stored in a frameNode and this stack is obsoleted.
-     */
-    static thread_local std::vector<RefPtr<GridContainerInfo>> gridContainerStack_;
 };
 
 } // namespace OHOS::Ace::Framework

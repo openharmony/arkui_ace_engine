@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "grid_container_view.h"
+#include "grid_container_model_ng.h"
 
 #include "grid_container_pattern.h"
 
@@ -24,20 +24,14 @@
 
 namespace OHOS::Ace::NG {
 
-void GridContainerView::Create(const RefPtr<GridContainerInfo>& containerInfo)
+void GridContainerModelNG::Create(const RefPtr<GridContainerInfo>& containerInfo)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::GRIDCONTAINER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridContainerLayoutPattern>(); });
     stack->Push(frameNode);
-
     ACE_UPDATE_LAYOUT_PROPERTY(GridContainerLayoutProperty, ContainerInfo, *containerInfo);
-
-    PaddingProperty padding;
-    padding.left = CalcLength(containerInfo->GetMarginLeft());
-    padding.right = CalcLength(containerInfo->GetMarginRight());
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding);
 }
 
 } // namespace OHOS::Ace::NG

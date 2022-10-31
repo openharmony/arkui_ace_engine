@@ -100,8 +100,8 @@ public:
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
     virtual void SetUseAlign(
         AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) = 0;
-    virtual void SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset,
-        const RefPtr<GridContainerInfo>& info, GridSizeType type = GridSizeType::UNDEFINED) = 0;
+    virtual void SetGrid(
+        std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED) = 0;
     virtual void SetZIndex(int32_t value) = 0;
 
     // position

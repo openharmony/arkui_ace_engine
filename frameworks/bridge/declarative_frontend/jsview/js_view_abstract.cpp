@@ -2791,8 +2791,7 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
         return;
     }
     auto span = info[0]->ToNumber<int32_t>();
-    auto gridContainerInfo = JSGridContainer::GetContainer();
-    ViewAbstractModel::GetInstance()->SetGrid(span, std::nullopt, gridContainerInfo);
+    ViewAbstractModel::GetInstance()->SetGrid(span, std::nullopt);
 }
 
 void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
@@ -2802,8 +2801,7 @@ void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
         return;
     }
     auto offset = info[0]->ToNumber<int32_t>();
-    auto gridContainerInfo = JSGridContainer::GetContainer();
-    ViewAbstractModel::GetInstance()->SetGrid(std::nullopt, offset, gridContainerInfo);
+    ViewAbstractModel::GetInstance()->SetGrid(std::nullopt, offset);
 }
 
 static bool ParseSpanAndOffset(const JSRef<JSVal>& val, uint32_t& span, int32_t& offset)
@@ -2836,7 +2834,6 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
     // keys order must be strictly refer to GridSizeType
     const char* keys[] = { "", "xs", "sm", "md", "lg" };
 
-    auto gridContainerInfo = JSGridContainer::GetContainer();
     for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
         JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
         if (val->IsNull() || val->IsEmpty()) {
@@ -2845,7 +2842,7 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
         uint32_t span = 0;
         int32_t offset = 0;
         if (ParseSpanAndOffset(val, span, offset)) {
-            ViewAbstractModel::GetInstance()->SetGrid(span, offset, gridContainerInfo, static_cast<GridSizeType>(i));
+            ViewAbstractModel::GetInstance()->SetGrid(span, offset, static_cast<GridSizeType>(i));
         }
     }
 }
