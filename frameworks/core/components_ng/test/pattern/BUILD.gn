@@ -28,5 +28,6 @@ group("pattern_unittest") {
     "text:text_pattern_test_ng",
     "textfield:textfield_pattern_test_ng",
     "toast:toast_pattern_test_ng",
+    "xcomponent:xcomponent_pattern_test_ng",
   ]
 }
