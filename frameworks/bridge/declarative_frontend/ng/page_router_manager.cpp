@@ -102,6 +102,24 @@ void PageRouterManager::Push(const RouterPageInfo& target, const std::string& pa
     StartPush(target, params, mode);
 }
 
+void PageRouterManager::PushWithCallback(const RouterPageInfo& target, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, RouterMode mode)
+{
+    CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGI("in router opt, post push router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent([weak = WeakClaim(this), target, params, mode, errorCallback]() {
+            auto router = weak.Upgrade();
+            CHECK_NULL_VOID(router);
+            router->PushWithCallback(target, params, errorCallback, mode);
+        });
+        return;
+    }
+    StartPush(target, params, mode, errorCallback);
+}
+
 void PageRouterManager::Replace(const RouterPageInfo& target, const std::string& params, RouterMode mode)
 {
     CHECK_RUN_ON(JS);
@@ -117,6 +135,24 @@ void PageRouterManager::Replace(const RouterPageInfo& target, const std::string&
         return;
     }
     StartReplace(target, params, mode);
+}
+
+void PageRouterManager::ReplaceWithCallback(const RouterPageInfo& target, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, RouterMode mode)
+{
+    CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGI("in router opt, post replace router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent([weak = WeakClaim(this), target, params, mode, errorCallback]() {
+            auto router = weak.Upgrade();
+            CHECK_NULL_VOID(router);
+            router->ReplaceWithCallback(target, params, errorCallback, mode);
+        });
+        return;
+    }
+    StartReplace(target, params, mode, errorCallback);
 }
 
 void PageRouterManager::BackWithTarget(const RouterPageInfo& target, const std::string& params)
@@ -362,7 +398,8 @@ std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const s
     return { std::distance(iter, pageRouterStack_.rend()) - 1, iter->Upgrade() };
 }
 
-void PageRouterManager::StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode)
+void PageRouterManager::StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     CHECK_RUN_ON(JS);
     RouterOptScope scope(this);
@@ -379,6 +416,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (pagePath.empty()) {
         LOGE("[Engine Log] this uri not support in route push.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
+        }
         return;
     }
 
@@ -396,7 +436,8 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
     LoadPage(GenerateNextPageId(), info, params);
 }
 
-void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode)
+void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     CHECK_RUN_ON(JS);
     RouterOptScope scope(this);
@@ -413,6 +454,9 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (pagePath.empty()) {
         LOGE("[Engine Log] this uri not support in route push.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR_LITE);
+        }
         return;
     }
 

@@ -1837,6 +1837,8 @@ shared_ptr<JsValue> JsHandleAnimator(
     }
     if (!arg) {
         LOGE("arg is nullptr");
+        runtime->ThrowError("Parameter error. The number of parameters must be greater than or equal to 1.",
+            ERROR_CODE_PARAM_INVALID);
         return runtime->NewNull();
     }
     auto page = GetStagingPage(runtime);
@@ -1845,6 +1847,12 @@ shared_ptr<JsValue> JsHandleAnimator(
         return runtime->NewNull();
     }
     std::string arguments = arg->ToString(runtime);
+    // argv[1] is "1" when input null.
+    if (arguments == "\"1\"") {
+        runtime->ThrowError("Parameter error. The number of parameters must be greater than or equal to 1.",
+            ERROR_CODE_PARAM_INVALID);
+        return runtime->NewNull();
+    }
     if (methodName == ANIMATOR_CREATE_ANIMATOR || methodName == ANIMATOR_CREATE) {
         int32_t bridgeId = JsiAnimatorBridgeUtils::JsCreateBridgeId();
         auto animatorContext = JsiAnimatorBridgeUtils::CreateAnimatorContext(runtime, page->GetPageId(), bridgeId);

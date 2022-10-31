@@ -807,14 +807,14 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
 }
 
 void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
-    Push(PageTarget(uri), params, errorCallback);
-}
-
-void FrontendDelegateDeclarative::PushWithModeAndCallback(const std::string& uri, const std::string& params,
-    uint32_t routerMode, const std::function<void(const std::string&, int32_t)>& errorCallback)
-{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->PushWithCallback({ uri }, params, errorCallback, static_cast<NG::RouterMode>(routerMode));
+        OnMediaQueryUpdate();
+        return;
+    }
     Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
 }
 
@@ -840,14 +840,14 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
 }
 
 void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
-    Replace(PageTarget(uri), params, errorCallback);
-}
-
-void FrontendDelegateDeclarative::ReplaceWithModeAndCallback(const std::string& uri, const std::string& params,
-    uint32_t routerMode, const std::function<void(const std::string&, int32_t)>& errorCallback)
-{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->ReplaceWithCallback(
+            { uri }, params, errorCallback, static_cast<NG::RouterMode>(routerMode));
+        return;
+    }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
 }
 
