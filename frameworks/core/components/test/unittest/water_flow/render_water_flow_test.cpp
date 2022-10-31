@@ -47,8 +47,8 @@ constexpr double START_POS = 0.0;
 constexpr size_t TOTAL_COUNT = 5000;
 const Size FLOW_MAX_SIZE(1000, 1000);
 const Size FLOW_MIN_SIZE(150, 150);
-constexpr Dimension MIN_WIDTH = 300.0_px;
-constexpr Dimension MIN_HEIGHT = 300.0_px;
+constexpr Dimension MIN_WIDTH = 100.0_px;
+constexpr Dimension MIN_HEIGHT = 100.0_px;
 constexpr Dimension MAX_WIDTH = 1000.0_px;
 constexpr Dimension MAX_HEIGHT = 1000.0_px;
 constexpr int64_t MICROSEC_TO_NANOSEC = 1000;
@@ -514,7 +514,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_ScrollToIndex_001, TestSize.Le
     auto iter = renderNode_->flowMatrix_.find(index);
     EXPECT_TRUE(iter != renderNode_->flowMatrix_.end());
     if (iter != renderNode_->flowMatrix_.end()) {
-        EXPECT_EQ(iter->second.mainPos, 400);
+        EXPECT_EQ(iter->second.mainPos, 250);
     }
 }
 
@@ -536,7 +536,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_ScrollToIndex_002, TestSize.Le
     auto iter = renderNode_->flowMatrix_.find(index);
     EXPECT_TRUE(iter != renderNode_->flowMatrix_.end());
     if (iter != renderNode_->flowMatrix_.end()) {
-        EXPECT_EQ(iter->second.mainPos, 400);
+        EXPECT_EQ(iter->second.mainPos, 250);
     }
 }
 
@@ -558,7 +558,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_ScrollToIndex_003, TestSize.Le
     auto iter = renderNode_->flowMatrix_.find(index);
     EXPECT_TRUE(iter != renderNode_->flowMatrix_.end());
     if (iter != renderNode_->flowMatrix_.end()) {
-        EXPECT_EQ(iter->second.mainPos, 400);
+        EXPECT_EQ(iter->second.mainPos, 250);
     }
 }
 
@@ -866,9 +866,9 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_PerformLayout_001, TestSize.Le
     EXPECT_EQ(renderNode_->crossSideSize_.size(), 1);
     size_t index = 0;
     for (const auto& item : renderNode_->GetChildren()) {
-        EXPECT_TRUE(item->GetPosition() == Offset(START_POS, index * 400));
-        EXPECT_TRUE(item->GetLayoutSize() == Size(renderNode_->crossSize_,
-            renderNode_->itemConstraintSize_.minMainSize));
+        EXPECT_TRUE(item->GetPosition() == Offset(
+            START_POS, index * (ITEM_HEIGHT + WaterFlowTestUtils::rowGap.Value())));
+        EXPECT_TRUE(item->GetLayoutSize() == Size(renderNode_->crossSize_, ITEM_HEIGHT));
         index++;
     }
 }
@@ -887,9 +887,10 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_PerformLayout_002, TestSize.Le
     EXPECT_EQ(renderNode_->crossSideSize_.size(), 2);
     size_t index = 0;
     for (const auto& item : renderNode_->GetChildren()) {
-        EXPECT_TRUE(item->GetPosition() == Offset(index % 2 * 550, index / 2 * 400));
-        EXPECT_TRUE(item->GetLayoutSize() == Size((renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT,
-            renderNode_->itemConstraintSize_.minMainSize));
+        EXPECT_TRUE(item->GetPosition() == Offset(
+            index % 2 * 550, index / 2 * (ITEM_HEIGHT + WaterFlowTestUtils::rowGap.Value())));
+        EXPECT_TRUE(item->GetLayoutSize() == Size(
+            (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT, ITEM_HEIGHT));
         index++;
     }
 }
@@ -908,9 +909,9 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_PerformLayout_003, TestSize.Le
     EXPECT_EQ(renderNode_->crossSideSize_.size(), 1);
     size_t index = 0;
     for (const auto& item : renderNode_->GetChildren()) {
-        EXPECT_TRUE(item->GetPosition() == Offset(index * 400, START_POS));
-        EXPECT_TRUE(item->GetLayoutSize() == Size(renderNode_->itemConstraintSize_.minMainSize,
-            renderNode_->crossSize_));
+        EXPECT_TRUE(item->GetPosition() == Offset(
+            index * (ITEM_WIDTH + WaterFlowTestUtils::columnsGap.Value()), START_POS));
+        EXPECT_TRUE(item->GetLayoutSize() == Size(ITEM_WIDTH, renderNode_->crossSize_));
         index++;
     }
 }
@@ -929,9 +930,10 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_PerformLayout_004, TestSize.Le
     EXPECT_EQ(renderNode_->crossSideSize_.size(), 2);
     size_t index = 0;
     for (const auto& item : renderNode_->GetChildren()) {
-        EXPECT_TRUE(item->GetPosition() == Offset(index / 2 * 400, index % 2 * 550));
-        EXPECT_TRUE(item->GetLayoutSize() == Size(renderNode_->itemConstraintSize_.minMainSize,
-            (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT));
+        EXPECT_TRUE(item->GetPosition() == Offset(
+            index / 2 * (ITEM_WIDTH + WaterFlowTestUtils::columnsGap.Value()), index % 2 * 550));
+        EXPECT_TRUE(item->GetLayoutSize() == Size(
+            ITEM_WIDTH, (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT));
         index++;
     }
 }
@@ -951,14 +953,12 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_PerformLayout_005, TestSize.Le
     size_t index = 0;
     for (const auto& item : renderNode_->GetChildren()) {
         if (index < renderNode_->crossSideSize_.size()) {
-            EXPECT_TRUE(item->GetPosition() == Offset(START_POS, (renderNode_->mainSize_) -
-                (renderNode_->itemConstraintSize_.minMainSize)));
+            EXPECT_TRUE(item->GetPosition() == Offset(START_POS, renderNode_->mainSize_ - ITEM_HEIGHT));
         } else {
-            EXPECT_TRUE(item->GetPosition() == Offset(START_POS, (renderNode_->mainSize_) -
-                (renderNode_->itemConstraintSize_.minMainSize) - index * 400));
+            EXPECT_TRUE(item->GetPosition() == Offset(START_POS, (renderNode_->mainSize_ - ITEM_HEIGHT) -
+                index * (ITEM_HEIGHT + WaterFlowTestUtils::rowGap.Value())));
         }
-        EXPECT_TRUE(item->GetLayoutSize() == Size(renderNode_->crossSize_,
-            renderNode_->itemConstraintSize_.minMainSize));
+        EXPECT_TRUE(item->GetLayoutSize() == Size(renderNode_->crossSize_, ITEM_HEIGHT));
         index++;
     }
 }
@@ -978,14 +978,13 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_PerformLayout_006, TestSize.Le
     size_t index = 0;
     for (const auto& item : renderNode_->GetChildren()) {
         if (index < renderNode_->crossSideSize_.size()) {
-            EXPECT_TRUE(item->GetPosition() == Offset(index % 2 * 550, renderNode_->mainSize_ -
-                renderNode_->itemConstraintSize_.minMainSize));
+            EXPECT_TRUE(item->GetPosition() == Offset(index % 2 * 550, renderNode_->mainSize_ - ITEM_HEIGHT));
         } else {
-            EXPECT_TRUE(item->GetPosition() == Offset(index % 2 * 550, (renderNode_->mainSize_) -
-            (renderNode_->itemConstraintSize_.minMainSize) - (index / renderNode_->crossSideSize_.size() * 400)));
+            EXPECT_TRUE(item->GetPosition() == Offset(index % 2 * 550, renderNode_->mainSize_ - ITEM_HEIGHT -
+                (index / renderNode_->crossSideSize_.size()) * (ITEM_HEIGHT + WaterFlowTestUtils::rowGap.Value())));
         }
         EXPECT_TRUE(item->GetLayoutSize() == Size((renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT,
-            renderNode_->itemConstraintSize_.minMainSize));
+            ITEM_HEIGHT));
         index++;
     }
 }
@@ -1005,14 +1004,12 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_PerformLayout_007, TestSize.Le
     size_t index = 0;
     for (const auto& item : renderNode_->GetChildren()) {
         if (index < renderNode_->crossSideSize_.size()) {
-            EXPECT_TRUE(item->GetPosition() == Offset((renderNode_->mainSize_) -
-                (renderNode_->itemConstraintSize_.minMainSize), START_POS));
+            EXPECT_TRUE(item->GetPosition() == Offset((renderNode_->mainSize_) - ITEM_WIDTH, START_POS));
         } else {
-            EXPECT_TRUE(item->GetPosition() == Offset((renderNode_->mainSize_) -
-                (renderNode_->itemConstraintSize_.minMainSize) - index * 400, START_POS));
+            EXPECT_TRUE(item->GetPosition() == Offset((renderNode_->mainSize_) - ITEM_WIDTH -
+                index * (ITEM_WIDTH + WaterFlowTestUtils::columnsGap.Value()), START_POS));
         }
-        EXPECT_TRUE(item->GetLayoutSize() == Size(renderNode_->itemConstraintSize_.minMainSize,
-            renderNode_->crossSize_));
+        EXPECT_TRUE(item->GetLayoutSize() == Size(ITEM_WIDTH, renderNode_->crossSize_));
         index++;
     }
 }
@@ -1032,14 +1029,13 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_PerformLayout_008, TestSize.Le
     size_t index = 0;
     for (const auto& item : renderNode_->GetChildren()) {
         if (index < renderNode_->crossSideSize_.size()) {
-            EXPECT_TRUE(item->GetPosition() == Offset(renderNode_->mainSize_ -
-                renderNode_->itemConstraintSize_.minMainSize, index % 2 * 550));
+            EXPECT_TRUE(item->GetPosition() == Offset(renderNode_->mainSize_ - ITEM_WIDTH, index % 2 * 550));
         } else {
-            EXPECT_TRUE(item->GetPosition() == Offset((renderNode_->mainSize_) -
-                (renderNode_->itemConstraintSize_.minMainSize) - index / renderNode_->crossSideSize_.size() * 400,
+            EXPECT_TRUE(item->GetPosition() == Offset((renderNode_->mainSize_) - ITEM_WIDTH -
+                (index / renderNode_->crossSideSize_.size()) * (ITEM_WIDTH + WaterFlowTestUtils::columnsGap.Value()),
                 index % 2 * 550));
         }
-        EXPECT_TRUE(item->GetLayoutSize() == Size(renderNode_->itemConstraintSize_.minMainSize,
+        EXPECT_TRUE(item->GetLayoutSize() == Size(ITEM_WIDTH,
             (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT));
         index++;
     }
@@ -1839,7 +1835,6 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_MakeInnerLayoutParam_001, Test
     CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
     CHECK_RENDERNODE_NULL_VOID(renderNode_);
     renderNode_->InitialFlowProp();
-    Size size(450, 300);
     size_t index = 0;
     size_t itemIndex = renderNode_->GetNextSupplyedIndex();
     double targetPos = renderNode_->GetTargetPos();
@@ -1847,7 +1842,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_MakeInnerLayoutParam_001, Test
     LayoutParam innerLayout;
     innerLayout = renderNode_->MakeInnerLayoutParam(index);
     auto result = innerLayout.GetMaxSize();
-    EXPECT_EQ(result, size);
+    EXPECT_EQ(result.Width(), (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT);    
 }
 
 /**
@@ -1945,8 +1940,8 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_CallItemConstraintSize_001, Te
     renderNode_->CallItemConstraintSize();
     EXPECT_EQ(renderNode_->itemConstraintSize_.maxCrossSize, 1000.0);
     EXPECT_EQ(renderNode_->itemConstraintSize_.maxMainSize, 1000.0);
-    EXPECT_EQ(renderNode_->itemConstraintSize_.minCrossSize, 300.0);
-    EXPECT_EQ(renderNode_->itemConstraintSize_.minMainSize, 300.0);
+    EXPECT_EQ(renderNode_->itemConstraintSize_.minCrossSize, 100.0);
+    EXPECT_EQ(renderNode_->itemConstraintSize_.minMainSize, 100.0);
 }
 
 /**
@@ -1994,7 +1989,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_SupplyItems_001, TestSize.Leve
     renderNode_->SupplyItems(itemIndex, targetPos);
     for (auto itemMessage : renderNode_->flowMatrix_) {
         EXPECT_EQ(itemMessage.second.crossSize, (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT);
-        EXPECT_EQ(itemMessage.second.mainSize, renderNode_->itemConstraintSize_.minMainSize);
+        EXPECT_EQ(itemMessage.second.mainSize, ITEM_HEIGHT);
     }
 }
 
@@ -2017,7 +2012,8 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_LayoutItems_001, TestSize.Leve
     }
     renderNode_->LayoutItems(renderNode_->cacheItems_);
     for (auto itemMessage : renderNode_->items_) {
-        EXPECT_EQ(itemMessage.second->GetLayoutSize(), Size(450.0, 300.0));
+        EXPECT_EQ(itemMessage.second->GetLayoutSize(), Size(
+            (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT, ITEM_HEIGHT));
     }
 }
 
@@ -2066,8 +2062,8 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_SetFooterPosition_001, TestSiz
     auto itemIndex = renderNode_->GetNextSupplyedIndex();
     auto targetPos = renderNode_->GetTargetPos();
     renderNode_->SupplyItems(itemIndex, targetPos);
-    renderNode_->footerMaxSize_ = Size(150.0, 10.0);
-    renderNode_->viewportStartPos_ = 110.0;
+    renderNode_->footerMaxSize_ = Size(150.0, 150.0);
+    renderNode_->viewportStartPos_ = 50.0;
     renderNode_->SetFooterPosition();
     EXPECT_TRUE(renderNode_->footer_->GetPosition() == Offset(
         (renderNode_->crossSize_ - renderNode_->footerMaxSize_.Width()) / CENTER_POINT,
@@ -2118,7 +2114,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_LayoutFooter_001, TestSize.Lev
     auto itemIndex = renderNode_->GetNextSupplyedIndex();
     auto targetPos = renderNode_->GetTargetPos();
     renderNode_->SupplyItems(itemIndex, targetPos);
-    renderNode_->viewportStartPos_ = 250.0;
+    renderNode_->viewportStartPos_ = 50.0;
     renderNode_->LayoutFooter();
     EXPECT_TRUE(renderNode_->footer_->GetPosition() == Offset(
         (renderNode_->crossSize_ - renderNode_->footerMaxSize_.Width()) / CENTER_POINT,
@@ -2144,7 +2140,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastSupplyedIndex_001, Test
     auto targetPos = renderNode_->GetTargetPos();
     renderNode_->SupplyItems(itemIndex, targetPos);
     result = renderNode_->GetLastSupplyedIndex();
-    EXPECT_EQ(result, 5);
+    EXPECT_EQ(result, 7);
 }
 
 /**
@@ -2164,7 +2160,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetNextSupplyedIndex_001, Test
     auto targetPos = renderNode_->GetTargetPos();
     renderNode_->SupplyItems(itemIndex, targetPos);
     result = renderNode_->GetNextSupplyedIndex();
-    EXPECT_EQ(result, 6);
+    EXPECT_EQ(result, 8);
 }
 
 /**
@@ -2184,7 +2180,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastSupplyedMainSize_001, T
     auto targetPos = renderNode_->GetTargetPos();
     renderNode_->SupplyItems(itemIndex, targetPos);
     result = renderNode_->GetLastSupplyedMainSize();
-    EXPECT_EQ(result, 1100.0);
+    EXPECT_EQ(result, 900.0);
 }
 
 /**
