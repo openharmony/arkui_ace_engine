@@ -53,7 +53,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<CheckBoxGroupPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        auto enabled = eventHub->IsEnabled();
+        auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(enabled);
+        return paintMethod;
     }
 
     bool OnDirtyLayoutWrapperSwap(
@@ -112,7 +118,7 @@ private:
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
-
+    
     RefPtr<ClickEvent> clickListener_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
