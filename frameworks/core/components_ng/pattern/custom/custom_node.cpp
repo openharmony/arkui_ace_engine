@@ -35,25 +35,6 @@ CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
     : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
-CustomNode::~CustomNode()
-{
-    if (destroyFunc_) {
-        destroyFunc_();
-    }
-}
-
-void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
-{
-    Build();
-    if (child_) {
-        child_->MountToParent(Claim(this));
-        child_->AdjustLayoutWrapperTree(parent, true, true);
-        child_.Reset();
-    } else {
-        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
-    }
-}
-
 void CustomNode::Build()
 {
     if (renderFunction_) {
@@ -71,25 +52,16 @@ void CustomNode::Build()
     UINode::Build();
 }
 
-void CustomNode::Update()
+void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
-    if (updateFunc_) {
-        updateFunc_();
+    Build();
+    if (child_) {
+        child_->MountToParent(Claim(this));
+        child_->AdjustLayoutWrapperTree(parent, true, true);
+        child_.Reset();
+    } else {
+        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
     }
-    needRebuild_ = false;
 }
 
-void CustomNode::MarkNeedUpdate()
-{
-    auto context = GetContext();
-    if (!context) {
-        LOGE("context is nullptr, fail to push async task");
-        return;
-    }
-    if (needRebuild_) {
-        return;
-    }
-    needRebuild_ = true;
-    context->AddDirtyCustomNode(Claim(this));
-}
 } // namespace OHOS::Ace::NG

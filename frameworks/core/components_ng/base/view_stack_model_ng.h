@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -27,6 +28,12 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ViewStackModelNG : public ViewStackModel {
 public:
+    void Push(const RefPtr<AceType>& node, bool isCustomView) override
+    {
+        auto uiNode = AceType::DynamicCast<UINode>(node);
+        ViewStackProcessor::GetInstance()->Push(uiNode, isCustomView);
+    }
+
     void Pop() override
     {
         ViewStackProcessor::GetInstance()->Pop();
@@ -35,6 +42,16 @@ public:
     void PopContainer() override
     {
         ViewStackProcessor::GetInstance()->PopContainer();
+    }
+
+    void PushKey(const std::string& key) override
+    {
+        ViewStackProcessor::GetInstance()->PushKey(key);
+    }
+
+    void PopKey() override
+    {
+        ViewStackProcessor::GetInstance()->PopKey();
     }
 
     void NewScope() override

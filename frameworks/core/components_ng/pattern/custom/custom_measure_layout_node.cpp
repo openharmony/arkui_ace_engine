@@ -39,35 +39,6 @@ CustomMeasureLayoutNode::CustomMeasureLayoutNode(int32_t nodeId, const std::stri
     : FrameNode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
-CustomMeasureLayoutNode::~CustomMeasureLayoutNode()
-{
-    if (destroyFunc_) {
-        destroyFunc_();
-    }
-}
-
-void CustomMeasureLayoutNode::Update()
-{
-    if (updateFunc_) {
-        updateFunc_();
-    }
-    needRebuild_ = false;
-}
-
-void CustomMeasureLayoutNode::MarkNeedUpdate()
-{
-    auto context = GetContext();
-    if (!context) {
-        LOGE("context is nullptr, fail to push async task");
-        return;
-    }
-    if (needRebuild_) {
-        return;
-    }
-    needRebuild_ = true;
-    context->AddDirtyCustomNode(Claim(this));
-}
-
 bool CustomMeasureLayoutNode::FireOnMeasure(NG::LayoutWrapper* layoutWrapper)
 {
     if (measureFunc_) {

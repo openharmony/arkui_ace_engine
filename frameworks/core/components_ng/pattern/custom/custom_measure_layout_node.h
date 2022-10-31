@@ -22,55 +22,28 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
 namespace OHOS::Ace::NG {
 
 // CustomMeasureLayoutNode is the frame node of @Component struct.
-class ACE_EXPORT CustomMeasureLayoutNode : public FrameNode {
-    DECLARE_ACE_TYPE(CustomMeasureLayoutNode, FrameNode);
+class ACE_EXPORT CustomMeasureLayoutNode : public FrameNode, public CustomNodeBase {
+    DECLARE_ACE_TYPE(CustomMeasureLayoutNode, FrameNode, CustomNodeBase);
 
 public:
     static RefPtr<CustomMeasureLayoutNode> CreateCustomMeasureLayoutNode(int32_t nodeId, const std::string& viewKey);
 
     CustomMeasureLayoutNode(int32_t nodeId, const std::string& viewKey);
-    ~CustomMeasureLayoutNode() override;
+    ~CustomMeasureLayoutNode() override = default;
 
-    void SetAppearFunction(std::function<void()>&& appearFunc)
-    {
-        appearFunc_ = std::move(appearFunc);
-    }
-
-    void FireOnAppear() const
-    {
-        if (appearFunc_) {
-            appearFunc_();
-        }
-    }
-
-    void SetRenderFunction(const RenderFunction& renderFunction)
+    void SetRenderFunction(const RenderFunction& renderFunction) override
     {
         auto pattern = DynamicCast<CustomNodePattern>(GetPattern());
         if (pattern) {
             pattern->SetRenderFunction(renderFunction);
         }
     }
-
-    void SetUpdateFunction(std::function<void()>&& updateFunc)
-    {
-        updateFunc_ = std::move(updateFunc);
-    }
-
-    void SetDestroyFunction(std::function<void()>&& destroyFunc)
-    {
-        destroyFunc_ = std::move(destroyFunc);
-    }
-
-    // called by view in js thread
-    void MarkNeedUpdate();
-
-    // called by pipeline in js thread of update.
-    void Update();
 
     bool FireOnMeasure(LayoutWrapper* layoutWrapper);
 
@@ -88,14 +61,9 @@ public:
 
 private:
     void BuildChildren(const RefPtr<FrameNode>& child);
-
-    std::function<void()> updateFunc_;
-    std::function<void()> destroyFunc_;
-    std::function<void()> appearFunc_;
     std::function<void(LayoutWrapper* layoutWrapper)> layoutFunc_;
     std::function<void(LayoutWrapper* layoutWrapper)> measureFunc_;
     std::string viewKey_;
-    bool needRebuild_ = false;
 };
 } // namespace OHOS::Ace::NG
 
