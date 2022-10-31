@@ -142,8 +142,9 @@ int32_t DataAbilityHelperStandard::OpenFileWithDataAbility(const std::string& ur
 
 int32_t DataAbilityHelperStandard::OpenFileWithDataShare(const std::string& uriStr, const std::string& mode)
 {
-    if (useStageModel_ && !dataShareHelper_ && !runtimeContext_.expired()) {
-        dataShareHelper_ = DataShare::DataShareHelper::Creator(runtimeContext_.lock()->GetToken(), uriStr);
+    auto context = runtimeContext_.lock();
+    if (useStageModel_ && !dataShareHelper_ && context) {
+        dataShareHelper_ = DataShare::DataShareHelper::Creator(context->GetToken(), uriStr);
     }
 
     if (dataShareHelper_) {
