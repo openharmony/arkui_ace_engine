@@ -37,6 +37,10 @@ ohos_unittest("flex_layout_test_ng") {
     ":config_flex_layout_test",
     "$ace_root:ace_config",
   ]
+  configs += [
+    "$ace_root:ace_test_coverage_config",
+    "//third_party/curl:curl_config",
+  ]
 }
 
 config("config_flex_layout_test") {
