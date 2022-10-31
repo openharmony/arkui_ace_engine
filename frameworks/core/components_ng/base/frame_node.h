@@ -297,6 +297,8 @@ private:
     // dump self info.
     void DumpInfo() override;
 
+    void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
     std::vector<RectF> GetResponseRegionList(const RectF& rect);
