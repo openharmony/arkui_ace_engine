@@ -122,6 +122,7 @@ build_component_ng("pattern_ng") {
     "list/list_item_group_paint_method.cpp",
     "list/list_item_group_pattern.cpp",
     "list/list_item_model_ng.cpp",
+    "list/list_lanes_layout_algorithm.cpp",
     "list/list_layout_algorithm.cpp",
     "list/list_layout_property.cpp",
     "list/list_model_ng.cpp",

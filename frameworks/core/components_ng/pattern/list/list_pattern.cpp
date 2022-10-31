@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
@@ -149,6 +150,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     headerGroupNode_ = listLayoutAlgorithm->GetHeaderGroupNode();
     footerGroupNode_ = listLayoutAlgorithm->GetFooterGroupNode();
+    auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    if (lanesLayoutAlgorithm) {
+        lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
+    }
     CheckScrollable();
 
     bool indexChanged =
@@ -235,7 +240,20 @@ void ListPattern::CheckScrollable()
 
 RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
 {
-    auto listLayoutAlgorithm = MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm;
+    if (listLayoutProperty->HasLanes() || listLayoutProperty->HasLaneMinLength() ||
+        listLayoutProperty->HasLaneMaxLength()) {
+        auto lanesLayoutAlgorithm = MakeRefPtr<ListLanesLayoutAlgorithm>(startIndex_, endIndex_);
+        if ((listLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT) == 0) {
+            lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
+        }
+        listLayoutAlgorithm.Swap(lanesLayoutAlgorithm);
+    } else {
+        listLayoutAlgorithm.Swap(MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_));
+    }
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollIndexAlignment_);
