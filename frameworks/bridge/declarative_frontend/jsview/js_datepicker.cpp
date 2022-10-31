@@ -98,16 +98,14 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
 
 void JSDatePicker::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("DatePicker create error, info is non-valid");
-        return;
-    }
-
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
     DatePickerType pickerType = DatePickerType::DATE;
-    auto type = paramObject->GetProperty("type");
-    if (type->IsNumber()) {
+    JSRef<JSObject> paramObject;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto type = paramObject->GetProperty("type");
+        if (type->IsNumber()) {
         pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
+        }
     }
     switch (pickerType) {
         case DatePickerType::TIME: {
