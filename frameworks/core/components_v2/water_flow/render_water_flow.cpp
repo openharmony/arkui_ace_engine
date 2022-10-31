@@ -37,6 +37,7 @@ const RefPtr<CubicCurve> CURVE_SCROLL_TO_TOP = AceType::MakeRefPtr<CubicCurve>(0
 constexpr int32_t DEFAULT_DEPTH = 10;
 constexpr double MAX_CONSTRAINT_SCALE = 3.0;
 constexpr double CENTER_POINT = 2.0;
+constexpr int32_t CACHE_SIZE_SCALE = 3;
 const std::string UNIT_AUTO = "auto";
 } // namespace
 
@@ -305,7 +306,7 @@ void RenderWaterFlow::GetFlowSize()
             mainSize_ = viewPort_.Width();
         }
     }
-    cacheSize_ = mainSize_;
+    cacheSize_ = mainSize_ * CACHE_SIZE_SCALE;
 }
 
 void RenderWaterFlow::CallGap()
