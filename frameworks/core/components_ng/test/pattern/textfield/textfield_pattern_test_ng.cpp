@@ -33,7 +33,9 @@ namespace {
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 const std::string EMPTY_TEXT_VALUE = "DEFAULT_TEXT";
 const std::string TEXT_VALUE = "DEFAULT_TEXT";
-const std::string INSERT_VALUE_SINGLE_CHAR = "X";
+const std::string SINGLE_CHAR = "X";
+const std::string SINGLE_INSERT_TO_HEAD = "XDEFAULT_TEXT";
+const int32_t CARET_POSITION_0 = 0;
 const int32_t CARET_POSITION_1 = 10;
 const int32_t DELETE_LENGTH_1 = 1;
 } // namespace
@@ -56,9 +58,34 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldInsertValue001, TestSize.Level1)
     EXPECT_FALSE(frameNode == nullptr);
     ViewStackProcessor::GetInstance()->Push(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    pattern->InsertValue(INSERT_VALUE_SINGLE_CHAR);
-    EXPECT_EQ(pattern->GetEditingValue().text, INSERT_VALUE_SINGLE_CHAR);
-    EXPECT_EQ(pattern->GetEditingValue().caretPosition, INSERT_VALUE_SINGLE_CHAR.size());
+    pattern->InsertValue(SINGLE_CHAR);
+    EXPECT_EQ(pattern->GetEditingValue().text, SINGLE_CHAR);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, SINGLE_CHAR.size());
+}
+
+/**
+ * @tc.name: TextFieldInsertValue002
+ * @tc.desc: Test inserting value of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldInsertValue002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    // insert a text value and set position to 0
+    pattern->InsertValue(TEXT_VALUE);
+    pattern->SetCaretPosition(CARET_POSITION_0);
+    EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, CARET_POSITION_0);
+    // insert a value at position 0
+    pattern->InsertValue(SINGLE_CHAR);
+    // assert value should equal to the new value, and caret position at char length
+    EXPECT_EQ(pattern->GetEditingValue().text, SINGLE_INSERT_TO_HEAD);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, CARET_POSITION_0 + SINGLE_CHAR.size());
 }
 
 /**

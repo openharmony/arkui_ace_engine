@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,12 +47,13 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
+    float headerMainSize = 0.0f;
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
         headerWrapper->Measure(layoutConstraint);
-        headerMainSize_ = GetMainAxisSize(headerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        headerMainSize = GetMainAxisSize(headerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     }
-    float totalMainSize = MeasureListItem(layoutWrapper, itemLayoutConstraint, headerMainSize_);
+    float totalMainSize = MeasureListItem(layoutWrapper, itemLayoutConstraint, headerMainSize);
     if (footerIndex_ >= 0) {
         auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
         footerWrapper->Measure(layoutConstraint);
@@ -79,17 +82,11 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto paddingOffset = OffsetF(left, top);
     float crossSize = GetCrossAxisSize(size, axis_);
 
-    if (headerIndex_ >= 0) {
-        LayoutIndex(layoutWrapper, paddingOffset, headerIndex_, crossSize, 0.0f);
+    if (headerIndex_ >= 0 || footerIndex_ >= 0) {
+        LayoutHeaderFooter(layoutWrapper, paddingOffset, crossSize);
     }
-
     // layout items.
     LayoutListItem(layoutWrapper, paddingOffset, crossSize);
-
-    if (footerIndex_ >= 0) {
-        float endPos = itemPosition_.empty() ? headerMainSize_ : itemPosition_.rbegin()->second.second;
-        LayoutIndex(layoutWrapper, paddingOffset, footerIndex_, crossSize, endPos);
-    }
 }
 
 void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF& selfIdealSize,
@@ -190,10 +187,58 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
     }
 }
 
-void ListItemGroupLayoutAlgorithm::LayoutIndex(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset,
-    int32_t index, float crossSize, float startPos)
+void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapper,
+    const OffsetF& paddingOffset, float crossSize)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto groupLayoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutProperty);
+    CHECK_NULL_VOID(groupLayoutProperty);
+    OffsetF selfOffset = layoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    float mainPos = GetMainAxisOffset(selfOffset, axis_);
+    float headerMainSize = 0.0f;
+    V2::StickyStyle sticky = groupLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
+    if (headerIndex_ >= 0) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
+        CHECK_NULL_VOID(wrapper);
+        headerMainSize = wrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
+        float headerPos = 0.0f;
+        if (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER) {
+            float endPos = itemPosition_.empty() ? headerMainSize : itemPosition_.rbegin()->second.second;
+            float stickyPos = -mainPos;
+            if (stickyPos + headerMainSize > endPos) {
+                stickyPos = endPos - headerMainSize;
+            }
+            if (stickyPos > headerPos) {
+                headerPos = stickyPos;
+            }
+        }
+        LayoutIndex(wrapper, paddingOffset, crossSize, headerPos);
+    }
+
+    if (footerIndex_ >= 0) {
+        float endPos = itemPosition_.empty() ? headerMainSize : itemPosition_.rbegin()->second.second;
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
+        CHECK_NULL_VOID(wrapper);
+        if (groupLayoutProperty->HasListMainSize() &&
+            (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER)) {
+            float mainSize = groupLayoutProperty->GetListMainSize().value();
+            auto footerMainSize = wrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
+            float stickyPos = mainSize - mainPos - footerMainSize;
+            if (stickyPos < headerMainSize) {
+                stickyPos = headerMainSize;
+            }
+            if (stickyPos < endPos) {
+                endPos = stickyPos;
+            }
+        }
+        LayoutIndex(wrapper, paddingOffset, crossSize, endPos);
+    }
+}
+
+void ListItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
+    float crossSize, float startPos)
+{
     if (wrapper) {
         auto offset = paddingOffset;
         float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);

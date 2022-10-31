@@ -357,6 +357,7 @@ private:
     void CheckSelfIdealSize();
 
     void CheckAspectRatio();
+    void CheckBorderAndPadding();
 
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;

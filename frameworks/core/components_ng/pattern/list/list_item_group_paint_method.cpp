@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 
 namespace OHOS::Ace::NG {
-CanvasDrawFunction ListItemGroupPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+CanvasDrawFunction ListItemGroupPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetFrameSize();

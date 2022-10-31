@@ -15,24 +15,38 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 
+#include "bridge/declarative_frontend/jsview/models/counter_model_impl.h"
+#include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/components/counter/counter_theme.h"
-#include "frameworks/core/components_ng/pattern/counter/counter_view.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<CounterModel> CounterModel::instance_ = nullptr;
+
+CounterModel* CounterModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::CounterModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::CounterModelNG());
+        } else {
+            instance_.reset(new Framework::CounterModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-
-constexpr Dimension COUNTER_DEFAULT_HEIGHT = 32.0_vp;
-constexpr Dimension COUNTER_DEFAULT_WIDTH = 100.0_vp;
-constexpr Dimension COUNTER_DEFAULT_CONTROL_WIDTH = 32.0_vp;
-constexpr Dimension COUNTER_DEFAULT_RADIUS = 4.0_vp;
-
-} // namespace
 
 void JSCounter::JSBind(BindingTarget globalObj)
 {
@@ -60,13 +74,8 @@ void JSCounter::JsOnInc(const JSCallbackInfo& args)
         LOGW("Argument is not a function object");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CounterView::SetOnInc(JsEventCallback<void()>(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0])));
-        return;
-    }
-    if (!JSViewBindEvent(&CounterComponent::SetOnInc, args)) {
-        LOGW("Failed to bind event");
-    }
+    CounterModel::GetInstance()->SetOnInc(
+        JsEventCallback<void()>(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0])));
     args.ReturnSelf();
 }
 
@@ -80,13 +89,8 @@ void JSCounter::JsOnDec(const JSCallbackInfo& args)
         LOGW("Argument is not a function object");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CounterView::SetOnDec(JsEventCallback<void()>(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0])));
-        return;
-    }
-    if (!JSViewBindEvent(&CounterComponent::SetOnDec, args)) {
-        LOGW("Failed to bind event");
-    }
+    CounterModel::GetInstance()->SetOnDec(
+        JsEventCallback<void()>(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0])));
     args.ReturnSelf();
 }
 
@@ -106,8 +110,7 @@ void JSCounter::JSHeight(const JSCallbackInfo& args)
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
-
-    JSViewSetProperty(&CounterComponent::SetHeight, value);
+    CounterModel::GetInstance()->SetHeight(value);
     args.ReturnSelf();
 }
 
@@ -127,8 +130,7 @@ void JSCounter::JSWidth(const JSCallbackInfo& args)
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
-
-    JSViewSetProperty(&CounterComponent::SetWidth, value);
+    CounterModel::GetInstance()->SetWidth(value);
     args.ReturnSelf();
 }
 
@@ -140,14 +142,14 @@ void JSCounter::SetSize(const JSCallbackInfo& args)
         Dimension height;
         if (ConvertFromJSValue(obj->GetProperty("height"), height) && height.IsValid()) {
             if (GreatOrEqual(height.Value(), 0.0)) {
-                JSViewSetProperty(&CounterComponent::SetHeight, height);
+                CounterModel::GetInstance()->SetWidth(height);
             }
         }
 
         Dimension width;
         if (ConvertFromJSValue(obj->GetProperty("width"), width) && width.IsValid()) {
             if (GreatOrEqual(width.Value(), 0.0)) {
-                JSViewSetProperty(&CounterComponent::SetWidth, width);
+                CounterModel::GetInstance()->SetWidth(width);
             }
         }
     }
@@ -166,14 +168,13 @@ void JSCounter::JSControlWidth(const JSCallbackInfo& args)
         LOGE("args can not set control width");
         return;
     }
-
-    JSViewSetProperty(&CounterComponent::SetControlWidth, value);
+    CounterModel::GetInstance()->SetControlWidth(value);
     args.ReturnSelf();
 }
 
 void JSCounter::JSStateChange(bool state)
 {
-    JSViewSetProperty(&CounterComponent::SetState, state);
+    CounterModel::GetInstance()->SetStateChange(state);
 }
 
 void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
@@ -188,25 +189,13 @@ void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
         LOGE("args can not set backgroundColor");
         return;
     }
-    JSViewSetProperty(&CounterComponent::SetBackgroundColor, color);
+    CounterModel::GetInstance()->SetBackgroundColor(color);
     args.ReturnSelf();
 }
 
 void JSCounter::Create()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CounterView::Create();
-        return;
-    }
-    std::list<RefPtr<Component>> children;
-    RefPtr<OHOS::Ace::CounterComponent> component = AceType::MakeRefPtr<CounterComponent>(children);
-    ViewStackProcessor::GetInstance()->ClaimElementId(component);
-    ViewStackProcessor::GetInstance()->Push(component);
-
-    component->SetHeight(COUNTER_DEFAULT_HEIGHT);
-    component->SetWidth(COUNTER_DEFAULT_WIDTH);
-    component->SetControlWidth(COUNTER_DEFAULT_CONTROL_WIDTH);
-    component->SetControlRadius(COUNTER_DEFAULT_RADIUS);
+    CounterModel::GetInstance()->Create();
 }
 
 } // namespace OHOS::Ace::Framework

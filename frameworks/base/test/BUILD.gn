@@ -23,6 +23,9 @@ group("unittest") {
       "unittest/task_executor:unittest",
     ]
   } else if (!is_asan) {
-    deps += [ "unittest/subwindow:unittest" ]
+    deps += [
+      "unittest/subwindow:unittest",
+      "unittest/utils:unittest",
+    ]
   }
 }

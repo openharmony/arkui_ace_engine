@@ -48,7 +48,8 @@ private:
         int32_t currentIndex, float& mainLen);
     float MeasureListItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, float startPos);
     void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
-    void LayoutIndex(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, int32_t index,
+    void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
+    void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
         float crossSize, float startPos);
     inline RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index) const
     {
@@ -64,8 +65,6 @@ private:
     int32_t lanes_ = 1;
     V2::ListItemAlign itemAlign_ = V2::ListItemAlign::START;
     float spaceWidth_ = 0.0f;
-
-    float headerMainSize_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

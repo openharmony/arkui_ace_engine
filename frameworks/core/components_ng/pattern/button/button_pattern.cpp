@@ -106,7 +106,8 @@ void ButtonPattern::OnTouchDown()
 
     if (buttonEventHub->GetStateEffect()) {
         const auto& renderContext = host->GetRenderContext();
-        backgroundColor_ = renderContext->GetBackgroundColorValue();
+        CHECK_NULL_VOID(renderContext);
+        backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
         if (isSetClickedColor_) {
             // for user self-defined
             renderContext->UpdateBackgroundColor(clickedColor_);
