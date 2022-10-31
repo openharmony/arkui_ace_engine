@@ -61,6 +61,9 @@ public:
 
     void SetIteration(int32_t iteration)
     {
+        if (iteration < 0 && iteration != ANIMATION_REPEAT_INFINITE) {
+            return;
+        }
         iteration_ = iteration;
     }
 
