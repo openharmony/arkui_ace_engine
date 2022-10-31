@@ -42,11 +42,15 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
 {
     auto containerModalNode = FrameNode::CreateFrameNode(
         "ContainerModal", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPattern>());
+    containerModalNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
 
     column->AddChild(BuildTitle(containerModalNode));
     column->AddChild(content);
+    content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    content->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
 

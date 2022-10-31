@@ -112,6 +112,7 @@ public:
     void ResetHostNode();
 
     RefPtr<FrameNode> GetHostNode() const;
+    WeakPtr<FrameNode> GetWeakHostNode() const;
     std::string GetHostTag() const;
     int32_t GetHostDepth() const;
 

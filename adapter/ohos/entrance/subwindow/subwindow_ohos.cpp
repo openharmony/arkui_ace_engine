@@ -384,22 +384,11 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 {
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
+        posX = 0;
+        posY = 0;
+        width = defaultDisplay->GetWidth();
+        height = defaultDisplay->GetHeight();
         density = defaultDisplay->GetVirtualPixelRatio();
-    }
-    auto mainWindow = Platform::AceContainer::GetUIWindow(parentContainerId_);
-    if (!mainWindow) {
-        LOGE("mainWindow is nullptr");
-        if (defaultDisplay) {
-            posX = 0;
-            posY = 0;
-            width = defaultDisplay->GetWidth();
-            height = defaultDisplay->GetHeight();
-        }
-    } else {
-        posX = static_cast<int32_t>(mainWindow->GetRect().posX_);
-        posY = static_cast<int32_t>(mainWindow->GetRect().posY_);
-        width = static_cast<int32_t>(mainWindow->GetRect().width_);
-        height = static_cast<int32_t>(mainWindow->GetRect().height_);
     }
     LOGI("Toast posX: %{public}d, posY: %{public}d, width: %{public}d, height: %{public}d, density: %{public}f",
         posX, posY, width, height, density);
@@ -410,7 +399,7 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
     OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
     windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     windowOption->SetWindowRect({ posX, posY, width, height });
-    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
     int32_t dialogId = gToastDialogId.fetch_add(1, std::memory_order_relaxed);
     std::string windowName = "ARK_APP_SUBWINDOW_TOAST_DIALOG_" + std::to_string(dialogId);
     dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
@@ -418,6 +407,7 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
         LOGI("create window error return");
         return false;
     }
+    dialogWindow_->SetLayoutFullScreen(true);
     LOGI("SubwindowOhos::InitToastDialogWindow end");
     return true;
 }

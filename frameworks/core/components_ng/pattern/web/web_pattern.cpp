@@ -664,10 +664,19 @@ WebOverlayType WebPattern::GetTouchHandleOverlayType(
     return INVALID_OVERLAY;
 }
 
+std::optional<OffsetF> WebPattern::GetCoordinatePoint()
+{
+    auto frameNode = GetHost();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    return frameNode->GetOffsetRelativeToWindow();
+}
+
 RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle)
 {
     RectF paintRect;
-    auto offset = GetHostFrameGlobalOffset().value_or(OffsetF());
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
     auto size = GetHostFrameSize().value_or(SizeF());
     float edgeHeight = touchHandle->GetEdgeHeight();
     float x = touchHandle->GetX();
