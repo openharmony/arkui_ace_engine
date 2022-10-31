@@ -44,8 +44,9 @@ class ACE_EXPORT RevSourceMap final : public Referenced {
 public:
     MappingInfo Find(int32_t row, int32_t col);
     std::string GetOriginalNames(const std::string& sourceCode, uint32_t& errorPos) const;
-    void ExtractKeyInfo(const std::string& sourceMap, std::vector<std::string>& sourceKeyInfo);
+    static void ExtractKeyInfo(const std::string& sourceMap, std::vector<std::string>& sourceKeyInfo);
     void Init(const std::string& sourceMap);
+    static void MergeInit(const std::string& sourceMap, RefPtr<RevSourceMap>& RevSourceMap);
 
 private:
     SourceMapInfo nowPos_;
@@ -56,9 +57,9 @@ private:
     std::vector<std::string> nameMap_;
     std::vector<SourceMapInfo> afterPos_;
 
-    std::vector<std::string> HandleMappings(const std::string& mapping);
-    uint32_t Base64CharToInt(char charCode);
-    bool VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans);
+    static std::vector<std::string> HandleMappings(const std::string& mapping);
+    static uint32_t Base64CharToInt(char charCode);
+    static bool VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans);
 };
 
 }  // namespace OHOS::Ace::Framework
