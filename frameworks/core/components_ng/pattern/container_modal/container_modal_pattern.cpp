@@ -41,24 +41,8 @@ void ContainerModalPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
-    windowMode_ = windowManager->FireWindowGetModeCallBack();
+    windowMode_ = windowManager->GetWindowMode();
     ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING);
-}
-
-bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, false);
-    if (!config.frameSizeChange || windowMode_ == windowManager->FireWindowGetModeCallBack()) {
-        LOGI("container modal node no need to render");
-        return false;
-    }
-
-    windowMode_ = windowManager->FireWindowGetModeCallBack();
-    ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING);
-    return true;
 }
 
 void ContainerModalPattern::ShowTitle(bool isShow)
@@ -73,6 +57,7 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     CHECK_NULL_VOID(contentNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
+    windowMode_ = PipelineContext::GetCurrentContext()->GetWindowManager()->GetWindowMode();
 
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
@@ -178,7 +163,6 @@ void ContainerModalPattern::InitContainerEvent()
         if (floatingLayoutProperty->GetVisibilityValue() != VisibleType::VISIBLE) {
             return;
         }
-
         // TODO: transition out animation
         // step4. Touch other area to hide floating title.
         floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -235,7 +219,7 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     CHECK_NULL_VOID(windowManager);
 
     // update normal title
-    if (windowManager->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING) {
+    if (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
         CHECK_NULL_VOID(columnNode);
         auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
@@ -301,7 +285,8 @@ void ContainerModalPattern::ChangeFloatingTitle(const RefPtr<FrameNode>& floatin
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT, isFocus);
 
     // hide leftSplit button when window mode is WINDOW_MODE_SPLIT_PRIMARY type
-    leftSplitButton->GetRenderContext()->SetVisible(windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    leftSplitButton->GetLayoutProperty()->UpdateVisibility(
+        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
 
     // update maxRecover button
     auto maxRecoverIconFocused = windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
@@ -360,6 +345,44 @@ bool ContainerModalPattern::CanShowFloatingTitle()
         return false;
     }
     return true;
+}
+
+void ContainerModalPattern::SetAppTitle(const std::string& title)
+{
+    LOGI("SetAppTitle successfully, title is %{public}s", title.c_str());
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().front()->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    auto titleLabel = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(TITLE_LABEL_INDEX));
+    titleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
+    titleLabel->MarkDirtyNode();
+
+    auto floatingNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().back());
+    CHECK_NULL_VOID(floatingNode);
+    auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(TITLE_LABEL_INDEX));
+    floatingTitleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
+    floatingTitleLabel->MarkDirtyNode();
+}
+
+void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
+{
+    if (icon == nullptr) {
+        LOGE("SetAppIcon failed, icon PixelMap is null.");
+        return;
+    }
+    LOGI("SetAppIcon successfully");
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetPixMap(icon);
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().front()->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    auto titleIcon = AceType::DynamicCast<FrameNode>(titleNode->GetChildren().front());
+    titleIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
+    titleIcon->MarkModifyDone();
+
+    auto floatingNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().back());
+    CHECK_NULL_VOID(floatingNode);
+    auto floatingTitleIcon = AceType::DynamicCast<FrameNode>(floatingNode->GetChildren().front());
+    floatingTitleIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
+    floatingTitleIcon->MarkModifyDone();
 }
 
 } // namespace OHOS::Ace::NG

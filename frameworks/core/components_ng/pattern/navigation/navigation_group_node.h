@@ -73,10 +73,17 @@ public:
         return dividerNode_;
     }
 
-private:
-    void AddNavDestinationToNavigation(const RefPtr<UINode>& child);
-    void BackToPreNavDestination(const RefPtr<UINode>& child);
+    void MarkIsFirstNavDestination(bool isFirstNavDestination)
+    {
+        isFirstNavDestination_ = isFirstNavDestination;
+    }
 
+    bool IsFirstNavDestination() const
+    {
+        return isFirstNavDestination_;
+    }
+
+private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;

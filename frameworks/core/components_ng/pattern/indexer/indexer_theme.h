@@ -37,6 +37,8 @@ inline constexpr float KEYFRAME_END = 1.0;
 inline constexpr double DEFAULT_OPACITY_IN_PERCENT = 1.0;
 inline constexpr double NINETY_OPACITY_IN_PERCENT = 0.9;
 inline constexpr double ZERO_OPACITY_IN_PERCENT = 0.0;
+inline constexpr int32_t INDEXER_BUBBLE_ANIMATION_DURATION = 3000;
+inline constexpr int32_t INDEXER_BUBBLE_MAXSIZE = 6;
 // data for list mode
 inline constexpr double INDEXER_LIST_ITEM_TEXT_SIZE = 12.0; // list mode, font size (FP)
 inline constexpr uint32_t INDEXER_LIST_COLOR = 0x99000000;

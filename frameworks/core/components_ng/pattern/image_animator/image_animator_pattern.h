@@ -48,6 +48,8 @@ public:
         return MakeRefPtr<ImageAnimatorEventHub>();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     void SetImages(std::vector<ImageProperties>&& images)
     {
         if (images_.size() == images.size()) {
@@ -132,6 +134,7 @@ public:
 private:
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
+    std::string ImagesToString() const;
 
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;

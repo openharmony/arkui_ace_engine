@@ -15,11 +15,10 @@
 
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/container_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
-#include "core/components_ng/pattern/shape/shape_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -49,14 +48,59 @@ void ShapeModelNG::SetViewPort(
     ACE_UPDATE_PAINT_PROPERTY(ContainerPaintProperty, ShapeViewBox, shapeViewBox);
 }
 
-void ShapeModelNG::SetWidth(Dimension& width)
+void ShapeModelNG::SetStroke(const Color& color)
 {
-    ViewAbstract::SetWidth(CalcLength(width));
+    ShapeAbstractModelNG().SetStroke(color);
 }
 
-void ShapeModelNG::SetHeight(Dimension& height)
+void ShapeModelNG::SetFill(const Color& color)
 {
-    ViewAbstract::SetHeight(CalcLength(height));
+    ShapeAbstractModelNG().SetFill(color);
+}
+
+void ShapeModelNG::SetStrokeDashOffset(const Ace::Dimension& dashOffset)
+{
+    ShapeAbstractModelNG().SetStrokeDashOffset(dashOffset);
+}
+
+void ShapeModelNG::SetStrokeLineCap(int lineCapStyle)
+{
+    ShapeAbstractModelNG().SetStrokeLineCap(lineCapStyle);
+}
+
+void ShapeModelNG::SetStrokeLineJoin(int lineJoinStyle)
+{
+    ShapeAbstractModelNG().SetStrokeLineJoin(lineJoinStyle);
+}
+
+void ShapeModelNG::SetStrokeMiterLimit(double miterLimit)
+{
+    ShapeAbstractModelNG().SetStrokeMiterLimit(miterLimit);
+}
+
+void ShapeModelNG::SetStrokeOpacity(double opacity)
+{
+    ShapeAbstractModelNG().SetStrokeOpacity(opacity);
+}
+
+void ShapeModelNG::SetFillOpacity(double opacity)
+{
+    ShapeAbstractModelNG().SetFillOpacity(opacity);
+}
+
+void ShapeModelNG::SetStrokeWidth(const Ace::Dimension& lineWidth)
+{
+    ShapeAbstractModelNG().SetStrokeWidth(lineWidth);
+}
+
+void ShapeModelNG::SetStrokeDashArray(const std::vector<Ace::Dimension>& segments)
+{
+    ShapeAbstractModelNG().SetStrokeDashArray(segments);
+}
+
+void ShapeModelNG::SetAntiAlias(bool antiAlias)
+{
+    ShapeAbstractModelNG().SetAntiAlias(antiAlias);
 }
 
 } // namespace OHOS::Ace::NG

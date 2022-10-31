@@ -478,6 +478,8 @@ void RenderSwiper::InitRecognizer(bool catchMode)
         auto pipeline = context_.Upgrade();
         if (!catchMode && pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
             clickRecognizer_->SetUseCatchMode(false);
+        } else if (!showIndicator_) {
+            clickRecognizer_->SetUseCatchMode(false);
         } else {
             clickRecognizer_->SetUseCatchMode(true);
         }
@@ -1307,6 +1309,11 @@ double RenderSwiper::CalculateEndOffset(int32_t fromIndex, int32_t toIndex, bool
     return end;
 }
 
+void RenderSwiper::ResetScrollOffset()
+{
+    scrollOffset_ = 0.0;
+}
+
 void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool reverse)
 {
     if (!swipeToController_ || isIndicatorAnimationStart_ || fromIndex == toIndex) {
@@ -1346,6 +1353,7 @@ void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool r
             swiper->outItemIndex_ = fromIndex;
             swiper->currentIndex_ = toIndex;
             swiper->moveStatus_ = false;
+            swiper->ResetScrollOffset();
             swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
@@ -2383,7 +2391,8 @@ void RenderSwiper::StartIndicatorSpringAnimation(double start, double end)
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->ResetIndicatorSpringStatus();
+            swiper->UpdateIndicatorSpringStatus(SpringStatus::SPRING_STOP);
+            swiper->UpdateIndicatorTailPosition(DRAG_OFFSET_MIN);
         }
     });
 }

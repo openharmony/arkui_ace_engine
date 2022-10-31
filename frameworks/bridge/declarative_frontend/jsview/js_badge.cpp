@@ -85,7 +85,16 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
 
         Dimension badgeSize;
         if (ParseJsDimensionFp(badgeSizeValue, badgeSize)) {
-            badgeParameters.badgeCircleSize = badgeSize;
+            auto badgeTheme = GetTheme<BadgeTheme>();
+            if (!badgeTheme) {
+                LOGE("Get badge theme error");
+                return;
+            }
+            if (badgeSize.IsNonNegative()) {
+                badgeParameters.badgeCircleSize = badgeSize;
+            } else {
+                badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
+            }
         }
 
         Color color;
@@ -132,6 +141,7 @@ void JSBadge::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badg
     badge->SetBadgePosition(badgeTheme->GetBadgePosition());
     badge->SetBadgeTextColor(badgeTheme->GetBadgeTextColor());
     badge->SetBadgeFontSize(badgeTheme->GetBadgeFontSize());
+    badge->SetBadgeCircleSize(badgeTheme->GetBadgeCircleSize());
 }
 
 void JSBadge::SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge)
@@ -174,7 +184,9 @@ void JSBadge::SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<O
 
         Dimension badgeSize;
         if (ParseJsDimensionFp(badgeSizeValue, badgeSize)) {
-            badge->SetBadgeCircleSize(badgeSize);
+            if (badgeSize.IsNonNegative()) {
+                badge->SetBadgeCircleSize(badgeSize);
+            }
         }
 
         Color badgeColor;

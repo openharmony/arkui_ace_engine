@@ -15,9 +15,10 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 
+#include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 
 namespace OHOS::Ace {
 

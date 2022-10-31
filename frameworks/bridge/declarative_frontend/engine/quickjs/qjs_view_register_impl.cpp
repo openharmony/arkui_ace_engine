@@ -16,11 +16,13 @@
 #include <cstdint>
 
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
-#include "core/components_v2/inspector/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_v2/inspector/inspector.h"
+#include "core/pipeline/base/component.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
@@ -451,10 +453,10 @@ void JsBindViews(BindingTarget globalObj)
 void CreatePageRoot(RefPtr<JsAcePage>& page, JSView* view)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        auto pageRootNode = view->CreateUINode();
+        auto pageRootNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode());
         page->SetRootNode(pageRootNode);
     } else {
-        auto rootComponent = view->CreateComponent();
+        auto rootComponent = AceType::DynamicCast<Component>(view->CreateViewNode());
         std::list<RefPtr<Component>> stackChildren;
         stackChildren.emplace_back(rootComponent);
         auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
@@ -463,7 +465,9 @@ void CreatePageRoot(RefPtr<JsAcePage>& page, JSView* view)
         auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
         rootComposed->SetChild(rootStackComponent);
         page->SetRootComponent(rootComposed);
-        page->SetPageTransition(view->BuildPageTransitionComponent());
+        auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
+        ViewStackProcessor::GetInstance()->ClearPageTransitionComponent();
+        page->SetPageTransition(pageTransitionComponent);
     }
 }
 

@@ -274,29 +274,29 @@ void RenderTabBar::UpdatePosition()
 
 void RenderTabBar::SetScrollIndicator(double percent, int32_t newIndex, bool needChange)
 {
-   indicatorPlusX_ = 0.0;
-   indicatorPlusWidth_ = 0.0;
-   if (newIndex < 0 || newIndex >= tabsSize_) {
-      LOGW("boundary index = %{public}d", newIndex);
-      return;
-   }
+    indicatorPlusX_ = 0.0;
+    indicatorPlusWidth_ = 0.0;
+    if (newIndex < 0 || newIndex >= tabsSize_) {
+        LOGW("boundary index = %{public}d", newIndex);
+        return;
+    }
     
-   if (isVertical_) {
-       return;
-   }
+    if (isVertical_) {
+        return;
+    }
 
-   double newItemsWidth = tabsWidth_[newIndex];
-   double curItemsWidth = tabsWidth_[index_];
-   indicatorPlusX_ = curItemsWidth * percent;
-   if (needChange) {
-      if (percent<0) {
-         indicatorPlusX_ = curItemsWidth * (1.0 - std::abs(percent));
-      } else {
-         indicatorPlusX_ = curItemsWidth * (1.0 - std::abs(percent)) * -1.0;
-      }
-   }
-   indicatorPlusWidth_ = (curItemsWidth - newItemsWidth) * std::abs(percent);
-   MarkNeedLayout();
+    double newItemsWidth = tabsWidth_[newIndex];
+    double curItemsWidth = tabsWidth_[index_];
+    indicatorPlusX_ = curItemsWidth * percent;
+    if (needChange) {
+        if (percent<0) {
+            indicatorPlusX_ = curItemsWidth * (1.0 - std::abs(percent));
+        } else {
+            indicatorPlusX_ = curItemsWidth * (1.0 - std::abs(percent)) * -1.0;
+        }
+    }
+    indicatorPlusWidth_ = (curItemsWidth - newItemsWidth) * std::abs(percent);
+    MarkNeedLayout();
 }
 
 void RenderTabBar::SetIndex(int32_t index, bool force)
@@ -586,7 +586,8 @@ LayoutParam RenderTabBar::MakeIndicatorLayoutParam(const RefPtr<RenderNode>& ite
             std::max(0.0, maxLayoutParam.Height()) - NormalizeToPx(FOCUS_ANIMATION_WIDTH) * DOUBLE_FACTOR));
     } else {
         innerLayout.SetMaxSize(
-            Size(std::max(0.0, tabsWidth_[index_] - indicatorPlusWidth_ - NormalizeToPx(FOCUS_ANIMATION_WIDTH) * DOUBLE_FACTOR),
+            Size(std::max(
+                0.0, tabsWidth_[index_] - indicatorPlusWidth_ - NormalizeToPx(FOCUS_ANIMATION_WIDTH) * DOUBLE_FACTOR),
                 std::max(0.0, maxLayoutParam.Height()) - NormalizeToPx(FOCUS_ANIMATION_WIDTH) * DOUBLE_FACTOR));
     }
 
@@ -594,8 +595,10 @@ LayoutParam RenderTabBar::MakeIndicatorLayoutParam(const RefPtr<RenderNode>& ite
         auto childSize = GetTabItemChildLayoutSize(item);
         childSize += indicatorPadding_.GetLayoutSizeInPx(context->GetDipScale());
 
-        innerLayout.SetMaxSize(Size(std::min(innerLayout.GetMaxSize().Width() - indicatorPlusWidth_ , childSize.Width()-indicatorPlusWidth_),
-                                    std::min(innerLayout.GetMaxSize().Height(), childSize.Height())));
+        innerLayout.SetMaxSize(
+            Size(std::min(
+                innerLayout.GetMaxSize().Width() - indicatorPlusWidth_, childSize.Width() - indicatorPlusWidth_),
+                std::min(innerLayout.GetMaxSize().Height(), childSize.Height())));
     }
     return innerLayout;
 }

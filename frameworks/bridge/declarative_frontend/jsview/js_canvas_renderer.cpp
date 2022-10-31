@@ -271,10 +271,18 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::SetAntiAlias()
 {
-    if (isOffscreen_) {
-        offscreenCanvas_->SetAntiAlias(anti_);
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_) {
+            offscreenCanvasPattern_->SetAntiAlias(anti_);
+        } else {
+            customPaintPattern_->SetAntiAlias(anti_);
+        }
     } else {
-        pool_->SetAntiAlias(anti_);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetAntiAlias(anti_);
+        } else {
+            pool_->SetAntiAlias(anti_);
+        }
     }
 }
 
@@ -408,7 +416,11 @@ void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
             lineDash = customPaintPattern_->GetLineDash().lineDash;
         }
     } else {
-        lineDash = pool_->GetLineDash();
+        if (isOffscreen_) {
+            lineDash = offscreenCanvas_->GetLineDash().lineDash;
+        } else {
+            lineDash = pool_->GetLineDash().lineDash;
+        }
     }
     JSRef<JSObject> lineDashObj = JSRef<JSObject>::New();
     for (int i = 0; i < lineDash.size(); i++) {
@@ -1060,7 +1072,29 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsSetPixelMap(const JSCallbackInfo& info)
 {
-    return;
+    if (info.Length() != 1) {
+        LOGE("The argv is wrong, it is supposed to have 1 argument");
+        return;
+    }
+    CanvasImage image;
+    RefPtr<PixelMap> pixelMap = nullptr;
+    if (info[0]->IsObject()) {
+#if !defined(PREVIEW)
+        pixelMap = CreatePixelMapFromNapiValue(info[0]);
+#endif
+        if (!pixelMap) {
+            LOGE("pixelMap is null");
+            return;
+        }
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            isOffscreen_ ? offscreenCanvasPattern_->DrawPixelMap(pixelMap, image)
+                : customPaintPattern_->DrawPixelMap(pixelMap, image);
+        } else {
+            isOffscreen_ ? offscreenCanvas_->DrawPixelMap(pixelMap, image)
+                : pool_->DrawPixelMap(pixelMap, image);
+        }
+    }
 }
 
 void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)

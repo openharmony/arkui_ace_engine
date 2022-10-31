@@ -45,11 +45,13 @@ public:
     bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
 
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
-    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
+    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE,
+        bool forceFireEvent = false);
 
     RefPtr<FrameNode> GetLastPage();
 
 private:
+    void StartSharedTransition(const RefPtr<FrameNode>& outNode, const RefPtr<FrameNode>& inNode, bool needFlush) const;
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;
 

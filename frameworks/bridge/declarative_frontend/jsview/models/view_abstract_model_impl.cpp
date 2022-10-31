@@ -15,18 +15,35 @@
 
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 
+#include <functional>
+
 #include "base/geometry/animatable_dimension.h"
+#include "base/log/ace_scoring_log.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/box/box_component_helper.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/placement.h"
 #include "core/event/ace_event_handler.h"
+#include "core/event/touch_event.h"
+#include "core/gestures/gesture_info.h"
+#include "core/gestures/long_press_gesture.h"
+
+// avoid windows build error about macro defined in winuser.h
+#ifdef GetMessage
+#undef GetMessage
+#endif
 
 namespace OHOS::Ace::Framework {
+
+constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
+constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 
 RefPtr<Decoration> GetBackDecoration()
 {
@@ -134,6 +151,31 @@ Gradient ToGradient(const NG::Gradient& gradient)
     return retGradient;
 }
 
+void ViewAbstractModelImpl::SwapBackBorder(const RefPtr<Decoration>& decoration)
+{
+    CHECK_NULL_VOID(decoration);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto boxDecoration = box->GetBackDecoration();
+    if (boxDecoration) {
+        decoration->SetBorder(boxDecoration->GetBorder());
+        boxDecoration->SetBorder({});
+    }
+}
+
+OnDragFunc ViewAbstractModelImpl::ToDragFunc(NG::OnDragStartFunc&& onDragStart)
+{
+    auto dragStart = [dragStartFunc = std::move(onDragStart)](
+                         const RefPtr<DragEvent>& event, const std::string& extraParams) -> DragItemInfo {
+        auto dragInfo = dragStartFunc(event, extraParams);
+        DragItemInfo info;
+        info.extraInfo = dragInfo.extraInfo;
+        info.pixelMap = dragInfo.pixelMap;
+        info.customComponent = AceType::DynamicCast<Component>(dragInfo.node);
+        return info;
+    };
+    return dragStart;
+}
+
 void ViewAbstractModelImpl::SetWidth(const Dimension& width)
 {
     bool isPercentSize = (width.Unit() == DimensionUnit::PERCENT);
@@ -157,17 +199,6 @@ void ViewAbstractModelImpl::SetWidth(const Dimension& width)
             box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
                 BoxStateAttribute::WIDTH, AnimatableDimension(box->GetWidth(), option), VisualState::NORMAL);
         }
-    }
-}
-
-void ViewAbstractModelImpl::SwapBackBorder(const RefPtr<Decoration>& decoration)
-{
-    CHECK_NULL_VOID(decoration);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto boxDecoration = box->GetBackDecoration();
-    if (boxDecoration) {
-        decoration->SetBorder(boxDecoration->GetBorder());
-        boxDecoration->SetBorder({});
     }
 }
 
@@ -707,7 +738,7 @@ void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optio
         coverageComponent->SetX(offsetX.value());
     }
     if (offsetY.has_value()) {
-        coverageComponent->SetX(offsetY.value());
+        coverageComponent->SetY(offsetY.value());
     }
 }
 
@@ -724,21 +755,25 @@ void ViewAbstractModelImpl::SetVisibility(VisibleType visible, std::function<voi
     display->SetVisibleChangeEvent(eventMarker);
 }
 
-void ViewAbstractModelImpl::SetSharedTransition(const SharedTransitionOption& option)
+void ViewAbstractModelImpl::SetSharedTransition(
+    const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option)
 {
     auto sharedTransitionComponent = ViewStackProcessor::GetInstance()->GetSharedTransitionComponent();
-    sharedTransitionComponent->SetShareId(option.id);
+    sharedTransitionComponent->SetShareId(shareId);
+    if (!option) {
+        return;
+    }
     TweenOption tweenOption;
-    tweenOption.SetCurve(option.curve);
-    tweenOption.SetDuration(option.duration);
-    tweenOption.SetDelay(option.delay);
-    tweenOption.SetMotionPathOption(option.motionPathOption);
+    tweenOption.SetCurve(option->curve);
+    tweenOption.SetDuration(option->duration);
+    tweenOption.SetDelay(option->delay);
+    tweenOption.SetMotionPathOption(option->motionPathOption);
     auto sharedTransitionEffect =
-        SharedTransitionEffect::GetSharedTransitionEffect(option.type, sharedTransitionComponent->GetShareId());
+        SharedTransitionEffect::GetSharedTransitionEffect(option->type, sharedTransitionComponent->GetShareId());
     sharedTransitionComponent->SetEffect(sharedTransitionEffect);
     sharedTransitionComponent->SetOption(tweenOption);
-    if (option.zIndex != 0) {
-        sharedTransitionComponent->SetZIndex(option.zIndex);
+    if (option->zIndex != 0) {
+        sharedTransitionComponent->SetZIndex(option->zIndex);
     }
 }
 
@@ -1015,7 +1050,20 @@ void ViewAbstractModelImpl::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
     }
 }
 
-void ViewAbstractModelImpl::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) {}
+void ViewAbstractModelImpl::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    auto impl = inspector->GetInspectorFunctionImpl();
+    auto onMouseId = [func = std::move(onMouseEventFunc), impl](MouseInfo& mouseInfo) {
+        if (impl) {
+            impl->UpdateEventInfo(mouseInfo);
+        }
+        func(mouseInfo);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnMouseId(onMouseId);
+}
 
 void ViewAbstractModelImpl::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
 {
@@ -1083,6 +1131,59 @@ void ViewAbstractModelImpl::SetOnBlur(OnBlurFunc&& onBlurCallback)
     if (focusableComponent) {
         focusableComponent->SetOnBlur(onBlurCallback);
     }
+}
+
+void ViewAbstractModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragStartId(ToDragFunc(std::move(onDragStart)));
+}
+
+void ViewAbstractModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragEnterId(onDragEnter);
+}
+
+void ViewAbstractModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragLeaveId(onDragLeave);
+}
+
+void ViewAbstractModelImpl::SetOnDragMove(NG::OnDragDropFunc&& onDragMove)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragMoveId(onDragMove);
+}
+
+void ViewAbstractModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDropId(onDrop);
+}
+
+void ViewAbstractModelImpl::SetOnVisibleChange(
+    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto nodeId = inspector->GetId();
+
+    for (const auto& ratio : ratios) {
+        context->AddVisibleAreaChangeNode(nodeId, ratio, onVisibleChange);
+    }
+}
+
+void ViewAbstractModelImpl::SetOnAreaChanged(
+    std::function<void(const Rect&, const Offset&, const Rect&, const Offset&)>&& onAreaChanged)
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->GetEventExtensions()->GetOnAreaChangeExtension()->AddOnAreaChangeEvent(std::move(onAreaChanged));
 }
 
 void ViewAbstractModelImpl::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
@@ -1250,6 +1351,199 @@ void ViewAbstractModelImpl::SetHitTestMode(NG::HitTestMode hitTestMode)
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     if (component) {
         component->SetHitTestMode(mode);
+    }
+}
+
+void ViewAbstractModelImpl::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto popupComponent = ViewStackProcessor::GetInstance()->GetPopupComponent(true);
+    CHECK_NULL_VOID(popupComponent);
+
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    param->SetTargetMargin(boxComponent->GetMargin());
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    param->SetTargetId(inspector->GetId());
+
+    popupComponent->SetPopupParam(param);
+    if (param->GetOnStateChange()) {
+        auto changeEvent = EventMarker(param->GetOnStateChange());
+        popupComponent->SetOnStateChange(changeEvent);
+    }
+    popupComponent->SetMessage(param->GetMessage());
+    popupComponent->SetPlacementOnTop(param->GetPlacement() == Placement::TOP);
+
+    auto btnPropFirst = param->GetPrimaryButtonProperties();
+    if (btnPropFirst.touchFunc) {
+        btnPropFirst.actionId = EventMarker([onTouch = btnPropFirst.touchFunc]() {
+            TouchEventInfo info("unknown");
+            onTouch(info);
+        });
+    }
+    popupComponent->SetPrimaryButtonProperties(btnPropFirst);
+
+    auto btnPropSecond = param->GetSecondaryButtonProperties();
+    if (btnPropSecond.touchFunc) {
+        btnPropSecond.actionId = EventMarker([onTouch = btnPropSecond.touchFunc]() {
+            TouchEventInfo info("unknown");
+            onTouch(info);
+        });
+    }
+    popupComponent->SetSecondaryButtonProperties(btnPropSecond);
+
+    auto customComponent = AceType::DynamicCast<Component>(customNode);
+    if (customComponent) {
+        popupComponent->SetCustomComponent(customComponent);
+    }
+}
+
+RefPtr<SelectTheme> GetSelectTheme()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetTheme<SelectTheme>();
+}
+
+GestureEventFunc CreateMenuEventWithParams(
+    const WeakPtr<OHOS::Ace::MenuComponent>& weak, std::vector<NG::OptionParam>&& params)
+{
+    return [weak, params](const GestureEvent& info) {
+        auto menuComponent = weak.Upgrade();
+        CHECK_NULL_VOID(menuComponent);
+        auto menuTheme = GetSelectTheme();
+        if (menuTheme) {
+            menuComponent->SetTheme(menuTheme);
+        }
+        menuComponent->ClearOptions();
+
+        for (const auto& param : params) {
+            auto optionTheme = GetSelectTheme();
+            if (!optionTheme) {
+                continue;
+            }
+            auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(param.first);
+
+            optionComponent->SetTextStyle(optionTheme->GetOptionTextStyle());
+            optionComponent->SetTheme(optionTheme);
+            optionComponent->SetText(textComponent);
+            optionComponent->SetValue(param.first);
+            optionComponent->SetCustomizedCallback(param.second);
+            menuComponent->AppendOption(optionComponent);
+        }
+
+        auto showDialog = menuComponent->GetTargetCallback();
+        showDialog("BindMenu", info.GetGlobalLocation());
+    };
+}
+
+void ExecMenuBuilder(const std::function<void()>& builderFunc, const RefPtr<MenuComponent>& menuComponent)
+{
+    // use another VSP instance while executing the builder function
+    ScopedViewStackProcessor builderViewStackProcessor;
+    {
+        ACE_SCORING_EVENT("contextMenu.builder");
+        builderFunc();
+    }
+    auto customComponent = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(customComponent);
+
+    // Set the theme
+    auto menuTheme = GetSelectTheme();
+    if (menuTheme) {
+        menuComponent->SetTheme(menuTheme);
+    }
+    auto optionTheme = GetSelectTheme();
+    auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+
+    // Set the custom component
+    optionComponent->SetCustomComponent(customComponent);
+    menuComponent->ClearOptions();
+    menuComponent->AppendOption(optionComponent);
+}
+
+GestureEventFunc CreateMenuEventWithBuilder(
+    const WeakPtr<OHOS::Ace::MenuComponent>& weak, std::function<void()>&& buildFunc)
+{
+    return [weak, builderFunc = std::move(buildFunc)](const GestureEvent& info) {
+        auto menuComponent = weak.Upgrade();
+        CHECK_NULL_VOID(menuComponent);
+        menuComponent->SetIsCustomMenu(true);
+        ExecMenuBuilder(builderFunc, menuComponent);
+        auto showDialog = menuComponent->GetTargetCallback();
+        showDialog("BindMenu", info.GetGlobalLocation());
+    };
+}
+
+void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
+    CHECK_NULL_VOID(menuComponent);
+    auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
+    GestureEventFunc eventFunc;
+    if (!params.empty()) {
+        eventFunc = CreateMenuEventWithParams(weak, std::move(params));
+    } else if (buildFunc) {
+        eventFunc = CreateMenuEventWithBuilder(weak, std::move(buildFunc));
+    } else {
+        LOGE("No param object.");
+        return;
+    }
+    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    tapGesture->SetOnActionId(eventFunc);
+    click->SetOnClick(tapGesture);
+}
+
+void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
+    CHECK_NULL_VOID(menuComponent);
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+    menuComponent->SetIsContextMenu(true);
+#endif
+
+    auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
+    if (type == ResponseType::RIGHT_CLICK) {
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        box->SetOnMouseId([weak, builderFunc = std::move(buildFunc)](MouseInfo& info) {
+            auto menuComponent = weak.Upgrade();
+            CHECK_NULL_VOID(menuComponent);
+            if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                ExecMenuBuilder(builderFunc, menuComponent);
+                auto showMenu = menuComponent->GetTargetCallback();
+                info.SetStopPropagation(true);
+                LOGI("Context menu is triggered, type is right click.");
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+                showMenu("", info.GetScreenLocation());
+#else
+                showMenu("", info.GetGlobalLocation());
+#endif
+            }
+        });
+    } else if (type == ResponseType::LONGPRESS) {
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        RefPtr<Gesture> longGesture = AceType::MakeRefPtr<LongPressGesture>(
+            DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION, false, true);
+        longGesture->SetOnActionId([weak, builderFunc = std::move(buildFunc)](const GestureEvent& info) mutable {
+            auto menuComponent = weak.Upgrade();
+            CHECK_NULL_VOID(menuComponent);
+            ExecMenuBuilder(builderFunc, menuComponent);
+            auto showMenu = menuComponent->GetTargetCallback();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+            showMenu("", info.GetScreenLocation());
+#else
+            showMenu("", info.GetGlobalLocation());
+#endif
+        });
+        box->SetOnLongPress(longGesture);
+    } else {
+        LOGE("The arg responseType is invalid.");
     }
 }
 

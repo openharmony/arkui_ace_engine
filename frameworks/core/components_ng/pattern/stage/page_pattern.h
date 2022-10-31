@@ -27,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
+using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<FrameNode>>;
 // PagePattern is the base class for page root render node.
 class ACE_EXPORT PagePattern : public Pattern {
     DECLARE_ACE_TYPE(PagePattern, Pattern);
@@ -89,6 +90,18 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    const SharedTransitionMap& GetSharedTransitionMap() const
+    {
+        return sharedTransitionMap_;
+    }
+
+    void BuildSharedTransitionMap();
+
+    void MarkForceLoaded()
+    {
+        isLoaded_ = true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
@@ -106,6 +119,8 @@ private:
 
     bool isOnShow_ = false;
     bool isLoaded_ = false;
+
+    SharedTransitionMap sharedTransitionMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

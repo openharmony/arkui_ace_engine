@@ -15,8 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_page_transition_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/functions/js_page_transition_function.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 

@@ -100,10 +100,21 @@ public:
         json->Put("selectable", selectable_ ? "true" : "false");
     }
 
+    void MarkIsSelected(bool isSelected)
+    {
+        isSelected_ = isSelected;
+    }
+
+    bool IsSelected() const
+    {
+        return isSelected_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;
     bool selectable_ = true;
+    bool isSelected_ = false;
     int32_t mainIndex_ = -1;
     int32_t crossIndex_ = -1;
 

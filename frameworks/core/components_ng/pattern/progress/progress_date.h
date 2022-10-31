@@ -34,6 +34,46 @@ enum class ProgressType {
     CAPSULE = 9,
 };
 
+class ProgressTypeUtils {
+public:
+    static std::string ConvertProgressTypeToString(ProgressType progressType)
+    {
+        std::string progressTypeUtils = "";
+        switch (progressType) {
+            case ProgressType::LINEAR:
+                progressTypeUtils = "ProgressType.LINEAR";
+                break;
+            case ProgressType::RING:
+                progressTypeUtils = "ProgressType.RING";
+                break;
+            case ProgressType::SCALE:
+                progressTypeUtils = "ProgressType.SCALE";
+                break;
+            case ProgressType::CIRCLE:
+                progressTypeUtils = "ProgressType.CIRCLE";
+                break;
+            case ProgressType::GAUGE:
+                progressTypeUtils = "ProgressType.GAUGE";
+                break;
+            case ProgressType::ARC:
+                progressTypeUtils = "ProgressType.ARC";
+                break;
+            case ProgressType::MOON:
+                progressTypeUtils = "ProgressType.MOON";
+                break;
+            case ProgressType::BUBBLE:
+                progressTypeUtils = "ProgressType.BUBBLE";
+                break;
+            case ProgressType::CAPSULE:
+                progressTypeUtils = "ProgressType.CAPSULE";
+                break;
+            default:
+                progressTypeUtils = "ProgressType.DEFAULT";
+        }
+        return progressTypeUtils;
+    }
+};
+
 struct ProgressDate {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxValue, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Value, double);

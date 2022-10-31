@@ -66,9 +66,11 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
+    lastTouchEvent_ = event;
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
     touchPoints_[event.id] = event;
+    inputEventType_ = InputEventType::TOUCH_SCREEN;
 
     if (state_ == DetectState::READY) {
         AddToReferee(event.id, AceType::Claim(this));
@@ -94,8 +96,11 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
     lastAxisEvent_ = event;
+    inputEventType_ = InputEventType::AXIS;
 
     if (state_ == DetectState::READY) {
+        AddToReferee(0, AceType::Claim(this));
+        velocityTracker_.Reset();
         state_ = DetectState::DETECTING;
     }
 }
@@ -109,6 +114,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     globalPoint_ = Point(event.x, event.y);
+    lastTouchEvent_ = event;
     touchPoints_.erase(itr);
     velocityTracker_.UpdateTouchPoint(event, true);
 
@@ -160,7 +166,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         return;
     }
 
-    SendCallbackMsg(onActionEnd_, false);
+    SendCallbackMsg(onActionEnd_);
     Reset();
 }
 
@@ -173,6 +179,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
 
     globalPoint_ = Point(event.x, event.y);
+    lastTouchEvent_ = event;
     if (state_ == DetectState::READY) {
         touchPoints_[event.id] = event;
         return;
@@ -257,15 +264,15 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         } else if (result == GestureAcceptResult::REJECT) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
-    }
-    if (state_ == DetectState::DETECTED) {
+    } else if (state_ == DetectState::DETECTED && refereeState_ == RefereeState::SUCCEED) {
         if ((direction_.type & PanDirection::VERTICAL) == 0) {
             averageDistance_.SetY(0.0);
         } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
             averageDistance_.SetX(0.0);
         }
 
-        SendCallbackMsg(onActionUpdate_, false);
+        LOGD("pan recognizer detected successful");
+        SendCallbackMsg(onActionUpdate_);
     }
 }
 
@@ -346,7 +353,7 @@ void PanRecognizer::Reset()
     pendingCancel_ = false;
 }
 
-void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isTouchEvent)
+void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
     if (callback && *callback) {
         GestureEvent info;
@@ -357,19 +364,29 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
-        info.SetGlobalPoint(globalPoint_).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
+        info.SetGlobalPoint(globalPoint_)
+            .SetLocalLocation(Offset(globalPoint_.GetX(), globalPoint_.GetY()) - coordinateOffset_);
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetDelta(delta_);
         info.SetMainDelta(mainDelta_);
-        if (isTouchEvent) {
-            info.SetVelocity(velocityTracker_.GetVelocity());
-            info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
-        } else {
+        if (inputEventType_ == InputEventType::AXIS) {
             info.SetVelocity(Velocity());
             info.SetMainVelocity(0.0);
+        } else {
+            info.SetVelocity(velocityTracker_.GetVelocity());
+            info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetInputEventType(inputEventType_);
+        info.SetForce(lastTouchEvent_.force);
+        if (lastTouchEvent_.tiltX.has_value()) {
+            info.SetTiltX(lastTouchEvent_.tiltX.value());
+        }
+        if (lastTouchEvent_.tiltY.has_value()) {
+            info.SetTiltY(lastTouchEvent_.tiltY.value());
+        }
+        info.SetSourceTool(lastTouchEvent_.sourceTool);
         (*callback)(info);
     }
 }

@@ -71,14 +71,14 @@ public:
             return;
         }
         std::vector<std::vector<double>> radiusArray(4);
-        radiusArray[0] = { propTopLeftRadius_.value().GetX().ConvertToVp(),
-            propTopLeftRadius_.value().GetY().ConvertToVp() };
-        radiusArray[1] = { propTopRightRadius_.value().GetX().ConvertToVp(),
-            propTopRightRadius_.value().GetY().ConvertToVp() };
-        radiusArray[2] = { propBottomRightRadius_.value().GetX().ConvertToVp(),
-            propBottomRightRadius_.value().GetY().ConvertToVp() };
-        radiusArray[3] = { propBottomLeftRadius_.value().GetX().ConvertToVp(),
-            propBottomLeftRadius_.value().GetY().ConvertToVp() };
+        radiusArray[0] = { propTopLeftRadius_.value().GetX().ConvertToPx(),
+            propTopLeftRadius_.value().GetY().ConvertToPx() };
+        radiusArray[1] = { propTopRightRadius_.value().GetX().ConvertToPx(),
+            propTopRightRadius_.value().GetY().ConvertToPx() };
+        radiusArray[2] = { propBottomRightRadius_.value().GetX().ConvertToPx(),
+            propBottomRightRadius_.value().GetY().ConvertToPx() };
+        radiusArray[3] = { propBottomLeftRadius_.value().GetX().ConvertToPx(),
+            propBottomLeftRadius_.value().GetY().ConvertToPx() };
         json->Put("radius", radiusArray.data());
     }
 

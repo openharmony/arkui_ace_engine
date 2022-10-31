@@ -20,12 +20,13 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/components/common/layout/grid_container_info.h"
 
 namespace OHOS::Ace::V2 {
 
 constexpr int32_t DEFAULT_COLUMN_NUMBER = 12;
-struct GridContainerSize : public AceType {
+struct GridContainerSize : public Referenced {
     GridContainerSize() = default;
     explicit GridContainerSize(int32_t column)
     {
@@ -66,7 +67,7 @@ enum class GridSizeType {
     UNDEFINED = 6,
 };
 
-struct GridSizeInfo : public AceType {
+struct GridSizeInfo : public Referenced {
     std::vector<Dimension> sizeInfo {
         Dimension(320, DimensionUnit::VP),
         Dimension(520, DimensionUnit::VP),

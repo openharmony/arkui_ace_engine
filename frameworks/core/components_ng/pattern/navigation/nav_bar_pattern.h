@@ -50,8 +50,6 @@ public:
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-
     void OnModifyDone() override;
 };
 

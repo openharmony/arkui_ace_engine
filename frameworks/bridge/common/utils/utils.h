@@ -424,11 +424,11 @@ inline TabBarMode ConvertStrToTabBarMode(const std::string& value)
     return temp == "fixed" ? TabBarMode::FIXED : TabBarMode::SCROLLABLE;
 }
 
-RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
+ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
 
-RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
+ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
 
-ACE_EXPORT RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
+ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
 
 ACE_EXPORT TransitionType ParseTransitionType(const std::string& transitionType);
 

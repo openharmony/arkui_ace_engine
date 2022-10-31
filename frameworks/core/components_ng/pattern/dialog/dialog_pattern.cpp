@@ -22,15 +22,19 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -41,18 +45,36 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 
-const char SEPARATE[] = " ";
-
-constexpr Dimension SHEET_IMAGE_SIZE = 40.0_vp;
 constexpr Dimension SHEET_IMAGE_PADDING = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
+const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
+
+RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& color)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    textNode->SetInternal();
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textProps, nullptr);
+    textProps->UpdateContent(text);
+    if (!color.empty()) {
+        textProps->UpdateTextColor(Color::FromString(color));
+    } else {
+        textProps->UpdateTextColor(Color::BLUE);
+    }
+    textNode->SetInternal();
+    return textNode;
+}
 
 } // namespace
 
@@ -154,17 +176,16 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
         return;
     }
 
-    std::string data;
     // Make dialog Content Column
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(contentColumn);
 
-    auto title = BuildTitle(data, dialogProperties);
+    auto title = BuildTitle(dialogProperties);
     CHECK_NULL_VOID(title);
     contentColumn->AddChild(title);
 
-    auto content = BuildContent(data, dialogProperties);
+    auto content = BuildContent(dialogProperties);
     CHECK_NULL_VOID(content);
     contentColumn->AddChild(content);
     UpdateContentRenderContext(contentColumn, dialogTheme_);
@@ -205,7 +226,7 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     contentColumn->MountToParent(dialog);
 }
 
-RefPtr<FrameNode> DialogPattern::BuildTitle(std::string& data, const DialogProperties& dialogProperties)
+RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProperties)
 {
     // Make Title node
     auto title = FrameNode::CreateFrameNode(
@@ -217,7 +238,6 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(std::string& data, const DialogPrope
     titleProp->UpdateAdaptMaxFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
     titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleMinFontSize());
     titleProp->UpdateContent(dialogProperties.title);
-    data += dialogProperties.title + SEPARATE;
     PaddingProperty titlePadding;
     auto paddingInTheme = (dialogProperties.content.empty() && dialogProperties.buttons.empty())
                               ? dialogTheme_->GetTitleDefaultPadding()
@@ -227,12 +247,27 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(std::string& data, const DialogPrope
     titlePadding.top = CalcLength(paddingInTheme.Top());
     titlePadding.bottom = CalcLength(paddingInTheme.Bottom());
     titleProp->UpdatePadding(titlePadding);
+
     // XTS inspector value
     title_ = dialogProperties.title;
+
+    // actionSheet title needs to align flex start
+    if (dialogProperties.type == DialogType::ACTION_SHEET) {
+        auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(row, nullptr);
+        auto rowProps = row->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(rowProps, nullptr);
+        rowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+        rowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        title->MountToParent(row);
+        return row;
+    }
+
     return title;
 }
 
-RefPtr<FrameNode> DialogPattern::BuildContent(std::string& data, const DialogProperties& dialogProperties)
+RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& dialogProperties)
 {
     // Make Content node
     auto contentNode = FrameNode::CreateFrameNode(
@@ -246,7 +281,6 @@ RefPtr<FrameNode> DialogPattern::BuildContent(std::string& data, const DialogPro
     }
     contentProp->UpdateContent(dialogProperties.content);
     LOGD("content = %s", dialogProperties.content.c_str());
-    data += dialogProperties.content + SEPARATE;
     // update padding
     Edge contentPaddingInTheme;
     if (!dialogProperties.title.empty()) {
@@ -281,29 +315,33 @@ void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_
     hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(closeCallback));
 }
 
-RefPtr<UINode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t index)
+RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t index)
 {
-    ButtonView::CreateWithLabel(params.text);
-    if (!params.textColor.empty()) {
-        ButtonView::SetTextColor(Color::FromString(params.textColor));
-    }
-    auto buttonNode = ViewStackProcessor::GetInstance()->Finish();
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
+    // append text inside button
+    auto textNode = CreateButtonText(params.text, params.textColor);
+    CHECK_NULL_RETURN(textNode, nullptr);
+    textNode->MountToParent(buttonNode);
 
-    // bind click event
-    auto buttonFrame = AceType::DynamicCast<FrameNode>(buttonNode);
-    auto hub = buttonFrame->GetOrCreateGestureEventHub();
+    auto hub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
-    hub->AddClickEvent(params.action);
+    // bind click event
+    if (params.action) {
+        hub->AddClickEvent(params.action);
+    }
 
     // to close dialog when clicked inside button rect
     BindCloseCallBack(hub, index);
 
     // update background color
     if (params.isBgColorSetted) {
-        auto renderContext = buttonFrame->GetRenderContext();
+        auto renderContext = buttonNode->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, nullptr);
         renderContext->UpdateBackgroundColor(params.bgColor);
     }
+    buttonNode->SetInternal();
     return buttonNode;
 }
 
@@ -333,7 +371,9 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
 
     for (size_t i = 0; i < buttons.size(); ++i) {
         auto buttonNode = CreateButton(buttons[i], i);
+        CHECK_NULL_RETURN(buttonNode, nullptr);
         buttonNode->MountToParent(container);
+        buttonNode->MarkModifyDone();
     }
     return container;
 }
@@ -352,7 +392,6 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     CHECK_NULL_RETURN(itemRow, nullptr);
     auto layoutProps = itemRow->GetLayoutProperty<LinearLayoutProperty>();
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    layoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
 
     // mount icon
@@ -370,9 +409,10 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
         };
         auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         iconProps->UpdatePadding(imagePadding);
-        auto imageSrc = ImageSourceInfo(item.icon, SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE);
+        LOGD("item icon src = %s", item.icon.c_str());
+        auto imageSrc = ImageSourceInfo(item.icon);
         iconProps->UpdateImageSourceInfo(imageSrc);
-
+        iconProps->UpdateUserDefinedIdealSize(CalcSize(SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE));
         iconNode->MountToParent(itemRow);
         iconNode->MarkModifyDone();
     }
@@ -395,7 +435,9 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     }
     // set sheetItem action
     auto hub = itemRow->GetOrCreateGestureEventHub();
-    hub->AddClickEvent(item.action);
+    if (item.action) {
+        hub->AddClickEvent(item.action);
+    }
     // close dialog when clicked
     BindCloseCallBack(hub, -1);
 

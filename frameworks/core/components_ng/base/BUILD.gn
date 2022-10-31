@@ -21,6 +21,8 @@ build_component_ng("base_ng") {
     "inspector.cpp",
     "ui_node.cpp",
     "view_abstract.cpp",
+    "view_full_update_model_ng.cpp",
+    "view_partial_update_model_ng.cpp",
     "view_stack_processor.cpp",
   ]
   component_ng_deps = [

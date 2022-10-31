@@ -243,6 +243,14 @@ Offset RenderStack::GetNonPositionedChildOffset(const Size& childSize)
     if (GreatOrEqual(size.Height(), childSize.Height())) {
         offset.SetY((1.0 + align_.GetVertical()) * (size.Height() - childSize.Height()) / 2.0);
     }
+
+    // child larger than the parent
+    if (GreatOrEqual(childSize.Width(), size.Width())) {
+        offset.SetX(-(1.0 + coefficients * align_.GetHorizontal()) * (childSize.Width() - size.Width()) / 2.0);
+    }
+    if (GreatOrEqual(childSize.Height(), size.Height())) {
+        offset.SetY(-(1.0 + align_.GetVertical()) * (childSize.Height() - size.Height()) / 2.0);
+    }
     return offset;
 }
 

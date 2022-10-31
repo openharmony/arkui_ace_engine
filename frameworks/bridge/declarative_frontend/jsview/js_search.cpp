@@ -18,6 +18,7 @@
 #include <optional>
 #include <string>
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "core/components/search/search_component.h"
 #include "core/components/search/search_theme.h"
@@ -25,10 +26,10 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/search/search_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/js_textfield.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 

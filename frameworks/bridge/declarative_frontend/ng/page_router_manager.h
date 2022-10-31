@@ -60,6 +60,7 @@ struct RouterTask {
 };
 
 class PageRouterManager : public AceType {
+    DECLARE_ACE_TYPE(PageRouterManager, AceType)
 public:
     PageRouterManager() = default;
     ~PageRouterManager() override = default;
@@ -117,8 +118,7 @@ public:
 
     void SetIsCard()
     {
-        isCardRouter = true;
-        return;
+        isCardRouter_ = true;
     }
 
 private:
@@ -171,7 +171,7 @@ private:
     bool inRouterOpt_ = false;
     LoadPageCallback loadJs_;
     LoadCardCallback loadCard_;
-    bool isCardRouter = false;
+    bool isCardRouter_ = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
     RouterPageInfo ngBackUri_ = { "" };

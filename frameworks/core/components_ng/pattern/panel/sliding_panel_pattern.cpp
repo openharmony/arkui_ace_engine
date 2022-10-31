@@ -127,6 +127,9 @@ void SlidingPanelPattern::InitializeLayoutProps()
     if (isFirstLayout_) {
         CheckPanelModeandType();
         AnimateTo(defaultBlankHeights_[mode_], mode_);
+        if (previousMode_ != mode_) {
+            FireSizeChangeEvent();
+        }
         auto dragBar = GetDragBarNode();
         auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
         CHECK_NULL_VOID(dragBarPattern);
@@ -238,7 +241,6 @@ void SlidingPanelPattern::HandleDragEnd(float dragVelocity)
     if (isAnimating_) {
         return;
     }
-    previousMode_ = mode_;
     auto dragLen = currentOffset_ - dragStartCurrentOffset_;
     type_ = GetPanelType();
     switch (type_) {
@@ -262,6 +264,7 @@ void SlidingPanelPattern::HandleDragEnd(float dragVelocity)
     AnimateTo(defaultBlankHeights_[mode_], mode_);
     if (previousMode_ != mode_) {
         FireSizeChangeEvent();
+        previousMode_ = mode_;
     }
 }
 
@@ -461,7 +464,7 @@ void SlidingPanelPattern::FireSizeChangeEvent()
     auto dragBarFrameSize = dragBar->GetGeometryNode()->GetFrameSize();
     float height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_] - dragBarFrameSize.Height());
     float width = std::floor(frameSize.Width());
-    slidingPanelEventHub->FireSizeChangeEvent(width, height, mode_);
+    slidingPanelEventHub->FireSizeChangeEvent(mode_, width, height);
 }
 
 void SlidingPanelPattern::FireHeightChangeEvent()
@@ -487,7 +490,6 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     Pattern::ToJsonValue(json);
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    json->Put("show", layoutProperty->GetShow().value_or(true) ? "true" : "false");
     static const char* PANEL_TYPE[] = { "PanelType.Minibar", "PanelType.Foldable", "PanelType.Temporary" };
     json->Put(
         "type", PANEL_TYPE[static_cast<int32_t>(layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR))]);

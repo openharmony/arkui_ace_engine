@@ -15,13 +15,14 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 
 namespace OHOS::Ace {
 
@@ -95,6 +96,11 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcId);
     };
     XComponentModel::GetInstance()->SetOnSurfaceDestroyEvent(std::move(surfaceDestroyCallback));
+
+    if (info.Length() > 1 && info[1]->IsString()) {
+        auto soPath = info[1]->ToString();
+        XComponentModel::GetInstance()->SetSoPath(soPath);
+    }
 }
 
 void JSXComponent::JsOnLoad(const JSCallbackInfo& args)

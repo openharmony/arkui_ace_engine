@@ -42,4 +42,28 @@ void NavigatorEventHub::NavigatePage()
     LOGD("navigate success");
 }
 
+std::string NavigatorEventHub::GetNavigatorType() const
+{
+    switch (type_) {
+        case NavigatorType::PUSH:
+            return "NavigatorType.Push";
+        case NavigatorType::BACK:
+            return "NavigatorType.Back";
+        case NavigatorType::DEFAULT:
+            return "NavigatorType.Default";
+        case NavigatorType::REPLACE:
+            return "NavigatorType.Replace";
+        default:
+            return "NavigatorType.Push";
+    }
+}
+
+void NavigatorEventHub::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("active", active_ ? "true" : "false");
+    json->Put("target", url_.c_str());
+    json->Put("type", GetNavigatorType().c_str());
+    json->Put("params", params_.c_str());
+}
+
 } // namespace OHOS::Ace::NG

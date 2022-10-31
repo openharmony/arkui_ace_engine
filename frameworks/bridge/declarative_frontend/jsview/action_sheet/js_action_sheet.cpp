@@ -18,12 +18,13 @@
 #include <string>
 #include <vector>
 
+#include "base/log/ace_scoring_log.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -51,7 +52,7 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
 
     auto iconVal = obj->GetProperty("icon");
     std::string icon;
-    if (JSActionSheet::ParseJsString(iconVal, icon)) {
+    if (JSActionSheet::ParseJsMedia(iconVal, icon)) {
         sheetInfo.icon = icon;
     }
 
@@ -164,7 +165,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         JSRef<JSVal> value = confirmObj->GetProperty("value");
         std::string buttonValue;
         if (ParseJsString(value, buttonValue)) {
-            ButtonInfo buttonInfo = { .text = buttonValue, .textColor = "" };
+            ButtonInfo buttonInfo = { .text = buttonValue, .textColor = "blue" };
             JSRef<JSVal> actionValue = confirmObj->GetProperty("action");
             // parse confirm action
             if (actionValue->IsFunction()) {

@@ -561,7 +561,7 @@ void ViewAbstract::BindPopup(
 }
 
 // common function to bind menu
-void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId)
+void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
 {
     LOGD("ViewAbstract::BindMenu");
     auto container = Container::Current();
@@ -574,11 +574,12 @@ void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId)
     CHECK_NULL_VOID(overlayManager);
 
     // pass in menuNode to register it in OverlayManager
-    overlayManager->ShowMenu(targetId, menuNode);
+    overlayManager->ShowMenu(targetId, true, offset, menuNode);
     LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
 }
 
-void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode)
+void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
+    const NG::OffsetF& offset)
 {
     CHECK_NULL_VOID(targetNode);
 
@@ -586,22 +587,31 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
         LOGD("menu params is empty");
         return;
     }
-    auto menuNode = MenuView::Create(std::move(params), targetNode->GetTag(), targetNode->GetId());
-    BindMenu(menuNode, targetNode->GetId());
+    auto menuNode = MenuView::Create(std::move(params), targetNode->GetTag(), targetNode->GetId(), offset);
+    BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
-void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode)
+void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
+    bool isContextMenu, const NG::OffsetF& offset)
 {
     LOGD("ViewAbstract::BindMenuWithCustomNode");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
 
-    auto menuNode = MenuView::Create(customNode, targetNode->GetTag(), targetNode->GetId());
-    BindMenu(menuNode, targetNode->GetId());
+    auto menuNode = MenuView::Create(customNode, targetNode->GetTag(), targetNode->GetId(), offset);
+    if (isContextMenu) {
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
+        return;
+    }
+    BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
-void ViewAbstract::ShowMenu(int32_t targetId)
+void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu)
 {
+    if (isContextMenu) {
+        SubwindowManager::GetInstance()->ShowMenuNG(nullptr, targetId, offset);
+        return;
+    }
     LOGD("ViewAbstract::ShowMenu");
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -612,7 +622,7 @@ void ViewAbstract::ShowMenu(int32_t targetId)
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    overlayManager->ShowMenu(targetId);
+    overlayManager->ShowMenu(targetId, true, offset, nullptr, isContextMenu);
 }
 
 void ViewAbstract::SetBackdropBlur(const Dimension& radius)
@@ -771,6 +781,18 @@ void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
 void ViewAbstract::SetMotionPath(const MotionPathOption& motionPath)
 {
     ACE_UPDATE_RENDER_CONTEXT(MotionPath, motionPath);
+}
+
+void ViewAbstract::SetSharedTransition(
+    const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->SetSharedTransitionOptions(option);
+        target->SetShareId(shareId);
+    }
 }
 
 } // namespace OHOS::Ace::NG

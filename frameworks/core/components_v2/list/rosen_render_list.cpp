@@ -80,6 +80,10 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
     // own seperate recording. In order to accomplish the effect that [divider] is covered by [currentStickyItem_], we
     // should draw it before [currentStickyItem_] being painted.
     rsNode->SetPaintOrder(true);
+    // paint custom effect
+    if (scrollEffect_) {
+        scrollEffect_->Paint(context, viewPort_, offset);
+    }
     PaintDivider(rsNode);
 
     if (currentStickyItem_) {
@@ -94,10 +98,11 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
     // paint scrollBar
     if (scrollBar_ && scrollBar_->NeedPaint()) {
         bool needPaint = false;
-        if (scrollBar_->GetFirstLoad() || scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
+        if (scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
             scrollBarOpacity_ = UINT8_MAX;
             needPaint = true;
         } else {
+            // for DisplayMode::Auto
             if (scrollBarOpacity_ != 0) {
                 needPaint = true;
             }
@@ -107,10 +112,6 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
             RefPtr<RosenScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<RosenScrollBarPainter>();
             scrollBarPainter->PaintBar(
                 canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
-            if (scrollBar_->GetFirstLoad()) {
-                scrollBar_->SetFirstLoad(false);
-                scrollBar_->HandleScrollBarEnd();
-            }
         }
     }
 

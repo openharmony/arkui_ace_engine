@@ -221,11 +221,11 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childLayoutWrapper) {
-            continue;
+            break;
         }
         auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
         if (!childLayoutProperty) {
-            continue;
+            break;
         }
         int32_t itemRowStart = childLayoutProperty->GetRowStart().value_or(-1);
         int32_t itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
@@ -268,7 +268,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
-            continue;
+            break;
         }
         OffsetF childOffset;
         auto childPosition = itemsPosition_.find(index);
@@ -291,7 +291,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
             if (!wrapper) {
                 LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
-                continue;
+                break;
             }
             auto layoutProperty = wrapper->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);

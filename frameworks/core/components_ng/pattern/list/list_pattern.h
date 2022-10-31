@@ -45,7 +45,7 @@ public:
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
         auto lanes = listLayoutProperty->GetLanes().value_or(1);
         auto drawVertical = (axis == Axis::HORIZONTAL);
-        return MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes, itemPosition_);
+        return MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes, spaceWidth_, itemPosition_);
     }
 
     bool IsAtomicNode() const override
@@ -181,6 +181,7 @@ private:
     float estimateOffset_ = 0.0f;
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
+    float spaceWidth_ = 0.0f;
 
     float currentDelta_ = 0.0f;
 
@@ -193,6 +194,9 @@ private:
     bool isScroll_ = false;
     bool scrollStop_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
+
+    WeakPtr<FrameNode> headerGroupNode_;
+    WeakPtr<FrameNode> footerGroupNode_;
 };
 } // namespace OHOS::Ace::NG
 

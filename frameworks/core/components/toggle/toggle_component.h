@@ -124,9 +124,20 @@ public:
         fontSizeDefined_ = state;
     }
 
+    void SetDisabled(bool disabled)
+    {
+        isDisabled_ = disabled;
+    }
+
+    bool IsDisabled() const
+    {
+        return isDisabled_;
+    }
+
 private:
     bool isChecked_ = false;
     bool fontSizeDefined_ = false;
+    bool isDisabled_ = false;
     Color backgroundColor_;
     Color checkedColor_;
     Color pressedBlendColor_;

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_LAYOUT_PROPERTY_H
 
+#include <type_traits>
+
 #include "base/geometry/axis.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
@@ -23,6 +25,7 @@
 #include "core/components_ng/property/property.h"
 // TODO: need to delete it.
 #include "core/components_v2/list/list_component.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ListLayoutProperty : public LayoutProperty {
@@ -47,6 +50,7 @@ public:
         value->propLaneMaxLength_ = CloneLaneMaxLength();
         value->propListItemAlign_ = CloneListItemAlign();
         value->propCachedCount_ = CloneCachedCount();
+        value->propStickyStyle_ = CloneStickyStyle();
         return value;
     }
 
@@ -63,7 +67,10 @@ public:
         ResetLaneMaxLength();
         ResetListItemAlign();
         ResetCachedCount();
+        ResetStickyStyle();
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE);
@@ -75,6 +82,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMaxLength, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, V2::StickyStyle, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

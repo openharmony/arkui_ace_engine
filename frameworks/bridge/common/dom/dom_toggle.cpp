@@ -58,7 +58,8 @@ bool DOMToggle::SetSpecializedAttr(const std::pair<std::string, std::string>& at
             [](DOMToggle& toggle, const std::string& value) {
                 toggle.toggleChild_->SetCheckedState(StringToBool(value));
             } },
-        { DOM_DISABLED, [](DOMToggle& toggle, const std::string& value) { toggle.isDisabled_ = StringToBool(value); } },
+        { DOM_DISABLED, [](DOMToggle& toggle, const std::string& value) {
+            toggle.toggleChild_->SetDisabled(StringToBool(value)); } },
         { DOM_TEXT_VALUE, [](DOMToggle& toggle, const std::string& value) { toggle.textChild_->SetData(value); } },
     };
     auto operatorIter = BinarySearchFindIndex(toggleAttrOperators, ArraySize(toggleAttrOperators), attr.first.c_str());
@@ -154,7 +155,7 @@ void DOMToggle::PrepareSpecializedComponent()
 {
     textChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     ResetColorStyle();
-    if (isDisabled_) {
+    if (toggleChild_->IsDisabled()) {
         PrepareDisabledStyle();
     }
     textStyle_.SetAdaptTextSize(textStyle_.GetFontSize(), textStyle_.GetFontSize());

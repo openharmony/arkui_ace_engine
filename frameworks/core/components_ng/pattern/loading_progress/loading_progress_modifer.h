@@ -20,6 +20,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -61,9 +62,17 @@ public:
 
     void SetDate(float date)
     {
-        constexpr float speedOfModifier = 0.1f;
         if (date_) {
-            date_->SetWithAnimation({ .speed = speedOfModifier, .repeatTimes = -1, .autoReverse = false }, date);
+            AnimationOption option = AnimationOption();
+            RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
+            option.SetDuration(300);
+            option.SetDelay(0);
+            option.SetCurve(curve);
+            option.SetIteration(-1);
+            option.SetTempo(0.2f);
+            AnimationUtils::Animate(option, [&]() {
+                date_->Set(date);
+            });
         }
     }
 

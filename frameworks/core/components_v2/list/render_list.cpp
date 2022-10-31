@@ -27,6 +27,7 @@
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/scroll/scroll_spring_effect.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_scroll_bar_controller.h"
@@ -113,6 +114,11 @@ void RenderList::Update(const RefPtr<Component>& component)
     if (component_->GetEdgeEffect() == EdgeEffect::SPRING) {
         if (!scrollEffect_ || scrollEffect_->GetEdgeEffect() != EdgeEffect::SPRING) {
             scrollEffect_ = AceType::MakeRefPtr<ScrollSpringEffect>();
+            ResetEdgeEffect();
+        }
+    } else if (component_->GetEdgeEffect() == EdgeEffect::FADE) {
+        if (!scrollEffect_ || scrollEffect_->GetEdgeEffect() != EdgeEffect::FADE) {
+            scrollEffect_ = AceType::MakeRefPtr<ScrollFadeEffect>();
             ResetEdgeEffect();
         }
     } else {
@@ -229,6 +235,10 @@ void RenderList::InitScrollable(Axis axis)
         if (proxy) {
             proxy->StartScrollBarAnimator();
         }
+        auto scrollBar = list->scrollBar_;
+        if (scrollBar) {
+            scrollBar->HandleScrollBarEnd();
+        }
         list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
         list->HandleListEvent();
     });
@@ -267,12 +277,13 @@ bool RenderList::IsReachStart()
 
 void RenderList::InitScrollBar()
 {
-    if (scrollBar_) {
-        scrollBar_->Reset();
-        scrollBar_->SetDisplayMode(component_->GetScrollBar());
+    if (!component_) {
+        LOGE("InitScrollBar failed, component_ is null.");
         return;
     }
-    if (!component_) {
+    if (scrollBar_) {
+        scrollBar_->SetDisplayMode(component_->GetScrollBar());
+        scrollBar_->Reset();
         return;
     }
     const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
@@ -633,8 +644,8 @@ void RenderList::PerformLayout()
 
     // Check if reach the end of list
     reachEnd_ = LessOrEqual(curMainPos, mainSize);
-    bool noEdgeEffect =
-        (scrollable_ && scrollable_->IsAnimationNotRunning()) || !scrollEffect_ || autoScrollingForItemMove_;
+    bool noEdgeEffect = (scrollable_ && scrollable_->IsAnimationNotRunning()) ||
+        !(scrollEffect_ && scrollEffect_->IsSpringEffect()) || autoScrollingForItemMove_;
     if (noEdgeEffect && reachEnd_) {
         // Adjust end of list to match the end of layout
         if (LessNotEqual(curMainPos, mainSize)) {
@@ -1157,6 +1168,19 @@ bool RenderList::GetCurMainPosAndMainSize(double& curMainPos, double& mainSize)
     return true;
 }
 
+bool RenderList::HandleOverScroll()
+{
+    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && (reachStart_ || reachEnd_)) {
+        double overScroll = scrollEffect_->CalculateOverScroll(prevOffset_, reachEnd_);
+        if (!NearZero(overScroll)) {
+            Axis axis = IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
+            scrollEffect_->HandleOverScroll(axis, overScroll, viewPort_);
+        }
+        return false;
+    }
+    return true;
+}
+
 bool RenderList::UpdateScrollPosition(double offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
@@ -1198,6 +1222,7 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
         scrollState_ = ScrollState::IDLE;
     }
     currentOffset_ += offset;
+    bool next = HandleOverScroll();
     if (source == SCROLL_FROM_AXIS) {
         double curMainPos = 0.0;
         double mainSize = 0.0;
@@ -1209,7 +1234,7 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
         }
     }
     MarkNeedLayout(true);
-    return true;
+    return next;
 }
 
 bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,

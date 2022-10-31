@@ -209,6 +209,8 @@ public:
     {
         enabled_ = enabled;
     }
+    // get XTS inspector value
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
 private:
     WeakPtr<FrameNode> host_;

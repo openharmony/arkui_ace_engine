@@ -273,6 +273,9 @@ public:
     void OnAccessibilityEvent(AccessibilityEventType eventType) const;
     void MarkNeedRenderOnly();
 
+    void OnDetachFromMainTree() override;
+    void OnAttachToMainTree() override;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     void UpdateLayoutPropertyFlag() override;
@@ -291,11 +294,10 @@ private:
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
 
-    void OnDetachFromMainTree() override;
-    void OnAttachToMainTree() override;
-
     // dump self info.
     void DumpInfo() override;
+
+    void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;

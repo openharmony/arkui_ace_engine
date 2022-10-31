@@ -72,7 +72,11 @@ void RenderPickerOption::Update(const RefPtr<Component>& component)
     }
     optionSize_ = theme->GetOptionSize(option->GetSelected());
     if (!NearZero(NormalizeToPx(option->GetFixHeight()))) {
-        optionSize_.SetHeight(NormalizeToPx(option->GetFixHeight()));
+        if (option->GetFixHeight().Unit() == DimensionUnit::PERCENT) {
+            optionSize_.SetHeight(optionSize_.Height() * option->GetFixHeight().Value());
+        } else {
+            optionSize_.SetHeight(NormalizeToPx(option->GetFixHeight()));
+        }
     }
     optionSizeUnit_ = theme->GetOptionSizeUnit();
     optionPadding_ = theme->GetOptionPadding();

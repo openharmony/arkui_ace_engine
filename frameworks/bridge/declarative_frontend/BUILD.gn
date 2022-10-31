@@ -255,24 +255,29 @@ template("declarative_js_engine") {
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
       "jsview/models/column_model_impl.cpp",
+      "jsview/models/counter_model_impl.cpp",
       "jsview/models/data_panel_model_impl.cpp",
       "jsview/models/divider_model_impl.cpp",
       "jsview/models/ellipse_model_impl.cpp",
       "jsview/models/flex_model_impl.cpp",
       "jsview/models/for_each_model_impl.cpp",
       "jsview/models/gauge_model_impl.cpp",
+      "jsview/models/grid_col_model_impl.cpp",
       "jsview/models/grid_item_model_impl.cpp",
       "jsview/models/grid_model_impl.cpp",
+      "jsview/models/grid_row_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
       "jsview/models/line_model_impl.cpp",
       "jsview/models/linear_split_model_impl.cpp",
+      "jsview/models/list_item_group_model_impl.cpp",
       "jsview/models/list_item_model_impl.cpp",
       "jsview/models/list_model_impl.cpp",
       "jsview/models/marquee_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
+      "jsview/models/patternlock_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
@@ -284,6 +289,8 @@ template("declarative_js_engine") {
       "jsview/models/slider_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
+      "jsview/models/stepper_item_model_impl.cpp",
+      "jsview/models/stepper_model_impl.cpp",
       "jsview/models/swiper_model_impl.cpp",
       "jsview/models/tab_content_model_impl.cpp",
       "jsview/models/tabs_model_impl.cpp",
@@ -293,6 +300,8 @@ template("declarative_js_engine") {
       "jsview/models/text_timer_model_impl.cpp",
       "jsview/models/toggle_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
+      "jsview/models/view_full_update_model_impl.cpp",
+      "jsview/models/view_partial_update_model_impl.cpp",
     ]
 
     # rich components needed by phone and TV. wearable like watch do not need them
@@ -449,6 +458,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_column.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_flex.cpp",
+      "jsview/js_grid_container.cpp",
       "jsview/js_image.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
@@ -457,14 +467,8 @@ template("declarative_js_engine_ng") {
       "jsview/js_row.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_text.cpp",
-
-      # jsview bindings
-      "jsview/bindings/js_view_abstract_binding.cpp",
-      "jsview/bindings/js_view_binding.cpp",
-
-      # ng jsviews
-      "ng/jsview/js_view.cpp",
-      "ng/jsview/js_view_abstract.cpp",
+      "jsview/js_view.cpp",
+      "jsview/js_view_abstract.cpp",
     ]
 
     sources += [

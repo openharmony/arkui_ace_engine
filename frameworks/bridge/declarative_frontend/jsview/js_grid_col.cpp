@@ -19,10 +19,30 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components_ng/pattern/grid_col/grid_col_view.h"
-#include "core/components_v2/grid_layout/grid_col_component.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/grid_col_model_impl.h"
+#include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 
+namespace OHOS::Ace {
+
+std::unique_ptr<GridColModel> GridColModel::instance_;
+
+GridColModel* GridColModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::GridColModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::GridColModelNG());
+        } else {
+            instance_.reset(new Framework::GridColModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
@@ -51,9 +71,8 @@ RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValu
     if (jsValue->IsNumber()) {
         double columnNumber = 0.0;
         JSViewAbstract::ParseJsDouble(jsValue, columnNumber);
-        auto gridContainerSize = columnNumber >= 0 ?
-                                    AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber):
-                                    AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
+        auto gridContainerSize = columnNumber >= 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber)
+                                                   : AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
         return gridContainerSize;
     } else if (jsValue->IsObject()) {
         auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
@@ -93,21 +112,8 @@ RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValu
 
 } // namespace
 
-void JSGridCol::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSGridCol>::Declare("GridCol");
-    JSClass<JSGridCol>::StaticMethod("create", &JSGridCol::Create, MethodOptions::NONE);
-    JSClass<JSGridCol>::StaticMethod("span", &JSGridCol::Span, MethodOptions::NONE);
-    JSClass<JSGridCol>::StaticMethod("offset", &JSGridCol::Offset, MethodOptions::NONE);
-    JSClass<JSGridCol>::StaticMethod("order", &JSGridCol::Order, MethodOptions::NONE);
-    JSClass<JSGridCol>::Inherit<JSContainerBase>();
-    JSClass<JSGridCol>::Bind<>(globalObj);
-}
-
 void JSGridCol::Create(const JSCallbackInfo& info)
 {
-    bool isNewPipeline = Container::IsCurrentUseNewPipeline();
-
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto gridParam = JSRef<JSObject>::Cast(info[0]);
         auto spanParam = gridParam->GetProperty("span");
@@ -117,23 +123,9 @@ void JSGridCol::Create(const JSCallbackInfo& info)
         auto offset = ParserGridContainerSize(offsetParam, 0);
         auto order = ParserGridContainerSize(orderParam, 0);
 
-        if (isNewPipeline) {
-            NG::GridColView::Create(span, offset, order);
-        } else {
-            auto component = AceType::MakeRefPtr<V2::GridColComponent>();
-            ViewStackProcessor::GetInstance()->Push(component);
-            component->SetSpan(span);
-            component->SetOffset(offset);
-            component->SetOrder(order);
-        }
-        return;
-    }
-
-    if (isNewPipeline) {
-        NG::GridColView::Create();
+        GridColModel::GetInstance()->Create(span, offset, order);
     } else {
-        auto component = AceType::MakeRefPtr<V2::GridColComponent>();
-        ViewStackProcessor::GetInstance()->Push(component);
+        GridColModel::GetInstance()->Create();
     }
 }
 
@@ -144,17 +136,7 @@ void JSGridCol::Span(const JSCallbackInfo& info)
         return;
     }
     auto span = ParserGridContainerSize(info[0], 1);
-    
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GridColView::SetSpan(span);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gridCol = AceType::DynamicCast<V2::GridColComponent>(component);
-    if (gridCol) {
-        gridCol->SetSpan(span);
-    }
+    GridColModel::GetInstance()->SetSpan(span);
 }
 
 void JSGridCol::Offset(const JSCallbackInfo& info)
@@ -164,17 +146,7 @@ void JSGridCol::Offset(const JSCallbackInfo& info)
         return;
     }
     auto offset = ParserGridContainerSize(info[0], 0);
-    
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GridColView::SetOffset(offset);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gridCol = AceType::DynamicCast<V2::GridColComponent>(component);
-    if (gridCol) {
-        gridCol->SetOffset(offset);
-    }
+    GridColModel::GetInstance()->SetOffset(offset);
 }
 
 void JSGridCol::Order(const JSCallbackInfo& info)
@@ -184,17 +156,18 @@ void JSGridCol::Order(const JSCallbackInfo& info)
         return;
     }
     auto order = ParserGridContainerSize(info[0], 0);
-    
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GridColView::SetOrder(order);
-        return;
-    }
+    GridColModel::GetInstance()->SetOrder(order);
+}
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gridCol = AceType::DynamicCast<V2::GridColComponent>(component);
-    if (gridCol) {
-        gridCol->SetOrder(order);
-    }
+void JSGridCol::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSGridCol>::Declare("GridCol");
+    JSClass<JSGridCol>::StaticMethod("create", &JSGridCol::Create, MethodOptions::NONE);
+    JSClass<JSGridCol>::StaticMethod("span", &JSGridCol::Span, MethodOptions::NONE);
+    JSClass<JSGridCol>::StaticMethod("offset", &JSGridCol::Offset, MethodOptions::NONE);
+    JSClass<JSGridCol>::StaticMethod("order", &JSGridCol::Order, MethodOptions::NONE);
+    JSClass<JSGridCol>::Inherit<JSContainerBase>();
+    JSClass<JSGridCol>::Bind<>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

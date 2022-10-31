@@ -30,7 +30,7 @@ constexpr double SQUARE = 2.0;
 
 // The running time of the curve needs to be normalized to the interval of 0.0 to 1.0;
 // Relatively, the corresponding value of the curve also needs to be normalized to the interval of 0.0 to 1.0;
-class Curve : public AceType {
+class ACE_EXPORT_WITH_PREVIEW Curve : public AceType {
     DECLARE_ACE_TYPE(Curve, AceType);
 
 public:

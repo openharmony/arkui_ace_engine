@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -69,7 +70,7 @@ void JSGrid::Create(const JSCallbackInfo& info)
             jsScroller->SetController(positionController);
 
             // Init scroll bar proxy.
-            scrollBarProxy = jsScroller->GetScrollBarProxy();
+            scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(jsScroller->GetScrollBarProxy());
             if (!scrollBarProxy) {
                 scrollBarProxy = AceType::MakeRefPtr<ScrollBarProxy>();
                 jsScroller->SetScrollBarProxy(scrollBarProxy);

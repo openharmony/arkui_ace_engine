@@ -28,6 +28,21 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string VisibleTypeToString(VisibleType type)
+{
+    static const LinearEnumMapNode<VisibleType, std::string> visibilityMap[] = {
+        { VisibleType::VISIBLE, "Visibility.Visible" },
+        { VisibleType::INVISIBLE, "Visibility.Hidden" },
+        { VisibleType::GONE, "Visibility.None" },
+    };
+    auto idx = BinarySearchFindIndex(visibilityMap, ArraySize(visibilityMap), type);
+    if (idx >= 0) {
+        return visibilityMap[idx].value;
+    }
+    return "Visibility.Visible";
+}
+} // namespace
 
 void LayoutProperty::Reset()
 {
@@ -50,6 +65,8 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
+
+    json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
 }
 
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
@@ -142,7 +159,31 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     }
 
     CheckSelfIdealSize();
+    CheckBorderAndPadding();
     CheckAspectRatio();
+}
+
+void LayoutProperty::CheckBorderAndPadding()
+{
+    auto selfWidth = layoutConstraint_->selfIdealSize.Width();
+    auto selfHeight = layoutConstraint_->selfIdealSize.Height();
+    if (!selfWidth && !selfHeight) {
+        return;
+    }
+    auto selfWidthFloat = selfWidth.value_or(Infinity<float>());
+    auto selfHeightFloat = selfHeight.value_or(Infinity<float>());
+    auto paddingWithBorder = CreatePaddingAndBorder();
+    auto deflateWidthF = paddingWithBorder.Width();
+    auto deflateHeightF = paddingWithBorder.Height();
+    if (LessOrEqual(deflateWidthF, selfWidthFloat) && LessOrEqual(deflateHeightF, selfHeightFloat)) {
+        return;
+    }
+    if (GreatNotEqual(deflateWidthF, selfWidthFloat)) {
+        layoutConstraint_->selfIdealSize.SetWidth(deflateWidthF);
+    }
+    if (GreatNotEqual(deflateHeightF, selfHeightFloat)) {
+        layoutConstraint_->selfIdealSize.SetHeight(deflateHeightF);
+    }
 }
 
 void LayoutProperty::CheckAspectRatio()
@@ -171,14 +212,6 @@ void LayoutProperty::CheckAspectRatio()
         selfWidth = selfHeight.value() * aspectRatio;
     }
 
-    if (selfWidth.value_or(0) > maxWidth) {
-        selfWidth = maxWidth;
-        selfHeight = selfWidth.value() / aspectRatio;
-    }
-    if (selfHeight.value_or(0) > maxHeight) {
-        selfHeight = maxHeight;
-        selfWidth = selfHeight.value() * aspectRatio;
-    }
     if (selfHeight) {
         layoutConstraint_->selfIdealSize.SetHeight(selfHeight);
     }

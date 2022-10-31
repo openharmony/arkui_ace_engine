@@ -61,6 +61,7 @@ ACE_EXPORT extern const char STAGE_ETS_TAG[];
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // js custom view
 ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
+ACE_EXPORT extern const char JS_VIEW_COMPONENT_TAG[];
 // js lazy foreach node
 ACE_EXPORT extern const char JS_LAZY_FOR_EACH_ETS_TAG[];
 // js lazy foreach node
@@ -94,6 +95,7 @@ ACE_EXPORT extern const char STACK_ETS_TAG[];
 // swiper
 ACE_EXPORT extern const char SWIPER_COMPONENT_TAG[];
 ACE_EXPORT extern const char SWIPER_ETS_TAG[];
+ACE_EXPORT extern const char SWIPER_INDICATOR_ETS_TAG[];
 
 // tabs
 ACE_EXPORT extern const char TABS_COMPONENT_TAG[];

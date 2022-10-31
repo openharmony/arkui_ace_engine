@@ -15,20 +15,21 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
-#include "core/common/container.h"
-#include "core/components_ng/pattern/image/image_model.h"
-
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
 
 #include "base/image/pixel_map.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
+#include "core/common/container.h"
 #include "core/components/image/image_event.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 
 namespace OHOS::Ace {
 
@@ -379,8 +380,8 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 {
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
-        DragItemInfo itemInfo;
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
+        NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
 
         auto ret = func->Execute(info, extraParams);
@@ -402,7 +403,7 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
         ParseAndUpdateDragItemInfo(builderObj->GetProperty("builder"), itemInfo);
         return itemInfo;
     };
-    ImageModel::GetInstance()->SetOnDragStartId(onDragStartId);
+    ImageModel::GetInstance()->SetOnDragStart(std::move(onDragStartId));
 }
 
 void JSImage::JsOnDragEnter(const JSCallbackInfo& info)
@@ -414,7 +415,7 @@ void JSImage::JsOnDragEnter(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDragEnter");
         func->Execute(info, extraParams);
     };
-    ImageModel::GetInstance()->SetOnDragEnterId(onDragEnterId);
+    ImageModel::GetInstance()->SetOnDragEnter(std::move(onDragEnterId));
 }
 
 void JSImage::JsOnDragMove(const JSCallbackInfo& info)
@@ -426,7 +427,7 @@ void JSImage::JsOnDragMove(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDragMove");
         func->Execute(info, extraParams);
     };
-    ImageModel::GetInstance()->SetOnDragMoveId(onDragMoveId);
+    ImageModel::GetInstance()->SetOnDragMove(std::move(onDragMoveId));
 }
 
 void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
@@ -438,7 +439,7 @@ void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDragLeave");
         func->Execute(info, extraParams);
     };
-    ImageModel::GetInstance()->SetOnDragLeaveId(onDragLeaveId);
+    ImageModel::GetInstance()->SetOnDragLeave(std::move(onDragLeaveId));
 }
 
 void JSImage::JsOnDrop(const JSCallbackInfo& info)
@@ -450,7 +451,7 @@ void JSImage::JsOnDrop(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDrop");
         func->Execute(info, extraParams);
     };
-    ImageModel::GetInstance()->SetOnDropId(onDropId);
+    ImageModel::GetInstance()->SetOnDrop(std::move(onDropId));
 }
 
 void JSImage::SetCopyOption(const JSCallbackInfo& info)

@@ -21,6 +21,7 @@
 
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
+#include "include/core/SkImage.h"
 #include "include/core/SkRRect.h"
 #include "include/core/SkScalar.h"
 #include "include/effects/SkGradientShader.h"
@@ -1133,6 +1134,24 @@ SkPaint SkiaDecorationPainter::CreateMaskSkPaint(const RefPtr<BasicShape>& basic
     paint.setStyle(SkPaint::Style::kFill_Style);
     paint.setColor(basicShape->GetColor().GetValue());
     return paint;
+}
+
+RSImage SkiaDecorationPainter::CreateBorderImageGradient(const NG::Gradient& gradient, const SizeF& paintSize)
+{
+    auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, paintSize);
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setShader(std::move(shader));
+
+    auto imageInfo = SkImageInfo::Make(paintSize.Width(), paintSize.Height(),
+        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+    SkBitmap skBitmap;
+    skBitmap.allocPixels(imageInfo);
+
+    std::unique_ptr<SkCanvas> skCanvas = std::make_unique<SkCanvas>(skBitmap);
+    skCanvas->drawPaint(paint);
+    auto skImage = SkImage::MakeFromBitmap(skBitmap);
+    return RSImage(&skImage);
 }
 
 } // namespace OHOS::Ace::NG

@@ -33,8 +33,8 @@ SvgFeOffset::SvgFeOffset() : SvgFe()
     declaration_->InitializeStyle();
 }
 
-void SvgFeOffset::OnAsImageFilter(
-    sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+void SvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
+    ColorInterpolationType& currentColor) const
 {
     auto declaration = AceType::DynamicCast<SvgFeOffsetDeclaration>(declaration_);
     if (!declaration) {

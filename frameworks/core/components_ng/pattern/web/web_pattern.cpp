@@ -258,7 +258,11 @@ void WebPattern::HandleFocusEvent()
         LOGE("handle focus delegate_ is nullptr");
         return;
     }
-    delegate_->OnFocus();
+    if (needOnFocus_) {
+        delegate_->OnFocus();
+    } else {
+        needOnFocus_ = true;
+    }
 }
 
 void WebPattern::HandleBlurEvent()
@@ -526,11 +530,6 @@ void WebPattern::OnModifyDone()
         }
     }
 
-    // update bgcolor.
-    if (renderContext->HasBackgroundColor()) {
-        delegate_->UpdateBackgroundColor(static_cast<int32_t>(renderContext->GetBackgroundColor()->GetValue()));
-    }
-
     // Initialize events such as keyboard, focus, etc.
     InitEvent();
 }
@@ -665,10 +664,19 @@ WebOverlayType WebPattern::GetTouchHandleOverlayType(
     return INVALID_OVERLAY;
 }
 
+std::optional<OffsetF> WebPattern::GetCoordinatePoint()
+{
+    auto frameNode = GetHost();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    return frameNode->GetOffsetRelativeToWindow();
+}
+
 RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle)
 {
     RectF paintRect;
-    auto offset = GetHostFrameGlobalOffset().value_or(OffsetF());
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
     auto size = GetHostFrameSize().value_or(SizeF());
     float edgeHeight = touchHandle->GetEdgeHeight();
     float x = touchHandle->GetX();

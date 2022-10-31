@@ -21,6 +21,26 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& map)
+{
+    const auto& children = node->GetChildren();
+    for (const auto& child : children) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(child);
+        if (!frameChild) {
+            IterativeAddToSharedMap(child, map);
+            continue;
+        }
+        auto id = frameChild->GetRenderContext()->GetShareId();
+        if (!id.empty()) {
+            LOGD("add id:%{public}s, child:%{public}p", id.c_str(), AceType::RawPtr(frameChild));
+            map[id] = frameChild;
+        }
+        IterativeAddToSharedMap(frameChild, map);
+    }
+}
+} // namespace
+
 void PagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -33,6 +53,7 @@ void PagePattern::OnAttachToFrameNode()
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
     if (!isLoaded_) {
+        ProcessShowState();
         isOnShow_ = true;
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(context, false);
@@ -101,6 +122,14 @@ void PagePattern::OnHide()
         context->PostAsyncEvent([onPageHide = onPageHide_]() { onPageHide(); });
     }
     ProcessHideState();
+}
+
+void PagePattern::BuildSharedTransitionMap()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    sharedTransitionMap_.clear();
+    IterativeAddToSharedMap(host, sharedTransitionMap_);
 }
 
 } // namespace OHOS::Ace::NG

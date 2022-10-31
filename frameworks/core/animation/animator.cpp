@@ -46,7 +46,7 @@ void Animator::SetDurationScale(float scale)
     scale_ = scale;
 }
 
-float Animator::GetAnimationScale()
+float Animator::GetAnimationScale() const
 {
 #ifdef OHOS_STANDARD_SYSTEM
     // if rosen is enabled, animationScale should be set on Rosen.
@@ -97,6 +97,13 @@ void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
         controller->OnFrame(duration);
     };
     scheduler_ = SchedulerBuilder::Build(callback, context);
+}
+
+void Animator::AttachSchedulerOnContainer()
+{
+    auto container = Container::Current();
+    auto pipeline = container->GetPipelineContext();
+    AttachScheduler(pipeline);
 }
 
 bool Animator::HasScheduler() const
@@ -221,6 +228,11 @@ bool Animator::SetIteration(int32_t iteration)
     return true;
 }
 
+int32_t Animator::GetIteration() const
+{
+    return iteration_;
+}
+
 void Animator::SetStartDelay(int32_t startDelay)
 {
     CHECK_RUN_ON(UI);
@@ -242,6 +254,11 @@ void Animator::SetFillMode(FillMode fillMode)
     for (auto& controller : proxyControllers_) {
         controller->SetFillMode(fillMode);
     }
+}
+
+FillMode Animator::GetFillMode() const
+{
+    return fillMode_;
 }
 
 void Animator::SetTempo(float tempo)

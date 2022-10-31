@@ -54,7 +54,7 @@ void GridEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto dragEvent = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)
@@ -157,7 +157,7 @@ void GridEventHub::HandleOnItemDragUpdate(const GestureEvent& info)
     }
 
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnItemDragMove(info, draggedIndex_);
+    dragDropProxy_->OnItemDragMove(info, draggedIndex_, DragType::GRID);
 }
 
 void GridEventHub::HandleOnItemDragEnd(const GestureEvent& info)
@@ -167,8 +167,8 @@ void GridEventHub::HandleOnItemDragEnd(const GestureEvent& info)
     }
 
     CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->OnItemDragEnd(info, draggedIndex_, DragType::GRID);
     dragDropProxy_->DestroyDragWindow();
-    dragDropProxy_->OnItemDragEnd(info, draggedIndex_);
     dragDropProxy_ = nullptr;
     draggedIndex_ = 0;
 }

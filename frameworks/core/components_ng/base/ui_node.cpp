@@ -141,6 +141,9 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 {
     CHECK_NULL_VOID(parent);
     parent->AddChild(AceType::Claim(this), slot);
+    if (parent->GetPageId() != 0) {
+        SetHostPageId(parent->GetPageId());
+    }
 }
 
 void UINode::OnRemoveFromParent()

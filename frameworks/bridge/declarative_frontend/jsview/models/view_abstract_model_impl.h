@@ -18,6 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -26,6 +27,7 @@ public:
     ~ViewAbstractModelImpl() override = default;
 
     static void SwapBackBorder(const RefPtr<Decoration>& decoration);
+    static OnDragFunc ToDragFunc(NG::OnDragStartFunc&& onDragStart);
 
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
@@ -88,7 +90,8 @@ public:
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override;
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
-    void SetSharedTransition(const SharedTransitionOption& option) override;
+    void SetSharedTransition(
+        const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
     void SetGeometryTransition(const std::string& id) override;
     void SetMotionPath(const MotionPathOption& option) override;
 
@@ -132,6 +135,16 @@ public:
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override;
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override;
+    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
+    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
+    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
+    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
+    void SetOnVisibleChange(
+        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override;
+    void SetOnAreaChanged(
+        std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
+            onAreaChanged) override;
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;
@@ -147,6 +160,10 @@ public:
     void SetDebugLine(const std::string& line) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
+
+    void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override;
+    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;

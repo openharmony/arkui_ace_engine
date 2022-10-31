@@ -52,7 +52,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr float WINDOW_WIDTH = 520;
+constexpr Dimension WINDOW_WIDTH = 520.0_vp;
+constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
 
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
@@ -75,7 +76,7 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info);
-    
+
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
     auto iconSize = theme->GetMenuIconSize();
@@ -250,6 +251,10 @@ void NavigationView::Create()
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
+
+        auto context = contentNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateBackgroundColor(Color::WHITE);
     }
 
     // divider node
@@ -271,10 +276,11 @@ void NavigationView::Create()
 
     stack->Push(navigationGroupNode);
     auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
-    navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
+    navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
+    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 }
 
-void NavigationView::SetTitle(const std::string& title)
+void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -319,6 +325,11 @@ void NavigationView::SetTitle(const std::string& title)
     textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    if (!hasSubTitle) {
+        textLayoutProperty->UpdateMaxLines(1);
+    } else {
+        textLayoutProperty->UpdateMaxLines(2);
+    }
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
@@ -388,6 +399,7 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
+    textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetSubtitle(subtitleNode);
     navBarNode->MarkModifyDone();
@@ -420,7 +432,7 @@ void NavigationView::SetMenuItems(std::list<BarItem>&& menuItems)
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     auto rowProperty = menuNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
-    rowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
+    rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     for (const auto& menuItem : menuItems) {
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
@@ -529,7 +541,7 @@ void NavigationView::SetNavigationMode(NavigationMode mode)
     CHECK_NULL_VOID(context);
     auto navigationMode = static_cast<NG::NavigationMode>(mode);
     if (navigationMode == NavigationMode::AUTO) {
-        if (context->GetCurrentRootWidth() >= WINDOW_WIDTH) {
+        if (context->GetCurrentRootWidth() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
             navigationMode = NavigationMode::SPLIT;
         } else {
             navigationMode = NavigationMode::STACK;
@@ -572,11 +584,9 @@ void NavigationView::SetHideBackButton(bool hideBackButton)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto titleBarNode = AceType::DynamicCast<NavBarNode>(navBarNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateHideBackButton(hideBackButton);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
 void NavigationView::SetHideToolBar(bool hideToolBar)
@@ -611,9 +621,8 @@ void NavigationView::SetToolBarItems(std::list<BarItem>&& toolBarItems)
         }
         navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     }
-    int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto toolBarNode = FrameNode::GetOrCreateFrameNode(
-        V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(navBarNode->GetPreToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
     auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_EVENLY);
@@ -625,6 +634,7 @@ void NavigationView::SetToolBarItems(std::list<BarItem>&& toolBarItems)
         toolBarNode->AddChild(barItemNode);
     }
     navBarNode->SetToolBarNode(toolBarNode);
+    navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
     navBarNode->MarkModifyDone();
 }

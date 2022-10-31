@@ -76,18 +76,18 @@ const std::string CONTAINER_ID = "__container__";
 
 } // namespace
 
-class RelativeContainerPropertyTestNg : public testing::Test {
+class RelativeContainerLayoutTestNg : public testing::Test {
 public:
     static void SetUpTestCase() {};
     static void TearDownTestCase() {};
 };
 
 /**
- * @tc.name: RelativeContainerPropertyTest001
+ * @tc.name: RelativeContainerLayoutTest001
  * @tc.desc: Set an item with alignrules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest001, TestSize.Level1)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -164,11 +164,11 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest001, TestSi
 }
 
 /**
- * @tc.name: RelativeContainerPropertyTest002
+ * @tc.name: RelativeContainerLayoutTest002
  * @tc.desc: Set two item with alignrules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest002, TestSize.Level1)
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize.Level1)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -280,11 +280,11 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest002, TestSi
 }
 
 /**
- * @tc.name: RelativeContainerPropertyTest003
+ * @tc.name: RelativeContainerLayoutTest003
  * @tc.desc: Set five items with different alignrules value into RelativeContainer and check .
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSize.Level1)
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize.Level1)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
@@ -335,12 +335,12 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
               .alignRules({
                 left: { anchor: "bt1", align: HorizontalAlign.End },
                 right:{ anchor: "__container__", align: HorizontalAlign.End },
-                top: { anchor: "tx2", align: VerticalAlign.Center },
+                top: { anchor: "bt2", align: VerticalAlign.Center },
                 bottom: { anchor: "__container__", align: VerticalAlign.Bottom }
               }).id("bt3").borderWidth(1).borderColor(Color.Black)
             Button("Button 4").fontSize(20).padding(10)
               .alignRules({
-                left: { anchor: "tx2", align: HorizontalAlign.End },
+                left: { anchor: "bt2", align: HorizontalAlign.End },
                 middle: {anchor: "__container__", align: HorizontalAlign.Center},
                 right:{ anchor: "__container__", align: HorizontalAlign.Center },
                 top: { anchor: "bt1", align: VerticalAlign.Bottom }
@@ -350,7 +350,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
                 left: { anchor: "bt1", align: HorizontalAlign.End },
                 top: { anchor: "__container__", align: VerticalAlign.Top },
                 center: {anchor: "bt1", align: VerticalAlign.Center},
-                bottom: { anchor: "tx4", align: VerticalAlign.Bottom }
+                bottom: { anchor: "bt4", align: VerticalAlign.Bottom }
               }).id("bt5").borderWidth(1).borderColor(Color.Black)
         }.width(200).height(200)
     */
@@ -383,7 +383,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
     // Add secondItem-Box2 with 4alignRules(2 HorizontalAlign and 2 VerticalAlign).
     int32_t secondNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto secondItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, secondNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ButtonPattern>(); });
+        V2::BLANK_ETS_TAG, secondNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> secondItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(secondItem, secondItemGeometryNode, secondItem->GetLayoutProperty());
@@ -409,7 +409,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
     // Add thirdItem-Box3 with size and 4alignRules(2 HorizontalAlign and 2 VerticalAlign).
     int32_t thirdnodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto thirdItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, thirdnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ButtonPattern>(); });
+        V2::BLANK_ETS_TAG, thirdnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> thirdItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> thirdItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(thirdItem, thirdItemGeometryNode, thirdItem->GetLayoutProperty());
@@ -437,7 +437,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
     // Add fourthItem-Box4 with 4alignRules(3 HorizontalAlign and 1 VerticalAlign).
     int32_t fourthnodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto fourthItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, fourthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ButtonPattern>(); });
+        V2::BLANK_ETS_TAG, fourthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> fourthItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> fourthItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(fourthItem, fourthItemGeometryNode, fourthItem->GetLayoutProperty());
@@ -463,7 +463,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
     // Add fifthItem-Box5 with 4alignRules(1 HorizontalAlign and 3 VerticalAlign).
     int32_t fifthnodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto fifthItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, fifthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ButtonPattern>(); });
+        V2::BLANK_ETS_TAG, fifthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> fifthItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> fifthItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(fifthItem, fifthItemGeometryNode, fifthItem->GetLayoutProperty());

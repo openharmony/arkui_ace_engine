@@ -79,14 +79,15 @@ public:
     {
         PaintProperty::ToJsonValue(json);
         json->Put("stroke", propStroke_.value_or(Color::BLACK).ColorToString().c_str());
-        json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension()).ConvertToVp());
+        json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension()).ConvertToPx());
         json->Put("strokeOpacity", propStrokeOpacity_.value_or(STOKE_OPACITY_DEFAULT));
-        json->Put("strokeDashOffset", propStrokeDashOffset_.value_or(Dimension()).ConvertToVp());
+        json->Put("strokeDashOffset", propStrokeDashOffset_.value_or(Dimension()).ConvertToPx());
         std::vector<Ace::Dimension> strokeDashDimensionArray =
             propStrokeDashArray_.value_or(std::vector<Ace::Dimension>());
         std::vector<int32_t> strokeDashIntArray(strokeDashDimensionArray.size());
-        for (int32_t i = 0; i < strokeDashDimensionArray.size(); i++) {
-            strokeDashIntArray.emplace_back(strokeDashDimensionArray[i].ConvertToVp());
+        int32_t len = static_cast<int32_t>(strokeDashDimensionArray.size());
+        for (int32_t i = 0; i < len; i++) {
+            strokeDashIntArray[i] = strokeDashDimensionArray[i].ConvertToPx();
         }
         json->Put("strokeDashArray", strokeDashIntArray.data());
         std::array<std::string, 3> lineCap = { "BUTT", "ROUND", "SQUARE" };

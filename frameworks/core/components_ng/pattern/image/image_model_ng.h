@@ -45,11 +45,11 @@ public:
     void SetAutoResize(bool autoResize) override;
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float>& matrix) override;
-    void SetOnDragStartId(const OnDragFunc& onDragStartId) override;
-    void SetOnDragEnterId(const OnDropFunc&  onDragStartId) override;
-    void SetOnDragLeaveId(const OnDropFunc& onDragStartId) override;
-    void SetOnDragMoveId(const OnDropFunc& onDragMoveId) override;
-    void SetOnDropId(const OnDropFunc& onDropId) override;
+    void SetOnDragStart(OnDragStartFunc&& onDragStart) override;
+    void SetOnDragEnter(OnDragDropFunc&&  onDragEnter) override;
+    void SetOnDragLeave(OnDragDropFunc&& onDragLeave) override;
+    void SetOnDragMove(OnDragDropFunc&& onDragMove) override;
+    void SetOnDrop(OnDragDropFunc&& onDrop) override;
     void SetCopyOption(const CopyOptions& copyOption) override;
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
 };

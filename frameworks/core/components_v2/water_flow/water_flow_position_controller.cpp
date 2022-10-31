@@ -28,15 +28,6 @@ void WaterFlowPositionController::JumpTo(int32_t index, int32_t source)
     waterFlow->ScrollToIndex(index, source);
 }
 
-bool WaterFlowPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
-{
-    auto waterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scroll_.Upgrade());
-    if (!waterFlow) {
-        return false;
-    }
-    return waterFlow->AnimateTo(position, duration, curve);
-}
-
 Axis WaterFlowPositionController::GetScrollDirection() const
 {
     auto waterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scroll_.Upgrade());

@@ -19,15 +19,16 @@
 #include <string>
 #include <vector>
 
+#include "base/log/ace_scoring_log.h"
+#include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/option/option_component.h"
 #include "core/components/select/select_component.h"
 #include "core/components_ng/pattern/select/select_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
 void JSSelect::Create(const JSCallbackInfo& info)

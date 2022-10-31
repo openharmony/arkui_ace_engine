@@ -24,7 +24,9 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_v2/list/list_component.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -34,12 +36,18 @@ enum class ScrollIndexAlignment {
     ALIGN_BUTTON = 1,
 };
 
+struct ListItemInfo {
+    float startPos;
+    float endPos;
+    bool isGroup;
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    using PositionMap = std::map<int32_t, std::pair<float, float>>;
+    using PositionMap = std::map<int32_t, ListItemInfo>;
 
     ListLayoutAlgorithm(int32_t startIndex, int32_t endIndex) : preStartIndex_(startIndex), preEndIndex_(endIndex) {}
 
@@ -128,9 +136,9 @@ public:
             return 0.0f;
         }
         if (GetStartIndex() == 0) {
-            return itemPosition_.begin()->second.first;
+            return itemPosition_.begin()->second.startPos;
         }
-        return itemPosition_.begin()->second.first - spaceWidth_;
+        return itemPosition_.begin()->second.startPos - spaceWidth_;
     }
 
     float GetEndPosition() const
@@ -139,9 +147,19 @@ public:
             return 0.0f;
         }
         if (GetEndIndex() == totalItemCount_ - 1) {
-            return itemPosition_.rbegin()->second.second;
+            return itemPosition_.rbegin()->second.endPos;
         }
-        return itemPosition_.rbegin()->second.second + spaceWidth_;
+        return itemPosition_.rbegin()->second.endPos + spaceWidth_;
+    }
+
+    WeakPtr<FrameNode> GetHeaderGroupNode() const
+    {
+        return headerGroupNode_;
+    }
+
+    WeakPtr<FrameNode> GetFooterGroupNode() const
+    {
+        return footerGroupNode_;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -174,10 +192,14 @@ private:
     void CalculateLanes(const LayoutConstraintF& layoutConstraint, Axis axis);
     void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
-    int LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
-        int& currentIndex, float& mainLen);
-    int LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
-        int& currentIndex, float& mainLen);
+    int32_t LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& currentIndex, float startPos, float& endPos);
+    int32_t LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& currentIndex, float endPos, float& startPos);
+
+    static RefPtr<ListItemGroupLayoutProperty> GetListItemGroup(const RefPtr<LayoutWrapper>&  layoutWrapper);
+    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
+    void GetHeaderFooterGroupNode(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
@@ -205,6 +227,11 @@ private:
     float contentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
+
+    V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
+    LayoutConstraintF groupLayoutConstraint_;
+    WeakPtr<FrameNode> headerGroupNode_;
+    WeakPtr<FrameNode> footerGroupNode_;
 };
 } // namespace OHOS::Ace::NG
 

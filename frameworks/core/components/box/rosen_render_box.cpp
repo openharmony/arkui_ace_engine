@@ -25,6 +25,7 @@
 
 #include "core/common/frontend.h"
 #include "core/components/box/rosen_mask_painter.h"
+#include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_edge.h"
@@ -33,7 +34,6 @@
 #include "core/components/image/image_component.h"
 #include "core/components/image/rosen_render_image.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "core/components/common/painter/debug_boundary_painter.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -277,6 +277,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         // draw background image on current context/canvas
         renderImage_->RenderWithContext(context, offset);
     }
+    auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
     auto pipeline = context_.Upgrade();
     if (!pipeline) {
         return;
@@ -314,10 +315,21 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             RosenDecorationPainter::PaintHueRotate(outerRRect, canvas, backDecoration_->GetHueRotate(), bgColor);
             RosenDecorationPainter::PaintColorBlend(outerRRect, canvas, backDecoration_->GetColorBlend(), bgColor);
         }
-        auto position = Offset(GetPosition().GetX() + NormalizeToPx(margin_.Left()),
-            GetPosition().GetY() + NormalizeToPx(margin_.Top()));
-        RosenDecorationPainter::PaintBorderImage(backDecoration_, paintSize_, position, offset, canvas, image_,
-            dipScale_);
+        auto position = Offset(0.0, 0.0);
+        if (rsNode == nullptr) {
+            LOGE("rsNode is null.");
+            return;
+        }
+        rsNode->DrawOnNode(
+            Rosen::RSModifierType::OVERLAY_STYLE, [weak = WeakClaim(this), position](std::shared_ptr<SkCanvas> canvas) {
+                auto renderBox = weak.Upgrade();
+                if (renderBox == nullptr) {
+                    LOGE("renderBox is null.");
+                    return;
+                }
+                RosenDecorationPainter::PaintBorderImage(renderBox->backDecoration_, renderBox->paintSize_, position,
+                    canvas.get(), renderBox->image_, renderBox->dipScale_);
+            });
     }
     RenderNode::Paint(context, offset);
     if (frontDecoration_) {
@@ -360,8 +372,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     if (needFocusBorder_) {
         PaintFocus(focusRect, context);
     }
-    const auto renderContext = static_cast<RosenRenderContext*>(&context);
-    auto rsNode = renderContext->GetRSNode();
+
     if (rsNode == nullptr) {
         return;
     }

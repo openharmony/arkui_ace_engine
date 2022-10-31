@@ -27,6 +27,7 @@
 #include "base/i18n/localization.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/theme_manager.h"
@@ -108,9 +109,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
     // check password image size.
     if (!showPasswordIcon) {
-        textRect_.SetSize(SizeF(std::min(static_cast<float>(paragraph_->GetLongestLine()),
-                                    contentConstraint.maxSize.Width() - horizontalPaddingSum),
-            height));
+        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), height));
         imageRect_.SetSize(SizeF());
         auto contentSize = contentConstraint.maxSize;
         MinusPaddingToSize(pattern->GetUtilPadding(), contentSize);
@@ -144,21 +143,35 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto frameNode = layoutWrapper->GetHostNode();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto left = pattern->GetPaddingLeft();
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentSize = content->GetRect().GetSize();
+    auto textRectOffsetX = pattern->GetPaddingLeft();
+    auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+        case TextAlign::START:
+            break;
+        case TextAlign::CENTER:
+            textRectOffsetX += contentSize.Width() / 2.0f - textRect_.Width() / 2.0f;
+            break;
+        case TextAlign::END:
+            textRectOffsetX += contentSize.Width() - textRect_.Width();
+            break;
+        default:
+            break;
+    }
     auto align = Alignment::CENTER;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update content position.
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    CHECK_NULL_VOID(content);
-    auto contentSize = content->GetRect().GetSize();
     auto contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
-    content->SetOffset(OffsetF(left, contentOffset.GetY()));
+    content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // update text rect.
     auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
     // adjust text rect to the basic padding first
-    textRect_.SetOffset(OffsetF(left, textOffset.GetY()));
+    textRect_.SetOffset(OffsetF(textRectOffsetX, textOffset.GetY()));
     // update image rect.
     if (!imageRect_.IsEmpty()) {
         auto imageOffset = Alignment::GetAlignPosition(contentSize, imageRect_.GetSize(), Alignment::CENTER_RIGHT);

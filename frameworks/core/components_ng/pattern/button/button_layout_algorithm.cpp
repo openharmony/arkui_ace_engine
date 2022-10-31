@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -22,7 +23,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
@@ -43,6 +43,15 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     } else {
         BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto left = static_cast<float>(buttonTheme->GetPadding().Left().ConvertToPx());
+    auto right = static_cast<float>(buttonTheme->GetPadding().Right().ConvertToPx());
+    layoutWrapper->GetGeometryNode()->SetFrameSize(
+        SizeF { left + layoutWrapper->GetGeometryNode()->GetFrameSize().Width() + right,
+            layoutWrapper->GetGeometryNode()->GetFrameSize().Height() });
 }
 
 void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)

@@ -104,6 +104,11 @@ RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
     return hostNode_.Upgrade();
 }
 
+WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
+{
+    return hostNode_;
+}
+
 std::string LayoutWrapper::GetHostTag() const
 {
     auto host = GetHostNode();

@@ -21,6 +21,7 @@
 #include <string>
 
 #include "base/i18n/localization.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/source_map.h"
 #include "bridge/common/utils/utils.h"
@@ -36,6 +37,25 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+
+void ExitToDesktop()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [] {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->Finish(false);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+} // namespace
 
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
@@ -418,7 +438,8 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         std::string pagePath;
         size_t pageRouteSize = pageRouterStack_.size();
         if (pageRouteSize < 2) {
-            LOGE("fail to back page due to page size is only one");
+            LOGI("router stack is only one, back to desktop");
+            ExitToDesktop();
             return;
         }
         // TODO: restore page operation.
@@ -443,7 +464,8 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         PopPageToIndex(pageInfo.first, params, true, true);
         return;
     }
-    LOGW("fail to find specified page to pop");
+    LOGI("fail to find specified page to pop");
+    ExitToDesktop();
 }
 
 void PageRouterManager::BackCheckAlert(const RouterPageInfo& target, const std::string& params)
@@ -484,6 +506,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
     auto pageNode =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
     auto result = loadJs_(target.path);
     if (!result) {
@@ -507,6 +530,7 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
     auto pageNode =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
 
     if (!loadCard_) {
@@ -520,7 +544,7 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
         return;
     }
 
-    if (!OnPageReady(pageNode, needHideLast, needHideLast, isCardRouter, cardId)) {
+    if (!OnPageReady(pageNode, needHideLast, false, isCardRouter_, cardId)) {
         LOGE("fail to mount page");
         pageRouterStack_.pop_back();
         return;

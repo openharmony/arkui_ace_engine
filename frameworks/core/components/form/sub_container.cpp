@@ -293,7 +293,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             LOGE("ETS Card not support old pipeline");
             return;
         }
-    } else if (cardType_ == FrontendType::JS_CARD) { 
+    } else if (cardType_ == FrontendType::JS_CARD) {
         // JS Card : API9 only support Old Pipeline JSCard, Host can be NG or Old
         if (Container::IsCurrentUseNewPipeline()) {
             auto pattern = formPattern_.Upgrade();

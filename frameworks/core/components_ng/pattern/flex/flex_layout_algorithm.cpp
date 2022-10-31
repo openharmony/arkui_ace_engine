@@ -197,14 +197,19 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     if (textDir_ == TextDirection::AUTO) {
         textDir_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
-    textDir_ = AdjustTextDirectionByDir();
     TravelChildrenFlexProps(layoutWrapper);
 }
 
 void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
 {
     if (!magicNodes_.empty()) {
-        LOGD("second measure feature");
+        LOGD("second measure feature, only update child layout constraint");
+        const auto& childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        for (auto& [index, children] : magicNodes_) {
+            for (auto& item : children) {
+                item.layoutConstraint = childLayoutConstraint;
+            }
+        }
         return;
     }
     maxDisplayPriority_ = 0;
@@ -817,15 +822,6 @@ FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutW
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
     return flexItemProperty ? flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) : crossAxisAlign_;
-}
-
-TextDirection FlexLayoutAlgorithm::AdjustTextDirectionByDir() const
-{
-    auto textDir = textDir_;
-    if (direction_ == FlexDirection::ROW_REVERSE) {
-        textDir = (textDir == TextDirection::RTL) ? TextDirection::LTR : TextDirection::RTL;
-    }
-    return textDir;
 }
 
 } // namespace OHOS::Ace::NG

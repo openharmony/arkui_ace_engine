@@ -55,29 +55,12 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
     }
 }
 
-template<typename T>
-void UpdateRSPropWithAnimation(
-    const std::shared_ptr<RSAnimatableProperty<T>>& rsProperty, const AnimateConfig& config, const T& value)
-{
-    RSAnimationTimingProtocol protocol;
-    protocol.SetSpeed(config.speed);
-    protocol.SetAutoReverse(config.autoReverse);
-    protocol.SetRepeatCount(config.repeatTimes);
-    RSNode::Animate(
-        protocol, RSAnimationTimingCurve::LINEAR, [rsProperty, value]() {
-            rsProperty->Set(value);
-        });
-}
-
 #define CONVERT_PROP(prop, srcType, propType)                                                     \
     if (AceType::InstanceOf<srcType>(prop)) {                                                     \
         auto castProp = AceType::DynamicCast<srcType>(prop);                                      \
         auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get());          \
-        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },                \
-            [rsProp](const propType& value) { rsProp->Set(value); },                              \
-            [rsProp](const AnimateConfig& config, const propType& value) {                        \
-                UpdateRSPropWithAnimation(rsProp, config, value);                                 \
-            });                                                                                   \
+        castProp->SetUpCallbacks([rsProp]()->propType { return rsProp->Get(); },                \
+            [rsProp](const propType& value) { rsProp->Set(value); });                             \
         return rsProp;                                                                            \
     }
 

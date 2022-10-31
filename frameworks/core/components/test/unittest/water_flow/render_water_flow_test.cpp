@@ -41,6 +41,7 @@ using WaterFlowPositionController = OHOS::Ace::V2::WaterFlowPositionController;
 
 namespace OHOS::Ace {
 constexpr size_t CREATE_FLOWITEM_COUNT = 5;
+constexpr size_t CREATE_FLOWITEM_MAX_COUNT = 50;
 constexpr size_t START_INDEX = 0;
 constexpr double START_POS = 0.0;
 constexpr size_t TOTAL_COUNT = 5000;
@@ -469,24 +470,6 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetEstimatedHeight_002, TestSi
     renderNode_->crossSideSize_.push_back(450);
     auto estimatedHeight = renderNode_->GetEstimatedHeight();
     EXPECT_EQ(estimatedHeight, 10);
-}
-
-/**
- * @tc.name: RenderWaterFlowTest_AnimateTo_001
- * @tc.desc: Verify AnimateTo setting duration.
- * @tc.type: FUNC
- * @tc.require: issueI5TFPO
- */
-HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_AnimateTo_001, TestSize.Level1)
-{
-    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
-    CHECK_RENDERNODE_NULL_VOID(renderNode_);
-    EXPECT_TRUE(renderNode_->animator_ != nullptr);
-    float duration = 100.0;
-    auto result = renderNode_->AnimateTo(100.0_px, duration, nullptr);
-    CHECK_RENDERNODE_NULL_VOID(renderNode_->animator_);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(renderNode_->animator_->GetDuration(), duration);
 }
 
 /**
@@ -1043,4 +1026,1252 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_PerformLayout_008, TestSize.Le
         index++;
     }
 }
+
+/**
+ * @tc.name: RenderWaterFlowTest_DoJump_001
+ * @tc.desc: Verify the function that jump the position to be set by parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_DoJump_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
+
+    EXPECT_TRUE(renderNode_ != nullptr);
+    double mainSizeOffset = 20.0;
+    renderNode_->reachHead_ = false;
+    renderNode_->reachTail_ = false;
+    renderNode_->DoJump(mainSizeOffset, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(renderNode_->viewportStartPos_, mainSizeOffset);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_SetScrollBarCallback_001
+ * @tc.desc: Verify the function that set the callbacks of scroll bar.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_SetScrollBarCallback_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr", "1fr", FlexDirection::COLUMN);
+
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->scrollBar_ != nullptr);
+    EXPECT_TRUE(renderNode_->scrollBar_->barController_ != nullptr);
+    renderNode_->SetScrollBarCallback();
+    EXPECT_TRUE(renderNode_->scrollBar_->barController_->callback_ != nullptr);
+    EXPECT_TRUE(renderNode_->scrollBar_->barController_->barEndCallback_ != nullptr);
+    EXPECT_TRUE(renderNode_->scrollBar_->barController_->scrollEndCallback_ != nullptr);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_InitScrollBarProxy_001
+ * @tc.desc: Verify the function that initialize the callbacks of scroll bar proxy.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBarProxy_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
+
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->scrollBarProxy_ != nullptr);
+    renderNode_->InitScrollBarProxy();
+    EXPECT_TRUE(!renderNode_->scrollBarProxy_->scrollableNodes_.empty());
+    EXPECT_EQ(renderNode_->scrollBarProxy_->scrollableNodes_.size(), 1);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_InitScrollBarProxy_002
+ * @tc.desc: Verify the function that initialize the callbacks of scroll bar proxy.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBarProxy_002, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
+
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->scrollBarProxy_ = nullptr;
+    renderNode_->InitScrollBarProxy();
+    EXPECT_TRUE(renderNode_->scrollBarProxy_ == nullptr);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_InitScrollBar_001
+ * @tc.desc: Verify the function that initialize the scroll bar of waterflow.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBar_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
+
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->component_ != nullptr);
+    renderNode_->component_->SetController(nullptr);
+    renderNode_->InitScrollBar();
+    EXPECT_TRUE(renderNode_->component_->displayMode_ == DisplayMode::OFF);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_InitScrollBar_003
+ * @tc.desc: Verify the function that initialize the scroll bar of waterflow.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBar_002, TestSize.Level1)
+{
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->component_ = nullptr;
+    renderNode_->InitScrollBar();
+    EXPECT_TRUE(renderNode_->scrollBar_ == nullptr);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_InitScrollBar_004
+ * @tc.desc: Verify the function that initialize the scroll bar of waterflow.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBar_003, TestSize.Level1)
+{
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->Attach(nullptr);
+    renderNode_->InitScrollBar();
+    EXPECT_TRUE(renderNode_->scrollBar_ == nullptr);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_InitScrollBar_005
+ * @tc.desc: Verify the function that initialize the scroll bar of waterflow.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBar_004, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
+
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->InitScrollBar();
+    EXPECT_TRUE(renderNode_->scrollBar_ != nullptr);
+    EXPECT_TRUE(renderNode_->scrollBar_->GetPositionMode() == PositionMode::RIGHT);
+
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->InitScrollBar();
+    EXPECT_TRUE(renderNode_->scrollBar_ != nullptr);
+    EXPECT_TRUE(renderNode_->scrollBar_->GetPositionMode() == PositionMode::BOTTOM);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_DeleteItems_001
+ * @tc.desc: Verify the function that delete items by index
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_DeleteItems_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+
+    int size = renderNode_->items_.size();
+    renderNode_->SetDeleteChildByIndex([](int32_t index) {});
+    renderNode_->DeleteItems(START_INDEX);
+    EXPECT_EQ(renderNode_->items_.size(), (size - 1));
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_DeleteItems_002
+ * @tc.desc: Verify the function that delete items by index
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_DeleteItems_002, TestSize.Level2)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->deleteChildByIndex_ = nullptr;
+    EXPECT_TRUE(renderNode_->items_.empty());
+    renderNode_->DeleteItems(START_INDEX);
+    EXPECT_TRUE(renderNode_->items_.empty());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_DeleteItems_003
+ * @tc.desc: Verify the function that delete items by index
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_DeleteItems_003, TestSize.Level2)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->SetDeleteChildByIndex([](int32_t index) {});
+    EXPECT_TRUE(renderNode_->items_.empty());
+    renderNode_->DeleteItems(START_INDEX);
+    EXPECT_TRUE(renderNode_->items_.empty());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_DealCache_001
+ * @tc.desc: Verify the function that delete items which be out of cache area.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_DealCache_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = 0;
+    renderNode_->cacheSize_ = 0;
+    renderNode_->mainSize_ = 0;
+    auto size = renderNode_->items_.size();
+    EXPECT_TRUE(size == CREATE_FLOWITEM_MAX_COUNT);
+    renderNode_->DealCache();
+    EXPECT_EQ(renderNode_->items_.size(), size);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_DealCache_002
+ * @tc.desc: Verify the function that delete items which be out of cache area.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_DealCache_002, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = 0;
+    renderNode_->cacheSize_ = 0;
+    renderNode_->mainSize_ = 0;
+    auto size = renderNode_->items_.size();
+    EXPECT_EQ(CREATE_FLOWITEM_MAX_COUNT, size);
+    renderNode_->DealCache();
+    EXPECT_EQ(renderNode_->items_.size(), size);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_DealCache_003
+ * @tc.desc: Verify the function that delete items which be out of cache area.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_DealCache_003, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = 0;
+    renderNode_->cacheSize_ = 0;
+    renderNode_->mainSize_ = 0;
+    auto size = renderNode_->items_.size();
+    EXPECT_EQ(CREATE_FLOWITEM_MAX_COUNT, size);
+    renderNode_->DealCache();
+    EXPECT_EQ(renderNode_->items_.size(), size);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_DealCache_004
+ * @tc.desc: Verify the function that delete items which be out of cache area.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_DealCache_004, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = 0;
+    renderNode_->cacheSize_ = 0;
+    renderNode_->mainSize_ = 0;
+    auto size = renderNode_->items_.size();
+    EXPECT_EQ(CREATE_FLOWITEM_MAX_COUNT, size);
+    renderNode_->DealCache();
+    EXPECT_EQ(renderNode_->items_.size(), size);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetCacheTargetPos_001
+ * @tc.desc: Verify the function that calculate the size (viewport position, cache size, main size)
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetCacheTargetPos_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = START_POS;
+    renderNode_->cacheSize_ = 100;
+    renderNode_->mainSize_ = 100;
+    EXPECT_EQ(renderNode_->GetCacheTargetPos(), 200);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTargetPos_001
+ * @tc.desc: Verify the function that calculate the size (viewport position, main size)
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTargetPos_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = START_POS;
+    renderNode_->targetIndex_ = -1;
+    renderNode_->mainSize_ = 100;
+    EXPECT_EQ(renderNode_->GetTargetPos(), 100);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTargetPos_002
+ * @tc.desc: Verify the function that calculate the size (viewport position, main size)
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTargetPos_002, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = START_POS;
+    renderNode_->targetIndex_ = -1;
+    renderNode_->mainSize_ = 100;
+    EXPECT_EQ(renderNode_->GetTargetPos(), 100);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTargetPos_003
+ * @tc.desc: Verify the function that calculate the size (viewport position, main size)
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTargetPos_003, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = 100.0;
+    renderNode_->targetIndex_ = -1;
+    renderNode_->mainSize_ = 100.0;
+    EXPECT_TRUE(renderNode_->GetTargetPos() == 0);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTargetPos_004
+ * @tc.desc: Verify the function that calculate the size (viewport position, main size)
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTargetPos_004, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = 100;
+    renderNode_->targetIndex_ = -1;
+    renderNode_->mainSize_ = 100;
+    EXPECT_TRUE(renderNode_->GetTargetPos() == 0);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTargetPos_005
+ * @tc.desc: Verify the function that calculate the size (viewport position, main size)
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTargetPos_005, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = 0;
+    renderNode_->targetIndex_ = 0;
+    renderNode_->mainSize_ = 100;
+    EXPECT_TRUE(renderNode_->GetTargetPos() == DBL_MAX);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTargetPos_006
+ * @tc.desc: Verify the function that calculate the size (viewport position, main size)
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTargetPos_006, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = 5005;
+    renderNode_->targetIndex_ = 0;
+    renderNode_->mainSize_ = 100;
+    EXPECT_TRUE(renderNode_->GetTargetPos() == DBL_MAX);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTailPos_001
+ * @tc.desc: Verify the function that calculate the position of last item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTailPos_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->GetTailPos() == START_POS);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTailPos_002
+ * @tc.desc: Verify the function that calculate the position of last item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTailPos_002, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->GetTailPos() == START_POS);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTailPos_003
+ * @tc.desc: Verify the function that calculate the position of last item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTailPos_003, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN_REVERSE);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->GetTailPos() == START_POS);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTailPos_004
+ * @tc.desc: Verify the function that calculate the position of last item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTailPos_004, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW_REVERSE);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->GetTailPos() == START_POS);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetTailPos_005
+ * @tc.desc: Verify the function that calculate the position of last item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetTailPos_005, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->SetGetTotalCount([this]() {
+        return renderNode_->flowMatrix_.size() - 1;
+    });
+    renderNode_->InitialFlowProp();
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    EXPECT_GT(renderNode_->GetTailPos(), START_POS);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_CheckReachHead_001
+ * @tc.desc: Verify the function that check the viewport is on the head.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_CheckReachHead_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = START_POS;
+    EXPECT_TRUE(renderNode_->CheckReachHead());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_CheckReachHead_002
+ * @tc.desc: Verify the function that check the viewport is on the head.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_CheckReachHead_002, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = START_POS;
+    EXPECT_TRUE(renderNode_->CheckReachHead());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_CheckReachHead_003
+ * @tc.desc: Verify the function that check the viewport is on the head.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_CheckReachHead_003, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = START_POS;
+    EXPECT_TRUE(renderNode_->CheckReachHead());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_CheckReachHead_004
+ * @tc.desc: Verify the function that check the viewport is on the head.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_CheckReachHead_004, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->viewportStartPos_ = START_POS;
+    EXPECT_TRUE(renderNode_->CheckReachHead());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetCrossSize_001
+ * @tc.desc: Verify the function that get the cross size of the selected item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetCrossSize_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_EQ(renderNode_->GetCrossSize(nullptr), 0.0);
+    for (const auto& item : renderNode_->items_) {
+        EXPECT_EQ(renderNode_->GetCrossSize(item.second), item.second->GetLayoutSize().Width());
+    }
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetCrossSize_002
+ * @tc.desc: Verify the function that get the cross size of the selected item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetCrossSize_002, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    for (const auto& item : renderNode_->items_) {
+        EXPECT_EQ(renderNode_->GetCrossSize(item.second), item.second->GetLayoutSize().Height());
+    }
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetCrossSize_003
+ * @tc.desc: Verify the function that get the cross size of the selected item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetCrossSize_003, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->GetCrossSize(nullptr) == 0);
+    for (const auto& item : renderNode_->items_) {
+        EXPECT_EQ(renderNode_->GetCrossSize(item.second), item.second->GetLayoutSize().Width());
+    }
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetCrossSize_004
+ * @tc.desc: Verify the function that get the cross size of the selected item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetCrossSize_004, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    for (const auto& item : renderNode_->items_) {
+        EXPECT_EQ(renderNode_->GetCrossSize(item.second), item.second->GetLayoutSize().Height());
+    }
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetMainSize_001
+ * @tc.desc: Verify the function that get the cross size of the selected item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetMainSize_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    auto item = renderNode_->items_[START_INDEX];
+    EXPECT_TRUE(renderNode_->GetMainSize(nullptr) == 0);
+    EXPECT_TRUE(renderNode_->GetMainSize(item) == item->GetLayoutSize().Height());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetMainSize_002
+ * @tc.desc: Verify the function that get the cross size of the selected item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetMainSize_002, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    auto item = renderNode_->items_[START_INDEX];
+    EXPECT_TRUE(renderNode_->GetMainSize(item) == item->GetLayoutSize().Width());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetMainSize_003
+ * @tc.desc: Verify the function that get the cross size of the selected item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetMainSize_003, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    auto item = renderNode_->items_[START_INDEX];
+    EXPECT_TRUE(renderNode_->GetMainSize(nullptr) == 0);
+    EXPECT_TRUE(renderNode_->GetMainSize(item) == item->GetLayoutSize().Height());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetMainSize_004
+ * @tc.desc: Verify the function that get the cross size of the selected item
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetMainSize_004, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW_REVERSE, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    auto item = renderNode_->items_[START_INDEX];
+    EXPECT_TRUE(renderNode_->GetMainSize(item) == item->GetLayoutSize().Width());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetFlowItemByChild_001
+ * @tc.desc: Verify the function that get the flow item with child.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetFlowItemByChild_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->GetFlowItemByChild(nullptr) == nullptr);
+    auto item = renderNode_->items_[START_INDEX];
+    EXPECT_TRUE(renderNode_->GetFlowItemByChild(renderNode_) == item);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetFlowItemByChild_002
+ * @tc.desc: Verify the function that get the flow item with child.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetFlowItemByChild_002, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    EXPECT_TRUE(renderNode_->GetFlowItemByChild(renderNode_) == nullptr);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_ConstraintItemSize_001
+ * @tc.desc: Verify the function that get constrain size of the flow item.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_ConstraintItemSize_001, TestSize.Level1)
+{
+    V2::FlowStyle flowStyleTest = {0, 0, 30, 50};
+    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->itemConstraintSize_ = V2::ItemConstraintSize{300, 400, 500, 600};
+    EXPECT_TRUE(renderNode_->ConstraintItemSize(flowStyleTest, START_INDEX).mainSize == 500);
+    V2::FlowStyle flowStyleTestMax = {3000, 4000, 5000, 6000};
+    EXPECT_TRUE(renderNode_->ConstraintItemSize(flowStyleTestMax, START_INDEX).mainSize == 600);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetCrossEndPos_001
+ * @tc.desc: Verify the function that get the end position of the selected cross index.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetCrossEndPos_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("50px 60px 70px 80px", "", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    renderNode_->InitialFlowProp();
+    renderNode_->crossGap_ = 0;
+    EXPECT_TRUE(renderNode_->GetCrossEndPos(4) == 0);
+    EXPECT_TRUE(renderNode_->GetCrossEndPos(3) == 180);
+    renderNode_->crossGap_ = 10;
+    EXPECT_TRUE(renderNode_->GetCrossEndPos(2) == 130);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_UpdateMainSideEndPos_001
+ * @tc.desc: Verify the function that get the end position of the selected cross index.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_UpdateMainSideEndPos_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr", "", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->InitialFlowProp();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    EXPECT_EQ(renderNode_->mainSideEndPos_.size(), renderNode_->itemsByCrossIndex_.size());
+    renderNode_->UpdateMainSideEndPos();
+    EXPECT_FALSE(renderNode_->mainSideEndPos_.empty());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_ClearFlowMatrix_001
+ * @tc.desc: Verify the function that clear the selected item if index > -1, else clear all.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_ClearFlowMatrix_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr 1fr", "", FlexDirection::COLUMN);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    auto targetIndex = 1;
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->InitialFlowProp();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    renderNode_->ClearFlowMatrix(START_INDEX + 1);
+    EXPECT_EQ(renderNode_->flowMatrix_.size(), targetIndex);
+    renderNode_->ClearFlowMatrix(START_INDEX, true);
+    EXPECT_TRUE(renderNode_->flowMatrix_.empty());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_ClearItemsByCrossIndex_001
+ * @tc.desc: Verify the function that clear the selected item if cross index > -1, else clear all.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_ClearItemsByCrossIndex_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr 1fr 1fr", "", FlexDirection::COLUMN, CREATE_FLOWITEM_MAX_COUNT);
+    EXPECT_TRUE(renderNode_ != nullptr);
+    int index = 4;
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->InitialFlowProp();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    renderNode_->ClearItemsByCrossIndex(index);
+    auto cross = renderNode_->itemsByCrossIndex_.begin();
+    while (cross != renderNode_->itemsByCrossIndex_.end()) {
+        EXPECT_EQ((*cross).size(), 1);
+        cross++;
+    }
+    renderNode_->ClearItemsByCrossIndex(START_INDEX, true);
+    EXPECT_EQ(renderNode_->itemsByCrossIndex_.size(), renderNode_->crossCount_);
+    EXPECT_TRUE(!renderNode_->itemsByCrossIndex_.empty());
+    for (const auto& itemIndex : renderNode_->itemsByCrossIndex_) {
+        EXPECT_TRUE(itemIndex.empty());
+    }
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_RegisterItemGenerator_001
+ * @tc.desc: Verify the function that judge itemGenerator_.Upgrade.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_RegisterItemGenerator_001, TestSize.Level1)
+{
+    RefPtr<V2::WaterFlowItemGenerator> itemgenerator = AceType::MakeRefPtr<V2::WaterFlowItemGenerator>();
+    renderNode_->RegisterItemGenerator(itemgenerator);
+    EXPECT_TRUE(renderNode_->itemGenerator_.Upgrade());
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_HandleScrollEvent_001
+ * @tc.desc: Verify the function that get the value of map.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_HandleScrollEvent_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    renderNode_->HandleScrollEvent();
+    for (auto event : renderNode_->waterflowEventFlags_) {
+        EXPECT_FALSE(event.second);
+    }
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_MakeInnerLayoutParam_001
+ * @tc.desc: Verify the function that get the value of minsize.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_MakeInnerLayoutParam_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    renderNode_->InitialFlowProp();
+    Size size(450, 300);
+    size_t index = 0;
+    size_t itemIndex = renderNode_->GetNextSupplyedIndex();
+    double targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    LayoutParam innerLayout;
+    innerLayout = renderNode_->MakeInnerLayoutParam(index);
+    auto result = innerLayout.GetMaxSize();
+    EXPECT_EQ(result, size);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_SetChildPosition_001
+ * @tc.desc: Verify the function that value of GetChildPosition after using SetChildPosition.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_SetChildPosition_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN);
+    renderNode_->InitialFlowProp();
+    size_t itemIndex = renderNode_->GetNextSupplyedIndex();
+    double targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    size_t index = 0;
+    for (auto& item : renderNode_->items_) {
+        item.second->SetLayoutSize(Size(160, 160));
+        renderNode_->SetChildPosition(item.second, index);
+        EXPECT_TRUE(renderNode_->GetPosition() == Offset(index % 5 * 210, index / 5 * 210));
+    }
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_CreateScrollable_001
+ * @tc.desc: Verify the function that Check whether scrollable_ is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_CreateScrollable_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    renderNode_->CreateScrollable();
+    EXPECT_TRUE(renderNode_->scrollable_ != nullptr);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_OnTouchTestHit_001
+ * @tc.desc: Verify the function that Check whether scrollable_ is nullptr.
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_OnTouchTestHit_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    touchRestrict.UpdateForbiddenType(1);
+    Offset offset(START_POS, START_POS);
+    renderNode_->OnTouchTestHit(offset, touchRestrict, result);
+    EXPECT_FALSE(renderNode_->scrollable_ == nullptr);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_UpdateScrollPosition_001
+ * @tc.desc: Verify the function that return value of UpdateScrollPosition.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_UpdateScrollPosition_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    double offset = 1.0;
+    int32_t source = 10;
+    auto result = renderNode_->UpdateScrollPosition(offset, source);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_CallGap_001
+ * @tc.desc: Verify the function that find the value of mainGap_.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_CallGap_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    renderNode_->CallGap();
+    EXPECT_EQ(renderNode_->mainGap_, 100.0);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_CallGap_001
+ * @tc.desc: Verify the function that find the value of maxCrossSize,maxMainSize,minCrossSize and minMainSize.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_CallItemConstraintSize_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN);
+    renderNode_->InitialFlowProp();
+    renderNode_->CallItemConstraintSize();
+    EXPECT_EQ(renderNode_->itemConstraintSize_.maxCrossSize, 1000.0);
+    EXPECT_EQ(renderNode_->itemConstraintSize_.maxMainSize, 1000.0);
+    EXPECT_EQ(renderNode_->itemConstraintSize_.minCrossSize, 300.0);
+    EXPECT_EQ(renderNode_->itemConstraintSize_.minMainSize, 300.0);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_InitialFlowProp_001
+ * @tc.desc: Verify the function that value of cacheSize after using InitialFlowProp.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitialFlowProp_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    renderNode_->InitialFlowProp();
+    EXPECT_EQ(renderNode_->cacheSize_, 1000.0);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_ GetFlowSize_001
+ * @tc.desc: Verify the function that find the value of mainSize_ and crossSize_.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetFlowSize_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    EXPECT_EQ(renderNode_->mainSize_, 1000.0);
+    EXPECT_EQ(renderNode_->crossSize_, 1000.0);
+    EXPECT_EQ(renderNode_->cacheSize_, renderNode_->mainSize_);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_ GetFlowSize_001
+ * @tc.desc: Verify the function that value of targetIndex_ after using SuppltItems.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_SupplyItems_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    renderNode_->InitialFlowProp();
+    size_t itemIndex = renderNode_->GetNextSupplyedIndex();
+    double targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    for (auto itemMessage : renderNode_->flowMatrix_) {
+        EXPECT_EQ(itemMessage.second.crossSize, (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT);
+        EXPECT_EQ(itemMessage.second.mainSize, renderNode_->itemConstraintSize_.minMainSize);
+    }
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_LayoutItems_001
+ * @tc.desc: Verify the function that value of GetPosition after using LayoutItems.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_LayoutItems_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    renderNode_->InitialFlowProp();
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    for (size_t index = 0; index < renderNode_->items_.size(); index++) {
+        renderNode_->cacheItems_.emplace(index);
+    }
+    renderNode_->LayoutItems(renderNode_->cacheItems_);
+    for (auto itemMessage : renderNode_->items_) {
+        EXPECT_EQ(itemMessage.second->GetLayoutSize(), Size(450.0, 300.0));
+    }
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetFooterSize_001
+ * @tc.desc: Verify the function that value to width and height.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetFooterSize_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr");
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    auto waterflowElement = AceType::MakeRefPtr<MockWaterFlowElement>();
+    CHECK_RENDERNODE_NULL_VOID(waterflowElement);
+    waterflowElement->SetContext(mockContext_);
+    WeakPtr<V2::WaterFlowItemGenerator> waterFlowItemGenerator(waterflowElement);
+    renderNode_->RegisterItemGenerator(std::move(waterFlowItemGenerator));
+    renderNode_->RequestWaterFlowFooter();
+    double mainSize = 10.0;
+    double crossSize = 100.0;
+    renderNode_->GetFooterSize(mainSize, crossSize);
+    EXPECT_EQ(renderNode_->footerMaxSize_.Width(), crossSize);
+    EXPECT_EQ(renderNode_->footerMaxSize_.Height(), mainSize);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_SetFooterPosition_001
+ * @tc.desc: Verify the function that value of GetPosition after using SetFooterPosition.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_SetFooterPosition_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr");
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    renderNode_->SetGetTotalCount([this]() {
+        return renderNode_->flowMatrix_.size() - 1;
+    });
+    auto waterflowElement = AceType::MakeRefPtr<MockWaterFlowElement>();
+    CHECK_RENDERNODE_NULL_VOID(waterflowElement);
+    waterflowElement->SetContext(mockContext_);
+    WeakPtr<V2::WaterFlowItemGenerator> waterFlowItemGenerator(waterflowElement);
+    renderNode_->RegisterItemGenerator(std::move(waterFlowItemGenerator));
+    renderNode_->InitialFlowProp();
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    renderNode_->footerMaxSize_ = Size(150.0, 10.0);
+    renderNode_->viewportStartPos_ = 110.0;
+    renderNode_->SetFooterPosition();
+    EXPECT_TRUE(renderNode_->footer_->GetPosition() == Offset(
+        (renderNode_->crossSize_ - renderNode_->footerMaxSize_.Width()) / CENTER_POINT,
+        renderNode_->mainSize_ - renderNode_->footerMaxSize_.Height()));
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_SetFooterPosition_002
+ * @tc.desc: Verify the function that value of GetPosition after using SetFooterPosition.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_SetFooterPosition_002, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr");
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    auto waterflowElement = AceType::MakeRefPtr<MockWaterFlowElement>();
+    CHECK_RENDERNODE_NULL_VOID(waterflowElement);
+    waterflowElement->SetContext(mockContext_);
+    WeakPtr<V2::WaterFlowItemGenerator> waterFlowItemGenerator(waterflowElement);
+    renderNode_->RegisterItemGenerator(std::move(waterFlowItemGenerator));
+    renderNode_->RequestWaterFlowFooter();
+    renderNode_->footerMaxSize_ = Size(150.0, 10.0);
+    renderNode_->SetFooterPosition();
+    EXPECT_TRUE(renderNode_->footer_->GetPosition() == Offset((renderNode_->crossSize_ - 150) / CENTER_POINT,
+        START_POS));
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_LayoutFooter_001
+ * @tc.desc: Verify the function that value of GetPosition after using LayoutFooter.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_LayoutFooter_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr");
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    renderNode_->SetGetTotalCount([this]() {
+        return renderNode_->flowMatrix_.size() - 1;
+    });
+    auto waterflowElement = AceType::MakeRefPtr<MockWaterFlowElement>();
+    CHECK_RENDERNODE_NULL_VOID(waterflowElement);
+    waterflowElement->SetContext(mockContext_);
+    WeakPtr<V2::WaterFlowItemGenerator> waterFlowItemGenerator(waterflowElement);
+    renderNode_->RegisterItemGenerator(std::move(waterFlowItemGenerator));
+    renderNode_->InitialFlowProp();
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    renderNode_->viewportStartPos_ = 250.0;
+    renderNode_->LayoutFooter();
+    EXPECT_TRUE(renderNode_->footer_->GetPosition() == Offset(
+        (renderNode_->crossSize_ - renderNode_->footerMaxSize_.Width()) / CENTER_POINT,
+        renderNode_->mainSize_ - renderNode_->footerMaxSize_.Height()));
+    EXPECT_TRUE(renderNode_->footer_->GetLayoutSize() == Size(renderNode_->footerMaxSize_.Width(),
+        renderNode_->footerMaxSize_.Height()));
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetLastSupplyedIndex_001
+ * @tc.desc: Verify the function that return value of GetLastSupplyedIndex.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastSupplyedIndex_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr");
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    auto result = renderNode_->GetLastSupplyedIndex();
+    EXPECT_EQ(result, 0);
+    renderNode_->InitialFlowProp();
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    result = renderNode_->GetLastSupplyedIndex();
+    EXPECT_EQ(result, 5);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetNextSupplyedIndex_001
+ * @tc.desc: Verify the function that return value of GetNextSupplyedIndex.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetNextSupplyedIndex_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr");
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    auto result = renderNode_->GetNextSupplyedIndex();
+    EXPECT_EQ(result, 0);
+    renderNode_->InitialFlowProp();
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    result = renderNode_->GetNextSupplyedIndex();
+    EXPECT_EQ(result, 6);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetLastSupplyedMainSize_001
+ * @tc.desc: Verify the function that return value of GetLastSupplyedMainSize.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastSupplyedMainSize_001, TestSize.Level1)
+{
+    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr");
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    auto result = renderNode_->GetLastSupplyedMainSize();
+    EXPECT_EQ(result, 0);
+    renderNode_->InitialFlowProp();
+    auto itemIndex = renderNode_->GetNextSupplyedIndex();
+    auto targetPos = renderNode_->GetTargetPos();
+    renderNode_->SupplyItems(itemIndex, targetPos);
+    result = renderNode_->GetLastSupplyedMainSize();
+    EXPECT_EQ(result, 1100.0);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetLastMainBlankPos_001
+ * @tc.desc: Verify the function that change the return value of the parameter GetLastMainBlankPos.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastMainBlankPos_001, TestSize.Level1)
+{
+    for (size_t i = 0; i < CREATE_FLOWITEM_COUNT; i++) {
+        renderNode_->mainSideEndPos_.emplace_back(START_POS + i);
+    }
+    for (size_t i = 0; i < CREATE_FLOWITEM_COUNT; i++) {
+        renderNode_->crossSideSize_.emplace_back(START_POS + i);
+    }
+    auto result = renderNode_->GetLastMainBlankPos();
+    EXPECT_EQ(result.GetY(), START_POS);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetLastMainBlankPos_002
+ * @tc.desc: Verify the function that return value of GetLastMainBlankPos.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastMainBlankPos_002, TestSize.Level1)
+{
+    const double pos = 100.0;
+    for (size_t i = 0; i < CREATE_FLOWITEM_COUNT; i++) {
+        renderNode_->mainSideEndPos_.emplace_back(pos - i);
+    }
+    for (size_t i = 0; i < CREATE_FLOWITEM_COUNT; i++) {
+        renderNode_->crossSideSize_.emplace_back(pos + i);
+    }
+    auto result = renderNode_->GetLastMainBlankPos();
+    EXPECT_EQ(result.GetY(), pos - CREATE_FLOWITEM_COUNT + 1);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetLastMainBlankCross_001
+ * @tc.desc: Verify the function that return value of GetLastMainBlankCross.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastMainBlankCross_001, TestSize.Level1)
+{
+    const double pos = 4.0;
+    for (size_t i = 0; i < CREATE_FLOWITEM_COUNT; i++) {
+        renderNode_->mainSideEndPos_.emplace_back(pos - i);
+    }
+    auto result = renderNode_->GetLastMainBlankCross();
+    EXPECT_EQ(result, pos);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetLastMainBlankCross_002
+ * @tc.desc: Verify the function that return value of GetLastMainBlankCross.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastMainBlankCross_002, TestSize.Level2)
+{
+    CHECK_RENDERNODE_NULL_VOID(renderNode_);
+    EXPECT_TRUE(renderNode_->mainSideEndPos_.empty());
+    auto result = renderNode_->GetLastMainBlankCross();
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetLastMainBlankPos_001
+ * @tc.desc: Verify the function that change the return value of the parameter GetLastMainPos.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastMainPos_001, TestSize.Level1)
+{
+    const double pos = 100.0;
+    for (size_t i = 0; i < CREATE_FLOWITEM_COUNT; i++) {
+        renderNode_->mainSideEndPos_.emplace_back(pos + i);
+    }
+    for (size_t i = 0; i < CREATE_FLOWITEM_COUNT; i++) {
+        renderNode_->crossSideSize_.emplace_back(pos + i);
+    }
+    auto result = renderNode_->GetLastMainPos();
+    EXPECT_EQ(result.GetY(), pos + CREATE_FLOWITEM_COUNT - 1);
+}
+
+/**
+ * @tc.name: RenderWaterFlowTest_GetLastMainBlankPos_002
+ * @tc.desc: Verify the function that change the return value of the parameter GetLastMainPos.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetLastMainPos_002, TestSize.Level1)
+{
+    const double pos = 100.0;
+    for (size_t i = 0; i < CREATE_FLOWITEM_COUNT; i++) {
+        renderNode_->mainSideEndPos_.emplace_back(pos - i);
+    }
+    for (size_t i = 0; i < CREATE_FLOWITEM_COUNT; i++) {
+        renderNode_->crossSideSize_.emplace_back(pos + i);
+    }
+    auto result = renderNode_->GetLastMainPos();
+    EXPECT_EQ(result.GetY(), pos);
+}
 } // namespace OHOS::Ace
+

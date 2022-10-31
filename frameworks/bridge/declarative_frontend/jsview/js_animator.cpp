@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_animator_function.h"
 #include "core/common/container.h"
@@ -77,8 +78,8 @@ RefPtr<PipelineContext> GetCurrentContext()
     return pipelineContext;
 }
 
-void AddEventListener(const EventMarker& event, EventOperation operation, const std::string& animatorId,
-    const JSCallbackInfo& info)
+void AddEventListener(
+    const EventMarker& event, EventOperation operation, const std::string& animatorId, const JSCallbackInfo& info)
 {
     auto page = GetCurrentPage();
     auto animatorInfo = GetAnimatorInfo(animatorId, page);
@@ -101,41 +102,36 @@ void AddEventListener(const EventMarker& event, EventOperation operation, const 
         case EventOperation::START:
             animator->ClearStartListeners();
             if (!event.IsEmpty()) {
-                animator->AddStartListener([event, weakContext = context] {
-                    AceAsyncEvent<void()>::Create(event, weakContext)();
-                });
+                animator->AddStartListener(
+                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
             }
             break;
         case EventOperation::PAUSE:
             animator->ClearPauseListeners();
             if (!event.IsEmpty()) {
-                animator->AddPauseListener([event, weakContext = context] {
-                    AceAsyncEvent<void()>::Create(event, weakContext)();
-                });
+                animator->AddPauseListener(
+                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
             }
             break;
         case EventOperation::REPEAT:
             animator->ClearRepeatListeners();
             if (!event.IsEmpty()) {
-                animator->AddRepeatListener([event, weakContext = context] {
-                    AceAsyncEvent<void()>::Create(event, weakContext)();
-                });
+                animator->AddRepeatListener(
+                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
             }
             break;
         case EventOperation::CANCEL:
             animator->ClearIdleListeners();
             if (!event.IsEmpty()) {
-                animator->AddIdleListener([event, weakContext = context] {
-                    AceAsyncEvent<void()>::Create(event, weakContext)();
-                });
+                animator->AddIdleListener(
+                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
             }
             break;
         case EventOperation::FINISH:
             animator->ClearStopListeners();
             if (!event.IsEmpty()) {
-                animator->AddStopListener([event, weakContext = context] {
-                    AceAsyncEvent<void()>::Create(event, weakContext)();
-                });
+                animator->AddStopListener(
+                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
             }
             break;
         case EventOperation::NONE:
@@ -152,9 +148,7 @@ void AddFrameListener(const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<Key
     }
     auto frameEvent = animatorInfo->GetFrameEvent();
     if (frameEvent) {
-        animation->AddListener([frameEvent](const float& progress) {
-            frameEvent(progress);
-        });
+        animation->AddListener([frameEvent](const float& progress) { frameEvent(progress); });
     }
 }
 
@@ -176,8 +170,8 @@ void HandleAnimatorInfo(const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<A
     animator->SetAnimationDirection(playMode);
 }
 
-bool CreateAnimation(const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<Animator>& animator,
-    AnimationStatus operation)
+bool CreateAnimation(
+    const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<Animator>& animator, AnimationStatus operation)
 {
     if (!animatorInfo || !animator) {
         LOGE("animatorInfo or animator is nullptr");
@@ -187,9 +181,7 @@ bool CreateAnimation(const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<Anim
     if (motion) {
         auto frameEvent = animatorInfo->GetFrameEvent();
         if (frameEvent) {
-            motion->AddListener([frameEvent](const float& progress) {
-                frameEvent(progress);
-            });
+            motion->AddListener([frameEvent](const float& progress) { frameEvent(progress); });
         }
         animator->ClearPauseListeners();
         animator->ClearRepeatListeners();
@@ -457,8 +449,7 @@ void JSAnimator::OnFrame(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsAnimatorFunction> function = AceType::MakeRefPtr<JsAnimatorFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto OnFrameEvent = [execCtx = info.GetExecutionContext(), func = std::move(function)](
-        const float& progress) {
+    auto OnFrameEvent = [execCtx = info.GetExecutionContext(), func = std::move(function)](const float& progress) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Animator.onFrame");
         func->Execute(progress);
@@ -545,8 +536,8 @@ void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
         auto springMotion = AceType::MakeRefPtr<SpringMotion>(start, end, velocity, springProperty);
         obj->SetMotion(springMotion);
     } else {
-        if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() || !info[3]->IsNumber()
-            || !info[4]->IsObject()) {
+        if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() || !info[3]->IsNumber() ||
+            !info[4]->IsObject()) {
             LOGE("The scroll args is wrong");
             return;
         }
@@ -560,8 +551,8 @@ void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
             return;
         }
         RefPtr<SpringProperty> springProperty = prop->GetSpringProp();
-        RefPtr<ScrollMotion> scrollMotion = AceType::MakeRefPtr<ScrollMotion>(position, velocity, ExtentPair(min, min),
-            ExtentPair(max, max), springProperty);
+        RefPtr<ScrollMotion> scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
+            position, velocity, ExtentPair(min, min), ExtentPair(max, max), springProperty);
         obj->SetMotion(scrollMotion);
     }
     obj->IncRefCount();

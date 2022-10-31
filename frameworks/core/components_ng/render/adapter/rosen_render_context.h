@@ -35,6 +35,8 @@
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+class BorderImageModifier;
+class MouseSelectModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -45,7 +47,7 @@ public:
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
-    void SyncGeometryProperties(const RectF& rectF) override;
+    void SyncGeometryProperties(const RectF& paintRect) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
@@ -138,6 +140,9 @@ public:
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const override;
 
+    void SetSharedTranslate(float xTranslate, float yTranslate) override;
+    void ResetSharedTranslate() override;
+
     static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren);
 
@@ -157,6 +162,13 @@ public:
 
     void NotifyTransition(
         const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) override;
+
+    void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
+
+    void PaintAccessibilityFocus() override;
+
+    void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) override;
+    void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -208,6 +220,8 @@ private:
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
+    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
@@ -229,6 +243,7 @@ private:
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void PaintBorderImage();
     void PaintBorderImageGradient();
+    void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
@@ -243,8 +258,11 @@ private:
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
+    std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
+    std::shared_ptr<MouseSelectModifier> mouseSelectModifier_ = nullptr;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
+    std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

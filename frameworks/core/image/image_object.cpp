@@ -74,7 +74,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
 
     //if is png or apng check
 #ifdef APNG_IMAGE_SUPPORT
-    if(source.isPng())
+    if (source.IsPng())
     {
         auto apngDecoder = AceType::MakeRefPtr<PNGImageDecoder>(skData);
         if(apngDecoder && apngDecoder->isApng()){

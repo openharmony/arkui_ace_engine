@@ -478,21 +478,7 @@ public:
         return nullptr;
     }
 
-    void SetVisible(bool visible, bool inRecursion = false)
-    {
-        if (visible_ != visible) {
-            visible_ = visible;
-            AddDirtyRenderBoundaryNode();
-            OnVisibleChanged();
-            CheckIfNeedUpdateTouchRect();
-            if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
-                MarkParentNeedRender();
-            }
-        }
-        for (auto& child : children_) {
-            child->SetVisible(visible, true);
-        }
-    }
+    void SetVisible(bool visible, bool inRecursion = false);
 
     virtual bool GetVisible() const
     {

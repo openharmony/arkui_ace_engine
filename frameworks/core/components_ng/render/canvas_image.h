@@ -60,7 +60,8 @@ public:
     // TODO: use [PixelMap] as data source when rs provides interface like
     // DrawBitmapRect(Media::PixelMap* pixelMap, const Rect& dstRect, const Rect& srcRect, ...)
     // now we make [SkImage] from [PixelMap] and use [drawImageRect] to draw image
-    static RefPtr<CanvasImage> Create(const RefPtr<PixelMap>& pixelMap, const RefPtr<RenderTaskHolder>& renderTaskHolder);
+    static RefPtr<CanvasImage> Create(
+        const RefPtr<PixelMap>& pixelMap,const RefPtr<RenderTaskHolder>& renderTaskHolder);
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
     void SetImagePaintConfig(const ImagePaintConfig& imagePaintConfig)

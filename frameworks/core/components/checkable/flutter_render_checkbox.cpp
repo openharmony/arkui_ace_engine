@@ -153,16 +153,10 @@ void FlutterRenderCheckbox::DrawPartSelect(const ScopedCanvas& canvas, const Off
     const Offset end =
         Offset(drawSize_.Width() * CHECK_MARK_PART_END_Y_POSITION, drawSize_.Width() * CHECK_MARK_PART_Y_POSITION);
 
-    strokePaint.paint()->setColor(inactiveColor_);
-    strokePaint.paint()->setAntiAlias(true);
     path->moveTo(originX + start.GetX(), originY + start.GetY());
     path->lineTo(originX + end.GetX(), originY + end.GetY());
     canvas->drawPath(path.get(), shadowPaint, paintData);
     canvas->drawPath(path.get(), strokePaint, paintData);
-
-    SetStrokeWidth(NormalizeToPx(checkStroke_), strokePaint);
-    strokePaint.paint()->setColor(pointColor_);
-    strokePaint.paint()->setStrokeCap(SkPaint::kRound_Cap);
 }
 
 void FlutterRenderCheckbox::DrawUnselected(

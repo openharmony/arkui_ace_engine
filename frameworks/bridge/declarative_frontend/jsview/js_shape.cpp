@@ -16,7 +16,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 
 #include "base/geometry/ng/image_mesh.h"
-#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/shape_model_impl.h"
 #include "core/common/container.h"
@@ -104,14 +103,8 @@ void JSShape::JsWidth(const JSCallbackInfo& info)
 
 void JSShape::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
-    }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
-    }
-    ShapeModel::GetInstance()->SetWidth(value);
+    JSViewAbstract::JsWidth(jsValue);
+    ShapeModel::GetInstance()->SetWidth();
 }
 
 void JSShape::JsHeight(const JSCallbackInfo& info)
@@ -126,14 +119,8 @@ void JSShape::JsHeight(const JSCallbackInfo& info)
 
 void JSShape::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
-    }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
-    }
-    ShapeModel::GetInstance()->SetHeight(value);
+    JSViewAbstract::JsHeight(jsValue);
+    ShapeModel::GetInstance()->SetHeight();
 }
 
 void JSShape::JsSize(const JSCallbackInfo& info)
@@ -183,7 +170,7 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
             dashArray.emplace_back(dashArray[i]);
         }
     }
-    ShapeAbstractModel::GetInstance()->SetStrokeDashArray(dashArray);
+    ShapeModel::GetInstance()->SetStrokeDashArray(dashArray);
     info.SetReturnValue(info.This());
 }
 
@@ -197,7 +184,7 @@ void JSShape::SetStroke(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], strokeColor)) {
         return;
     }
-    ShapeAbstractModel::GetInstance()->SetStroke(strokeColor);
+    ShapeModel::GetInstance()->SetStroke(strokeColor);
 }
 
 void JSShape::SetFill(const JSCallbackInfo& info)
@@ -207,11 +194,11 @@ void JSShape::SetFill(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsString() && info[0]->ToString() == "none") {
-        ShapeAbstractModel::GetInstance()->SetFill(Color::TRANSPARENT);
+        ShapeModel::GetInstance()->SetFill(Color::TRANSPARENT);
     } else {
         Color fillColor;
         if (ParseJsColor(info[0], fillColor)) {
-            ShapeAbstractModel::GetInstance()->SetFill(fillColor);
+            ShapeModel::GetInstance()->SetFill(fillColor);
         }
     }
 }
@@ -226,17 +213,17 @@ void JSShape::SetStrokeDashOffset(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], offset)) {
         return;
     }
-    ShapeAbstractModel::GetInstance()->SetStrokeDashOffset(offset);
+    ShapeModel::GetInstance()->SetStrokeDashOffset(offset);
 }
 
 void JSShape::SetStrokeLineCap(int lineCap)
 {
-    ShapeAbstractModel::GetInstance()->SetStrokeLineCap(lineCap);
+    ShapeModel::GetInstance()->SetStrokeLineCap(lineCap);
 }
 
 void JSShape::SetStrokeLineJoin(int lineJoin)
 {
-    ShapeAbstractModel::GetInstance()->SetStrokeLineJoin(lineJoin);
+    ShapeModel::GetInstance()->SetStrokeLineJoin(lineJoin);
 }
 
 void JSShape::SetStrokeMiterLimit(const JSCallbackInfo& info)
@@ -250,7 +237,7 @@ void JSShape::SetStrokeMiterLimit(const JSCallbackInfo& info)
         return;
     }
     if (GreatOrEqual(miterLimit, 1.0)) {
-        ShapeAbstractModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
+        ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
     }
 }
 
@@ -264,7 +251,7 @@ void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], strokeOpacity)) {
         return;
     }
-    ShapeAbstractModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
+    ShapeModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
 void JSShape::SetFillOpacity(const JSCallbackInfo& info)
@@ -277,7 +264,7 @@ void JSShape::SetFillOpacity(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], fillOpacity)) {
         return;
     }
-    ShapeAbstractModel::GetInstance()->SetFillOpacity(fillOpacity);
+    ShapeModel::GetInstance()->SetFillOpacity(fillOpacity);
 }
 
 void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
@@ -290,12 +277,12 @@ void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], lineWidth)) {
         return;
     }
-    ShapeAbstractModel::GetInstance()->SetStrokeWidth(lineWidth);
+    ShapeModel::GetInstance()->SetStrokeWidth(lineWidth);
 }
 
 void JSShape::SetAntiAlias(bool antiAlias)
 {
-    ShapeAbstractModel::GetInstance()->SetAntiAlias(antiAlias);
+    ShapeModel::GetInstance()->SetAntiAlias(antiAlias);
 }
 
 void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
@@ -333,7 +320,7 @@ void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
     if (!ParseJsInteger(rowValue, row)) {
         return;
     }
-    ShapeModel::GetInstance()->SetBitmapMesh(mesh,static_cast<int32_t>(column),static_cast<int32_t>(row));
+    ShapeModel::GetInstance()->SetBitmapMesh(mesh, static_cast<int32_t>(column), static_cast<int32_t>(row));
 }
 
 void JSShape::JSBind(BindingTarget globalObj)

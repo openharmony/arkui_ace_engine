@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
+#include <cstdint>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/common/clipboard/clipboard.h"
@@ -39,7 +41,6 @@
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/drawing.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "commonlibrary/c_utils/base/include/refbase.h"
@@ -56,7 +57,7 @@ constexpr Dimension CURSOR_PADDING = 2.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
-enum class CaretUpdateType { CLICK, DEL, EVENT, INPUT, NONE };
+enum class CaretUpdateType { PRESSED, DEL, EVENT, INPUT, NONE };
 
 class TextFieldPattern : public Pattern, public ValueChangeObserver {
     DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
@@ -97,7 +98,7 @@ public:
     }
 
     void UpdateCaretPositionByTextEdit();
-    void UpdateCaretPositionByTouchOffset();
+    void UpdateCaretPositionByPressOffset();
     void UpdateSelectionOffset();
 
     float CalcCursorOffsetXByPosition(int32_t position);
@@ -212,6 +213,11 @@ public:
         return utilPadding_.left.value_or(basicPaddingLeft_);
     }
 
+    float GetPaddingRight() const
+    {
+        return utilPadding_.right.value_or(basicPaddingLeft_);
+    }
+
     const PaddingPropertyF& GetUtilPadding() const
     {
         return utilPadding_;
@@ -263,6 +269,7 @@ public:
         return textBoxes_;
     }
     void CaretMoveToLastNewLineChar();
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
 private:
     bool IsTextArea();
@@ -273,12 +280,18 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-    void InitClickEvent();
-    void HandleClickEvent(const GestureEvent& info);
+
     void InitFocusEvent();
     void InitTouchEvent();
+    void InitLongPressEvent();
+
     void AddScrollEvent();
     void OnTextAreaScroll(float dy);
+    void InitMouseEvent();
+    void HandleMouseEvent(const MouseInfo& info);
+    void HandleLongPress(GestureEvent& info);
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
+
     void CursorMoveOnClick(const Offset& offset);
 
     void HandleSelectionUp();
@@ -297,14 +310,30 @@ private:
 
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
+    void UpdateDestinationToCaretByEvent();
+    void UpdateCaretOffsetByLastTouchOffset();
+    bool UpdateCaretPositionByMouseMovement();
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
     void StartTwinkling();
     void StopTwinkling();
 
+    void SetCaretOffsetXForEmptyText();
     void UpdateTextFieldManager(const Offset& offset);
     void OnTextInputActionUpdate(TextInputAction value);
+
+    std::u16string GetTextForDisplay() const;
+    std::string TextInputTypeToString() const;
+    std::string TextInputActionToString() const;
+    std::string GetPlaceholderFont() const;
+    RefPtr<TextFieldTheme> GetTheme() const;
+    std::string GetPlaceholderColor() const;
+    std::string GetFontSize() const;
+    std::string GetPlaceHolder() const;
+    uint32_t GetMaxLength() const;
+    std::string GetInputFilter() const;
+
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -332,6 +361,7 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<InputEvent> mouseEvent_;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
 
     // What the keyboard should appears.
@@ -354,6 +384,7 @@ private:
     bool cursorVisible_ = false;
     bool focusEventInitialized_ = false;
     bool preferredLineHeightNeedToUpdate = true;
+    bool isMousePressed_ = false;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;

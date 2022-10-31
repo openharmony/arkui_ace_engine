@@ -253,6 +253,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void CloseSelectOverlay();
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
+    std::optional<OffsetF> GetCoordinatePoint();
 
     struct TouchInfo {
         float x = -1.0f;
@@ -278,6 +279,7 @@ private:
     float selectHotZone_ = 10.0f;
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
+    bool needOnFocus_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };

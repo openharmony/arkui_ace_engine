@@ -307,7 +307,7 @@ public:
         miterLimit_ = miterLimit;
     }
 
-    const LineDashParam& GetLineDash() const
+    LineDashParam GetLineDash() const
     {
         return lineDash_;
     }

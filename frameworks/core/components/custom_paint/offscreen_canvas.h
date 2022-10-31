@@ -122,6 +122,11 @@ public:
         strokeState_.SetLineDash(segments);
     }
 
+    LineDashParam GetLineDash() const
+    {
+        return strokeState_.GetLineDash();
+    }
+
     void SetTextAlign(TextAlign align)
     {
         fillState_.SetTextAlign(align);

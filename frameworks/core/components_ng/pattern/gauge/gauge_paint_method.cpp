@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 
+#include <cmath>
+
 #include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
@@ -48,8 +50,14 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     RenderRingInfo data;
     data.radius = std::min(frameSize.Width(), frameSize.Height()) / 2.0f;
     data.center = Offset(frameSize.Width() / 2.0f + offset.GetX(), frameSize.Height() / 2.0f + offset.GetY());
-    auto startAngle = paintProperty->GetStartAngle().value_or(DEFAULT_START_DEGREE);
-    auto endAngle = paintProperty->GetEndAngle().value_or(DEFAULT_END_DEGREE);
+    float startAngle = DEFAULT_START_DEGREE;
+    float endAngle = DEFAULT_END_DEGREE;
+    if (paintProperty->GetStartAngle().has_value() && !std::isnan(paintProperty->GetStartAngle().value())) {
+        startAngle = paintProperty->GetStartAngle().value();
+    }
+    if (paintProperty->GetEndAngle().has_value() && !std::isnan(paintProperty->GetEndAngle().value())) {
+        endAngle = paintProperty->GetEndAngle().value();
+    }
     float startDegree = startAngle;
     float sweepDegree = endAngle - startAngle;
     if (sweepDegree > 360.0f || sweepDegree < 0.0f) {

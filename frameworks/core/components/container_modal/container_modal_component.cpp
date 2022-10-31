@@ -73,7 +73,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     titleBox->SetOnMouseId([contextWptr = context_](MouseInfo& info) {
         auto context = contextWptr.Upgrade();
         if (context && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
-            context->GetWindowManager()->FireWindowStartMoveCallBack();
+            context->GetWindowManager()->WindowStartMove();
         }
     });
 
@@ -81,7 +81,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     titleBox->SetOnTouchMoveId([contextWptr = context_](const TouchEventInfo&) {
         auto context = contextWptr.Upgrade();
         if (context) {
-            context->GetWindowManager()->FireWindowStartMoveCallBack();
+            context->GetWindowManager()->WindowStartMove();
         }
     });
     titleBox->SetChild(titleChildrenRow);
@@ -228,6 +228,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     }
     TextStyle style;
     style.SetFontSize(TITLE_TEXT_FONT_SIZE);
+    style.SetMaxLines(1);
     style.SetTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
     style.SetFontWeight(FontWeight::W500);
     style.SetAllowScale(false);
@@ -256,13 +257,13 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     }
     auto titleMaximizeRecoverButton = BuildControlButton(maxRecoverButton, [windowManager]() {
             if (windowManager) {
-                auto mode = windowManager->FireWindowGetModeCallBack();
+                auto mode = windowManager->GetWindowMode();
                 if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                     LOGI("recover button clicked");
-                    windowManager->FireWindowRecoverCallBack();
+                    windowManager->WindowRecover();
                 } else {
                     LOGI("maximize button clicked");
-                    windowManager->FireWindowMaximizeCallBack();
+                    windowManager->WindowMaximize();
                 }
             }
         }, isFocus, isFloating);
@@ -271,7 +272,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     auto titleMinimizeButton = BuildControlButton(minimizeButton, [windowManager]() {
             if (windowManager) {
                 LOGI("minimize button clicked");
-                windowManager->FireWindowMinimizeCallBack();
+                windowManager->WindowMinimize();
             }
         }, isFocus, isFloating);
     auto closeButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
@@ -279,7 +280,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     auto titleCloseButton = BuildControlButton(closeButton, [windowManager]() {
             if (windowManager) {
                 LOGI("close button clicked");
-                windowManager->FireWindowCloseCallBack();
+                windowManager->WindowClose();
             }
         }, isFocus, isFloating);
     std::list<RefPtr<Component>> titleChildren;

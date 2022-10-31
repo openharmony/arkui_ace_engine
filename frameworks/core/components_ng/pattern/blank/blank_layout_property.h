@@ -48,6 +48,12 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinSize, Dimension, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("min", GetMinSizeValue(Dimension()).ToString().c_str());
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BlankLayoutProperty);
 };

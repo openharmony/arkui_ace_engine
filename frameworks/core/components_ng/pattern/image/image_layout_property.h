@@ -26,6 +26,12 @@ struct ImageSizeStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoResize, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SourceSize, SizeF);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FitOriginalSize, bool);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str());
+        json->Put("fitOriginalSize", propFitOriginalSize.value_or(true) ? "true" : "false");
+        json->Put("autoResize", propAutoResize.value_or(true) ? "true" : "false");
+    }
 };
 
 class ACE_EXPORT ImageLayoutProperty : public LayoutProperty {
@@ -43,6 +49,8 @@ public:
         value->propImageSourceInfo_ = CloneImageSourceInfo();
         value->propAlt_ = CloneAlt();
         value->propImageFit_ = CloneImageFit();
+        value->propSyncMode_ = CloneSyncMode();
+        value->propCopyOptions_ = CloneCopyOptions();
         value->propImageSizeStyle_ = CloneImageSizeStyle();
         return value;
     }
@@ -53,12 +61,30 @@ public:
         ResetImageSourceInfo();
         ResetAlt();
         ResetImageFit();
+        ResetSyncMode();
+        ResetCopyOptions();
         ResetImageSizeStyle();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        static const char* OBJECTFITVALUE[] = { "ImageFit.Fill", "ImageFit.Contain", "ImageFit.Cover",
+            "ImageFit.FitWidth", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
+        static const char* COPYOPTIONSVALUE[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
+            "CopyOptions.Distributed" };
+        json->Put("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str());
+        json->Put("objectFit", OBJECTFITVALUE[static_cast<int32_t>(propImageFit_.value_or(ImageFit::COVER))]);
+        json->Put("syncLoad", propSyncMode_.value_or(false) ? "true" : "false");
+        json->Put("copyOption", COPYOPTIONSVALUE[static_cast<int32_t>(propCopyOptions_.value_or(CopyOptions::None))]);
+        ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Alt, ImageSourceInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncMode, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptions, CopyOptions, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_GROUP(ImageSizeStyle, ImageSizeStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, AutoResize, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, SourceSize, SizeF, PROPERTY_UPDATE_LAYOUT);

@@ -56,6 +56,32 @@ public:
         ResetStrokeWidth();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put("value", StringUtils::DoubleToString(propValue_.value_or(0)).c_str());
+        json->Put("max", StringUtils::DoubleToString(propMax_.value_or(100)).c_str());
+        json->Put("min", StringUtils::DoubleToString(propMin_.value_or(0)).c_str());
+        json->Put("startAngle", StringUtils::DoubleToString(propStartAngle_.value_or(0)).c_str());
+        json->Put("endAngle", StringUtils::DoubleToString(propEndAngle_.value_or(360)).c_str());
+        if (propStrokeWidth_.has_value()) {
+            json->Put("strokeWidth", propStrokeWidth_.value().ToString().c_str());
+        } else {
+            json->Put("strokeWidth", "");
+        }
+        auto jsonColors = JsonUtil::CreateArray(true);
+        if (propColors_.has_value() && propColors_.has_value()) {
+            for (size_t i = 0; i < propValues_.value().size(); i++) {
+                auto jsonObject = JsonUtil::CreateArray(true);
+                jsonObject->Put("0", propColors_.value()[i].ColorToString().c_str());
+                jsonObject->Put("1", propValues_.value()[i]);
+                auto index = std::to_string(i);
+                jsonColors->Put(index.c_str(), jsonObject);
+            }
+        }
+        json->Put("colors", jsonColors->ToString().c_str());
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, float, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Min, float, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Max, float, PROPERTY_UPDATE_RENDER);
