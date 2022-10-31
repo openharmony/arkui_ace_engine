@@ -263,6 +263,10 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
         }
         lastLayoutSize_ = GetLayoutSize();
     }
+    if (!skCanvas_) {
+        LOGE("skCanvas_ is null");
+        return;
+    }
     skCanvas_->scale(viewScale, viewScale);
     TriggerOnReadyEvent();
 
