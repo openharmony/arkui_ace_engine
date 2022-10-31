@@ -53,6 +53,7 @@ private:
     std::string UpdateNodeRectStrInfoV2(const RefPtr<AccessibilityNode> node);
     std::string ConvertStrToPropertyType(std::string& typeValue);
     std::string ConvertPseudoClassStyle(const std::string pseudoClassValue);
+    Rect deviceRect_;
 };
 
 } // namespace OHOS::Ace::Framework
