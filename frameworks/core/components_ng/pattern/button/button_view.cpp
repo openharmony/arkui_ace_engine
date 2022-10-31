@@ -45,6 +45,7 @@ void ButtonView::CreateWithLabel(const std::string& label)
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(label);
         textNode->SetInternal();
+        SetTextDefaultAttributes(textNode);
         frameNode->AddChild(textNode);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -86,6 +87,23 @@ void ButtonView::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode)
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
 }
+
+void ButtonView::SetTextDefaultAttributes(const RefPtr<FrameNode>& textNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    auto textColor = buttonTheme->GetTextStyle().GetTextColor();
+    textLayoutProperty->UpdateTextColor(textColor);
+    auto fontSize = buttonTheme->GetTextStyle().GetFontSize();
+    textLayoutProperty->UpdateFontSize(fontSize);
+    textLayoutProperty->UpdateFontWeight(buttonTheme->GetTextStyle().GetFontWeight());
+}
+
 
 void ButtonView::SetType(ButtonType buttonType)
 {
