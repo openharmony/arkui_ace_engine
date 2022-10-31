@@ -222,11 +222,6 @@ bool ScrollBar::IsActive() const
     return false;
 }
 
-void ScrollBar::SetUndisplay()
-{
-    displayMode_ = DisplayMode::OFF;
-}
-
 Size ScrollBar::GetRootSize() const
 {
     auto context = pipelineContext_.Upgrade();
@@ -241,9 +236,14 @@ Size ScrollBar::GetRootSize() const
 
 void ScrollBar::Reset()
 {
-    if (barController_) {
-        barController_->Reset();
+    if (!barController_) {
+        return;
     }
+    if (displayMode_ == DisplayMode::AUTO) {
+        barController_->HandleScrollBarEnd();
+        return;
+    }
+    barController_->Reset();
 }
 
 } // namespace OHOS::Ace

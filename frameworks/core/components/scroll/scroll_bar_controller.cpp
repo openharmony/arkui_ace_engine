@@ -79,7 +79,7 @@ void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context, bo
 
     touchAnimator_ = AceType::MakeRefPtr<Animator>(context);
     dragEndAnimator_ = AceType::MakeRefPtr<Animator>(context);
-    scrollEndAnimator_ = AceType::MakeRefPtr<Animator>(context);
+    InitBarEndAnimation(context);
 
     // when touching down, it need vibrate, last 100ms
     auto vibratorContext = context.Upgrade();
@@ -250,7 +250,7 @@ bool ScrollBarController::UpdateScrollPosition(const double offset, int32_t sour
     if (callback_) {
         auto scroll = AceType::DynamicCast<RenderScroll>(scroll_.Upgrade());
         if (scroll && !NearZero(scroll->GetEstimatedHeight())) {
-            double mainSize = isVertical_ ? scroll->GetLayoutSize().Height(): scroll->GetLayoutSize().Width();
+            double mainSize = isVertical_ ? scroll->GetLayoutSize().Height() : scroll->GetLayoutSize().Width();
             double estimatedHeight = scroll->GetEstimatedHeight();
             double activeHeight = mainSize * mainSize / estimatedHeight;
             if (!NearEqual(mainSize, activeHeight)) {
@@ -265,41 +265,52 @@ bool ScrollBarController::UpdateScrollPosition(const double offset, int32_t sour
 void ScrollBarController::HandleScrollBarEnd()
 {
     isActive_ = false;
-    if (scrollEndAnimator_ && barEndCallback_) {
-        if (!scrollEndAnimator_->IsStopped()) {
-            scrollEndAnimator_->Stop();
-        }
-        scrollEndAnimator_->ClearInterpolators();
-
-        auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_START, UINT8_MAX);
-        auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_MIDDLE, UINT8_MAX);
-        auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_END, 0);
-        hiddenMiddleKeyframe->SetCurve(Curves::LINEAR);
-        hiddenEndKeyframe->SetCurve(Curves::FRICTION);
-
-        auto animation = AceType::MakeRefPtr<KeyframeAnimation<int32_t>>();
-        animation->AddKeyframe(hiddenStartKeyframe);
-        animation->AddKeyframe(hiddenMiddleKeyframe);
-        animation->AddKeyframe(hiddenEndKeyframe);
-        animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
-            auto scrollBar = weakBar.Upgrade();
-            if (scrollBar && scrollBar->barEndCallback_) {
-                scrollBar->barEndCallback_(value);
-            }
-        });
-        scrollEndAnimator_->AddInterpolator(animation);
-        scrollEndAnimator_->SetDuration(STOP_DURATION);
-        scrollEndAnimator_->Play();
+    if (!scrollEndAnimator_) {
+        LOGE("scrollEndAnimator_ is not exist.");
+        return;
     }
+    if (!scrollEndAnimator_->IsStopped()) {
+        scrollEndAnimator_->Stop();
+    }
+    scrollEndAnimator_->Play();
+}
+
+void ScrollBarController::InitBarEndAnimation(const WeakPtr<PipelineContext>& context)
+{
+    if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
+        scrollEndAnimator_->Stop();
+    }
+    if (scrollEndAnimator_) {
+        scrollEndAnimator_->Play();
+        return;
+    }
+
+    scrollEndAnimator_ = AceType::MakeRefPtr<Animator>(context);
+    auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_START, UINT8_MAX);
+    auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_MIDDLE, UINT8_MAX);
+    auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_END, 0);
+    hiddenMiddleKeyframe->SetCurve(Curves::LINEAR);
+    hiddenEndKeyframe->SetCurve(Curves::FRICTION);
+
+    auto animation = AceType::MakeRefPtr<KeyframeAnimation<int32_t>>();
+    animation->AddKeyframe(hiddenStartKeyframe);
+    animation->AddKeyframe(hiddenMiddleKeyframe);
+    animation->AddKeyframe(hiddenEndKeyframe);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar && scrollBar->barEndCallback_) {
+            scrollBar->barEndCallback_(value);
+        }
+    });
+    scrollEndAnimator_->AddInterpolator(animation);
+    scrollEndAnimator_->SetDuration(STOP_DURATION);
+    scrollEndAnimator_->Play();
 }
 
 void ScrollBarController::Reset()
 {
-    if (scrollEndAnimator_) {
-        if (!scrollEndAnimator_->IsStopped()) {
-            scrollEndAnimator_->Stop();
-        }
-        scrollEndAnimator_->ClearInterpolators();
+    if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
+        scrollEndAnimator_->Stop();
     }
 }
 
@@ -307,7 +318,6 @@ bool ScrollBarController::CheckScroll()
 {
     auto scroll = AceType::DynamicCast<RenderScroll>(scroll_.Upgrade());
     return scroll != nullptr;
-
 }
 
 void ScrollBarController::SetIsHover(bool isHover)
