@@ -45,6 +45,7 @@ ohos_shared_library("plugincomponent") {
     "ability_base:want",
     "bundle_framework:appexecfwk_core",
     "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
   ]
 
   relative_install_dir = "module"
