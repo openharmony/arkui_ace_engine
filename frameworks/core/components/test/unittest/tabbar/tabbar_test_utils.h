@@ -67,10 +67,6 @@ public:
         return tabsSize_;
     }
 
-    void SetIndex(int32_t index)
-    {
-        index_ = index;
-    }
 };
 
 class MockRenderTabContent final : public RenderTabContent {

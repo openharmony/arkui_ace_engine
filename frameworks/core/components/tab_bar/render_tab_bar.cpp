@@ -797,7 +797,15 @@ std::string RenderTabBar::ProvideRestoreInfo()
 void RenderTabBar::ApplyRestoreInfo(const RefPtr<TabController>& controller)
 {
     auto parent = GetParent().Upgrade();
+    if (!parent) {
+        LOGE("parent is nullptr");
+        return;
+    }
     auto grandParent = parent->GetParent().Upgrade();
+    if (!grandParent) {
+        LOGE("grandParent is nullptr");
+        return;
+    }
     std::string restoreInfo = grandParent->GetRestoreInfo();
     if (restoreInfo.empty()) {
         return;
