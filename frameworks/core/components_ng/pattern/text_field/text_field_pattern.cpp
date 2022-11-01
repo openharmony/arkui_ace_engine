@@ -59,11 +59,32 @@ constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
-const std::string DIGIT_FORMATTER = "-[0-9]+(.[0-9]+)?|[0-9]+(.[0-9]+)?";
-const std::string PHONE_FORMATTER = "\\d{3}-\\d{8}|\\d{4}-\\d{7}|\\d{11}";
-const std::string EMAIL_FORMATTER = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
-const std::string URL_FORMATTER = "[a-zA-z]+://[^\\s]*";
-const std::string SINGLE_LINE_FORMATTER = "\\n";
+const std::string DIGIT_WHITE_LIST = "-[0-9]+(.[0-9]+)?|[0-9]+(.[0-9]+)?";
+const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
+const std::string EMAIL_WHITE_LIST = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
+const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
+
+void RemoveErrorTextFromValue(const std::string& value, const std::string& errorText, std::string& result)
+{
+    int32_t valuePtr = 0;
+    int32_t errorTextPtr = 0;
+    auto valueSize = static_cast<int32_t>(value.size());
+    auto errorTextSize = static_cast<int32_t>(errorText.size());
+    while (errorTextPtr < errorTextSize) {
+        while (value[valuePtr] != errorText[errorTextPtr] && valuePtr < valueSize) {
+            result += value[valuePtr];
+            valuePtr++;
+        }
+        // no more text left to remove in value
+        if (valuePtr >= valueSize) {
+            return;
+        }
+        // increase both value ptr and error text ptr if char in value is removed
+        valuePtr++;
+        errorTextPtr++;
+    }
+    result += value.substr(valuePtr);
+}
 
 std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
 {
@@ -73,17 +94,6 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
         result += ",";
     }
     result = result.substr(0, result.size() - 1);
-    return result;
-}
-
-std::string WstringSearch(const std::string& wideText, const std::regex& regex)
-{
-    std::string result;
-    std::smatch matchResults;
-    std::regex_search(wideText, matchResults, regex);
-    for (auto&& mr : matchResults) {
-        result.append(mr);
-    }
     return result;
 }
 
@@ -867,6 +877,10 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
     StartTwinkling();
     lastTouchOffset_ = offset;
     caretUpdateType_ = CaretUpdateType::PRESSED;
@@ -1108,21 +1122,42 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         return;
     }
     std::string oldText = textEditingValue_.text;
+    auto caretStart = 0;
+    std::string valueToUpdate = insertValue;
+    std::string result;
+    auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto inputType = textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
     if (InSelectMode()) {
-        textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) + insertValue +
-                                 textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
-        textEditingValue_.caretPosition = static_cast<int32_t>(insertValue.size() + textSelector_.GetStart());
-    } else {
-        auto textToUpdate =
-            textEditingValue_.GetValueBeforeCursor() + insertValue + textEditingValue_.GetValueAfterCursor();
-        // TODO: change counter style
-        if (textToUpdate == oldText) {
-            return;
+        if (inputType == TextInputType::EMAIL_ADDRESS) {
+            valueToUpdate = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) + insertValue +
+                            textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
         }
-        textEditingValue_.text = textToUpdate;
-        textEditingValue_.CursorMoveToPosition(
-            textEditingValue_.caretPosition + static_cast<int32_t>(insertValue.size()));
+        caretStart = textSelector_.GetStart();
+    } else {
+        if (inputType == TextInputType::EMAIL_ADDRESS) {
+            valueToUpdate =
+                textEditingValue_.GetValueBeforeCursor() + insertValue + textEditingValue_.GetValueAfterCursor();
+        }
+        caretStart = textEditingValue_.caretPosition;
     }
+    EditingValueFilter(valueToUpdate, result);
+    if ((inputType == TextInputType::EMAIL_ADDRESS && result == oldText) ||
+        (inputType != TextInputType::EMAIL_ADDRESS && result.empty())) {
+        return;
+    }
+    if (inputType != TextInputType::EMAIL_ADDRESS) {
+        if (InSelectMode()) {
+            textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) + result +
+                                     textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
+        } else {
+            textEditingValue_.text =
+                textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
+        }
+    } else {
+        textEditingValue_.text = result;
+    }
+    textEditingValue_.CursorMoveToPosition(caretStart + static_cast<int32_t>(insertValue.size()));
     // TODO: update obscure pending for password input
     SetEditingValueToProperty(textEditingValue_.text);
     operationRecords_.emplace_back(textEditingValue_);
@@ -1144,58 +1179,58 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     eventHub->FireOnChange(textEditingValue_.text);
 }
 
-void TextFieldPattern::FilterWithRegex(const std::string& filter, std::string& valueToUpdate)
+bool TextFieldPattern::FilterWithRegex(const std::string& filter, const std::string& valueToUpdate, std::string& result)
 {
     if (filter.empty() || valueToUpdate.empty()) {
         LOGD("Text is empty or filter is empty");
-        return;
+        return false;
     }
     std::regex filterRegex(filter);
 
-    auto textError = std::regex_replace(valueToUpdate, filterRegex, "");
-    if (!textError.empty()) {
+    auto errorText = std::regex_replace(valueToUpdate, filterRegex, "");
+    RemoveErrorTextFromValue(valueToUpdate, errorText, result);
+    if (!errorText.empty()) {
         auto textFieldEventHub = GetHost()->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(textFieldEventHub);
-        LOGD("FireOnInputFilterError text %{public}s", textError.c_str());
-        textFieldEventHub->FireOnInputFilterError(textError);
+        CHECK_NULL_RETURN(textFieldEventHub, false);
+        LOGD("Error text %{public}s", errorText.c_str());
+        textFieldEventHub->FireOnInputFilterError(errorText);
     }
-    valueToUpdate = WstringSearch(valueToUpdate, filterRegex);
+    return !errorText.empty();
 }
 
-void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate)
+void TextFieldPattern::EditingValueFilter(const std::string& valueToUpdate, std::string& result)
 {
     auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     // filter text editing value with user defined filter first
     auto inputFilter = textFieldLayoutProperty->GetInputFilterValue("");
+    bool textChanged = false;
     if (!inputFilter.empty()) {
-        std::regex filterRegex(inputFilter);
-        valueToUpdate = std::regex_replace(valueToUpdate, filterRegex, "");
-    }
-    if (textFieldLayoutProperty->GetMaxLinesValue(1) == 1) {
-        std::regex filterRegex(SINGLE_LINE_FORMATTER);
-        valueToUpdate = std::regex_replace(valueToUpdate, filterRegex, "");
+        textChanged |= FilterWithRegex(inputFilter, valueToUpdate, result);
     }
     switch (textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
         case TextInputType::NUMBER: {
-            FilterWithRegex(DIGIT_FORMATTER, valueToUpdate);
+            textChanged |= FilterWithRegex(DIGIT_WHITE_LIST, valueToUpdate, result);
             break;
         }
         case TextInputType::PHONE: {
-            FilterWithRegex(PHONE_FORMATTER, valueToUpdate);
+            textChanged |= FilterWithRegex(PHONE_WHITE_LIST, valueToUpdate, result);
             break;
         }
         case TextInputType::EMAIL_ADDRESS: {
-            FilterWithRegex(EMAIL_FORMATTER, valueToUpdate);
+            textChanged |= FilterWithRegex(EMAIL_WHITE_LIST, valueToUpdate, result);
             break;
         }
         case TextInputType::URL: {
-            FilterWithRegex(URL_FORMATTER, valueToUpdate);
+            textChanged |= FilterWithRegex(URL_WHITE_LIST, valueToUpdate, result);
             break;
         }
         default: {
             // No need limit.
         }
+    }
+    if (!textChanged) {
+        result = valueToUpdate;
     }
 }
 
@@ -1485,6 +1520,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     }
     textEditingValue_.caretPosition = position;
     selectionMode_ = SelectionMode::NONE;
+    caretUpdateType_ = CaretUpdateType::EVENT;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
