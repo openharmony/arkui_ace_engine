@@ -442,6 +442,7 @@ void RenderList::CalculateLanes()
     lanes_ = lanes;
     if (lanes > 1) { // if lanes changes, adjust startIndex_
         startIndex_ -= GetItemRelativeIndex(startIndex_) % lanes;
+        RemoveAllItems();
     }
 }
 
