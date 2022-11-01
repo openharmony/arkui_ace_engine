@@ -1303,7 +1303,9 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Offset& offset, SkPaint& pa
     SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetEndOffset().GetX() + offset.GetX()),
         SkDoubleToScalar(gradient.GetEndOffset().GetY() + offset.GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
-    auto gradientColors = gradient.GetColors();
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    std::sort(gradientColors.begin(), gradientColors.end(),
+        [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
     uint32_t colorsSize = gradientColors.size();
     SkColor colors[gradientColors.size()];
     float pos[gradientColors.size()];

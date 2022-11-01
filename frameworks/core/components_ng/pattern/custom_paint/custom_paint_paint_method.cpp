@@ -102,6 +102,8 @@ void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& p
         SkDoubleToScalar(gradient.GetEndOffset().GetY() + offset.GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
     auto gradientColors = gradient.GetColors();
+    std::sort(gradientColors.begin(), gradientColors.end(),
+        [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
     uint32_t colorsSize = gradientColors.size();
     SkColor colors[gradientColors.size()];
     float pos[gradientColors.size()];
