@@ -62,6 +62,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (userActionStart) {
             userActionStart(info);
         }
+        // Trigger custom drag start event
+        CHECK_NULL_VOID(actuator->customCallback_);
+        auto customActionStart = actuator->customCallback_->GetActionStartEventFunc();
+        if (customActionStart) {
+            customActionStart(info);
+        }
     };
     panRecognizer_->SetOnActionStart(actionStart);
 
@@ -72,6 +78,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto userActionUpdate = actuator->userCallback_->GetActionUpdateEventFunc();
         if (userActionUpdate) {
             userActionUpdate(info);
+        }
+        CHECK_NULL_VOID(actuator->customCallback_);
+        auto customActionUpdate = actuator->customCallback_->GetActionUpdateEventFunc();
+        if (customActionUpdate) {
+            customActionUpdate(info);
         }
     };
     panRecognizer_->SetOnActionUpdate(actionUpdate);
@@ -84,6 +95,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (userActionEnd) {
             userActionEnd(info);
         }
+        CHECK_NULL_VOID(actuator->customCallback_);
+        auto customActionEnd = actuator->customCallback_->GetActionEndEventFunc();
+        if (customActionEnd) {
+            customActionEnd(info);
+        }
     };
     panRecognizer_->SetOnActionEnd(actionEnd);
 
@@ -94,6 +110,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto userActionCancel = actuator->userCallback_->GetActionCancelEventFunc();
         if (userActionCancel) {
             userActionCancel();
+        }
+        CHECK_NULL_VOID(actuator->customCallback_);
+        auto customActionCancel = actuator->customCallback_->GetActionCancelEventFunc();
+        if (customActionCancel) {
+            customActionCancel();
         }
     };
     panRecognizer_->SetOnActionCancel(actionCancel);
