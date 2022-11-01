@@ -33,39 +33,16 @@ public:
     static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);
     static bool IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern);
 
-    explicit ImageSourceInfo(
-        const std::string& imageSrc,
-        Dimension width = Dimension(-1),
-        Dimension height = Dimension(-1),
-        InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
+    explicit ImageSourceInfo(const std::string& imageSrc, Dimension width = Dimension(-1),
+        Dimension height = Dimension(-1), InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
         const RefPtr<PixelMap>& pixmap = nullptr);
 
     ImageSourceInfo() = default;
     ~ImageSourceInfo() = default;
 
-    bool operator==(const ImageSourceInfo& info) const
-    {
-        return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
-                // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
-               src_ == info.src_ &&
-               resourceId_ == info.resourceId_ &&
-               sourceWidth_ == info.sourceWidth_ &&
-               sourceHeight_ == info.sourceHeight_ &&
-               fillColor_ == info.fillColor_;
-    }
+    bool operator==(const ImageSourceInfo& info) const;
 
-    bool operator!=(const ImageSourceInfo& info) const
-    {
-        return (!pixmap_ && info.pixmap_) ||
-               (pixmap_ && !info.pixmap_) ||
-               (pixmap_ && info.pixmap_ && pixmap_ != info.pixmap_) ||
-                // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
-               src_ != info.src_ ||
-               resourceId_ != info.resourceId_ ||
-               sourceWidth_ != info.sourceWidth_ ||
-               sourceHeight_ != info.sourceHeight_ ||
-               fillColor_ != info.fillColor_;
-    }
+    bool operator!=(const ImageSourceInfo& info) const;
 
     void SetSrc(const std::string& src, std::optional<Color> fillColor = std::nullopt)
     {
@@ -103,8 +80,7 @@ public:
     bool IsValid() const
     {
         return (src_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID) ||
-               (!src_.empty() && resourceId_ == InternalResource::ResourceId::NO_ID) ||
-               pixmap_;
+               (!src_.empty() && resourceId_ == InternalResource::ResourceId::NO_ID) || pixmap_;
     }
 
     bool IsSvg() const
@@ -122,20 +98,7 @@ public:
         return srcType_;
     }
 
-    std::string ToString() const
-    {
-        if (!src_.empty()) {
-            return src_ + std::string("w") + std::to_string(sourceWidth_.Value()) +
-                std::string("h") + std::to_string(sourceHeight_.Value());
-        } else if (resourceId_ != InternalResource::ResourceId::NO_ID) {
-            return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
-        } else if (pixmap_) {
-            return std::string("pixmapID: ") + pixmap_->GetId() +
-                std::string(" -> modifyID: ") + pixmap_->GetModifyId();
-        } else {
-            return std::string("empty source");
-        }
-    }
+    std::string ToString() const;
 
     void SetDimension(Dimension width, Dimension Height)
     {
@@ -182,10 +145,7 @@ public:
         return pixmap_;
     }
 
-    const std::string& GetCacheKey() const
-    {
-        return cacheKey_;
-    }
+    std::string GetCacheKey() const;
 
 private:
     SrcType ResolveSrcType() const;

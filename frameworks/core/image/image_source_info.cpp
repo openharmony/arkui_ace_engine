@@ -22,12 +22,41 @@
 
 namespace OHOS::Ace {
 
+bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
+{
+    // only svg uses fillColor
+    if (isSvg_ && fillColor_ != info.fillColor_) {
+        return false;
+    }
+    return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
+           // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
+           src_ == info.src_ && resourceId_ == info.resourceId_;
+}
+
+bool ImageSourceInfo::operator!=(const ImageSourceInfo& info) const
+{
+    return !(operator==(info));
+}
+
+std::string ImageSourceInfo::ToString() const
+{
+    if (!src_.empty()) {
+        return src_;
+    } else if (resourceId_ != InternalResource::ResourceId::NO_ID) {
+        return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
+    } else if (pixmap_) {
+        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId();
+    } else {
+        return std::string("empty source");
+    }
+}
+
 bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)
 {
     // 4 is the length of ".svg".
     return (src.size() > 4 && src.substr(src.size() - 4) == ".svg") ||
-        (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
-            resourceId < InternalResource::ResourceId::SVG_END);
+           (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
+               resourceId < InternalResource::ResourceId::SVG_END);
 }
 
 bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::string& pattern)
@@ -115,8 +144,7 @@ ImageSourceInfo::ImageSourceInfo(
         LOGW("multi image source set, only one will be load.");
     }
     auto name = src_ + AceApplicationInfo::GetInstance().GetAbilityName();
-    cacheKey_ = std::to_string(std::hash<std::string> {}(name)) +
-                std::to_string(static_cast<int32_t>(resourceId_));
+    cacheKey_ = std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_));
 }
 
 SrcType ImageSourceInfo::ResolveSrcType() const
@@ -136,6 +164,15 @@ SrcType ImageSourceInfo::ResolveSrcType() const
 void ImageSourceInfo::SetFillColor(const Color& color)
 {
     fillColor_.emplace(color.GetValue());
+}
+
+std::string ImageSourceInfo::GetCacheKey() const
+{
+    // only svg sets fillColor
+    if (isSvg_ && fillColor_.has_value()) {
+        return cacheKey_ + fillColor_.value().ColorToString();
+    }
+    return cacheKey_;
 }
 
 } // namespace OHOS::Ace
