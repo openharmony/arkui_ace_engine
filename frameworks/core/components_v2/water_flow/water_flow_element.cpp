@@ -141,6 +141,7 @@ void WaterFlowElement::OnDataSourceUpdated(size_t startIndex)
         render->OnDataSourceUpdated(startIndex);
         render->SetTotalCount(ElementProxyHost::TotalCount());
     }
+    ElementProxyHost::OnDataSourceUpdated(startIndex);
 }
 
 size_t WaterFlowElement::TotalCount()

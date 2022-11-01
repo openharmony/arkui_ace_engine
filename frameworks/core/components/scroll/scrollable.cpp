@@ -24,6 +24,7 @@
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
 #include "core/event/ace_events.h"
+#include "core/common/layout_inspector.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -460,6 +461,9 @@ void Scrollable::StartSpringMotion(
                 scrollEvent.eventType = "scrollend";
                 context->SendEventToAccessibility(scrollEvent);
             }
+#if !defined(PREVIEW)
+            LayoutInspector::SupportInspector();
+#endif
         }
     });
 }
@@ -490,6 +494,9 @@ void Scrollable::ProcessScrollMotionStop()
         if (scrollEnd_) {
             scrollEnd_();
         }
+#if !defined(PREVIEW)
+        LayoutInspector::SupportInspector();
+#endif
     }
 }
 
