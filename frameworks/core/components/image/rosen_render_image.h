@@ -126,7 +126,6 @@ private:
     void UpdatePixmap(const RefPtr<PixelMap>& pixmap);
     void UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context);
     void ProcessPixmapForPaint();
-    std::string GetSvgImageKey();
     std::function<void()> GenerateThumbnailLoadTask();
 
     RefPtr<ImageObject> imageObj_;
