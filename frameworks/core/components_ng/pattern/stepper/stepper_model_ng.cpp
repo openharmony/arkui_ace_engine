@@ -147,7 +147,9 @@ RefPtr<FrameNode> StepperModelNG::CreateButtonChild(
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(symbol);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(Color::BLACK);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(theme->GetTextMaxLines());
+    if (theme) {
+        textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(theme->GetTextMaxLines());
+    }
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     textNode->MarkModifyDone();
 

@@ -461,8 +461,7 @@ void RatingPattern::OnModifyDone()
         ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b001));
     UpdateInternalResource(foregroundImageSourceInfo, 0b001);
     // Recreate ImageLoadingContext only when image source info has changed.
-    if (!foregroundImageLoadingCtx_ ||
-        (foregroundImageLoadingCtx_ && (foregroundImageLoadingCtx_->GetSourceInfo() != foregroundImageSourceInfo))) {
+    if (!foregroundImageLoadingCtx_ || (foregroundImageLoadingCtx_->GetSourceInfo() != foregroundImageSourceInfo)) {
         // Construct the ImageLoadingContext and register the image life cycle callback.
         LoadNotifier loadNotifierForegroundImage(
             CreateDataReadyCallback(0b001), CreateLoadSuccessCallback(0b001), CreateLoadFailCallback(0b001));
@@ -477,8 +476,7 @@ void RatingPattern::OnModifyDone()
     ImageSourceInfo secondaryImageSourceInfo =
         ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b010));
     UpdateInternalResource(secondaryImageSourceInfo, 0b010);
-    if (!secondaryImageLoadingCtx_ ||
-        (secondaryImageLoadingCtx_ && secondaryImageLoadingCtx_->GetSourceInfo() != secondaryImageSourceInfo)) {
+    if (!secondaryImageLoadingCtx_ || secondaryImageLoadingCtx_->GetSourceInfo() != secondaryImageSourceInfo) {
         LoadNotifier loadNotifierSecondaryImage(
             CreateDataReadyCallback(0b010), CreateLoadSuccessCallback(0b010), CreateLoadFailCallback(0b010));
         secondaryImageLoadingCtx_ =

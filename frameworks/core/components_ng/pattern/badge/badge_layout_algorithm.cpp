@@ -111,6 +111,7 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
@@ -121,6 +122,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childrenSize = children.size();
 
     auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto parentSize = geometryNode->GetFrameSize();
     auto width = parentSize.Width();
     auto height = parentSize.Height();

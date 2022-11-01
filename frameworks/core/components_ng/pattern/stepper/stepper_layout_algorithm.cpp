@@ -97,6 +97,7 @@ void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(stepperTheme);
     CHECK_NULL_VOID(layoutWrapper);
     auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     if (!frameSize.IsPositive()) {
         LOGW("Frame size is not positive.");
@@ -104,8 +105,10 @@ void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     auto leftButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
+    CHECK_NULL_VOID(leftButtonWrapper);
     auto leftButtonTextWrapper = leftButtonWrapper->GetOrCreateChildByIndex(0);
     auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(2);
+    CHECK_NULL_VOID(rightButtonWrapper);
     auto rightButtonTextWrapper = rightButtonWrapper->GetOrCreateChildByIndex(0);
     if (!swiperWrapper || !leftButtonWrapper || !rightButtonWrapper) {
         return;

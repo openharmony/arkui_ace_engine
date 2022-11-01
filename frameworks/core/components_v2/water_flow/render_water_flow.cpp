@@ -102,6 +102,9 @@ void RenderWaterFlow::PerformLayout()
         viewportStartPos_ = 0.0;
     }
 
+    if (!scrollBar_) {
+        return;
+    }
     scrollBar_->SetScrollable(false);
     if (scrollBar_ && (GetEstimatedHeight() > mainSize_)) {
         scrollBar_->SetScrollable(true);
