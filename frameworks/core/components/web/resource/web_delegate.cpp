@@ -1988,6 +1988,23 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
+            std::string customScheme;
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webData = webPattern->GetCustomScheme();
+                CHECK_NULL_VOID(webData);
+                customScheme = webData.value();
+            } else {
+                auto webCom = delegate->webComponent_.Upgrade();
+                CHECK_NULL_VOID(webCom);
+                customScheme = webCom->GetCustomScheme();
+            }
+            if (!customScheme.empty()) {
+                LOGI("custome scheme %{public}s", customScheme.c_str());
+                initArgs.web_engine_args_to_add.push_back(
+                    std::string("--ohos-custom-scheme=").append(customScheme));
+            }
             sptr<Surface> surface = surfaceWeak.promote();
             CHECK_NULL_VOID(surface);
             delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);

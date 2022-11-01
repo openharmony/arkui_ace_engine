@@ -1228,6 +1228,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
     JSClass<JSWeb>::StaticMethod("onShowFileSelector", &JSWeb::OnFileSelectorShow);
+    JSClass<JSWeb>::StaticMethod("privilegedSchemes", &JSWeb::OnPrivilegedSchemes);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
@@ -2546,6 +2547,78 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnFileSelectorShow(std::move(jsCallback));
+}
+
+bool WebcustomSchemeCheckName(std::string scheme)
+{
+    #define MAX_NAME_SIZE 32
+    if (scheme.size() > MAX_NAME_SIZE || scheme.empty()) {
+        LOGE("wdf invalid size");
+        return false;
+    }
+
+    for(auto it = scheme.begin(); it != scheme.end(); it++) {
+        char chr = *it;
+        if ((chr >= 'a' && chr <= 'z') || (chr >= '0' && chr <= '9') || (chr == '.') || (chr == '+') || (chr == '-')) {
+           continue;
+        } else {
+           LOGE("wdf invalid character %{public}c", chr);
+           return false;
+        }
+    }
+    return true;
+}
+
+void JSWeb::OnPrivilegedSchemes(const JSCallbackInfo& args)
+{
+    if ((args.Length() <= 0) || !(args[0]->IsArray())) {
+        LOGE("arg is invalid");
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+    if (array->Length() > 3) {
+        LOGE("arg len invalid");
+        return;
+    }
+    std::string cmdLine;
+    for (size_t i = 0; i < array->Length(); i++) {
+        auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
+        auto schemeName  = obj->GetProperty("schemeName");
+        auto isCors = obj->GetProperty("isSupportCors");
+        auto isFetch = obj->GetProperty("isSupportFetch");
+        if (!schemeName->IsString() || !isCors->IsBoolean() || !isFetch->IsBoolean()) {
+            LOGE("scheme value is undefined");
+            return;
+        }   
+        auto schemeNamestr = schemeName->ToString();
+        if (!WebcustomSchemeCheckName(schemeNamestr)) {
+            LOGE("scheme name is invalid");
+            return;
+        }
+        auto isCorsBool = isCors->ToBoolean();
+        auto isFetchBool = isFetch->ToBoolean();
+        LOGI("reg scheme info %{public}s:%{public}d:%{public}d", schemeNamestr.c_str(), isCorsBool, isFetchBool);
+        cmdLine.append(schemeNamestr + ",");
+        if (isCorsBool) {
+            cmdLine.append("1,");
+        } else {
+            cmdLine.append("0,");
+        }
+
+        if (isFetchBool) {
+            cmdLine.append("1;");
+        } else {
+            cmdLine.append("0;");
+        }
+    }
+    cmdLine.pop_back();
+    LOGI("reg scheme cmdline %{public}s", cmdLine.c_str());
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetCustomScheme(cmdLine);
+        return;
+    }
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetCustomScheme(cmdLine);
 }
 
 JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)

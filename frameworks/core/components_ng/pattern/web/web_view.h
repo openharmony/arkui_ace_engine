@@ -67,6 +67,7 @@ public:
     static void SetZoomAccessEnabled(bool isZoomAccessEnabled);
     static void SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled);
     static void SetUserAgent(const std::string& userAgent);
+    static void SetCustomScheme(const std::string& customScheme);
     static void SetRenderExitedId(OnWebAsyncFunc&& renderExitedId);
     static void SetRefreshAccessedHistoryId(OnWebAsyncFunc&& refreshAccessedHistoryId);
     static void SetCacheMode(WebCacheMode mode);

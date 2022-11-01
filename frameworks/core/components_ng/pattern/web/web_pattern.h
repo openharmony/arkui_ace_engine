@@ -115,6 +115,16 @@ public:
         return webData_;
     }
 
+    void SetCustomScheme(const std::string& scheme)
+    {
+        customScheme_ = scheme;
+    }
+
+    const std::optional<std::string>& GetCustomScheme() const
+    {
+        return customScheme_;
+    }
+
     void SetWebController(const RefPtr<WebController>& webController)
     {
         // TODO: add web controller diff function.
@@ -264,6 +274,7 @@ private:
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
+    std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
