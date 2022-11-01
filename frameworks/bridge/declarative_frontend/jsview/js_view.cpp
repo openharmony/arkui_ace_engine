@@ -592,7 +592,7 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
 
 void JSViewPartialUpdate::MarkNeedUpdate()
 {
-    ViewPartialUpdateModel::GetInstance()->MarkNeedUpdate(viewNode_);
+    needsUpdate_ = ViewPartialUpdateModel::GetInstance()->MarkNeedUpdate(viewNode_);
 }
 
 /**
