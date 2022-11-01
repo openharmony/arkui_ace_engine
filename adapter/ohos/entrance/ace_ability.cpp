@@ -82,6 +82,10 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePath, const s
         return FrontendType::JS;
     }
     auto rootJson = JsonUtil::ParseJsonString(jsonStr);
+    if (rootJson == nullptr) {
+        LOGE("return default frontend: JS frontend.");
+        return FrontendType::JS;
+    }
     auto mode = rootJson->GetObject("mode");
     if (mode != nullptr) {
         if (mode->GetString("syntax") == "ets" || mode->GetString("type") == "pageAbility") {
@@ -292,9 +296,10 @@ void AceAbility::OnStart(const Want& want)
 
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->package + "/";
+    if (moduleInfo == nullptr) {
+        return;
     }
+    packagePathStr += "/" + moduleInfo->package + "/";
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     std::string srcPath;
     if (info != nullptr && !info->srcPath.empty()) {

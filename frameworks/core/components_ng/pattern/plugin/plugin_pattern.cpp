@@ -384,7 +384,6 @@ void PluginPattern::GetModuleNameByWant(const WeakPtr<PluginPattern>& weak, Requ
     auto pluginPattern = weak.Upgrade();
     if (!pluginPattern) {
         LOGE("pluginPattern is nullptr.");
-        pluginPattern->FireOnErrorEvent("1", "pluginPattern is nullptr.");
         return;
     }
 
