@@ -947,7 +947,9 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
 
     // Only MainWindow instance will be registered to watch dog.
     if (!isSubContainer_) {
-        AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+        if (!AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint()) {
+            AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+        }
         frontend_->AttachPipelineContext(pipelineContext_);
     } else {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
