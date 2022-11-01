@@ -72,6 +72,9 @@ private:
     static std::string TranslateRawStack(const std::string& rawStackStr);
     static std::string TranslateStack(const std::string& stackStr, const std::string& pageUrl,
         const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType* data = nullptr);
+    static std::string TranslateBySourceMap(const std::string& stackStr, const std::string& pageUrl,
+        const std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps, const RefPtr<RevSourceMap>& appMap,
+        const AceType* data = nullptr);
     static void ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res);
     static void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);
     static std::string GetSourceInfo(const std::string& line, const std::string& column,

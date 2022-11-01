@@ -31,24 +31,6 @@ void IndexerView::Create(const std::vector<std::string>& arrayValue, int32_t sel
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
     
-    auto indexerPattern = frameNode->GetPattern<IndexerPattern>();
-    auto storedArrayValue = indexerPattern->GetArrayValue();
-    bool arrayValueSame = false;
-    if (storedArrayValue.size() == arrayValue.size()) {
-        arrayValueSame = true;
-        auto iterStore = storedArrayValue.begin();
-        auto iter = arrayValue.begin();
-        for (auto index = 0; index < arrayValue.size(); index++) {
-            if ((*iterStore) != (*iter)) {
-                arrayValueSame = false;
-                break;
-            }
-        }
-    }
-    if (arrayValueSame) {
-        return;
-    }
-    
     frameNode->Clean();
     int32_t indexerSize = arrayValue.size();
     for (int32_t index = 0; index < indexerSize; index++) {

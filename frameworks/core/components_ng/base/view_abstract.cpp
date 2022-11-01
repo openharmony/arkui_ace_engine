@@ -277,6 +277,10 @@ void ViewAbstract::SetEnabled(bool enabled)
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetEnabled(enabled);
+
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(enabled);
 }
 
 void ViewAbstract::SetFocusable(bool focusable)

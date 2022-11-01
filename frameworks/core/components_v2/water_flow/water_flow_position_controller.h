@@ -29,7 +29,6 @@ public:
     Axis GetScrollDirection() const override;
 
     void JumpTo(int32_t index, int32_t source) override;
-    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowPositionController);

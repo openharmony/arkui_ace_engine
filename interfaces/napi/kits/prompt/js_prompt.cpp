@@ -63,6 +63,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         napi_get_named_property(env, argv, "duration", &durationNApi);
         napi_get_named_property(env, argv, "bottom", &bottomNApi);
     } else {
+        NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     size_t ret = 0;
@@ -205,7 +206,13 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         size_t ret = 0;
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
-        if ((i == 0) && (valueType == napi_object)) {
+        if (i == 0) {
+            if (valueType != napi_object) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+                return nullptr;
+            }
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
             napi_get_named_property(env, argv[0], "message", &asyncContext->messageNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
@@ -448,7 +455,13 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         size_t ret = 0;
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
-        if ((i == 0) && (valueType == napi_object)) {
+        if (i == 0) {
+            if (valueType != napi_object) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+                return nullptr;
+            }
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
             napi_typeof(env, asyncContext->titleNApi, &valueType);

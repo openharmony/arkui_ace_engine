@@ -154,6 +154,8 @@ protected:
     // Play shrink animation when lost hover or pressed state, from active with to inactive width.
     void PlayShrinkAnimation();
 
+    void InitBarEndAnimation(const WeakPtr<PipelineContext>& context);
+
     WeakPtr<RenderNode> scroll_;
     ScrollBarPositionCallback callback_;
     ScrollBarEventCallback scrollEndCallback_;

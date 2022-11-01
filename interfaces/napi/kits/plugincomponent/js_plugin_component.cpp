@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <cstdint>
+
 #include "hilog_wrapper.h"
+#include "ipc_skeleton.h"
 #include "js_plugin_callback.h"
 #include "js_plugin_callback_mgr.h"
 #include "js_plugin_util.h"
@@ -329,6 +332,9 @@ void AceRequestCompleteAsyncCallbackWork(napi_env env, napi_status status, void*
     if (asyncCallbackInfo->ability != nullptr) {
         std::shared_ptr<AAFwk::Want> pWant = asyncCallbackInfo->ability->GetWant();
         asyncCallbackInfo->wantStage = *pWant;
+    } else {
+        int32_t pid = IPCSkeleton::GetCallingPid();
+        asyncCallbackInfo->wantStage.SetBundle("plugin" + std::to_string(pid));
     }
 
     std::shared_ptr<AceJSPluginRequestParam> param = std::make_shared<AceJSPluginRequestParam>(
@@ -430,6 +436,9 @@ void AceRequestPromiseAsyncCallbackWork(napi_env env, napi_status status, void* 
     if (asyncCallbackInfo->ability != nullptr) {
         std::shared_ptr<AAFwk::Want> pWant = asyncCallbackInfo->ability->GetWant();
         asyncCallbackInfo->wantStage = *pWant;
+    } else {
+        int32_t pid = IPCSkeleton::GetCallingPid();
+        asyncCallbackInfo->wantStage.SetBundle("plugin" + std::to_string(pid));
     }
 
     std::shared_ptr<AceJSPluginRequestParam> param = std::make_shared<AceJSPluginRequestParam>(
@@ -522,12 +531,7 @@ bool UnwrapParamForOn(napi_env env, size_t argc, napi_value* argv,
         return false;
     }
 
-    if (asyncCallbackInfo->ability == nullptr && argc != ACE_ARGS_THREE) {
-        HILOG_INFO("%{public}s called, Params is invalid.", __func__);
-        return false;
-    }
-
-    if (argc == ACE_ARGS_THREE || asyncCallbackInfo->ability == nullptr) {
+    if (argc == ACE_ARGS_THREE) {
         if (!UnwrapStageWantFromJS(env, argv[ACE_PARAM0], asyncCallbackInfo)) {
             HILOG_INFO("%{public}s called, the owner want parameter is invalid.", __func__);
             return false;
@@ -586,6 +590,9 @@ void AceOnCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data
     if (asyncCallbackInfo->ability != nullptr) {
         std::shared_ptr<AAFwk::Want> pWant = asyncCallbackInfo->ability->GetWant();
         asyncCallbackInfo->wantStage = *pWant;
+    } else {
+        int32_t pid = IPCSkeleton::GetCallingPid();
+        asyncCallbackInfo->wantStage.SetBundle("plugin" + std::to_string(pid));
     }
 
     bool ret = JSPluginCallbackMgr::Instance().RegisterOnEvent(env, eventCallbackType,

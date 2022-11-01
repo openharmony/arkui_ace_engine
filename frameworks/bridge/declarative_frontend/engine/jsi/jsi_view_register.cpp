@@ -16,6 +16,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
@@ -225,7 +226,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             }
             pageNode->Clean();
         }
-        auto pageRootNode = view->CreateUINode();
+        auto pageRootNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode());
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
         // update page life cycle function.
@@ -261,7 +262,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
     LOGD("Loading page root component: Setting pipeline to use %{public}s.",
         view->isFullUpdate() ? "Full Update" : "Partial Update");
-    auto rootComponent = view->CreateComponent();
+    auto rootComponent = AceType::DynamicCast<Component>(view->CreateViewNode());
     std::list<RefPtr<Component>> stackChildren;
     stackChildren.emplace_back(rootComponent);
     auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
@@ -270,7 +271,9 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
     rootComposed->SetChild(rootStackComponent);
     page->SetRootComponent(rootComposed);
-    page->SetPageTransition(view->BuildPageTransitionComponent());
+    auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
+    ViewStackProcessor::GetInstance()->ClearPageTransitionComponent();
+    page->SetPageTransition(pageTransitionComponent);
 
     // We are done, tell to the JSAgePage
     page->SetPageCreated();
@@ -411,7 +414,7 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
         auto pageNode = pageRouterManager->GetCurrentPageNode();
         CHECK_NULL_VOID(pageNode);
 
-        auto pageRootNode = view->CreateUINode();
+        auto pageRootNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode());
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
 

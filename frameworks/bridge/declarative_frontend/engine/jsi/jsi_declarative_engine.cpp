@@ -78,6 +78,7 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
+const std::string MERGE_SOURCEMAPS_PATH = "sourceMaps.map";
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -1023,12 +1024,21 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     }
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
+    auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
     // get source map
     std::string jsSourceMap;
-    if (delegate->GetAssetContent(url + ".map", jsSourceMap)) {
-        page->SetPageMap(jsSourceMap);
+    if (!JSNApi::IsBundle(vm)) {
+        if (delegate->GetAssetContent(MERGE_SOURCEMAPS_PATH, jsSourceMap)) {
+            page->SetSourceMap(jsSourceMap);
+        } else {
+            LOGW("js source map load failed!");
+        }
     } else {
-        LOGW("js source map load failed!");
+        if (delegate->GetAssetContent(url + ".map", jsSourceMap)) {
+            page->SetPageMap(jsSourceMap);
+        } else {
+            LOGW("js source map load failed!");
+        }
     }
     // get js bundle content
     shared_ptr<JsValue> jsCode = runtime->NewUndefined();

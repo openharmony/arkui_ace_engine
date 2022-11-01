@@ -258,6 +258,7 @@ void ListElement::OnDataSourceUpdated(size_t startIndex)
         renderList_->RemoveAllItems();
         renderList_->MarkNeedLayout();
     }
+    ElementProxyHost::OnDataSourceUpdated(startIndex);
 }
 
 void ListElement::OnPostFlush()
