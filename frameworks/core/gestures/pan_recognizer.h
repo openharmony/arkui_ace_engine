@@ -112,6 +112,8 @@ public:
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
+    void SetDirection(const PanDirection& direction);
+
 private:
     enum class GestureAcceptResult {
         ACCEPT,
