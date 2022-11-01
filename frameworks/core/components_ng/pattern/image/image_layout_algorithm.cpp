@@ -39,7 +39,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         return std::nullopt;
     }
     // if image data is valid, use image source, or use altImage data
-    auto imageLoadingContext = loadingCtx_->GetImageSize().IsPositive() ? loadingCtx_ : altLoadingCtx_;
+    auto imageLoadingContext = loadingCtx_ ? loadingCtx_ : altLoadingCtx_;
     auto rawImageSize = imageLoadingContext->GetImageSize();
     SizeF componentSize(rawImageSize);
     do {
