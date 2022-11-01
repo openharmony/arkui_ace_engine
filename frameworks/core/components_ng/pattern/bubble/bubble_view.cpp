@@ -139,6 +139,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
 void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode)
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
+    CHECK_NULL_VOID(popupNode);
     auto popupProp = AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty());
     auto popupPaintProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
     auto message = param->GetMessage();

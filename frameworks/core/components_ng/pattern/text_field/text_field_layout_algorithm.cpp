@@ -48,6 +48,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS);
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     float contentHeight = 0.0f;
@@ -140,6 +141,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto left = pattern->GetPaddingLeft();

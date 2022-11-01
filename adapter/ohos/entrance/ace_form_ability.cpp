@@ -76,9 +76,10 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     // get asset
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->package + "/";
+    if (moduleInfo == nullptr) {
+        return;
     }
+    packagePathStr += "/" + moduleInfo->package + "/";
 
     // init form ability
     bool isHap = !moduleInfo->hapPath.empty();

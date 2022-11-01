@@ -335,6 +335,7 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
     focusCallbackEvents_->SetIsFocusOnTouch(isFocusOnTouch);
 
     auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto gesture = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
 

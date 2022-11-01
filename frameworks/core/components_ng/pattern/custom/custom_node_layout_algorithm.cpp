@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG {
 void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = DynamicCast<CustomMeasureLayoutNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(host);
     if (renderFunction_ && host) {
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");

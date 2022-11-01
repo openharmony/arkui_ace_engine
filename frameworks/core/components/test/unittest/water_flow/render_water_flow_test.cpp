@@ -154,6 +154,7 @@ void RenderWaterFlowTest::CreateRenderWaterFlow(std::string columnsArgs, std::st
 
 void RenderWaterFlowTest::SetCallback()
 {
+    CHECK_NULL_VOID(renderNode_);
     renderNode_->SetBuildChildByIndex([this](size_t index) {
         auto item = WaterFlowTestUtils::CreateRenderItem(mockContext_);
         if (!item) {

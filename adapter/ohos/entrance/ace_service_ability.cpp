@@ -76,9 +76,10 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
     // get asset
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->package + "/";
+    if (!moduleInfo) {
+        return;
     }
+    packagePathStr += "/" + moduleInfo->package + "/";
 
     // init service
     bool isHap = !moduleInfo->hapPath.empty();
