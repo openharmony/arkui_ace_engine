@@ -163,6 +163,7 @@ RefPtr<Component> TabContentProxyElement::OnMakeEmptyComponent()
 void TabContentProxyElement::OnDataSourceUpdated(size_t startIndex)
 {
     LOGI("tab content does not support lazyForEach yet");
+    ElementProxyHost::OnDataSourceUpdated(startIndex);
 }
 
 void TabContentProxyElement::UpdateIndex()
