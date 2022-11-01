@@ -191,11 +191,12 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
+    CHECK_NULL_RETURN(dateNode, nullptr);
     SetDialogAcceptEvent(dateNode, std::move(acceptEvent));
     auto clickCallback = [dateNode](const GestureEvent& /*info*/) {
         auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
-        auto str = pickerPattern->GetSelectedObject(true);
         CHECK_NULL_VOID(pickerPattern);
+        auto str = pickerPattern->GetSelectedObject(true);
         auto datePickerEventHub = pickerPattern->GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
         datePickerEventHub->FireDialogAcceptEvent(str);

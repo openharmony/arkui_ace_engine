@@ -131,7 +131,7 @@ void RosenRenderPickerBase::PaintGradient(
     Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
 
     auto renderBox = GetBgColorBox();
-    if (data_->GetHasBackgroundColor() && renderBox) {
+    if (data_ && data_->GetHasBackgroundColor() && renderBox) {
         endColor = renderBox->GetColor();
     }
 

@@ -131,7 +131,7 @@ void PatternLockPaintMethod::PaintLockLine(RSCanvas& canvas, const OffsetF& offs
         OffsetF pointEnd = GetCircleCenterByXY(offset, choosePoint_[i + 1].GetColumn(), choosePoint_[i + 1].GetRow());
         canvas.DrawLine(RSPoint(pointBegin.GetX(), pointBegin.GetY()), RSPoint(pointEnd.GetX(), pointEnd.GetY()));
     }
-    if (count > 0 && isMoveEventValid_) {
+    if (isMoveEventValid_) {
         OffsetF pointBegin =
             GetCircleCenterByXY(offset, choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
         float x1 = pointBegin.GetX();
