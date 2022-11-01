@@ -38,6 +38,19 @@ struct OverlayOptions {
         return (content.compare(value.content) == 0) && (align == value.align) &&
                (x == value.x) && (y == value.y);
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("title", content.c_str());
+        auto jsonOptions = JsonUtil::Create(true);
+        // should get TextDirection
+        jsonOptions->Put("align", align.GetAlignmentStr(TextDirection::LTR).c_str());
+        auto jsonOffset = JsonUtil::Create(true);
+        jsonOffset->Put("x", x.ToString().c_str());
+        jsonOffset->Put("y", y.ToString().c_str());
+        jsonOptions->Put("offset", jsonOffset);
+        json->Put("options", jsonOptions);
+    }
 };
 
 } // namespace OHOS::Ace::NG

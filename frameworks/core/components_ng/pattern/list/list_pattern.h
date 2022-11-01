@@ -194,6 +194,11 @@ private:
     bool isScroll_ = false;
     bool scrollStop_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
+
+    WeakPtr<FrameNode> headerGroupNode_;
+    WeakPtr<FrameNode> footerGroupNode_;
+    std::map<int32_t, int32_t> lanesItemRange_;
+    int32_t lanes_;
 };
 } // namespace OHOS::Ace::NG
 

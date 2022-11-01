@@ -53,7 +53,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<CheckBoxPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        auto enabled = eventHub->IsEnabled();
+        auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(enabled);
+        return paintMethod;
     }
 
     RefPtr<EventHub> CreateEventHub() override

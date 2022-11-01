@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COUNTER_COUNTER_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COUNTER_COUNTER_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_COUNTER_COUNTER_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_COUNTER_COUNTER_MODEL_NG_H
 
-#include <functional>
-
-#include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/counter/counter_model.h"
 #include "core/components/counter/counter_theme.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT CounterView {
+class ACE_EXPORT CounterModelNG : public CounterModel {
 public:
-    using CounterEventFunc = std::function<void()>;
-
-    static void Create();
-    static void SetOnInc(CounterEventFunc&& onInc);
-    static void SetOnDec(CounterEventFunc&& onDec);
+    void Create() override;
+    void SetOnInc(CounterEventFunc&& onInc) override;
+    void SetOnDec(CounterEventFunc&& onDec) override;
+    void SetHeight(const Dimension& value) override;
+    void SetWidth(const Dimension& value) override;
+    void SetControlWidth(const Dimension& value) override;
+    void SetStateChange(bool value) override;
+    void SetBackgroundColor(const Color& value) override;
 
 private:
     static RefPtr<FrameNode> CreateButtonChild(
@@ -41,4 +41,4 @@ private:
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COUNTER_COUNTER_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_COUNTER_COUNTER_MODEL_NG_H

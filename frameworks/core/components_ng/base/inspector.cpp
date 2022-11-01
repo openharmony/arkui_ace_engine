@@ -191,7 +191,9 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
         return false;
     }
 
-    auto rect = inspectorElement->GetGeometryNode()->GetFrameRect();
+    auto size = inspectorElement->GetGeometryNode()->GetFrameSize();
+    auto offset = inspectorElement->GetOffsetRelativeToWindow();
+    Rect rect { offset.GetX(), offset.GetY(), size.Width(), size.Height() };
     context->GetTaskExecutor()->PostTask(
         [weak = AceType::WeakClaim(AceType::RawPtr(context)), rect, action, params]() {
             auto context = weak.Upgrade();

@@ -250,6 +250,10 @@ void RenderFlex::PerformLayout()
         return;
     }
 
+    if (!GetVisible() || GetHidden()) {
+        return;
+    }
+
     auto context = GetContext().Upgrade();
     if (!context) {
         return;

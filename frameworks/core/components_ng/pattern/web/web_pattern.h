@@ -253,6 +253,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void CloseSelectOverlay();
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
+    std::optional<OffsetF> GetCoordinatePoint();
 
     struct TouchInfo {
         float x = -1.0f;

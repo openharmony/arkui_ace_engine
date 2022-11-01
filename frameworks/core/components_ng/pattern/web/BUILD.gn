@@ -39,7 +39,6 @@ build_component_ng("web_pattern_ng") {
     configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
     deps = [
       "$ability_runtime_path/frameworks/native/appkit:appkit_native",
-      "//foundation/graphic/graphic_2d/rosen/modules/composer:libcomposer",
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
       "//foundation/window/window_manager/utils:libwmutil",
       "//foundation/window/window_manager/wm:libwm",

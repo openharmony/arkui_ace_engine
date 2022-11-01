@@ -82,11 +82,11 @@ public:
 
     std::string ToString() const
     {
-        std::string config = "Viewport config: ";
-        config.append(" size:(" + std::to_string(width_) + ", " + std::to_string(height_) + ")");
-        config.append(" orintentation:" + std::to_string(orientation_));
-        config.append(" density:" + std::to_string(density_));
-        config.append(" position:(" + std::to_string(posX_) + ", " + std::to_string(posY_) + ")");
+        std::string config = "Viewport config:";
+        config.append(" size: (" + std::to_string(width_) + ", " + std::to_string(height_) + ")");
+        config.append(" orientation: " + std::to_string(orientation_));
+        config.append(" density: " + std::to_string(density_));
+        config.append(" position: (" + std::to_string(posX_) + ", " + std::to_string(posY_) + ")");
         return config;
     }
 

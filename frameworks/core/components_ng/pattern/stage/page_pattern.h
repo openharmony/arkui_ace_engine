@@ -97,6 +97,11 @@ public:
 
     void BuildSharedTransitionMap();
 
+    void MarkForceLoaded()
+    {
+        isLoaded_ = true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;

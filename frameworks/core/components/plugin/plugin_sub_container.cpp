@@ -180,7 +180,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     const std::string& moduleResPath, const std::string& data)
 {
     ContainerScope scope(instanceId_);
-
+    CHECK_NULL_VOID(frontend_);
     frontend_->ResetPageLoadState();
     auto flutterAssetManager = SetAssetManager(path, module);
 

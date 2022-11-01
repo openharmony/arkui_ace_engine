@@ -83,7 +83,7 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator001, TestSize.Level1)
 
 /**
  * @tc.name: DialogFrameNodeCreator002
- * @tc.desc: Test ActionSheet dialog with image icon (file source)
+ * @tc.desc: Test ActionSheet dialog with alignment
  * @tc.type: FUNC
  * @tc.author: zhoutianer
  */
@@ -112,6 +112,88 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator002, TestSize.Level1)
         .content = MESSAGE,
         .alignment = DialogAlignment::BOTTOM,
         .sheetsInfo = sheetItems,
+    };
+
+    DialogView::CreateDialogNode(props, nullptr);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    /**
+     * @tc.steps: step2. check if properties are initiated correctly
+     */
+    EXPECT_EQ(frameNode == nullptr, false);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    EXPECT_EQ(pattern->GetMessage(), MESSAGE);
+    EXPECT_EQ(pattern->GetTitle(), TITLE);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator002
+ * @tc.desc: Test ActionSheet dialog with image icon (internal source)
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Dialog with properties
+     */
+    vector<ActionSheetInfo> sheetItems = {
+        ActionSheetInfo {
+            .title = SHEET_TITLE,
+            .icon = INTERNAL_SOURCE,
+        },
+        ActionSheetInfo {
+            .title = SHEET_TITLE_2,
+            .icon = INTERNAL_SOURCE,
+        },
+        ActionSheetInfo {
+            .title = SHEET_TITLE_3,
+            .icon = INTERNAL_SOURCE,
+        },
+    };
+    DialogProperties props = {
+        .type = DialogType::ACTION_SHEET,
+        .title = TITLE,
+        .content = MESSAGE,
+        .sheetsInfo = sheetItems,
+    };
+
+    DialogView::CreateDialogNode(props, nullptr);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    /**
+     * @tc.steps: step2. check if properties are initiated correctly
+     */
+    EXPECT_EQ(frameNode == nullptr, false);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    EXPECT_EQ(pattern->GetMessage(), MESSAGE);
+    EXPECT_EQ(pattern->GetTitle(), TITLE);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator002
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Dialog with properties
+     */
+    ButtonInfo button = {
+        .text = "confirm",
+        .textColor = "yellow",
+        .isBgColorSetted = true,
+        .bgColor = Color::BLUE,
+    };
+    DialogProperties props = {
+        .type = DialogType::ACTION_SHEET,
+        .title = TITLE,
+        .content = MESSAGE,
+        .buttons = vector<ButtonInfo>{button}
     };
 
     DialogView::CreateDialogNode(props, nullptr);

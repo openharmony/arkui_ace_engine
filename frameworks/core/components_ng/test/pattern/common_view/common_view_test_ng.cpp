@@ -43,5 +43,7 @@ HWTEST_F(CommonViewTestNg, CommonViewTest001, TestSize.Level1)
     auto blankNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(blankNode == nullptr);
     EXPECT_EQ(blankNode->GetTag(), V2::COMMON_VIEW_ETS_TAG);
+    EXPECT_EQ(blankNode->IsAtomicNode(), false);
 }
+
 } // namespace OHOS::Ace::NG

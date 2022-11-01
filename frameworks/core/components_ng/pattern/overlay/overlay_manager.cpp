@@ -53,6 +53,7 @@ void OverlayManager::ShowToast(
     }
 
     auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
+    CHECK_NULL_VOID(toastNode);
     auto toastId = toastNode->GetId();
     ToastInfo info = { toastId, toastNode };
     toastInfo_ = info;

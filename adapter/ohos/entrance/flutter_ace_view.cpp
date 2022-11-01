@@ -548,6 +548,9 @@ void FlutterAceView::SetShellHolder(std::unique_ptr<flutter::OhosShellHolder> ho
 
 void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (!pointerEvent) {
+        return;
+    }
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
     auto markProcess = [pointerEvent]() {
         if (pointerEvent) {

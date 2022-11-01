@@ -63,6 +63,11 @@ public:
         } else {
             host->ReplaceChild(host->GetChildAtIndex(headerIndex_), header);
         }
+        auto frameNode  = AceType::DynamicCast<FrameNode>(header);
+        CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(1);
     }
 
     void AddFooter(const RefPtr<NG::UINode>& footer)
@@ -76,6 +81,11 @@ public:
         } else {
             host->ReplaceChild(host->GetChildAtIndex(footerIndex_), footer);
         }
+        auto frameNode  = AceType::DynamicCast<FrameNode>(footer);
+        CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(1);
     }
 
 private:

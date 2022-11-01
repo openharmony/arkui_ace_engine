@@ -43,7 +43,7 @@ protected:
  * @tc.name: BadgeFrameNodeCreator001
  * @tc.desc: Test empty property of Badge.
  * @tc.type: FUNC
- * @tc.author: 
+ * @tc.author:
  */
 HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
 {
@@ -61,7 +61,7 @@ HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
  * @tc.name: BadgeFrameNodeCreator002
  * @tc.desc: Test all the properties of Badge.
  * @tc.type: FUNC
- * @tc.author: 
+ * @tc.author:
  */
 HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
 {

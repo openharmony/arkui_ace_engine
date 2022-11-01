@@ -273,7 +273,7 @@ public:
         AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) override
     {}
 
-    void SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, const RefPtr<GridContainerInfo>& info,
+    void SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset,
         GridSizeType type = GridSizeType::UNDEFINED) override
     {
         ViewAbstract::SetGrid(span, offset, type);

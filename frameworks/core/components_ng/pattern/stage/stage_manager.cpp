@@ -47,12 +47,13 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         FirePageHide(children.back(), needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         outPageNode = AceType::DynamicCast<FrameNode>(children.back());
     }
+    bool isFirstMainPage = children.empty();
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
     node->GetRenderContext()->SyncGeometryProperties(rect);
     node->MountToParent(stageNode_);
     stageNode_->RebuildRenderContextTree();
-    FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
+    FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE, isFirstMainPage);
 
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
@@ -212,12 +213,16 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     }
 }
 
-void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
+void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType, bool forceFireEvent)
 {
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    if (forceFireEvent) {
+        // first load main page, fire onPageShow directly.
+        pagePattern->MarkForceLoaded();
+    }
     pagePattern->OnShow();
     if (transitionType != PageTransitionType::NONE) {
         pagePattern->TriggerPageTransition(transitionType, nullptr);

@@ -53,6 +53,7 @@ void PagePattern::OnAttachToFrameNode()
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
     if (!isLoaded_) {
+        ProcessShowState();
         isOnShow_ = true;
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(context, false);

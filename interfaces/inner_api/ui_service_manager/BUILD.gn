@@ -62,7 +62,6 @@ ohos_shared_library("ui_service_mgr") {
   external_deps = [
     "ability_base:want",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]

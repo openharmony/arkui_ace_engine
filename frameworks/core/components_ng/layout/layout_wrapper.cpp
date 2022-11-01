@@ -104,6 +104,11 @@ RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
     return hostNode_.Upgrade();
 }
 
+WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
+{
+    return hostNode_;
+}
+
 std::string LayoutWrapper::GetHostTag() const
 {
     auto host = GetHostNode();
@@ -139,6 +144,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 
     auto preConstraint = layoutProperty_->GetLayoutConstraint();
     auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
+    layoutProperty_->BuildGridProperty(host);
     if (parentConstraint) {
         geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
         layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
@@ -235,6 +241,7 @@ void LayoutWrapper::Layout()
     }
 
     layoutAlgorithm_->Layout(this);
+    layoutProperty_->UpdateGridOffset(this);
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
 }

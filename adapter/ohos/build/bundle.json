@@ -97,6 +97,7 @@
                 "//foundation/arkui/ace_engine/frameworks/core/focus/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/gestures/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/image/test:unittest",
+                "//foundation/arkui/ace_engine/interfaces/test:unittest",
                 "//foundation/arkui/ace_engine/test/fuzztest:fuzztest"
             ]
         }

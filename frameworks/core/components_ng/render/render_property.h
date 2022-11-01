@@ -83,8 +83,19 @@ struct TransformProperty {
 
 struct DecorationProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurRadius, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("blur", propBlurRadius.value_or(0.0_vp).Value());
+        auto jsonShadow = JsonUtil::Create(true);
+        auto shadow = propBackShadow.value_or(Shadow());
+        jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+        jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+        jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+        jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+        json->Put("shadow", jsonShadow);
+    }
 };
 
 struct GraphicsProperty {
@@ -118,6 +129,10 @@ struct GradientProperty {
 
 struct OverlayProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverlayText, OverlayOptions);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        propOverlayText.value_or(OverlayOptions()).ToJsonValue(json);
+    }
 };
 
 struct MotionPathProperty {

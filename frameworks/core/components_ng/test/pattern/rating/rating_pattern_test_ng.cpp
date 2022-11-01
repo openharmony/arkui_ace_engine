@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <stdint.h>
+#include <string>
 
 #include "gtest/gtest.h"
 #include "third_party/libpng/png.h"
@@ -38,6 +39,7 @@ const bool DEFAULT_RATING_INDICATOR = false;
 const int32_t DEFAULT_STAR_NUM = 5;
 const int32_t RATING_STAR_NUM = 10;
 constexpr double RATING_SCORE = 3.0;
+const std::string RATING_SCORE_CHANGE = "3.0";
 constexpr double RATING_SCORE_1 = 6.0;
 constexpr int32_t RATING_STAR_NUM_1 = -1;
 const std::string RATING_BACKGROUND_URL = "common/img1.png";
@@ -206,11 +208,35 @@ HWTEST_F(RatingPropertyTestNg, RatingLConstrainsPropertyTest006, TestSize.Level1
 }
 
 /**
- * @tc.name: RatingMeasureTest007
+ * @tc.name: RatingEventTest007
+ * @tc.desc: Test Rating onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingPropertyTestNg, RatingEventTest007, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetRatingScore(RATING_SCORE);
+    rating.SetStars(RATING_STAR_NUM_1);
+   
+    std::string unknownRatingScore;
+    auto onChange = [&unknownRatingScore](const std::string& raingScore) { unknownRatingScore = raingScore; };
+    rating.SetOnChange(onChange);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+
+    auto ratingEventHub = frameNode->GetEventHub<RatingEventHub>();
+    ratingEventHub->FireChangeEvent(RATING_SCORE_CHANGE);
+    EXPECT_EQ(unknownRatingScore, RATING_SCORE_CHANGE);
+}
+
+/**
+ * @tc.name: RatingMeasureTest008
  * @tc.desc: Test rating measure and layout function
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingMeasureTest007, TestSize.Level1)
+HWTEST_F(RatingPropertyTestNg, RatingMeasureTest008, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();

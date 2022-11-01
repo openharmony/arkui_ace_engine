@@ -161,6 +161,22 @@ void FrameNode::DumpInfo()
     }
 }
 
+void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    bool enabled = true;
+    bool focusable = false;
+    bool focused = false;
+    auto focusHub = GetFocusHub();
+    if (focusHub) {
+        enabled = focusHub->IsEnabled();
+        focusable = focusHub->IsFocusable();
+        focused = focusHub->IsCurrentFocus();
+    }
+    json->Put("enabled", enabled);
+    json->Put("focusable", focusable);
+    json->Put("focused", focused);
+}
+
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
@@ -172,6 +188,10 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (pattern_) {
         pattern_->ToJsonValue(json);
     }
+    if (eventHub_) {
+        pattern_->ToJsonValue(json);
+    }
+    FocusToJsonValue(json);
 }
 
 void FrameNode::OnAttachToMainTree()
@@ -458,11 +478,7 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
     } while (false);
     // check position flag.
-    const auto& gridProperty = layoutWrapper->GetLayoutProperty()->GetGridProperty(Claim(this));
-    bool hasGridOffset = gridProperty ? (gridProperty->GetOffset() != UNDEFINED_DIMENSION) : false;
-    if (renderContext_->HasPosition() || hasGridOffset) {
-        layoutWrapper->SetOutOfLayout(true);
-    }
+    layoutWrapper->SetOutOfLayout(renderContext_->HasPosition());
     layoutWrapper->SetActive(isActive_);
     return layoutWrapper;
 }

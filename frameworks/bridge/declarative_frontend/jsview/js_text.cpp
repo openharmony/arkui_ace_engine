@@ -91,6 +91,10 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
+    if (!fontSize.IsValid()) {
+        LOGE("FontSize value is not valid");
+        return;
+    }
     TextModel::GetInstance()->SetFontSize(fontSize);
 }
 

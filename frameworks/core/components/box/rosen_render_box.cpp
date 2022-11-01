@@ -315,7 +315,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             RosenDecorationPainter::PaintHueRotate(outerRRect, canvas, backDecoration_->GetHueRotate(), bgColor);
             RosenDecorationPainter::PaintColorBlend(outerRRect, canvas, backDecoration_->GetColorBlend(), bgColor);
         }
-        auto position = Offset(GetPosition().GetX(), GetPosition().GetY());
+        auto position = Offset(0.0, 0.0);
         if (rsNode == nullptr) {
             LOGE("rsNode is null.");
             return;

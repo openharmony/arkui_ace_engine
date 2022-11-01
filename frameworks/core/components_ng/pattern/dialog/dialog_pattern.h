@@ -93,11 +93,11 @@ private:
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const RefPtr<DialogTheme>& theme);
 
-    RefPtr<FrameNode> BuildTitle(std::string& data, const DialogProperties& dialogProperties);
-    RefPtr<FrameNode> BuildContent(std::string& data, const DialogProperties& dialogProperties);
+    RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
+    RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
 
     RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons);
-    RefPtr<UINode> CreateButton(const ButtonInfo& params, int32_t index);
+    RefPtr<FrameNode> CreateButton(const ButtonInfo& params, int32_t index);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
     // build ActionSheet items

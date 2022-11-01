@@ -57,9 +57,10 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
     if (!leftClickEvent_) {
         auto clickEvent = [swiperNode, weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            if (stepperPattern) {
-                stepperPattern->HandlingButtonClickEvent(true, swiperNode);
+            if (!stepperPattern) {
+                return;
             }
+            stepperPattern->HandlingButtonClickEvent(true, swiperNode);
             auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
             if (swiperPattern) {
                 auto swiperController = swiperPattern->GetSwiperController();
@@ -75,9 +76,10 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
     if (!rightClickEvent_) {
         auto clickEvent = [swiperNode, weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            if (stepperPattern) {
-                stepperPattern->HandlingButtonClickEvent(false, swiperNode);
+            if (!stepperPattern) {
+                return;
             }
+            stepperPattern->HandlingButtonClickEvent(false, swiperNode);
             auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
             if (swiperPattern) {
                 auto swiperController = swiperPattern->GetSwiperController();

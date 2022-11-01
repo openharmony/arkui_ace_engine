@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/composed_element.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
@@ -99,7 +100,7 @@ void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapp
 {
     info->SetProperty<std::string>("name", layoutWrapper->GetHostNode()->GetTag());
     info->SetProperty<std::string>("id", std::to_string(layoutWrapper->GetHostNode()->GetId()));
-    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()));
+    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()));
     info->SetPropertyObject("borderInfo", GenBorderInfo(layoutWrapper));
     info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
 }

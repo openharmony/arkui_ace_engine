@@ -89,7 +89,7 @@ void DragDropProxy::OnItemDragStart(const GestureEvent& info, const RefPtr<Frame
         static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), frameNode);
 }
 
-void DragDropProxy::OnItemDragMove(const GestureEvent& info, int32_t draggedIndex)
+void DragDropProxy::OnItemDragMove(const GestureEvent& info, int32_t draggedIndex, DragType dragType)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -98,10 +98,10 @@ void DragDropProxy::OnItemDragMove(const GestureEvent& info, int32_t draggedInde
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     manager->OnItemDragMove(static_cast<float>(info.GetGlobalPoint().GetX()),
-        static_cast<float>(info.GetGlobalPoint().GetY()), draggedIndex);
+        static_cast<float>(info.GetGlobalPoint().GetY()), draggedIndex, dragType);
 }
 
-void DragDropProxy::OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex)
+void DragDropProxy::OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex, DragType dragType)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -110,7 +110,7 @@ void DragDropProxy::OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     manager->OnItemDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
-        static_cast<float>(info.GetGlobalPoint().GetY()), draggedIndex);
+        static_cast<float>(info.GetGlobalPoint().GetY()), draggedIndex, dragType);
 }
 
 void DragDropProxy::onItemDragCancel()

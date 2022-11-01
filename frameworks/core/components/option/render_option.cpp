@@ -622,6 +622,10 @@ void RenderOption::UpdateAccessibilityInfo(Size size, Offset offset, bool isSele
     PositionInfo positionInfo = { (size.Width()) * viewScale, (size.Height()) * viewScale, (offset.GetX()) * viewScale,
         (offset.GetY()) * viewScale };
     accessibilityNode->SetPositionInfo(positionInfo);
+    if (accessibilityNode->GetParentNode()) {
+        bool visible = accessibilityNode->GetRect().IsIntersectWith(accessibilityNode->GetParentNode()->GetRect());
+        accessibilityNode->SetVisible(visible);
+    }
     if (data_ && data_->GetText()) {
         auto text = data_->GetText();
         accessibilityNode->SetText(text->GetData());

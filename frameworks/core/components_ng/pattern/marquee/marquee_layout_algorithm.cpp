@@ -48,6 +48,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         // Use idea size first if it is valid.
         frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
         if (frameSize.IsValid()) {
+            childFrameSize = lastChildFrame;
             break;
         }
 
@@ -67,7 +68,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
-
+    
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     if (lastChildFrame != childFrameSize || lastMarqueeFrame != frameSize.ConvertToSizeT()) {
         auto pattern = layoutWrapper->GetHostNode()->GetPattern<MarqueePattern>();

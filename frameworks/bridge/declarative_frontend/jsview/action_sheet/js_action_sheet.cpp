@@ -165,7 +165,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         JSRef<JSVal> value = confirmObj->GetProperty("value");
         std::string buttonValue;
         if (ParseJsString(value, buttonValue)) {
-            ButtonInfo buttonInfo = { .text = buttonValue, .textColor = "" };
+            ButtonInfo buttonInfo = { .text = buttonValue, .textColor = "blue" };
             JSRef<JSVal> actionValue = confirmObj->GetProperty("action");
             // parse confirm action
             if (actionValue->IsFunction()) {
