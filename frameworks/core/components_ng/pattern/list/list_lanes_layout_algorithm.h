@@ -29,6 +29,15 @@ public:
     {
         lanesItemRange_.swap(itemRange);
     }
+    void SetLanes(int32_t lanes)
+    {
+        lanes_ = lanes;
+    }
+    int32_t GetLanes() const override
+    {
+        return lanes_.value_or(1);
+    }
+
 protected:
     void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
         LayoutConstraintF& contentConstraint) override;
@@ -39,10 +48,6 @@ protected:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize) override;
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, Axis axis) override;
-    int32_t GetLanes() const override
-    {
-        return lanes_.value_or(1);
-    }
     int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index) override;
 
 private:

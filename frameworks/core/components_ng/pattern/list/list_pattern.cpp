@@ -153,6 +153,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
+        lanes_ = lanesLayoutAlgorithm->GetLanes();
     }
     CheckScrollable();
 
@@ -250,6 +251,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         if ((listLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT) == 0) {
             lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
         }
+        lanesLayoutAlgorithm->SetLanes(lanes_);
         listLayoutAlgorithm.Swap(lanesLayoutAlgorithm);
     } else {
         listLayoutAlgorithm.Swap(MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_));
