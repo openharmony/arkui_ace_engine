@@ -72,6 +72,7 @@ public:
     void OnWindowShow() override;
 
 private:
+    void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override
     {
         auto id = frameNode->GetId();
