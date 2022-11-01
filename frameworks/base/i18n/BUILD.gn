@@ -23,7 +23,10 @@ template("ace_base_i18n") {
   source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
-    deps = [ "$ace_root/frameworks/base/resource:ace_resource" ]
+    deps = [
+      "$ace_root/frameworks/base/resource:ace_resource",
+      "//third_party/icu/icu4c:shared_icui18n",
+    ]
 
     if (enable_ng_build) {
       deps += [

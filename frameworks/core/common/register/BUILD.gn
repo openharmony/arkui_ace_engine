@@ -38,8 +38,6 @@ ohos_shared_library("hdc_register") {
     "//third_party/libuv:uv",
   ]
 
-  external_deps += [ "c_utils:utils" ]
-
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",

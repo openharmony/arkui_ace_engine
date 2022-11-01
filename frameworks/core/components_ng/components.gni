@@ -126,10 +126,7 @@ template("build_component_ng") {
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
         configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
-        deps += [
-          "//foundation/graphic/graphic_2d/rosen/modules/composer:libcomposer",
-          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-        ]
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
         include_dirs +=
             [ "//foundation/window/window_manager/interfaces/innerkits" ]
       }
