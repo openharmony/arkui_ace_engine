@@ -2553,7 +2553,7 @@ bool WebcustomSchemeCheckName(std::string scheme)
 {
     #define MAX_NAME_SIZE 32
     if (scheme.size() > MAX_NAME_SIZE || scheme.empty()) {
-        LOGE("wdf invalid size");
+        LOGE("invalid size");
         return false;
     }
 
@@ -2562,7 +2562,7 @@ bool WebcustomSchemeCheckName(std::string scheme)
         if ((chr >= 'a' && chr <= 'z') || (chr >= '0' && chr <= '9') || (chr == '.') || (chr == '+') || (chr == '-')) {
            continue;
         } else {
-           LOGE("wdf invalid character %{public}c", chr);
+           LOGE("invalid character %{public}c", chr);
            return false;
         }
     }
