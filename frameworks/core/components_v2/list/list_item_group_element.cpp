@@ -98,6 +98,7 @@ void ListItemGroupElement::OnDataSourceUpdated(size_t startIndex)
         renderListItemGroup_->RemoveAllItems();
         renderListItemGroup_->MarkNeedLayout();
     }
+    ElementProxyHost::OnDataSourceUpdated(startIndex);
 }
 
 } // namespace OHOS::Ace::V2

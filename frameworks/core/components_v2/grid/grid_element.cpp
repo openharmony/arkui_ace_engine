@@ -202,6 +202,7 @@ void GridElement::OnDataSourceUpdated(size_t startIndex)
     }
     render->OnDataSourceUpdated(static_cast<int32_t>(startIndex));
     render->SetTotalCount(ElementProxyHost::TotalCount());
+    ElementProxyHost::OnDataSourceUpdated(startIndex);
 }
 
 void GridElement::OnPostFlush()
