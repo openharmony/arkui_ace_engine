@@ -3108,75 +3108,55 @@ class ViewPU extends NativeViewPartialUpdate {
         If.branchId(branchId);
         branchfunc();
     }
-    /*
-       Partial updates for ForEach (no index in itemGenFunc)
-       1. Generate IDs for new array.
-       2. Set new IDs and get diff to old one stored in C++.
-       3. Create new elements.
+    /**
+     Partial updates for ForEach.
+     * @param elmtId ID of element.
+     * @param itemArray Array of items for use of itemGenFunc.
+     * @param itemGenFunc Item generation function to generate new elements. If index parameter is
+     *                    given set itemGenFuncUsesIndex to true.
+     * @param idGenFunc   ID generation function to generate unique ID for each element. If index parameter is
+     *                    given set idGenFuncUsesIndex to true.
+     * @param itemGenFuncUsesIndex itemGenFunc optional index parameter is given or not.
+     * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
      */
-    forEachUpdateFunction(elmtId, _arr, itemGenFunc, idGenFunc) {
-        
+    forEachUpdateFunction(elmtId, itemArray, itemGenFunc, idGenFunc, itemGenFuncUsesIndex = false, idGenFuncUsesIndex = false) {
+
         if (idGenFunc === undefined) {
-            
-            idGenFunc = function makeIdGenFunction() {
-                let index = 0;
-                // Developer should give ID gen function. If not use this default.
-                return (item) => `${index++}_${JSON.stringify(item)}`;
-            }();
+
+            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
+            idGenFuncUsesIndex = true;
         }
         let diffIndexArray = []; // New indexes compared to old one.
         let newIdArray = [];
-        const arr = _arr; // just to trigger a 'get' onto the array
-        // Create array of new ids.
-        arr.forEach((item) => {
-            newIdArray.push(idGenFunc(item));
-        });
+        const arr = itemArray; // just to trigger a 'get' onto the array
+        // ID gen is with index.
+        if (idGenFuncUsesIndex) {
+            // Create array of new ids.
+            arr.forEach((item, indx) => {
+                newIdArray.push(idGenFunc(item, indx));
+            });
+        }
+        else {
+            // Create array of new ids.
+            arr.forEach((item, index) => {
+                newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
+            });
+        }
         // set new array on C++ side
         // C++ returns array of indexes of newly added array items
         // these are indexes in new child list.
         ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
-        
+
+        // Item gen is with index.
         // Create new elements if any.
         diffIndexArray.forEach((indx) => {
             ForEach.createNewChildStart(newIdArray[indx], this);
-            itemGenFunc(arr[indx]);
-            ForEach.createNewChildFinish(newIdArray[indx], this);
-        });
-    }
-    /*
-        Partial updates for ForEach (index in itemGenFunc)
-        1. Generate IDs for new array.
-        2. Set new IDs and get diff to old one stored in C++.
-        3. Create new elements.
-      */
-    forEachWithIndexUpdateFunction(elmtId, _arr, itemGenFunc, _idGenFunc) {
-        
-        if (_idGenFunc == undefined) {
-            
-        }
-        let idGenFunc = function makeIdGenFunction() {
-            // index in local scope
-            // this works as long as idGenFunc in incrementing loop like below
-            let index = 0;
-            // include the index to generate default idGenFunc and also to supplement the given idGenFunc
-            return (item) => `${index++}__${_idGenFunc ? _idGenFunc(item) : JSON.stringify(item)}`;
-        }();
-        let diffIndexArray = []; // New indexes compared to old one.
-        let newIdArray = [];
-        const arr = _arr; // just to trigger a 'get' onto the array
-        // Create array of new ids.
-        arr.forEach((item) => {
-            newIdArray.push(idGenFunc(item));
-        });
-        // set new array on C++ side
-        // C++ returns array of indexes of newly added array items
-        // these are indexes in new child list.
-        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
-        
-        // Create new elements if any.
-        diffIndexArray.forEach((indx) => {
-            ForEach.createNewChildStart(newIdArray[indx], this);
-            itemGenFunc(arr[indx], indx);
+            if (itemGenFuncUsesIndex) {
+                itemGenFunc(arr[indx], indx);
+            }
+            else {
+                itemGenFunc(arr[indx]);
+            }
             ForEach.createNewChildFinish(newIdArray[indx], this);
         });
     }
