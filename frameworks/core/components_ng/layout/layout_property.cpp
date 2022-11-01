@@ -137,6 +137,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         auto margin = CreateMargin();
         MinusPaddingToSize(margin, layoutConstraint_->maxSize);
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
+        MinusPaddingToSize(margin, layoutConstraint_->percentReference);
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
     }
     if (calcLayoutConstraint_) {
