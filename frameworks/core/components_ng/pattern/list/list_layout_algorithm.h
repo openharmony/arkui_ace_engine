@@ -161,6 +161,11 @@ public:
     void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
         int32_t endIndex, float endPos);
 
+    virtual int32_t GetLanes() const
+    {
+        return 1;
+    }
+
 protected:
     virtual void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
         LayoutConstraintF& contentConstraint);
@@ -171,10 +176,6 @@ protected:
     virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     virtual void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, Axis axis) {};
-    virtual int32_t GetLanes() const
-    {
-        return 1;
-    }
     virtual int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index)
     {
         return index;
