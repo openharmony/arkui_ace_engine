@@ -21,6 +21,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/layout_inspector.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/element_register.h"
@@ -118,7 +119,12 @@ public:
 
     virtual RefPtr<Element> OnUpdateElement(const RefPtr<Element>& element, const RefPtr<Component>& component) = 0;
     virtual RefPtr<Component> OnMakeEmptyComponent() = 0;
-    virtual void OnDataSourceUpdated(size_t startIndex) = 0;
+    virtual void OnDataSourceUpdated(size_t startIndex)
+    {
+#if !defined(PREVIEW)
+    LayoutInspector::SupportInspector();
+#endif
+    }
     virtual size_t GetReloadedCheckNum();
 
 private:
