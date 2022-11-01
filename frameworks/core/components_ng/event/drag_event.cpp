@@ -46,13 +46,8 @@ DragEventActuator::DragEventActuator(
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
 }
 
-void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+void DragEventActuator::SetOnActionStart()
 {
-    if (!userCallback_) {
-        return;
-    }
-
     auto actionStart = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -62,9 +57,18 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (userActionStart) {
             userActionStart(info);
         }
+        // Trigger custom drag start event
+        CHECK_NULL_VOID(actuator->customCallback_);
+        auto customActionStart = actuator->customCallback_->GetActionStartEventFunc();
+        if (customActionStart) {
+            customActionStart(info);
+        }
     };
     panRecognizer_->SetOnActionStart(actionStart);
+}
 
+void DragEventActuator::SetOnActionUpdate()
+{
     auto actionUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -73,9 +77,17 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (userActionUpdate) {
             userActionUpdate(info);
         }
+        CHECK_NULL_VOID(actuator->customCallback_);
+        auto customActionUpdate = actuator->customCallback_->GetActionUpdateEventFunc();
+        if (customActionUpdate) {
+            customActionUpdate(info);
+        }
     };
     panRecognizer_->SetOnActionUpdate(actionUpdate);
+}
 
+void DragEventActuator::SetOnActionEnd()
+{
     auto actionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -84,9 +96,17 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (userActionEnd) {
             userActionEnd(info);
         }
+        CHECK_NULL_VOID(actuator->customCallback_);
+        auto customActionEnd = actuator->customCallback_->GetActionEndEventFunc();
+        if (customActionEnd) {
+            customActionEnd(info);
+        }
     };
     panRecognizer_->SetOnActionEnd(actionEnd);
+}
 
+void DragEventActuator::SetOnActionCancel()
+{
     auto actionCancel = [weak = WeakClaim(this)]() {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -95,8 +115,26 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (userActionCancel) {
             userActionCancel();
         }
+        CHECK_NULL_VOID(actuator->customCallback_);
+        auto customActionCancel = actuator->customCallback_->GetActionCancelEventFunc();
+        if (customActionCancel) {
+            customActionCancel();
+        }
     };
     panRecognizer_->SetOnActionCancel(actionCancel);
+}
+
+void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+{
+    if (!userCallback_) {
+        return;
+    }
+
+    SetOnActionStart();
+    SetOnActionUpdate();
+    SetOnActionEnd();
+    SetOnActionCancel();
 
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     if (!SequencedRecognizer_) {
