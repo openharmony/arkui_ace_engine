@@ -32,7 +32,6 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -196,8 +195,6 @@ void WrapLayoutAlgorithm::HandleDialogStretch()
 void WrapLayoutAlgorithm::PerformLayoutInitialize(const RefPtr<LayoutProperty>& layoutProp)
 {
     CHECK_NULL_VOID(layoutProp);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     auto constraint = layoutProp->GetLayoutConstraint();
     // if flex width and height is not set, wrap is as large as children, no need to set alignment_.
     if (constraint->selfIdealSize.Height() || constraint->selfIdealSize.Width()) {
@@ -478,7 +475,7 @@ void WrapLayoutAlgorithm::CalcItemMainAxisStartAndSpaceBetween(
             break;
         }
         case WrapAlignment::CENTER: {
-            AddExtraSpaceToStartPosition(startPosition, content.mainLength / 2.0f, true);
+            AddExtraSpaceToStartPosition(startPosition, spaceLeftOnMainAxis / 2.0f, true);
             break;
         }
         case WrapAlignment::SPACE_BETWEEN: {

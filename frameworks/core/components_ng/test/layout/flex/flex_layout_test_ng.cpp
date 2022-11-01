@@ -1353,13 +1353,13 @@ HWTEST_F(FlexLayoutTestNg, wrapRowLayoutTest002, TestSize.Level1)
     auto firstChildSize = firstChildWrapper->GetGeometryNode()->GetFrameSize();
     auto firstChildOffset = firstChildWrapper->GetGeometryNode()->GetFrameOffset();
     EXPECT_EQ(firstChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    EXPECT_EQ(firstChildOffset, OffsetF(0.0f, verticalRemaining / 2));
+    EXPECT_EQ(firstChildOffset, OffsetF(HALF_PERCENT_WIDTH, verticalRemaining / 2));
 
     auto secondChildWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
     auto secondChildSize = secondChildWrapper->GetGeometryNode()->GetFrameSize();
     auto secondChildOffset = secondChildWrapper->GetGeometryNode()->GetFrameOffset();
     EXPECT_EQ(secondChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    EXPECT_EQ(secondChildOffset, OffsetF(HALF_PERCENT_WIDTH, verticalRemaining / 2));
+    EXPECT_EQ(secondChildOffset, OffsetF(0.0f, verticalRemaining / 2));
 
     auto thirdChildWrapper = layoutWrapper->GetOrCreateChildByIndex(2);
     auto thirdChildSize = thirdChildWrapper->GetGeometryNode()->GetFrameSize();
