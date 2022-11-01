@@ -2557,13 +2557,13 @@ bool WebcustomSchemeCheckName(std::string scheme)
         return false;
     }
 
-    for(auto it = scheme.begin(); it != scheme.end(); it++) {
+    for (auto it = scheme.begin(); it != scheme.end(); it++) {
         char chr = *it;
         if ((chr >= 'a' && chr <= 'z') || (chr >= '0' && chr <= '9') || (chr == '.') || (chr == '+') || (chr == '-')) {
-           continue;
+            continue;
         } else {
-           LOGE("invalid character %{public}c", chr);
-           return false;
+            LOGE("invalid character %{public}c", chr);
+            return false;
         }
     }
     return true;
@@ -2571,12 +2571,13 @@ bool WebcustomSchemeCheckName(std::string scheme)
 
 void JSWeb::OnPrivilegedSchemes(const JSCallbackInfo& args)
 {
+#define MAX_CUSTOM_SCHEME_SIZE 3
     if ((args.Length() <= 0) || !(args[0]->IsArray())) {
         LOGE("arg is invalid");
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
-    if (array->Length() > 3) {
+    if (array->Length() > MAX_CUSTOM_SCHEME_SIZE) {
         LOGE("arg len invalid");
         return;
     }
@@ -2589,7 +2590,7 @@ void JSWeb::OnPrivilegedSchemes(const JSCallbackInfo& args)
         if (!schemeName->IsString() || !isCors->IsBoolean() || !isFetch->IsBoolean()) {
             LOGE("scheme value is undefined");
             return;
-        }   
+        }
         auto schemeNamestr = schemeName->ToString();
         if (!WebcustomSchemeCheckName(schemeNamestr)) {
             LOGE("scheme name is invalid");
