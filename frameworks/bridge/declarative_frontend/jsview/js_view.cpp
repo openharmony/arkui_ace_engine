@@ -467,7 +467,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-        if (jsView->viewNode_.Invalid() && jsView->jsViewFunction_) {
+        if (jsView->jsViewFunction_) {
             jsView->jsViewFunction_->ExecuteAppear();
         }
     };
