@@ -42,16 +42,6 @@
 #define JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK_THREAD(exec, ...) \
     CHECK_JAVASCRIPT_SCOPE_AND_THREAD(exec, __VA_ARGS__)        \
     JAVASCRIPT_EXECUTION_SCOPE(exec)
-#elif USE_QUICKJS_ENGINE
-#define JAVASCRIPT_EXECUTION_SCOPE(exec) QJSContext::Scope ___contextScope___(exec.context);
-#define JAVASCRIPT_EXECUTION_SCOPE_STATIC
-#define CHECK_JAVASCRIPT_SCOPE_AND_RETURN
-#define CHECK_JAVASCRIPT_SCOPE(exec, ...)                                                  \
-    if (QJSDeclarativeEngineInstance::GetQJSRuntime() == nullptr || exec.context == nullptr) \
-        return __VA_ARGS__;
-#define JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(exec, ...) \
-    CHECK_JAVASCRIPT_SCOPE(exec, __VA_ARGS__)            \
-    JAVASCRIPT_EXECUTION_SCOPE(exec)
 #elif USE_ARK_ENGINE
 #define JAVASCRIPT_EXECUTION_SCOPE(exec) \
     panda::LocalScope socpe(exec.vm_);

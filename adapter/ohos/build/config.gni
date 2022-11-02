@@ -20,14 +20,6 @@ defines = [
 ]
 
 js_engines = []
-qjs_engine = {
-  engine_name = "qjs"
-  engine_path = "quickjs"
-  engine_defines = [ "USE_QUICKJS_ENGINE" ]
-  have_debug = true
-  declarative_default = true
-}
-js_engines += [ qjs_engine ]
 ark_engine = {
   engine_name = "ark"
   engine_path = "jsi"

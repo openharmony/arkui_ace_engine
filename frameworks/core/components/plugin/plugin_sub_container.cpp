@@ -32,17 +32,12 @@
 namespace OHOS::Ace {
 namespace {
 const int32_t THEME_ID_DEFAULT = 117440515;
-constexpr char DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative.z.so";
 constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
 } // namespace
 
-const char* GetDeclarativeSharedLibrary(bool isArkApp)
+const char* GetDeclarativeSharedLibrary()
 {
-    if (isArkApp) {
-        return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
-    } else {
-        return DECLARATIVE_JS_ENGINE_SHARED_LIB;
-    }
+    return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
 void PluginSubContainer::Initialize()
@@ -75,7 +70,7 @@ void PluginSubContainer::Initialize()
     // set JS engine，init in JS thread
     auto loader = PluginManager::GetInstance().GetJsEngineLoader();
     if (!loader) {
-        loader = &Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
+        loader = &Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
         PluginManager::GetInstance().SetJsEngineLoader(loader);
     }
     auto jsEngine = loader->CreateJsEngine(instanceId_);

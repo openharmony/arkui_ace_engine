@@ -29,8 +29,6 @@
 
 #ifdef USE_V8_ENGINE
 #include "bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#elif USE_QUICKJS_ENGINE
-#include "bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
 #elif USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif

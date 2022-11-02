@@ -28,7 +28,6 @@
 #include "core/image/image_object.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
-#include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
 
 namespace OHOS::Ace {
 using setColorFunc = std::function<void (const std::string&)>;

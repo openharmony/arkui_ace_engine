@@ -24,7 +24,6 @@
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine.h"
 
 namespace OHOS::Ace {
 namespace {

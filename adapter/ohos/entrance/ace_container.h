@@ -40,10 +40,10 @@ class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatch
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    AceContainer(int32_t instanceId, FrontendType type,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
-    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    AceContainer(int32_t instanceId, FrontendType type,
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
@@ -268,7 +268,7 @@ public:
         return parentId_;
     }
 
-    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, const std::string& instanceName,
+    static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
 
@@ -377,7 +377,6 @@ private:
     std::unordered_map<uint64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
 
     FrontendType type_ = FrontendType::JS;
-    bool isArkApp_ = false;
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     WindowModal windowModal_ { WindowModal::NORMAL };
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };

@@ -38,7 +38,6 @@ template("pa_backend") {
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "$ability_runtime_path/frameworks/native/appkit:appkit_native",
       "//foundation/arkui/napi:ace_napi",
-      "//foundation/arkui/napi:ace_napi_quickjs",
       "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     ]

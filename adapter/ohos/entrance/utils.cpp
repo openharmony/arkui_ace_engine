@@ -27,21 +27,6 @@
 
 namespace OHOS::Ace {
 
-bool GetIsArkFromConfig(const std::string& packagePath, bool isHap)
-{
-    std::string jsonStr = isHap ? GetStringFromHap(packagePath, "config.json") :
-        GetStringFromFile(packagePath, "config.json");
-    if (jsonStr.empty()) {
-        LOGE("return not arkApp.");
-        return false;
-    }
-    auto rootJson = JsonUtil::ParseJsonString(jsonStr);
-    auto module = rootJson->GetValue("module");
-    auto distro = module->GetValue("distro");
-    std::string virtualMachine = distro->GetString("virtualMachine");
-    return virtualMachine.find("ark") != std::string::npos;
-}
-
 std::string GetStringFromFile(const std::string& packagePathStr, const std::string& fileName)
 {
     auto configPath = packagePathStr + fileName;

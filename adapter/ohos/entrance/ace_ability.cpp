@@ -312,7 +312,6 @@ void AceAbility::OnStart(const Want& want)
     bool isHap = moduleInfo ? !moduleInfo->hapPath.empty() : false;
     std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePath, srcPath, isHap);
-    bool isArkApp = GetIsArkFromConfig(packagePath, isHap);
 
     AceApplicationInfo::GetInstance().SetAbilityName(info ? info->name : "");
     std::string moduleName = info ? info->moduleName : "";
@@ -349,7 +348,7 @@ void AceAbility::OnStart(const Want& want)
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
 
     // create container
-    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, shared_from_this(),
+    Platform::AceContainer::CreateContainer(abilityId_, frontendType, srcPath, shared_from_this(),
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); },
             [this](const std::string& address) {
                 AAFwk::Want want;

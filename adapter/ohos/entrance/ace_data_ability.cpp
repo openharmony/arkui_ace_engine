@@ -82,12 +82,9 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want)
     }
     packagePathStr += "/" + moduleInfo->package + "/";
     // init data ability
-    bool isHap = moduleInfo ? !moduleInfo->hapPath.empty() : false;
-    std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     BackendType backendType = BackendType::DATA;
-    bool isArkApp = GetIsArkFromConfig(packagePath, isHap);
 
-    Platform::PaContainer::CreateContainer(abilityId_, backendType, isArkApp, this,
+    Platform::PaContainer::CreateContainer(abilityId_, backendType, this,
         std::make_unique<DataPlatformEventCallback>([this]() { TerminateAbility(); }));
 
     AceEngine::InitJsDumpHeadSignal();
