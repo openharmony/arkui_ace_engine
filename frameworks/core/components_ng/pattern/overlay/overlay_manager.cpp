@@ -232,6 +232,15 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     menuMap_.erase(it);
 }
 
+void OverlayManager::CleanMenuInSubWindow()
+{
+    LOGI("OverlayManager::CleanMenuInSubWindow");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->Clean();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
 {
