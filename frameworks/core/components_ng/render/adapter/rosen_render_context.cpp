@@ -269,6 +269,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
         }
         if (rosenRenderContext->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             rosenRenderContext->PaintBackground();
+            rosenRenderContext->RequestNextFrame();
         }
     };
     return task;
@@ -635,6 +636,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
         }
         if (rosenRenderContext->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             rosenRenderContext->PaintBorderImage();
+            rosenRenderContext->RequestNextFrame();
         }
     };
     return task;
