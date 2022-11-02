@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr size_t MAX_BACKGROUND_THREADS = 8;
-constexpr size_t MAX_DEFAULT_THREADS = 4;
+constexpr size_t HIGH_PRIO_THREADS = 1;
 constexpr uint32_t PURGE_FLAG_MASK = (1 << MAX_BACKGROUND_THREADS) - 1;
 
 void SetThreadName(uint32_t threadNo)
@@ -139,7 +139,7 @@ void BackgroundTaskExecutor::StartNewThreads(size_t num)
     // Start new threads.
     std::list<std::thread> newThreads;
     for (size_t idx = 0; idx < num; ++idx) {
-        bool handleLow = currentThreadNo + idx > MAX_DEFAULT_THREADS;
+        bool handleLow = currentThreadNo + idx > HIGH_PRIO_THREADS;
         newThreads.emplace_back(std::bind(&BackgroundTaskExecutor::ThreadLoop, this, currentThreadNo + idx, handleLow));
     }
 
