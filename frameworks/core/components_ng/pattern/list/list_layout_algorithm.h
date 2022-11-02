@@ -215,6 +215,8 @@ private:
     float endMainPos_ = 0.0f;
     int32_t preStartIndex_ = -1;
     int32_t preEndIndex_ = -1;
+    float preStartPos_ = 0.0f;
+    float preEndPos_ = 0.0f;
 
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
