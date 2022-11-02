@@ -16,7 +16,6 @@
 #include <cstdint>
 
 #include "base/log/log.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -90,7 +89,7 @@ void CreatePageRoot(RefPtr<JsAcePage>& page, JSView* view)
     CHECK_NULL_VOID(pageRouterManager);
     auto pageNode = pageRouterManager->GetCurrentPageNode();
     CHECK_NULL_VOID(pageNode);
-    auto pageRootNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode());
+    auto pageRootNode = view->CreateUINode();
     CHECK_NULL_VOID(pageRootNode);
     pageRootNode->MountToParent(pageNode);
 }

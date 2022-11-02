@@ -72,12 +72,12 @@ public:
         return true;
     }
 
-    const RefPtr<TextFieldController>& GetSearchController()
+    const RefPtr<Ace::TextFieldController>& GetSearchController()
     {
         return searchController_;
     }
 
-    void SetSearchController(const RefPtr<TextFieldController>& searchController)
+    void SetSearchController(const RefPtr<Ace::TextFieldController>& searchController)
     {
         searchController_ = searchController;
     }
@@ -94,7 +94,7 @@ private:
     RefPtr<ClickEvent> imageClickListener_;
     RefPtr<ClickEvent> buttonClickListener_;
 
-    RefPtr<TextFieldController> searchController_;
+    RefPtr<Ace::TextFieldController> searchController_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -53,10 +53,8 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     LOGD("Measure Menu Position = %{public}f %{public}f", position_.GetX(), position_.GetY());
     auto leftSpace = position_.GetX();
     auto rightSpace = screenSize_.Width() - leftSpace;
-    float maxWidth = std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding;
     auto childConstraint = props->CreateChildConstraint();
-    childConstraint.maxSize.SetWidth(maxWidth);
-    childConstraint.percentReference.SetWidth(maxWidth);
+    childConstraint.maxSize.SetWidth(std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding);
 
     // measure children (options/customNode)
     SizeF menuSize;

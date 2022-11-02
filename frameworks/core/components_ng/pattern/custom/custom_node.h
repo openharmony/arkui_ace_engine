@@ -21,19 +21,18 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
 namespace OHOS::Ace::NG {
 // CustomNode is the frame node of @Component struct.
-class ACE_EXPORT CustomNode : public UINode, public CustomNodeBase {
-    DECLARE_ACE_TYPE(CustomNode, UINode, CustomNodeBase);
+class ACE_EXPORT CustomNode : public UINode {
+    DECLARE_ACE_TYPE(CustomNode, UINode);
 
 public:
     static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
 
     CustomNode(int32_t nodeId, const std::string& viewKey);
-    ~CustomNode() override = default;
+    ~CustomNode() override;
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
@@ -42,15 +41,54 @@ public:
         return true;
     }
 
-    void SetRenderFunction(const RenderFunction& renderFunction) override
+    void SetRenderFunction(const RenderFunction& renderFunction)
     {
         renderFunction_ = renderFunction;
     }
 
+    void FireOnAppear() const
+    {
+        if (appearFunc_) {
+            appearFunc_();
+        }
+    }
+
+    void SetAppearFunction(std::function<void()>&& appearFunc)
+    {
+        appearFunc_ = std::move(appearFunc);
+    }
+
+    void SetUpdateFunction(std::function<void()>&& updateFunc)
+    {
+        updateFunc_ = std::move(updateFunc);
+    }
+
+    void SetDestroyFunction(std::function<void()>&& destroyFunc)
+    {
+        destroyFunc_ = std::move(destroyFunc);
+    }
+
+    void Reset()
+    {
+        updateFunc_ = nullptr;
+        appearFunc_ = nullptr;
+        destroyFunc_ = nullptr;
+    }
+
+    // called by view in js thread
+    void MarkNeedUpdate();
+
+    // called by pipeline in js thread of update.
+    void Update();
+
     void Build() override;
 
 private:
+    std::function<void()> updateFunc_;
+    std::function<void()> appearFunc_;
+    std::function<void()> destroyFunc_;
     std::string viewKey_;
+    bool needRebuild_ = false;
     RenderFunction renderFunction_;
     RefPtr<UINode> child_;
 };

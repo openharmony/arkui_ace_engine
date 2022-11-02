@@ -478,8 +478,6 @@ void RenderSwiper::InitRecognizer(bool catchMode)
         auto pipeline = context_.Upgrade();
         if (!catchMode && pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
             clickRecognizer_->SetUseCatchMode(false);
-        } else if (!showIndicator_) {
-            clickRecognizer_->SetUseCatchMode(false);
         } else {
             clickRecognizer_->SetUseCatchMode(true);
         }
@@ -2391,8 +2389,7 @@ void RenderSwiper::StartIndicatorSpringAnimation(double start, double end)
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->UpdateIndicatorSpringStatus(SpringStatus::SPRING_STOP);
-            swiper->UpdateIndicatorTailPosition(DRAG_OFFSET_MIN);
+            swiper->ResetIndicatorSpringStatus();
         }
     });
 }

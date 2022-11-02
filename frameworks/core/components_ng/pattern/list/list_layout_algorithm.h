@@ -18,13 +18,13 @@
 
 #include <map>
 #include <optional>
+#include <stdint.h>
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_properties.h"
 
@@ -115,6 +115,16 @@ public:
         return spaceWidth_;
     }
 
+    void SetLanes(int32_t lanes)
+    {
+        lanes_ = lanes;
+    }
+
+    std::optional<int32_t> GetLanes() const
+    {
+        return lanes_;
+    }
+
     float GetEstimateOffset() const
     {
         return estimateOffset_;
@@ -161,34 +171,9 @@ public:
     void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
         int32_t endIndex, float endPos);
 
-    virtual int32_t GetLanes() const
-    {
-        return 1;
-    }
-
-protected:
-    virtual void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
-        LayoutConstraintF& contentConstraint);
-    virtual int32_t LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        Axis axis, int32_t& currentIndex, float startPos, float& endPos);
-    virtual int32_t LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        Axis axis, int32_t& currentIndex, float endPos, float& startPos);
-    virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
-    virtual void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& layoutConstraint, Axis axis) {};
-    virtual int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index)
-    {
-        return index;
-    }
-
-    static RefPtr<ListItemGroupLayoutProperty> GetListItemGroup(const RefPtr<LayoutWrapper>&  layoutWrapper);
-    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
-    void SetItemInfo(int32_t index, ListItemInfo&& info)
-    {
-        itemPosition_[index] = info;
-    }
-
 private:
+    void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
+
     void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
     void RecyclePrevIndex(LayoutWrapper* layoutWrapper);
@@ -204,6 +189,16 @@ private:
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
+    void CalculateLanes(const LayoutConstraintF& layoutConstraint, Axis axis);
+    void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
+    float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+    int32_t LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& currentIndex, float startPos, float& endPos);
+    int32_t LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& currentIndex, float endPos, float& startPos);
+
+    static RefPtr<ListItemGroupLayoutProperty> GetListItemGroup(const RefPtr<LayoutWrapper>&  layoutWrapper);
+    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
     void GetHeaderFooterGroupNode(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
@@ -221,6 +216,9 @@ private:
 
     int32_t totalItemCount_ = 0;
 
+    std::optional<int32_t> lanes_;
+    std::optional<float> minLaneLength_;
+    std::optional<float> maxLaneLength_;
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
     float estimateOffset_ = 0.0f;
@@ -231,6 +229,7 @@ private:
     float paddingAfterContent_ = 0.0f;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
+    LayoutConstraintF groupLayoutConstraint_;
     WeakPtr<FrameNode> headerGroupNode_;
     WeakPtr<FrameNode> footerGroupNode_;
 };

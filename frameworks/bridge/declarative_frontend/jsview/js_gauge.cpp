@@ -29,7 +29,7 @@ GaugeModel* GaugeModel::GetInstance()
 {
     if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::GaugeModelNG());
+        instance_.reset(new NG::DataPanelModelNG());
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::GaugeModelNG());

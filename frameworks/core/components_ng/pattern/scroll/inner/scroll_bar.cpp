@@ -16,42 +16,9 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
 #include "core/animation/curve_animation.h"
-#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-ScrollBar::ScrollBar()
-{
-    InitTheme();
-}
-
-ScrollBar::ScrollBar(DisplayMode displayMode, ShapeMode shapeMode, PositionMode positionMode)
-    : displayMode_(displayMode), shapeMode_(shapeMode), positionMode_(positionMode)
-{
-    InitTheme();
-}
-
-void ScrollBar::InitTheme()
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    if (theme == nullptr) {
-        LOGW("ScrollBarTheme is null");
-        return;
-    }
-    SetInactiveWidth(theme->GetNormalWidth());
-    SetNormalWidth(theme->GetNormalWidth());
-    SetActiveWidth(theme->GetActiveWidth());
-    SetTouchWidth(theme->GetTouchWidth());
-    SetReservedHeight(theme->GetReservedHeight());
-    SetMinHeight(theme->GetMinHeight());
-    SetMinDynamicHeight(theme->GetMinDynamicHeight());
-    SetBackgroundColor(theme->GetBackgroundColor());
-    SetForegroundColor(theme->GetForegroundColor());
-    SetPadding(theme->GetPadding());
-    SetScrollable(true);
-}
 
 bool ScrollBar::InBarRegion(const Point& point) const
 {
@@ -107,8 +74,7 @@ void ScrollBar::SetRectTrickRegion(const Offset& offset, const Size& size,
         }
         double lastMainOffset =
             std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
-        offsetScale_ = (mainSize - activeSize) / (estimatedHeight - mainSize);
-        double activeMainOffset = offsetScale_ * lastMainOffset;
+        double activeMainOffset = (mainSize - activeSize) * lastMainOffset / (estimatedHeight - mainSize);
         activeMainOffset = std::min(activeMainOffset, barRegionSize - activeSize);
         double normalWidth = NormalizeToPx(normalWidth_);
         if (positionMode_ == PositionMode::LEFT) {
@@ -172,14 +138,6 @@ bool ScrollBar::NeedPaint() const
 double ScrollBar::GetNormalWidthToPx() const
 {
     return NormalizeToPx(normalWidth_);
-}
-
-double ScrollBar::CalcPatternOffset(double scrollBarOffset)
-{
-    if (!isDriving_ || NearZero(offsetScale_)) {
-        return scrollBarOffset;
-    }
-    return scrollBarOffset / offsetScale_;
 }
 
 double ScrollBar::NormalizeToPx(const Dimension& dimension) const

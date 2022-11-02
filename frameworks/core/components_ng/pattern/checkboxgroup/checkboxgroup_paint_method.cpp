@@ -54,14 +54,11 @@ void CheckBoxGroupPaintMethod::InitializeParam()
     borderRadius_ = checkBoxTheme->GetBorderRadius().ConvertToPx();
     checkStroke_ = checkBoxTheme->GetCheckStroke().ConvertToPx();
     activeColor_ = checkBoxTheme->GetActiveColor();
-    inactiveColor_ = checkBoxTheme->GetInactiveColor();
     shadowColor_ = checkBoxTheme->GetShadowColor();
 }
 
 void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    constexpr uint8_t ENABLED_ALPHA = 255;
-    constexpr uint8_t DISABLED_ALPHA = 102;
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<CheckBoxGroupPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
@@ -87,27 +84,18 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     if (status == CheckBoxGroupPaintProperty::SelectStatus::ALL) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
-        if (!enabled_) {
-            brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
-        }
         DrawActiveBorder(canvas, paintOffset, brush, contentSize);
+        pen.SetColor(ToRSColor(Color::WHITE));
         DrawCheck(canvas, paintOffset, pen, contentSize);
     } else if (status == CheckBoxGroupPaintProperty::SelectStatus::NONE) {
-        pen.SetColor(ToRSColor(inactiveColor_));
+        pen.SetColor(ToRSColor(Color::GRAY));
         brush.SetColor(ToRSColor(Color::WHITE));
-        if (!enabled_) {
-            pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
-        }
         DrawUnselected(canvas, paintOffset, pen, brush, contentSize);
     } else {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
-        if (!enabled_) {
-            brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
-        }
         DrawActiveBorder(canvas, paintOffset, brush, contentSize);
+        pen.SetColor(ToRSColor(Color::WHITE));
         DrawPart(canvas, paintOffset, pen, contentSize);
     }
 }
@@ -115,6 +103,7 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
 void CheckBoxGroupPaintMethod::DrawUnselected(
     RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSBrush& brush, SizeF& paintSize) const
 {
+    pen.SetColor(ToRSColor(Color::GRAY));
     float originX = origin.GetX();
     float originY = origin.GetY();
     auto rrect = RSRoundRect(

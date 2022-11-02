@@ -200,18 +200,6 @@ public:
         return static_cast<bool>(onDrop_);
     }
 
-    bool IsEnabled() const
-    {
-        return enabled_;
-    }
-
-    void SetEnabled(bool enabled)
-    {
-        enabled_ = enabled;
-    }
-    // get XTS inspector value
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
-
 private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
@@ -227,8 +215,6 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDragMove_;
     OnDragFunc onDrop_;
-
-    bool enabled_ { true };
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

@@ -102,8 +102,6 @@ void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& p
         SkDoubleToScalar(gradient.GetEndOffset().GetY() + offset.GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
     auto gradientColors = gradient.GetColors();
-    std::sort(gradientColors.begin(), gradientColors.end(),
-        [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
     uint32_t colorsSize = gradientColors.size();
     SkColor colors[gradientColors.size()];
     float pos[gradientColors.size()];
@@ -752,11 +750,6 @@ void CustomPaintPaintMethod::Arc(PaintWrapper* paintWrapper, const ArcParam& par
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
         skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(half), false);
         skPath_.arcTo(rect, SkDoubleToScalar(half + startAngle), SkDoubleToScalar(half), false);
-    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
-        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
-        skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(half), false);
-        skPath_.arcTo(rect, SkDoubleToScalar(half + startAngle), SkDoubleToScalar(half), false);
-        skPath_.arcTo(rect, SkDoubleToScalar(half + half + startAngle), SkDoubleToScalar(sweepAngle), false);
     } else {
         skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(sweepAngle), false);
     }
@@ -980,10 +973,6 @@ void CustomPaintPaintMethod::Path2DArc(const OffsetF& offset, const PathArgs& ar
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
         skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
         skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
-    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
-        skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
-        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
-        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle, false);
     } else {
         skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
     }

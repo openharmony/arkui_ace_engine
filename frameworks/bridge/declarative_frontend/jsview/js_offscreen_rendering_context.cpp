@@ -135,18 +135,12 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
 
     if (args.Length() >= 3) {
         if (args[0]->IsNumber() && args[1]->IsNumber()) {
-            double fWidth = 0.0;
-            double fHeight = 0.0;
-            int width = 0;
-            int height = 0;
-            JSViewAbstract::ParseJsDouble(args[0], fWidth);
-            JSViewAbstract::ParseJsDouble(args[1], fHeight);
-
-            fWidth = SystemProperties::Vp2Px(fWidth);
-            fHeight = SystemProperties::Vp2Px(fHeight);
-            width = round(fWidth);
-            height = round(fHeight);
-
+            double width = 0.0;
+            double height = 0.0;
+            JSViewAbstract::ParseJsDouble(args[0], width);
+            JSViewAbstract::ParseJsDouble(args[1], height);
+            width = SystemProperties::Vp2Px(width);
+            height = SystemProperties::Vp2Px(height);
             auto container = Container::Current();
             if (container) {
                 if (Container::IsCurrentUseNewPipeline()) {

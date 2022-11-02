@@ -29,9 +29,8 @@ void TextFieldController::Delete() {}
 void TextFieldController::CaretPosition(int32_t caretPosition)
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    if (textFieldPattern) {
-        textFieldPattern->SetCaretPosition(caretPosition);
-    }
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->SetCaretPosition(caretPosition);
     if (setCaretPosition_) {
         setCaretPosition_(caretPosition);
     }

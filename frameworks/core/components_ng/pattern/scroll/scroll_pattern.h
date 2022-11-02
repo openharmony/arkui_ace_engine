@@ -84,8 +84,6 @@ public:
         return currentOffset_;
     }
 
-    void ResetPosition();
-
     Offset GetCurrentOffset() const
     {
         if (axis_ == Axis::HORIZONTAL) {

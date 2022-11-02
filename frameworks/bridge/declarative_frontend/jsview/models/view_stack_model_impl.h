@@ -20,18 +20,11 @@
 #include "base/utils/macros.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace::Framework {
 
 class ViewStackModelImpl : public ViewStackModel {
 public:
-    void Push(const RefPtr<AceType>& node, bool isCustomView) override
-    {
-        auto uiNode = AceType::DynamicCast<Component>(node);
-        ViewStackProcessor::GetInstance()->Push(uiNode, isCustomView);
-    }
-
     void Pop() override
     {
         ViewStackProcessor::GetInstance()->Pop();
@@ -40,16 +33,6 @@ public:
     void PopContainer() override
     {
         ViewStackProcessor::GetInstance()->PopContainer();
-    }
-
-    void PushKey(const std::string& key) override
-    {
-        ViewStackProcessor::GetInstance()->PushKey(key);
-    }
-
-    void PopKey() override
-    {
-        ViewStackProcessor::GetInstance()->PopKey();
     }
 
     void NewScope() override

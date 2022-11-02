@@ -52,13 +52,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto eventHub = host->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        auto enabled = eventHub->IsEnabled();
-        auto paintMethod = MakeRefPtr<RadioPaintMethod>(enabled);
-        return paintMethod;
+        return MakeRefPtr<RadioPaintMethod>();
     }
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*config*/) override

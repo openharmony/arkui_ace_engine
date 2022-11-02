@@ -927,10 +927,3 @@ var GridDirection;
   GridDirection[GridDirection["RowReverse"] = 2] = "RowReverse";
   GridDirection[GridDirection["ColumnReverse"] = 3] = "ColumnReverse";
 })(GridDirection || (GridDirection = {}));
-
-var SelectStatus;
-(function (SelectStatus) {
-  SelectStatus[SelectStatus["All"] = 0] = "All";
-  SelectStatus[SelectStatus["Part"] = 1] = "Part";
-  SelectStatus[SelectStatus["None"] = 2] = "None";
-})(SelectStatus || (SelectStatus = {}));

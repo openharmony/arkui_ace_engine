@@ -181,13 +181,14 @@ protected:
     void DealCache(int32_t start, int32_t end);
     void DeleteItems(int32_t index, bool isTail);
 
+    void GetMinAndMaxIndex(int32_t& min, int32_t& max);
     int32_t GetItemMainIndex(int32_t index);
 
     bool NeedUpdate(const RefPtr<Component>& component);
 
     void CalculateWholeSize(double drawLength);
 
-    void InitScrollBar();
+    void InitScrollBar(const RefPtr<Component>& component);
     void InitScrollBarProxy();
 
     void DoJump(double position, int32_t source);
@@ -254,7 +255,7 @@ protected:
     int32_t scrollBarOpacity_ = 0;
     double estimateHeight_ = 0.0;
     double estimatePos_ = 0.0;
-    double estimateAverageHeight_ = 0.0;
+    double estimateAverageHight_ = 0.0;
     bool totalCountFlag_ = false;
     bool animatorJumpFlag_ = false;
     Color scrollBarColor_;

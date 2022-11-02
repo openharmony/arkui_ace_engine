@@ -207,24 +207,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     viewPort_ = layoutAlgorithm->GetViewPortSize();
     viewPortExtent_ = layoutAlgorithm->GetViewPortExtent();
 
-    auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
-    if (paintProperty && paintProperty->NeedPaintScrollBar()) {
-        return true;
-    }
     return false;
-}
-
-void ScrollPattern::ResetPosition()
-{
-    currentOffset_ = 0.0f;
-    lastOffset_ = 0.0f;
-    auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
-    if (paintProperty) {
-        paintProperty->UpdateScrollBarOffset(currentOffset_, viewPort_, viewPortExtent_, !isScrollContent_);
-    }
-    if (scrollBarProxy_) {
-        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
-    }
 }
 
 bool ScrollPattern::IsAtTop() const
@@ -394,9 +377,6 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (!ScrollPageCheck(delta, source)) {
         return false;
     }
-    auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, false);
-    delta = paintProperty->CalculaltePatternOffset(delta);
     // TODO: scrollBar effect!!
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
@@ -421,8 +401,10 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
         next = true;
     }
     // inner scroll bar
-    if (lastOffset_ != currentOffset_) {
-        paintProperty->UpdateScrollBarOffset(currentOffset_, viewPort_, viewPortExtent_, !isScrollContent_);
+    auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
+    if (paintProperty && lastOffset_ != currentOffset_) {
+        paintProperty->UpdateScrollBarOffset(currentOffset_, viewPortExtent_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     // outer scrollbar
     if (source != SCROLL_FROM_BAR && scrollBarProxy_ && lastOffset_ != currentOffset_) {

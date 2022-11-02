@@ -52,10 +52,7 @@ RenderGridScroll::~RenderGridScroll()
 
 void RenderGridScroll::Update(const RefPtr<Component>& component)
 {
-    component_ = AceType::DynamicCast<GridLayoutComponent>(component);
-    ACE_DCHECK(component_);
     if (!NeedUpdate(component)) {
-        InitScrollBar();
         return;
     }
     useScrollable_ = SCROLLABLE::NO_SCROLL;
@@ -71,7 +68,7 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     ApplyRestoreInfo();
     RenderGridLayout::Update(component);
     FindRefreshParent(AceType::WeakClaim(this));
-    InitScrollBar();
+    InitScrollBar(component);
     TakeBoundary();
     const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (!grid) {
@@ -108,7 +105,7 @@ bool RenderGridScroll::NeedUpdate(const RefPtr<Component>& component)
         rowsArgs_ != grid->GetRowsArgs() || userColGap_ != grid->GetColumnGap() || userRowGap_ != grid->GetRowGap() ||
         rightToLeft_ != grid->GetRightToLeft()) {
         return true;
-    }
+    };
     return false;
 }
 
@@ -154,10 +151,6 @@ void RenderGridScroll::CreateScrollable()
             if (proxy) {
                 proxy->StartScrollBarAnimator();
             }
-            auto scrollBar = grid->scrollBar_;
-            if (scrollBar) {
-                scrollBar->HandleScrollBarEnd();
-            }
         }
     });
     InitializeScrollable(scrollable_);
@@ -167,7 +160,7 @@ void RenderGridScroll::CreateScrollable()
 void RenderGridScroll::CheckJumpToIndex(double offset)
 {
     int32_t index = startShowItemIndex_;
-    double dtIndex = -offset / estimateAverageHeight_;
+    double dtIndex = -offset / estimateAverageHight_;
     double remainOffset = 0.0;
     if (dtIndex >= 0) {
         auto idx = static_cast<int32_t>(dtIndex);
@@ -175,7 +168,7 @@ void RenderGridScroll::CheckJumpToIndex(double offset)
         if (index >= GetItemTotalCount()) {
             index = GetItemTotalCount() - 1;
         } else {
-            remainOffset = -offset - idx * estimateAverageHeight_;
+            remainOffset = -offset - idx * estimateAverageHight_;
         }
     } else {
         auto idx = static_cast<int32_t>(-dtIndex);
@@ -183,16 +176,16 @@ void RenderGridScroll::CheckJumpToIndex(double offset)
         if (index < 0) {
             index = 0;
         } else {
-            remainOffset = -offset + idx * estimateAverageHeight_;
+            remainOffset = -offset + idx * estimateAverageHight_;
         }
     }
     int32_t rankIndex = GetStartingItem(index);
-    if ((index - rankIndex) * estimateAverageHeight_ > colSize_) {
+    if ((index - rankIndex) * estimateAverageHight_ > colSize_) {
         currentOffset_ += offset;
         return;
     }
     ScrollToIndex(rankIndex, SCROLL_FROM_BAR);
-    currentOffset_ = remainOffset + (index - rankIndex) * estimateAverageHeight_;
+    currentOffset_ = remainOffset + (index - rankIndex) * estimateAverageHight_;
 }
 
 bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
@@ -1008,7 +1001,7 @@ void RenderGridScroll::ClearLayout(bool needReservedPlace)
     endIndex_ = -1;
     lastOffset_ = 0.0;
     estimatePos_ = 0.0;
-    estimateAverageHeight_ = 0.0;
+    estimateAverageHight_ = 0.0;
     estimateHeight_ = 0.0;
 
     colCount_ = 0;
@@ -1041,6 +1034,18 @@ void RenderGridScroll::ClearItems()
         RemoveChildByIndex(item.first);
     }
     loadingIndex_ = -1;
+}
+
+void RenderGridScroll::GetMinAndMaxIndex(int32_t& min, int32_t& max)
+{
+    for (const auto& item : items_) {
+        if (item.first < min) {
+            min = item.first;
+        }
+        if (item.first > max) {
+            max = item.first;
+        }
+    }
 }
 
 int32_t RenderGridScroll::GetItemMainIndex(int32_t index)
@@ -1127,10 +1132,10 @@ void RenderGridScroll::CalculateWholeSize(double drawLength)
         scrollBarExtent += GetSize(gridCells_.at(index).at(0)) + *mainGap_;
     }
     if (itemCount > 0 && !gridMatrix_.empty()) {
-        estimateAverageHeight_ = scrollBarExtent / itemCount;
-        estimateHeight_ = estimateAverageHeight_ * GetItemTotalCount();
+        estimateAverageHight_ = scrollBarExtent / itemCount;
+        estimateHeight_ = estimateAverageHight_ * GetItemTotalCount();
         int32_t startItem = gridMatrix_.begin()->second[0];
-        estimatePos_ = estimateAverageHeight_ * startItem;
+        estimatePos_ = estimateAverageHight_ * startItem;
     }
 
     bool isScrollable = false;
@@ -1159,31 +1164,31 @@ double RenderGridScroll::GetEstimatedHeight()
     return estimateHeight_;
 }
 
-void RenderGridScroll::InitScrollBar()
+void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
 {
-    if (!component_) {
-        LOGE("InitScrollBar failed, component_ is null.");
-        return;
-    }
     if (scrollBar_) {
-        scrollBar_->SetDisplayMode(component_->GetScrollBar());
         scrollBar_->Reset();
         return;
     }
-
+    const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (!grid) {
+        LOGE("RenderGridLayout update failed.");
+        EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
+        return;
+    }
     const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
     if (!theme) {
         return;
     }
     RefPtr<GridScrollController> controller = AceType::MakeRefPtr<GridScrollController>();
-    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBar(), theme->GetShapeMode());
+    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(grid->GetScrollBar(), theme->GetShapeMode());
     scrollBar_->SetScrollBarController(controller);
 
     // set the scroll bar style
     scrollBar_->SetReservedHeight(theme->GetReservedHeight());
     scrollBar_->SetMinHeight(theme->GetMinHeight());
     scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
-    auto& scrollBarColor = component_->GetScrollBarColor();
+    auto& scrollBarColor = grid->GetScrollBarColor();
     if (!scrollBarColor.empty()) {
         scrollBarColor_ = Color::FromString(scrollBarColor);
     } else {
@@ -1193,8 +1198,8 @@ void RenderGridScroll::InitScrollBar()
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
     scrollBar_->SetPadding(theme->GetPadding());
     scrollBar_->SetScrollable(true);
-    if (!component_->GetScrollBarWidth().empty()) {
-        const auto& width = StringUtils::StringToDimension(component_->GetScrollBarWidth());
+    if (!grid->GetScrollBarWidth().empty()) {
+        const auto& width = StringUtils::StringToDimension(grid->GetScrollBarWidth());
         scrollBar_->SetInactiveWidth(width);
         scrollBar_->SetNormalWidth(width);
         scrollBar_->SetActiveWidth(width);

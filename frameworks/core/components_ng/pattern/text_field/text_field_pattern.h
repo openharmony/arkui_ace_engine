@@ -213,11 +213,6 @@ public:
         return utilPadding_.left.value_or(basicPaddingLeft_);
     }
 
-    float GetPaddingRight() const
-    {
-        return utilPadding_.right.value_or(basicPaddingLeft_);
-    }
-
     const PaddingPropertyF& GetUtilPadding() const
     {
         return utilPadding_;
@@ -319,7 +314,6 @@ private:
     void StartTwinkling();
     void StopTwinkling();
 
-    void SetCaretOffsetXForEmptyText();
     void UpdateTextFieldManager(const Offset& offset);
     void OnTextInputActionUpdate(TextInputAction value);
 
@@ -337,8 +331,8 @@ private:
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    bool FilterWithRegex(const std::string& filter, const std::string& valueToUpdate, std::string& result);
-    void EditingValueFilter(const std::string& valueToUpdate, std::string& result);
+    void FilterWithRegex(const std::string& filter, std::string& valueToUpdate);
+    void EditingValueFilter(std::string& valueToUpdate);
     float PreferredLineHeight();
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();

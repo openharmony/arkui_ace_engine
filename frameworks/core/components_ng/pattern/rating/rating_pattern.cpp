@@ -455,7 +455,7 @@ void RatingPattern::OnModifyDone()
     if (!ratingLayoutProperty->HasForegroundImageSourceInfo()) {
         isForegroundImageInfoFromTheme_ = true;
         ratingLayoutProperty->UpdateForegroundImageSourceInfo(GetImageSourceInfoFromTheme(0b001));
-        singleStarImagePaintConfig_.isSvg_ = true;
+        singleStarImagePaintConfig_.isSvg = true;
     }
     ImageSourceInfo foregroundImageSourceInfo =
         ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b001));

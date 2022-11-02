@@ -111,6 +111,7 @@ public:
     }
 
     double GetEstimatedHeight();
+    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
     void ScrollToIndex(int32_t index, int32_t source);
 
     inline Axis GetAxis() const

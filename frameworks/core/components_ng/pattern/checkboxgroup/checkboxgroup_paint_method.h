@@ -28,7 +28,7 @@ class CheckBoxGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintMethod, NodePaintMethod)
 
 public:
-    CheckBoxGroupPaintMethod(bool enabled) : enabled_(enabled) {};
+    CheckBoxGroupPaintMethod() = default;
 
     ~CheckBoxGroupPaintMethod() override = default;
 
@@ -46,10 +46,7 @@ private:
     float borderRadius_ = 0.0f;
     float checkStroke_ = 0.0f;
     Color activeColor_ = Color::BLUE;
-    Color inactiveColor_ = Color::GRAY;
     Color shadowColor_ = Color::WHITE;
-
-    bool enabled_ = true;
 };
 } // namespace OHOS::Ace::NG
 

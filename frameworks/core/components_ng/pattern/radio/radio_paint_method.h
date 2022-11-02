@@ -28,7 +28,7 @@ class RadioPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(RadioPaintMethod, NodePaintMethod)
 
 public:
-    RadioPaintMethod(bool enabled) : enabled_(enabled) {};
+    RadioPaintMethod() = default;
     ~RadioPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
@@ -43,8 +43,6 @@ private:
     Color activeColor_ = Color::BLUE;
     Color inactiveColor_ = Color::WHITE;
     Color shadowColor_ = Color::RED;
-
-    bool enabled_ = true;
 };
 } // namespace OHOS::Ace::NG
 

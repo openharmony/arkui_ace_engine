@@ -78,9 +78,7 @@ void RenderLoadingProgress::UpdateRingAnimation()
         auto loading = weak.Upgrade();
         if (loading) {
             loading->ringOffset_.SetY(value * loading->scale_);
-            if (loading->GetVisible() && !loading->GetHidden()) {
-                loading->MarkNeedRender();
-            }
+            loading->MarkNeedRender();
         }
     });
     double moveRange = ringRadius_ * moveRatio_ * 2.0;
@@ -99,9 +97,7 @@ void RenderLoadingProgress::UpdateRingAnimation()
     ringController_->AddInterpolator(ringMove);
     ringController_->SetIteration(ANIMATION_REPEAT_INFINITE);
     ringController_->SetDuration(LOOP_DURATION);
-    if (GetVisible() && !GetHidden()) {
-        ringController_->Play();
-    }
+    ringController_->Play();
 }
 
 void RenderLoadingProgress::UpdateCometAnimation()
@@ -130,9 +126,7 @@ void RenderLoadingProgress::UpdateCometAnimation()
             loading->DoCometTailAnimation();
         }
     });
-    if (GetVisible() && !GetHidden()) {
-        cometController_->Play();
-    }
+    cometController_->Play();
 }
 
 void RenderLoadingProgress::DoCometTailAnimation()
@@ -183,9 +177,7 @@ void RenderLoadingProgress::DoCometTailAnimation()
             loading->DoCometLoopAnimation();
         }
     });
-    if (GetVisible() && !GetHidden()) {
-        cometController_->Play();
-    }
+    cometController_->Play();
 }
 
 void RenderLoadingProgress::DoCometLoopAnimation()
@@ -211,9 +203,7 @@ void RenderLoadingProgress::DoCometLoopAnimation()
     cometController_->AddInterpolator(cometLoopDegree);
     cometController_->SetIteration(ANIMATION_REPEAT_INFINITE);
     cometController_->SetDuration(LOOP_DURATION);
-    if (GetVisible() && !GetHidden()) {
-        cometController_->Play();
-    }
+    cometController_->Play();
 }
 
 void RenderLoadingProgress::UpdateCometParams()
@@ -341,9 +331,7 @@ void RenderLoadingProgress::SetDragDistance(double distance)
             break;
         }
     }
-    if (GetVisible() && !GetHidden()) {
-        MarkNeedRender();
-    }
+    MarkNeedRender();
 }
 
 void RenderLoadingProgress::PerformLayout()

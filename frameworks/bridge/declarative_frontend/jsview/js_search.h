@@ -54,13 +54,13 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSSearchController* scroller);
     void CaretPosition(int32_t caretPosition);
-    void SetController(const RefPtr<TextFieldControllerBase>& controller)
+    void SetController(const RefPtr<TextFieldController>& controller)
     {
         controller_ = controller;
     }
 
 private:
-    WeakPtr<TextFieldControllerBase> controller_;
+    WeakPtr<TextFieldController> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSSearchController);
 };
 

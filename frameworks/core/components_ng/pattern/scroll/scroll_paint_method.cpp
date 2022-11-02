@@ -47,6 +47,8 @@ void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrap
         return;
     }
 
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    paintProperty->UpdateScrollBarRegion(frameSize);
     ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
     if (scrollBar->GetFirstLoad()) {
         scrollBar->SetFirstLoad(false);

@@ -1894,7 +1894,8 @@ void JSViewAbstract::ParseBorderImageDimension(
     for (uint32_t i = 0; i < keys.size(); i++) {
         Dimension currentDimension;
         auto dimensionValue = object->GetProperty(keys.at(i).c_str());
-        if (ParseJsDimensionVp(dimensionValue, currentDimension)) {
+        if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
+            ParseJsDimensionVp(dimensionValue, currentDimension);
             auto direction = static_cast<BorderImageDirection>(i);
             switch (direction) {
                 case BorderImageDirection::LEFT:
@@ -1994,8 +1995,9 @@ void JSViewAbstract::ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<Bor
 
 void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    Dimension outsetDimension;
-    if (ParseJsDimensionVp(args, outsetDimension)) {
+    if (args->IsNumber() || args->IsString()) {
+        Dimension outsetDimension;
+        ParseJsDimensionVp(args, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::LEFT, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::TOP, outsetDimension);
@@ -2021,7 +2023,8 @@ void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<Bor
 void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
     Dimension sliceDimension;
-    if (ParseJsDimensionVp(args, sliceDimension)) {
+    if (args->IsNumber() || args->IsString()) {
+        ParseJsDimensionVp(args, sliceDimension);
         borderImage->SetEdgeSlice(BorderImageDirection::LEFT, sliceDimension);
         borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, sliceDimension);
         borderImage->SetEdgeSlice(BorderImageDirection::TOP, sliceDimension);
@@ -2033,7 +2036,8 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
     static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
     for (uint32_t i = 0; i < keys.size(); i++) {
         auto dimensionValue = object->GetProperty(keys.at(i).c_str());
-        if (ParseJsDimensionVp(dimensionValue, sliceDimension)) {
+        if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
+            ParseJsDimensionVp(dimensionValue, sliceDimension);
             borderImage->SetEdgeSlice(static_cast<BorderImageDirection>(i), sliceDimension);
         }
     }
@@ -2041,8 +2045,9 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
 
 void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    Dimension widthDimension;
-    if (ParseJsDimensionVp(args, widthDimension)) {
+    if (args->IsNumber() || args->IsString()) {
+        Dimension widthDimension;
+        ParseJsDimensionVp(args, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::LEFT, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::TOP, widthDimension);
@@ -2791,7 +2796,8 @@ void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
         return;
     }
     auto span = info[0]->ToNumber<int32_t>();
-    ViewAbstractModel::GetInstance()->SetGrid(span, std::nullopt);
+    auto gridContainerInfo = JSGridContainer::GetContainer();
+    ViewAbstractModel::GetInstance()->SetGrid(span, std::nullopt, gridContainerInfo);
 }
 
 void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
@@ -2801,7 +2807,8 @@ void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
         return;
     }
     auto offset = info[0]->ToNumber<int32_t>();
-    ViewAbstractModel::GetInstance()->SetGrid(std::nullopt, offset);
+    auto gridContainerInfo = JSGridContainer::GetContainer();
+    ViewAbstractModel::GetInstance()->SetGrid(std::nullopt, offset, gridContainerInfo);
 }
 
 static bool ParseSpanAndOffset(const JSRef<JSVal>& val, uint32_t& span, int32_t& offset)
@@ -2834,6 +2841,7 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
     // keys order must be strictly refer to GridSizeType
     const char* keys[] = { "", "xs", "sm", "md", "lg" };
 
+    auto gridContainerInfo = JSGridContainer::GetContainer();
     for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
         JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
         if (val->IsNull() || val->IsEmpty()) {
@@ -2842,7 +2850,7 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
         uint32_t span = 0;
         int32_t offset = 0;
         if (ParseSpanAndOffset(val, span, offset)) {
-            ViewAbstractModel::GetInstance()->SetGrid(span, offset, static_cast<GridSizeType>(i));
+            ViewAbstractModel::GetInstance()->SetGrid(span, offset, gridContainerInfo, static_cast<GridSizeType>(i));
         }
     }
 }

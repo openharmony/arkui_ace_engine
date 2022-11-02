@@ -68,11 +68,6 @@ public:
         return velocity_;
     }
 
-    void SetMainAxis(Axis axis)
-    {
-        mainAxis_ = axis;
-    }
-
     double GetMainAxisPos() const
     {
         switch (mainAxis_) {

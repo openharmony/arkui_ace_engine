@@ -19,7 +19,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -73,6 +72,10 @@ void TextModelNG::Create(const std::string& content)
 
 void TextModelNG::SetFontSize(const Dimension& value)
 {
+    if (!value.IsValid()) {
+        LOGE("FontSize value is not valid");
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
 
@@ -175,36 +178,27 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
 
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
-    auto dragStart = [dragStartFunc = std::move(onDragStart)](
-                         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
-        auto dragInfo = dragStartFunc(event, extraParams);
-        DragDropInfo info;
-        info.extraInfo = dragInfo.extraInfo;
-        info.pixelMap = dragInfo.pixelMap;
-        info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
-        return info;
-    };
-    ViewAbstract::SetOnDragStart(std::move(dragStart));
+    LOGE("no support SetOnDragStartId");
 }
 
 void TextModelNG::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
 {
-    ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
+    LOGE("no support SetOnDragEnterId");
 }
 
 void TextModelNG::SetOnDragMove(NG::OnDragDropFunc&& onDragMove)
 {
-    ViewAbstract::SetOnDragMove(std::move(onDragMove));
+    LOGE("no support SetOnDragMoveId");
 }
 
 void TextModelNG::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
 {
-    ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
+    LOGE("no support SetOnDragLeaveId");
 }
 
 void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 {
-    ViewAbstract::SetOnDrop(std::move(onDrop));
+    LOGE("no support SetOnDropId");
 }
 
 } // namespace OHOS::Ace::NG

@@ -83,11 +83,10 @@ class ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
 
 public:
-    ScrollBar();
+    ScrollBar() = default;
     explicit ScrollBar(
-        DisplayMode displayMode,
-        ShapeMode shapeMode = ShapeMode::RECT,
-        PositionMode positionMode = PositionMode::RIGHT);
+        DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT, PositionMode positionMode = PositionMode::RIGHT)
+        : displayMode_(displayMode), shapeMode_(shapeMode), positionMode_(positionMode) {}
     ~ScrollBar() override = default;
 
     bool InBarRegion(const Point& point) const;
@@ -96,7 +95,6 @@ public:
     void UpdateScrollBarRegion(
         const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight);
     double GetNormalWidthToPx() const;
-    double CalcPatternOffset(double scrollBarOffset);
 
     void Reset();
 
@@ -295,14 +293,6 @@ public:
         return isPressed_;
     }
 
-    void SetDriving(bool isDriving)
-    {
-        isDriving_ = isDriving;
-    }
-
-protected:
-    void InitTheme();
-
 private:
     void SetBarRegion(const Offset& offset, const Size& size);
     void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
@@ -334,13 +324,11 @@ private:
     double bottomAngle_ = DEFAULT_BOTTOMANGLE;
     double minAngle_ = DEFAULT_MINANGLE;
     double outBoundary_ = 0.0;
-    double offsetScale_ = 1.0f;
 
     bool isScrollable_ = false;
     bool firstLoad_ = true;
 
     bool isPressed_ = false;
-    bool isDriving_ = false; // false: scroll driving; true: bar driving
 };
 
 } // namespace OHOS::Ace::NG

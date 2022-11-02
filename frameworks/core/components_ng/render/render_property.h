@@ -129,10 +129,6 @@ struct GradientProperty {
 
 struct OverlayProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverlayText, OverlayOptions);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
-    {
-        propOverlayText.value_or(OverlayOptions()).ToJsonValue(json);
-    }
 };
 
 struct MotionPathProperty {
