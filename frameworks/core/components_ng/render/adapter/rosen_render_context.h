@@ -119,7 +119,6 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
-    void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateBackShadow(const Shadow& shadow) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
@@ -216,6 +215,7 @@ private:
     void OnFrontInvertUpdate(const Dimension& invert) override;
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
+    void OnFrontBlurRadiusUpdate(const Dimension& radius) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;

@@ -488,6 +488,8 @@ public:
     bool operator==(const BackgroundImageSize& size) const;
     bool operator!=(const BackgroundImageSize& size) const;
 
+    std::string ToString() const;
+
 private:
     BackgroundImageSizeType typeX_ { BackgroundImageSizeType::AUTO };
     double valueX_ = 0.0;
@@ -594,6 +596,8 @@ public:
     bool operator==(const BackgroundImagePosition& backgroundImagePosition) const;
 
     bool operator!=(const BackgroundImagePosition& backgroundImagePosition) const;
+
+    std::string ToString() const;
 
 private:
     BackgroundImagePositionType typeX_ { BackgroundImagePositionType::PX };

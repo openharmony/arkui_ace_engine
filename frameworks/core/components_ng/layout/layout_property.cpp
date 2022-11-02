@@ -42,6 +42,21 @@ std::string VisibleTypeToString(VisibleType type)
     }
     return "Visibility.Visible";
 }
+
+std::string TextDirectionToString(TextDirection type)
+{
+    static const LinearEnumMapNode<TextDirection, std::string> toStringMap[] = {
+        { TextDirection::LTR, "Direction.Ltr" },
+        { TextDirection::RTL, "Direction.Rtl" },
+        { TextDirection::INHERIT, "Direction.Inherit" },
+        { TextDirection::AUTO, "Direction.Auto" },
+    };
+    auto idx = BinarySearchFindIndex(toStringMap, ArraySize(toStringMap), type);
+    if (idx >= 0) {
+        return toStringMap[idx].value;
+    }
+    return "Direction.Auto";
+}
 } // namespace
 
 void LayoutProperty::Reset()
@@ -67,6 +82,7 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
 
     json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
+    json->Put("direction", TextDirectionToString(GetLayoutDirection()).c_str());
 }
 
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
