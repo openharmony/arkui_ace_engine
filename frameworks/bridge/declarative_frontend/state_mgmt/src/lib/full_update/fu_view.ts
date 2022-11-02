@@ -81,6 +81,7 @@ abstract class View extends NativeViewFullUpdate implements
     if (parent) {
       // this View is not a top-level View
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+      this.setCardId(parent.getCardId());
       this.localStorage_ = parent.localStorage_;
     } else if (localStorage) {
       this.localStorage_ = localStorage;

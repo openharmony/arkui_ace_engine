@@ -192,12 +192,12 @@ void CardFrontendDeclarative::UpdateData(const std::string& dataList)
                 frontend->UpdatePageData(dataList);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
 void CardFrontendDeclarative::UpdatePageData(const std::string& dataList)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI); // eTSCard UI == Main JS/UI/PLATFORM
     if (!delegate_) {
         LOGE("the delegate is null");
         EventReport::SendFormException(FormExcepType::UPDATE_PAGE_ERR);

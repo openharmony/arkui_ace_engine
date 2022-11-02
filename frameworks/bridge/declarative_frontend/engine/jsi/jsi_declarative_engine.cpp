@@ -968,7 +968,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
     return true;
 }
 
-bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, uint64_t cardId)
+bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t cardId)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
@@ -1155,7 +1155,7 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
     return ExecuteAbc(urlName.value());
 }
 
-bool JsiDeclarativeEngine::LoadCard(const std::string& url, uint64_t cardId)
+bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadCard");
     return ExecuteCardAbc(url, cardId);

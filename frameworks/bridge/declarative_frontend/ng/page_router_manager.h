@@ -32,7 +32,7 @@
 namespace OHOS::Ace::NG {
 
 using LoadPageCallback = std::function<bool(const std::string&)>;
-using LoadCardCallback = std::function<bool(const std::string&, uint64_t cardId)>;
+using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 
 enum class RouterMode {
     STANDARD = 0,
@@ -67,7 +67,7 @@ public:
 
     void RunPage(const std::string& url, const std::string& params);
 
-    void RunCard(const std::string& url, const std::string& params, uint64_t cardId);
+    void RunCard(const std::string& url, const std::string& params, int64_t cardId);
 
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)
     {
@@ -166,12 +166,12 @@ private:
     void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition);
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
-        bool isCardRouter = false, uint64_t cardId = 0);
+        bool isCardRouter = false, int64_t cardId = 0);
     static bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
-    void LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, uint64_t cardId,
+    void LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
         bool isRestore = false, bool needHideLast = true);
 
     RefPtr<Framework::ManifestParser> manifestParser_;
