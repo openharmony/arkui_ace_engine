@@ -51,6 +51,7 @@ public:
 
 private:
     void OnModifyDone() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
