@@ -809,6 +809,9 @@ void RenderPickerBase::GetRenders(const RefPtr<RenderNode>& render)
 
     DealRenders(render);
     for (const auto& child : render->GetChildren()) {
+#if defined(PREVIEW)
+        child->SetAccessibilityNode(nullptr);
+#endif
         GetRenders(child);
     }
 }

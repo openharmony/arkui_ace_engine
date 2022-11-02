@@ -384,9 +384,7 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateSpecializedNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId)
 {
 #if defined(PREVIEW)
-    if (IsDeclarative()) {
-        return nullptr;
-    }
+    return nullptr;
 #endif
     if (nodeId < ROOT_STACK_BASE) {
         return nullptr;
