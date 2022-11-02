@@ -220,7 +220,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         return;
     }
     fadeColor_ = swiper->GetFadeColor();
-    scale_ = context->GetDipScale();
+    if (context) {
+        scale_ = context->GetDipScale();
+    }
 
     curve_ = swiper->GetCurve();
     if (curve_) {

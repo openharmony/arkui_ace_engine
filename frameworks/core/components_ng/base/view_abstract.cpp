@@ -543,7 +543,9 @@ void ViewAbstract::BindPopup(
         } else {
             LOGE("useCustom is invalid");
         }
-        popupId = popupNode->GetId();
+        if (popupNode) {
+            popupId = popupNode->GetId();
+        }
     } else {
         // use param to update PopupParm
         if (!isUseCustom) {

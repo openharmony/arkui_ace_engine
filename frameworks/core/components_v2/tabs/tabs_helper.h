@@ -186,7 +186,7 @@ public:
         if (tabContentItemComponent && tabContentItemComponent->HasBarBuilder()) {
             newBarItemComponent = AceType::MakeRefPtr<TabBarItemComponent>(
                 tabContentItemComponent->ExecuteBarBuilder());
-        } else {
+        } else if (tabContentItemComponent) {
             newBarItemComponent = AceType::MakeRefPtr<TabBarItemComponent>(
                 TabBarItemComponent::BuildWithTextIcon(
                     tabContentItemComponent->GetBarText(), tabContentItemComponent->GetBarIcon()));
@@ -458,6 +458,7 @@ public:
     {
         if (!renderNode) {
             LOGE("Render node is nullptr");
+            return;
         }
         auto t1 = renderNode->GetChildren().front();
         auto t2 = t1 ? t1->GetChildren().front() : nullptr;
