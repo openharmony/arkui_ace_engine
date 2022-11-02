@@ -434,8 +434,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition()
         auto positionY = positionValue.GetY();
         targetOffset_ = OffsetF(positionX.ConvertToPx(), positionY.ConvertToPx());
     } else {
-        targetOffset_ = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
-        LOGD("no position set");
+        targetOffset_ = targetNode->GetOffsetRelativeToWindow();
     }
 }
 
