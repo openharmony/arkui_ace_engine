@@ -163,8 +163,11 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
         .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateNodeFunc = std::move(updateViewNodeFunction),
-        .pageTransitionFunc = std::move(pageTransitionFunction),
         .isStatic = IsStatic() };
+
+    if (jsViewFunction_ && jsViewFunction_->HasPageTransition()) {
+        info.pageTransitionFunc = std::move(pageTransitionFunction);
+    }
 
     return ViewFullUpdateModel::GetInstance()->CreateNode(std::move(info));
 }
