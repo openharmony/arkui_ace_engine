@@ -287,7 +287,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->ShowMenu(targetId, true, offset, menuNode, true);
+    overlay->ShowMenuInSubWindow(targetId, true, offset, menuNode, true);
 }
 
 void SubwindowOhos::HideMenuNG()
