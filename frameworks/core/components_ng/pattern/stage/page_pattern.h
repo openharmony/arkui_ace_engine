@@ -113,7 +113,6 @@ private:
     std::function<bool()> OnBackPressed_;
 
     bool isOnShow_ = false;
-    bool isLoaded_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
 
