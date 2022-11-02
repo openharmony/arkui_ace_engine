@@ -53,10 +53,10 @@ std::string AceApplicationInfoImpl::GetJsEngineParam(const std::string& key) con
 
 void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
-    std::string languageLower;
+    std::string languageLower = language;
     std::transform(language.begin(), language.end(), languageLower.begin(), ::tolower);
 
-    std::string countryOrRegionUpper;
+    std::string countryOrRegionUpper = countryOrRegion;
     std::transform(countryOrRegion.begin(), countryOrRegion.end(), countryOrRegionUpper.begin(), ::tolower);
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
