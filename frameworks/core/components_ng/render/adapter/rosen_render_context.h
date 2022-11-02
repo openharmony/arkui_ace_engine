@@ -234,6 +234,10 @@ private:
     void PaintGraphics();
     void OnPaintGraphics();
     void PaintOverlayText();
+    void PaintBorderImage();
+    void PaintBorderImageGradient();
+    void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+
 
     RectF AdjustPaintRect();
 
@@ -241,9 +245,6 @@ private:
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
-    void PaintBorderImage();
-    void PaintBorderImageGradient();
-    void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
