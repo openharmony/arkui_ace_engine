@@ -23,6 +23,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/test/pattern/custom_paint/common_constants.h"
+
+// Add the following two macro definitions to test the private and protected method.
+#define private public
+#define protected public
 
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_event_hub.h"
@@ -30,8 +35,6 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_view.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 
 using namespace testing;
@@ -39,41 +42,58 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 
-namespace {
-
-const float IDEAL_WIDTH = 300.0f;
-const float IDEAL_HEIGHT = 300.0f;
-
-const float MAX_WIDTH = 400.0f;
-const float MAX_HEIGHT = 400.0f;
-
-const float MIN_WIDTH = 0.0f;
-const float MIN_HEIGHT = 0.0f;
-
-const SizeF IDEAL_SIZE(IDEAL_WIDTH, IDEAL_HEIGHT);
-const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
-const SizeF MIN_SIZE(MIN_WIDTH, MIN_HEIGHT);
-
-} // namespace
-
 class CustomPaintPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
 };
+
+void CustomPaintPatternTestNg::SetUpTestCase()
+{
+    GTEST_LOG_(INFO) << "CustomPaintPatternTestNg SetUpTestCase";
+}
+
+void CustomPaintPatternTestNg::TearDownTestCase()
+{
+    GTEST_LOG_(INFO) << "CustomPaintPatternTestNg TearDownTestCase";
+}
+
+void CustomPaintPatternTestNg::SetUp()
+{
+    GTEST_LOG_(INFO) << "CustomPaintPatternTestNg SetUp";
+}
+
+void CustomPaintPatternTestNg::TearDown()
+{
+    GTEST_LOG_(INFO) << "CustomPaintPatternTestNg TearDown";
+}
 
 /**
  * @tc.name: CustomPaintPatternTestNg001
- * @tc.desc: Create the object of CustomPaintPattern and make sure its tag is corrected.
+ * @tc.desc: Test attributes of the object customPattern.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg001, TestSize.Level1)
 {
-    auto pattern = CustomPaintView::Create();
-    EXPECT_FALSE(pattern == nullptr);
-    auto customPaintFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(customPaintFrameNode == nullptr);
-    EXPECT_EQ(customPaintFrameNode->GetTag(), V2::CANVAS_ETS_TAG);
+    auto customPattern = CustomPaintView::Create();
+    EXPECT_FALSE(customPattern == nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::CANVAS_ETS_TAG);
+    EXPECT_FALSE(customPattern->IsAtomicNode());
+
+    customPattern->SetCanvasSize(IDEAL_SIZE);
+    EXPECT_EQ(customPattern->GetWidth(), IDEAL_WIDTH);
+    EXPECT_EQ(customPattern->GetHeight(), IDEAL_HEIGHT);
+
+    customPattern->paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(nullptr);
+    EXPECT_FALSE(customPattern->paintMethod_ == nullptr);
+    customPattern->paintMethod_->SetLineDash(CANDIDATE_DOUBLES);
+    customPattern->paintMethod_->SetLineDashOffset(CANDIDATE_DOUBLES[0]);
+    EXPECT_EQ(customPattern->GetLineDash().dashOffset, CANDIDATE_DOUBLES[0]);
+    EXPECT_EQ(customPattern->GetLineDash().lineDash, CANDIDATE_DOUBLES);
 }
 
 /**
@@ -83,38 +103,49 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg001, TestSize.Level1)
  */
 HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg002, TestSize.Level1)
 {
-    auto pattern = CustomPaintView::Create();
-    EXPECT_FALSE(pattern == nullptr);
-    bool flagEventCbk = false;
-    CustomPaintView::SetOnReady([&flagEventCbk] () { flagEventCbk = true; });
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto customPattern = CustomPaintView::Create();
+    EXPECT_FALSE(customPattern == nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_FALSE(frameNode == nullptr);
     auto eventHub = frameNode->GetEventHub<CustomPaintEventHub>();
     EXPECT_FALSE(eventHub == nullptr);
+
+    // The flag used to determine whether the event callback function executed successfully.
+    bool flagEventCbk = false;
+
+    // Set the onReadEvent as nullptr, the value of flagEventCbk keep false always.
+    CustomPaintView::SetOnReady(nullptr);
+    eventHub->FireReadyEvent();
+    EXPECT_FALSE(flagEventCbk);
+
+    // Set the onReadEvent as the function which changes the value of flagEventCbk, the value will be modified when
+    // the onReadyEvent is fired.
+    CustomPaintView::SetOnReady([&flagEventCbk] () { flagEventCbk = true; });
     eventHub->FireReadyEvent();
     EXPECT_TRUE(flagEventCbk);
 }
 
 /**
  * @tc.name: CustomPaintPatternTestNg003
- * @tc.desc: Create the object of CustomPaintPattern.
+ * @tc.desc: Test the MeasureContent function with different layoutWrapper.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg003, TestSize.Level1)
 {
-    auto pattern = CustomPaintView::Create();
-    EXPECT_FALSE(pattern == nullptr);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto customPattern = CustomPaintView::Create();
+    EXPECT_FALSE(customPattern == nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_FALSE(frameNode == nullptr);
+
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto layoutProperty = layoutWrapper.GetLayoutProperty();
     EXPECT_FALSE(layoutProperty == nullptr);
 
-    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = MAX_SIZE;

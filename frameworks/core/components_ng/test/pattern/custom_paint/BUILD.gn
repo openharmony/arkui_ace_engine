@@ -19,7 +19,12 @@ import(
 ohos_unittest("custom_paint_pattern_test_ng") {
   module_out_path = "$test_output_path/custom_paint"
 
-  sources = [ "custom_paint_pattern_test_ng.cpp" ]
+  sources = [
+    "canvas_paint_method_test_ng.cpp",
+    "common_constants.cpp",
+    "custom_paint_pattern_test_ng.cpp",
+    "offscreen_canvas_paint_pattern_test_ng.cpp",
+  ]
 
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
