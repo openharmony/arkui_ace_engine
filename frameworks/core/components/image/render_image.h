@@ -407,6 +407,7 @@ private:
     RefPtr<Clipboard> clipboard_;
     Offset popOverlayOffset_;
     CopyOptions copyOption_ = CopyOptions::None;
+    Offset lastDragMoveOffset_;
 };
 
 } // namespace OHOS::Ace

@@ -210,6 +210,7 @@ private:
     CopyOptions copyOption_ = CopyOptions::None;
     Offset startOffset_;
     Offset endOffset_;
+    Offset lastDragMoveOffset_;
 };
 
 } // namespace OHOS::Ace
