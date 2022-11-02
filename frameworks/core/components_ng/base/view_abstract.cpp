@@ -406,8 +406,6 @@ void ViewAbstract::SetOnDragStart(
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(std::move(onDragStart));
-
-    AddDragFrameNodeToManager();
 }
 
 void ViewAbstract::SetOnDragEnter(
