@@ -278,9 +278,9 @@ void DragWindowOhos::DrawText(std::shared_ptr<txt::Paragraph> paragraph,
             renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
         path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
             renderText->GetStartOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetPaintRect().Right() - renderText->GetGlobalOffset().GetX(),
+        path.lineTo(renderText->GetPaintRect().Width(),
             renderText->GetStartOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetPaintRect().Right() - renderText->GetGlobalOffset().GetX(),
+        path.lineTo(renderText->GetPaintRect().Width(),
             renderText->GetEndOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
         path.lineTo(renderText->GetEndOffset().GetX() - renderText->GetGlobalOffset().GetX(),
             renderText->GetEndOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
@@ -296,7 +296,7 @@ void DragWindowOhos::DrawText(std::shared_ptr<txt::Paragraph> paragraph,
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
     auto skia = canvasNode->BeginRecording(rect.width_, rect.height_);
-    paragraph->Paint(skia, offset.GetX(), offset.GetY());
+    paragraph->Paint(skia, 0, 0);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 }

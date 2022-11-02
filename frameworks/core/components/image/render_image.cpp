@@ -959,10 +959,11 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
         if (!dragWindow_) {
             auto rect = pipelineContext->GetCurrentWindowRect();
             dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
-                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
-                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Top(), initRenderNode->GetPaintRect().Width(),
-                initRenderNode->GetPaintRect().Height());
-            dragWindow_->SetOffset(rect.Left(), rect.Top());
+                static_cast<int32_t>(info.GetGlobalPoint().GetX() + rect.Left()),
+                static_cast<int32_t>(info.GetGlobalPoint().GetY() + rect.Top()),
+                static_cast<uint32_t>(initRenderNode->GetPaintRect().Width()),
+                static_cast<uint32_t>(initRenderNode->GetPaintRect().Height()));
+            dragWindow_->SetOffset(static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()));
             auto image = initRenderNode->GetSkImage();
             dragWindow_->DrawImage(image);
         }
@@ -1021,6 +1022,10 @@ void RenderImage::PanOnActionUpdate(const GestureEvent& info)
     if (isDragDropNode_ && dragWindow_) {
         int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
         int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+        if (lastDragMoveOffset_ == Offset(x, y)) {
+            return;
+        }
+        lastDragMoveOffset_ = Offset(x, y);
         if (dragWindow_) {
             dragWindow_->MoveTo(x, y);
         }
