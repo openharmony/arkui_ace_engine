@@ -102,7 +102,9 @@ void RenderList::Update(const RefPtr<Component>& component)
     SetOnRotateCallback(list);
 
     UpdateAccessibilityAttr();
-    layoutManager_->Update();
+    if (layoutManager_) {
+        layoutManager_->Update();
+    }
     overSpringProperty_ = list->OverSpringProperty();
 }
 
