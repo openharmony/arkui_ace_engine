@@ -31,7 +31,11 @@ void JSContextMenu::Close(const JSCallbackInfo& args)
         return;
     }
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
-    SubwindowManager::GetInstance()->CloseMenu();
+    if (Container::IsCurrentUseNewPipeline()) {
+        SubwindowManager::GetInstance()->HideMenuNG();    
+    } else {
+        SubwindowManager::GetInstance()->CloseMenu();
+    }
 #else
     // Close context menu.
     auto container = Container::Current();
