@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -31,10 +32,12 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
-const std::string EMPTY_TEXT_VALUE = "DEFAULT_TEXT";
+const std::string EMPTY_TEXT_VALUE;
 const std::string TEXT_VALUE = "DEFAULT_TEXT";
 const std::string INSERT_VALUE_SINGLE_CHAR = "X";
+const std::string LOWERCASE_FILTER = "[a-z]";
 const int32_t CARET_POSITION_1 = 10;
+const int32_t DELETE_LENGTH_1 = 1;
 } // namespace
 class TextFieldPatternTestNg : public testing::Test {
 public:
@@ -61,6 +64,27 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldInsertValue001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextFieldDeleteForwardValue001
+ * @tc.desc: Test deleting value of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldDeleteForwardValue001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->InsertValue(TEXT_VALUE);
+    EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, static_cast<int32_t>(TEXT_VALUE.size()));
+    pattern->DeleteForward(DELETE_LENGTH_1);
+    EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE.substr(0, TEXT_VALUE.size() - DELETE_LENGTH_1));
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, TEXT_VALUE.size() - DELETE_LENGTH_1);
+}
+
+/**
  * @tc.name: TextFieldMoveCaret001
  * @tc.desc: Test textfield move caret.
  * @tc.type: FUNC
@@ -75,10 +99,30 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldMoveCaret001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->InsertValue(TEXT_VALUE);
     EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE);
-    EXPECT_EQ(pattern->GetEditingValue().caretPosition, INSERT_VALUE_SINGLE_CHAR.size());
     pattern->SetCaretPosition(CARET_POSITION_1);
     // inserting text value length larger than caret position
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, CARET_POSITION_1);
+}
+
+/**
+ * @tc.name: TextFieldFilter001
+ * @tc.desc: Test textfield filter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldFilter001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    layoutProperty->UpdateInputFilter(LOWERCASE_FILTER);
+    pattern->InsertValue(INSERT_VALUE_SINGLE_CHAR);
+    EXPECT_EQ(pattern->GetEditingValue().text, EMPTY_TEXT_VALUE);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, EMPTY_TEXT_VALUE.size());
 }
 
 } // namespace OHOS::Ace::NG

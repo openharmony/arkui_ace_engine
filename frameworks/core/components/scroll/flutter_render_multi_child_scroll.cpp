@@ -34,34 +34,30 @@ void FlutterRenderMultiChildScroll::Paint(RenderContext& context, const Offset& 
     // paint custom effect
     const auto renderContext = static_cast<FlutterRenderContext*>(&context);
     flutter::Canvas* canvas = renderContext->GetCanvas();
-    if (canvas != nullptr) {
-        // paint custom effect
-        if (scrollEffect_) {
-            scrollEffect_->Paint(context, viewPort_, offset);
-        }
+    if (canvas == nullptr) {
+        return;
+    }
+    // paint custom effect
+    if (scrollEffect_) {
+        scrollEffect_->Paint(context, viewPort_, offset);
+    }
 
-        // paint scrollBar
-        if (scrollBar_ && scrollBar_->NeedPaint()) {
-            bool needPaint = false;
-            if (scrollBar_->GetFirstLoad() || scrollBar_->IsActive() ||
-                scrollBar_->GetDisplayMode() == DisplayMode::ON) {
-                scrollBarOpacity_ = UINT8_MAX;
+    // paint scrollBar
+    if (scrollBar_ && scrollBar_->NeedPaint()) {
+        bool needPaint = false;
+        if (scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
+            scrollBarOpacity_ = UINT8_MAX;
+            needPaint = true;
+        } else {
+            if (scrollBarOpacity_ != 0) {
                 needPaint = true;
-            } else {
-                if (scrollBarOpacity_ != 0) {
-                    needPaint = true;
-                }
             }
-            if (needPaint) {
-                scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), lastOffset_, GetEstimatedHeight());
-                RefPtr<FlutterScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<FlutterScrollBarPainter>();
-                scrollBarPainter->PaintBar(
-                    canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
-                if (scrollBar_->GetFirstLoad()) {
-                    scrollBar_->SetFirstLoad(false);
-                    scrollBar_->HandleScrollBarEnd();
-                }
-            }
+        }
+        if (needPaint) {
+            scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), lastOffset_, GetEstimatedHeight());
+            RefPtr<FlutterScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<FlutterScrollBarPainter>();
+            scrollBarPainter->PaintBar(
+                canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
         }
     }
 }

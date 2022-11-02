@@ -42,23 +42,17 @@ Dimension GridProperty::GetOffset()
 bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefPtr<AceType>& host)
 {
     auto gridContainer = DynamicCast<GridContainerLayoutProperty>(container);
-    auto mGridContainer = DynamicCast<GridContainerLayoutProperty>(container_);
-
-    if ((container_) && (*mGridContainer == *gridContainer)) {
-        return false;
-    }
-    container_ = container;
 
     GridColumnInfo::Builder builder;
     auto containerInfo = MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoValue());
     builder.SetParent(Claim(&gridContainer->GetContainerInfoRef()));
-
     for (const auto& item : typedPropertySet_) {
         builder.SetSizeColumn(item.type_, item.span_);
         builder.SetOffset(item.offset_, item.type_);
     }
-
     gridInfo_ = builder.Build();
+    container_ = container;
+
     gridContainer->RegistGridChild(DynamicCast<FrameNode>(host));
     return true;
 }

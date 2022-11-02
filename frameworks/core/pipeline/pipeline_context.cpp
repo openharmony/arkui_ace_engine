@@ -1714,17 +1714,6 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
         return false;
     }
-    if (!isKeyEvent_ && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        if (KeyCode::KEY_DPAD_UP <= event.code && event.code <= KeyCode::KEY_DPAD_RIGHT) {
-            if (event.action == KeyAction::UP) {
-                SetIsKeyEvent(true);
-            }
-        } else if (event.code == KeyCode::KEY_ENTER) {
-            if (event.action == KeyAction::CLICK) {
-                SetIsKeyEvent(true);
-            }
-        }
-    }
     rootElement_->HandleSpecifiedKey(event);
 
     SetShortcutKey(event);

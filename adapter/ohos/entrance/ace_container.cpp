@@ -1198,7 +1198,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
 
     if (!isSubContainer_) {
         // Only MainWindow instance in FA model will be registered to watch dog.
-        if (!GetSettings().usingSharedRuntime) {
+        if (!GetSettings().usingSharedRuntime && !AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint()) {
             AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
         }
         frontend_->AttachPipelineContext(pipelineContext_);

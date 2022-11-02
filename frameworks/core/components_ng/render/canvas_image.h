@@ -42,7 +42,7 @@ struct ImagePaintConfig {
     ImageFit imageFit_ = ImageFit::COVER;
     std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
     bool needFlipCanvasHorizontally_ = false;
-    bool isSvg = false;
+    bool isSvg_ = false;
 };
 
 struct RenderTaskHolder;

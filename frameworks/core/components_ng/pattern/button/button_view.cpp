@@ -45,6 +45,7 @@ void ButtonView::CreateWithLabel(const std::string& label)
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(label);
         textNode->SetInternal();
+        SetTextDefaultAttributes(textNode);
         frameNode->AddChild(textNode);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -56,8 +57,8 @@ void ButtonView::CreateWithLabel(const std::string& label)
     auto buttonAccessibilityProperty = frameNode->GetAccessibilityProperty<ButtonAccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
     buttonAccessibilityProperty->SetText(label);
-    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, label);
     stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, label);
 }
 
 void ButtonView::Create(const std::string& tagName)
@@ -78,11 +79,31 @@ void ButtonView::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode)
     CHECK_NULL_VOID(buttonTheme);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    SetType(ButtonType::CAPSULE);
+    auto castButtonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    if (castButtonLayoutProperty) {
+        castButtonLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
 }
+
+void ButtonView::SetTextDefaultAttributes(const RefPtr<FrameNode>& textNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    auto textColor = buttonTheme->GetTextStyle().GetTextColor();
+    textLayoutProperty->UpdateTextColor(textColor);
+    auto fontSize = buttonTheme->GetTextStyle().GetFontSize();
+    textLayoutProperty->UpdateFontSize(fontSize);
+    textLayoutProperty->UpdateFontWeight(buttonTheme->GetTextStyle().GetFontWeight());
+}
+
 
 void ButtonView::SetType(ButtonType buttonType)
 {
@@ -102,6 +123,7 @@ void ButtonView::SetStateEffect(bool stateEffect)
 void ButtonView::SetFontSize(const Dimension& fontSize)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
         return;
     }

@@ -27,7 +27,7 @@ class ACE_EXPORT NavigationView {
 public:
     static void Create();
     // title bar
-    static void SetTitle(const std::string& title);
+    static void SetTitle(const std::string& title, bool hasSubTitle = false);
     static void SetCustomTitle(const RefPtr<UINode>& customTitle);
     static void SetTitleMode(NG::NavigationTitleMode mode);
     static void SetSubtitle(const std::string& subtitle);
