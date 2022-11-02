@@ -98,6 +98,7 @@ public:
         jsViewFunction_->SetContext(context);
     }
 
+    // Used to set/get card id C++
     void SetCardId(int64_t cardId)
     {
         cardId_ = cardId;
@@ -107,6 +108,10 @@ public:
     {
         return cardId_;
     }
+
+    // Used to set/get card id JS
+    void JsSetCardId(int64_t cardId);
+    void JsGetCardId(const JSCallbackInfo& info);
 
     // Used by full update variant only from js_lazy_foreach.cpp
     virtual void RemoveChildGroupById(const std::string& viewId) {}
@@ -128,7 +133,10 @@ protected:
     std::string viewId_;
 
     // card id for eTS Card
+    // set on the root JSView of the card and inherited by all child JSViews
+    // -1 means not part of a card
     int64_t cardId_ = -1;
+
 private:
     int32_t instanceId_ = -1;
     int32_t restoreInstanceId_ = -1;
