@@ -52,15 +52,6 @@ void PagePattern::OnAttachToFrameNode()
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
-    if (!isLoaded_) {
-        isOnShow_ = true;
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        if (onPageShow_) {
-            context->PostAsyncEvent([onPageShow = onPageShow_]() { onPageShow(); });
-        }
-        isLoaded_ = true;
-    }
     return false;
 }
 
@@ -97,11 +88,11 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnShow()
 {
-    if (isOnShow_ || !isLoaded_) {
+    if (isOnShow_) {
         return;
     }
-    ProcessShowState();
     isOnShow_ = true;
+    ProcessShowState();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (onPageShow_) {
@@ -115,12 +106,12 @@ void PagePattern::OnHide()
         return;
     }
     isOnShow_ = false;
+    ProcessHideState();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (onPageHide_) {
         context->PostAsyncEvent([onPageHide = onPageHide_]() { onPageHide(); });
     }
-    ProcessHideState();
 }
 
 void PagePattern::BuildSharedTransitionMap()
