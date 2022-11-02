@@ -23,12 +23,16 @@ template("ace_base_i18n") {
   source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
-    deps = [
-      "$ace_root/frameworks/base/resource:ace_resource",
-      "//third_party/icu/icu4c:shared_icui18n",
-    ]
+    deps = [ "$ace_root/frameworks/base/resource:ace_resource" ]
 
-    if (enable_ng_build) {
+    if (defined(config.use_external_icu)) {
+      if (config.use_external_icu == "shared") {
+        deps += [ "//third_party/icu/icu4c:shared_icui18n" ]
+      } else if (config.use_external_icu == "static") {
+        deps += [ "//third_party/icu/icu4c:static_icui18n" ]
+      }
+      configs += [ "$ace_flutter_engine_root/icu:icu_config_$platform" ]
+    } else if (enable_ng_build) {
       deps += [
         "$ace_flutter_engine_root_new/third_party/icu:ace_libicu_dev_$platform",
       ]
