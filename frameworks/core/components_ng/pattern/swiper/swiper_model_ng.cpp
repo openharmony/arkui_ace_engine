@@ -54,7 +54,7 @@ RefPtr<SwiperController> SwiperModelNG::Create()
             ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
         auto layoutProperty = swiperIndicatorNode->GetLayoutProperty();
-        layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
         swiperGroupNode->AddChild(swiperIndicatorNode);
         swiperGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
