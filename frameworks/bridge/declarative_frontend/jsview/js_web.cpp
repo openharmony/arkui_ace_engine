@@ -1228,7 +1228,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
     JSClass<JSWeb>::StaticMethod("onShowFileSelector", &JSWeb::OnFileSelectorShow);
-    JSClass<JSWeb>::StaticMethod("privilegedSchemes", &JSWeb::OnPrivilegedSchemes);
+    JSClass<JSWeb>::StaticMethod("customchemes", &JSWeb::CustomSchemes);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
@@ -2569,9 +2569,9 @@ bool WebcustomSchemeCheckName(std::string scheme)
     return true;
 }
 
-void JSWeb::OnPrivilegedSchemes(const JSCallbackInfo& args)
+void JSWeb::CustomSchemes(const JSCallbackInfo& args)
 {
-#define MAX_CUSTOM_SCHEME_SIZE 3
+#define MAX_CUSTOM_SCHEME_SIZE 10
     if ((args.Length() <= 0) || !(args[0]->IsArray())) {
         LOGE("arg is invalid");
         return;
