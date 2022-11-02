@@ -104,9 +104,13 @@ void ListPattern::OnModifyDone()
         gestureHub->AddScrollableEvent(scrollableEvent_);
     } else {
         if (scrollableEvent_->GetAxis() != axis) {
-            scrollableEvent_->SetAxis(axis);
             gestureHub->RemoveScrollableEvent(scrollableEvent_);
+            scrollableEvent_->SetAxis(axis);
             gestureHub->AddScrollableEvent(scrollableEvent_);
+            if (scrollEffect_) {
+                gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
+                gestureHub->AddScrollEdgeEffect(GetDirection(), scrollEffect_);
+            }
         }
     }
 

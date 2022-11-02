@@ -112,7 +112,11 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
 
-        itemPosition_.clear();
+        if (!itemPosition_.empty()) {
+            preStartPos_ = itemPosition_.begin()->second.startPos;
+            preEndPos_ = itemPosition_.rbegin()->second.endPos;
+            itemPosition_.clear();
+        }
 
         CalculateLanes(listLayoutProperty, layoutConstraint, axis);
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
@@ -198,31 +202,13 @@ void ListLayoutAlgorithm::MeasureList(
                 LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, startPos);
             }
         }
-        RecyclePrevIndex(layoutWrapper);
         CalculateEstimateOffset();
     } else if (NonNegative(currentOffset_)) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(preStartIndex_);
-        if (!wrapper) {
-            LOGI("the %{public}d wrapper is null in LayoutForward", preStartIndex_);
-            return;
-        }
-        // Calculate the end pos of the priv item ahead of the StartIndex.
-        // the child frame offset is include list padding and border, need to delete it first to match content origin.
-        float startPos =
-            GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) - paddingBeforeContent_;
-        LayoutForward(layoutWrapper, layoutConstraint, axis, preStartIndex_, startPos);
+        LayoutForward(layoutWrapper, layoutConstraint, axis, preStartIndex_, preStartPos_);
     } else {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(preEndIndex_);
-        if (!wrapper) {
-            LOGI("the %{public}d wrapper is null in LayoutBackward", preEndIndex_);
-            return;
-        }
-        // Calculate the start pos of the next item behind the EndIndex.
-        // the child frame offset is include list padding and border, need to delete it first to match content origin.
-        float endPos = GetMainAxisOffset(wrapper->GetGeometryNode()->GetMarginFrameOffset(), axis) +
-                       GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis) - paddingBeforeContent_;
-        LayoutBackward(layoutWrapper, layoutConstraint, axis, preEndIndex_, endPos);
+        LayoutBackward(layoutWrapper, layoutConstraint, axis, preEndIndex_, preEndPos_);
     }
+    RecyclePrevIndex(layoutWrapper);
     GetHeaderFooterGroupNode(layoutWrapper);
 }
 
