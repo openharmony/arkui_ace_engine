@@ -34,12 +34,11 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = props->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
 
-    float maxTextWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0;
+    auto maxTextWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0;
 
     // measure text
     auto childConstraint = props->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(maxTextWidth);
-    childConstraint.percentReference.SetWidth(maxTextWidth);
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     text->Measure(childConstraint);
 

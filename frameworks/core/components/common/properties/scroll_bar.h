@@ -59,6 +59,7 @@ public:
     void AddScrollBarController(const Offset& coordinateOffset, TouchTestResult& result);
     void SetActive(bool isActive);
     bool IsActive() const;
+    void SetUndisplay();
     Size GetRootSize() const;
 
     void Reset();
@@ -208,6 +209,16 @@ public:
         return isScrollable_;
     }
 
+    void SetFirstLoad(bool firstLoad)
+    {
+        firstLoad_ = firstLoad;
+    }
+
+    bool GetFirstLoad() const
+    {
+        return firstLoad_;
+    }
+
     void SetPositionMode(PositionMode positionMode)
     {
         positionMode_ = positionMode;
@@ -293,6 +304,7 @@ private:
     double outBoundary_ = 0.0;
 
     bool isScrollable_ = false;
+    bool firstLoad_ = true;
 
     WeakPtr<PipelineContext> pipelineContext_;
     RefPtr<ScrollBarController> barController_;

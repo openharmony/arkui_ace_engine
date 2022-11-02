@@ -51,7 +51,6 @@ void RenderSlider::Update(const RefPtr<Component>& component)
         onChange_ = *slider->GetOnChange();
     }
     sliderComponent_ = slider;
-    hoverAnimationType_ = slider->GetMouseAnimationType();
     if (!blockActive_) {
         Initialize(slider);
         if (!slider) {
@@ -343,12 +342,6 @@ void RenderSlider::Initialize(const RefPtr<SliderComponent>& sliderComponent)
             slider->FireMoveEndEvent();
         }
     });
-}
-
-void RenderSlider::AnimateMouseHoverExit()
-{
-    isHover_ = false;
-    MarkNeedLayout();
 }
 
 bool RenderSlider::HandleMouseEvent(const MouseEvent& event)

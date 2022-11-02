@@ -60,9 +60,9 @@ public:
         SetChildPosition(child, 0, 0, 0, 0);
     }
 
-    void InitScrollBarTest()
+    void InitScrollBarTest(const RefPtr<Component>& component)
     {
-        InitScrollBar();
+        InitScrollBar(component);
     }
 
     void SetDirection(bool rightToLeft)
@@ -513,7 +513,7 @@ HWTEST_F(RenderGridTestV2, RenderGridRTL013, TestSize.Level1)
     component->SetDirection(FlexDirection::ROW);
     renderGridScroll_->SetDirection(true);
     renderGridScroll_->SetVertical(true);
-    renderGridScroll_->InitScrollBarTest();
+    renderGridScroll_->InitScrollBarTest(component);
     EXPECT_EQ(renderGridScroll_->GetDirection(), true);
 
     GTEST_LOG_(INFO) << "RenderGridTestV2 rtl013 end";

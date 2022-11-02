@@ -73,9 +73,6 @@ public:
 
     void NavigatePage();
 
-    std::string GetNavigatorType() const;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-
 private:
     std::string url_;
     std::string params_;

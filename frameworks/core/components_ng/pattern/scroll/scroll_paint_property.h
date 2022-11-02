@@ -19,9 +19,11 @@
 #include <algorithm>
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,7 +33,7 @@ class ScrollPaintProperty : public PaintProperty {
 public:
     ScrollPaintProperty()
     {
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+        InitScrollBar();
     }
     ~ScrollPaintProperty() override = default;
 
@@ -56,8 +58,31 @@ public:
         json->Put("scrollBarWidth", scrollBar_ ? scrollBar_->GetActiveWidth().ToString().c_str() : "");
     }
 
+    void InitScrollBar()
+    {
+        if (scrollBar_ == nullptr) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+            scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+            scrollBar_->SetInactiveWidth(theme->GetNormalWidth());
+            scrollBar_->SetNormalWidth(theme->GetNormalWidth());
+            scrollBar_->SetActiveWidth(theme->GetActiveWidth());
+            scrollBar_->SetTouchWidth(theme->GetTouchWidth());
+            scrollBar_->SetReservedHeight(theme->GetReservedHeight());
+            scrollBar_->SetMinHeight(theme->GetMinHeight());
+            scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
+            scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
+            scrollBar_->SetForegroundColor(theme->GetForegroundColor());
+            scrollBar_->SetPadding(theme->GetPadding());
+            scrollBar_->SetScrollable(true);
+        }
+    }
+
     RefPtr<ScrollBar> GetScrollBar()
     {
+        if (scrollBar_ == nullptr) {
+            InitScrollBar();
+        }
         return scrollBar_;
     }
 
@@ -97,40 +122,28 @@ public:
         scrollBar_->SetDisplayMode(displayMode);
     }
 
-    void SetScrollBarPositionMode(const Axis& axis)
+    void UpdateScrollBarOffset(float currentOffset, const SizeF& viewPortExtent)
     {
-        if (!scrollBar_) {
-            return;
-        }
-        scrollBar_->SetPositionMode(axis == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
+        currentOffset_ = currentOffset;
+        viewPortExtent_ = viewPortExtent;
     }
 
-    bool NeedPaintScrollBar() const
-    {
-        return scrollBar_ && scrollBar_->NeedScrollBar();
-    }
-
-    void UpdateScrollBarOffset(float currentOffset, SizeF viewPort, SizeF viewPortExtent, bool isDriving)
+    void UpdateScrollBarRegion(const SizeF& frameSize)
     {
         if (scrollBar_ == nullptr) {
             return;
         }
-        scrollBar_->SetDriving(isDriving);
-        Size size(viewPort.Width(), viewPort.Height());
-        Offset scrollOffset = { 0.0 - currentOffset, 0.0 - currentOffset }; // fit for w/h switched.
-        auto estimatedHeight = (propAxis_ == Axis::HORIZONTAL) ? viewPortExtent.Width() : viewPortExtent.Height();
+
+        Size size(frameSize.Width(), frameSize.Height());
+        Offset scrollOffset =
+            (propAxis_ == Axis::HORIZONTAL) ? Offset(0.0 - currentOffset_, 0.0) : Offset(0.0, 0.0 - currentOffset_);
+        double estimatedHeight = (propAxis_ == Axis::HORIZONTAL) ? viewPortExtent_.Width() : viewPortExtent_.Height();
         scrollBar_->UpdateScrollBarRegion(Offset(), size, scrollOffset, estimatedHeight);
     }
 
-    float CalculaltePatternOffset(float currentOffset)
-    {
-        if (scrollBar_ == nullptr) {
-            return currentOffset;
-        }
-        return scrollBar_->CalcPatternOffset(currentOffset);
-    }
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollOffset, float, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollViewPortExtent, SizeF, PROPERTY_UPDATE_RENDER);
 
 private:
     float currentOffset_ = 0.0f;

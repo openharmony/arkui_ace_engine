@@ -171,7 +171,7 @@ void ImagePattern::SetImagePaintConfig(
     if (colorFilterMatrix.has_value()) {
         imagePaintConfig.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
     }
-    imagePaintConfig.isSvg_ = isSvg;
+    imagePaintConfig.isSvg = isSvg;
 
     canvasImage->SetImagePaintConfig(imagePaintConfig);
 }
@@ -371,13 +371,6 @@ void ImagePattern::OnWindowShow()
 {
     isShow_ = true;
     LoadImageDataIfNeed();
-}
-
-void ImagePattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 } // namespace OHOS::Ace::NG

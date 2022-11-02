@@ -92,14 +92,8 @@ public:
 
     // router operation
     void Push(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
-    void PushWithCallback(const RouterPageInfo& target, const std::string& params,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr,
-        RouterMode mode = RouterMode::STANDARD);
     bool Pop();
     void Replace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
-    void ReplaceWithCallback(const RouterPageInfo& target, const std::string& params,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr,
-        RouterMode mode = RouterMode::STANDARD);
     void BackWithTarget(const RouterPageInfo& target, const std::string& params);
     void Clear();
     int32_t GetStackSize() const;
@@ -148,12 +142,10 @@ private:
 
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url);
 
-    void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
+    void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     void StartBack(const RouterPageInfo& target, const std::string& params);
     bool StartPop();
-    void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
+    void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     void BackCheckAlert(const RouterPageInfo& target, const std::string& params);
     void StartClean();
 

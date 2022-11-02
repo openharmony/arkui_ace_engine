@@ -32,7 +32,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<TextFieldController> SearchView::Create(
+RefPtr<Ace::TextFieldController> SearchView::Create(
     std::optional<std::string>& value, std::optional<std::string>& placeholder, std::optional<std::string>& icon)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -93,7 +93,7 @@ RefPtr<TextFieldController> SearchView::Create(
 
     ViewStackProcessor::GetInstance()->Push(frameNode);
     auto pattern = frameNode->GetPattern<SearchPattern>();
-    pattern->SetSearchController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->SetSearchController(AceType::MakeRefPtr<Ace::TextFieldController>());
     return pattern->GetSearchController();
 }
 

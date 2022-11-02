@@ -39,7 +39,6 @@ public:
 
 private:
     static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode);
-    static void SetTextDefaultAttributes(const RefPtr<FrameNode>& textNode);
 };
 } // namespace OHOS::Ace::NG
 

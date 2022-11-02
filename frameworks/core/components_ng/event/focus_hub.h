@@ -262,8 +262,10 @@ public:
     {
         return show_;
     }
-
-    bool IsEnabled() const;
+    bool IsEnabled() const
+    {
+        return enabled_;
+    }
 
     bool IsCurrentFocus() const
     {
@@ -489,6 +491,7 @@ private:
     bool currentFocus_ { false };
     bool isFirstFocusInPage_ { true };
     bool show_ { true };
+    bool enabled_ { true };
 
     FocusType focusType_ = FocusType::DISABLE;
     RectF rectFromOrigin_;

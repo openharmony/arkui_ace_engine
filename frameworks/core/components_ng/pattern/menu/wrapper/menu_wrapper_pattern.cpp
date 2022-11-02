@@ -29,9 +29,6 @@ void MenuWrapperPattern::OnModifyDone()
 
     // close menu when clicked outside the menu region
     auto callback = [targetId = targetId_, host](const TouchEventInfo& info) {
-        if (info.GetTouches().empty()) {
-            return;
-        }
         auto touch = info.GetTouches().front();
         // only hide menu when touch DOWN occurs
         if (touch.GetTouchType() != TouchType::DOWN) {

@@ -40,8 +40,6 @@ public:
 
     void UpdateVisibleType(VisibleType type);
 
-    void SetVisible(bool visible, bool inRecursion = false) override;
-
     void UpdateHidden(bool hidden)
     {
         if (GetHidden() != hidden) {

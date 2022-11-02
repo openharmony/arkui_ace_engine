@@ -52,7 +52,6 @@ GestureEventFunc ClickEventActuator::GetClickEvent()
 {
     auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
         for (const auto& callback : actuator->clickEvents_) {
             if (callback) {
                 (*callback)(info);

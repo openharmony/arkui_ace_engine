@@ -153,18 +153,19 @@ void ImageSourceInfo::SetFillColor(const Color& color)
 
 bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
 {
-    // only svg uses fillColor
-    if (isSvg_ && fillColor_ != info.fillColor_) {
-        return false;
-    }
     return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
            // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
-           src_ == info.src_ && resourceId_ == info.resourceId_;
+           src_ == info.src_ && resourceId_ == info.resourceId_ && sourceWidth_ == info.sourceWidth_ &&
+           sourceHeight_ == info.sourceHeight_ && fillColor_ == info.fillColor_;
 }
 
 bool ImageSourceInfo::operator!=(const ImageSourceInfo& info) const
 {
-    return !(operator==(info));
+    return (!pixmap_ && info.pixmap_) || (pixmap_ && !info.pixmap_) ||
+           (pixmap_ && info.pixmap_ && pixmap_ != info.pixmap_) ||
+           // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
+           src_ != info.src_ || resourceId_ != info.resourceId_ || sourceWidth_ != info.sourceWidth_ ||
+           sourceHeight_ != info.sourceHeight_ || fillColor_ != info.fillColor_;
 }
 
 void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillColor)
@@ -241,7 +242,8 @@ SrcType ImageSourceInfo::GetSrcType() const
 std::string ImageSourceInfo::ToString() const
 {
     if (!src_.empty()) {
-        return src_;
+        return src_ + std::string("w") + std::to_string(sourceWidth_.Value()) + std::string("h") +
+               std::to_string(sourceHeight_.Value());
     } else if (resourceId_ != InternalResource::ResourceId::NO_ID) {
         return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
     } else if (pixmap_) {
@@ -289,12 +291,8 @@ const RefPtr<PixelMap>& ImageSourceInfo::GetPixmap() const
     return pixmap_;
 }
 
-std::string ImageSourceInfo::GetCacheKey() const
+const std::string& ImageSourceInfo::GetCacheKey() const
 {
-    // only svg sets fillColor
-    if (isSvg_ && fillColor_.has_value()) {
-        return cacheKey_ + fillColor_.value().ColorToString();
-    }
     return cacheKey_;
 }
 

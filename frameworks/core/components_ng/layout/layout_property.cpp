@@ -131,13 +131,13 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
+    UpdateGridConstraint();
     layoutConstraint_ = parentConstraint;
     if (margin_) {
         // TODO: add margin is negative case.
         auto margin = CreateMargin();
         MinusPaddingToSize(margin, layoutConstraint_->maxSize);
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
-        MinusPaddingToSize(margin, layoutConstraint_->percentReference);
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
     }
     if (calcLayoutConstraint_) {
@@ -221,44 +221,42 @@ void LayoutProperty::CheckAspectRatio()
     // TODO: after measure done, need to check AspectRatio again.
 }
 
+const std::unique_ptr<GridProperty>& LayoutProperty::GetGridProperty(RefPtr<FrameNode> node)
+{
+    if (gridProperty_ && !gridProperty_->HasContainer()) {
+        BuildGridProperty(node);
+    }
+    return gridProperty_;
+}
+
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
-    if (!gridProperty_) {
-        return;
-    }
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
             auto containerLayout = AceType::DynamicCast<FrameNode>(parent)->GetLayoutProperty();
             gridProperty_->UpdateContainer(containerLayout, host);
             SetHost(host);
-            UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty_->GetWidth()), std::nullopt));
-            break;
+            return;
         }
         parent = parent->GetParent();
     }
 }
 
-void LayoutProperty::UpdateGridOffset(LayoutWrapper* layoutWrapper)
+void LayoutProperty::UpdateGridConstraint()
 {
-    if (!gridProperty_ || !gridProperty_->HasContainer()) {
-        return;
+    if (gridProperty_ && gridProperty_->HasContainer()) {
+        UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty_->GetWidth()), std::nullopt));
+        auto optOffset = gridProperty_->GetOffset();
+        if (optOffset == UNDEFINED_DIMENSION) {
+            return;
+        }
+        OffsetT<Dimension> offset(optOffset, Dimension());
+        auto target = GetHost()->GetRenderContext();
+        if (target) {
+            target->UpdatePosition(offset);
+        }
     }
-    auto optOffset = gridProperty_->GetOffset();
-    if (optOffset == UNDEFINED_DIMENSION) {
-        return;
-    }
-    float offset = 0;
-    auto host = layoutWrapper->GetHostNode();
-    for (auto node = DynamicCast<FrameNode>(host->GetParent()); (node && node->GetTag() != V2::GRIDCONTAINER_ETS_TAG);
-         node = DynamicCast<FrameNode>(node->GetParent())) {
-        auto geometryNode = node->GetGeometryNode();
-        offset += geometryNode->GetFrameOffset().GetX();
-    }
-    const auto& currentGeometryNode = layoutWrapper->GetGeometryNode();
-    auto frameOffset = currentGeometryNode->GetFrameOffset();
-    frameOffset.SetX(optOffset.ConvertToPx() - offset);
-    currentGeometryNode->SetFrameOffset(frameOffset);
 }
 
 void LayoutProperty::CheckSelfIdealSize()

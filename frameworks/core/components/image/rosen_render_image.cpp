@@ -551,6 +551,15 @@ void RosenRenderImage::RebuildSvgRenderTree(const SvgRenderTree& svgRenderTree, 
     MarkNeedRender();
 }
 
+std::string RosenRenderImage::GetSvgImageKey()
+{
+    auto key = sourceInfo_.GetCacheKey();
+    if (sourceInfo_.GetFillColor().has_value()) {
+        key += sourceInfo_.GetFillColor().value().ColorToString();
+    }
+    return key;
+}
+
 void RosenRenderImage::CacheSvgImageObject()
 {
     auto context = GetContext().Upgrade();
@@ -560,7 +569,7 @@ void RosenRenderImage::CacheSvgImageObject()
     }
     auto imageCache = context->GetImageCache();
     if (imageCache) {
-        imageCache->CacheImgObj(sourceInfo_.GetCacheKey(), imageObj_);
+        imageCache->CacheImgObj(GetSvgImageKey(), imageObj_);
     }
 }
 
@@ -576,7 +585,7 @@ RefPtr<ImageObject> RosenRenderImage::QueryCacheSvgImageObject()
         LOGE("image cached is null!");
         return nullptr;
     }
-    return imageCache->GetCacheImgObj(sourceInfo_.GetCacheKey());
+    return imageCache->GetCacheImgObj(GetSvgImageKey());
 }
 
 void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)

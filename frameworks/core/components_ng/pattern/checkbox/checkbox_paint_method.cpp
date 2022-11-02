@@ -53,14 +53,11 @@ void CheckBoxPaintMethod::InitializeParam()
     borderRadius_ = checkBoxTheme->GetBorderRadius().ConvertToPx();
     checkStroke_ = checkBoxTheme->GetCheckStroke().ConvertToPx();
     activeColor_ = checkBoxTheme->GetActiveColor();
-    inactiveColor_ = checkBoxTheme->GetInactiveColor();
     shadowColor_ = checkBoxTheme->GetShadowColor();
 }
 
 void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    constexpr uint8_t ENABLED_ALPHA = 255;
-    constexpr uint8_t DISABLED_ALPHA = 102;
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
@@ -90,18 +87,12 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     if (isSelected) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
-        if (!enabled_) {
-            brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
-        }
         DrawActiveBorder(canvas, paintOffset, brush, contentSize);
+        pen.SetColor(ToRSColor(Color::WHITE));
         DrawCheck(canvas, paintOffset, pen, contentSize);
     } else {
-        pen.SetColor(ToRSColor(inactiveColor_));
+        pen.SetColor(ToRSColor(Color::GRAY));
         brush.SetColor(ToRSColor(Color::WHITE));
-        if (!enabled_) {
-            pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
-        }
         DrawUnselected(canvas, paintOffset, pen, brush, contentSize);
     }
 }
@@ -109,6 +100,7 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
 void CheckBoxPaintMethod::DrawUnselected(
     RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSBrush& brush, SizeF& paintSize) const
 {
+    pen.SetColor(ToRSColor(Color::GRAY));
     float originX = origin.GetX();
     float originY = origin.GetY();
     auto rrect = RSRoundRect(
@@ -154,7 +146,7 @@ void CheckBoxPaintMethod::DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSP
     path.LineTo(originX + middle.GetX(), originY + middle.GetY());
     shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     shadowPen.SetWidth(checkStroke_);
-
+    
     shadowPen.SetColor(ToRSColor(shadowColor_));
 
     canvas.AttachPen(shadowPen);

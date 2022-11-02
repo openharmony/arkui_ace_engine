@@ -197,8 +197,6 @@ private:
 
     WeakPtr<FrameNode> headerGroupNode_;
     WeakPtr<FrameNode> footerGroupNode_;
-    std::map<int32_t, int32_t> lanesItemRange_;
-    int32_t lanes_;
 };
 } // namespace OHOS::Ace::NG
 
