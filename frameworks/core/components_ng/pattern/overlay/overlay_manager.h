@@ -71,6 +71,8 @@ public:
         RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
     void HideMenu(int32_t targetId);
     void DeleteMenu(int32_t targetId);
+    void ShowMenuInSubWindow(int32_t targetId, bool isMenu = true, const NG::OffsetF& offset = NG::OffsetF(),
+        RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
     void PopToast(int32_t toastId);
