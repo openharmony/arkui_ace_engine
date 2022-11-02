@@ -33,6 +33,51 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    float GetInitialTitleOffsetY() const
+    {
+        return initialTitleOffsetY_;
+    }
+
+    void SetInitialTitleOffsetY(float initialTitleOffsetY)
+    {
+        initialTitleOffsetY_ = initialTitleOffsetY;
+    }
+
+    bool IsInitialTitle() const
+    {
+        return isInitialTitle_;
+    }
+
+    void MarkIsInitialTitle(bool isInitialTitle)
+    {
+        isInitialTitle_ = isInitialTitle;
+    }
+
+    float GetInitialSubtitleOffsetY() const
+    {
+        return initialSubtitleOffsetY_;
+    }
+
+    void SetInitialSubtitleOffsetY(float initialSubtitleOffsetY)
+    {
+        initialSubtitleOffsetY_ = initialSubtitleOffsetY;
+    }
+
+    bool IsInitialSubtitle() const
+    {
+        return isInitialSubtitle_;
+    }
+
+    void MarkIsInitialSubtitle(bool isInitialSubtitle)
+    {
+        isInitialSubtitle_ = isInitialSubtitle;
+    }
+
+    float GetMinTitleHeight() const
+    {
+        return minTitleHeight_;
+    }
+
 private:
     void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
@@ -54,15 +99,26 @@ private:
 
     void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight);
-    void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode, float subtitleHeight);
+    void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
 
     // set variables from theme
     void InitializeTheme();
+
+    float GetFontHeightByFontSize(const RefPtr<LayoutWrapper>& layoutWrapper,
+        const RefPtr<FrameNode>& textNode, const Dimension& fontSize);
 
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
     Dimension menuHeight_;
     Dimension iconSize_;
+    Dimension titleFontSize_;
+
+    float initialTitleOffsetY_ = 0.0f;
+    bool isInitialTitle_ = true;
+    float initialSubtitleOffsetY_ = 0.0f;
+    bool isInitialSubtitle_ = true;
+    float minTitleHeight_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TitleBarLayoutAlgorithm);
 };
