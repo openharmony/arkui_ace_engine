@@ -439,10 +439,14 @@ void RenderList::CalculateLanes()
              "%{public}f, maxLaneLength_: %{public}f",
             maxLanes, minLanes, minLaneLength_, maxLaneLength_);
     } while (0);
-    lanes_ = lanes;
-    if (lanes > 1) { // if lanes changes, adjust startIndex_
-        startIndex_ -= GetItemRelativeIndex(startIndex_) % lanes;
-        RemoveAllItems();
+    if (lanes != lanes_) {  // if lanes changes, adjust startIndex_
+        lanes_ = lanes;
+        if (lanes > 1) {
+            size_t startIndex = startIndex_ - GetItemRelativeIndex(startIndex_) % lanes;
+            if (startIndex_ != startIndex) {
+                RemoveAllItems();
+            }
+        }
     }
 }
 

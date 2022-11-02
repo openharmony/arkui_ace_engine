@@ -131,7 +131,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-        if (jsView->jsViewFunction_) {
+        if (jsView->viewNode_.Invalid() && jsView->jsViewFunction_) {
             jsView->jsViewFunction_->ExecuteAppear();
         }
     };
@@ -163,8 +163,11 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
         .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateNodeFunc = std::move(updateViewNodeFunction),
-        .pageTransitionFunc = std::move(pageTransitionFunction),
         .isStatic = IsStatic() };
+
+    if (jsViewFunction_ && jsViewFunction_->HasPageTransition()) {
+        info.pageTransitionFunc = std::move(pageTransitionFunction);
+    }
 
     return ViewFullUpdateModel::GetInstance()->CreateNode(std::move(info));
 }

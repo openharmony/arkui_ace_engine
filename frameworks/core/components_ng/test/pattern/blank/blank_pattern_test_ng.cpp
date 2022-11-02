@@ -181,7 +181,8 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator004, TestSize.Level1)
     Dimension blankMin;
     PaddingProperty noPadding;
 
-    auto rowFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rowFrameNode = FrameNode::CreateFrameNode(
+        V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
@@ -250,7 +251,8 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator005, TestSize.Level1)
     Dimension blankMin;
     PaddingProperty noPadding;
 
-    auto rowFrameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rowFrameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);

@@ -1825,7 +1825,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_MakeInnerLayoutParam_001, Test
     LayoutParam innerLayout;
     innerLayout = renderNode_->MakeInnerLayoutParam(index);
     auto result = innerLayout.GetMaxSize();
-    EXPECT_EQ(result.Width(), (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT);    
+    EXPECT_EQ(result.Width(), (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT);
 }
 
 /**

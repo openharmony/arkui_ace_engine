@@ -35,7 +35,7 @@ public:
     }
     int32_t GetLanes() const override
     {
-        return lanes_.value_or(1);
+        return lanes_;
     }
 
 protected:
@@ -55,7 +55,8 @@ private:
     int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t index);
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
 
-    std::optional<int32_t> lanes_;
+    int32_t lanes_ = 1;
+    bool lanesChanged_ = false;
     std::optional<float> minLaneLength_;
     std::optional<float> maxLaneLength_;
     std::map<int32_t, int32_t> lanesItemRange_;

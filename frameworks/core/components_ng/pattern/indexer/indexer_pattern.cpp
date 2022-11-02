@@ -64,7 +64,9 @@ void IndexerPattern::OnModifyDone()
             indexerPattern->SetIsTouch(true);
         };
         touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-        gesture->AddTouchEvent(touchListener_);
+        if (gesture) {
+            gesture->AddTouchEvent(touchListener_);
+        }
     }
 
     auto focusHub = host->GetFocusHub();

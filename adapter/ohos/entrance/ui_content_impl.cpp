@@ -282,7 +282,9 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
         CommonInitialize(window, url, storage);
         return;
     }
-    CommonInitialize(window, url, storage);
+    if (window) {
+        CommonInitialize(window, url, storage);
+    }
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
     // run page.
     Platform::AceContainer::RunPage(
@@ -415,7 +417,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
         info = extensionContext->GetAbilityInfo();
     }
-    AceApplicationInfo::GetInstance().SetAbilityName(info->name);
+    if (info) {
+        AceApplicationInfo::GetInstance().SetAbilityName(info->name);
+    }
 
     RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
     bool isModelJson = info != nullptr ? info->isModuleJson : false;

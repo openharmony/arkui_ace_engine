@@ -210,7 +210,9 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
         },
         TaskExecutor::TaskType::UI);
 
-    frontend_->AttachPipelineContext(pipelineContext_);
+    if (frontend_) {
+        frontend_->AttachPipelineContext(pipelineContext_);
+    }
     if (frontend_) {
         frontend_->SetDensity(density_);
         UpdateSurfaceSize();

@@ -146,6 +146,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto countLimit = layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : MAX_COUNT;
 
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
+    CHECK_NULL_VOID(textWrapper);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
     auto textGeometryNode = textWrapper->GetGeometryNode();

@@ -82,7 +82,7 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want)
     }
     packagePathStr += "/" + moduleInfo->package + "/";
     // init data ability
-    bool isHap = !moduleInfo->hapPath.empty();
+    bool isHap = moduleInfo ? !moduleInfo->hapPath.empty() : false;
     std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     BackendType backendType = BackendType::DATA;
     bool isArkApp = GetIsArkFromConfig(packagePath, isHap);

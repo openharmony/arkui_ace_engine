@@ -111,6 +111,9 @@ public:
     void SetAxis(Axis axis)
     {
         axis_ = axis;
+        if (scrollable_) {
+            scrollable_->SetAxis(axis);
+        }
     }
 
     void SetScrollable(const RefPtr<Scrollable>& scrollable)

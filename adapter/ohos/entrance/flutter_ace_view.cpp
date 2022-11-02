@@ -579,7 +579,9 @@ void FlutterAceView::ProcessDragEvent(int32_t x, int32_t y, const DragEventActio
 void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     MouseEvent event;
-    ConvertMouseEvent(pointerEvent, event);
+    if (pointerEvent) {
+        ConvertMouseEvent(pointerEvent, event);
+    }
     auto markProcess = [pointerEvent]() {
         if (pointerEvent) {
             LOGI("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
@@ -595,7 +597,9 @@ void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
 void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     AxisEvent event;
-    ConvertAxisEvent(pointerEvent, event);
+    if (pointerEvent) {
+        ConvertAxisEvent(pointerEvent, event);
+    }
     auto markProcess = [pointerEvent]() {
         if (pointerEvent) {
             LOGI("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());

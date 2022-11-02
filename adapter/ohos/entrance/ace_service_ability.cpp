@@ -82,7 +82,7 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
     packagePathStr += "/" + moduleInfo->package + "/";
 
     // init service
-    bool isHap = !moduleInfo->hapPath.empty();
+    bool isHap = moduleInfo ? !moduleInfo->hapPath.empty() : false;
     std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     BackendType backendType = BackendType::SERVICE;
     bool isArkApp = GetIsArkFromConfig(packagePath, isHap);

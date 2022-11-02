@@ -18,7 +18,7 @@ class ForEach {
     static create(): void {}
     static pop(): void { }
     static getIdArray(elmtId: number, emptyArray: string[]): boolean { return false; }
-    static setIdArray(elmtId: number, newIdArray: string[]): void {}
+    static setIdArray(elmtId: number, newIdArray: string[], diffIndexArray: number[]): void {}
     static createNewChildStart(id: string, parentView: NativeViewPartialUpdate): void {}
     static createNewChildFinish(id: string, parentView: NativeViewPartialUpdate): void {}
 }
