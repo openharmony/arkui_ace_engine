@@ -405,11 +405,9 @@ void RenderImage::PerformLayout()
         imageLayoutCallbacks.begin(), imageLayoutCallbacks.end(), [](std::function<void()> callback) { callback(); });
     LayoutImageObject();
     if (renderAltImage_) {
-        renderAltImage_->Layout(GetLayoutParam());
-        // don't wait for network image to return its size
-        if (!GetLayoutSize().IsValid()) {
-            SetLayoutSize(renderAltImage_->GetLayoutSize());
-        }
+        LayoutParam altLayoutParam;
+        altLayoutParam.SetFixedSize(GetLayoutSize());
+        renderAltImage_->Layout(altLayoutParam);
     }
 
     CalculateResizeTarget();

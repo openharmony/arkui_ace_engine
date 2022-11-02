@@ -219,12 +219,7 @@ void ImageProvider::FetchImageObject(
     if (onBackgroundTaskPostCallback) {
         onBackgroundTaskPostCallback(cancelableTask);
     }
-    // load network image on low priority to avoid blocking
-    if (imageInfo.GetSrcType() == SrcType::NETWORK) {
-        BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask, BgTaskPriority::LOW);
-    } else {
-        BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
-    }
+    BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
 }
 
 RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(
