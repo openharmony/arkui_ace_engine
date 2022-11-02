@@ -41,7 +41,8 @@ struct OverlayOptions {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
-        json->Put("title", content.c_str());
+        auto jsonOverlay = JsonUtil::Create(true);
+        jsonOverlay->Put("title", content.c_str());
         auto jsonOptions = JsonUtil::Create(true);
         // should get TextDirection
         jsonOptions->Put("align", align.GetAlignmentStr(TextDirection::LTR).c_str());
@@ -49,7 +50,8 @@ struct OverlayOptions {
         jsonOffset->Put("x", x.ToString().c_str());
         jsonOffset->Put("y", y.ToString().c_str());
         jsonOptions->Put("offset", jsonOffset);
-        json->Put("options", jsonOptions);
+        jsonOverlay->Put("options", jsonOptions);
+        json->Put("overlay", jsonOverlay);
     }
 };
 

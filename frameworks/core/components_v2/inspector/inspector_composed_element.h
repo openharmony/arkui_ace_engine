@@ -152,7 +152,6 @@ public:
     std::string GetBackgroundColor() const override;
     std::string GetBackgroundImageSize() const override;
     std::string GetBackgroundImagePosition() const override;
-    std::string GetAlignmentType(double width, double height) const override;
 
     // front decoration settings
     RefPtr<Decoration> GetFrontDecoration() const override;
