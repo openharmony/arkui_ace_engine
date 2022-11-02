@@ -292,14 +292,13 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
 
 void SubwindowOhos::HideMenuNG()
 {
-    auto targetId = targetId_;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->HideMenu(targetId);
+    overlay->CleanMenuInSubWindow();
     context->FlushPipelineImmediately();
     HideWindow();
 }
