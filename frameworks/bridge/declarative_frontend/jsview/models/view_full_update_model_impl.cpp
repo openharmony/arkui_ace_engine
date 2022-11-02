@@ -43,7 +43,7 @@ RefPtr<AceType> ViewFullUpdateModelImpl::CreateNode(NodeInfo&& info)
         // add render function callback to element. when the element rebuilds due
         // to state update it will call this callback to get the new child component.
         if (element) {
-            auto renderFunction = [renderFunc = std::move(nodeInfo.renderFunc)](
+            auto renderFunction = [renderFunc = nodeInfo.renderFunc](
                                       const RefPtr<Component>& component) -> RefPtr<Component> {
                 if (!renderFunc) {
                     return nullptr;
@@ -53,8 +53,7 @@ RefPtr<AceType> ViewFullUpdateModelImpl::CreateNode(NodeInfo&& info)
             };
             element->SetRenderFunction(std::move(renderFunction));
             if (nodeInfo.pageTransitionFunc) {
-                auto pageTransitionFunction = [transitionFunc =
-                                                      std::move(nodeInfo.pageTransitionFunc)]() -> RefPtr<Component> {
+                auto pageTransitionFunction = [transitionFunc = nodeInfo.pageTransitionFunc]() -> RefPtr<Component> {
                     transitionFunc();
                     auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
                     ViewStackProcessor::GetInstance()->ClearPageTransitionComponent();
