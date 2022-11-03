@@ -47,11 +47,6 @@ public:
         return false;
     }
 
-    virtual bool IsAccessibilityFocused() const
-    {
-        return false;
-    }
-
     virtual bool IsSelected() const
     {
         return false;
@@ -82,6 +77,11 @@ public:
         return false;
     }
 
+    virtual bool IsScrollable() const
+    {
+        return false;
+    }
+
     virtual int32_t GetCurrentIndex() const
     {
         return 0;
@@ -95,6 +95,11 @@ public:
     virtual int32_t GetEndIndex() const
     {
         return 0;
+    }
+
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("scrollable", IsScrollable());
     }
 
 protected:

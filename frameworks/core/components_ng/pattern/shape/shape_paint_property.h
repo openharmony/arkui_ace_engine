@@ -80,24 +80,26 @@ public:
         PaintProperty::ToJsonValue(json);
         json->Put("stroke", propStroke_.value_or(Color::BLACK).ColorToString().c_str());
         json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension()).ConvertToPx());
-        json->Put("strokeOpacity", propStrokeOpacity_.value_or(STOKE_OPACITY_DEFAULT));
-        json->Put("strokeDashOffset", propStrokeDashOffset_.value_or(Dimension()).ConvertToPx());
-        std::vector<Ace::Dimension> strokeDashDimensionArray =
-            propStrokeDashArray_.value_or(std::vector<Ace::Dimension>());
-        std::vector<int32_t> strokeDashIntArray(strokeDashDimensionArray.size());
-        int32_t len = static_cast<int32_t>(strokeDashDimensionArray.size());
-        for (int32_t i = 0; i < len; i++) {
-            strokeDashIntArray[i] = strokeDashDimensionArray[i].ConvertToPx();
+        json->Put("strokeOpacity", std::to_string(propStrokeOpacity_.value_or(STOKE_OPACITY_DEFAULT)).c_str());
+        json->Put("strokeDashOffset", propStrokeDashOffset_.value_or(Dimension()).ToString().c_str());
+
+        auto jsonDashArray = JsonUtil::CreateArray(true);
+        std::vector<Dimension> array = propStrokeDashArray_.value_or(std::vector<Dimension>());
+        for (size_t i = 0; i < array.size(); i++) {
+            auto index = std::to_string(i);
+            auto value = array[i].ToString();
+            jsonDashArray->Put(index.c_str(), value.c_str());
         }
-        json->Put("strokeDashArray", strokeDashIntArray.data());
-        std::array<std::string, 3> lineCap = { "BUTT", "ROUND", "SQUARE" };
+        json->Put("strokeDashArray", jsonDashArray);
+
+        std::array<std::string, 3> lineCap = { "LineCapStyle.Butt", "LineCapStyle.Round", "LineCapStyle.Square" };
         json->Put("strokeLineCap", lineCap.at(propStrokeLineCap_.value_or(0) % 3).c_str());
-        std::array<std::string, 3> lineJoin = { "MITER", "ROUND", "BEVEL" };
+        std::array<std::string, 3> lineJoin = { "LineJoinStyle.Miter", "LineJoinStyle.Round", "LineJoinStyle.Bevel" };
         json->Put("strokeLineJoin", lineJoin.at(propStrokeLineJoin_.value_or(0) % 3).c_str());
-        json->Put("strokeMiterLimit", propStrokeMiterLimit_.value_or(STOKE_MITERLIMIT_DEFAULT));
+        json->Put("strokeMiterLimit", std::to_string(propStrokeMiterLimit_.value_or(STOKE_MITERLIMIT_DEFAULT)).c_str());
         json->Put("fill", propFill_.value_or(Color::BLACK).ColorToString().c_str());
-        json->Put("fillOpacity", propFillOpacity_.value_or(FILL_OPACITY_DEFAULT));
-        json->Put("antiAlias", propAntiAlias_.value_or(ANTIALIAS_DEFAULT));
+        json->Put("fillOpacity", std::to_string(propFillOpacity_.value_or(FILL_OPACITY_DEFAULT)).c_str());
+        json->Put("antiAlias", propAntiAlias_.value_or(ANTIALIAS_DEFAULT) ? "true" : "false");
     }
 
     void UpdateShapeProperty(const RefPtr<ShapePaintProperty>& target);

@@ -81,6 +81,18 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
 
+    if (padding_) {
+        json->Put("padding", padding_->ToJsonString().c_str());
+    } else {
+        json->Put("padding", "0.0");
+    }
+
+    if (margin_) {
+        json->Put("margin", margin_->ToJsonString().c_str());
+    } else {
+        json->Put("margin", "0.0");
+    }
+
     json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
     json->Put("direction", TextDirectionToString(GetLayoutDirection()).c_str());
 }

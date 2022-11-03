@@ -1539,26 +1539,14 @@ std::string TextFieldPattern::TextInputTypeToString() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     switch (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
-        case TextInputType::UNSPECIFIED:
-            return "UNSPECIFIED";
-        case TextInputType::TEXT:
-            return "TEXT";
-        case TextInputType::MULTILINE:
-            return "MULTILINE";
         case TextInputType::NUMBER:
-            return "NUMBER";
-        case TextInputType::PHONE:
-            return "PHONE";
-        case TextInputType::DATETIME:
-            return "DATETIME";
+            return "InputType.Number";
         case TextInputType::EMAIL_ADDRESS:
-            return "EMAIL_ADDRESS";
-        case TextInputType::URL:
-            return "URL";
+            return "InputType.Email";
         case TextInputType::VISIBLE_PASSWORD:
-            return "PASSWORD";
+            return "InputType.Password";
         default:
-            return "NA";
+            return "InputType.Normal";
     }
 }
 
@@ -1567,22 +1555,16 @@ std::string TextFieldPattern::TextInputActionToString() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     switch (GetTextInputActionValue(TextInputAction::NEXT)) {
-        case TextInputAction::UNSPECIFIED:
-            return "UNSPECIFIED";
-        case TextInputAction::DONE:
-            return "DONE";
-        case TextInputAction::END:
-            return "END";
         case TextInputAction::GO:
-            return "GO";
-        case TextInputAction::NEXT:
-            return "NEXT";
+            return "EnterKeyType.Go";
         case TextInputAction::SEARCH:
-            return "SEARCH";
+            return "EnterKeyType.Search";
         case TextInputAction::SEND:
-            return "SEND";
+            return "EnterKeyType.Send";
+        case TextInputAction::NEXT:
+            return "EnterKeyType.Next";
         default:
-            return "NA";
+            return "EnterKeyType.Done";
     }
 }
 
