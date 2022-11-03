@@ -135,12 +135,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
     this.syncInstanceId();
 
-    let cb = this.watchedProps.get(varName)
-    if (cb) {
-      stateMgmtConsole.debug(`   .. calling @Watch function`);
-      cb.call(this, varName);
-    }
-
     if (dependentElmtIds.size) {
       if (!this.dirtDescendantElementIds_.size) {
         // mark Composedelement dirty when first elmtIds are added
@@ -152,6 +146,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.dirtDescendantElementIds_ = union;
       stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
     }
+
+    let cb = this.watchedProps.get(varName)
+    if (cb) {
+      stateMgmtConsole.debug(`   .. calling @Watch function`);
+      cb.call(this, varName);
+    }
+  
     this.restoreInstanceId();
   }
 

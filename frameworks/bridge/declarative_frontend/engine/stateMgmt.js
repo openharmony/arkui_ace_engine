@@ -2950,13 +2950,9 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
-        
+
         this.syncInstanceId();
-        let cb = this.watchedProps.get(varName);
-        if (cb) {
-            
-            cb.call(this, varName);
-        }
+
         if (dependentElmtIds.size) {
             if (!this.dirtDescendantElementIds_.size) {
                 // mark Composedelement dirty when first elmtIds are added
@@ -2968,6 +2964,13 @@ class ViewPU extends NativeViewPartialUpdate {
             this.dirtDescendantElementIds_ = union;
             
         }
+
+        let cb = this.watchedProps.get(varName);
+        if (cb) {
+            
+            cb.call(this, varName);
+        }
+
         this.restoreInstanceId();
     }
     /**
