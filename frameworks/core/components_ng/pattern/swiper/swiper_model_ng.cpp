@@ -48,7 +48,12 @@ RefPtr<SwiperController> SwiperModelNG::Create()
             V2::SWIPER_ETS_TAG, swiperNodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
         swiperGroupNode->AddChild(swiperNode);
         swiperNode->MarkModifyDone();
+    } else {
+        auto swiperUINode = swiperGroupNode->GetChildren().front();
+        CHECK_NULL_RETURN(swiperUINode, nullptr);
+        swiperNode = AceType::DynamicCast<FrameNode>(swiperUINode);
     }
+
     if (swiperGroupNode->GetChildren().size() == 1) {
         auto swiperIndicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(),
@@ -64,7 +69,8 @@ RefPtr<SwiperController> SwiperModelNG::Create()
     ViewStackProcessor::GetInstance()->Push(swiperGroupNode);
     CHECK_NULL_RETURN(swiperNode, nullptr);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
-    return pattern ? pattern->GetSwiperController() : nullptr;
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetSwiperController();
 }
 
 void SwiperModelNG::SetDirection(Axis axis)
