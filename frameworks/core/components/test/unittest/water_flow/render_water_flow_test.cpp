@@ -1102,10 +1102,14 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBarProxy_002, TestSi
  */
 HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBar_001, TestSize.Level1)
 {
-    CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::COLUMN);
-
     EXPECT_TRUE(renderNode_ != nullptr);
+    auto component = WaterFlowTestUtils::CreateComponent("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN);
+    auto waterflowComponent = AceType::DynamicCast<WaterFlowComponent>(component);
+    CHECK_RENDERNODE_NULL_VOID(waterflowComponent);
+    waterflowComponent->SetScrollBarDisplayMode(DisplayMode::OFF);
+    renderNode_->component_ = waterflowComponent;
     EXPECT_TRUE(renderNode_->component_ != nullptr);
+    CHECK_RENDERNODE_NULL_VOID(renderNode_->component_ != nullptr);
     renderNode_->component_->SetController(nullptr);
     renderNode_->InitScrollBar();
     EXPECT_TRUE(renderNode_->component_->displayMode_ == DisplayMode::OFF);
@@ -1153,10 +1157,18 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBar_004, TestSize.Le
     renderNode_->InitScrollBar();
     EXPECT_TRUE(renderNode_->scrollBar_ != nullptr);
     EXPECT_TRUE(renderNode_->scrollBar_->GetPositionMode() == PositionMode::RIGHT);
+}
 
+/**
+ * @tc.name: RenderWaterFlowTest_InitScrollBar_005
+ * @tc.desc: Verify the function that initialize the scroll bar of waterflow.
+ * @tc.type: FUNC
+ * @tc.require: issueI5TFPO
+ */
+HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitScrollBar_005, TestSize.Level1)
+{
     CreateRenderWaterFlow("1fr 1fr 1fr", "1fr 1fr 1fr", FlexDirection::ROW);
     EXPECT_TRUE(renderNode_ != nullptr);
-    renderNode_->InitScrollBar();
     EXPECT_TRUE(renderNode_->scrollBar_ != nullptr);
     EXPECT_TRUE(renderNode_->scrollBar_->GetPositionMode() == PositionMode::BOTTOM);
 }
