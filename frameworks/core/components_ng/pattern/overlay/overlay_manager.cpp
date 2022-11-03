@@ -53,6 +53,7 @@ void OverlayManager::ShowToast(
     }
 
     auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
+    CHECK_NULL_VOID(toastNode);
     auto toastId = toastNode->GetId();
     ToastInfo info = { toastId, toastNode };
     toastInfo_ = info;
@@ -124,8 +125,8 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::ShowMenu(int32_t targetId, bool isMenu, const NG::OffsetF& offset, RefPtr<FrameNode> menu,
-    bool isContextMenu)
+void OverlayManager::ShowMenu(
+    int32_t targetId, bool isMenu, const NG::OffsetF& offset, RefPtr<FrameNode> menu, bool isContextMenu)
 {
     if (!menu) {
         // get existing menuNode
@@ -168,6 +169,45 @@ void OverlayManager::ShowMenu(int32_t targetId, bool isMenu, const NG::OffsetF& 
     }
 }
 
+// subwindow only contains one menu instance.
+void OverlayManager::ShowMenuInSubWindow(
+    int32_t targetId, bool isMenu, const NG::OffsetF& offset, RefPtr<FrameNode> menu, bool isContextMenu)
+{
+    if (!menu) {
+        // get existing menuNode
+        auto it = menuMap_.find(targetId);
+        if (it != menuMap_.end()) {
+            menu = it->second;
+        } else {
+            LOGW("menuNode doesn't exists %{public}d", targetId);
+        }
+    } else {
+        // creating new menu
+        menuMap_[targetId] = menu;
+        LOGI("menuNode %{public}d added to map", targetId);
+    }
+    CHECK_NULL_VOID(menu);
+    auto menuChild = menu->GetChildAtIndex(0);
+    CHECK_NULL_VOID(menuChild);
+    auto menuFrameNode = DynamicCast<FrameNode>(menuChild);
+    auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetIsContextMenu(isContextMenu);
+    auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
+    if (isMenu && props) {
+        props->UpdateMenuOffset(offset);
+        menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    CHECK_NULL_VOID(props);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->Clean();
+    menu->MountToParent(rootNode);
+    menu->MarkModifyDone();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    LOGI("menuNode mounted in subwindow");
+}
+
 void OverlayManager::HideMenu(int32_t targetId)
 {
     LOGI("OverlayManager::HideMenuNode");
@@ -190,6 +230,15 @@ void OverlayManager::DeleteMenu(int32_t targetId)
         return;
     }
     menuMap_.erase(it);
+}
+
+void OverlayManager::CleanMenuInSubWindow()
+{
+    LOGI("OverlayManager::CleanMenuInSubWindow");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->Clean();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 RefPtr<FrameNode> OverlayManager::ShowDialog(

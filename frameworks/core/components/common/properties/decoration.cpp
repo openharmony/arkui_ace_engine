@@ -190,6 +190,26 @@ bool BackgroundImageSize::operator!=(const BackgroundImageSize& size) const
     return !operator==(size);
 }
 
+std::string BackgroundImageSize::ToString() const
+{
+    auto widthType = GetSizeTypeX();
+    if (widthType == BackgroundImageSizeType::CONTAIN) {
+        return "ImageSize.Contain";
+    }
+    if (widthType == BackgroundImageSizeType::COVER) {
+        return "ImageSize.Cover";
+    }
+    if (widthType == BackgroundImageSizeType::AUTO) {
+        return "ImageSize.Auto";
+    }
+    auto jsonValue = JsonUtil::Create(true);
+    Dimension width = Dimension((GetSizeValueX()), DimensionUnit::VP);
+    Dimension height = Dimension((GetSizeValueY()), DimensionUnit::VP);
+    jsonValue->Put("width", width.ToString().c_str());
+    jsonValue->Put("height", height.ToString().c_str());
+    return jsonValue->ToString();
+}
+
 BackgroundImagePosition BackgroundImagePosition::operator+(const BackgroundImagePosition& rhs) const
 {
     auto rhsX = rhs.GetSizeValueX();
@@ -248,6 +268,52 @@ bool BackgroundImagePosition::operator==(const BackgroundImagePosition& backgrou
 bool BackgroundImagePosition::operator!=(const BackgroundImagePosition& backgroundImagePosition) const
 {
     return !operator==(backgroundImagePosition);
+}
+
+static std::string GetAlignmentType(double width, double height)
+{
+    const double halfDimension = 50.0;
+    auto jsonValue = JsonUtil::Create(true);
+    if (NearZero(width)) {
+        if (NearZero(height)) {
+            return "Alignment.TopStart";
+        }
+        if (NearEqual(height, halfDimension)) { // Determine whether the vertical element is centered
+            return "Alignment.Start";
+        }
+        return "Alignment.BottomStart";
+    } else if (NearEqual(width, halfDimension)) { // Judge whether the horizontal element is centered
+        if (NearZero(height)) {
+            return "Alignment.Top";
+        }
+        if (NearEqual(height, halfDimension)) {
+            return "Alignment.Center";
+        }
+        return "Alignment.Bottom";
+    } else {
+        if (NearZero(height)) {
+            return "Alignment.TopEnd";
+        }
+        if (NearEqual(height, halfDimension)) {
+            return "Alignment.End";
+        }
+        return "Alignment.BottomEnd";
+    }
+}
+
+std::string BackgroundImagePosition::ToString() const
+{
+    if (GetSizeTypeX() == BackgroundImagePositionType::PX) {
+        auto width = GetSizeValueX();
+        auto height = GetSizeValueY();
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("x", width);
+        jsonValue->Put("y", height);
+        return jsonValue->ToString();
+    }
+    auto width = GetSizeValueX();
+    auto height = GetSizeValueY();
+    return GetAlignmentType(width, height);
 }
 
 CanvasPath2D::CanvasPath2D(const std::string& cmds)

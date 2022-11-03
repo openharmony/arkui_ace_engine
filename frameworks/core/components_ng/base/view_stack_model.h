@@ -30,8 +30,11 @@ public:
     static ViewStackModel* GetInstance();
     virtual ~ViewStackModel() = default;
 
+    virtual void Push(const RefPtr<AceType>& node, bool isCustomView) = 0;
     virtual void Pop() = 0;
     virtual void PopContainer() = 0;
+    virtual void PushKey(const std::string& key) = 0;
+    virtual void PopKey() = 0;
     virtual void NewScope() = 0;
     virtual RefPtr<AceType> Finish() = 0;
     virtual std::string ProcessViewId(const std::string& viewId) = 0;

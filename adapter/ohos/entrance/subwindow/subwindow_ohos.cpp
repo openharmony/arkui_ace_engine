@@ -73,6 +73,9 @@ void SubwindowOhos::InitContainer()
         auto windowType = parentWindow->GetType();
         if (windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_FLOAT);
+        } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
+            windowOption->SetParentId(parentWindowId);
         } else {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
@@ -284,19 +287,18 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->ShowMenu(targetId, true, offset, menuNode, true);
+    overlay->ShowMenuInSubWindow(targetId, true, offset, menuNode, true);
 }
 
 void SubwindowOhos::HideMenuNG()
 {
-    auto targetId = targetId_;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->HideMenu(targetId);
+    overlay->CleanMenuInSubWindow();
     context->FlushPipelineImmediately();
     HideWindow();
 }

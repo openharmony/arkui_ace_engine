@@ -286,7 +286,30 @@ void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string
     uvWorkData_.want = want;
     uvWorkData_.data = data;
     uvWorkData_.name = name;
-    OnRequestEventInner(&uvWorkData_);
+
+    uv_loop_s* loop = nullptr;
+    napi_get_uv_event_loop(cbInfo_.env, &loop);
+    uv_work_t* work = new uv_work_t;
+    work->data = (void*)this;
+    int rev = uv_queue_work(
+        loop, work, [](uv_work_t* work) {},
+        [](uv_work_t* work, int status) {
+            if (work == nullptr) {
+                return;
+            }
+            JSPluginCallback* context = (JSPluginCallback*)work->data;
+            if (context) {
+                context->OnRequestEventInner(&context->uvWorkData_);
+            }
+            delete work;
+            work = nullptr;
+        });
+    if (rev != 0) {
+        if (work != nullptr) {
+            delete work;
+            work = nullptr;
+        }
+    }
 }
 
 void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData)
@@ -328,11 +351,12 @@ void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTe
     }
 
     if (cbInfo_.callback != nullptr) {
-        uvWorkData_.that = (void *)this;
+        uvWorkData_.that = (void*)this;
         uvWorkData_.sourceName = pluginTemplate.GetSource();
         uvWorkData_.abilityName = pluginTemplate.GetAbility();
         uvWorkData_.data = data;
         uvWorkData_.extraData = extraData;
+
         OnRequestCallBackInner(&uvWorkData_);
     } else {
         if (asyncJSCallbackInfo_) {

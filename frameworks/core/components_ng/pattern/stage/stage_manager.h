@@ -50,8 +50,7 @@ public:
     RefPtr<FrameNode> GetLastPage();
 
 private:
-    void StartSharedTransition(
-        const RefPtr<FrameNode>& outNode, const RefPtr<FrameNode>& inNode, bool needFlush) const;
+    void StartSharedTransition(const RefPtr<FrameNode>& outNode, const RefPtr<FrameNode>& inNode, bool needFlush) const;
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;
 

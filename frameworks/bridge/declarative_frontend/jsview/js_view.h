@@ -20,37 +20,22 @@
 #include <string>
 
 #include "base/log/ace_scoring_log.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
-#include "core/pipeline/base/composed_component.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/view_partial_update_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
-
-namespace OHOS::Ace {
-
-class ComposedElement;
-
-namespace NG {
-class CustomNode;
-class UINode;
-} // namespace NG
-
-} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 class JSView : public JSViewAbstract, public Referenced {
 public:
-    JSView()
-    {
-        instanceId_ = Container::CurrentId();
-    }
+    JSView() : instanceId_(Container::CurrentId()) {}
     ~JSView() override = default;
     virtual void Destroy(JSView* parentCustomView) = 0;
-    virtual RefPtr<Component> CreateComponent() = 0;
-    RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
 
-    virtual RefPtr<NG::UINode> CreateUINode()
+    virtual RefPtr<AceType> CreateViewNode()
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
@@ -86,7 +71,7 @@ public:
 
     void RenderJSExecution();
 
-    virtual void MarkNeedUpdate();
+    virtual void MarkNeedUpdate() = 0;
 
     bool NeedsUpdate()
     {
@@ -113,6 +98,21 @@ public:
         jsViewFunction_->SetContext(context);
     }
 
+    // Used to set/get card id C++
+    void SetCardId(int64_t cardId)
+    {
+        cardId_ = cardId;
+    }
+
+    int64_t GetCardId() const
+    {
+        return cardId_;
+    }
+
+    // Used to set/get card id JS
+    void JsSetCardId(int64_t cardId);
+    void JsGetCardId(const JSCallbackInfo& info);
+
     // Used by full update variant only from js_lazy_foreach.cpp
     virtual void RemoveChildGroupById(const std::string& viewId) {}
     virtual void MarkLazyForEachProcess(const std::string& groudId) {}
@@ -128,15 +128,14 @@ protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
 
-    WeakPtr<ComposedElement> GetElement()
-    {
-        return element_;
-    }
-
-    WeakPtr<ComposedElement> element_;
-    WeakPtr<NG::UINode> node_;
+    WeakPtr<AceType> viewNode_;
     // view id for custom view itself
     std::string viewId_;
+
+    // card id for eTS Card
+    // set on the root JSView of the card and inherited by all child JSViews
+    // -1 means not part of a card
+    int64_t cardId_ = -1;
 
 private:
     int32_t instanceId_ = -1;
@@ -149,13 +148,12 @@ public:
     JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
     ~JSViewFullUpdate() override;
 
-    RefPtr<Component> InternalRender(const RefPtr<Component>& parent);
     void Destroy(JSView* parentCustomView) override;
-    RefPtr<Component> CreateComponent() override;
 
     // TODO: delete this after the toolchain for partial update is ready.
-    RefPtr<NG::UINode> InternalRender();
-    RefPtr<NG::UINode> CreateUINode() override;
+    RefPtr<AceType> InternalRender();
+
+    RefPtr<AceType> CreateViewNode() override;
 
     void MarkNeedUpdate() override;
 
@@ -244,18 +242,16 @@ private:
 };
 
 class JSViewPartialUpdate : public JSView {
-    using UpdateFuncResult = std::tuple<int32_t, RefPtr<Component>, RefPtr<Component>>;
-
 public:
     explicit JSViewPartialUpdate(JSRef<JSObject> jsObject);
     ~JSViewPartialUpdate() override;
 
-    RefPtr<Component> InitialRender();
     void Destroy(JSView* parentCustomView) override;
-    RefPtr<Component> CreateComponent() override;
 
-    RefPtr<NG::UINode> InitialUIRender();
-    RefPtr<NG::UINode> CreateUINode() override;
+    RefPtr<AceType> InitialRender();
+
+    RefPtr<AceType> CreateViewNode() override;
+
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
@@ -298,19 +294,6 @@ public:
     void JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& info);
 
     /**
-     * flush pendingElementUpdates
-     * and call ComponentToElementLocalizedUpdate for each entry
-     * returns always mull
-     */
-    void MakeElementUpdatesToCompleteRerender();
-
-    /**
-     * take given Component and update the referenced main Element and its wrapping Elements with it.
-     * to be executed on UI thread
-     */
-    void ComponentToElementLocalizedUpdate(const UpdateFuncResult& updateFuncResult);
-
-    /**
     JS exposed function to check from ElementRegister if given elmtId is (still) in use
     */
     bool JsElementIdExists(int32_t elmtId);
@@ -335,16 +318,13 @@ private:
     <1> outmost wrapping Component
     <2> main Component
     */
-    std::list<UpdateFuncResult> pendingElementUpdates_;
+    std::list<UpdateTask> pendingUpdateTasks_;
 
     // The C++ JSView object owns a reference to the JS Object
     // AssignNewView assigns the JS View
     // Destroy deleted the ref, and thereby triggers the deletion
     // GC -> JS View Object -> JSView C++ Object
     JSRef<JSObject> jsViewObject_;
-
-    void UpdateCustomFrame(RefPtr<NG::CustomMeasureLayoutNode> customNode);
-    void UpdateNormalFrame(RefPtr<NG::CustomNode> customNode);
 };
 
 } // namespace OHOS::Ace::Framework

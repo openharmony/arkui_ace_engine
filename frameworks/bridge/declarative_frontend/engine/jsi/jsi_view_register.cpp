@@ -16,6 +16,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
@@ -225,7 +226,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             }
             pageNode->Clean();
         }
-        auto pageRootNode = view->CreateUINode();
+        auto pageRootNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode());
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
         // update page life cycle function.
@@ -261,7 +262,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
     LOGD("Loading page root component: Setting pipeline to use %{public}s.",
         view->isFullUpdate() ? "Full Update" : "Partial Update");
-    auto rootComponent = view->CreateComponent();
+    auto rootComponent = AceType::DynamicCast<Component>(view->CreateViewNode());
     std::list<RefPtr<Component>> stackChildren;
     stackChildren.emplace_back(rootComponent);
     auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
@@ -270,7 +271,9 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
     rootComposed->SetChild(rootStackComponent);
     page->SetRootComponent(rootComposed);
-    page->SetPageTransition(view->BuildPageTransitionComponent());
+    auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
+    ViewStackProcessor::GetInstance()->ClearPageTransitionComponent();
+    page->SetPageTransition(pageTransitionComponent);
 
     // We are done, tell to the JSAgePage
     page->SetPageCreated();
@@ -398,6 +401,8 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
         auto cardId = CardScope::CurrentId();
+        view->SetCardId(cardId);
+
         auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
         CHECK_NULL_VOID(frontEnd);
 
@@ -411,7 +416,7 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
         auto pageNode = pageRouterManager->GetCurrentPageNode();
         CHECK_NULL_VOID(pageNode);
 
-        auto pageRootNode = view->CreateUINode();
+        auto pageRootNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode());
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
 
@@ -439,7 +444,7 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
         });
         return;
     } else {
-        LOGE("eTSCard not only support NG structure");
+        LOGE("eTSCard only support NG structure");
     }
 }
 
@@ -467,6 +472,59 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
 #endif
     UpdateRootComponent(obj);
 
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc > 2) {
+        LOGE("The arg is wrong, must have no more than two argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject()) {
+        LOGE("The arg is wrong, value must be IsObject");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsObject()) {
+        LOGE("The arg is wrong, value must be object");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
+        LOGE("JSPostCardAction: argument provided is not a View!");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int64_t cardId = view->GetCardId();
+
+    auto value = panda::JSON::Stringify(vm, secondArg);
+    if (!value->IsString()) {
+        LOGE("The second arg is wrong");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto valueStr = panda::Local<panda::StringRef>(value);
+    auto action = valueStr->ToString();
+
+    auto container = Container::Current();
+    if (container && container->IsUseNewPipeline()) {
+        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        if (!frontEnd) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+
+        auto delegate = frontEnd->GetDelegate();
+        if (!delegate) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+
+        delegate->FireCardAction(action);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1453,6 +1511,8 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadEtsCard"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadEtsCard));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "postCardAction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSPostCardAction));
 #if defined(PREVIEW)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewComponent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsPreviewerComponent));

@@ -37,6 +37,7 @@ const RefPtr<CubicCurve> CURVE_SCROLL_TO_TOP = AceType::MakeRefPtr<CubicCurve>(0
 constexpr int32_t DEFAULT_DEPTH = 10;
 constexpr double MAX_CONSTRAINT_SCALE = 3.0;
 constexpr double CENTER_POINT = 2.0;
+constexpr int32_t CACHE_SIZE_SCALE = 3;
 const std::string UNIT_AUTO = "auto";
 } // namespace
 
@@ -174,6 +175,10 @@ void RenderWaterFlow::CreateScrollable()
             if (proxy) {
                 proxy->StartScrollBarAnimator();
             }
+            auto scrollBar = flow->scrollBar_;
+            if (scrollBar) {
+                scrollBar->HandleScrollBarEnd();
+            }
         }
     });
     scrollable_->Initialize(context_);
@@ -308,7 +313,7 @@ void RenderWaterFlow::GetFlowSize()
             mainSize_ = viewPort_.Width();
         }
     }
-    cacheSize_ = mainSize_;
+    cacheSize_ = mainSize_ * CACHE_SIZE_SCALE;
 }
 
 void RenderWaterFlow::CallGap()
@@ -697,21 +702,21 @@ void RenderWaterFlow::InitScrollBar()
         return;
     }
 
-    if (!component_->GetController()) {
-        component_->SetScrollBarDisplayMode(DisplayMode::OFF);
+    if (scrollBar_) {
+        scrollBar_->SetDisplayMode(component_->GetScrollBarDisplayMode());
+        scrollBar_->Reset();
+        return;
     }
 
     const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
     if (!theme) {
         return;
     }
-    if (scrollBar_) {
-        scrollBar_->Reset();
-    } else {
-        RefPtr<WaterFlowScrollController> controller = AceType::MakeRefPtr<WaterFlowScrollController>();
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBarDisplayMode(), theme->GetShapeMode());
-        scrollBar_->SetScrollBarController(controller);
-    }
+
+    RefPtr<WaterFlowScrollController> controller = AceType::MakeRefPtr<WaterFlowScrollController>();
+    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBarDisplayMode(), theme->GetShapeMode());
+    scrollBar_->SetScrollBarController(controller);
+
     // set the scroll bar style
     scrollBar_->SetMinHeight(theme->GetMinHeight());
     scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
@@ -785,26 +790,6 @@ void RenderWaterFlow::SetScrollBarCallback()
     scrollBar_->SetCallBack(scrollCallback, barEndCallback, scrollEndCallback);
 }
 
-bool RenderWaterFlow::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
-{
-    if (!animator_->IsStopped()) {
-        animator_->Stop();
-    }
-    animator_->ClearInterpolators();
-    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(-viewportStartPos_, NormalizeToPx(position), curve);
-    animation->AddListener([weakScroll = AceType::WeakClaim(this)](double value) {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->DoJump(value, SCROLL_FROM_JUMP);
-        }
-    });
-    animator_->AddInterpolator(animation);
-    animator_->SetDuration(static_cast<int32_t>(duration));
-    animator_->ClearStopListeners();
-    animator_->Play();
-    return true;
-}
-
 void RenderWaterFlow::ScrollToIndex(int32_t index, int32_t source)
 {
     if (source != SCROLL_FROM_JUMP) {
@@ -820,12 +805,6 @@ void RenderWaterFlow::ScrollToIndex(int32_t index, int32_t source)
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("context is null");
-        return;
-    }
-
-    auto showItems = GetShowItems();
-    if (showItems.find(index) != showItems.end()) {
-        LOGW("Item show in view port already, not do scrllToIndex.");
         return;
     }
 

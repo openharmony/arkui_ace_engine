@@ -31,8 +31,8 @@ void ListPositionController::JumpTo(int32_t index, int32_t source)
         auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
         if (listPattern) {
             LOGW("jumpTo is not supported now");
+            listPattern->ScrollToIndex(index);
         }
-        listPattern->ScrollToIndex(index);
     }
 }
 

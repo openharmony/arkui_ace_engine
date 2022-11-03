@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -37,10 +38,16 @@ void IndexerPattern::OnModifyDone()
         arrayValue_ = layoutProperty->GetArrayValue().value();
         itemCount_ = static_cast<int32_t>(arrayValue_.size());
     }
-    if (!isInitialized_ && layoutProperty->GetSelected().has_value()) {
-        selected_ = layoutProperty->GetSelected().value();
+
+    if (layoutProperty->GetSelected().has_value() && storeSelected_ != layoutProperty->GetSelected().value()) {
+        storeSelected_ = layoutProperty->GetSelected().value();
+        selected_ = storeSelected_;
+        if (storeSelected_ >= itemCount_) {
+            storeSelected_ = 0;
+            selected_ = 0;
+        }
+        ApplyIndexChanged();
     }
-    isInitialized_ = true;
 
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
@@ -57,7 +64,9 @@ void IndexerPattern::OnModifyDone()
             indexerPattern->SetIsTouch(true);
         };
         touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-        gesture->AddTouchEvent(touchListener_);
+        if (gesture) {
+            gesture->AddTouchEvent(touchListener_);
+        }
     }
 
     auto focusHub = host->GetFocusHub();
@@ -271,6 +280,7 @@ void IndexerPattern::ApplyIndexChanged()
 
                 auto listNode = AceType::DynamicCast<FrameNode>(iter);
                 listNode->Clean();
+                int32_t popupDataIndex = 0;
                 for (const auto& data: popupDataValue) {
                     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1,
                         AceType::MakeRefPtr<TextPattern>());
@@ -290,8 +300,18 @@ void IndexerPattern::ApplyIndexChanged()
                     textNodeRenderContext->BlendBgColor(popupBackground);
 
                     Dimension radius = Dimension(NG::BUBBLE_BOX_RADIUS);
-                    BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-                    textNodeRenderContext->UpdateBorderRadius(borderRadius);
+                    if (popupDataValue.size() <= 1) {
+                        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
+                        textNodeRenderContext->UpdateBorderRadius(borderRadius);
+                    } else {
+                        if (popupDataIndex == 0) {
+                            BorderRadiusProperty borderRadius { radius, radius, Dimension(0), Dimension(0) };
+                            textNodeRenderContext->UpdateBorderRadius(borderRadius);
+                        } else if (popupDataIndex == INDEXER_BUBBLE_MAXSIZE - 1) {
+                            BorderRadiusProperty borderRadius { Dimension(0), Dimension(0), radius, radius };
+                            textNodeRenderContext->UpdateBorderRadius(borderRadius);
+                        }
+                    }
                     textNode->MarkModifyDone();
                     auto listItemNode = FrameNode::GetOrCreateFrameNode(
                         V2::LIST_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
@@ -299,6 +319,7 @@ void IndexerPattern::ApplyIndexChanged()
                     listItemNode->MarkModifyDone();
                     
                     listNode->AddChild(listItemNode);
+                    popupDataIndex++;
                 }
                 listNode->MarkModifyDone();
                 listNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

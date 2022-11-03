@@ -98,6 +98,18 @@ public:
     void SetAxis(Axis axis)
     {
         axis_ = axis;
+        PanDirection panDirection;
+        if (axis_ == Axis::VERTICAL) {
+            panDirection.type = PanDirection::VERTICAL;
+        } else {
+            panDirection.type = PanDirection::HORIZONTAL;
+        }
+        if (panRecognizer_) {
+            panRecognizer_->SetDirection(panDirection);
+        }
+        if (panRecognizerNG_) {
+            panRecognizerNG_->SetDirection(panDirection);
+        }
     }
 
     void SetScrollableNode(const WeakPtr<RenderNode>& node)

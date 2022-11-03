@@ -104,8 +104,6 @@ public:
         return flexItemProperty_;
     }
 
-    const std::unique_ptr<GridProperty>& GetGridProperty(RefPtr<FrameNode> node);
-
     TextDirection GetLayoutDirection() const
     {
         return layoutDirection_.value_or(TextDirection::AUTO);
@@ -313,7 +311,7 @@ public:
         }
     }
 
-    void UpdateGridConstraint();
+    void UpdateGridOffset(LayoutWrapper* layoutWrapper);
 
     void BuildGridProperty(const RefPtr<FrameNode>& host);
 

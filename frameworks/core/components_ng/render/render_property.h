@@ -40,6 +40,7 @@ struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImagePosition, BackgroundImagePosition);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundBlurStyle, BlurStyle);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 struct BorderImageProperty {
@@ -79,6 +80,7 @@ struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, Vector3F);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector4F);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 struct DecorationProperty {
@@ -87,7 +89,7 @@ struct DecorationProperty {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
-        json->Put("blur", propBlurRadius.value_or(0.0_vp).Value());
+        json->Put("backdropBlur", propBlurRadius.value_or(0.0_vp).Value());
         auto jsonShadow = JsonUtil::Create(true);
         auto shadow = propBackShadow.value_or(Shadow());
         jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
@@ -107,28 +109,37 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontInvert, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontColorBlend, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 struct RenderPositionProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Position, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Offset, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Anchor, OffsetT<Dimension>);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 struct ClipProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipShape, RefPtr<BasicShape>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipEdge, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipMask, RefPtr<BasicShape>);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 struct GradientProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(RadialGradient, NG::Gradient);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 struct OverlayProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverlayText, OverlayOptions);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        propOverlayText.value_or(OverlayOptions()).ToJsonValue(json);
+    }
 };
 
 struct MotionPathProperty {

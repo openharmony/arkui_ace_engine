@@ -27,10 +27,10 @@
 namespace OHOS::Ace::Framework {
 // This is the primary class by which the CardFrontend delegates
 
-using LoadCardCallback = std::function<bool(const std::string&, uint64_t cardId)>;
+using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 using UpdateCardDataCallback = std::function<void(const std::string&)>;
 
-class CardFrontendDelegateDeclarative : public FrontendDelegateDeclarativeNG {
+class ACE_EXPORT CardFrontendDelegateDeclarative : public FrontendDelegateDeclarativeNG {
     DECLARE_ACE_TYPE(CardFrontendDelegateDeclarative, FrontendDelegateDeclarativeNG);
 
 public:
@@ -39,9 +39,11 @@ public:
     {}
     ~CardFrontendDelegateDeclarative() override;
 
-    void RunCard(const std::string& url, const std::string& params, const std::string& profile, uint64_t cardId);
+    void RunCard(const std::string& url, const std::string& params, const std::string& profile, int64_t cardId);
 
     void FireCardEvent(const EventMarker& eventMarker, const std::string& params = "");
+
+    void FireCardAction(const std::string& action);
 
     void SetLoadCardCallBack(const LoadCardCallback& loadCallback)
     {

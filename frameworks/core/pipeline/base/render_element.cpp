@@ -65,7 +65,9 @@ void RenderElement::Prepare(const WeakPtr<Element>& parent)
             // store distribute node
             context->StoreNode(restoreId, AceType::WeakClaim(this));
             // restore distribute node info
-            renderNode_->SetRestoreInfo(context->GetRestoreInfo(restoreId));
+            if (renderNode_) {
+                renderNode_->SetRestoreInfo(context->GetRestoreInfo(restoreId));
+            }
         }
     }
 }

@@ -283,6 +283,7 @@ void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar, bool fro
         auto tabContent = weak.Upgrade();
         if (tabContent) {
             tabContent->UpdateChildPosition(value, index, newIndex, needChange);
+            tabContent->HandContentIndicatorEvent(newIndex, needChange);
         }
     }));
 
@@ -296,7 +297,6 @@ void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar, bool fro
         auto tabContent = weak.Upgrade();
         if (tabContent) {
             tabContent->HandleStartListener(newIndex, needChange, isLinkBar);
-            tabContent->HandContentIndicatorEvent(newIndex, needChange);
         }
     });
     animator_->SetDuration(static_cast<int32_t>(scrollDuration_));

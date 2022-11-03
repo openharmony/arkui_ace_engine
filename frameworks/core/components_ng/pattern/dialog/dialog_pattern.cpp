@@ -354,9 +354,11 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
         container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     } else {
         container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-        auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
-        layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
-        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        if (container) {
+            auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
+            layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        }
     }
 
     CHECK_NULL_RETURN(container, nullptr);

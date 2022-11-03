@@ -102,6 +102,8 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO);
     }
+    // update percentRef
+    innerLayout.percentReference = innerLayout.maxSize;
 }
 
 double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
