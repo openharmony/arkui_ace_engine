@@ -87,6 +87,9 @@ public:
     static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
     static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
     static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
+
+private:
+    static void RegisterPipelineCallback(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG
 
