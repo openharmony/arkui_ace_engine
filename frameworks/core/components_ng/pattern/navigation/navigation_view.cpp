@@ -322,7 +322,7 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+    textLayoutProperty->UpdateFontSize(MAX_TITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
     if (!hasSubTitle) {

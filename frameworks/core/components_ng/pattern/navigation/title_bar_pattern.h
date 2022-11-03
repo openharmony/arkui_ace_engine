@@ -43,6 +43,7 @@ public:
         titleBarLayoutAlgorithm->MarkIsInitialTitle(isInitialTitle_);
         titleBarLayoutAlgorithm->SetInitialSubtitleOffsetY(initialSubtitleOffsetY_);
         titleBarLayoutAlgorithm->MarkIsInitialSubtitle(isInitialSubtitle_);
+        titleBarLayoutAlgorithm->SetMinTitleHeight(minTitleHeight_);
         return titleBarLayoutAlgorithm;
     }
 

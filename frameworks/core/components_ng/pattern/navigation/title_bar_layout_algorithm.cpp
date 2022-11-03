@@ -41,7 +41,7 @@ float TitleBarLayoutAlgorithm::GetFontHeightByFontSize(const RefPtr<LayoutWrappe
 {
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
-    auto preFontSize = textLayoutProperty->GetFontSize().value_or(titleFontSize_);
+    auto preFontSize = textLayoutProperty->GetFontSize().value_or(MIN_TITLE_FONT_SIZE);
     textLayoutProperty->UpdateFontSize(fontSize);
     auto constraint = textLayoutProperty->CreateChildConstraint();
     layoutWrapper->Measure(constraint);
