@@ -219,7 +219,7 @@ private:
     OnItemDragMoveFunc onItemDragMoveId_;
     OnItemDragLeaveFunc onItemDragLeaveId_;
     OnItemDropFunc onItemDropId_;
-    ListItemAlign listItemAlign_ { ListItemAlign::CENTER };
+    ListItemAlign listItemAlign_ { ListItemAlign::START };
     std::optional<std::pair<Dimension, Dimension>> laneContrain_;
     int32_t lanes_ { -1 };
 
