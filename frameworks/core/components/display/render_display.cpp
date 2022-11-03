@@ -274,10 +274,6 @@ void RenderDisplay::UpdateVisibleType(VisibleType type)
 
 void RenderDisplay::SetVisible(bool visible, bool inRecursion)
 {
-    // prevent propagating setVisible to invisible components
-    if (visible && GetVisibleType() != VisibleType::VISIBLE) {
-        return;
-    }
     RenderNode::SetVisible(visible, inRecursion);
 }
 
