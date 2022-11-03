@@ -15,6 +15,11 @@
 
 #include "core/components/text_field/render_text_field.h"
 
+#include <regex>
+#include <string>
+#include <unordered_map>
+#include <utility>
+
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -61,6 +66,10 @@ constexpr double FIFTY_PERCENT = 0.5;
 constexpr Dimension OFFSET_FOCUS = 4.0_vp;
 constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
+const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
+const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
+const std::string EMAIL_WHITE_LIST = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
+const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 // Whether the system is Mac or not determines which key code is selected.
 #if defined(MAC_PLATFORM)
 #define KEY_META_OR_CTRL_LEFT KeyCode::KEY_META_LEFT
@@ -70,6 +79,53 @@ constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 #define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_CTRL_RIGHT
 #endif
 
+void RemoveErrorTextFromValue(const std::string& value, const std::string& errorText, std::string& result)
+{
+    int32_t valuePtr = 0;
+    int32_t errorTextPtr = 0;
+    auto valueSize = static_cast<int32_t>(value.size());
+    auto errorTextSize = static_cast<int32_t>(errorText.size());
+    while (errorTextPtr < errorTextSize) {
+        while (value[valuePtr] != errorText[errorTextPtr] && valuePtr < valueSize) {
+            result += value[valuePtr];
+            valuePtr++;
+        }
+        // no more text left to remove in value
+        if (valuePtr >= valueSize) {
+            return;
+        }
+        // increase both value ptr and error text ptr if char in value is removed
+        valuePtr++;
+        errorTextPtr++;
+    }
+    result += value.substr(valuePtr);
+}
+
+void GetKeyboardFilter(TextInputType keyboard, std::string& keyboardFilterValue)
+{
+    switch (keyboard) {
+        case TextInputType::NUMBER: {
+            keyboardFilterValue = DIGIT_WHITE_LIST;
+            break;
+        }
+        case TextInputType::PHONE: {
+            keyboardFilterValue = PHONE_WHITE_LIST;
+            break;
+        }
+        case TextInputType::EMAIL_ADDRESS: {
+            keyboardFilterValue = EMAIL_WHITE_LIST;
+            break;
+        }
+        case TextInputType::URL: {
+            keyboardFilterValue = URL_WHITE_LIST;
+            break;
+        }
+        default: {
+            // No need limit.
+            return;
+        }
+    }
+}
 } // namespace
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -221,7 +277,6 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         }
         keyboard_ = textField->GetTextInputType();
     }
-
     if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative()) {
@@ -302,7 +357,6 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     UpdateConfiguration();
 #endif
     SetCallback(textField);
-    UpdateFormatters();
     UpdateFocusStyles();
     UpdateIcon(textField);
     RegisterFontCallbacks();
@@ -1313,57 +1367,109 @@ std::wstring WstringSearch(std::wstring wideText, const std::wregex& regex)
     return result;
 }
 
-void RenderTextField::EditingValueFilter(TextEditingValue& result)
+bool RenderTextField::FilterWithRegex(std::string& valueToUpdate, const std::string& filter, bool needToEscape)
 {
-    for (const auto& formatter : textInputFormatters_) {
-        if (formatter) {
-            formatter->Format(GetEditingValue(), result);
-        }
+    if (filter.empty() || valueToUpdate.empty()) {
+        LOGD("Text is empty or filter is empty");
+        return false;
     }
+    std::string escapeFilter;
+    if (needToEscape && !TextFieldControllerBase::EscapeString(filter, escapeFilter)) {
+        LOGE("Filter %{public}s is not legal", filter.c_str());
+        return false;
+    }
+    if (!needToEscape) {
+        escapeFilter = filter;
+    }
+    std::regex filterRegex(escapeFilter);
+    auto errorText = std::regex_replace(valueToUpdate, filterRegex, "");
+    if (!errorText.empty()) {
+        std::string result;
+        RemoveErrorTextFromValue(valueToUpdate, errorText, result);
+        valueToUpdate = result;
+        if (onError_) {
+            onError_(errorText);
+        }
+        return true;
+    }
+    return false;
+}
 
-    if (inputFilter_.empty() || result.text.empty()) {
+void RenderTextField::EditingValueFilter(TextEditingValue& valueToUpdate)
+{
+    FilterWithRegex(valueToUpdate.text, inputFilter_, true);
+    KeyboardEditingValueFilter(valueToUpdate);
+}
+
+void RenderTextField::KeyboardEditingValueFilter(TextEditingValue& valueToUpdate)
+{
+    std::string keyboardFilterValue;
+    GetKeyboardFilter(keyboard_, keyboardFilterValue);
+    if (keyboardFilterValue.empty()) {
         return;
     }
-
-    std::wregex filterRegex(StringUtils::ToWstring(inputFilter_));
-
-    auto wideText = result.GetWideText();
-    auto wideTextError = std::regex_replace(wideText, filterRegex, L"");
-    if (!wideTextError.empty() && onError_) {
-        onError_(StringUtils::ToString(wideTextError));
-    }
-
-    auto start = result.selection.GetStart();
-    auto end = result.selection.GetEnd();
+    bool textChanged = false;
+    auto start = valueToUpdate.selection.GetStart();
+    auto end = valueToUpdate.selection.GetEnd();
+    // in keyboard filter, the white lists are already escaped
     if ((start <= 0) && (end <= 0)) {
-        result.text = StringUtils::ToString(WstringSearch(wideText, filterRegex));
+        FilterWithRegex(valueToUpdate.text, keyboardFilterValue);
     } else {
-        std::wstring wstrBeforeSelection;
-        if ((start > 0) && (static_cast<size_t>(start) <= wideText.length())) {
-            wstrBeforeSelection = wideText.substr(0, start);
-            wstrBeforeSelection = WstringSearch(wstrBeforeSelection, filterRegex);
+        std::string strBeforeSelection;
+        if ((start > 0) && (static_cast<size_t>(start) <= valueToUpdate.text.length())) {
+            strBeforeSelection = valueToUpdate.text.substr(0, start);
+            textChanged |= FilterWithRegex(strBeforeSelection, keyboardFilterValue);
         }
-        std::wstring wstrInSelection;
+        std::string strInSelection;
         if (start < end) {
-            wstrInSelection = wideText.substr(start, end - start);
-            wstrInSelection = WstringSearch(wstrInSelection, filterRegex);
+            strInSelection = valueToUpdate.text.substr(start, end - start);
+            textChanged |= FilterWithRegex(strInSelection, keyboardFilterValue);
         }
-        std::wstring wstrAfterSelection;
-        if (end >= start && end <= static_cast<int32_t>(wideText.length())) {
-            size_t lenLeft = wideText.length() - static_cast<size_t>(end);
-            wstrAfterSelection = wideText.substr(end, lenLeft);
-            wstrAfterSelection = WstringSearch(wstrAfterSelection, filterRegex);
+        std::string strAfterSelection;
+        if (end >= start && end <= static_cast<int32_t>(valueToUpdate.text.length())) {
+            size_t lenLeft = valueToUpdate.text.length() - static_cast<size_t>(end);
+            strAfterSelection = valueToUpdate.text.substr(end, lenLeft);
+            textChanged |= FilterWithRegex(strAfterSelection, keyboardFilterValue);
         }
-
-        result.text = StringUtils::ToString(wstrBeforeSelection + wstrInSelection + wstrAfterSelection);
-        if (result.selection.baseOffset > result.selection.extentOffset) {
-            result.selection.Update(static_cast<int32_t>(wstrBeforeSelection.length() + wstrInSelection.length()),
-                static_cast<int32_t>(wstrBeforeSelection.length()));
+        if (!textChanged) {
+            return;
+        }
+        valueToUpdate.text = strBeforeSelection + strBeforeSelection + strBeforeSelection;
+        if (valueToUpdate.selection.baseOffset > valueToUpdate.selection.extentOffset) {
+            valueToUpdate.selection.Update(static_cast<int32_t>(strBeforeSelection.length() + strInSelection.length()),
+                static_cast<int32_t>(strBeforeSelection.length()));
         } else {
-            result.selection.Update(static_cast<int32_t>(wstrBeforeSelection.length()),
-                static_cast<int32_t>(wstrBeforeSelection.length() + wstrInSelection.length()));
+            valueToUpdate.selection.Update(static_cast<int32_t>(strBeforeSelection.length()),
+                static_cast<int32_t>(strBeforeSelection.length() + strInSelection.length()));
         }
     }
+}
+
+void RenderTextField::UpdateInsertText(std::string insertValue)
+{
+    insertValue_ = std::move(insertValue);
+    insertTextUpdated_ = true;
+}
+
+void RenderTextField::HandleValueFilter(TextEditingValue& valueBeforeUpdate, TextEditingValue& valueNeedToUpdate)
+{
+    if (insertTextUpdated_) {
+        TextEditingValue textEditingValue;
+        textEditingValue.text = insertValue_;
+        EditingValueFilter(textEditingValue);
+        if (!textEditingValue.text.empty()) {
+            valueNeedToUpdate.text =
+                valueBeforeUpdate.GetBeforeSelection() + textEditingValue.text + valueBeforeUpdate.GetAfterSelection();
+            valueNeedToUpdate.UpdateSelection(
+                std::max(valueBeforeUpdate.selection.GetStart(), 0) + textEditingValue.text.length());
+        } else {
+            // text inserted is filtered to empty string
+            valueNeedToUpdate = valueBeforeUpdate;
+        }
+        insertTextUpdated_ = false;
+        return;
+    }
+    EditingValueFilter(valueNeedToUpdate);
 }
 
 void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
@@ -1387,7 +1493,7 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
 
     ChangeCounterStyle(valueNeedToUpdate);
 
-    EditingValueFilter(valueNeedToUpdate);
+    HandleValueFilter(valueBeforeUpdate, valueNeedToUpdate);
 
     if (obscure_ && (valueNeedToUpdate.text.length() == valueBeforeUpdate.text.length() + 1)) {
         // Reset pending.
@@ -1763,7 +1869,6 @@ void RenderTextField::OnValueChanged(bool needFireChangeEvent, bool needFireSele
 {
     isValueFromFront_ = !needFireChangeEvent;
     TextEditingValue temp = GetEditingValue();
-    EditingValueFilter(temp);
     if (cursorPositionType_ == CursorPositionType::NORMAL && temp.selection.GetStart() == temp.selection.GetEnd()) {
         temp.selection.Update(AdjustCursorAndSelection(temp.selection.GetEnd()));
     }
@@ -2444,6 +2549,7 @@ void RenderTextField::Insert(const std::string& text)
                 auto textEditingValue = std::make_shared<TextEditingValue>();
                 textEditingValue->text = value.GetBeforeSelection() + text + value.GetAfterSelection();
                 textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
+                textField->UpdateInsertText(text);
                 textField->UpdateEditingValue(textEditingValue, true);
             },
             TaskExecutor::TaskType::UI);

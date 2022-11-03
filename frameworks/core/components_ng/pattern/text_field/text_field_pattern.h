@@ -345,8 +345,9 @@ private:
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    bool FilterWithRegex(const std::string& filter, const std::string& valueToUpdate, std::string& result);
-    void EditingValueFilter(const std::string& valueToUpdate, std::string& result);
+    bool FilterWithRegex(
+        const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
+    void EditingValueFilter(std::string& valueToUpdate, std::string& result);
     float PreferredLineHeight();
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
