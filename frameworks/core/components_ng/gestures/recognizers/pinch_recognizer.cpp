@@ -239,7 +239,7 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     }
 }
 
-bool PinchRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+bool PinchRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<PinchRecognizer> curr = AceType::DynamicCast<PinchRecognizer>(recognizer);
     if (!curr) {

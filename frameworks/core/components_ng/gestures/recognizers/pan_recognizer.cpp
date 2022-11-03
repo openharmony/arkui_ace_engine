@@ -406,7 +406,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
     }
 }
 
-bool PanRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<PanRecognizer> curr = AceType::DynamicCast<PanRecognizer>(recognizer);
     if (!curr) {

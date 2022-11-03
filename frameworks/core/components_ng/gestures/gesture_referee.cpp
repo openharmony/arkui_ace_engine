@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-void GestureScope::AddMember(const RefPtr<GestureRecognizer>& recognizer)
+void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     if (!recognizer) {
         LOGE("gesture recognizer is null, AddMember failed.");
@@ -37,10 +37,10 @@ void GestureScope::AddMember(const RefPtr<GestureRecognizer>& recognizer)
     recognizers_.emplace_back(recognizer);
 }
 
-bool GestureScope::Existed(const RefPtr<GestureRecognizer>& recognizer)
+bool GestureScope::Existed(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     if (!recognizer) {
-        LOGE("recognizer is null, AddGestureRecognizer failed.");
+        LOGE("recognizer is null, AddNGGestureRecognizer failed.");
         return false;
     }
 
@@ -52,7 +52,7 @@ bool GestureScope::Existed(const RefPtr<GestureRecognizer>& recognizer)
     return result != recognizers_.cend();
 }
 
-bool GestureScope::CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer)
+bool GestureScope::CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     for (const auto& weak : recognizers_) {
         auto member = weak.Upgrade();
@@ -67,7 +67,7 @@ bool GestureScope::CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer)
     return false;
 }
 
-void GestureScope::OnAcceptGesture(const RefPtr<GestureRecognizer>& recognizer)
+void GestureScope::OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     for (const auto& weak : recognizers_) {
         auto gesture = weak.Upgrade();
@@ -80,10 +80,10 @@ void GestureScope::OnAcceptGesture(const RefPtr<GestureRecognizer>& recognizer)
     }
 }
 
-RefPtr<GestureRecognizer> GestureScope::UnBlockGesture()
+RefPtr<NGGestureRecognizer> GestureScope::UnBlockGesture()
 {
     auto iter =
-        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const WeakPtr<GestureRecognizer>& member) {
+        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const WeakPtr<NGGestureRecognizer>& member) {
             auto recognizer = member.Upgrade();
             return recognizer && ((recognizer->GetRefereeState() == RefereeState::PENDING_BLOCKED) ||
                                      (recognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED));
@@ -98,7 +98,7 @@ RefPtr<GestureRecognizer> GestureScope::UnBlockGesture()
 bool GestureScope::IsPending()
 {
     auto iter =
-        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const WeakPtr<GestureRecognizer>& member) {
+        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const WeakPtr<NGGestureRecognizer>& member) {
             auto recognizer = member.Upgrade();
             return recognizer && ((recognizer->GetRefereeState() == RefereeState::PENDING));
         });
@@ -128,8 +128,8 @@ void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& re
         gestureScopes_.try_emplace(touchId, scope);
     }
     for (const auto& item : result) {
-        if (AceType::InstanceOf<GestureRecognizer>(item)) {
-            scope->AddMember(DynamicCast<GestureRecognizer>(item));
+        if (AceType::InstanceOf<NGGestureRecognizer>(item)) {
+            scope->AddMember(DynamicCast<NGGestureRecognizer>(item));
         }
     }
 }
@@ -148,7 +148,7 @@ void GestureReferee::CleanGestureScope(size_t touchId)
     }
 }
 
-void GestureReferee::Adjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     CHECK_NULL_VOID(recognizer);
 
@@ -168,7 +168,7 @@ void GestureReferee::Adjudicate(const RefPtr<GestureRecognizer>& recognizer, Ges
     }
 }
 
-void GestureReferee::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer)
+void GestureReferee::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_VOID(recognizer);
 
@@ -207,7 +207,7 @@ void GestureReferee::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recog
     }
 }
 
-void GestureReferee::HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer)
+void GestureReferee::HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_VOID(recognizer);
 
@@ -229,7 +229,7 @@ void GestureReferee::HandlePendingDisposal(const RefPtr<GestureRecognizer>& reco
     recognizer->OnPending();
 }
 
-void GestureReferee::HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer)
+void GestureReferee::HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_VOID(recognizer);
 
@@ -242,7 +242,7 @@ void GestureReferee::HandleRejectDisposal(const RefPtr<GestureRecognizer>& recog
     if (prevState != RefereeState::PENDING) {
         return;
     }
-    RefPtr<GestureRecognizer> newBlockRecognizer;
+    RefPtr<NGGestureRecognizer> newBlockRecognizer;
     for (const auto& scope : gestureScopes_) {
         newBlockRecognizer = scope.second->UnBlockGesture();
         if (newBlockRecognizer) {

@@ -303,7 +303,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
     }
 }
 
-bool ClickRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<ClickRecognizer> curr = AceType::DynamicCast<ClickRecognizer>(recognizer);
     if (!curr) {

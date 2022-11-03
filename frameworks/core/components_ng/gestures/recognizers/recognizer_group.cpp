@@ -41,7 +41,7 @@ void RecognizerGroup::OnFinishGestureReferee(int32_t touchId)
     MultiFingersRecognizer::OnFinishGestureReferee(touchId);
 }
 
-void RecognizerGroup::AddChildren(const std::list<RefPtr<GestureRecognizer>>& recognizers)
+void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers)
 {
     // TODO: add state adjustment.
     for (const auto& child : recognizers) {
@@ -52,7 +52,7 @@ void RecognizerGroup::AddChildren(const std::list<RefPtr<GestureRecognizer>>& re
     }
 }
 
-bool RecognizerGroup::Existed(const RefPtr<GestureRecognizer>& recognizer)
+bool RecognizerGroup::Existed(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_RETURN(recognizer, false);
 
@@ -97,17 +97,17 @@ void RecognizerGroup::OnResetStatus()
 bool RecognizerGroup::CheckAllFailed()
 {
     auto notFailMember =
-        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const RefPtr<GestureRecognizer>& member) {
+        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const RefPtr<NGGestureRecognizer>& member) {
             return member && member->GetRefereeState() != RefereeState::FAIL;
         });
 
     return notFailMember == recognizers_.end();
 }
 
-void RecognizerGroup::GroupAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+void RecognizerGroup::GroupAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     disposal_ = disposal;
-    GestureRecognizer::BatchAdjudicate(recognizer, disposal);
+    NGGestureRecognizer::BatchAdjudicate(recognizer, disposal);
 }
 
 } // namespace OHOS::Ace::NG

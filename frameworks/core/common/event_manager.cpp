@@ -254,11 +254,8 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
     }
 
     if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            refereeNG_->CleanGestureScope(point.id);
-        } else {
-            referee_->CleanGestureScope(point.id);
-        }
+        refereeNG_->CleanGestureScope(point.id);
+        referee_->CleanGestureScope(point.id);
         touchTestResults_.erase(point.id);
     }
 
@@ -617,11 +614,8 @@ void EventManager::ClearResults()
 EventManager::EventManager()
 {
     LOGD("EventManger Constructor.");
-    if (Container::IsCurrentUseNewPipeline()) {
-        refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
-    } else {
-        referee_ = AceType::MakeRefPtr<GestureReferee>();
-    }
+    refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
+    referee_ = AceType::MakeRefPtr<GestureReferee>();
 }
 
 } // namespace OHOS::Ace

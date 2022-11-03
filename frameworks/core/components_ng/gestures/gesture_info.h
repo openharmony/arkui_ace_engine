@@ -36,7 +36,7 @@
 
 namespace OHOS::Ace::NG {
 
-class GestureRecognizer;
+class NGGestureRecognizer;
 
 class ACE_EXPORT Gesture : public virtual AceType {
     DECLARE_ACE_TYPE(Gesture, AceType);
@@ -85,7 +85,7 @@ public:
         return gestureMask_;
     }
 
-    virtual RefPtr<GestureRecognizer> CreateRecognizer() = 0;
+    virtual RefPtr<NGGestureRecognizer> CreateRecognizer() = 0;
 
 protected:
     int32_t fingers_ = 1;

@@ -35,7 +35,7 @@ public:
     ~PinchGesture() override = default;
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer() override;
+    RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
 private:
     double distance_ = 0.0;

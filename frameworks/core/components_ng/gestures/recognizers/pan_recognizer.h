@@ -70,7 +70,7 @@ private:
     void HandleTouchMoveEvent(const AxisEvent& event) override;
     void HandleTouchCancelEvent(const AxisEvent& event) override;
 
-    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
+    bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
