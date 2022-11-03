@@ -23,8 +23,8 @@ namespace OHOS::Ace::Framework {
 
 class GridModelImpl : public OHOS::Ace::GridModel {
 public:
-    void Create(const RefPtr<V2::GridPositionController>& positionController,
-        const RefPtr<ScrollBarProxy>& scrollBarProxy) override;
+    void Create(
+        const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy) override;
     void Pop() override;
     void SetColumnsTemplate(const std::string& value) override;
     void SetRowsTemplate(const std::string& value) override;
@@ -51,6 +51,7 @@ public:
     void SetOnItemDragMove(std::function<void(const ItemDragInfo&, int32_t, int32_t)>&& value) override;
     void SetOnItemDragLeave(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;
     void SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>&& value) override;
+    RefPtr<ScrollControllerBase> CreatePositionController() override;
 };
 
 } // namespace OHOS::Ace::Framework

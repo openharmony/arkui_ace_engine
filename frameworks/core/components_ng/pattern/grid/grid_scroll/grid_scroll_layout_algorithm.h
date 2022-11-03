@@ -76,6 +76,7 @@ private:
     void StripItemsOutOfViewport(LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
+    void FireScrollingEvent(LayoutWrapper* layoutWrapper);
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
