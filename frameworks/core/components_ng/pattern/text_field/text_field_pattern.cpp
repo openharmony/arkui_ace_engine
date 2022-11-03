@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 #include <cstdint>
+#include <regex>
 #include <string>
 
 #include "base/geometry/dimension.h"
@@ -48,7 +49,6 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
-
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
@@ -59,7 +59,7 @@ constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
-const std::string DIGIT_WHITE_LIST = "-[0-9]+(.[0-9]+)?|[0-9]+(.[0-9]+)?";
+const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
@@ -891,9 +891,11 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
 void TextFieldPattern::HandleTouchUp()
 {
     if (isMousePressed_) {
+        LOGD("TextFieldPattern::HandleTouchUp of mouse");
         isMousePressed_ = false;
         return;
     }
+    LOGD("TextFieldPattern::HandleTouchUp");
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (!focusHub->RequestFocusImmediately()) {
         LOGE("Request focus failed, cannot open input method");
@@ -1177,17 +1179,26 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnChange(textEditingValue_.text);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-bool TextFieldPattern::FilterWithRegex(const std::string& filter, const std::string& valueToUpdate, std::string& result)
+bool TextFieldPattern::FilterWithRegex(
+    const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape)
 {
     if (filter.empty() || valueToUpdate.empty()) {
         LOGD("Text is empty or filter is empty");
         return false;
     }
-    std::regex filterRegex(filter);
-
-    auto errorText = std::regex_replace(valueToUpdate, filterRegex, "");
+    std::string escapeFilter;
+    if (needToEscape && !TextFieldControllerBase::EscapeString(filter, escapeFilter)) {
+        LOGE("Escape filter string failed");
+        return false;
+    }
+    if (!needToEscape) {
+        escapeFilter = filter;
+    }
+    std::regex filterRegex(escapeFilter);
+    auto errorText = regex_replace(valueToUpdate, filterRegex, "");
     RemoveErrorTextFromValue(valueToUpdate, errorText, result);
     if (!errorText.empty()) {
         auto textFieldEventHub = GetHost()->GetEventHub<TextFieldEventHub>();
@@ -1198,7 +1209,7 @@ bool TextFieldPattern::FilterWithRegex(const std::string& filter, const std::str
     return !errorText.empty();
 }
 
-void TextFieldPattern::EditingValueFilter(const std::string& valueToUpdate, std::string& result)
+void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::string& result)
 {
     auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
@@ -1207,6 +1218,11 @@ void TextFieldPattern::EditingValueFilter(const std::string& valueToUpdate, std:
     bool textChanged = false;
     if (!inputFilter.empty()) {
         textChanged |= FilterWithRegex(inputFilter, valueToUpdate, result);
+    }
+    if (textChanged) {
+        valueToUpdate = result;
+        result = "";
+        textChanged = false;
     }
     switch (textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
         case TextInputType::NUMBER: {
@@ -1596,9 +1612,9 @@ std::string TextFieldPattern::GetPlaceholderFont() const
     CHECK_NULL_RETURN(theme, "");
     auto jsonValue = JsonUtil::Create(true);
     if (layoutProperty->GetPlaceholderItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL) {
-        jsonValue->Put("placeholderItalicFontStyle", "NORMAL");
+        jsonValue->Put("placeholderItalicFontStyle", "FontStyle.Normal");
     } else {
-        jsonValue->Put("placeholderItalicFontStyle", "ITALIC");
+        jsonValue->Put("placeholderItalicFontStyle", "FontStyle.Italic");
     }
     // placeholder font size not exist in theme, use normal font size by default
     jsonValue->Put("placeholderFontSize", GetFontSize().c_str());
@@ -1663,7 +1679,7 @@ std::string TextFieldPattern::GetFontSize() const
     CHECK_NULL_RETURN(theme, "");
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return std::to_string(layoutProperty->GetFontSizeValue(theme->GetFontSize()).ConvertToPx());
+    return layoutProperty->GetFontSizeValue(theme->GetFontSize()).ToString();
 }
 
 uint32_t TextFieldPattern::GetMaxLength() const
