@@ -1542,6 +1542,10 @@ void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
     }
     rsNode_ = externalNode;
 
+    // TODO: need move property to new rs node.
+    ResetTransform();
+    ResetTransformMatrix();
+
     // after update, tell parent to update RSNode hierarchy.
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);

@@ -52,6 +52,11 @@ public:
         height_.reset();
     }
 
+    bool IsValid() const
+    {
+        return width_ && height_;
+    }
+
     const std::optional<CalcLength>& Width() const
     {
         return width_;

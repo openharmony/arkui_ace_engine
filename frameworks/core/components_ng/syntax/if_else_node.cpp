@@ -100,7 +100,7 @@ void IfElseNode::FlushUpdateAndMarkDirty()
         LOGD("%{public}s id %{public}d, branchId changed, resetting with %{public}d new children",
             AceType::TypeName(this), GetId(), static_cast<int32_t>(GetChildren().size()));
         // mark parent dirty to flush measure.
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
     branchIdChanged_ = false;
     getProcessed_ = false;

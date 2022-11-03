@@ -278,6 +278,7 @@ public:
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
+    bool IsNeedRequestParentMeasure() const;
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
 
