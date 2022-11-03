@@ -219,6 +219,7 @@ public:
         taskExecutor->PostTask([] {
             SubwindowManager::GetInstance()->ClearMenu();
             SubwindowManager::GetInstance()->HideMenuNG();
+            SubwindowManager::GetInstance()->HidePopupNG();
         }, TaskExecutor::TaskType::UI);
     }
 

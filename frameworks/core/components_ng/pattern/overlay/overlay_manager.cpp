@@ -104,7 +104,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         }
         LOGI("begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-        rootNode->RemoveChild(popupInfo.popupNode);
+        rootNode->RemoveChild(popupMap_[targetId].popupNode);
     } else {
         // Push popup
         if (popupInfo.isCurrentOnShow) {
@@ -114,6 +114,31 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         popupMap_[targetId].popupNode->MountToParent(rootNode);
     }
+    popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
+{
+    popupMap_[targetId] = popupInfo;
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    if (!popupInfo.markNeedUpdate || !popupInfo.popupNode) {
+        return;
+    }
+    popupMap_[targetId].markNeedUpdate = false;
+    auto rootChildren = rootNode->GetChildren();
+    auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
+    if (iter == rootChildren.end()) {
+        LOGW("OverlayManager: popupNode is not found in rootChildren");
+        return;
+    }
+    if (!popupInfo.isCurrentOnShow) {
+        return;
+    }
+    LOGI("begin pop");
+    popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+    rootNode->RemoveChild(popupMap_[targetId].popupNode);
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }

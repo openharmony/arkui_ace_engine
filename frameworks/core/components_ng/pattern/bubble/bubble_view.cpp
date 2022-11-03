@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -44,6 +45,17 @@ constexpr Dimension DEFAULT_FONT_SIZE = 14.0_fp;
 constexpr Dimension BUTTON_PADDING = 8.0_fp;
 constexpr Dimension BUTTON_ZERO_PADDING = 0.0_fp;
 
+OffsetF GetDisplayWindowRectOffset()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, OffsetF());
+    auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
+        pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
+    return displayWindowOffset;
+}
+
 } // namespace
 
 RefPtr<FrameNode> BubbleView::CreateBubbleNode(
@@ -69,6 +81,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateUseCustom(useCustom);
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
+    popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    auto displayWindowOffset = GetDisplayWindowRectOffset();
+    popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
     if (param->GetArrowOffset().has_value()) {
         popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());
     }
@@ -111,6 +126,9 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdateUseCustom(param->IsUseCustom());
     layoutProps->UpdateEnableArrow(param->EnableArrow());
     layoutProps->UpdatePlacement(param->GetPlacement());
+    layoutProps->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    auto displayWindowOffset = GetDisplayWindowRectOffset();
+    layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
     auto popupPaintProps = popupNode->GetPaintProperty<BubbleRenderProperty>();
     popupPaintProps->UpdateUseCustom(param->IsUseCustom());
     popupPaintProps->UpdateEnableArrow(param->EnableArrow());
@@ -150,6 +168,9 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     popupProp->UpdateUseCustom(param->IsUseCustom());
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
+    popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    auto displayWindowOffset = GetDisplayWindowRectOffset();
+    popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
     // Update paint props
     if (param->GetArrowOffset().has_value()) {
         popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());

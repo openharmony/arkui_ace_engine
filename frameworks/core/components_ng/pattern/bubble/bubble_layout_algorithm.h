@@ -91,7 +91,7 @@ private:
         BOTTOM_RIGHT_ERROR,
     };
 
-    void InitTargetSizeAndPosition();
+    void InitTargetSizeAndPosition(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition, OffsetF& topPosition,
