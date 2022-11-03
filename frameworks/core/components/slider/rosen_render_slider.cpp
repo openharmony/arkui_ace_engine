@@ -323,7 +323,7 @@ void RosenRenderSlider::Paint(RenderContext& context, const Offset& offset)
         LOGE("paint canvas is null");
         return;
     }
-    if ((!showTips_ && tip_) || (tip_ && !isDraging_)) {
+    if ((!showTips_ && tip_) || (tip_ && !isDragging_)) {
         tip_->SetVisible(false);
     }
     if (GetFocus() && mode_ == SliderMode::INSET) {
