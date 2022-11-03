@@ -512,12 +512,18 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
         navigator->MarkModifyDone();
 
         int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto backButtonNode =
-            FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<TextPattern>());
-        auto textLayoutProperty = backButtonNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(BACK_BUTTON);
+        auto backButtonNode = FrameNode::CreateFrameNode(
+            V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ImagePattern>());
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        ImageSourceInfo imageSourceInfo;
+        imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         backButtonNode->MountToParent(navigator);
+        backButtonNode->MarkModifyDone();
 
         navBarNode->SetBackButton(navigator);
         navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);

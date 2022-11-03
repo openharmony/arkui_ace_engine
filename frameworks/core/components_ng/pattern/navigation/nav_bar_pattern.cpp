@@ -133,7 +133,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
         return;
     }
     titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));
-    titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue(false));
+    titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue(true));
     BuildTitleBar(hostNode, titleBarNode, navBarLayoutProperty);
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
