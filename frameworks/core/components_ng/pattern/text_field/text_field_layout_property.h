@@ -96,6 +96,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptions, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        ACE_PROPERTY_TO_JSON_VALUE(propTextLineStyle_, TextLineStyle);
+    }
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
