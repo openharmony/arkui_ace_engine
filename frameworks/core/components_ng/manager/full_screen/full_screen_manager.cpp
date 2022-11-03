@@ -41,18 +41,25 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
     }
 
     auto layoutProperty = frameNode->GetLayoutProperty();
-    auto originGeometryNode = frameNode->GetGeometryNode()->Clone();
+    auto geometryNode = frameNode->GetGeometryNode();
+    auto originGeometryNode = geometryNode->Clone();
     auto resultForGeo = originGeometryNode_.try_emplace(nodeId, originGeometryNode);
     if (!resultForGeo.second) {
         return;
     }
     // TODO: remove the original property of padding&margin
-    auto rootWidth = CalcLength(context->GetRootWidth());
-    auto rootHeight = CalcLength(context->GetRootHeight());
-    CalcSize idealSize = { rootWidth, rootHeight };
+    auto rootWidth = context->GetRootWidth();
+    auto rootHeight = context->GetRootHeight();
+    auto calcRootWidth = CalcLength(rootWidth);
+    auto calcRootHeight = CalcLength(rootHeight);
+    CalcSize idealSize = { calcRootWidth, calcRootHeight };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize.SetWidth(static_cast<float>(rootWidth));
+    parentLayoutConstraint.maxSize.SetHeight(static_cast<float>(rootHeight));
+    geometryNode->SetParentLayoutConstraint(parentLayoutConstraint);
     frameNode->UpdateLayoutConstraint(layoutConstraint);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     rootNode->RebuildRenderContextTree();
