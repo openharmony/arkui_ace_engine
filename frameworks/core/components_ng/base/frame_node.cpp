@@ -707,7 +707,7 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (!isActive_) {
+    if (!isActive_ || !eventHub_->IsEnabled()) {
         LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
