@@ -76,7 +76,7 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info);
-    
+
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
     auto iconSize = theme->GetMenuIconSize();
@@ -280,7 +280,7 @@ void NavigationView::Create()
     navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 }
 
-void NavigationView::SetTitle(const std::string& title)
+void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -325,6 +325,11 @@ void NavigationView::SetTitle(const std::string& title)
     textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    if (!hasSubTitle) {
+        textLayoutProperty->UpdateMaxLines(1);
+    } else {
+        textLayoutProperty->UpdateMaxLines(2);
+    }
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
@@ -394,6 +399,7 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
+    textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetSubtitle(subtitleNode);
     navBarNode->MarkModifyDone();

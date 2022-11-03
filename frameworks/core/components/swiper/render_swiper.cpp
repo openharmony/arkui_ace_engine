@@ -220,7 +220,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         return;
     }
     fadeColor_ = swiper->GetFadeColor();
-    scale_ = context->GetDipScale();
+    if (context) {
+        scale_ = context->GetDipScale();
+    }
 
     curve_ = swiper->GetCurve();
     if (curve_) {
@@ -477,6 +479,8 @@ void RenderSwiper::InitRecognizer(bool catchMode)
         static const int32_t bubbleModeVersion = 6;
         auto pipeline = context_.Upgrade();
         if (!catchMode && pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
+            clickRecognizer_->SetUseCatchMode(false);
+        } else if (!showIndicator_) {
             clickRecognizer_->SetUseCatchMode(false);
         } else {
             clickRecognizer_->SetUseCatchMode(true);
@@ -2389,7 +2393,8 @@ void RenderSwiper::StartIndicatorSpringAnimation(double start, double end)
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->ResetIndicatorSpringStatus();
+            swiper->UpdateIndicatorSpringStatus(SpringStatus::SPRING_STOP);
+            swiper->UpdateIndicatorTailPosition(DRAG_OFFSET_MIN);
         }
     });
 }

@@ -42,7 +42,9 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
+    if (renderContext_) {
+        renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
+    }
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
@@ -186,6 +188,9 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         renderContext_->ToJsonValue(json);
     }
     if (pattern_) {
+        pattern_->ToJsonValue(json);
+    }
+    if (eventHub_) {
         pattern_->ToJsonValue(json);
     }
     FocusToJsonValue(json);
@@ -475,11 +480,7 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
     } while (false);
     // check position flag.
-    const auto& gridProperty = layoutWrapper->GetLayoutProperty()->GetGridProperty(Claim(this));
-    bool hasGridOffset = gridProperty ? (gridProperty->GetOffset() != UNDEFINED_DIMENSION) : false;
-    if (renderContext_->HasPosition() || hasGridOffset) {
-        layoutWrapper->SetOutOfLayout(true);
-    }
+    layoutWrapper->SetOutOfLayout(renderContext_->HasPosition());
     layoutWrapper->SetActive(isActive_);
     return layoutWrapper;
 }

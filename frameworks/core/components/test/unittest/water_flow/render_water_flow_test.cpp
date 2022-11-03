@@ -474,24 +474,6 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetEstimatedHeight_002, TestSi
 }
 
 /**
- * @tc.name: RenderWaterFlowTest_AnimateTo_001
- * @tc.desc: Verify AnimateTo setting duration.
- * @tc.type: FUNC
- * @tc.require: issueI5TFPO
- */
-HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_AnimateTo_001, TestSize.Level1)
-{
-    CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
-    CHECK_RENDERNODE_NULL_VOID(renderNode_);
-    EXPECT_TRUE(renderNode_->animator_ != nullptr);
-    float duration = 100.0;
-    auto result = renderNode_->AnimateTo(100.0_px, duration, nullptr);
-    CHECK_RENDERNODE_NULL_VOID(renderNode_->animator_);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(renderNode_->animator_->GetDuration(), duration);
-}
-
-/**
  * @tc.name: RenderWaterFlowTest_ScrollToIndex_001
  * @tc.desc: Fill in items, and verify that ScrollToIndex finds the specified items outside the window and gets pos.
  * @tc.type: FUNC
@@ -1843,7 +1825,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_MakeInnerLayoutParam_001, Test
     LayoutParam innerLayout;
     innerLayout = renderNode_->MakeInnerLayoutParam(index);
     auto result = innerLayout.GetMaxSize();
-    EXPECT_EQ(result.Width(), (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT);    
+    EXPECT_EQ(result.Width(), (renderNode_->crossSize_ - renderNode_->crossGap_) / CENTER_POINT);
 }
 
 /**

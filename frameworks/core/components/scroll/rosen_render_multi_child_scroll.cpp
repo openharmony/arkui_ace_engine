@@ -57,7 +57,7 @@ void RosenRenderMultiChildScroll::Paint(RenderContext& context, const Offset& of
     // paint scrollBar
     if (scrollBar_ && scrollBar_->NeedPaint()) {
         bool needPaint = false;
-        if (scrollBar_->GetFirstLoad() || scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
+        if (scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
             scrollBarOpacity_ = UINT8_MAX;
             needPaint = true;
         } else {
@@ -70,10 +70,6 @@ void RosenRenderMultiChildScroll::Paint(RenderContext& context, const Offset& of
             RefPtr<RosenScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<RosenScrollBarPainter>();
             scrollBarPainter->PaintBar(
                 canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
-            if (scrollBar_->GetFirstLoad()) {
-                scrollBar_->SetFirstLoad(false);
-                scrollBar_->HandleScrollBarEnd();
-            }
         }
     }
 }

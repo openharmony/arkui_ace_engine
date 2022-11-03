@@ -585,8 +585,8 @@ void PickerBaseComponent::Initialize(
     if (!rootAccessibility_ && isDialog_) {
         rootAccessibilityId_ = accessibilityManager->GenerateNextAccessibilityId();
 #if defined(PREVIEW)
-        rootAccessibility_ = accessibilityManager->CreateSpecializedNode(
-            "picker-dialog", rootAccessibilityId_, GetPickerBaseId());
+        rootAccessibility_ = accessibilityManager->CreateAccessibilityNode(
+            "picker-dialog", rootAccessibilityId_, GetPickerBaseId(), -1);
 #else
         rootAccessibility_ = accessibilityManager->CreateSpecializedNode("picker-dialog", rootAccessibilityId_, -1);
 #endif

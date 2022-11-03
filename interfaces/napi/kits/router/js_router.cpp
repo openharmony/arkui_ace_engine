@@ -164,7 +164,13 @@ bool ParseParamWithCallback(napi_env env, RouterAsyncContext* asyncContext, cons
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
-        if ((i == 0) && valueType == napi_object) {
+        if (i == 0) {
+            if (valueType != napi_object) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+                return false;
+            }
             napi_value uriNApi = nullptr;
             napi_value params = nullptr;
             napi_get_named_property(env, argv[i], "url", &uriNApi);
@@ -263,8 +269,8 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
             auto delegate = EngineHelper::GetCurrentDelegate();
             if (delegate) {
                 if (asyncContext->isModeType) {
-                    delegate->PushWithModeAndCallback(
-                        asyncContext->uriString, asyncContext->paramsString, asyncContext->mode, errorCallback);
+                    delegate->PushWithCallback(
+                        asyncContext->uriString, asyncContext->paramsString, errorCallback, asyncContext->mode);
                 } else {
                     delegate->PushWithCallback(asyncContext->uriString, asyncContext->paramsString, errorCallback);
                 }
@@ -410,8 +416,8 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
             auto delegate = EngineHelper::GetCurrentDelegate();
             if (delegate) {
                 if (asyncContext->isModeType) {
-                    delegate->ReplaceWithModeAndCallback(
-                        asyncContext->uriString, asyncContext->paramsString, asyncContext->mode, errorCallback);
+                    delegate->ReplaceWithCallback(
+                        asyncContext->uriString, asyncContext->paramsString, errorCallback, asyncContext->mode);
                 } else {
                     delegate->ReplaceWithCallback(asyncContext->uriString, asyncContext->paramsString, errorCallback);
                 }

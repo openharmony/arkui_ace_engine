@@ -417,6 +417,16 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
     return true;
 }
 
+void PanRecognizer::SetDirection(const PanDirection& direction)
+{
+    ChangeDirection(direction);
+    if ((direction_.type & PanDirection::VERTICAL) == 0) {
+        velocityTracker_.SetMainAxis(Axis::HORIZONTAL);
+    } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
+        velocityTracker_.SetMainAxis(Axis::VERTICAL);
+    }
+}
+
 void PanRecognizer::ChangeFingers(int32_t fingers)
 {
     if (fingers_ != fingers) {

@@ -68,6 +68,14 @@ void ScrollModelNG::SetAxis(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis);
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollPaintProperty, Axis, axis);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->SetScrollBarPositionMode(axis);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetPosition();
 }
 
 void ScrollModelNG::SetOnScrollBegin(NG::ScrollBeginEvent&& event)

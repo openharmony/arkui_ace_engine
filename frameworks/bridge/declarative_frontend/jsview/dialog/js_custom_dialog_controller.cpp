@@ -322,6 +322,10 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     // NG
     if (Container::IsCurrentUseNewPipeline()) {
         auto container = Container::Current();
+        if (container->IsSubContainer()) {
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+            container = AceEngine::Get().GetContainer(parentContainerId);
+        }
         CHECK_NULL_VOID(container);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);

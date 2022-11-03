@@ -269,6 +269,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
         }
         if (rosenRenderContext->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             rosenRenderContext->PaintBackground();
+            rosenRenderContext->RequestNextFrame();
         }
     };
     return task;
@@ -635,6 +636,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
         }
         if (rosenRenderContext->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             rosenRenderContext->PaintBorderImage();
+            rosenRenderContext->RequestNextFrame();
         }
     };
     return task;
@@ -1111,14 +1113,8 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
+void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
 {
-    auto& frontDecoration = GetOrCreateFrontDecoration();
-    if (frontDecoration->CheckBlurRadius(radius)) {
-        return;
-    }
-    frontDecoration->UpdateBlurRadius(radius);
-
     auto pipelineBase = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineBase);
     std::shared_ptr<Rosen::RSFilter> frontFilter = nullptr;

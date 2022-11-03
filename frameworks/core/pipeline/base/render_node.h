@@ -478,7 +478,7 @@ public:
         return nullptr;
     }
 
-    void SetVisible(bool visible, bool inRecursion = false);
+    virtual void SetVisible(bool visible, bool inRecursion = false);
 
     virtual bool GetVisible() const
     {

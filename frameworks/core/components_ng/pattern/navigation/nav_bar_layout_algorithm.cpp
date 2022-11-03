@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -48,7 +49,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     }
 
     // MINI 模式
-    if (navBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
+    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         // 有subtitle
         if (hostNode->GetSubtitle()) {
             constraint.selfIdealSize =
@@ -63,19 +64,32 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
         return static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     }
 
+    float titleBarHeight = 0.0f;
+    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
+        auto titleBar = AceType::DynamicCast<TitleBarNode>(titleBarNode);
+        CHECK_NULL_RETURN(titleBar, 0.0f);
+        auto titlePattern = titleBar->GetPattern<TitleBarPattern>();
+        CHECK_NULL_RETURN(titlePattern, 0.0f);
+        titleBarHeight = titlePattern->GetTempTitleBarHeight();
+    }
+
     // FREE 和 FULL 模式，有subtitle
     if (hostNode->GetSubtitle()) {
-        constraint.selfIdealSize =
-            OptionalSizeF(navigationSize.Width(), static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+        if (NearZero(titleBarHeight)) {
+            titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        }
+        constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
         titleBarWrapper->Measure(constraint);
-        return static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        return titleBarHeight;
     }
 
     // no subtitle
-    constraint.selfIdealSize =
-        OptionalSizeF(navigationSize.Width(), static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+    if (NearZero(titleBarHeight)) {
+        titleBarHeight = static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    }
+    constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
     titleBarWrapper->Measure(constraint);
-    return static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    return titleBarHeight;
 }
 
 float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,

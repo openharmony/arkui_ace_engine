@@ -225,7 +225,7 @@ public:
     // Load the je file of the page in NG structure..
     bool LoadPageSource(const std::string& url) override;
 
-    bool LoadCard(const std::string& url, uint64_t cardId) override;
+    bool LoadCard(const std::string& url, int64_t cardId) override;
                  
     // Update running page
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;
@@ -350,7 +350,7 @@ private:
     void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
     bool ExecuteAbc(const std::string &fileName);
-    bool ExecuteCardAbc(const std::string &fileName, uint64_t cardId);
+    bool ExecuteCardAbc(const std::string &fileName, int64_t cardId);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

@@ -309,7 +309,7 @@ void AceAbility::OnStart(const Want& want)
         AceApplicationInfo::GetInstance().SetPackageName(info->bundleName);
     }
 
-    bool isHap = !moduleInfo->hapPath.empty();
+    bool isHap = moduleInfo ? !moduleInfo->hapPath.empty() : false;
     std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePath, srcPath, isHap);
     bool isArkApp = GetIsArkFromConfig(packagePath, isHap);

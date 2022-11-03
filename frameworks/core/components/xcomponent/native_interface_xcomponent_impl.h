@@ -131,6 +131,22 @@ public:
         return mouseEvent_;
     }
 
+    void SetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType toolType) {}
+
+    OH_NativeXComponent_TouchPointToolType GetToolType(size_t pointIndex) const
+    {
+        return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
+    }
+
+    float GetTiltX(size_t pointIndex) const
+    {
+        return 0.0;
+    }
+
+    float GetTiltY(size_t pointIndex) const
+    {
+        return 0.0;
+    }
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -156,6 +172,9 @@ struct OH_NativeXComponent {
     int32_t GetMouseEvent(const void* window, OH_NativeXComponent_MouseEvent* mouseEvent);
     int32_t RegisterCallback(OH_NativeXComponent_Callback* callback);
     int32_t RegisterMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback);
+    int32_t GetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType);
+    int32_t GetTiltX(size_t pointIndex, float* tiltX);
+    int32_t GetTiltY(size_t pointIndex, float* tiltY);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

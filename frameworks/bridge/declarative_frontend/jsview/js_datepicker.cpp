@@ -189,16 +189,14 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
 
 void JSDatePicker::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("DatePicker create error, info is non-valid");
-        return;
-    }
-
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
     DatePickerType pickerType = DatePickerType::DATE;
-    auto type = paramObject->GetProperty("type");
-    if (type->IsNumber()) {
+    JSRef<JSObject> paramObject;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto type = paramObject->GetProperty("type");
+        if (type->IsNumber()) {
         pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
+        }
     }
     switch (pickerType) {
         case DatePickerType::TIME: {
@@ -342,9 +340,14 @@ PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
 
 void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
 {
-    auto startDate = paramObj->GetProperty("start");
-    auto endDate = paramObj->GetProperty("end");
-    auto selectedDate = paramObj->GetProperty("selected");
+    JSRef<JSVal> startDate;
+    JSRef<JSVal> endDate;
+    JSRef<JSVal> selectedDate;
+    if (!paramObj->IsUndefined()) {
+        startDate = paramObj->GetProperty("start");
+        endDate = paramObj->GetProperty("end");
+        selectedDate = paramObj->GetProperty("selected");
+    }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
     auto parseSelectedDate = ParseDate(selectedDate);

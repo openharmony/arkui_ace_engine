@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/animation/curve_animation.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
@@ -269,6 +270,11 @@ void RenderDisplay::UpdateVisibleType(VisibleType type)
         MarkNeedLayout();
         OnVisibleChange(type);
     }
+}
+
+void RenderDisplay::SetVisible(bool visible, bool inRecursion)
+{
+    RenderNode::SetVisible(visible, inRecursion);
 }
 
 } // namespace OHOS::Ace

@@ -50,6 +50,8 @@ constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 
 // title
 constexpr Dimension TITLE_HEIGHT = 56.0_vp;
+constexpr Dimension MAX_TITLE_FONT_SIZE = 30.0_vp;
+constexpr Dimension MIN_TITLE_FONT_SIZE = 20.0_vp;
 // subtitle
 constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title3
 constexpr Color SUBTITLE_COLOR = Color(0x99000000); // ohos_id_alpha_content_secondary
@@ -110,10 +112,9 @@ enum class NavigationTitleMode {
 };
 
 enum class NavigationMode {
-    AUTO = 0,
+    STACK = 0,
     SPLIT,
-    STACK,
-    OVERLAY,
+    AUTO,
 };
 
 enum class NavBarPosition {

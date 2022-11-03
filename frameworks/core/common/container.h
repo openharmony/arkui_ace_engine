@@ -105,16 +105,16 @@ public:
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
 
-    virtual void SetCardFrontend(WeakPtr<Frontend> frontend, uint64_t cardId) {}
+    virtual void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) {}
 
-    virtual WeakPtr<Frontend> GetCardFrontend(uint64_t cardId) const
+    virtual WeakPtr<Frontend> GetCardFrontend(int64_t cardId) const
     {
         return nullptr;
     }
 
-    virtual void SetCardPipeline(WeakPtr<PipelineBase>, uint64_t cardId) {}
+    virtual void SetCardPipeline(WeakPtr<PipelineBase>, int64_t cardId) {}
 
-    virtual WeakPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const
+    virtual WeakPtr<PipelineBase> GetCardPipeline(int64_t cardId) const
     {
         return nullptr;
     }
@@ -257,7 +257,7 @@ public:
         return IdeDebuggerConnected_;
     }
 
-    virtual void GetCardFrontendMap(std::unordered_map<uint64_t, WeakPtr<Frontend>>& cardFrontendMap) const {}
+    virtual void GetCardFrontendMap(std::unordered_map<int64_t, WeakPtr<Frontend>>& cardFrontendMap) const {}
 
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;

@@ -33,6 +33,11 @@ const char DELIMITER_COMMA = ',';
 const char DELIMITER_SEMICOLON = ';';
 const char DOUBLE_SLASH = '\\';
 const char WEBPACK[] = "webpack:///";
+constexpr int32_t AFTER_COLUMN = 0;
+constexpr int32_t SOURCES_VAL = 1;
+constexpr int32_t BEFORE_ROW = 2;
+constexpr int32_t BEFORE_COLUMN = 3;
+constexpr int32_t NAMES_VAL = 4;
 
 MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
 {
@@ -206,16 +211,16 @@ void RevSourceMap::Init(const std::string& sourceMap)
             break;
         }
         if (ans.size() == 1) {
-            nowPos_.afterColumn += ans[0];
+            nowPos_.afterColumn += ans[AFTER_COLUMN];
             continue;
         }
         // after decode, assgin each value to the position
-        nowPos_.afterColumn += ans[0];
-        nowPos_.sourcesVal += ans[1];
-        nowPos_.beforeRow += ans[2];
-        nowPos_.beforeColumn += ans[3];
+        nowPos_.afterColumn += ans[AFTER_COLUMN];
+        nowPos_.sourcesVal += ans[SOURCES_VAL];
+        nowPos_.beforeRow += ans[BEFORE_ROW];
+        nowPos_.beforeColumn += ans[BEFORE_COLUMN];
         if (ans.size() == 5) {
-            nowPos_.namesVal += ans[4];
+            nowPos_.namesVal += ans[NAMES_VAL];
         }
         afterPos_.push_back({ nowPos_.beforeRow, nowPos_.beforeColumn, nowPos_.afterRow, nowPos_.afterColumn,
             nowPos_.sourcesVal, nowPos_.namesVal });
@@ -225,6 +230,83 @@ void RevSourceMap::Init(const std::string& sourceMap)
     sourceKeyInfo.clear();
     sourceKeyInfo.shrink_to_fit();
 };
+
+void RevSourceMap::MergeInit(const std::string& sourceMap,
+    RefPtr<RevSourceMap>& curMapData)
+{
+    std::vector<std::string> sourceKey;
+    std::string mark = "";
+    ExtractKeyInfo(sourceMap, sourceKey);
+    for (auto sourceKeyInfo : sourceKey) {
+        if (sourceKeyInfo == SOURCES || sourceKeyInfo == NAMES ||
+            sourceKeyInfo == MAPPINGS || sourceKeyInfo == FILE ||
+            sourceKeyInfo == SOURCE_CONTENT ||  sourceKeyInfo == SOURCE_ROOT) {
+            mark = sourceKeyInfo;
+        } else if (mark == SOURCES) {
+            curMapData->sources_.push_back(sourceKeyInfo);
+        } else if (mark == NAMES) {
+            curMapData->names_.push_back(sourceKeyInfo);
+        } else if (mark == MAPPINGS) {
+            curMapData->mappings_.push_back(sourceKeyInfo);
+        } else if (mark == FILE) {
+            curMapData->files_.push_back(sourceKeyInfo);
+        } else {
+            continue;
+        }
+    }
+
+    // transform to vector for mapping easily
+    curMapData->mappings_ = HandleMappings(curMapData->mappings_[0]);
+
+    // the first bit: the column after transferring.
+    // the second bit: the source file.
+    // the third bit: the row before transferring.
+    // the fourth bit: the column before transferring.
+    // the fifth bit: the variable name.
+    for (const auto& mapping : curMapData->mappings_) {
+        if (mapping == ";") {
+            // plus a line for each semicolon
+            curMapData->nowPos_.afterRow++,
+            curMapData->nowPos_.afterColumn = 0;
+            continue;
+        }
+        std::vector<int32_t> ans;
+
+        if (!VlqRevCode(mapping, ans)) {
+            LOGE("decode code fail");
+            return;
+        }
+        if (ans.size() == 0) {
+            LOGE("decode sourcemap fail, mapping: %{public}s", mapping.c_str());
+            break;
+        }
+        if (ans.size() == 1) {
+            curMapData->nowPos_.afterColumn += ans[AFTER_COLUMN];
+            continue;
+        }
+        // after decode, assgin each value to the position
+        curMapData->nowPos_.afterColumn += ans[AFTER_COLUMN];
+        curMapData->nowPos_.sourcesVal += ans[SOURCES_VAL];
+        curMapData->nowPos_.beforeRow += ans[BEFORE_ROW];
+        curMapData->nowPos_.beforeColumn += ans[BEFORE_COLUMN];
+        if (ans.size() == 5) {
+            curMapData->nowPos_.namesVal += ans[NAMES_VAL];
+        }
+        curMapData->afterPos_.push_back({
+            curMapData->nowPos_.beforeRow,
+            curMapData->nowPos_.beforeColumn,
+            curMapData->nowPos_.afterRow,
+            curMapData->nowPos_.afterColumn,
+            curMapData->nowPos_.sourcesVal,
+            curMapData->nowPos_.namesVal
+        });
+    }
+    curMapData->mappings_.clear();
+    curMapData->mappings_.shrink_to_fit();
+    sourceKey.clear();
+    sourceKey.shrink_to_fit();
+};
+
 
 std::vector<std::string> RevSourceMap::HandleMappings(const std::string& mapping)
 {

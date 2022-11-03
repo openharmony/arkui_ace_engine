@@ -70,7 +70,7 @@ public:
     const std::string& GetSrc() const;
     std::optional<Color> GetFillColor() const;
     const RefPtr<PixelMap>& GetPixmap() const;
-    const std::string& GetCacheKey() const;
+    std::string GetCacheKey() const;
 
 private:
     SrcType ResolveSrcType() const;

@@ -277,6 +277,10 @@ void ViewAbstract::SetEnabled(bool enabled)
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetEnabled(enabled);
+
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(enabled);
 }
 
 void ViewAbstract::SetFocusable(bool focusable)
@@ -402,8 +406,6 @@ void ViewAbstract::SetOnDragStart(
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(std::move(onDragStart));
-
-    AddDragFrameNodeToManager();
 }
 
 void ViewAbstract::SetOnDragEnter(
@@ -539,7 +541,9 @@ void ViewAbstract::BindPopup(
         } else {
             LOGE("useCustom is invalid");
         }
-        popupId = popupNode->GetId();
+        if (popupNode) {
+            popupId = popupNode->GetId();
+        }
     } else {
         // use param to update PopupParm
         if (!isUseCustom) {
