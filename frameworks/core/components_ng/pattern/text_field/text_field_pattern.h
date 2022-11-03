@@ -328,6 +328,7 @@ private:
     std::string TextInputActionToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
+    std::string GetTextColor() const;
     std::string GetPlaceholderColor() const;
     std::string GetFontSize() const;
     std::string GetPlaceHolder() const;

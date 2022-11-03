@@ -1646,6 +1646,15 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     return theme;
 }
 
+std::string TextFieldPattern::GetTextColor() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, "");
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return layoutProperty->GetTextColorValue(theme->GetTextColor()).ColorToString();
+}
+
 std::string TextFieldPattern::GetPlaceholderColor() const
 {
     auto theme = GetTheme();
@@ -1691,6 +1700,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("placeholder", GetPlaceholderColor().c_str());
     json->Put("text", textEditingValue_.text.c_str());
     json->Put("fontSize", GetFontSize().c_str());
+    json->Put("fontColor", GetTextColor().c_str());
     json->Put("type", TextInputTypeToString().c_str());
     json->Put("placeholderColor", GetPlaceholderColor().c_str());
     json->Put("placeholderFont", GetPlaceholderFont().c_str());
