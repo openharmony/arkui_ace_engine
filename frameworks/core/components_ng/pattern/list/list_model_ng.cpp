@@ -179,7 +179,8 @@ void ListModelNG::SetOnItemDragStart(OnItemDragStartFunc&& onItemDragStart)
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto onDragStart = [func = std::move(onItemDragStart)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<AceType> {
+    auto onDragStart =
+        [func = std::move(onItemDragStart)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<AceType> {
         ScopedViewStackProcessor builderViewStackProcessor;
         {
             return func(dragInfo, index);
