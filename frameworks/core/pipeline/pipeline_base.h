@@ -482,6 +482,17 @@ public:
 
     virtual void FlushReloadTransition() {}
 
+    // for sync animation only
+    AnimationOption GetSyncAnimationOption()
+    {
+        return animationOption_;
+    }
+
+    void SetSyncAnimationOption(const AnimationOption& option)
+    {
+        animationOption_ = option;
+    }
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -526,6 +537,7 @@ protected:
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
+    AnimationOption animationOption_;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

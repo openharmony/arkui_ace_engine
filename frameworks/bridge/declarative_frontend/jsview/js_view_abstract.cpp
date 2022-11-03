@@ -863,6 +863,10 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
         transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     }
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    if (!option.IsValid()) {
+        option = PipelineBase::GetCurrentContext()->GetSyncAnimationOption();
+    }
+    option.SetAllowRunningAsynchronously(false);
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
@@ -922,6 +926,10 @@ void JSViewAbstract::JsRotateX(const JSCallbackInfo& info)
 
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    if (!option.IsValid()) {
+        option = PipelineBase::GetCurrentContext()->GetSyncAnimationOption();
+    }
+    option.SetAllowRunningAsynchronously(false);
     transform->RotateX(rotateVal, option);
 }
 
@@ -944,6 +952,10 @@ void JSViewAbstract::JsRotateY(const JSCallbackInfo& info)
     }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    if (!option.IsValid()) {
+        option = PipelineBase::GetCurrentContext()->GetSyncAnimationOption();
+    }
+    option.SetAllowRunningAsynchronously(false);
     transform->RotateY(rotateVal, option);
 }
 
