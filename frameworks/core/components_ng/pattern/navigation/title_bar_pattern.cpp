@@ -129,6 +129,11 @@ void TitleBarPattern::HandleDragStart(const GestureEvent& info)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+        return;
+    }
     defaultTitleBarHeight_ = titleBarNode->GetGeometryNode()->GetFrameSize().Height();
     SetMaxTitleBarHeight();
     SetTempTitleBarHeight(static_cast<float>(info.GetOffsetY()));
@@ -162,6 +167,11 @@ void TitleBarPattern::HandleDragUpdate(const GestureEvent& info)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+        return;
+    }
     SetTempTitleBarHeight(static_cast<float>(info.GetOffsetY()));
     titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
     SetTempTitleOffsetY();
@@ -177,7 +187,15 @@ void TitleBarPattern::HandleDragUpdate(const GestureEvent& info)
     UpdateSubTitleOpacity(tempOpacity);
 }
 
-void TitleBarPattern::HandleDragEnd(double dragVelocity) {}
+void TitleBarPattern::HandleDragEnd(double dragVelocity) {
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+        return;
+    }
+}
 
 void TitleBarPattern::SetMaxTitleBarHeight()
 {

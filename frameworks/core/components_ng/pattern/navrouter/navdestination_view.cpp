@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,9 +57,14 @@ void NavDestinationView::Create()
         titleBarNode->AddChild(backButtonNode);
         titleBarNode->SetBackButton(backButtonNode);
 
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        ImageSourceInfo imageSourceInfo;
+        imageSourceInfo.SetResourceId(theme->GetBackResourceId());
         auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonLayoutProperty);
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        backButtonNode->MarkModifyDone();
 
         auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
         CHECK_NULL_VOID(titleBarLayoutProperty);
