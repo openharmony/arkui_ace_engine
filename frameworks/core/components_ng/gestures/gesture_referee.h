@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-class GestureRecognizer;
+class NGGestureRecognizer;
 
 enum class GestureDisposal {
     ACCEPT = 0,
@@ -43,8 +43,8 @@ public:
     explicit GestureScope(size_t touchId) : touchId_(touchId) {}
     ~GestureScope() override = default;
 
-    void AddMember(const RefPtr<GestureRecognizer>& recognizer);
-    void DelMember(const RefPtr<GestureRecognizer>& recognizer);
+    void AddMember(const RefPtr<NGGestureRecognizer>& recognizer);
+    void DelMember(const RefPtr<NGGestureRecognizer>& recognizer);
 
     void Close();
 
@@ -55,11 +55,11 @@ public:
         return recognizers_.empty();
     }
 
-    bool CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer);
+    bool CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognizer);
 
-    void OnAcceptGesture(const RefPtr<GestureRecognizer>& recognizer);
+    void OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer);
 
-    RefPtr<GestureRecognizer> UnBlockGesture();
+    RefPtr<NGGestureRecognizer> UnBlockGesture();
 
     bool IsDelayClosed() const
     {
@@ -72,8 +72,8 @@ public:
     }
 
 private:
-    bool Existed(const RefPtr<GestureRecognizer>& recognizer);
-    std::list<WeakPtr<GestureRecognizer>> recognizers_;
+    bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
+    std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
 
     size_t touchId_ = 0;
     bool isDelay_ = false;
@@ -93,12 +93,12 @@ public:
 
     // Called by the gesture recognizer when the gesture recognizer has completed the recognition of the gesture (accept
     // or reject)
-    void Adjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
+    void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
 
 private:
-    void HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer);
+    void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
+    void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
+    void HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
 
     // Stores gesture recognizer collection according to Id.
     std::unordered_map<size_t, RefPtr<GestureScope>> gestureScopes_;

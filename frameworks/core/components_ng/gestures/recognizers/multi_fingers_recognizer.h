@@ -23,8 +23,8 @@
 
 namespace OHOS::Ace::NG {
 
-class MultiFingersRecognizer : public GestureRecognizer {
-    DECLARE_ACE_TYPE(MultiFingersRecognizer, GestureRecognizer);
+class MultiFingersRecognizer : public NGGestureRecognizer {
+    DECLARE_ACE_TYPE(MultiFingersRecognizer, NGGestureRecognizer);
 
 public:
     MultiFingersRecognizer() = default;

@@ -28,8 +28,8 @@ namespace OHOS::Ace::NG {
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
-class ACE_EXPORT GestureRecognizer : public TouchEventTarget {
-    DECLARE_ACE_TYPE(GestureRecognizer, TouchEventTarget)
+class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
+    DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
 
 public:
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
@@ -71,7 +71,7 @@ public:
     // implementation must check that the given recognizer type matches the
     // current one. The return value should be false if the reconciliation fails
     // and true if it succeeds
-    virtual bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+    virtual bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     {
         return true;
     }
@@ -113,7 +113,7 @@ public:
         return refereeState_;
     }
 
-    void SetGestureGroup(const WeakPtr<GestureRecognizer>& gestureGroup)
+    void SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
     {
         gestureGroup_ = gestureGroup;
     }
@@ -189,12 +189,12 @@ public:
     }
 
 protected:
-    void Adjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+    void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
         disposal_ = disposal;
         BatchAdjudicate(recognizer, disposal);
     }
-    virtual void BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
+    virtual void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
 
     virtual void OnBeginGestureReferee(int32_t touchId) {}
     virtual void OnFinishGestureReferee(int32_t touchId) {}
@@ -230,7 +230,7 @@ protected:
     SourceType deviceType_ = SourceType::NONE;
 
 private:
-    WeakPtr<GestureRecognizer> gestureGroup_;
+    WeakPtr<NGGestureRecognizer> gestureGroup_;
 };
 
 } // namespace OHOS::Ace::NG

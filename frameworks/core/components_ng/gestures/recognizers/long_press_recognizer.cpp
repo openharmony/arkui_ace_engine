@@ -248,7 +248,7 @@ void LongPressRecognizer::OnResetStatus()
     deadlineTimer_.Cancel();
 }
 
-bool LongPressRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<LongPressRecognizer> curr = AceType::DynamicCast<LongPressRecognizer>(recognizer);
     if (!curr) {

@@ -40,7 +40,7 @@ RefPtr<GestureReferee> GetCurrentGestureReferee()
 
 } // namespace
 
-bool GestureRecognizer::HandleEvent(const TouchEvent& point)
+bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
     switch (point.type) {
         case TouchType::MOVE:
@@ -64,7 +64,7 @@ bool GestureRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
-bool GestureRecognizer::HandleEvent(const AxisEvent& event)
+bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 {
     switch (event.action) {
         case AxisAction::BEGIN:
@@ -86,7 +86,7 @@ bool GestureRecognizer::HandleEvent(const AxisEvent& event)
     return true;
 }
 
-void GestureRecognizer::BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     auto gestureGroup = gestureGroup_.Upgrade();
     if (gestureGroup) {

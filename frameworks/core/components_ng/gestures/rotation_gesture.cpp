@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<GestureRecognizer> RotationGesture::CreateRecognizer()
+RefPtr<NGGestureRecognizer> RotationGesture::CreateRecognizer()
 {
     auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(fingers_, angle_);
     if (onActionStartId_) {

@@ -93,7 +93,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     };
     panRecognizer_->SetOnActionCancel(actionCancel);
 
-    std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     if (!SequencedRecognizer_) {
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
         SequencedRecognizer_->RemainChildOnResetStatus();
