@@ -60,7 +60,7 @@ int32_t OH_NativeXComponent_GetTouchEvent(
     return component->GetTouchEvent(window, touchEvent);
 }
 
-int32_t OH_NativeXComponent_GetTouchPointToolType(OH_NativeXComponent* component, size_t pointIndex,
+int32_t OH_NativeXComponent_GetTouchPointToolType(OH_NativeXComponent* component, uint32_t pointIndex,
     OH_NativeXComponent_TouchPointToolType* toolType)
 {
     if ((component == nullptr) || (toolType == nullptr)) {
@@ -69,7 +69,7 @@ int32_t OH_NativeXComponent_GetTouchPointToolType(OH_NativeXComponent* component
     return component->GetToolType(pointIndex, toolType);
 }
 
-int32_t OH_NativeXComponent_GetTouchPointTiltX(OH_NativeXComponent* component, size_t pointIndex, float* tiltX)
+int32_t OH_NativeXComponent_GetTouchPointTiltX(OH_NativeXComponent* component, uint32_t pointIndex, float* tiltX)
 {
     if ((component == nullptr) || (tiltX == nullptr)) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
@@ -77,7 +77,7 @@ int32_t OH_NativeXComponent_GetTouchPointTiltX(OH_NativeXComponent* component, s
     return component->GetTiltX(pointIndex, tiltX);
 }
 
-int32_t OH_NativeXComponent_GetTouchPointTiltY(OH_NativeXComponent* component, size_t pointIndex, float* tiltY)
+int32_t OH_NativeXComponent_GetTouchPointTiltY(OH_NativeXComponent* component, uint32_t pointIndex, float* tiltY)
 {
     if ((component == nullptr) || (tiltY == nullptr)) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
