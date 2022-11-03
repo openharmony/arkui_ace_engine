@@ -657,6 +657,17 @@ public:
 
     virtual void FlushUITasks() = 0;
 
+    // for sync animation only
+    AnimationOption GetSyncAnimationOption()
+    {
+        return animationOption_;
+    }
+
+    void SetSyncAnimationOption(const AnimationOption& option)
+    {
+        animationOption_ = option;
+    }
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -724,6 +735,7 @@ protected:
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;
+    AnimationOption animationOption_;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;
