@@ -33,7 +33,7 @@ constexpr int32_t MAX_PINCH_FINGERS = 5;
 
 void PinchRecognizer::OnAccepted()
 {
-    ResSchedReport::GetInstance().ResSchedDataReport("pinch");
+    ResSchedReport::GetInstance().ResSchedDataReport("click");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
 }
