@@ -184,4 +184,69 @@ HWTEST_F(FlexPatternTestNg, FlexPatternTest001, TestSize.Level1)
     EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), flexProperty.flexAlign);
 }
 
+/**
+ * @tc.name: FlexPatternTest002
+ * @tc.desc: Test properties set of flex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexPatternTestNg, FlexPatternTest002, TestSize.Level1)
+{
+    FlexModelNG flexModelNG;
+    flexModelNG.CreateFlexRow();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
+    EXPECT_FALSE(flexLayoutProperty == nullptr);
+
+    flexModelNG.SetDirection(FlexDirection::ROW);
+    flexModelNG.SetMainAxisAlign(FlexAlign::FLEX_START);
+    flexModelNG.SetCrossAxisAlign(FlexAlign::FLEX_START);
+    EXPECT_EQ(flexLayoutProperty->GetFlexDirection(), FlexDirection::ROW);
+    EXPECT_EQ(flexLayoutProperty->GetMainAxisAlign(), FlexAlign::FLEX_START);
+    EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), FlexAlign::FLEX_START);
+
+    int32_t value = 2;
+    flexModelNG.SetJustifyContent(value);
+    flexModelNG.SetAlignItems(value);
+    flexModelNG.SetAlignContent(value);
+    EXPECT_EQ(flexLayoutProperty->GetMainAxisAlign(), static_cast<FlexAlign>(value));
+    EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), static_cast<FlexAlign>(value));
+}
+
+/**
+ * @tc.name: FlexWrapPatternTest002
+ * @tc.desc: Test properties set of flex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexPatternTestNg, FlexWrapPatternTest002, TestSize.Level1)
+{
+    FlexModelNG flexModelNG;
+    flexModelNG.CreateWrap();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
+    EXPECT_FALSE(flexLayoutProperty == nullptr);
+
+    flexModelNG.SetWrapDirection(WrapDirection::HORIZONTAL);
+    flexModelNG.SetWrapMainAlignment(WrapAlignment::START);
+    flexModelNG.SetWrapCrossAlignment(WrapAlignment::START);
+    flexModelNG.SetWrapAlignment(WrapAlignment::START);
+    EXPECT_EQ(flexLayoutProperty->GetWrapDirection(), WrapDirection::HORIZONTAL);
+    EXPECT_EQ(flexLayoutProperty->GetMainAlignment(), WrapAlignment::START);
+    EXPECT_EQ(flexLayoutProperty->GetCrossAlignment(), WrapAlignment::START);
+    EXPECT_EQ(flexLayoutProperty->GetAlignment(), WrapAlignment::START);
+
+    int32_t value = 1;
+    flexModelNG.SetJustifyContent(value);
+    flexModelNG.SetAlignItems(value);
+    flexModelNG.SetAlignContent(value);
+    EXPECT_EQ(flexLayoutProperty->GetMainAlignment(), WrapAlignment::CENTER);
+    EXPECT_EQ(flexLayoutProperty->GetCrossAlignment(), WrapAlignment::CENTER);
+    EXPECT_EQ(flexLayoutProperty->GetAlignment(), WrapAlignment::CENTER);
+}
+
 } // namespace OHOS::Ace::NG
