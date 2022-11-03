@@ -524,6 +524,7 @@ void ViewAbstract::BindPopup(
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
+    auto showInSubWindow = param->IsShowInSubWindow();
     if (popupInfo.isCurrentOnShow == isShow) {
         LOGI("No need to change popup show flag.");
         return;
@@ -557,6 +558,12 @@ void ViewAbstract::BindPopup(
     popupInfo.popupNode = popupNode;
     popupNode->MarkModifyDone();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
+    popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
+    if (showInSubWindow) {
+        SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
+        return;
+    }
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
@@ -578,8 +585,8 @@ void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId, const NG::Offs
     LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
 }
 
-void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
-    const NG::OffsetF& offset)
+void ViewAbstract::BindMenuWithItems(
+    std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset)
 {
     CHECK_NULL_VOID(targetNode);
 
