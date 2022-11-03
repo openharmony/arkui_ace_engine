@@ -33,6 +33,7 @@ void ProgressView::Create(double min, double value, double cachedValue, double m
 
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressLayoutProperty, Type, type);
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
 }
 
