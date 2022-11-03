@@ -24,21 +24,26 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t PAN_FINGER = 1;
+constexpr double PAN_DISTANCE = 5.0;
+constexpr int32_t LONG_PRESS_DURATION = 150;
+} // namespace
 
 DragEventActuator::DragEventActuator(
     const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance)
     : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers), distance_(distance)
 {
-    if (fingers_ < DEFAULT_PAN_FINGER) {
-        fingers_ = DEFAULT_PAN_FINGER;
+    if (fingers_ < PAN_FINGER) {
+        fingers_ = PAN_FINGER;
     }
 
-    if (LessOrEqual(distance_, DEFAULT_PAN_DISTANCE)) {
-        distance_ = DEFAULT_PAN_DISTANCE;
+    if (LessOrEqual(distance_, PAN_DISTANCE)) {
+        distance_ = PAN_DISTANCE;
     }
 
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
-    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(DEFAULT_LONG_PRESS_DURATION, fingers_, false, true);
+    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, true);
 }
 
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,

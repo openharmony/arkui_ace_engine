@@ -233,6 +233,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
 
+    // update new layout constrain.
+    layoutProperty_->UpdateLayoutConstraint(dirty->GetLayoutProperty());
+
     // active change flag judge.
     SetActive(dirty->IsActive());
     if (!isActive_) {
@@ -461,7 +464,10 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     }
     auto flag = layoutProperty_->GetPropertyChangeFlag();
-    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_);
+    // It is necessary to copy the layoutProperty property to prevent the layoutProperty property from being modified
+    // during the layout process, resulting in the problem of judging whether the front-end setting value changes the
+    // next time js is executed.
+    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
         forceLayout);
     do {
@@ -505,13 +511,16 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
     auto paintMethod = pattern_->CreateNodePaintMethod();
+    // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being modified
+    // during the paint process, resulting in the problem of judging whether the front-end setting value changes the
+    // next time js is executed.
     if (paintMethod) {
-        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_);
+        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
         paintWrapper->SetNodePaintMethod(paintMethod);
         return paintWrapper;
     }
     if (renderContext_->GetAccessibilityFocus().value_or(false)) {
-        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_);
+        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
         paintWrapper->SetNodePaintMethod(MakeRefPtr<NodePaintMethod>());
         return paintWrapper;
     }
