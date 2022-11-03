@@ -409,7 +409,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
         return;
     }
 
-    component->SetIsDialog(false);
+    component->SetIsDialog(true);
     component->SetIsCreateDialogComponent(true);
     component->SetColumnHeight(height);
     component->SetSelected(selected);
