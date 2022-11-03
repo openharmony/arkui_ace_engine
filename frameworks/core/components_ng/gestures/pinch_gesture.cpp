@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<GestureRecognizer> PinchGesture::CreateRecognizer()
+RefPtr<NGGestureRecognizer> PinchGesture::CreateRecognizer()
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);

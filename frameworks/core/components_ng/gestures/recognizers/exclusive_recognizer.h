@@ -29,11 +29,11 @@ class ACE_EXPORT ExclusiveRecognizer : public RecognizerGroup {
     DECLARE_ACE_TYPE(ExclusiveRecognizer, RecognizerGroup);
 
 public:
-    explicit ExclusiveRecognizer(const std::vector<RefPtr<GestureRecognizer>>& recognizers)
+    explicit ExclusiveRecognizer(const std::vector<RefPtr<NGGestureRecognizer>>& recognizers)
         : RecognizerGroup(recognizers)
     {}
 
-    explicit ExclusiveRecognizer(std::list<RefPtr<GestureRecognizer>>&& recognizers)
+    explicit ExclusiveRecognizer(std::list<RefPtr<NGGestureRecognizer>>&& recognizers)
         : RecognizerGroup(std::move(recognizers))
     {}
 
@@ -48,21 +48,21 @@ public:
     bool HandleEvent(const AxisEvent& event) override;
 
 private:
-    bool CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer);
+    bool CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandleTouchDownEvent(const TouchEvent& event) override {};
     void HandleTouchUpEvent(const TouchEvent& event) override {};
     void HandleTouchMoveEvent(const TouchEvent& event) override {};
     void HandleTouchCancelEvent(const TouchEvent& event) override {};
-    void BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal) override;
-    void HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    RefPtr<GestureRecognizer> UnBlockGesture();
+    void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) override;
+    void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
+    void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
+    void HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
+    RefPtr<NGGestureRecognizer> UnBlockGesture();
 
-    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
+    bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     void OnResetStatus() override;
 
-    RefPtr<GestureRecognizer> activeRecognizer_;
+    RefPtr<NGGestureRecognizer> activeRecognizer_;
 };
 
 } // namespace OHOS::Ace::NG

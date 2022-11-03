@@ -147,7 +147,7 @@ bool ExclusiveRecognizer::HandleEvent(const AxisEvent& event)
     return true;
 }
 
-bool ExclusiveRecognizer::CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer)
+bool ExclusiveRecognizer::CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     for (const auto& child : recognizers_) {
         if (child == recognizer) {
@@ -161,10 +161,10 @@ bool ExclusiveRecognizer::CheckNeedBlocked(const RefPtr<GestureRecognizer>& reco
     return false;
 }
 
-RefPtr<GestureRecognizer> ExclusiveRecognizer::UnBlockGesture()
+RefPtr<NGGestureRecognizer> ExclusiveRecognizer::UnBlockGesture()
 {
     auto iter =
-        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const RefPtr<GestureRecognizer>& member) {
+        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const RefPtr<NGGestureRecognizer>& member) {
             return member && ((member->GetRefereeState() == RefereeState::PENDING_BLOCKED) ||
                                  (member->GetRefereeState() == RefereeState::SUCCEED_BLOCKED));
         });
@@ -175,7 +175,7 @@ RefPtr<GestureRecognizer> ExclusiveRecognizer::UnBlockGesture()
     return *iter;
 }
 
-void ExclusiveRecognizer::BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+void ExclusiveRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     CHECK_NULL_VOID(recognizer);
 
@@ -201,7 +201,7 @@ void ExclusiveRecognizer::BatchAdjudicate(const RefPtr<GestureRecognizer>& recog
     }
 }
 
-void ExclusiveRecognizer::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer)
+void ExclusiveRecognizer::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_VOID(recognizer);
 
@@ -218,7 +218,7 @@ void ExclusiveRecognizer::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& 
     GroupAdjudicate(Claim(this), GestureDisposal::ACCEPT);
 }
 
-void ExclusiveRecognizer::HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer)
+void ExclusiveRecognizer::HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_VOID(recognizer);
 
@@ -234,7 +234,7 @@ void ExclusiveRecognizer::HandlePendingDisposal(const RefPtr<GestureRecognizer>&
     GroupAdjudicate(Claim(this), GestureDisposal::PENDING);
 }
 
-void ExclusiveRecognizer::HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer)
+void ExclusiveRecognizer::HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_VOID(recognizer);
 
@@ -274,7 +274,7 @@ void ExclusiveRecognizer::OnResetStatus()
     activeRecognizer_ = nullptr;
 }
 
-bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     auto curr = AceType::DynamicCast<ExclusiveRecognizer>(recognizer);
     if (!curr) {

@@ -85,7 +85,7 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
-void ParallelRecognizer::BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+void ParallelRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     CHECK_NULL_VOID(recognizer);
     if (disposal == GestureDisposal::ACCEPT) {
@@ -137,7 +137,7 @@ void ParallelRecognizer::BatchAdjudicate(const RefPtr<GestureRecognizer>& recogn
     }
 }
 
-bool ParallelRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+bool ParallelRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<ParallelRecognizer> curr = AceType::DynamicCast<ParallelRecognizer>(recognizer);
     if (!curr) {

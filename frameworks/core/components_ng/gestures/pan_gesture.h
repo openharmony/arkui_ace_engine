@@ -44,7 +44,7 @@ public:
     ~PanGesture() override = default;
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer() override;
+    RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
 private:
     PanDirection direction_;

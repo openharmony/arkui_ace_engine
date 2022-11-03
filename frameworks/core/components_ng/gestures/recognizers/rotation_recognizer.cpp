@@ -169,7 +169,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
     }
 }
 
-bool RotationRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+bool RotationRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<RotationRecognizer> curr = AceType::DynamicCast<RotationRecognizer>(recognizer);
     if (!curr) {

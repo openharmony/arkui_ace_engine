@@ -21,10 +21,10 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<GestureRecognizer> GestureGroup::CreateRecognizer()
+RefPtr<NGGestureRecognizer> GestureGroup::CreateRecognizer()
 {
     LOGD("create gesture group, sub size %{public}d, mode %{public}d", static_cast<int32_t>(gestures_.size()), mode_);
-    std::vector<RefPtr<GestureRecognizer>> recognizers;
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers;
     for (auto& subGesture : gestures_) {
         auto recognizer = subGesture->CreateRecognizer();
         if (recognizer) {
@@ -32,7 +32,7 @@ RefPtr<GestureRecognizer> GestureGroup::CreateRecognizer()
         }
     }
 
-    RefPtr<GestureRecognizer> groupRecognizer;
+    RefPtr<NGGestureRecognizer> groupRecognizer;
     switch (mode_) {
         case GestureMode::Sequence:
             groupRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
