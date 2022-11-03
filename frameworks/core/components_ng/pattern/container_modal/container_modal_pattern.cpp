@@ -148,7 +148,6 @@ void ContainerModalPattern::InitContainerEvent()
             // step2. Calculate the coordinates of touch move relative to touch down.
             auto deltaMoveX = fabs(info.GetChangedTouches().begin()->GetGlobalLocation().GetX() - container->moveX_);
             auto deltaMoveY = info.GetChangedTouches().begin()->GetGlobalLocation().GetY() - container->moveY_;
-
             // step3. If the horizontal distance of the touch move does not exceed 10px and the vertical distance
             // exceeds 20px, the floating title will be displayed.
             if (deltaMoveX <= MOVE_POPUP_DISTANCE_X && deltaMoveY >= MOVE_POPUP_DISTANCE_Y) {

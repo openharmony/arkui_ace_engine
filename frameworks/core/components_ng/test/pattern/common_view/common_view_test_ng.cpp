@@ -33,7 +33,7 @@ public:
 
 /**
  * @tc.name: CommonViewTest001
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonViewTestNg, CommonViewTest001, TestSize.Level1)
