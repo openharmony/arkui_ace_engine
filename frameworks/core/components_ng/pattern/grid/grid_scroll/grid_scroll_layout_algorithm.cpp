@@ -25,12 +25,12 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
-
 namespace OHOS::Ace::NG {
 
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -277,6 +277,7 @@ void GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cross
             gridLayoutInfo_.currentOffset_ = mainLength;
             gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
             gridLayoutInfo_.startIndex_ = currentIndex + 1;
+            FireScrollingEvent(layoutWrapper);
         }
     }
     // Case 1. if this while-loop breaks due to running out of records, the [currentMainLineIndex_] is larger by 1 than
@@ -323,6 +324,7 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         lineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), lineHeight);
         gridLayoutInfo_.startIndex_ = currentIndex;
+        FireScrollingEvent(layoutWrapper);
         doneCreateNewLine = true;
     }
     // If it fails to create new line when [FillNewLineForward] is called, it means that it reaches start
@@ -583,6 +585,13 @@ float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(LayoutWrapper* layoutW
     }
     position += crossStart * crossGap + crossPaddingOffset;
     return position;
+}
+
+void GridScrollLayoutAlgorithm::FireScrollingEvent(LayoutWrapper* layoutWrapper)
+{
+    auto eventhub = layoutWrapper->GetHostNode()->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventhub);
+    eventhub->FireOnScrollToIndex(gridLayoutInfo_.startMainLineIndex_);
 }
 
 // only for debug use

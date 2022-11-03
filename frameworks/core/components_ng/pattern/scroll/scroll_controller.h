@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ScrollController : public ScrollControllerBase {
     DECLARE_ACE_TYPE(ScrollController, ScrollControllerBase);
+
 public:
     ScrollController() = default;
 

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include "base/geometry/axis.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
@@ -402,21 +403,8 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.code == KeyCode::KEY_PAGE_DOWN) {
-        if (!isConfigScrollable_) {
-            return false;
-        }
-        LOGD("Keycode is PgDn. Scroll offset is %{public}f", -GetMainContentSize());
-        UpdateScrollPosition(-GetMainContentSize(), SCROLL_FROM_UPDATE);
-        return true;
-    }
-    if (event.code == KeyCode::KEY_PAGE_UP) {
-        if (!isConfigScrollable_) {
-            return false;
-        }
-        LOGD("Keycode is PgUp. Scroll offset is %{public}f", GetMainContentSize());
-        UpdateScrollPosition(GetMainContentSize(), SCROLL_FROM_UPDATE);
-        return true;
+    if ((event.code == KeyCode::KEY_PAGE_DOWN) || (event.code == KeyCode::KEY_PAGE_UP)) {
+        ScrollPage(event.code == KeyCode::KEY_PAGE_UP);
     }
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
         HandleDirectionKey(event.code);
@@ -436,6 +424,28 @@ bool GridPattern::HandleDirectionKey(KeyCode code)
         return true;
     }
     return false;
+}
+
+void GridPattern::SetPositionController(const RefPtr<ScrollController>& controller)
+{
+    positionController_ = DynamicCast<GridPositionController>(controller);
+    if (controller) {
+        controller->SetScrollPattern(AceType::WeakClaim<GridPattern>(this));
+    }
+}
+
+void GridPattern::ScrollPage(bool reverse)
+{
+    if (!isConfigScrollable_) {
+        return;
+    }
+    if (!reverse) {
+        LOGD("PgDn. Scroll offset is %{public}f", -GetMainContentSize());
+        UpdateScrollPosition(-GetMainContentSize(), SCROLL_FROM_UPDATE);
+    } else {
+        LOGD("PgUp. Scroll offset is %{public}f", GetMainContentSize());
+        UpdateScrollPosition(GetMainContentSize(), SCROLL_FROM_UPDATE);
+    }
 }
 
 } // namespace OHOS::Ace::NG
