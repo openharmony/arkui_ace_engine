@@ -770,6 +770,9 @@ void RenderPickerBase::GetRenders(const RefPtr<RenderNode>& render)
 
     DealRenders(render);
     for (const auto& child : render->GetChildren()) {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+        child->SetAccessibilityNode(nullptr);
+#endif
         GetRenders(child);
     }
 }

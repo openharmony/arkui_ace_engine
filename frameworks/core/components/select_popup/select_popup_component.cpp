@@ -335,7 +335,7 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
     tween->SetAnimationOperation(AnimationOperation::PLAY);
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    auto popupNode = manager->CreateSpecializedNode("select-popup", id, GetSelectPopupId());
+    auto popupNode = manager->CreateAccessibilityNode("select-popup", id, GetSelectPopupId(), -1);
     SetNode(popupNode);
 #else
     SetNode(manager->CreateSpecializedNode("select-popup", id, -1));
