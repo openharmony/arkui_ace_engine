@@ -21,6 +21,7 @@ group("unittest") {
     deps += [
       "unittest/jsfrontend/animation:unittest",
       "unittest/jsfrontend/codec:unittest",
+
       #"unittest/jsfrontend/dombutton:unittest",
       #"unittest/jsfrontend/domdiv:unittest",
       #"unittest/jsfrontend/domdivider:unittest",
@@ -37,8 +38,10 @@ group("unittest") {
       #"unittest/jsfrontend/domtext:unittest",
       "unittest/jsfrontend/event:unittest",
       "unittest/jsfrontend/manifest:unittest",
+
       #"unittest/jsfrontend/progress:unittest",
       "unittest/jsfrontend/source_map:unittest",
+
       #"unittest/jsfrontend/swiper:unittest",
       #"unittest/jsfrontend/switch:unittest",
       "unittest/jsfrontend/utils:unittest",
@@ -60,6 +63,7 @@ group("unittest") {
         "unittest/cardfrontend/frontend:unittest",
         "unittest/cardfrontend/mediaquery:unittest",
         "unittest/jsfrontend/dompiece:unittest",
+
         #"unittest/jsfrontend/dompopup:unittest",
         #"unittest/jsfrontend/domrating:unittest",
         #"unittest/jsfrontend/domrefresh:unittest",
