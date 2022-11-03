@@ -340,9 +340,14 @@ PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
 
 void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
 {
-    auto startDate = paramObj->GetProperty("start");
-    auto endDate = paramObj->GetProperty("end");
-    auto selectedDate = paramObj->GetProperty("selected");
+    JSRef<JSVal> startDate;
+    JSRef<JSVal> endDate;
+    JSRef<JSVal> selectedDate;
+    if (!paramObj->IsUndefined()) {
+        startDate = paramObj->GetProperty("start");
+        endDate = paramObj->GetProperty("end");
+        selectedDate = paramObj->GetProperty("selected");
+    }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
     auto parseSelectedDate = ParseDate(selectedDate);
