@@ -574,7 +574,7 @@ void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId, const NG::Offs
     CHECK_NULL_VOID(overlayManager);
 
     // pass in menuNode to register it in OverlayManager
-    overlayManager->ShowMenu(targetId, true, offset, menuNode);
+    overlayManager->ShowMenu(targetId, offset, menuNode);
     LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
 }
 
@@ -622,7 +622,7 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool is
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    overlayManager->ShowMenu(targetId, true, offset, nullptr, isContextMenu);
+    overlayManager->ShowMenu(targetId, offset, nullptr, isContextMenu);
 }
 
 void ViewAbstract::SetBackdropBlur(const Dimension& radius)

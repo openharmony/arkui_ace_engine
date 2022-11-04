@@ -29,16 +29,13 @@ void MenuWrapperPattern::OnModifyDone()
     auto gestureHub = host->GetOrCreateGestureEventHub();
 
     // close menu when clicked outside the menu region
-    auto callback = [targetId = targetId_, host, weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto menu = weak.Upgrade();
-        CHECK_NULL_VOID(menu);
-
+    auto callback = [targetId = targetId_, weak = WeakClaim(RawPtr(host))](const TouchEventInfo& info) {
         if (info.GetTouches().empty()) {
             return;
         }
-        auto touch = info.GetTouches().front();
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
 
-        // get menuNode's touch region
         auto menuNode = host->GetChildAtIndex(0);
         CHECK_NULL_VOID(menuNode);
         if (!InstanceOf<FrameNode>(menuNode)) {
@@ -47,32 +44,21 @@ void MenuWrapperPattern::OnModifyDone()
         }
         auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
         CHECK_NULL_VOID(menuFrameNode);
+        auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        // ContextMenu: close subwindow whenever touch event calls
+        if (menuPattern->IsContextMenu()) {
+            SubwindowManager::GetInstance()->HideMenuNG(targetId);
+            return;
+        }
+
+        // get menuNode's touch region
         auto menuGeometryNode = menuFrameNode->GetGeometryNode();
         CHECK_NULL_VOID(menuGeometryNode);
         auto menuZone = menuGeometryNode->GetFrameRect();
-        auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        std::vector<Rect> rects;
-        rects.emplace_back(Rect(Offset(menuZone.GetX(), menuZone.GetY()), Size(menuZone.Width(), menuZone.Height())));
-        auto position = touch.GetGlobalLocation();
-
-        if (touch.GetTouchType() == TouchType::UP && menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
-            if (menuPattern->IsContextMenu()) {
-                SubwindowManager::GetInstance()->HideMenuNG(targetId);
-            }
-            return;
-        }
-
-        if (touch.GetTouchType() != TouchType::DOWN) {
-            return;
-        }
-
+        const auto& position = info.GetTouches().front().GetGlobalLocation();
         // if DOWN-touched outside the menu region, then hide menu
         if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
-            if (menuPattern->IsContextMenu()) {
-                SubwindowManager::GetInstance()->HideMenuNG(targetId);
-                return;
-            }
             auto pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
@@ -89,6 +75,7 @@ void MenuWrapperPattern::OnModifyDone()
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
 {
+    // setup contextMenu's subWindow hotZone
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto gestureHub = host->GetOrCreateGestureEventHub();
