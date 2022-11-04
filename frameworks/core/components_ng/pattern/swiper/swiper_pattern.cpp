@@ -129,7 +129,6 @@ void SwiperPattern::CalculateCacheRange()
     auto cacheCount = layoutProperty->GetCachedCount().value_or(1);
     auto loadCount = cacheCount * 2 + displayCount;
     auto totalCount = TotalCount();
-
     if (totalCount <= 0) {
         LOGE("Total count of swiper children is not positive.");
         return;

@@ -148,15 +148,15 @@ SliderPaintMethod::LinePenAndSize SliderPaintMethod::GetSelectPen(
     } else {
         selectPenAndSize.start = sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
                                      ? PointF(offset.GetX() + parameters_.borderBlank + parameters_.sliderLength,
-                                           offset.GetY() + centerWidth_)
+                                         offset.GetY() + centerWidth_)
                                      : PointF(offset.GetX() + centerWidth_,
-                                           offset.GetY() + parameters_.borderBlank + parameters_.sliderLength);
+                                         offset.GetY() + parameters_.borderBlank + parameters_.sliderLength);
         selectPenAndSize.end =
             sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
                 ? PointF(offset.GetX() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength,
-                      offset.GetY() + centerWidth_)
+                    offset.GetY() + centerWidth_)
                 : PointF(offset.GetX() + centerWidth_,
-                      offset.GetY() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength);
+                    offset.GetY() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength);
     }
     return selectPenAndSize;
 }
@@ -179,9 +179,9 @@ SliderPaintMethod::CirclePenAndSize SliderPaintMethod::GetCirclePen(
         circlePenAndSize.center =
             sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
                 ? PointF(offset.GetX() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength,
-                      offset.GetY() + centerWidth_)
+                    offset.GetY() + centerWidth_)
                 : PointF(offset.GetX() + centerWidth_,
-                      offset.GetY() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength);
+                    offset.GetY() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength);
     }
     circlePenAndSize.radius = parameters_.blockDiameter * HALF * HALF;
     return circlePenAndSize;
