@@ -111,6 +111,12 @@ public:
 
     void ScrollPage(bool reverse);
 
+    bool UpdateStartIndex(uint32_t index);
+
+    bool AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
+
+    bool OnScrollCallback(float offset, int32_t source);
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -131,6 +137,7 @@ private:
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<GridPositionController> positionController_;
+    RefPtr<Animator> animator_;
 
     bool multiSelectable_ = false;
     bool supportAnimation_ = false;

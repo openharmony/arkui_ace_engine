@@ -22,24 +22,23 @@
 
 namespace OHOS::Ace::NG {
 
-void GridPositionController::JumpTo(int32_t index, int32_t source) {}
-
-bool GridPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
-{
-    return false;
-}
-
-void GridPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
+void GridPositionController::JumpTo(int32_t index, int32_t /* source */)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    if (gridPattern->GetGridLayoutInfo().axis_ == Axis::VERTICAL) {
-        gridPattern->UpdateScrollPosition(static_cast<float>(-pixelY), SCROLL_FROM_UPDATE);
-    } else {
-        gridPattern->UpdateScrollPosition(static_cast<float>(-pixelX), SCROLL_FROM_UPDATE);
-    }
+    gridPattern->UpdateStartIndex(index);
 }
+
+bool GridPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
+    return gridPattern->AnimateTo(position.ConvertToPx(), duration, curve);
+}
+
+void GridPositionController::ScrollBy(double /* pixelX */, double /* pixelY */, bool /* smooth */) {}
 
 Axis GridPositionController::GetScrollDirection() const
 {
@@ -52,9 +51,24 @@ Axis GridPositionController::GetScrollDirection() const
     return Axis::VERTICAL;
 }
 
-void GridPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) {}
+void GridPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool /* smooth */)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
 
-void GridPositionController::ScrollPage(bool reverse, bool smooth)
+    if ((gridPattern->GetGridLayoutInfo().axis_ == Axis::VERTICAL && scrollEdgeType == ScrollEdgeType::SCROLL_TOP) ||
+        (gridPattern->GetGridLayoutInfo().axis_ == Axis::HORIZONTAL && scrollEdgeType == ScrollEdgeType::SCROLL_LEFT)) {
+        gridPattern->UpdateStartIndex(0);
+    } else if ((gridPattern->GetGridLayoutInfo().axis_ == Axis::VERTICAL &&
+                   scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) ||
+               (gridPattern->GetGridLayoutInfo().axis_ == Axis::HORIZONTAL &&
+                   scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT)) {
+        gridPattern->UpdateStartIndex(gridPattern->GetGridLayoutInfo().childrenCount_ - 1);
+    }
+}
+
+void GridPositionController::ScrollPage(bool reverse, bool /* smooth */)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
