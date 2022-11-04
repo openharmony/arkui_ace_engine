@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
@@ -24,7 +25,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -95,6 +95,11 @@ void RadioPattern::OnClick()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->IsEnabled()) {
+        return;
+    }
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 

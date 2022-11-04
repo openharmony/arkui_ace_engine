@@ -81,6 +81,11 @@ void CheckBoxPattern::OnClick()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->IsEnabled()) {
+        return;
+    }
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     bool isSelected = false;
