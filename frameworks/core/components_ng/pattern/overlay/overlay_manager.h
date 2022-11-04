@@ -70,8 +70,8 @@ public:
         return popupMap_[targetId];
     }
 
-    void ShowMenu(int32_t targetId, bool isMenu = true, const NG::OffsetF& offset = NG::OffsetF(),
-        RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
+    void ShowMenu(
+        int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
     void HideMenu(int32_t targetId);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, bool isMenu = true, const NG::OffsetF& offset = NG::OffsetF(),

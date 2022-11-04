@@ -151,7 +151,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 }
 
 void OverlayManager::ShowMenu(
-    int32_t targetId, bool isMenu, const NG::OffsetF& offset, RefPtr<FrameNode> menu, bool isContextMenu)
+    int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu, bool isContextMenu)
 {
     if (!menu) {
         // get existing menuNode
@@ -173,12 +173,11 @@ void OverlayManager::ShowMenu(
     auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetIsContextMenu(isContextMenu);
+
     auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
-    if (isMenu && props) {
-        props->UpdateMenuOffset(offset);
-        menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
     CHECK_NULL_VOID(props);
+    props->UpdateMenuOffset(offset);
+
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto rootChildren = rootNode->GetChildren();

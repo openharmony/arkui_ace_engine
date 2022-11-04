@@ -53,11 +53,7 @@ public:
         menu_ = menu;
     }
 
-    void AddOptionNode(const RefPtr<FrameNode>& option)
-    {
-        CHECK_NULL_VOID(option);
-        options_.push_back(option);
-    }
+    void AddOptionNode(const RefPtr<FrameNode>& option);
 
     void SetSelected(int32_t index);
 
@@ -84,6 +80,9 @@ public:
     void SetSelectedOptionFontWeight(const FontWeight& value);
     void SetSelectedOptionFontFamily(const std::vector<std::string>& value);
     void SetSelectedOptionFontColor(const Color& color);
+
+    // Get functions for unit tests
+    const std::vector<RefPtr<FrameNode>>& GetOptions();
 
 private:
     void OnModifyDone() override;
