@@ -18,7 +18,7 @@
 #include <map>
 #include <vector>
 
-#include "sa_mgr_client.h"
+#include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "ui_service_mgr_client.h"
 
@@ -93,12 +93,18 @@ void PluginComponentManager::UnregisterCallBack(const AAFwk::Want& want)
 
 sptr<AppExecFwk::IBundleMgr> PluginComponentManager::GetBundleManager()
 {
-    auto bundleObj =
-        OHOS::DelayedSingleton<AAFwk::SaMgrClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (bundleObj == nullptr) {
-        LOGE("failed to get bundle manager service");
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        LOGE("Failed to get SystemAbilityManager.");
         return nullptr;
     }
+
+    auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bundleObj == nullptr) {
+        LOGE("Failed to get bundle manager service");
+        return nullptr;
+    }
+
     return iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
 }
 
