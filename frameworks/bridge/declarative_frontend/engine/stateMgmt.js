@@ -370,6 +370,7 @@ class LocalStorage extends NativeLocalStorage {
             p.aboutToBeDeleted();
         }
         
+        return true;
     }
     /**
      * Subscribe to value change notifications of named property

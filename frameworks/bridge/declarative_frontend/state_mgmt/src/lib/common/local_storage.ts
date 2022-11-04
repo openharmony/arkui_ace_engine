@@ -309,6 +309,7 @@ class LocalStorage extends NativeLocalStorage {
       p.aboutToBeDeleted();
     }
     stateMgmtConsole.debug(`${this.constructor.name}.deleteAll: success`);
+    return true;
   }
 
   /**
