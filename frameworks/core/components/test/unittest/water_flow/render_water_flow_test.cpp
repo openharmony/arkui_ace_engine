@@ -54,6 +54,7 @@ constexpr Dimension MAX_HEIGHT = 1000.0_px;
 constexpr int64_t MICROSEC_TO_NANOSEC = 1000;
 constexpr int64_t MILLISEC_TO_NANOSEC = 1000000;
 constexpr double CENTER_POINT = 2.0;
+constexpr int32_t CACHE_SIZE_SCALE = 3;
 
 using ConstraintSize = struct {
     Dimension minWidth;
@@ -1938,7 +1939,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_InitialFlowProp_001, TestSize.
     CreateRenderWaterFlow("1fr 1fr", "1fr 1fr", FlexDirection::COLUMN, CREATE_FLOWITEM_COUNT);
     CHECK_RENDERNODE_NULL_VOID(renderNode_);
     renderNode_->InitialFlowProp();
-    EXPECT_EQ(renderNode_->cacheSize_, 1000.0);
+    EXPECT_EQ(renderNode_->cacheSize_, renderNode_->mainSize_ * CACHE_SIZE_SCALE);
 }
 
 /**
@@ -1953,7 +1954,7 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_GetFlowSize_001, TestSize.Leve
     CHECK_RENDERNODE_NULL_VOID(renderNode_);
     EXPECT_EQ(renderNode_->mainSize_, 1000.0);
     EXPECT_EQ(renderNode_->crossSize_, 1000.0);
-    EXPECT_EQ(renderNode_->cacheSize_, renderNode_->mainSize_);
+    EXPECT_EQ(renderNode_->cacheSize_, renderNode_->mainSize_ * CACHE_SIZE_SCALE);
 }
 
 /**
