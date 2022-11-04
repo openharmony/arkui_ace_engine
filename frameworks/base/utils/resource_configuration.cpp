@@ -78,6 +78,7 @@ bool ResourceConfiguration::UpdateFromJsonString(const std::string jsonStr, uint
 {
     updateFlags = 0;
     std::unique_ptr<JsonValue> jsonConfig = JsonUtil::ParseJsonString(jsonStr);
+    
     if (!jsonConfig) {
         LOGW("Parse Json String failed");
         return false;
