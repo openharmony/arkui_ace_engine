@@ -678,7 +678,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
 
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
         eventManager_->AxisTest(scaleEvent, rootNode_);
-        eventManager_->DispatchAxisEvent(scaleEvent);
+        eventManager_->DispatchAxisEventNG(scaleEvent);
     }
 }
 
