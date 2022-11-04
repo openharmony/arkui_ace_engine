@@ -180,7 +180,7 @@ void RenderGridScroll::CheckJumpToIndex(double offset)
         }
     }
     int32_t rankIndex = GetStartingItem(index);
-    if ((index - rankIndex) * estimateAverageHight_ > colSize_) {
+    if (((index - rankIndex) * estimateAverageHight_) > (colSize_* JUMP_INDEX_THRESHOLD)) {
         currentOffset_ += offset;
         return;
     }
