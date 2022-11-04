@@ -542,6 +542,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
 
+    if (window_->IsFocused()) {
+        LOGI("UIContentImpl: focus again");
+        Focus();
+    }
+    dragWindowListener_ = new DragWindowListener(instanceId_);
+    window_->RegisterDragListener(dragWindowListener_);
+    occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
+    window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+
     // create ace_view
     auto flutterAceView =
         Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
@@ -588,7 +597,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
         }
     }
-    InitWindowCallback(info);
 }
 
 void UIContentImpl::Foreground()
@@ -720,7 +728,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGI("AceAbility::OnKeyUp called,touchEvent info: keyCode is %{private}d,"
+    LOGI("UIContentImpl: OnKeyUp called,touchEvent info: keyCode is %{private}d,"
          "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -733,38 +741,39 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
 {
-    LOGI("UIContent ProcessAxisEvent");
+    LOGI("UIContentImpl ProcessAxisEvent");
     return false;
 }
 
 bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 {
-    LOGI("UIContent ProcessVsyncEvent");
+    LOGI("UIContentImpl ProcessVsyncEvent");
     return false;
 }
 
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
+    LOGI("UIContentImpl: UpdateConfiguration called");
     if (!config) {
-        LOGE("UIContent null config");
+        LOGE("UIContentImpl null config");
         return;
     }
     Platform::AceContainer::OnConfigurationUpdated(instanceId_, (*config).GetName());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (!container) {
-        LOGE("UIContent container is null");
+        LOGE("UIContentImpl container is null");
         return;
     }
     auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
-    LOGI("UIContentImpl::UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
+    LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
 {
-    LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
+    LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
     SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -772,32 +781,32 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         LOGE("UpdateViewportConfig: container is null.");
         return;
     }
-    container->SetWindowPos(config.Left(), config.Top());
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("UpdateViewportConfig: taskExecutor is null.");
         return;
     }
     taskExecutor->PostTask([config, container, reason]() {
-            auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-            if (!aceView) {
-                LOGE("UpdateViewportConfig: aceView is null.");
-                return;
-            }
-            flutter::ViewportMetrics metrics;
-            metrics.physical_width = config.Width();
-            metrics.physical_height = config.Height();
-            metrics.device_pixel_ratio = config.Density();
-            Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
-            Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-                static_cast<WindowSizeChangeReason>(reason));
-            Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        }, TaskExecutor::TaskType::PLATFORM);
+        container->SetWindowPos(config.Left(), config.Top());
+        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
+        if (!aceView) {
+            LOGE("UpdateViewportConfig: aceView is null.");
+            return;
+        }
+        flutter::ViewportMetrics metrics;
+        metrics.physical_width = config.Width();
+        metrics.physical_height = config.Height();
+        metrics.device_pixel_ratio = config.Density();
+        Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
+        Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
+            static_cast<WindowSizeChangeReason>(reason));
+        Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
+    }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
 {
-    LOGI("UpdateWindowMode, window mode is %{public}d", mode);
+    LOGI("UIContentImpl: UpdateWindowMode, window mode is %{public}d", mode);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
@@ -852,70 +861,6 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
         return;
     }
     pipelineContext->DumpInfo(params, info);
-}
-
-void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info)
-{
-    LOGI("UIContent InitWindowCallback");
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        LOGE("InitWindowCallback failed, container(id=%{public}d) is null.", instanceId_);
-        return;
-    }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!pipelineContext) {
-        LOGE("InitWindowCallback failed, pipelineContext is null.");
-        return;
-    }
-    auto& window = window_;
-    if (!window) {
-        LOGE("InitWindowCallback failed, window is null.");
-        return;
-    }
-    if (window->IsFocused()) {
-        LOGI("UIContentImpl: focus again");
-        Focus();
-    }
-    if (info != nullptr) {
-        pipelineContext->SetAppLabelId(info->labelId);
-        pipelineContext->SetAppIconId(info->iconId);
-    }
-
-    pipelineContext->SetWindowMinimizeCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Minimize()); });
-
-    pipelineContext->SetWindowMaximizeCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Maximize()); });
-
-    pipelineContext->SetWindowRecoverCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Recover()); });
-
-    pipelineContext->SetWindowCloseCallBack(
-        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Close()); });
-
-    pipelineContext->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
-
-    pipelineContext->SetWindowSplitCallBack([window]() -> bool {
-        return (
-            OHOS::Rosen::WMError::WM_OK == window->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
-    });
-
-    pipelineContext->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
-
-    pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
-        Rect rect;
-        if (!window) {
-            return rect;
-        }
-        auto windowRect = window->GetRect();
-        rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
-        return rect;
-    });
-
-    dragWindowListener_ = new DragWindowListener(instanceId_);
-    window->RegisterDragListener(dragWindowListener_);
-    occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
-    window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
