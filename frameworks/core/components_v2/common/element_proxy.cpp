@@ -668,7 +668,10 @@ public:
         lazyForEachComponent->RegisterDataChangeListener(AceType::Claim(this));
         lazyForEachComponent_ = lazyForEachComponent;
 
-        children_.clear();
+        for (const auto& item : children_) {
+            auto childComponent = lazyForEachComponent_->GetChildByIndex(item.first);
+            item.second->Update(childComponent, startIndex_ + item.first);
+        }
     }
 
     void LocalizedUpdate(
