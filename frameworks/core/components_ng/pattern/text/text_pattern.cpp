@@ -151,6 +151,11 @@ void TextPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
+    if (CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag())) {
+        // measure flag changed, reset paragraph.
+        paragraph_.Reset();
+    }
+
     bool shouldClipToContent = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::NONE) == TextOverflow::CLIP;
     host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
 }

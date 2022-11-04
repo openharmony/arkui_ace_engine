@@ -38,8 +38,7 @@ class Paragraph : public virtual AceType {
     DECLARE_ACE_TYPE(NG::Paragraph, AceType)
 
 public:
-    static RefPtr<Paragraph> Create(const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle,
-        const RefPtr<FontCollection>& fontCollection);
+    static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
 
     // whether the paragraph has been build
     virtual bool IsValid() = 0;
@@ -56,6 +55,11 @@ public:
     virtual float GetHeight() = 0;
     virtual float GetTextWidth() = 0;
     virtual size_t GetLineCount() = 0;
+    virtual float GetMaxIntrinsicWidth() = 0;
+    virtual bool DidExceedMaxLines() = 0;
+    virtual float GetLongestLine() = 0;
+    virtual float GetMaxWidth() = 0;
+    virtual float GetAlphabeticBaseline() = 0;
 
     // interfaces for painting
     virtual void Paint(const RefPtr<Canvas>& canvas, float x, float y) = 0;

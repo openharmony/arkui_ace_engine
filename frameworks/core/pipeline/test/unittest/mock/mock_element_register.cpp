@@ -83,12 +83,19 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
 
 std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
 {
-    return removedItems_;
+    return removedItems_[0];
 }
+
+void ElementRegister::ClearRemovedItems(ElementIdType elmtId) {}
+
+void ElementRegister::ClearRemovedItemsSilently(ElementIdType elmtId) {}
 
 void ElementRegister::Clear()
 {
     itemMap_.clear();
     removedItems_.clear();
 }
+
+void ElementRegister::ClearInstance() {}
+
 } // namespace OHOS::Ace

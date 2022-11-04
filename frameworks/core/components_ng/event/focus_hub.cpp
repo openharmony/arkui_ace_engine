@@ -21,6 +21,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/event/ace_event_handler.h"
@@ -49,8 +50,12 @@ std::optional<std::string> FocusHub::GetInspectorKey() const
     return std::nullopt;
 }
 
-RefPtr<FocusHub> FocusHub::GetParentFocusHub() const
+RefPtr<FocusHub> FocusHub::GetParentFocusHub(FrameNode* node) const
 {
+    if (node) {
+        auto parentNode = node->GetFocusParent();
+        return parentNode ? parentNode->GetFocusHub() : nullptr;
+    }
     auto frameNode = GetFrameNode();
     if (frameNode) {
         auto parentNode = frameNode->GetFocusParent();
@@ -198,15 +203,15 @@ void FocusHub::LostSelfFocus()
     }
 }
 
-void FocusHub::RemoveSelf()
+void FocusHub::RemoveSelf(FrameNode* node)
 {
-    auto parent = GetParentFocusHub();
+    auto parent = GetParentFocusHub(node);
     if (parent) {
-        parent->RemoveChild(AceType::Claim(this));
+        parent->RemoveChild(this);
     }
 }
 
-void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
+void FocusHub::RemoveChild(FocusHub* focusNode)
 {
     // Not belong to this focus scope.
     if (!focusNode || focusNode->GetParentFocusHub() != this) {
