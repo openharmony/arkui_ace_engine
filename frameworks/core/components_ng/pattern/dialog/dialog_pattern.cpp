@@ -169,7 +169,9 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
         auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(contentWrapper);
-        UpdateContentRenderContext(contentWrapper, dialogTheme_);
+        if (!dialogProperties.customStyle) {
+            UpdateContentRenderContext(contentWrapper, dialogTheme_);
+        }
         customNode_->MountToParent(contentWrapper);
         auto dialog = GetHost();
         contentWrapper->MountToParent(dialog);
@@ -188,7 +190,9 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     auto content = BuildContent(dialogProperties);
     CHECK_NULL_VOID(content);
     contentColumn->AddChild(content);
-    UpdateContentRenderContext(contentColumn, dialogTheme_);
+    if (!dialogProperties.customStyle) {
+        UpdateContentRenderContext(contentColumn, dialogTheme_);
+    }
 
     auto columnProp = AceType::DynamicCast<LinearLayoutProperty>(contentColumn->GetLayoutProperty());
     CHECK_NULL_VOID(columnProp);
