@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -96,6 +97,9 @@ public:
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
         json->Put("name", name.c_str());
         json->Put("group", group.c_str());
+        if (host->GetTag() == V2::TOGGLE_ETS_TAG) {
+            json->Put("type", "ToggleType.Checkbox");
+        }
     }
 
 private:
