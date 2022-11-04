@@ -425,10 +425,11 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
                 auto pipelineContext = context.Upgrade();
                 if (pipelineContext && pipelineContext->GetTaskExecutor()) {
                     auto taskExecutor = pipelineContext->GetTaskExecutor();
-                    taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(), 
+                    taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
                         TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
                 } else {
-                    BackgroundTaskExecutor::GetInstance().PostTask(ImageCompressor::GetInstance()->ScheduleReleaseTask());
+                    BackgroundTaskExecutor::GetInstance().PostTask(
+                        ImageCompressor::GetInstance()->ScheduleReleaseTask());
                 }
             }
             callback({ image, renderTaskHolder->unrefQueue }, compressData);
