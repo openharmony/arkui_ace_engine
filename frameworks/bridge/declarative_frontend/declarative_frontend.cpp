@@ -185,15 +185,25 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
     type_ = type;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeFrontendDelegate(taskExecutor);
-    taskExecutor->PostTask(
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
-            auto jsEngine = weakEngine.Upgrade();
-            if (!jsEngine) {
-                return;
-            }
-            jsEngine->Initialize(delegate);
-        },
-        TaskExecutor::TaskType::JS);
+
+    bool needPostJsTask = true;
+    auto container = Container::Current();
+    if (container) {
+        const auto& setting = container->GetSettings();
+        needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread);
+    }
+    auto initJSEngineTask = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->Initialize(delegate);
+    };
+    if (needPostJsTask) {
+        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS);
+    } else {
+        initJSEngineTask();
+    }
 
     LOGD("DeclarativeFrontend initialize end.");
     return true;

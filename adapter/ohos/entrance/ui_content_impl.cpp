@@ -769,7 +769,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
 
 void UIContentImpl::SetBackgroundColor(uint32_t color)
 {
-    LOGI("UIContentImpl::SetBackgroundColor color is %{public}u", color);
+    LOGI("UIContentImpl: SetBackgroundColor color is %{public}u", color);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     if (!container) {
         LOGE("SetBackgroundColor failed: container is null.");
@@ -793,7 +793,7 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
 
 bool UIContentImpl::ProcessBackPressed()
 {
-    LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed called");
+    LOGI("UIContentImpl: ProcessBackPressed: Platform::AceContainer::OnBackPressed called");
     auto container = AceEngine::Get().GetContainer(instanceId_);
     if (!container) {
         return false;
@@ -827,7 +827,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGI("AceAbility::OnKeyUp called,touchEvent info: keyCode is %{private}d,"
+    LOGI("UIContentImpl: OnKeyUp called,touchEvent info: keyCode is %{private}d,"
          "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
@@ -838,38 +838,39 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
 {
-    LOGI("UIContent ProcessAxisEvent");
+    LOGI("UIContentImpl ProcessAxisEvent");
     return false;
 }
 
 bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 {
-    LOGI("UIContent ProcessVsyncEvent");
+    LOGI("UIContentImpl ProcessVsyncEvent");
     return false;
 }
 
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
+    LOGI("UIContentImpl: UpdateConfiguration called");
     if (!config) {
-        LOGE("UIContent null config");
+        LOGE("UIContentImpl null config");
         return;
     }
     Platform::AceContainer::OnConfigurationUpdated(instanceId_, (*config).GetName());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (!container) {
-        LOGE("UIContent container is null");
+        LOGE("UIContentImpl container is null");
         return;
     }
     auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
-    LOGI("UIContentImpl::UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
+    LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
 {
-    LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
+    LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
     SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -877,37 +878,37 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         LOGE("UpdateViewportConfig: container is null.");
         return;
     }
-    container->SetWindowPos(config.Left(), config.Top());
-    auto pipelineContext = container->GetPipelineContext();
-    if (pipelineContext) {
-        pipelineContext->SetDisplayWindowRectInfo(
-            Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-    }
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("UpdateViewportConfig: taskExecutor is null.");
         return;
     }
     taskExecutor->PostTask([config, container, reason]() {
-            auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-            if (!aceView) {
-                LOGE("UpdateViewportConfig: aceView is null.");
-                return;
-            }
-            flutter::ViewportMetrics metrics;
-            metrics.physical_width = config.Width();
-            metrics.physical_height = config.Height();
-            metrics.device_pixel_ratio = config.Density();
-            Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
-            Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-                static_cast<WindowSizeChangeReason>(reason));
-            Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        }, TaskExecutor::TaskType::PLATFORM);
+        container->SetWindowPos(config.Left(), config.Top());
+        auto pipelineContext = container->GetPipelineContext();
+        if (pipelineContext) {
+            pipelineContext->SetDisplayWindowRectInfo(
+                Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+        }
+        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
+        if (!aceView) {
+            LOGE("UpdateViewportConfig: aceView is null.");
+            return;
+        }
+        flutter::ViewportMetrics metrics;
+        metrics.physical_width = config.Width();
+        metrics.physical_height = config.Height();
+        metrics.device_pixel_ratio = config.Density();
+        Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
+        Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
+            static_cast<WindowSizeChangeReason>(reason));
+        Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
+    }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
 {
-    LOGI("UpdateWindowMode, window mode is %{public}d", mode);
+    LOGI("UIContentImpl: UpdateWindowMode, window mode is %{public}d", mode);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);

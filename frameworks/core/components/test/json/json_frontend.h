@@ -88,8 +88,6 @@ public:
 
     void OnNewRequest(const std::string& data) override;
 
-    void OnDialogUpdated(const std::string& data) override {}
-
     void OnNewWant(const std::string& data) override {}
 
     void CallRouterBack() override;

@@ -201,8 +201,6 @@ public:
 
     virtual void OnNewWant(const std::string& data) = 0;
 
-    virtual void OnDialogUpdated(const std::string& data) = 0;
-
     // call router back
     virtual void CallRouterBack() = 0;
 
