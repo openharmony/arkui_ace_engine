@@ -100,7 +100,7 @@ txt::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline)
             convertValue = txt::TextBaseline::kIdeographic;
             break;
         default:
-            LOGW("TextBaseline setting error! Now using default TextBaseline");
+            LOGD("TextBaseline setting error! Now using default TextBaseline");
             convertValue = txt::TextBaseline::kAlphabetic;
             break;
     }

@@ -838,19 +838,35 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 {
 #ifdef PIXEL_MAP_SUPPORTED
     // 0 Get input param
-    double left = 0.0;
-    double top = 0.0;
-    double width = 0.0;
-    double height = 0.0;
+    double fLeft = 0.0;
+    double fTop = 0.0;
+    double fWidth = 0.0;
+    double fHeight = 0.0;
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t width = 0;
+    int32_t height = 0;
     uint32_t final_width = 0.0;
     uint32_t final_height = 0.0;
-    JSViewAbstract::ParseJsDouble(info[0], left);
-    JSViewAbstract::ParseJsDouble(info[1], top);
-    JSViewAbstract::ParseJsDouble(info[2], width);
-    JSViewAbstract::ParseJsDouble(info[3], height);
+
+    JSViewAbstract::ParseJsDouble(info[0], fLeft);
+    JSViewAbstract::ParseJsDouble(info[1], fTop);
+    JSViewAbstract::ParseJsDouble(info[2], fWidth);
+    JSViewAbstract::ParseJsDouble(info[3], fHeight);
+
+    fLeft = SystemProperties::Vp2Px(fLeft);
+    fTop = SystemProperties::Vp2Px(fTop);
+    fWidth = SystemProperties::Vp2Px(fWidth);
+    fHeight = SystemProperties::Vp2Px(fHeight);
+
+    left = fLeft;
+    top = fTop;
+    width = round(fWidth);
+    height = round(fHeight);
 
     // 1 Get data from canvas
     std::unique_ptr<ImageData> canvasData;
+    
     if (isOffscreen_) {
         canvasData = offscreenCanvas_->GetImageData(left, top, width, height);
     } else {
@@ -868,7 +884,7 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
         }
     }
 
-    // 2 Create piexclmap
+    // 2 Create pixelmap
     OHOS::Media::InitializationOptions options;
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
