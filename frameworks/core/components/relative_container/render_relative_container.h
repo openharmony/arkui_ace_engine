@@ -24,7 +24,8 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
-
+using AlignRules = std::map<AlignDirection, AlignRule>;
+using AlignRulesMap = std::map<std::string, AlignRules>;
 class ACE_EXPORT RenderRelativeContainer : public RenderNode {
     DECLARE_ACE_TYPE(RenderRelativeContainer, RenderNode);
 
@@ -34,6 +35,11 @@ public:
     void Update(const RefPtr<Component>& component) override;
 
     void PerformLayout() override;
+
+    AlignRulesMap GetAlignRulesMap() const
+    {
+        return alignRulesMap_;
+    }
 
 private:
     void CollectNodesById();
@@ -59,6 +65,8 @@ private:
     // list of nodes that relied on the key node represented by string
     std::map<std::string, std::set<std::string>> reliedOnMap_;
     std::list<std::string> orderedRenderList_;
+
+    AlignRulesMap alignRulesMap_;
 };
 
 } // namespace OHOS::Ace
