@@ -199,7 +199,7 @@ public:
 
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
-    RefPtr<FocusHub> GetParentFocusHub() const;
+    RefPtr<FocusHub> GetParentFocusHub(FrameNode* node = nullptr) const;
     std::string GetFrameName() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
@@ -210,8 +210,8 @@ public:
 
     void LostFocus();
     void LostSelfFocus();
-    void RemoveSelf();
-    void RemoveChild(const RefPtr<FocusHub>& focusNode);
+    void RemoveSelf(FrameNode* frameNode);
+    void RemoveChild(FocusHub* focusNode);
     bool GoToNextFocusLinear(bool reverse, const RectF& rect = RectF());
     bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect);
 

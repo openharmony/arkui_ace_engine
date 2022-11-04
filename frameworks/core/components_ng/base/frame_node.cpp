@@ -62,7 +62,7 @@ FrameNode::~FrameNode()
     }
     auto focusHub = GetFocusHub();
     if (focusHub) {
-        focusHub->RemoveSelf();
+        focusHub->RemoveSelf(this);
     }
 }
 

@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPaintMethod, NodePaintMethod)
 public:
-    TextPaintMethod(std::shared_ptr<RSParagraph> paragraph, float baselineOffset)
+    TextPaintMethod(RefPtr<Paragraph> paragraph, float baselineOffset)
         : paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset)
     {}
     ~TextPaintMethod() override = default;
@@ -40,12 +40,15 @@ public:
         CHECK_NULL_RETURN(paragraph_, nullptr);
         auto offset = paintWrapper->GetContentOffset();
         auto paintOffset = offset - OffsetF(0.0, baselineOffset_);
-        return [paragraph = paragraph_, paintOffset](
-                   RSCanvas& canvas) { paragraph->Paint(&canvas, paintOffset.GetX(), paintOffset.GetY()); };
+        return [paragraph = paragraph_, paintOffset](RSCanvas& canvas) {
+            SkCanvas* skCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
+            auto paragraphCanvas = Canvas::Create(skCanvas);
+            paragraph->Paint(paragraphCanvas, paintOffset.GetX(), paintOffset.GetY());
+        };
     }
 
 private:
-    std::shared_ptr<RSParagraph> paragraph_;
+    RefPtr<Paragraph> paragraph_;
     float baselineOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPaintMethod);
