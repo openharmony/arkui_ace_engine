@@ -98,7 +98,7 @@ public:
                 V2::ConvertFlexAlignToStirng(property->GetMainAxisAlign().value_or(FlexAlign::FLEX_START)).c_str());
             jsonConstructor->Put("alignItems",
                 V2::ConvertFlexAlignToStirng(property->GetCrossAxisAlign().value_or(FlexAlign::FLEX_START)).c_str());
-            jsonConstructor->Put("alignContent", "FlexAlign.FLEX_START");
+            jsonConstructor->Put("alignContent", "FlexAlign.Start");
         } else {
             auto wrapDirection = property->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
             if (static_cast<int32_t>(direction) <= 1) {

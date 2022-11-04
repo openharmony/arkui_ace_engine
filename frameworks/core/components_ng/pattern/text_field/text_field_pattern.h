@@ -329,6 +329,7 @@ private:
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
     std::string GetTextColor() const;
+    std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
     std::string GetFontSize() const;
     std::string GetPlaceHolder() const;
