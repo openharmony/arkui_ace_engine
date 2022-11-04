@@ -239,6 +239,14 @@ public:
         dragEventActuator_->ReplaceDragEvent(dragEvent);
     }
 
+    void SetCustomDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
+    {
+        if (!dragEventActuator_) {
+            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
+        }
+        dragEventActuator_->SetCustomDragEvent(dragEvent);
+    }
+
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult);

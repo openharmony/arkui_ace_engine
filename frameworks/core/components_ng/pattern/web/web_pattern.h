@@ -231,6 +231,13 @@ private:
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragCancel();
+    bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void HandleAxisEvent(AxisInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
@@ -286,6 +293,7 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
     float selectHotZone_ = 10.0f;
+    RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
     bool needOnFocus_ = false;
@@ -294,6 +302,8 @@ private:
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
+    bool isDragging_ = false;
+    bool isW3cDragEvent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };

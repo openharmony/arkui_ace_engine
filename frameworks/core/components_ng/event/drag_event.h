@@ -82,6 +82,14 @@ public:
         userCallback_ = dragEvent;
     }
 
+    void SetCustomDragEvent(const RefPtr<DragEvent>& dragEvent)
+    {
+        if (customCallback_) {
+            customCallback_.Reset();
+        }
+        customCallback_ = dragEvent;
+    }
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
@@ -93,6 +101,7 @@ public:
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
+    RefPtr<DragEvent> customCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
