@@ -373,7 +373,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
 }
 #endif
 
-void ImageProvider::UploadImageToGPUForRender(const RefPtr<TaskExecutor>& taskExecutor,
+void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> context,
     const sk_sp<SkImage>& image,
     const sk_sp<SkData>& data,
     const std::function<void(flutter::SkiaGPUObject<SkImage>, sk_sp<SkData>)>&& callback,
@@ -393,7 +393,7 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<TaskExecutor>& taskEx
         callback({ image, renderTaskHolder->unrefQueue }, data);
         return;
     }
-    auto task = [taskExecutor, image, callback, renderTaskHolder, src] () {
+    auto task = [context, image, callback, renderTaskHolder, src] () {
         if (!renderTaskHolder) {
             LOGW("renderTaskHolder has been released.");
             return;
@@ -422,8 +422,14 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<TaskExecutor>& taskEx
             if (ImageCompressor::GetInstance()->CanCompress()) {
                 compressData = ImageCompressor::GetInstance()->GpuCompress(src, pixmap, width, height);
                 ImageCompressor::GetInstance()->WriteToFile(src, compressData, { width, height });
-                taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
-                    TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+                auto pipelineContext = context.Upgrade();
+                if (pipelineContext && pipelineContext->GetTaskExecutor()) {
+                    auto taskExecutor = pipelineContext->GetTaskExecutor();
+                    taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(), 
+                        TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+                } else {
+                    BackgroundTaskExecutor::GetInstance().PostTask(ImageCompressor::GetInstance()->ScheduleReleaseTask());
+                }
             }
             callback({ image, renderTaskHolder->unrefQueue }, compressData);
             // Trigger purge cpu bitmap resource, after image upload to gpu.

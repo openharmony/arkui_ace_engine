@@ -258,7 +258,7 @@ void StaticImageObject::UploadToGpuForRender(
         } else {
             image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
         }
-        ImageProvider::UploadImageToGPUForRender(taskExecutor, image, stripped, callback, renderTaskHolder, key);
+        ImageProvider::UploadImageToGPUForRender(pipelineContext, image, stripped, callback, renderTaskHolder, key);
         skData = nullptr;
     };
     if (syncMode) {
