@@ -847,13 +847,13 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
     NG::TransitionOptions transitionOption;
     transitionOption.Type = ParseTransitionType(transitionArgs->GetString("type", "All"));
     if (transitionArgs->Contains("opacity")) {
-        double opacity = 0.0;
+        double opacity = 1.0;
         ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
-        if (GreatNotEqual(opacity, 1.0) || opacity < 0) {
-            LOGW("set opacity in transition to %{public}f, over range, use default opacity 0", opacity);
-            opacity = 0.0;
+        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+            LOGW("set opacity in transition to %{public}lf, over range, use default opacity 1", opacity);
+            opacity = 1.0;
         }
-        transitionOption.UpdateOpacity(opacity);
+        transitionOption.UpdateOpacity(static_cast<float>(opacity));
         hasEffect = true;
     }
     if (transitionArgs->Contains("translate")) {
