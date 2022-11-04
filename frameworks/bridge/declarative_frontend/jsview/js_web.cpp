@@ -35,6 +35,9 @@
 #include "core/components_ng/pattern/web/web_view.h"
 #include "core/pipeline/pipeline_base.h"
 
+#define MAX_NAME_SIZE 32
+#define MAX_CUSTOM_SCHEME_SIZE 10
+
 namespace OHOS::Ace::Framework {
 
 class JSWebDialog : public Referenced {
@@ -2549,10 +2552,9 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
     webComponent->SetOnFileSelectorShow(std::move(jsCallback));
 }
 
-bool WebcustomSchemeCheckName(std::string scheme)
+bool WebcustomSchemeCheckName(const std::string scheme)
 {
-    #define MAX_NAME_SIZE 32
-    if (scheme.size() > MAX_NAME_SIZE || scheme.empty()) {
+    if (scheme.empty() || scheme.size() > MAX_NAME_SIZE) {
         LOGE("invalid size");
         return false;
     }
@@ -2571,7 +2573,6 @@ bool WebcustomSchemeCheckName(std::string scheme)
 
 void JSWeb::CustomSchemes(const JSCallbackInfo& args)
 {
-#define MAX_CUSTOM_SCHEME_SIZE 10
     if ((args.Length() <= 0) || !(args[0]->IsArray())) {
         LOGE("arg is invalid");
         return;
