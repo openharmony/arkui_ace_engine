@@ -35,6 +35,9 @@ public:
     void HideMenuNG(int32_t targetId) override {}
     void HideMenuNG() override {}
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override {}
+    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override {}
+    void HidePopupNG(int32_t targetId) override {}
+    void HidePopupNG() override {}
     bool CancelPopup(const std::string& id) override
     {
         return false;

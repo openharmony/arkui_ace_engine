@@ -258,6 +258,7 @@ void WebPattern::HandleFocusEvent()
         LOGE("handle focus delegate_ is nullptr");
         return;
     }
+    isFocus_ = true;
     if (needOnFocus_) {
         delegate_->OnFocus();
     } else {
@@ -271,6 +272,7 @@ void WebPattern::HandleBlurEvent()
         LOGE("handle blur delegate_ is nullptr");
         return;
     }
+    isFocus_ = false;
     delegate_->OnBlur();
     OnQuickMenuDismissed();
 }
@@ -322,7 +324,9 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
     auto drawSize = geometryNode->GetContentSize();
-    delegate_->Resize(drawSize.Width(), drawSize.Height());
+    drawSize_ = Size(drawSize.Width(), drawSize.Height());
+    drawSizeCache_ = drawSize_;
+    delegate_->Resize(drawSize_.Width(), drawSize_.Height());
     // first update size to load url.
     if (!isUrlLoaded_) {
         isUrlLoaded_ = true;
@@ -489,6 +493,26 @@ void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::RegistVirtualKeyBoardListener()
+{
+    if (!needUpdateWeb_) {
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        return;
+    }
+    pipelineContext->SetVirtualKeyBoardCallback(
+        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
+            auto webPattern = weak.Upgrade();
+            if (webPattern) {
+                return webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+            }
+            return false;
+        });
+    needUpdateWeb_ = false;
+}
+
 void WebPattern::OnModifyDone()
 {
     // called in each update function.
@@ -496,6 +520,7 @@ void WebPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    RegistVirtualKeyBoardListener();
     if (!delegate_) {
         // first create case,
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
@@ -532,6 +557,47 @@ void WebPattern::OnModifyDone()
 
     // Initialize events such as keyboard, focus, etc.
     InitEvent();
+}
+
+bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
+{
+    LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f",
+        width, height, keyboard);
+    CHECK_NULL_RETURN(delegate_, false);
+    if (!isFocus_) {
+        if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
+            drawSize_.SetSize(drawSizeCache_);
+            UpdateWebLayoutSize();
+            isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+        }
+        return false;
+    }
+    if (NearZero(keyboard)) {
+        drawSize_.SetSize(drawSizeCache_);
+        UpdateWebLayoutSize();
+        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+    } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+        drawSizeCache_.SetSize(drawSize_);
+        if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
+            isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+            return true;
+        }
+        drawSize_.SetHeight(height - keyboard - GetCoordinatePoint()->GetY());
+        UpdateWebLayoutSize();
+        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+    }
+    return true;
+}
+
+void WebPattern::UpdateWebLayoutSize()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rect = frameNode->GetGeometryNode()->GetFrameRect();
+    delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+    rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
+    frameNode->GetRenderContext()->SyncGeometryProperties(rect);
+    frameNode->MarkDirtyNode();
 }
 
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)

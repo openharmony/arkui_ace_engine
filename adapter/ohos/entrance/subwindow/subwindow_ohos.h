@@ -33,6 +33,7 @@
 #include "event_handler.h"
 #include "event_runner.h"
 #include "resource_manager.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Rosen {
 class Window;
@@ -55,6 +56,9 @@ public:
     void HideMenuNG(int32_t targetId) override;
     void HideMenuNG() override;
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
+    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override;
+    void HidePopupNG(int32_t targetId) override;
+    void HidePopupNG() override;
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
@@ -112,6 +116,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     int32_t targetId_ = -1;
     bool isToastWindow_ = false;
+    int32_t popupTargetId_ = -1;
 };
 
 } // namespace OHOS::Ace

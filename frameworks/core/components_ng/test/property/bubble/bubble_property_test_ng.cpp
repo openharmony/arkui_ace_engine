@@ -60,7 +60,7 @@ HWTEST_F(BubblePropertyTestNg, BubblePropertyTest001, TestSize.Level1)
 
 /**
  * @tc.name: BubblePropertyTest002
- * @tc.desc: set panelType value into BubblePropertyTest002 and get it.
+ * @tc.desc: set message value into BubblePropertyTest002 and get it.
  * @tc.type: FUNC
  */
 HWTEST_F(BubblePropertyTestNg, BubblePropertyTest002, TestSize.Level1)
