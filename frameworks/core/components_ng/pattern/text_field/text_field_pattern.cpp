@@ -1594,40 +1594,40 @@ std::string TextFieldPattern::GetPlaceholderFont() const
     CHECK_NULL_RETURN(theme, "");
     auto jsonValue = JsonUtil::Create(true);
     if (layoutProperty->GetPlaceholderItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL) {
-        jsonValue->Put("placeholderItalicFontStyle", "FontStyle.Normal");
+        jsonValue->Put("style", "FontStyle.Normal");
     } else {
-        jsonValue->Put("placeholderItalicFontStyle", "FontStyle.Italic");
+        jsonValue->Put("style", "FontStyle.Italic");
     }
     // placeholder font size not exist in theme, use normal font size by default
-    jsonValue->Put("placeholderFontSize", GetFontSize().c_str());
+    jsonValue->Put("size", GetFontSize().c_str());
     auto weight = layoutProperty->GetPlaceholderFontWeightValue(theme->GetFontWeight());
     switch (weight) {
         case FontWeight::W100:
-            jsonValue->Put("placeholderFontWeight", "100");
+            jsonValue->Put("weight", "100");
             break;
         case FontWeight::W200:
-            jsonValue->Put("placeholderFontWeight", "200");
+            jsonValue->Put("weight", "200");
             break;
         case FontWeight::W300:
-            jsonValue->Put("placeholderFontWeight", "300");
+            jsonValue->Put("weight", "300");
             break;
         case FontWeight::W400:
-            jsonValue->Put("placeholderFontWeight", "400");
+            jsonValue->Put("weight", "400");
             break;
         case FontWeight::W500:
-            jsonValue->Put("placeholderFontWeight", "500");
+            jsonValue->Put("weight", "500");
             break;
         case FontWeight::W600:
-            jsonValue->Put("placeholderFontWeight", "600");
+            jsonValue->Put("weight", "600");
             break;
         case FontWeight::W700:
-            jsonValue->Put("placeholderFontWeight", "700");
+            jsonValue->Put("weight", "700");
             break;
         case FontWeight::W800:
-            jsonValue->Put("placeholderFontWeight", "800");
+            jsonValue->Put("weight", "800");
             break;
         case FontWeight::W900:
-            jsonValue->Put("placeholderFontWeight", "900");
+            jsonValue->Put("weight", "900");
             break;
         default:
             jsonValue->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(weight).c_str());
@@ -1659,7 +1659,7 @@ std::string TextFieldPattern::GetCaretColor() const
 {
     auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, "");
-    auto paintProperty = GetLayoutProperty<TextFieldPaintProperty>();
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, "");
     return paintProperty->GetCursorColorValue(theme->GetCursorColor()).ColorToString();
 }
@@ -1680,6 +1680,37 @@ std::string TextFieldPattern::GetFontSize() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     return layoutProperty->GetFontSizeValue(theme->GetFontSize()).ToString();
+}
+
+Ace::FontStyle TextFieldPattern::GetItalicFontStyle() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Ace::FontStyle::NORMAL);
+    return layoutProperty->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL);
+}
+
+FontWeight TextFieldPattern::GetFontWeight() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, FontWeight::NORMAL);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, FontWeight::NORMAL);
+    return layoutProperty->GetFontWeightValue(theme->GetFontWeight());
+}
+
+std::string TextFieldPattern::GetFontFamily() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "HarmonyOS Sans");
+    auto family = layoutProperty->GetFontFamilyValue({ "HarmonyOS Sans" });
+    return ConvertFontFamily(family);
+}
+
+TextAlign TextFieldPattern::GetTextAlign() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextAlign::START);
+    return layoutProperty->GetTextAlign().value_or(TextAlign::START);
 }
 
 uint32_t TextFieldPattern::GetMaxLength() const
@@ -1704,28 +1735,18 @@ std::string TextFieldPattern::GetInputFilter() const
     return layoutProperty->GetInputFilterValue("");
 }
 
-std::string TextFieldPattern::GetTextAlign() const
-{
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, "TextAlign::Start");
-    switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
-        case TextAlign::START:
-            return "TextAlign.Start";
-        case TextAlign::CENTER:
-            return "TextAlign.Center";
-        case TextAlign::END:
-            return "TextAlign::End";
-        default:
-            return "TextAlign.Start";
-    }
-}
-
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("placeholder", GetPlaceholderColor().c_str());
+    json->Put("placeholder", GetPlaceHolder().c_str());
     json->Put("text", textEditingValue_.text.c_str());
     json->Put("fontSize", GetFontSize().c_str());
     json->Put("fontColor", GetTextColor().c_str());
+    json->Put("fontStyle", GetItalicFontStyle() == Ace::FontStyle::NORMAL
+                               ? "FontStyle.Normal"
+                               : "FontStyle.Italic");
+    json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight()).c_str());
+    json->Put("fontFamily", GetFontFamily().c_str());
+    json->Put("textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign()).c_str());
     json->Put("caretColor", GetCaretColor().c_str());
     json->Put("type", TextInputTypeToString().c_str());
     json->Put("placeholderColor", GetPlaceholderColor().c_str());
@@ -1734,7 +1755,6 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto maxLength = GetMaxLength();
     json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
     json->Put("inputFilter", GetInputFilter().c_str());
-    json->Put("textAlign", GetTextAlign().c_str());
 }
 
 } // namespace OHOS::Ace::NG

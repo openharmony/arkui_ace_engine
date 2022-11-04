@@ -25,6 +25,7 @@ class ACE_EXPORT QRCodeView {
 public:
     static void Create(const std::string& value);
     static void SetQRCodeColor(Color color);
+    static void SetQRBackgroundColor(Color color);
 };
 
 } // namespace OHOS::Ace::NG

@@ -31,12 +31,9 @@ namespace {
 std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration)
 {
     auto jsonSpanDeclaration = JsonUtil::Create(true);
-    if (color) {
-        jsonSpanDeclaration->Put("color", (color.value().ColorToString()).c_str());
-    }
-    if (textDecoration) {
-        jsonSpanDeclaration->Put("type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value()).c_str());
-    }
+    jsonSpanDeclaration->Put(
+        "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
+    jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     return jsonSpanDeclaration->ToString();
 }
 } // namespace

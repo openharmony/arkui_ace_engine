@@ -44,21 +44,14 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        static const std::array<std::string, 4> AXIS_TO_STRING = {
-            "Axis.VERTICAL",
-            "Axis.HORIZONTAL",
-            "Axis.FREE",
-            "Axis.NONE",
-        };
-        json->Put(
-            "Direction", AXIS_TO_STRING.at(static_cast<int32_t>(GetDirection().value_or(Axis::HORIZONTAL))).c_str());
-        json->Put("Thickness", GetThickness().value_or(Dimension(20.0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("thickness", GetThickness().value_or(Dimension(20.0, DimensionUnit::VP)).ToString().c_str());
         static const std::array<std::string, 3> SLIDER_MODE_TO_STRING = {
             "SliderMode.OUTSET",
             "SliderMode.INSET",
             "SliderMode.CAPSULE",
         };
-        json->Put("SliderMode",
+        // should be in constructor
+        json->Put("style",
             SLIDER_MODE_TO_STRING.at(static_cast<int32_t>(GetSliderMode().value_or(SliderModel::SliderMode::OUTSET)))
                 .c_str());
     }

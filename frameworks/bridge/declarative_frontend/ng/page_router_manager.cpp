@@ -311,8 +311,16 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
     CHECK_NULL_VOID(pagePattern);
     auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_VOID(pageInfo);
-    name = pageInfo->GetPageUrl();
-    path = pageInfo->GetPagePath();
+    auto url = pageInfo->GetPageUrl();
+    auto pos = url.rfind(".js");
+    if (pos == url.length() - 3) {
+        url = url.substr(0, pos);
+    }
+    pos = url.rfind("/");
+    if (pos != std::string::npos) {
+        name = url.substr(pos + 1);
+        path = url.substr(0, pos + 1);
+    }
 }
 
 std::string PageRouterManager::GetParams() const

@@ -30,11 +30,12 @@ const Dimension DEFAULT_CIRCLE_SIZE = 16.0_vp;
 
 void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    auto position = BadgeLayoutProperty::GetBadgePosition();
+    json->Put("position", GetBadgePositionString(position).c_str());
+
     LayoutProperty::ToJsonValue(json);
     json->Put("count", std::to_string(GetBadgeCount().value_or(DEFAULT_COUNT)).c_str());
     json->Put("maxCount", std::to_string(GetBadgeMaxCount().value_or(DEFAULT_MAX_COUNT)).c_str());
-    auto position = BadgeLayoutProperty::GetBadgePosition();
-    json->Put("position", GetBadgePositionString(position).c_str());
     json->Put("value", GetBadgeValue().value_or("").c_str());
 
     auto jsonValue = JsonUtil::Create(true);

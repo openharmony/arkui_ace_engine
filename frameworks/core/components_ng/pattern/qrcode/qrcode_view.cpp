@@ -32,11 +32,18 @@ void QRCodeView::Create(const std::string& value)
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, Color::BLACK);
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, Color::WHITE);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::WHITE);
 }
 
 void QRCodeView::SetQRCodeColor(Color color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, color);
+}
+
+void QRCodeView::SetQRBackgroundColor(Color color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
 } // namespace OHOS::Ace::NG

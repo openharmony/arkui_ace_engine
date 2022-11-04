@@ -39,7 +39,7 @@ RefPtr<SwiperController> SwiperModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto swiperGroupNode = SwiperGroupNode::GetOrCreateGroupNode(
-        V2::STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+        V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
 
     RefPtr<FrameNode> swiperNode;
     if (swiperGroupNode->GetChildren().empty()) {
