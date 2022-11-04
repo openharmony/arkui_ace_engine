@@ -27,7 +27,6 @@ namespace OHOS::Ace {
 
 class PanRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PanRecognizer, MultiFingersRecognizer);
-
 public:
     PanRecognizer(
         const WeakPtr<PipelineBase>& context, int32_t fingers, const PanDirection& direction, double distance)
@@ -111,6 +110,8 @@ public:
     void OnRejected() override;
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
+
+    void SetDirection(const PanDirection& direction);
 
 private:
     enum class GestureAcceptResult {
