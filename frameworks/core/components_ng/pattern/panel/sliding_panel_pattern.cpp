@@ -496,12 +496,10 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     static const char* PANEL_MODE[] = { "PanelMode.Mini", "PanelMode.Half", "PanelMode.Full" };
     json->Put("mode", PANEL_MODE[static_cast<int32_t>(layoutProperty->GetPanelMode().value_or(PanelMode::HALF))]);
     json->Put("dragBar", layoutProperty->GetHasDragBar().value_or(true) ? "true" : "false");
-    json->Put(
-        "miniHeight", std::to_string(layoutProperty->GetMiniHeight().value_or(miniHeight_).ConvertToPx()).c_str());
-    json->Put(
-        "halfHeight", std::to_string(layoutProperty->GetHalfHeight().value_or(halfHeight_).ConvertToPx()).c_str());
-    json->Put(
-        "fullHeight", std::to_string(layoutProperty->GetFullHeight().value_or(fullHeight_).ConvertToPx()).c_str());
+    json->Put("show", layoutProperty->GetIsShow().value_or(true) ? "true" : "false");
+    json->Put("miniHeight", layoutProperty->GetMiniHeight().value_or(miniHeight_).ToString().c_str());
+    json->Put("halfHeight", layoutProperty->GetHalfHeight().value_or(halfHeight_).ToString().c_str());
+    json->Put("fullHeight", layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str());
 }
 
 } // namespace OHOS::Ace::NG
