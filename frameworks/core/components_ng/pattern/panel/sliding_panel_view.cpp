@@ -46,6 +46,7 @@ void SlidingPanelView::Create(bool isShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, PanelType::FOLDABLE_BAR); // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, true);                   // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, PanelMode::HALF);         // default value
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, true);
 
     auto type = isShow ? VisibleType::VISIBLE : VisibleType::GONE;
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, type);
@@ -112,6 +113,11 @@ void SlidingPanelView::SetHalfHeight(const Dimension& halfHeight)
 void SlidingPanelView::SetFullHeight(const Dimension& fullHeight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight);
+}
+
+void SlidingPanelView::SetIsShow(bool isShow)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 }
 
 // Set the color of the panel content area

@@ -471,6 +471,7 @@ void JSSlidingPanel::SetShow(bool isShow)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
+        NG::SlidingPanelView::SetIsShow(isShow);
         return;
     }
     auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();

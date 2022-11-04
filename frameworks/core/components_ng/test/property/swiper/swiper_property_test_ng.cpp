@@ -406,6 +406,8 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPropertyTest0016, TestSize.Level1)
     ViewAbstract::SetInspectorId(V2::SWIPER_ETS_TAG);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
-    EXPECT_EQ(frameNode->GetInspectorId().value_or(""), V2::SWIPER_ETS_TAG);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    EXPECT_FALSE(swiperNode == nullptr);
+    EXPECT_EQ(swiperNode->GetInspectorId().value_or(""), V2::SWIPER_ETS_TAG);
 }
 } // namespace OHOS::Ace::NG
