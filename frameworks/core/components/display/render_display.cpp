@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "core/accessibility/accessibility_node.h"
 #include "core/animation/curve_animation.h"
 #include "core/components/common/layout/constants.h"
 
@@ -259,6 +260,10 @@ void RenderDisplay::OnVisibleChange(VisibleType type)
             default:
                 break;
         }
+    }
+    auto accessibilityNode = GetAccessibilityNode().Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetVisible(GetVisible());
     }
 }
 
