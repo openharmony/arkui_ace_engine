@@ -35,8 +35,12 @@
 #include "core/components_ng/pattern/web/web_view.h"
 #include "core/pipeline/pipeline_base.h"
 
-#define MAX_NAME_SIZE 32
-#define MAX_CUSTOM_SCHEME_SIZE 10
+namespace {
+
+constexpr int32_t MAX_NAME_SIZE = 32;
+constexpr int32_t MAX_CUSTOM_SCHEME_SIZE = 10;
+
+}
 
 namespace OHOS::Ace::Framework {
 
