@@ -1132,6 +1132,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
             swiper->RestoreAutoPlay();
             swiper->FireItemChangedEvent(!needRestore);
             swiper->ResetCachedChildren();
+            swiper->ResetIndicatorPosition();
             swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
