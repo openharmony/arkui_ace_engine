@@ -522,7 +522,6 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
         if (!delegate) {
             return panda::JSValueRef::Undefined(vm);
         }
-
         delegate->FireCardAction(action);
     }
     return panda::JSValueRef::Undefined(vm);

@@ -27,6 +27,8 @@
 #include "form_js_info.h"
 #include "want.h"
 #include "want_params_wrapper.h"
+
+#include "core/components/form/resource/form_utils.h"
 #endif
 
 namespace OHOS::Ace {
@@ -73,6 +75,7 @@ public:
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
     void OnDeathReceived();
+    void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
 #endif
 
 private:
@@ -100,6 +103,7 @@ private:
     AAFwk::Want wantCache_;
     bool hasCreated_ = false;
     std::shared_ptr<FormCallbackClient> formCallbackClient_;
+    std::shared_ptr<FormUtils> formUtils_;
 #endif
 };
 
