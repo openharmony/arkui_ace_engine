@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 // PagePattern is the base class for page render node.
@@ -60,15 +61,20 @@ public:
     {
         auto property = GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(property);
-        static const char* FLEXALIGN[] = { "FlexAlign.AUTO", "FlexAlign.FLEX_START", "FlexAlign.CENTER",
-            "FlexAlign.FLEX_END", "FlexAlign.STRETCH", "FlexAlign.BASELINE", "FlexAlign.SPACE_BETWEEN",
-            "FlexAlign.SPACE_AROUND", "FlexAlign.SPACE_EVENLY", "FlexAlign.SPACE_CUSTOMIZATION" };
-
+        static const char* HORIZONTALALIGN[] = { "HorizontalAlign.Start", "HorizontalAlign.Center",
+            "HorizontalAlign.End" };
+        static const char* VERTICALALIGN[] = { "VerticalAlign.Top", "VerticalAlign.Center", "VerticalAlign.Bottom" };
         json->Put("space", property->GetSpace().value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("alignItems",
-            FLEXALIGN[static_cast<int32_t>(property->GetCrossAxisAlign().value_or(FlexAlign::FLEX_START))]);
-        json->Put("justifyContent",
-            FLEXALIGN[static_cast<int32_t>(property->GetMainAxisAlign().value_or(FlexAlign::FLEX_START))]);
+        if (isVertical_) {
+            json->Put("alignItems",
+                HORIZONTALALIGN[static_cast<int32_t>(property->GetCrossAxisAlign().value_or(FlexAlign::FLEX_START))]);
+        } else {
+            json->Put("alignItems",
+                VERTICALALIGN[static_cast<int32_t>(property->GetCrossAxisAlign().value_or(FlexAlign::FLEX_START))]);
+        }
+        std::string result = "";
+        result = V2::ConvertFlexAlignToStirng(property->GetMainAxisAlign().value_or(FlexAlign::FLEX_START));
+        json->Put("justifyContent", result.c_str());
     }
 
 private:
