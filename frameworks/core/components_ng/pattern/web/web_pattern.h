@@ -72,6 +72,12 @@ public:
 
     ~WebPattern() override = default;
 
+    enum class VkState {
+        VK_NONE,
+        VK_SHOW,
+        VK_HIDE
+    };
+
     std::optional<std::string> GetSurfaceNodeName() const override
     {
         return "RosenWeb";
@@ -192,6 +198,9 @@ public:
     void UpdateLocale();
 
 private:
+    void RegistVirtualKeyBoardListener();
+    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
+    void UpdateWebLayoutSize();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
@@ -280,6 +289,11 @@ private:
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
     bool needOnFocus_ = false;
+    Size drawSize_;
+    Size drawSizeCache_;
+    bool needUpdateWeb_ = true;
+    bool isFocus_ = false;
+    VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
 
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
