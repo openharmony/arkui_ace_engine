@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
+#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_position_controller.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -103,12 +105,17 @@ public:
 
     void OnMouseSelectAll();
 
+    bool UpdateScrollPosition(float offset, int32_t source);
+
+    void SetPositionController(const RefPtr<ScrollController>& controller);
+
+    void ScrollPage(bool reverse);
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     float GetMainContentSize() const;
     void AddScrollEvent();
-    bool UpdateScrollPosition(float offset, int32_t source);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -123,6 +130,7 @@ private:
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<GridPositionController> positionController_;
 
     bool multiSelectable_ = false;
     bool supportAnimation_ = false;

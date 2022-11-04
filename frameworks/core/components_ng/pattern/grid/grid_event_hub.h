@@ -72,7 +72,8 @@ public:
     void FireOnScrollToIndex(int32_t param) const
     {
         if (onScrollToIndex_) {
-            onScrollToIndex_(std::make_shared<V2::GridEventInfo>(param).get());
+            V2::GridEventInfo info(param);
+            onScrollToIndex_(&info);
         }
     }
 
