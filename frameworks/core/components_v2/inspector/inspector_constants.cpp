@@ -369,7 +369,7 @@ ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
 ACE_EXPORT extern const char GRID_ROW_ETS_TAG[] = "GridRowComponent";
 
 // relativeContainer
-ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainer";
+ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainerComponent";
 ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
 
 // menu

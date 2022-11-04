@@ -65,6 +65,7 @@
 #include "core/components_v2/inspector/radio_composed_element.h"
 #include "core/components_v2/inspector/rating_composed_element.h"
 #include "core/components_v2/inspector/refresh_composed_element.h"
+#include "core/components_v2/inspector/relative_container_composed_element.h"
 #include "core/components_v2/inspector/row_composed_element.h"
 #include "core/components_v2/inspector/row_split_composed_element.h"
 #include "core/components_v2/inspector/scroll_bar_composed_element.h"
@@ -245,6 +246,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationMenusComposedElement>(id); } },
     { JS_VIEW_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { RELATIVE_CONTAINER_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::RelativeContainerComposedElement>(id); } },
 };
 
 } // namespace
@@ -334,6 +337,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { RICH_TEXT_COMPONENT_TAG, RICH_TEXT_ETS_TAG },
     { XCOMPONENT_TAG, XCOMPONENT_ETS_TAG },
     { JS_VIEW_COMPONENT_TAG, JS_VIEW_ETS_TAG },
+    { RELATIVE_CONTAINER_COMPONENT_TAG, RELATIVE_CONTAINER_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;
