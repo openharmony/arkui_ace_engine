@@ -36,7 +36,7 @@ public:
     ~TapGesture() override = default;
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer() override;
+    RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
 private:
     int32_t count_ = 1;

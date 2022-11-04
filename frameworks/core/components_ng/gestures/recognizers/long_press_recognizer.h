@@ -63,7 +63,7 @@ private:
     void HandleTouchUpEvent(const TouchEvent& event) override;
     void HandleTouchMoveEvent(const TouchEvent& event) override;
     void HandleTouchCancelEvent(const TouchEvent& event) override;
-    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
+    bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     void HandleOverdueDeadline(bool isCatchMode);
     void DeadlineTimer(int32_t time, bool isCatchMode);
     void DoRepeat();

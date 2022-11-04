@@ -299,12 +299,12 @@ public:
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        std::list<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult);
+        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult);
 
     void UpdateGestureHierarchy();
 
     // old path.
-    void UpdateExternalGestureRecognizer();
+    void UpdateExternalNGGestureRecognizer();
 
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
 
@@ -324,7 +324,7 @@ private:
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
-    std::list<RefPtr<GestureRecognizer>> gestureHierarchy_;
+    std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
 
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;

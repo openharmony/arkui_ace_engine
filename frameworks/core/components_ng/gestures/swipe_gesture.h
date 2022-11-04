@@ -37,7 +37,7 @@ public:
     ~SwipeGesture() override = default;
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer() override;
+    RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
 private:
     SwipeDirection direction_;

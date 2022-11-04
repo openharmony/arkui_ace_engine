@@ -96,7 +96,7 @@ void SequencedRecognizer::OnPending()
 
 void SequencedRecognizer::OnBlocked()
 {
-    RefPtr<GestureRecognizer> activeRecognizer;
+    RefPtr<NGGestureRecognizer> activeRecognizer;
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
     if (iter != recognizers_.end()) {
@@ -121,7 +121,7 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
-    RefPtr<GestureRecognizer> curRecognizer = *iter;
+    RefPtr<NGGestureRecognizer> curRecognizer = *iter;
     LOGD("%{public}p dispatch to the %{public}d gesture recognizer, event type is %{public}d", this, currentIndex_,
         static_cast<int32_t>(point.type));
     if (!curRecognizer) {
@@ -162,7 +162,7 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
-void SequencedRecognizer::BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+void SequencedRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     if (disposal == GestureDisposal::ACCEPT) {
         if (recognizer->GetRefereeState() == RefereeState::SUCCEED) {
@@ -248,7 +248,7 @@ void SequencedRecognizer::HandleOverdueDeadline()
     }
 }
 
-bool SequencedRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+bool SequencedRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<SequencedRecognizer> curr = AceType::DynamicCast<SequencedRecognizer>(recognizer);
     if (!curr) {

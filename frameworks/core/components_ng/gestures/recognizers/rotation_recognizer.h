@@ -40,7 +40,7 @@ private:
     void HandleTouchMoveEvent(const TouchEvent& event) override;
     void HandleTouchCancelEvent(const TouchEvent& event) override;
 
-    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
+    bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     double ComputeAngle();
     void OnResetStatus() override;
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);

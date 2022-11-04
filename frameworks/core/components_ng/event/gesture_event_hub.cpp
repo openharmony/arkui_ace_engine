@@ -61,9 +61,9 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         dragEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets);
     }
 
-    std::list<RefPtr<GestureRecognizer>> longPressRecognizers;
+    std::list<RefPtr<NGGestureRecognizer>> longPressRecognizers;
     for (const auto& item : dragTargets) {
-        longPressRecognizers.emplace_back(AceType::DynamicCast<GestureRecognizer>(item));
+        longPressRecognizers.emplace_back(AceType::DynamicCast<NGGestureRecognizer>(item));
     }
     if (!longPressRecognizers.empty()) {
         // this node has long press and drag event, combine into parallelRecognizer.
@@ -77,9 +77,9 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         nodeParallelRecognizer_.Reset();
     }
 
-    std::list<RefPtr<GestureRecognizer>> innerRecognizers;
+    std::list<RefPtr<NGGestureRecognizer>> innerRecognizers;
     for (auto const& eventTarget : innerTargets) {
-        auto recognizer = AceType::DynamicCast<GestureRecognizer>(eventTarget);
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(eventTarget);
         if (recognizer) {
             innerRecognizers.push_back(std::move(recognizer));
         } else {
@@ -93,7 +93,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
 }
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    std::list<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult)
+    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult)
 {
     auto host = GetFrameNode();
     if (!host) {
@@ -105,7 +105,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     }
 
     auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
-    RefPtr<GestureRecognizer> current;
+    RefPtr<NGGestureRecognizer> current;
 
     // Pack inner recognizer include self inner recognizer and children.
     if (innerRecognizers.size() == 1) {
@@ -140,7 +140,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             continue;
         }
         auto priority = recognizer->GetPriority();
-        std::list<RefPtr<GestureRecognizer>> recognizers { 1, recognizer };
+        std::list<RefPtr<NGGestureRecognizer>> recognizers { 1, recognizer };
         if (priority == GesturePriority::Parallel) {
             if (current) {
                 recognizers.push_front(current);
@@ -244,11 +244,11 @@ void GestureEventHub::CombineIntoExclusiveRecognizer(
     const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result)
 {
     TouchTestResult finalResult;
-    std::list<RefPtr<GestureRecognizer>> recognizers;
+    std::list<RefPtr<NGGestureRecognizer>> recognizers;
     const auto coordinateOffset = globalPoint - localPoint;
     auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
     for (auto const& eventTarget : result) {
-        auto recognizer = AceType::DynamicCast<GestureRecognizer>(eventTarget);
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(eventTarget);
         if (recognizer) {
             recognizers.push_back(std::move(recognizer));
         } else {
@@ -256,7 +256,7 @@ void GestureEventHub::CombineIntoExclusiveRecognizer(
         }
     }
 
-    RefPtr<GestureRecognizer> current;
+    RefPtr<NGGestureRecognizer> current;
     if (recognizers.size() == 1) {
         current = *recognizers.begin();
     } else if (recognizers.size() > 1) {

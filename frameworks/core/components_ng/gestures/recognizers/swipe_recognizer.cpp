@@ -264,7 +264,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     }
 }
 
-bool SwipeRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+bool SwipeRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<SwipeRecognizer> curr = AceType::DynamicCast<SwipeRecognizer>(recognizer);
     if (!curr) {

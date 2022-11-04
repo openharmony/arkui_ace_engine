@@ -29,7 +29,7 @@ class ACE_EXPORT SequencedRecognizer : public RecognizerGroup {
     DECLARE_ACE_TYPE(SequencedRecognizer, RecognizerGroup);
 
 public:
-    explicit SequencedRecognizer(const std::vector<RefPtr<GestureRecognizer>>& recognizers)
+    explicit SequencedRecognizer(const std::vector<RefPtr<NGGestureRecognizer>>& recognizers)
         : RecognizerGroup(recognizers)
     {}
     ~SequencedRecognizer() override = default;
@@ -47,9 +47,9 @@ private:
     void HandleTouchMoveEvent(const TouchEvent& event) override {};
     void HandleTouchCancelEvent(const TouchEvent& event) override {};
 
-    void BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal) override;
+    void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) override;
 
-    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
+    bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     void OnResetStatus() override;
     void DeadlineTimer();
     void HandleOverdueDeadline();

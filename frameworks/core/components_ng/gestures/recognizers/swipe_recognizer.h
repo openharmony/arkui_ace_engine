@@ -47,7 +47,7 @@ private:
     void HandleTouchUpEvent(const AxisEvent& event) override;
     void HandleTouchMoveEvent(const AxisEvent& event) override;
     void HandleTouchCancelEvent(const AxisEvent& event) override;
-    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
+    bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
 
     void OnResetStatus() override;
 

@@ -30,11 +30,11 @@ class ACE_EXPORT ParallelRecognizer : public RecognizerGroup {
     DECLARE_ACE_TYPE(ParallelRecognizer, RecognizerGroup);
 
 public:
-    explicit ParallelRecognizer(const std::vector<RefPtr<GestureRecognizer>>& recognizers)
+    explicit ParallelRecognizer(const std::vector<RefPtr<NGGestureRecognizer>>& recognizers)
         : RecognizerGroup(recognizers)
     {}
 
-    explicit ParallelRecognizer(std::list<RefPtr<GestureRecognizer>>&& recognizers)
+    explicit ParallelRecognizer(std::list<RefPtr<NGGestureRecognizer>>&& recognizers)
         : RecognizerGroup(std::move(recognizers))
     {}
 
@@ -53,9 +53,9 @@ private:
     void HandleTouchMoveEvent(const TouchEvent& event) override {};
     void HandleTouchCancelEvent(const TouchEvent& event) override {};
 
-    void BatchAdjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal) override;
+    void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) override;
 
-    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
+    bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
 
     void OnResetStatus() override
     {
@@ -63,7 +63,7 @@ private:
         currentBatchRecognizer_.Reset();
     }
 
-    RefPtr<GestureRecognizer> currentBatchRecognizer_;
+    RefPtr<NGGestureRecognizer> currentBatchRecognizer_;
 };
 
 } // namespace OHOS::Ace::NG
