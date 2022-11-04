@@ -34,7 +34,6 @@ void LayoutInspector::SupportInspector()
         return;
     }
     if (!container->GetIdeDebuggerConnected()) {
-        LOGE("container:GetIdeDebuggerConnected:false");
         return;
     }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
