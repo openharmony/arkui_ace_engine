@@ -226,7 +226,7 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
         }
         // 3. maxLanes >= minLanes > 1 ---> minLaneLength_ <= maxLaneLength < maxCrossSize
         if (GreatOrEqual(maxLanes, minLanes) && GreatNotEqual(minLanes, 1)) {
-            lanes_ = std::floor(maxLanes);
+            lanes = std::floor(maxLanes);
             break;
         }
         lanes = 1;
