@@ -396,12 +396,13 @@ void SubwindowOhos::GetToastDialogWindowProperty(
         posX, posY, width, height, density);
 }
 
-bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY)
+bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast)
 {
     OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
     windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     windowOption->SetWindowRect({ posX, posY, width, height });
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+    windowOption->SetFocusable(!isToast);
     int32_t dialogId = gToastDialogId.fetch_add(1, std::memory_order_relaxed);
     std::string windowName = "ARK_APP_SUBWINDOW_TOAST_DIALOG_" + std::to_string(dialogId);
     dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
@@ -506,8 +507,8 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
         auto childContainerId = subwindowOhos->GetChildContainerId();
         auto window = Platform::DialogContainer::GetUIWindow(childContainerId);
         auto dialogWindow = subwindowOhos->GetDialogWindow();
-        if (!dialogWindow || !window) {
-            bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY);
+        if (!dialogWindow || !window || !subwindowOhos->IsToastWindow()) {
+            bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY, true);
             if (!ret) {
                 return;
             }
@@ -515,6 +516,7 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
             if (!ret) {
                 return;
             }
+            subwindowOhos->SetIsToastWindow(true);
         }
         childContainerId = subwindowOhos->GetChildContainerId();
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
@@ -562,6 +564,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
         Platform::DialogContainer::ShowDialog(childContainerId, title, message, buttons, autoCancel,
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
     };
+    isToastWindow_ = false;
     if (!handler_->PostTask(showDialogCallback)) {
         LOGE("Post sync task error");
         return;
@@ -602,6 +605,7 @@ void SubwindowOhos::ShowActionMenu(const std::string& title,
         Platform::DialogContainer::ShowActionMenu(childContainerId, title, button,
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)));
     };
+    isToastWindow_ = false;
     if (!handler_->PostTask(showDialogCallback)) {
         LOGE("Post sync task error");
         return;
