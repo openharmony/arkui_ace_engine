@@ -67,7 +67,7 @@ void SelectPattern::RegisterOnClick()
         CHECK_NULL_VOID(context);
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        auto offset = NG::OffsetF(info.GetOffsetX(), info.GetOffsetY());
+        auto offset = OffsetF(info.GetOffsetX(), info.GetOffsetY());
         overlayManager->ShowMenu(id, offset, menu);
         // menuNode already registered, nullify
         menu.Reset();
@@ -373,6 +373,11 @@ void SelectPattern::SetSelectedOptionFontColor(const Color& color)
         CHECK_NULL_VOID(pattern);
         pattern->SetFontColor(color);
     }
+}
+
+const std::vector<RefPtr<FrameNode>>& SelectPattern::GetOptions()
+{
+    return options_;
 }
 
 // update selected option props

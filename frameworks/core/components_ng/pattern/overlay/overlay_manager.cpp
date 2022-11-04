@@ -152,7 +152,6 @@ void OverlayManager::ShowMenu(
     auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateMenuOffset(offset);
-    // menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);

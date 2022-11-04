@@ -81,6 +81,9 @@ public:
     void SetSelectedOptionFontFamily(const std::vector<std::string>& value);
     void SetSelectedOptionFontColor(const Color& color);
 
+    // Get functions for unit tests
+    const std::vector<RefPtr<FrameNode>>& GetOptions();
+
 private:
     void OnModifyDone() override;
 
