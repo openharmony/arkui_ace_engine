@@ -41,6 +41,7 @@
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/form_utils_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
@@ -53,6 +54,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/form_manager.h"
 #include "core/common/plugin_manager.h"
 
 namespace OHOS::Ace {
@@ -405,7 +407,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info;
-
     if (abilityContext) {
         info = abilityContext->GetAbilityInfo();
     } else {
@@ -557,6 +558,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     } else {
         instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
     }
+    auto formUtils = std::make_shared<FormUtilsImpl>();
+    FormManager::GetInstance().SetFormUtils(formUtils);
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
         context_, info, std::make_unique<ContentEventCallback>([context = context_] {
             auto sharedContext = context.lock();
@@ -589,7 +592,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
     container->SetWindowName(window_->GetWindowName());
     container->SetWindowId(window_->GetWindowId());
-
+    auto token = context->GetToken();
+    container->SetToken(token);
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
