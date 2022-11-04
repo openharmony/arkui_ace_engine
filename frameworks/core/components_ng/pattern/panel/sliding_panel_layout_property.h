@@ -44,6 +44,7 @@ public:
         value->propMiniHeight_ = CloneMiniHeight();
         value->propHalfHeight_ = CloneHalfHeight();
         value->propFullHeight_ = CloneFullHeight();
+        value->propIsShow_ = CloneIsShow();
         return value;
     }
 
@@ -56,6 +57,7 @@ public:
         ResetMiniHeight();
         ResetHalfHeight();
         ResetFullHeight();
+        ResetIsShow();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PanelType, PanelType, PROPERTY_UPDATE_MEASURE);
@@ -64,6 +66,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MiniHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HalfHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FullHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShow, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelLayoutProperty);
