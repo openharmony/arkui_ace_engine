@@ -19,9 +19,7 @@
 
 namespace OHOS::Ace::Framework {
 
-JSCanvasGradient::JSCanvasGradient()
-{
-}
+JSCanvasGradient::JSCanvasGradient() : isColorStopValid_(true) {}
 
 void JSCanvasGradient::Constructor(const JSCallbackInfo& args)
 {
@@ -49,15 +47,35 @@ void JSCanvasGradient::JSBind(BindingTarget globalObj)
 
 void JSCanvasGradient::addColorStop(const JSCallbackInfo& info)
 {
-    if (info[0]->IsNumber() && info[1]->IsString()) {
-        std::string jsColor = "";
+    if (!isColorStopValid_ && gradient_->GetColors().empty()) {
+        isColorStopValid_ = true;
+    }
+    if (isColorStopValid_ && info[0]->IsNumber() && info[1]->IsString()) {
         double offset = 0.0;
-        GradientColor color;
         JSViewAbstract::ParseJsDouble(info[0], offset);
+        if (offset < 0 || offset > 1) {
+            LOGE("offset not valid!");
+            isColorStopValid_ = false;
+            // if the offset is invalid, fill the shape with transparent
+            gradient_->ClearColors();
+            GradientColor color;
+            color.SetColor(Color::TRANSPARENT);
+            color.SetDimension(0.0);
+            gradient_->AddColor(color);
+            gradient_->AddColor(color);
+            return;
+        }
+        std::string jsColor;
+        GradientColor color;
         JSViewAbstract::ParseJsString(info[1], jsColor);
         color.SetColor(Color::FromString(jsColor));
         color.SetDimension(offset);
         if (gradient_) {
+            gradient_->AddColor(color);
+        }
+        auto colorSize = gradient_->GetColors().size();
+        // prevent setting only one colorStop
+        if (colorSize == 1) {
             gradient_->AddColor(color);
         }
     }
