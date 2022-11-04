@@ -495,7 +495,7 @@ void RenderSlider::HandleDragStart(const Offset& startPoint)
         }
         UpdateAnimation();
         controller_->Play();
-        isDraging_ = true;
+        isDragging_ = true;
         FireMovingEvent(SliderEvent::MOVE_START);
     }
 }
@@ -514,8 +514,8 @@ void RenderSlider::HandleDragUpdate(const Offset& updatePoint)
 
 void RenderSlider::HandleDragEnd()
 {
-    if (isDraging_) {
-        isDraging_ = false;
+    if (isDragging_) {
+        isDragging_ = false;
     }
     if (tip_) {
         tip_->SetVisible(false);
