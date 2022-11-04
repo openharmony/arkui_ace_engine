@@ -645,7 +645,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
             return;
         }
         isLayoutDirtyMarked_ = true;
-        if (!isMeasureBoundary && CheckNeedRequestParentMeasure(layoutFlag)) {
+        if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
             auto parent = GetAncestorNodeOfFrame();
             if (parent) {
                 parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -659,6 +659,20 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     }
     layoutProperty_->CleanDirty();
     MarkNeedRender(isRenderBoundary);
+}
+
+bool FrameNode::IsNeedRequestParentMeasure() const
+{
+    auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
+    if (layoutFlag == PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+        const auto& calcLayoutConstraint = layoutProperty_->GetCalcLayoutConstraint();
+        if (calcLayoutConstraint && calcLayoutConstraint->selfIdealSize &&
+            calcLayoutConstraint->selfIdealSize->IsValid()) {
+            LOGD("make self measure boundary");
+            return false;
+        }
+    }
+    return CheckNeedRequestParentMeasure(layoutFlag);
 }
 
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
