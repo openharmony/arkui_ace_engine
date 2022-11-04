@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,17 @@
  * limitations under the License.
  */
 
-#include "res_fuzzer.h"
-#include "json_util.h"
-#include <string>
+#include "util_fuzzer.h"
+
+#include <stddef.h>
+#include <stdint.h>
+
 
 namespace OHOS {
-    using namespace OHOS::Ace;
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
         bool result = false;
-        auto r = JsonUtil::Create(true);
-        auto r1 = JsonUtil::Create(false);
-        std::string s= (char*)data;
-        JsonUtil::ParseJsonString(s);
-        JsonUtil::ParseJsonString(s.c_str());
-        JsonUtil::CreateArray(true);
-        JsonUtil::CreateArray(false);
-        r->Put("123",111); 
-        r->Replace("1234", false);
-        r->Replace("123", 123);
+
         return result;
     }
 }
