@@ -124,8 +124,12 @@ void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width,
 RefPtr<DragWindow> DragWindow::CreateDragWindow(
     const std::string& windowName, int32_t x, int32_t y, uint32_t width, uint32_t height)
 {
+    int32_t halfWidth = static_cast<int32_t>(width) / 2;
+    int32_t halfHeight = static_cast<int32_t>(height) / 2;
+
     OHOS::sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
-    option->SetWindowRect({ x - static_cast<int32_t>(width) / 2, y - static_cast<int32_t>(height) / 2, width, height });
+    option->SetWindowRect({ x - halfWidth, y - halfHeight, width, height });
+    option->SetHitOffset(halfWidth, halfHeight);
     option->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_DRAGGING_EFFECT);
     option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
     option->SetFocusable(false);
