@@ -21,6 +21,7 @@ group("fuzztest") {
       "imageloader_fuzzer:ImageLoaderFuzzTest",
       "uiservice_fuzzer:UiServiceFuzzTest",
       "res_fuzzer:ResFuzzTest",
+      "util_fuzzer:UtilFuzzTest",
     ]
   }
 }

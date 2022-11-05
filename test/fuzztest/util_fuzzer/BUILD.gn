@@ -14,8 +14,10 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
-
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+module_output_path = "arkui/util"
 ##############################fuzztest##########################################
+import("//foundation/arkui/ace_engine/ace_config.gni")
 ohos_fuzztest("UtilFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file =
@@ -27,8 +29,9 @@ ohos_fuzztest("UtilFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "Util_fuzzer.cpp",
+  sources = [ "util_fuzzer.cpp",
               "$ace_root/frameworks/base/json/json_util.cpp",
+              "$ace_root/frameworks/base/utils/resource_configuration.cpp",
               "//third_party/cJSON/cJSON.c",
    ]
   include_dirs = [
