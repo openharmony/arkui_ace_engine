@@ -64,6 +64,8 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
         if (toggleType == ToggleType::CHECKBOX) {
             stack->Push(childFrameNode);
+            CheckBoxModelNG checkBoxModelNG;
+            checkBoxModelNG.SetSelect(isOn);
             return;
         }
         if (toggleType == ToggleType::SWITCH) {
@@ -85,6 +87,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         if (toggleType == ToggleType::SWITCH) {
+            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             stack->Push(childFrameNode);
             return;
         }
@@ -108,6 +111,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
     if (AceType::InstanceOf<ToggleButtonPattern>(pattern)) {
         if (toggleType == ToggleType::BUTTON) {
+            ToggleButtonModelNG::SetIsOn(isOn);
             stack->Push(childFrameNode);
             return;
         }
