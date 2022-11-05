@@ -759,6 +759,14 @@ void PipelineContext::Destroy()
     rootNode_.Reset();
     stageManager_.Reset();
     overlayManager_.Reset();
+    sharedTransitionManager_.Reset();
+    dragDropManager_.Reset();
+    selectOverlayManager_.Reset();
+    fullScreenManager_.Reset();
+    drawDelegate_.reset();
+    touchEvents_.clear();
+    buildFinishCallbacks_.clear();
+    ElementRegister::GetInstance()->ClearInstance();
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)

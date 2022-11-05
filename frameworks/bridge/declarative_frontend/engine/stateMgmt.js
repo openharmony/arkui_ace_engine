@@ -2941,6 +2941,11 @@ class ViewPU extends NativeViewPartialUpdate {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        let removedElmtIds = [];
+        this.updateFuncByElmtId.forEach((value, key) => {
+            removedElmtIds.push(key);
+        });
+        this.deletedElmtIdsSilently(removedElmtIds);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();

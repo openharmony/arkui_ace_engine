@@ -227,7 +227,6 @@ void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeI
 
 int32_t ToggleModelNG::RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId)
 {
-    ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
     auto parentFrame = childFrameNode->GetParent();
     CHECK_NULL_RETURN(parentFrame, 0);
     childFrameNode->SetRemoveSilently(true);

@@ -72,7 +72,7 @@ struct SpanItem : public Referenced {
     GestureEventFunc onClick;
     std::list<RefPtr<SpanItem>> children;
 
-    void UpdateParagraph(RSParagraphBuilder* builder);
+    void UpdateParagraph(const RefPtr<Paragraph>& builder);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };

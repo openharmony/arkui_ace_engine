@@ -33,6 +33,8 @@ UINode::~UINode()
 {
     if (!removeSilently_) {
         ElementRegister::GetInstance()->RemoveItem(nodeId_);
+    } else {
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
     if (!onMainTree_) {
         return;
