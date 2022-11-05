@@ -1014,9 +1014,7 @@ void RenderGridScroll::ClearItems()
 {
     decltype(items_) items(std::move(items_));
     for (const auto& item : items) {
-        if (item.first < startRankItemIndex_) {
-            deleteChildByIndex_(item.first);
-        }
+        deleteChildByIndex_(item.first);
         RemoveChildByIndex(item.first);
     }
     loadingIndex_ = -1;
