@@ -47,38 +47,31 @@ void OverlayManager::ShowToast(
     CHECK_NULL_VOID(rootNode);
 
     // only one toast
-    if (toastInfo_.toastNode) {
-        rootNode->RemoveChild(toastInfo_.toastNode);
+    if (!toast_.Invalid()) {
+        rootNode->RemoveChild(toast_.Upgrade());
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 
     auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
     CHECK_NULL_VOID(toastNode);
-    auto toastId = toastNode->GetId();
-    ToastInfo info = { toastId, toastNode };
-    toastInfo_ = info;
 
     // mount to parent
     toastNode->MountToParent(rootNode);
-    toastNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    toast_ = toastNode;
 
     context->GetTaskExecutor()->PostDelayedTask(
-        [weak = WeakClaim(this), toastId] {
-            LOGI("begin pop toast, id is %{public}d", toastId);
+        [weak = WeakClaim(this)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->PopToast(toastId);
+            overlayManager->PopToast();
         },
         TaskExecutor::TaskType::UI, duration);
 }
 
-void OverlayManager::PopToast(int32_t toastId)
+void OverlayManager::PopToast()
 {
-    RefPtr<UINode> toastUnderPop;
-    if (toastId != toastInfo_.toastId) {
-        return;
-    }
-    toastUnderPop = toastInfo_.toastNode;
+    auto toastUnderPop = toast_.Upgrade();
     if (!toastUnderPop) {
         LOGE("No toast under pop");
         return;
@@ -88,7 +81,7 @@ void OverlayManager::PopToast(int32_t toastId)
         LOGE("No root node in OverlayManager");
         return;
     }
-    LOGI("begin to pop toast, id is %{public}d", toastId);
+    LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
     rootNode->RemoveChild(toastUnderPop);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
