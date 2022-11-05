@@ -101,7 +101,6 @@ public:
     bool OnRestoreData(const std::string& data) override;
     void OnRemoteTerminated() override;
     void OnNewRequest(const std::string& data) override;
-    void OnDialogUpdated(const std::string& data) override {}
     void OnMemoryLevel(const int32_t level) override;
     void SetColorMode(ColorMode colorMode) override;
     void CallRouterBack() override;

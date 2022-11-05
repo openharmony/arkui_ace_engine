@@ -704,13 +704,6 @@ void JsFrontend::OnNewRequest(const std::string& data)
     }
 }
 
-void JsFrontend::OnDialogUpdated(const std::string& data)
-{
-    if (delegate_) {
-        delegate_->OnDialogUpdated(data);
-    }
-}
-
 void JsFrontend::CallRouterBack()
 {
     if (delegate_) {

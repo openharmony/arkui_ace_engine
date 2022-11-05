@@ -294,28 +294,26 @@ void AceContainer::OnShow(int32_t instanceId)
     }
 
     ContainerScope scope(instanceId);
-    auto front = container->GetFrontend();
-
-    // When it is subContainer, no need call the OnShow, because the frontend is the same the parent container.
-    if (front && !container->IsSubContainer()) {
-        front->UpdateState(Frontend::State::ON_SHOW);
-        front->OnShow();
-    }
-    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
-    container->GetCardFrontendMap(cardFrontendMap);
-    for (const auto& [_, weakCardFront] : cardFrontendMap) {
-        auto cardFront = weakCardFront.Upgrade();
-        if (!cardFront) {
-            LOGE("cardFront is null");
-            continue;
-        }
-        cardFront->OnShow();
-    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
     taskExecutor->PostTask(
         [container]() {
+            // When it is subContainer, no need call the OnShow,
+            auto front = container->GetFrontend();
+            if (front && !container->IsSubContainer()) {
+                front->UpdateState(Frontend::State::ON_SHOW);
+                front->OnShow();
+            }
+            std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
+            container->GetCardFrontendMap(cardFrontendMap);
+            for (const auto& [_, weakCardFront] : cardFrontendMap) {
+                auto cardFront = weakCardFront.Upgrade();
+                if (!cardFront) {
+                    LOGE("cardFront is null");
+                    continue;
+                }
+                cardFront->OnShow();
+            }
             auto pipelineBase = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineBase);
             pipelineBase->OnShow();
@@ -337,32 +335,6 @@ void AceContainer::OnHide(int32_t instanceId)
         return;
     }
     ContainerScope scope(instanceId);
-    auto front = container->GetFrontend();
-
-    // When it is subContainer, no need call the OnHide, because the frontend is the same the parent container.
-    if (front && !container->IsSubContainer()) {
-        front->UpdateState(Frontend::State::ON_HIDE);
-        front->OnHide();
-        auto taskExecutor = container->GetTaskExecutor();
-        if (taskExecutor) {
-            taskExecutor->PostTask([front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
-        }
-    }
-    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
-    container->GetCardFrontendMap(cardFrontendMap);
-    for (const auto& [_, weakCardFront] : cardFrontendMap) {
-        auto cardFront = weakCardFront.Upgrade();
-        if (!cardFront) {
-            LOGE("cardFront is null");
-            continue;
-        }
-        cardFront->OnHide();
-        auto taskExecutor = container->GetTaskExecutor();
-        if (taskExecutor) {
-            taskExecutor->PostTask(
-                [cardFront]() { cardFront->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
-        }
-    }
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("taskExecutor is null, OnHide failed.");
@@ -370,6 +342,31 @@ void AceContainer::OnHide(int32_t instanceId)
     }
     taskExecutor->PostTask(
         [container]() {
+            auto front = container->GetFrontend();
+            auto taskExecutor = container->GetTaskExecutor();
+            if (front && !container->IsSubContainer()) {
+                front->UpdateState(Frontend::State::ON_HIDE);
+                front->OnHide();
+                if (taskExecutor) {
+                    taskExecutor->PostTask(
+                        [front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
+                }
+            }
+
+            std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
+            container->GetCardFrontendMap(cardFrontendMap);
+            for (const auto& [_, weakCardFront] : cardFrontendMap) {
+                auto cardFront = weakCardFront.Upgrade();
+                if (!cardFront) {
+                    LOGE("cardFront is null");
+                    continue;
+                }
+                cardFront->OnHide();
+                if (taskExecutor) {
+                    taskExecutor->PostTask(
+                        [cardFront]() { cardFront->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
+                }
+            }
             auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("pipeline context is null, OnHide failed.");
@@ -387,23 +384,19 @@ void AceContainer::OnActive(int32_t instanceId)
         LOGE("container is null, OnActive failed.");
         return;
     }
-
     ContainerScope scope(instanceId);
-    auto front = container->GetFrontend();
-
-    // When it is subContainer, no need call the OnActive, because the frontend is the same the parent container.
-    if (front && !container->IsSubContainer()) {
-        front->OnActive();
-    }
-
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("taskExecutor is null, OnActive failed.");
         return;
     }
-
     taskExecutor->PostTask(
         [container]() {
+            // When it is subContainer, no need call the OnActive.
+            auto front = container->GetFrontend();
+            if (front && !container->IsSubContainer()) {
+                front->OnActive();
+            }
             auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("pipeline context is null, OnActive failed.");
@@ -422,13 +415,6 @@ void AceContainer::OnInactive(int32_t instanceId)
         return;
     }
     ContainerScope scope(instanceId);
-    auto front = container->GetFrontend();
-
-    // When it is subContainer, no need call the OnInactive, because the frontend is the same the parent container.
-    if (front && !container->IsSubContainer()) {
-        front->OnInactive();
-    }
-
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("taskExecutor is null, OnInactive failed.");
@@ -437,6 +423,12 @@ void AceContainer::OnInactive(int32_t instanceId)
 
     taskExecutor->PostTask(
         [container]() {
+            // When it is subContainer, no need call the OnInactive.
+            auto front = container->GetFrontend();
+            if (front && !container->IsSubContainer()) {
+                front->OnInactive();
+            }
+
             auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("pipeline context is null, OnInactive failed.");
@@ -580,20 +572,6 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
     auto front = container->GetFrontend();
     if (front) {
         front->OnNewRequest(data);
-    }
-}
-
-void AceContainer::OnDialogUpdated(int32_t instanceId, const std::string& data)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        return;
-    }
-
-    ContainerScope scope(instanceId);
-    auto front = container->GetFrontend();
-    if (front) {
-        front->OnDialogUpdated(data);
     }
 }
 
@@ -757,18 +735,19 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
         taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
     }
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
-    if (taskExecutor) {
-        taskExecutor->PostTask(
-            [instanceId, destroyCallback] {
-                LOGI("Remove on Platform thread...");
-                EngineHelper::RemoveEngine(instanceId);
-                AceEngine::Get().RemoveContainer(instanceId);
-                ConnectServerManager::Get().RemoveInstance(instanceId);
-                if (destroyCallback) {
-                    destroyCallback();
-                }
-            },
-            TaskExecutor::TaskType::PLATFORM);
+    auto removeContainerTask = [instanceId, destroyCallback] {
+        LOGI("Remove on Platform thread...");
+        EngineHelper::RemoveEngine(instanceId);
+        AceEngine::Get().RemoveContainer(instanceId);
+        ConnectServerManager::Get().RemoveInstance(instanceId);
+        if (destroyCallback) {
+            destroyCallback();
+        }
+    };
+    if (container->GetSettings().usePlatformAsUIThread) {
+        removeContainerTask();
+    } else {
+        taskExecutor->PostTask(removeContainerTask, TaskExecutor::TaskType::PLATFORM);
     }
 }
 
@@ -1164,36 +1143,42 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
             TaskExecutor::TaskType::PLATFORM);
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
-
-    taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
+    if (GetSettings().usePlatformAsUIThread) {
+        FrameReport::GetInstance().Init();
+    } else {
+        taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
+    }
 
     ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
     auto themeManager = AceType::MakeRefPtr<ThemeManager>();
-    if (themeManager) {
-        pipelineContext_->SetThemeManager(themeManager);
-        // Init resource
-        themeManager->InitResource(resourceInfo_);
-        taskExecutor_->PostTask(
-            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_] {
-                ACE_SCOPED_TRACE("OHOS::LoadThemes()");
-                LOGD("UIContent load theme");
-                themeManager->SetColorScheme(colorScheme);
-                themeManager->LoadCustomTheme(assetManager);
-                themeManager->LoadResourceThemes();
-            },
-            TaskExecutor::TaskType::UI);
-    }
+    pipelineContext_->SetThemeManager(themeManager);
+    // Init resource
+    themeManager->InitResource(resourceInfo_);
     taskExecutor_->PostTask(
-        [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
-            if (callback != nullptr) {
-                callback(AceType::DynamicCast<PipelineContext>(context));
-            }
-            if (!isSubContainer) {
-                context->SetupRootElement();
-            }
+        [themeManager, assetManager = assetManager_, colorScheme = colorScheme_] {
+            ACE_SCOPED_TRACE("OHOS::LoadThemes()");
+            LOGD("UIContent load theme");
+            themeManager->SetColorScheme(colorScheme);
+            themeManager->LoadCustomTheme(assetManager);
+            themeManager->LoadResourceThemes();
         },
         TaskExecutor::TaskType::UI);
+
+    auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
+        if (callback != nullptr) {
+            callback(AceType::DynamicCast<PipelineContext>(context));
+        }
+        if (!isSubContainer) {
+            context->SetupRootElement();
+        }
+    };
+    if (GetSettings().usePlatformAsUIThread) {
+        setupRootElementTask();
+    } else {
+        taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI);
+    }
+
     aceView_->Launch();
 
     if (!isSubContainer_) {

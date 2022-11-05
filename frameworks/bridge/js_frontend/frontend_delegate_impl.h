@@ -195,7 +195,6 @@ public:
     void OnSaveData(std::string& data);
     bool OnRestoreData(const std::string& data);
     void OnNewRequest(const std::string& data);
-    void OnDialogUpdated(const std::string& data);
     void OnMemoryLevel(const int32_t level);
     void OnNewWant(const std::string& data);
     void CallPopPage();
