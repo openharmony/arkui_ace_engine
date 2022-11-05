@@ -22,8 +22,7 @@ module_output_path = "arkui/res"
 ##############################fuzztest##########################################
 ohos_fuzztest("ResFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file =
-      "//foundation/arkui/ace_engine/test/fuzztest/res_fuzzer"
+  fuzz_config_file = "//foundation/arkui/ace_engine/test/fuzztest/res_fuzzer"
   include_dirs = []
   cflags = [
     "-g",
@@ -31,16 +30,17 @@ ohos_fuzztest("ResFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "res_fuzzer.cpp",
-              "$ace_root/frameworks/base/json/json_util.cpp",
-              "//third_party/cJSON/cJSON.c",
-   ]
+  sources = [
+    "$ace_root/frameworks/base/json/json_util.cpp",
+    "//third_party/cJSON/cJSON.c",
+    "res_fuzzer.cpp",
+  ]
   include_dirs = [
-      "$ace_root/frameworks/base/json",
-      "$ace_root/frameworks/base/",
-      "$ace_root/frameworks",
-       cjson_root,
-    ]
+    "$ace_root/frameworks/base/json",
+    "$ace_root/frameworks/base/",
+    "$ace_root/frameworks",
+    cjson_root,
+  ]
 
   deps = [
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",

@@ -16,12 +16,12 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 module_output_path = "arkui/util"
+
 ##############################fuzztest##########################################
 import("//foundation/arkui/ace_engine/ace_config.gni")
 ohos_fuzztest("UtilFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file =
-      "//foundation/arkui/ace_engine/test/fuzztest/util_fuzzer"
+  fuzz_config_file = "//foundation/arkui/ace_engine/test/fuzztest/util_fuzzer"
   include_dirs = []
   cflags = [
     "-g",
@@ -29,20 +29,21 @@ ohos_fuzztest("UtilFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "util_fuzzer.cpp",
-              "$ace_root/frameworks/base/json/json_util.cpp",
-              "$ace_root/frameworks/base/utils/resource_configuration.cpp",
-              "//third_party/cJSON/cJSON.c",
-              "$ace_root/frameworks/base/log/dump_log.cpp",
-              "$ace_root/adapter/ohos/osal/log_wrapper.cpp"
-   ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/base/log/dump_log.cpp",
+    "$ace_root/frameworks/base/utils/resource_configuration.cpp",
+    "//third_party/cJSON/cJSON.c",
+    "util_fuzzer.cpp",
+  ]
   include_dirs = [
-      "$ace_root/frameworks/base/utils",
-      "$ace_root/frameworks/base/json",
-      "$ace_root/frameworks/base/",
-      "$ace_root/frameworks",
-       cjson_root,
-    ]
+    "$ace_root/frameworks/base/utils",
+    "$ace_root/frameworks/base/json",
+    "$ace_root/frameworks/base/",
+    "$ace_root/frameworks",
+    cjson_root,
+  ]
 
   deps = [
     #"$ace_root/adapter/ohos/osal:ace_osal_ohos",
@@ -63,6 +64,7 @@ ohos_fuzztest("UtilFuzzTest") {
     "window_manager:libdm",
   ]
 }
+
 ###############################################################################
 group("fuzztest") {
   testonly = true

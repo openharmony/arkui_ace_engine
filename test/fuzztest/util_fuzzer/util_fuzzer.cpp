@@ -14,6 +14,7 @@
  */
 
 #include "util_fuzzer.h"
+#include "json_util.h"
 #include "resource_configuration.h"
 #include <string>
 #include <stddef.h>
@@ -28,7 +29,10 @@ namespace OHOS {
         ResourceConfiguration r;
         uint32_t update = 0;
         std::string s;
+
         r.UpdateFromJsonString(s,update);
+        auto j = JsonUtil::Create(true);
+        j->Put("123", "789");
         return result;
     }
 }
