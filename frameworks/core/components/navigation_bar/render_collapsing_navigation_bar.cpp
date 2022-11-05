@@ -124,8 +124,15 @@ void RenderCollapsingNavigationBar::PerformLayout()
     }
 
     auto fixedToolBar = GetFirstChild();
-    fixedToolBar->Layout(layoutParam);
-    fixedToolBar->SetPosition(Offset(0.0, fixedToolBarPos));
+    if (fixedToolBar) {
+        fixedToolBar->Layout(layoutParam);
+        fixedToolBar->SetPosition(Offset(0.0, fixedToolBarPos));
+    }
+
+    if (GetChildren().empty()) {
+        LOGI("Children is empty, just return.");
+        return;
+    }
     auto titleZone = GetChildren().back();
     titleZone->Layout(layoutParam);
     titleZone->SetPosition(Offset(0, titlePositionY));
