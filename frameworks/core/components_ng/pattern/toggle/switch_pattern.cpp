@@ -126,14 +126,14 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(startPos, endPos, curve);
     auto weak = AceType::WeakClaim(this);
     translate->AddListener(Animation<double>::ValueCallback([weak, startPos, endPos](double value) {
-        auto switch_ = weak.Upgrade();
-        CHECK_NULL_VOID(switch_);
+        auto switchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(switchPattern);
         if (!NearEqual(value, startPos) && !NearEqual(value, endPos) && !NearEqual(startPos, endPos)) {
             float moveRate =
                 Curves::EASE_OUT->MoveInternal(static_cast<float>((value - startPos) / (endPos - startPos)));
             value = startPos + (endPos - startPos) * moveRate;
         }
-        switch_->UpdateCurrentOffset(static_cast<float>(value - switch_->currentOffset_));
+        switchPattern->UpdateCurrentOffset(static_cast<float>(value - switchPattern->currentOffset_));
     }));
 
     if (!controller_) {
@@ -141,18 +141,19 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
-    controller_->AddStopListener([weak, this]() {
-        auto switch_ = weak.Upgrade();
-        CHECK_NULL_VOID(switch_);
-        if (!isOn_.value()) {
-            if (NearEqual(switch_->currentOffset_, GetSwitchWidth()) && changeFlag_) {
-                switch_->isOn_ = true;
-                switch_->UpdateChangeEvent();
+    controller_->AddStopListener([weak]() {
+        auto switchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(switchPattern);
+        if (!switchPattern->isOn_.value()) {
+            if (NearEqual(switchPattern->currentOffset_, switchPattern->GetSwitchWidth()) &&
+                switchPattern->changeFlag_) {
+                switchPattern->isOn_ = true;
+                switchPattern->UpdateChangeEvent();
             }
         } else {
-            if (NearEqual(switch_->currentOffset_, 0) && changeFlag_) {
-                switch_->isOn_ = false;
-                switch_->UpdateChangeEvent();
+            if (NearEqual(switchPattern->currentOffset_, 0) && switchPattern->changeFlag_) {
+                switchPattern->isOn_ = false;
+                switchPattern->UpdateChangeEvent();
             }
         }
     });
