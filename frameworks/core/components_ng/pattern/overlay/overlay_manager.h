@@ -30,16 +30,6 @@
 
 namespace OHOS::Ace::NG {
 
-struct ToastInfo {
-    int32_t toastId = -1;
-    RefPtr<FrameNode> toastNode;
-
-    bool operator==(const ToastInfo& value) const
-    {
-        return toastId == value.toastId && toastNode == value.toastNode;
-    }
-};
-
 struct PopupInfo {
     int32_t popupId = -1;
     WeakPtr<FrameNode> target;
@@ -76,7 +66,6 @@ public:
     void CleanMenuInSubWindow();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
-    void PopToast(int32_t toastId);
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
@@ -94,7 +83,9 @@ public:
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
 
 private:
-    NG::ToastInfo toastInfo_;
+    void PopToast();
+
+    WeakPtr<FrameNode> toast_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
