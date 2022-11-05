@@ -60,12 +60,14 @@ public:
         auto renderProperty = MakeRefPtr<ImageRenderProperty>();
         renderProperty->UpdatePaintProperty(this);
         renderProperty->propImagePaintStyle_ = CloneImagePaintStyle();
+        renderProperty->propNeedBorderRadius_ = CloneNeedBorderRadius();
         return renderProperty;
     }
 
     void Reset() override
     {
         ResetImagePaintStyle();
+        ResetNeedBorderRadius();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -82,6 +84,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, ColorFilter, std::vector<float>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, MatchTextDirection, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, SvgFillColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedBorderRadius, bool, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

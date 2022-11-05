@@ -171,6 +171,17 @@ void ImagePattern::SetImagePaintConfig(
     if (colorFilterMatrix.has_value()) {
         imagePaintConfig.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
     }
+    if (imageRenderProperty->GetNeedBorderRadiusValue(false)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto borderRadius = host->GetRenderContext()->GetBorderRadius();
+        std::vector<PointF> radiusXY = { { borderRadius->radiusTopLeft->ConvertToPx(),
+                                             borderRadius->radiusTopLeft->ConvertToPx() },
+            { borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx() },
+            { borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx() },
+            { borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx() } };
+        imagePaintConfig.borderRadiusXY_ = std::make_shared<std::vector<PointF>>(std::move(radiusXY));
+    }
     imagePaintConfig.isSvg_ = isSvg;
 
     canvasImage->SetImagePaintConfig(imagePaintConfig);
@@ -377,7 +388,6 @@ void ImagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
 }
 
