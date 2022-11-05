@@ -25,10 +25,10 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
         bool result = false;
-        // ResourceConfiguration r;
-        // uint32_t update = 0;
-        // std::string s;
-        // r.UpdateFromJsonString(s,update);
+        ResourceConfiguration r;
+        uint32_t update = 0;
+        std::string s;
+        r.UpdateFromJsonString(s,update);
         return result;
     }
 }

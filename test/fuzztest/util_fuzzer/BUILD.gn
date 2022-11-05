@@ -33,6 +33,8 @@ ohos_fuzztest("UtilFuzzTest") {
               "$ace_root/frameworks/base/json/json_util.cpp",
               "$ace_root/frameworks/base/utils/resource_configuration.cpp",
               "//third_party/cJSON/cJSON.c",
+              "$ace_root/frameworks/base/log/dump_log.cpp",
+              "$ace_root/adapter/ohos/osal/log_wrapper.cpp"
    ]
   include_dirs = [
       "$ace_root/frameworks/base/utils",
@@ -43,8 +45,7 @@ ohos_fuzztest("UtilFuzzTest") {
     ]
 
   deps = [
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    #"$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
     "//third_party/icu/icu4c:shared_icui18n",
