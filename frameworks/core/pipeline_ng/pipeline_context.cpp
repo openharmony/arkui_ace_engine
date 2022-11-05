@@ -15,6 +15,11 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
+#endif
+
 #include <algorithm>
 #include <cinttypes>
 #include <cstdint>
@@ -297,6 +302,15 @@ void PipelineContext::SetupRootElement()
     } else {
         rootNode_->AddChild(stageNode);
     }
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+    if (rsWindow) {
+        auto rsUIDirector = rsWindow->GetRsUIDirector();
+        if (rsUIDirector) {
+            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+        }
+    }
+#endif
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
@@ -326,11 +340,16 @@ void PipelineContext::SetupSubRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-        rootNode_->AddChild(ContainerModalView::Create(stageNode));
-    } else {
-        rootNode_->AddChild(stageNode);
+    rootNode_->AddChild(stageNode);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+    if (rsWindow) {
+        auto rsUIDirector = rsWindow->GetRsUIDirector();
+        if (rsUIDirector) {
+            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+        }
     }
+#endif
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
@@ -718,11 +737,29 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+    if (rsWindow) {
+        auto rsUIDirector = rsWindow->GetRsUIDirector();
+        if (rsUIDirector) {
+            rsUIDirector->SetContainerWindow(isShow); // set container window show state to render service
+        }
+    }
+#endif
 }
 
 void PipelineContext::SetAppBgColor(const Color& color)
 {
     appBgColor_ = color;
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+    if (rsWindow) {
+        auto rsUIDirector = rsWindow->GetRsUIDirector();
+        if (rsUIDirector) {
+            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+        }
+    }
+#endif
     CHECK_NULL_VOID(rootNode_);
     auto rootPattern = rootNode_->GetPattern<RootPattern>();
     CHECK_NULL_VOID(rootPattern);
