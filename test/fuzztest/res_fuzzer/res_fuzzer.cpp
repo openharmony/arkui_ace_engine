@@ -18,22 +18,22 @@
 #include <string>
 
 namespace OHOS {
-    using namespace OHOS::Ace;
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        bool result = false;
-        auto r = JsonUtil::Create(true);
-        auto r1 = JsonUtil::Create(false);
-        std::string s= (char*)data;
-        JsonUtil::ParseJsonString(s);
-        JsonUtil::ParseJsonString(s.c_str());
-        JsonUtil::CreateArray(true);
-        JsonUtil::CreateArray(false);
-        r->Put("123",111); 
-        r->Replace("1234", false);
-        r->Replace("123", 123);
-        return result;
-    }
+using namespace OHOS::Ace;
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+{
+    bool result = false;
+    auto r = JsonUtil::Create(true);
+    auto r1 = JsonUtil::Create(false);
+    std::string s = reinterpret_cast<const char*>(data);
+    JsonUtil::ParseJsonString(s);
+    JsonUtil::ParseJsonString(s.c_str());
+    JsonUtil::CreateArray(true);
+    JsonUtil::CreateArray(false);
+    r->Put("123",111); 
+    r->Replace("1234", false);
+    r->Replace("123", 123);
+    return result;
+}
 }
 
 /* Fuzzer entry point */

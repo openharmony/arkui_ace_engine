@@ -14,34 +14,50 @@
  */
 
 #include "util_fuzzer.h"
-#include "json_util.h"
-#include "resource_configuration.h"
-#include <string>
+
 #include <stddef.h>
 #include <stdint.h>
+#include <string>
 
+#include "json_util.h"
+#include "resource_configuration.h"
+#include "string_expression.h"
 
 namespace OHOS {
-    using namespace OHOS::Ace;
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        bool result = false;
-        ResourceConfiguration r;
-        uint32_t update = 0;
-        std::string s;
 
-        r.UpdateFromJsonString(s,update);
-        auto j = JsonUtil::Create(true);
-        j->Put("123", "789");
-        return result;
-    }
+using namespace OHOS::Ace;
+
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+{
+    bool result = false;
+    ResourceConfiguration r;
+    uint32_t update = 0;
+    std::string s;
+    r.UpdateFromJsonString(s, update);
+    return result;
 }
+
+void calc(const uint8_t* data, size_t size)
+{
+    double vpScale = 1;
+    double fpScale = 1;
+    double lpxScale = 1;
+    double parentLength = 1;
+    std::string s;
+    StringExpression::CalculateExp(s, [vpScale, fpScale, lpxScale, parentLength](const Dimension& dim) -> double {
+        double result = -1.0;
+        dim.NormalizeToPx(vpScale, fpScale, lpxScale, parentLength, result);
+        return result;
+    });
+}
+
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    OHOS::calc(data, size);
     return 0;
 }
-
