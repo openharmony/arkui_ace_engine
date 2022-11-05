@@ -84,7 +84,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation001, TestSize.Level1)
      * @tc.expected: step3. The return string is correct.
      */
     std::string info = renderFlex->ProvideRestoreInfo();
-    std::string expectStateResult = "{\"index\":2,\"OffsetX\":0,\"OffsetY\":0}";
+    std::string expectStateResult = "{\"index\":0,\"OffsetX\":0,\"OffsetY\":0}";
     EXPECT_EQ(info, expectStateResult);
 
     /**
@@ -93,7 +93,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation001, TestSize.Level1)
      */
     renderFlex->SetRestoreInfo(expectStateResult);
     renderTabBar->Update(tabBarComponent);
-    EXPECT_EQ(renderTabBar->GetIndex(), 2);
+    EXPECT_EQ(renderTabBar->GetIndex(), 0);
 
     /**
      * @tc.steps: step5. Second Update doesn't restore the state.
