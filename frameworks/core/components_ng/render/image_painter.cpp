@@ -147,7 +147,15 @@ void ImagePainter::DrawStaticImage(
     }
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
-
+    if (imagePaintConfig.borderRadiusXY_) {
+        RSRect rsRect(ToRSRect(imagePaintConfig.dstRect_));
+        std::vector<RSPoint> radiusXY;
+        for (auto radiusPoint : *imagePaintConfig.borderRadiusXY_) {
+            radiusXY.emplace_back(RSPoint(radiusPoint.GetX(), radiusPoint.GetY()));
+        }
+        RSRoundRect roundRect(rsRect, radiusXY);
+        canvas.ClipRoundRect(roundRect, rosen::ClipOp::INTERSECT);
+    }
     if (imagePaintConfig.needFlipCanvasHorizontally_) {
         ImagePainter::FlipHorizontal(canvas, offset.GetX(), imagePaintConfig.dstRect_.Width());
     }

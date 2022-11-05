@@ -57,6 +57,11 @@ void ImageModelNG::SetAlt(const std::string& src)
 
 void ImageModelNG::SetBorder(const Border& border) {}
 
+void ImageModelNG::SetBackBorder()
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true);
+}
+
 void ImageModelNG::SetBlur(double blur) {}
 
 void ImageModelNG::SetImageFit(int32_t value)
