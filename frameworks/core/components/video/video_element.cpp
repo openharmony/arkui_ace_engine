@@ -1159,7 +1159,7 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
 void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if (currentPos == currentPos_) {
+    if (currentPos == currentPos_ || isStop_) {
         return;
     }
     if (duration_ == 0) {
