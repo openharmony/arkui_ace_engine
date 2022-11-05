@@ -33,9 +33,16 @@ const int32_t CANVAS_WIDTH = 300;
 const int32_t CANVAS_HEIGHT = 300;
 
 const std::string NULL_STR;
+extern const std::string DEFAULT_STR = "default";
 const std::string IMAGE_SRC = "common/images/test.png";
 const std::string REPETITION_STR = "repetition";
+extern const std::vector<std::string> CANDIDATE_STRINGS = {
+    "aaaaaaaaaaaa",
+    "bbbbbb",
+    "abcdefg"
+};
 
+extern const double DEFAULT_DOUBLE = 10.0;
 const std::vector<double> CANDIDATE_DOUBLES = { 0.0, 1.0, 10.0, 100.0, 1000.0};
 
 const std::vector<Color> CANDIDATE_COLORS = {
