@@ -39,6 +39,11 @@ public:
 
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
+    {
+        return rsUIDirector_;
+    }
+
     void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
     void FlushTasks() override;
