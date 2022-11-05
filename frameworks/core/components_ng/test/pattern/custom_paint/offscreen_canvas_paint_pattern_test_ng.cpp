@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include <optional>
 
 #include "gtest/gtest.h"
@@ -24,6 +25,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/test/pattern/custom_paint/common_constants.h"
+#include "core/components_ng/test/pattern/custom_paint/mock/mock_paragraph.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
@@ -81,6 +83,30 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg001
     EXPECT_FALSE(offscreenCanvasPattern->offscreenPaintMethod_ == nullptr);
     EXPECT_EQ(offscreenCanvasPattern->GetWidth(), CANVAS_WIDTH);
     EXPECT_EQ(offscreenCanvasPattern->GetHeight(), CANVAS_HEIGHT);
+    // The function GetTextDirection always returns TextDirection::LTR.
+    for (const std::string& item : CANDIDATE_STRINGS) {
+        EXPECT_EQ(paintMethod->GetTextDirection(item), TextDirection::LTR);
+    }
+    std::unique_ptr<MockParagraph> mockParagraph = std::make_unique<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetMaxIntrinsicWidth()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE));
+    EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE));
+    EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE));
+    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE));
+
+    std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
+    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::LEFT, paragraph), 0.0);
+    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::RIGHT, paragraph), -DEFAULT_DOUBLE);
+    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE/2);
+    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::JUSTIFY, paragraph), 0.0);
+    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::START, paragraph), 0.0);
+    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::END, paragraph), -DEFAULT_DOUBLE);
+
+    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::ALPHABETIC, paragraph), -DEFAULT_DOUBLE);
+    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::IDEOGRAPHIC, paragraph), -DEFAULT_DOUBLE);
+    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::TOP, paragraph), 0.0);
+    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::BOTTOM, paragraph), -DEFAULT_DOUBLE);
+    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::MIDDLE, paragraph), -DEFAULT_DOUBLE / 2);
+    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::HANGING, paragraph), 0.0);
 }
 
 /**
@@ -213,7 +239,9 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003
     }
 
     offscreenCanvasPattern->SetLineDash(CANDIDATE_DOUBLES);
-    EXPECT_EQ(offscreenCanvasPattern->GetLineDash().lineDash, CANDIDATE_DOUBLES);
+    for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
+        EXPECT_EQ(offscreenCanvasPattern->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
+    }
     for (double item : CANDIDATE_DOUBLES) {
         offscreenCanvasPattern->SetLineDashOffset(item);
         EXPECT_EQ(offscreenCanvasPattern->GetLineDash().dashOffset, item);
