@@ -87,14 +87,14 @@ void SpanNode::MountToParagraph()
     LOGE("fail to find Text or Parent Span");
 }
 
-void SpanItem::UpdateParagraph(RSParagraphBuilder* builder)
+void SpanItem::UpdateParagraph(const RefPtr<Paragraph>& builder)
 {
     CHECK_NULL_VOID(builder);
     if (fontStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipelineContext->GetTheme<TextTheme>());
-        builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
+        builder->PushStyle(textStyle);
     }
     auto displayText = content;
     auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
@@ -106,7 +106,7 @@ void SpanItem::UpdateParagraph(RSParagraphBuilder* builder)
         }
     }
     if (fontStyle) {
-        builder->Pop();
+        builder->PopStyle();
     }
 }
 } // namespace OHOS::Ace::NG

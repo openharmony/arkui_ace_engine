@@ -16,6 +16,8 @@
 #include "frameworks/core/pipeline/base/element_register.h"
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "frameworks/base/memory/ace_type.h"
@@ -37,8 +39,10 @@ RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    auto position = itemMap_.find(elementId);
-    return position == itemMap_.end() ? nullptr : AceType::DynamicCast<Element>(position->second).Upgrade();
+    auto instanceId = Container::Current();
+    const auto& instanceMap = itemMap_[instanceId];
+    auto position = instanceMap.find(elementId);
+    return position == instanceMap.end() ? nullptr : AceType::DynamicCast<Element>(position->second).Upgrade();
 }
 
 RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
@@ -46,26 +50,35 @@ RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    auto position = itemMap_.find(elementId);
-    return position == itemMap_.end() ? nullptr : position->second.Upgrade();
+    auto instanceId = Container::Current();
+    const auto& instanceMap = itemMap_[instanceId];
+    auto position = instanceMap.find(elementId);
+    return position == instanceMap.end() ? nullptr : position->second.Upgrade();
 }
 
 RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elementId)
 {
-    auto position = itemMap_.find(elementId);
-    return (position == itemMap_.end()) ? nullptr : AceType::DynamicCast<V2::ElementProxy>(position->second).Upgrade();
+    auto instanceId = Container::Current();
+    const auto& instanceMap = itemMap_[instanceId];
+    auto position = instanceMap.find(elementId);
+    return (position == instanceMap.end()) ? nullptr
+                                           : AceType::DynamicCast<V2::ElementProxy>(position->second).Upgrade();
 }
 
 bool ElementRegister::Exists(ElementIdType elementId)
 {
+    auto instanceId = Container::Current();
+    const auto& instanceMap = itemMap_[instanceId];
     LOGD("ElementRegister::Exists(%{public}d) returns %{public}s", elementId,
-        (itemMap_.find(elementId) != itemMap_.end()) ? "true" : "false");
-    return (itemMap_.find(elementId) != itemMap_.end());
+        (instanceMap.find(elementId) != instanceMap.end()) ? "true" : "false");
+    return (instanceMap.find(elementId) != instanceMap.end());
 }
 
 bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
 {
-    auto result = itemMap_.emplace(elmtId, referenced);
+    auto instanceId = Container::Current();
+    auto& instanceMap = itemMap_[instanceId];
+    auto result = instanceMap.emplace(elmtId, referenced);
     if (!result.second) {
         LOGE("Duplicate elmtId %{public}d error.", elmtId);
     }
@@ -104,8 +117,10 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    auto iter = itemMap_.find(elementId);
-    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
+    auto instanceId = Container::Current();
+    const auto& instanceMap = itemMap_[instanceId];
+    auto iter = instanceMap.find(elementId);
+    return iter == instanceMap.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
 }
 
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
@@ -124,11 +139,14 @@ bool ElementRegister::RemoveItem(ElementIdType elementId)
         return false;
     }
 
-    auto removed = itemMap_.erase(elementId);
+    auto instanceId = Container::Current();
+    auto& instanceMap = itemMap_[instanceId];
+
+    auto removed = instanceMap.erase(elementId);
     if (removed) {
         LOGD("ElmtId %{public}d successfully removed from registry, added to list of removed Elements.", elementId);
-        removedItems_.insert(elementId);
-        LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
+        removedItems_[instanceId].insert(elementId);
+        LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_[instanceId].size()));
     } else {
         LOGD("ElmtId %{public}d not found. Cannot be removed.", elementId);
     }
@@ -141,7 +159,10 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
         return false;
     }
 
-    auto removed = itemMap_.erase(elementId);
+    auto instanceId = Container::Current();
+    auto& instanceMap = itemMap_[instanceId];
+
+    auto removed = instanceMap.erase(elementId);
     if (removed) {
         LOGD("ElmtId %{public}d successfully removed from registry, NOT added to list of removed Elements.", elementId);
     } else {
@@ -153,8 +174,23 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
 
 std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
 {
-    LOGD("return set of %{public}d elmtIds", static_cast<int32_t>(removedItems_.size()));
-    return removedItems_;
+    auto instanceId = Container::Current();
+    auto& removedItems = removedItems_[instanceId];
+    LOGD("return set of %{public}d elmtIds", static_cast<int32_t>(removedItems.size()));
+    return removedItems;
+}
+
+void ElementRegister::ClearRemovedItems(ElementIdType elmtId)
+{
+    auto instanceId = Container::CurrentId();
+    removedItems_[instanceId].erase(elmtId);
+}
+
+void ElementRegister::ClearRemovedItemsSilently(ElementIdType elmtId)
+{
+    auto uiNode = GetUINodeById(elmtId);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetRemoveSilently(true);
 }
 
 void ElementRegister::Clear()
@@ -163,4 +199,12 @@ void ElementRegister::Clear()
     itemMap_.clear();
     removedItems_.clear();
 }
+
+void ElementRegister::ClearInstance()
+{
+    auto instanceId = Container::CurrentId();
+    itemMap_[instanceId].clear();
+    removedItems_[instanceId].clear();
+}
+
 } // namespace OHOS::Ace

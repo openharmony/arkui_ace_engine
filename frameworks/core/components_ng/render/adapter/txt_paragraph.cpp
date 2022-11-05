@@ -17,18 +17,18 @@
 
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 
 namespace OHOS::Ace::NG {
 
-RefPtr<Paragraph> Paragraph::Create(const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle,
-    const RefPtr<FontCollection>& fontCollection)
+RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
     CHECK_NULL_RETURN(txtFontCollection, nullptr);
     auto sharedFontCollection = txtFontCollection->GetRawFontCollection();
-    return AceType::MakeRefPtr<TxtParagraph>(context, paraStyle, sharedFontCollection);
+    return AceType::MakeRefPtr<TxtParagraph>(paraStyle, sharedFontCollection);
 }
 
 bool TxtParagraph::IsValid()
@@ -57,7 +57,7 @@ void TxtParagraph::PushStyle(const TextStyle& style)
     }
 
     txt::TextStyle txtStyle;
-    Constants::ConvertTxtStyle(style, context_, txtStyle);
+    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContext(), txtStyle);
     builder_->PushStyle(txtStyle);
 }
 
@@ -108,6 +108,36 @@ float TxtParagraph::GetTextWidth()
         return std::max(paragraph_->GetLongestLine(), paragraph_->GetMaxIntrinsicWidth());
     }
     return paragraph_->GetLongestLine();
+}
+
+float TxtParagraph::GetMaxIntrinsicWidth()
+{
+    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    return static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
+}
+
+bool TxtParagraph::DidExceedMaxLines()
+{
+    CHECK_NULL_RETURN(paragraph_, false);
+    return paragraph_->DidExceedMaxLines();
+}
+
+float TxtParagraph::GetLongestLine()
+{
+    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    return static_cast<float>(paragraph_->GetLongestLine());
+}
+
+float TxtParagraph::GetMaxWidth()
+{
+    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    return static_cast<float>(paragraph_->GetMaxWidth());
+}
+
+float TxtParagraph::GetAlphabeticBaseline()
+{
+    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    return static_cast<float>(paragraph_->GetAlphabeticBaseline());
 }
 
 size_t TxtParagraph::GetLineCount()

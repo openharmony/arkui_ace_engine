@@ -53,7 +53,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<TextLayoutAlgorithm>(spanItemChildren_);
+        return MakeRefPtr<TextLayoutAlgorithm>(spanItemChildren_, paragraph_);
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -94,7 +94,7 @@ private:
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
-    std::shared_ptr<RSParagraph> paragraph_;
+    RefPtr<Paragraph> paragraph_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
 

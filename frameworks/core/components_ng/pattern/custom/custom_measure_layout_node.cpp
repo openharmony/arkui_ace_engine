@@ -37,7 +37,9 @@ RefPtr<CustomMeasureLayoutNode> CustomMeasureLayoutNode::CreateCustomMeasureLayo
 
 CustomMeasureLayoutNode::CustomMeasureLayoutNode(int32_t nodeId, const std::string& viewKey)
     : FrameNode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
-{}
+{
+    SetRemoveSilently(true);
+}
 
 bool CustomMeasureLayoutNode::FireOnMeasure(NG::LayoutWrapper* layoutWrapper)
 {

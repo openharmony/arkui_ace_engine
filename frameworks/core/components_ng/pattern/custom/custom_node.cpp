@@ -33,7 +33,9 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
 
 CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
     : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
-{}
+{
+    SetRemoveSilently(true);
+}
 
 void CustomNode::Build()
 {
