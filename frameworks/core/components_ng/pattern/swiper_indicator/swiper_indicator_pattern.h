@@ -45,12 +45,20 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SwiperIndicatorLayoutAlgorithm>();
+        auto indicatorLayoutAlgorithm = MakeRefPtr<SwiperIndicatorLayoutAlgorithm>();
+        indicatorLayoutAlgorithm->SetSwiperWidth(swiperWidth_);
+        indicatorLayoutAlgorithm->SetSwiperHeight(swiperHeight_);
+        return indicatorLayoutAlgorithm;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (GetPaintMethod()) {
+            auto paintMethod = GetPaintMethod();
+            paintMethod->SetItemCount(itemCount_);
+            paintMethod->SetAxis(axis_);
+            paintMethod->SetMainDelta(currentOffset_);
+            paintMethod->SetShowIndicator(showIndicator_);
             return GetPaintMethod();
         }
         auto swiperIndicatorPaintMethod =
@@ -112,6 +120,8 @@ private:
     int32_t itemCount_ = 0;
     bool showIndicator_ = true;
     Axis axis_ = Axis::HORIZONTAL;
+    double swiperWidth_ = 0.0;
+    double swiperHeight_ = 0.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
