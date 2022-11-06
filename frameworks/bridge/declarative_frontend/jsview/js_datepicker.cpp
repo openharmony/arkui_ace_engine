@@ -564,7 +564,7 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component>& component, const JS
     if (selectedDate->IsObject()) {
         datePicker->SetSelectedDate(parseSelectedDate);
     }
-    datePicker->SetIsDialog(false);
+    datePicker->SetIsDialog(true);
     datePicker->SetIsCreateDialogComponent(true);
     datePicker->SetShowLunar(isLunar);
 
@@ -580,7 +580,7 @@ void JSDatePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JS
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));
     }
-    timePicker->SetIsDialog(false);
+    timePicker->SetIsDialog(true);
     timePicker->SetIsCreateDialogComponent(true);
     timePicker->SetHour24(isUseMilitaryTime);
     component = timePicker;
@@ -819,7 +819,7 @@ void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JS
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));
     }
-    timePicker->SetIsDialog(false);
+    timePicker->SetIsDialog(true);
     timePicker->SetIsCreateDialogComponent(true);
     timePicker->SetHour24(isUseMilitaryTime);
     component = timePicker;

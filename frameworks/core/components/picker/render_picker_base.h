@@ -173,6 +173,7 @@ private:
 
     void LayoutBoxes();
     void LayoutColumns();
+    void SetOutBoxBorderRadius();
 
     void UpdateAccessibility();
     void UpdateTextAccessibility(const RefPtr<AccessibilityNode>& node, const RefPtr<RenderText>& text);
