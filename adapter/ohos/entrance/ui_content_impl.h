@@ -85,7 +85,6 @@ public:
     void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
-    void InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
@@ -95,7 +94,7 @@ private:
     int32_t instanceId_ = -1;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
-    
+
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
 };

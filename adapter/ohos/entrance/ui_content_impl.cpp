@@ -625,6 +625,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
 
+    if (window_->IsFocused()) {
+        LOGI("UIContentImpl: focus again");
+        Focus();
+    }
+    dragWindowListener_ = new DragWindowListener(instanceId_);
+    window_->RegisterDragListener(dragWindowListener_);
+    occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
+    window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+
     // create ace_view
     auto flutterAceView =
         Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
@@ -674,7 +683,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
         }
     }
-    InitWindowCallback(info);
 }
 
 void UIContentImpl::Foreground()
@@ -955,64 +963,6 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
         return;
     }
     pipelineContext->DumpInfo(params, info);
-}
-
-void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info)
-{
-    LOGI("UIContent InitWindowCallback");
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        LOGE("InitWindowCallback failed, container(id=%{public}d) is null.", instanceId_);
-        return;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGE("InitWindowCallback failed, pipelineContext is null.");
-        return;
-    }
-    auto& window = window_;
-    if (!window) {
-        LOGE("InitWindowCallback failed, window is null.");
-        return;
-    }
-    if (window->IsFocused()) {
-        LOGI("UIContentImpl: focus again");
-        Focus();
-    }
-    auto& windowManager = pipelineContext->GetWindowManager();
-    if (windowManager == nullptr) {
-        LOGE("InitWindowCallback failed, windowManager is null.");
-        return;
-    }
-    if (info != nullptr) {
-        windowManager->SetAppLabelId(info->labelId);
-        windowManager->SetAppIconId(info->iconId);
-    }
-
-    windowManager->SetWindowMinimizeCallBack([window]() { window->Minimize(); });
-    windowManager->SetWindowMaximizeCallBack([window]() { window->Maximize(); });
-    windowManager->SetWindowRecoverCallBack([window]() { window->Recover(); });
-    windowManager->SetWindowCloseCallBack([window]() { window->Close(); });
-    windowManager->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
-    windowManager->SetWindowSplitCallBack(
-        [window]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
-    windowManager->SetWindowGetModeCallBack(
-        [window]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
-
-    pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
-        Rect rect;
-        if (!window) {
-            return rect;
-        }
-        auto windowRect = window->GetRect();
-        rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
-        return rect;
-    });
-
-    dragWindowListener_ = new DragWindowListener(instanceId_);
-    window->RegisterDragListener(dragWindowListener_);
-    occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
-    window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)

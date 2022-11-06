@@ -103,6 +103,10 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     InitializeTask();
     platformEventCallback_ = std::move(callback);
     useStageModel_ = false;
+    auto ability = aceAbility_.lock();
+    if (ability) {
+        abilityInfo_ = ability->GetAbilityInfo();
+    }
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
@@ -690,8 +694,6 @@ void AceContainer::InitializeCallback()
             [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterDragEventCallback(dragEventCallback);
-
-    InitWindowCallback();
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp,
@@ -1064,7 +1066,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
             pipelineContext->SetIsSubPipeline(true);
         }
     }
-
+    InitWindowCallback();
     InitializeCallback();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
@@ -1149,21 +1151,19 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
     }
 
-    ThemeConstants::InitDeviceType();
-    // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
-    pipelineContext_->SetThemeManager(themeManager);
-    // Init resource
-    themeManager->InitResource(resourceInfo_);
-    taskExecutor_->PostTask(
-        [themeManager, assetManager = assetManager_, colorScheme = colorScheme_] {
-            ACE_SCOPED_TRACE("OHOS::LoadThemes()");
-            LOGD("UIContent load theme");
-            themeManager->SetColorScheme(colorScheme);
-            themeManager->LoadCustomTheme(assetManager);
-            themeManager->LoadResourceThemes();
-        },
-        TaskExecutor::TaskType::UI);
+    // Load custom style at UI thread before frontend attach, for loading style before building tree.
+    auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
+                                    colorScheme = colorScheme_, resourceInfo = resourceInfo_]() {
+        ACE_SCOPED_TRACE("OHOS::LoadThemes()");
+        LOGD("UIContent load theme");
+        ThemeConstants::InitDeviceType();
+        auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+        pipelineContext->SetThemeManager(themeManager);
+        themeManager->InitResource(resourceInfo);
+        themeManager->SetColorScheme(colorScheme);
+        themeManager->LoadCustomTheme(assetManager);
+        themeManager->LoadResourceThemes();
+    };
 
     auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
         if (callback != nullptr) {
@@ -1174,8 +1174,10 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         }
     };
     if (GetSettings().usePlatformAsUIThread) {
+        initThemeManagerTask();
         setupRootElementTask();
     } else {
+        taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI);
         taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI);
     }
 
@@ -1324,39 +1326,33 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 void AceContainer::InitWindowCallback()
 {
     LOGD("AceContainer InitWindowCallback");
-    auto aceAbility = aceAbility_.lock();
-    if (aceAbility == nullptr) {
-        LOGD("AceContainer::InitWindowCallback failed, aceAbility is null.");
-        return;
+    if (windowModal_ == WindowModal::CONTAINER_MODAL && pipelineContext_) {
+        auto& windowManager = pipelineContext_->GetWindowManager();
+        std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
+        if (info != nullptr) {
+            windowManager->SetAppLabelId(info->labelId);
+            windowManager->SetAppIconId(info->iconId);
+        }
+        windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
+        windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
+        windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
+        windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
+        windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+        windowManager->SetWindowSplitCallBack(
+            [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+        windowManager->SetWindowGetModeCallBack(
+            [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
     }
-    if (pipelineContext_ == nullptr) {
-        LOGE("AceContainer::InitWindowCallback failed, pipelineContext_ is null.");
-        return;
-    }
-    auto& window = aceAbility->GetWindow();
-    if (window == nullptr) {
-        LOGE("AceContainer::InitWindowCallback failed, window is null.");
-        return;
-    }
-    auto& windowManager = pipelineContext_->GetWindowManager();
-    if (windowManager == nullptr) {
-        LOGE("AceContainer::InitWindowCallback failed, windowManager is null.");
-        return;
-    }
-    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility->GetAbilityInfo();
-    if (info != nullptr) {
-        windowManager->SetAppLabelId(info->labelId);
-        windowManager->SetAppIconId(info->iconId);
-    }
-    windowManager->SetWindowMinimizeCallBack([window]() { window->Minimize(); });
-    windowManager->SetWindowMaximizeCallBack([window]() { window->Maximize(); });
-    windowManager->SetWindowRecoverCallBack([window]() { window->Recover(); });
-    windowManager->SetWindowCloseCallBack([window]() { window->Close(); });
-    windowManager->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
-    windowManager->SetWindowSplitCallBack(
-        [window]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
-    windowManager->SetWindowGetModeCallBack(
-        [window]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+
+    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
+        Rect rect;
+        if (!window) {
+            return rect;
+        }
+        auto windowRect = window->GetRect();
+        rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        return rect;
+    });
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
