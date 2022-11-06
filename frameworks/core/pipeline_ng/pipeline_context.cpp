@@ -323,6 +323,7 @@ void PipelineContext::SetupRootElement()
 void PipelineContext::SetupSubRootElement()
 {
     CHECK_RUN_ON(UI);
+    appBgColor_ = Color::TRANSPARENT;
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
     rootNode_->SetHostRootId(GetInstanceId());
