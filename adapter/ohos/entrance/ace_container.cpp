@@ -1149,21 +1149,19 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
     }
 
-    ThemeConstants::InitDeviceType();
-    // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
-    pipelineContext_->SetThemeManager(themeManager);
-    // Init resource
-    themeManager->InitResource(resourceInfo_);
-    taskExecutor_->PostTask(
-        [themeManager, assetManager = assetManager_, colorScheme = colorScheme_] {
-            ACE_SCOPED_TRACE("OHOS::LoadThemes()");
-            LOGD("UIContent load theme");
-            themeManager->SetColorScheme(colorScheme);
-            themeManager->LoadCustomTheme(assetManager);
-            themeManager->LoadResourceThemes();
-        },
-        TaskExecutor::TaskType::UI);
+    // Load custom style at UI thread before frontend attach, for loading style before building tree.
+    auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
+                                    colorScheme = colorScheme_, resourceInfo = resourceInfo_]() {
+        ACE_SCOPED_TRACE("OHOS::LoadThemes()");
+        LOGD("UIContent load theme");
+        ThemeConstants::InitDeviceType();
+        auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+        pipelineContext->SetThemeManager(themeManager);
+        themeManager->InitResource(resourceInfo);
+        themeManager->SetColorScheme(colorScheme);
+        themeManager->LoadCustomTheme(assetManager);
+        themeManager->LoadResourceThemes();
+    };
 
     auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
         if (callback != nullptr) {
@@ -1174,8 +1172,10 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         }
     };
     if (GetSettings().usePlatformAsUIThread) {
+        initThemeManagerTask();
         setupRootElementTask();
     } else {
+        taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI);
         taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI);
     }
 
