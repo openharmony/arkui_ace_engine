@@ -1968,6 +1968,26 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
 }
 
 #if defined(ENABLE_ROSEN_BACKEND)
+std::string WebDelegate::GetCustomScheme()
+{
+    std::string customScheme;
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        if (webPattern) {
+            auto webData = webPattern->GetCustomScheme();
+            if (webData) {
+                customScheme = webData.value();
+            }
+        }
+    } else {
+        auto webCom = webComponent_.Upgrade();
+        if (webCom) {
+            customScheme = webCom->GetCustomScheme();
+        }
+    }
+    return customScheme;
+}
+
 void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
 {
     LOGI("Create webview with surface");
@@ -1988,18 +2008,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
-            std::string customScheme;
-            if (Container::IsCurrentUseNewPipeline()) {
-                auto webPattern = delegate->webPattern_.Upgrade();
-                CHECK_NULL_VOID(webPattern);
-                auto webData = webPattern->GetCustomScheme();
-                CHECK_NULL_VOID(webData);
-                customScheme = webData.value();
-            } else {
-                auto webCom = delegate->webComponent_.Upgrade();
-                CHECK_NULL_VOID(webCom);
-                customScheme = webCom->GetCustomScheme();
-            }
+            std::string customScheme = delegate->GetCustomScheme();
             if (!customScheme.empty()) {
                 LOGI("custome scheme %{public}s", customScheme.c_str());
                 initArgs.web_engine_args_to_add.push_back(
