@@ -108,11 +108,6 @@ void CheckBoxGroupPattern::OnClick()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    if (!eventHub->IsEnabled()) {
-        return;
-    }
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     bool isSelected = false;
