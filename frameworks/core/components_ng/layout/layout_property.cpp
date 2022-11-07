@@ -55,7 +55,7 @@ std::string TextDirectionToString(TextDirection type)
     if (idx >= 0) {
         return toStringMap[idx].value;
     }
-    return "Direction.Auto";
+    return "Direction.Ltr";
 }
 } // namespace
 
