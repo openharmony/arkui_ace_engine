@@ -75,6 +75,7 @@ public:
     void Clip(const RefPtr<CanvasPath2D>& path) override;
     void BeginPath() override;
     void ClosePath() override;
+    void ResetTransform() override;
     void Restore() override;
     void Save() override;
     void Rotate(double angle) override;

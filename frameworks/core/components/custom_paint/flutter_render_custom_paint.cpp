@@ -1171,6 +1171,11 @@ void FlutterRenderCustomPaint::BeginPath()
     skPath_.reset();
 }
 
+void FlutterRenderCustomPaint::ResetTransform()
+{
+    skCanvas_->resetMatrix();
+}
+
 void FlutterRenderCustomPaint::ClosePath()
 {
     skPath_.close();

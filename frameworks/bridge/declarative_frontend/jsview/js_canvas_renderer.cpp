@@ -2088,11 +2088,22 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsResetTransform(const JSCallbackInfo& info)
 {
+    if (info.Length() != 0) {
+        LOGE("The argv is wrong");
+        return;
+    }
+
     if (Container::IsCurrentUseNewPipeline()) {
         if (isOffscreen_) {
             offscreenCanvasPattern_->ResetTransform();
         } else {
             customPaintPattern_->ResetTransform();
+        }
+    } else {
+        if (isOffscreen_) {
+            offscreenCanvas_->ResetTransform();
+        } else {
+            pool_->ResetTransform();
         }
     }
 }
