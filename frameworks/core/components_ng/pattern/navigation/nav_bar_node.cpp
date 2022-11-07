@@ -120,8 +120,9 @@ std::string NavBarNode::GetBarItemsString(bool isMenu) const
                 auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
                 if (!textLayoutProperty) {
                     jsonToolBarItem->Put("value", "");
+                } else {
+                    jsonToolBarItem->Put("value", textLayoutProperty->GetContentValue("").c_str());
                 }
-                jsonToolBarItem->Put("value", textLayoutProperty->GetContentValue("").c_str());
             } else {
                 jsonToolBarItem->Put("value", "");
             }
