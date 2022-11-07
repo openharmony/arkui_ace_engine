@@ -37,8 +37,10 @@ const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+#ifdef ENABLE_ROSEN_BACKEND
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
+#endif
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 

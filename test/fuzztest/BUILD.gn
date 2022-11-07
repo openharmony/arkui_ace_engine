@@ -19,6 +19,7 @@ group("fuzztest") {
   if (!is_asan) {
     deps = [
       "imageloader_fuzzer:ImageLoaderFuzzTest",
+      "res2_fuzzer:Res2FuzzTest",
       "res_fuzzer:ResFuzzTest",
       "uiservice_fuzzer:UiServiceFuzzTest",
       "util_fuzzer:UtilFuzzTest",
