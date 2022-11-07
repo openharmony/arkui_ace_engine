@@ -174,9 +174,6 @@ public:
     // called when gesture scope is closed.
     void ResetStatusOnFinish()
     {
-        if (!((refereeState_ == RefereeState::SUCCEED) || (refereeState_ == RefereeState::FAIL))) {
-            OnRejected();
-        }
         refereeState_ = RefereeState::READY;
         OnResetStatus();
     }
