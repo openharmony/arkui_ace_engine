@@ -76,7 +76,7 @@ void SwiperPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
 
     auto childrenSize = TotalCount();
-    if (CurrentIndex() >= 0 && CurrentIndex() < childrenSize) {
+    if (CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);

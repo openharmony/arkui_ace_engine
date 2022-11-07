@@ -40,6 +40,7 @@ RefPtr<SwiperController> SwiperModelNG::Create()
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto swiperGroupNode = SwiperGroupNode::GetOrCreateGroupNode(
         V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+    swiperGroupNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
 
     RefPtr<FrameNode> swiperNode;
     if (swiperGroupNode->GetChildren().empty()) {
