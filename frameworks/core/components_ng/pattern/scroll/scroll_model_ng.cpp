@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -29,6 +30,17 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+
+RefPtr<ScrollEdgeEffect> CreateScrollEdgeEffect(const EdgeEffect& effect)
+{
+    if (effect == EdgeEffect::SPRING) {
+        return AceType::MakeRefPtr<ScrollSpringEffect>();
+    }
+    if (effect == EdgeEffect::FADE) {
+        return AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
+    }
+    return AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
+}
 }
 
 void ScrollModelNG::Create()
@@ -165,19 +177,14 @@ void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     auto effect = static_cast<EdgeEffect>(edgeEffect);
-    RefPtr<ScrollEdgeEffect> scrollEdgeEffect;
-    if (effect == EdgeEffect::SPRING) {
-        scrollEdgeEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
-    } else if (effect == EdgeEffect::FADE) {
-        LOGW("current not support fade egde effect");
-        return;
-    } else {
-        scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
-    }
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = CreateScrollEdgeEffect(effect);
     pattern->SetScrollEdgeEffect(scrollEdgeEffect);
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->SetScrollEdgeEffect(scrollEdgeEffect);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->SetScrollEdgeEffect(scrollEdgeEffect);
 }
 
 } // namespace OHOS::Ace::NG
