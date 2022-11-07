@@ -68,6 +68,8 @@ public:
     void SetSourceSize(const std::optional<SizeF>& sourceSize = std::nullopt);
     void SetSvgFillColor(const std::optional<Color>& svgFillColorOpt);
 
+    void CacheImageObject();
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult, loadResultNotifierName)                                         \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResultNotifierName##NotifyTask)          \

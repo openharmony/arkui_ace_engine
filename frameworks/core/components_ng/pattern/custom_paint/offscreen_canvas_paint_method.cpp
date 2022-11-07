@@ -15,10 +15,10 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
+#include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "third_party/skia/include/encode/SkJpegEncoder.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/encode/SkWebpEncoder.h"
@@ -423,7 +423,7 @@ double OffscreenCanvasPaintMethod::BlurStrToDouble(const std::string& str)
     return ret;
 }
 
-void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<ImageObject>& imageObj)
+void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
 {
     if (imageObj->IsSvg()) {
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj)->GetSkiaDom();
@@ -454,8 +454,8 @@ void OffscreenCanvasPaintMethod::DrawImage(
     }
 
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                        ? ImageProvider::GetSkImage(canvasImage.src, context_, Size(width, height))
-                        : ImageProvider::GetSkImage(canvasImage.src, context_);
+                     ? Ace::ImageProvider::GetSkImage(canvasImage.src, context_, Size(width, height))
+                     : Ace::ImageProvider::GetSkImage(canvasImage.src, context_);
     if (!image) {
         LOGE("image is null");
         return;
@@ -503,7 +503,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     }
 
     // get skImage form pixelMap
-    auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
