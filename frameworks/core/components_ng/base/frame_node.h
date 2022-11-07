@@ -81,7 +81,7 @@ public:
 
     void InitializePatternAndContext();
 
-    void MarkModifyDone();
+    virtual void MarkModifyDone();
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
