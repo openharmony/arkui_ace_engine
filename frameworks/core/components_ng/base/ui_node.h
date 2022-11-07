@@ -60,7 +60,7 @@ public:
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean();
     void RemoveChildAtIndex(int32_t index);
-    RefPtr<UINode> GetChildAtIndex(int32_t index);
+    RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     void AttachToMainTree();
     void DetachFromMainTree();
 

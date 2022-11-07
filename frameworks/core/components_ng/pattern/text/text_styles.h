@@ -45,10 +45,6 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAlign, TextAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLength, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
-    {
-        json->Put("textAlign", V2::ConvertWrapTextAlignToString(propTextAlign.value_or(TextAlign::START)).c_str());
-    }
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,

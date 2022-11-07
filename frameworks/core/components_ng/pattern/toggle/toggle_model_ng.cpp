@@ -111,8 +111,8 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
     if (AceType::InstanceOf<ToggleButtonPattern>(pattern)) {
         if (toggleType == ToggleType::BUTTON) {
-            ToggleButtonModelNG::SetIsOn(isOn);
             stack->Push(childFrameNode);
+            ToggleButtonModelNG::SetIsOn(isOn);
             return;
         }
         if (toggleType == ToggleType::CHECKBOX) {

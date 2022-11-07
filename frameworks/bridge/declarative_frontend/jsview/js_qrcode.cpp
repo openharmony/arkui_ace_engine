@@ -71,7 +71,7 @@ void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBackgroundColor(backgroundColor);
+        NG::QRCodeView::SetQRBackgroundColor(backgroundColor);
         return;
     }
 

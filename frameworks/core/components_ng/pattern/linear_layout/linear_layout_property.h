@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT LinearLayoutProperty : public FlexLayoutProperty {
@@ -51,6 +52,35 @@ public:
     bool IsVertical() const
     {
         return isVertical_;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        std::string alignItems;
+        auto flexAlignItems = GetCrossAxisAlign().value_or(FlexAlign::CENTER);
+        if (isVertical_) {
+            alignItems = "HorizontalAlign::Center";
+            if (flexAlignItems == FlexAlign::FLEX_START) {
+                alignItems = "HorizontalAlign.Start";
+            } else if (flexAlignItems == FlexAlign::CENTER) {
+                alignItems = "HorizontalAlign.Center";
+            } else if (flexAlignItems == FlexAlign::FLEX_END) {
+                alignItems = "HorizontalAlign.End";
+            }
+        } else {
+            alignItems = "VerticalAlign.Center";
+            if (flexAlignItems == FlexAlign::FLEX_START) {
+                alignItems = "VerticalAlign.Top";
+            } else if (flexAlignItems == FlexAlign::CENTER) {
+                alignItems = "VerticalAlign.Center";
+            } else if (flexAlignItems == FlexAlign::FLEX_END) {
+                alignItems = "VerticalAlign.Bottom";
+            }
+        }
+        json->Put("alignItems", alignItems.c_str());
+        auto justifyContent = V2::ConvertFlexAlignToStirng(GetMainAxisAlign().value_or(FlexAlign::FLEX_START));
+        json->Put("justifyContent", justifyContent.c_str());
     }
 
 protected:

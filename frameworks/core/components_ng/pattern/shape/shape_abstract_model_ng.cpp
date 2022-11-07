@@ -61,7 +61,7 @@ void ShapeAbstractModelNG::SetStrokeOpacity(double opacity)
 
 void ShapeAbstractModelNG::SetFillOpacity(double opacity)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, FillOpacity, opacity);
+    ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, FillOpacity, std::clamp(opacity, 0.0, 1.0));
 }
 
 void ShapeAbstractModelNG::SetStrokeWidth(const Dimension& lineWidth)

@@ -40,6 +40,7 @@ public:
     {
         return false;
     }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 };
 
 } // namespace OHOS::Ace::NG
