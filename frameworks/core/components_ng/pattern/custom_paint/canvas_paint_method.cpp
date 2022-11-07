@@ -29,6 +29,7 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/flutter_font_collection.h"
 #include "core/components/font/rosen_font_collection.h"
+#include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/flutter_image_cache.h"
 
@@ -133,7 +134,7 @@ void CanvasPaintMethod::CreateBitmap(SizeF contentSize)
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
 }
 
-void CanvasPaintMethod::ImageObjReady(const RefPtr<ImageObject>& imageObj)
+void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
 {
     imageObj_ = imageObj;
     if (imageObj_->IsSvg()) {
@@ -203,7 +204,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     }
 
     // get skImage form pixelMap
-    auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
@@ -257,7 +258,7 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
 
     CHECK_NULL_RETURN(context_, nullptr);
 
-    auto image = ImageProvider::GetSkImage(src, context_);
+    auto image = Ace::ImageProvider::GetSkImage(src, context_);
     if (image) {
         auto rasterizedImage = image->makeRasterImage();
         auto canvasImage = flutter::CanvasImage::Create();

@@ -157,6 +157,7 @@ EnterStateTask ImageLoadingContext::CreateOnLoadSuccessTask()
         CHECK_NULL_VOID(imageLoadingContext);
         if (imageLoadingContext->loadNotifier_.loadSuccessNotifyTask_) {
             imageLoadingContext->loadNotifier_.loadSuccessNotifyTask_(imageLoadingContext->GetSourceInfo());
+            imageLoadingContext->CacheImageObject();
         }
         imageLoadingContext->needAlt_ = false;
     };
@@ -372,6 +373,17 @@ void ImageLoadingContext::ResetLoading()
 void ImageLoadingContext::ResumeLoading()
 {
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
+}
+
+void ImageLoadingContext::CacheImageObject()
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineCtx);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_VOID(imageCache);
+    if (imageCache && imageObj_->GetFrameCount() == 1) {
+        imageCache->CacheImgObjNG(imageObj_->GetSourceInfo().ToString(), imageObj_);
+    }
 }
 
 } // namespace OHOS::Ace::NG
