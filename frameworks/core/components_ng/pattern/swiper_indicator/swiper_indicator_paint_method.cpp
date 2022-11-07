@@ -34,6 +34,9 @@ namespace OHOS::Ace::NG {
 namespace {
 // for indicator
 constexpr uint32_t GRADIENT_COLOR_SIZE = 3;
+constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
+constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
+
 } // namespace
 
 CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
@@ -43,11 +46,9 @@ CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapp
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    auto size = paintProperty->GetSizeValue(theme->GetSize());
     auto geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
-    SizeF contentSize;
-    contentSize.SetHeight(static_cast<float>(size.ConvertToPx()));
+    SizeF contentSize = geometryNode->GetFrameSize();
     auto contentOffset = geometryNode->GetContentOffset();
 
     auto paintFunc = [weak = WeakClaim(this), paintProperty, contentSize, showIndicator = showIndicator_,
@@ -57,7 +58,7 @@ CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapp
             if (paintProperty->GetIndicatorMaskValue(false)) {
                 swiper_->PaintMask(canvas, paintProperty, contentSize, contentOffset);
             }
-            swiper_->PaintContent(canvas, paintProperty, contentSize, contentOffset);
+            swiper_->PaintContent(canvas, paintProperty, contentSize);
         }
     };
     return paintFunc;
@@ -116,82 +117,54 @@ void SwiperIndicatorPaintMethod::PaintMask(
 }
 
 void SwiperIndicatorPaintMethod::PaintContent(
-    RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset)
+    RSCanvas& canvas, const RefPtr<SwiperIndicatorPaintProperty>& paintProperty, SizeF contentSize)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperTheme);
-    auto height = contentSize.Height();
-    float radius = 0.0f;
-    radius = height / 2.0f; // for radius
-    auto hoverRadius_ = radius - radiusGap_;
+    auto indicatorSize = axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width();
+    auto userSize = paintProperty->GetSizeValue(swiperTheme->GetSize()).ConvertToPx();
+    auto radius = userSize / 2.0;
+    auto selectedSize = userSize * 2.0f;
 
-    IndicatorProperties indicatorProperties = PrepareIndicatorProperties(paintProperty);
-    Offset center = indicatorProperties.centerPadding;
+    Offset center = Offset(INDICATOR_PADDING_DEFAULT.ConvertToPx() + radius, indicatorSize / 2.0);
     int32_t targetIndex = GetCurrentIndex();
     for (int32_t i = 0; i < itemCount_; i++) {
         if (i != targetIndex) {
-            center += indicatorProperties.normalPaddingStart;
             RSBrush brush;
             brush.SetColor(ToRSColor(paintProperty->GetColor().value_or(swiperTheme->GetColor())));
             canvas.AttachBrush(brush);
             rosen::Point point;
             if (axis_ == Axis::HORIZONTAL) {
-                point.SetX(center.GetX() + contentOffset.GetX());
-                point.SetY(center.GetY() + contentOffset.GetY() + radius);
+                point.SetX(center.GetX());
+                point.SetY(center.GetY());
             } else {
-                point.SetX(contentOffset.GetX());
-                point.SetY(center.GetY() + contentOffset.GetY() + radius);
+                point.SetX(center.GetY());
+                point.SetY(center.GetX());
             }
 
-            canvas.DrawCircle(point, hoverRadius_);
-            center += indicatorProperties.normalPaddingEnd;
-        } else {
-            center += indicatorProperties.normalPaddingStart;
-            RSBrush brush;
-            brush.SetColor(ToRSColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor())));
-            canvas.AttachBrush(brush);
-            rosen::Point point;
-            if (axis_ == Axis::HORIZONTAL) {
-                point.SetX(center.GetX() + contentOffset.GetX());
-                point.SetY(center.GetY() + contentOffset.GetY() + radius);
-            } else {
-                point.SetX(contentOffset.GetX());
-                point.SetY(center.GetY() + contentOffset.GetY() + radius);
-            }
-
-            canvas.DrawCircle(point, hoverRadius_);
-            center += indicatorProperties.normalPaddingEnd;
+            canvas.DrawCircle(point, radius);
+            center += Offset(INDICATOR_ITEM_SPACE.ConvertToPx() + userSize, 0.0);
+            continue;
         }
-    }
-}
-
-SwiperIndicatorPaintMethod::IndicatorProperties SwiperIndicatorPaintMethod::PrepareIndicatorProperties(
-    RefPtr<SwiperIndicatorPaintProperty> paintProperty)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, IndicatorProperties(Offset(0.0, 0.0), Offset(0.0, 0.0), Offset(0.0, 0.0),
-                                    Offset(0.0, 0.0), Offset(0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 0.0));
-    auto swiperTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_RETURN(swiperTheme, IndicatorProperties(Offset(0.0, 0.0), Offset(0.0, 0.0), Offset(0.0, 0.0),
-                                       Offset(0.0, 0.0), Offset(0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 0.0));
-    scale_ = pipeline->GetDipScale();
-    uint32_t normalColor = paintProperty->GetColor().value_or(swiperTheme->GetColor()).GetValue();
-    uint32_t selectedColor = paintProperty->GetSelectedColor().value_or(swiperTheme->GetSelectedColor()).GetValue();
-    double normalPointRadius = pipeline->NormalizeToPx(paintProperty->GetSizeValue(swiperTheme->GetSize())) / 2.0;
-    double selectedPointRadius = swiperTheme->GetSelectedSize().ConvertToPx();
-    double indicatorPointPadding = swiperTheme->GetIndicatorPointPadding().Value() * scale_;
-    if (axis_ == Axis::HORIZONTAL) {
-        return IndicatorProperties(Offset(normalPointRadius, 0.0),
-            Offset(normalPointRadius + indicatorPointPadding, 0.0), Offset(selectedPointRadius, 0.0),
-            Offset(selectedPointRadius + indicatorPointPadding, 0.0), Offset(0.0, selectedPointRadius), normalColor,
-            selectedColor, normalPointRadius, selectedPointRadius, indicatorPointPadding);
-    } else {
-        return IndicatorProperties(Offset(0.0, normalPointRadius),
-            Offset(0.0, normalPointRadius + indicatorPointPadding), Offset(0.0, selectedPointRadius),
-            Offset(0.0, selectedPointRadius + indicatorPointPadding), Offset(selectedPointRadius, 0.0), normalColor,
-            selectedColor, normalPointRadius, selectedPointRadius, indicatorPointPadding);
+        RSBrush brush;
+        brush.SetColor(ToRSColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor())));
+        canvas.AttachBrush(brush);
+        Offset selectOffset;
+        if (axis_ == Axis::HORIZONTAL) {
+            selectOffset.SetX(center.GetX() - radius);
+            selectOffset.SetY(center.GetY() - radius);
+        } else {
+            selectOffset.SetX(center.GetY() - radius);
+            selectOffset.SetY(center.GetX() - radius);
+        }
+        auto rectWidth =
+            axis_ == Axis::HORIZONTAL ? selectedSize + selectOffset.GetX() : userSize + selectOffset.GetX();
+        auto rectHeight =
+            axis_ == Axis::HORIZONTAL ? userSize + selectOffset.GetY() : selectedSize + selectOffset.GetY();
+        canvas.DrawRoundRect({ { selectOffset.GetX(), selectOffset.GetY(), rectWidth, rectHeight }, radius, radius });
+        center += Offset(INDICATOR_ITEM_SPACE.ConvertToPx() + selectedSize, 0.0);
     }
 }
 
