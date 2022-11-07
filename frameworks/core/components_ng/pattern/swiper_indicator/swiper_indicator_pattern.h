@@ -48,6 +48,8 @@ public:
         auto indicatorLayoutAlgorithm = MakeRefPtr<SwiperIndicatorLayoutAlgorithm>();
         indicatorLayoutAlgorithm->SetSwiperWidth(swiperWidth_);
         indicatorLayoutAlgorithm->SetSwiperHeight(swiperHeight_);
+        indicatorLayoutAlgorithm->SetSwiperPaddingLeft(swiperPaddingLeft_);
+        indicatorLayoutAlgorithm->SetSwiperPaddingTop(swiperPaddingTop_);
         return indicatorLayoutAlgorithm;
     }
 
@@ -98,16 +100,6 @@ public:
         return currentIndex_;
     }
 
-    void SetItemCount(int32_t itemCount)
-    {
-        itemCount_ = itemCount;
-    }
-
-    int32_t GetItemCount() const
-    {
-        return itemCount_;
-    }
-
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -122,6 +114,8 @@ private:
     Axis axis_ = Axis::HORIZONTAL;
     double swiperWidth_ = 0.0;
     double swiperHeight_ = 0.0;
+    double swiperPaddingLeft_ = 0.0;
+    double swiperPaddingTop_ = 0.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };

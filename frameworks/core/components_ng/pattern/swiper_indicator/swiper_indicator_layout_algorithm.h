@@ -37,16 +37,9 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void UpdateIndicatorPosition(LayoutWrapper* layoutWrapper);
-
     void SetSwiperWidth(double swiperWidth)
     {
         swiperWidth_ = swiperWidth;
-    }
-
-    double GetSwiperWidth() const
-    {
-        return swiperWidth_;
     }
 
     void SetSwiperHeight(double swiperHeight)
@@ -54,20 +47,24 @@ public:
         swiperHeight_ = swiperHeight;
     }
 
-    double GetSwiperHeight() const
+    void SetSwiperPaddingLeft(double swiperPaddingLeft)
     {
-        return swiperHeight_;
+        swiperPaddingLeft_ = swiperPaddingLeft;
+    }
+
+    void SetSwiperPaddingTop(double swiperPaddingTop)
+    {
+        swiperPaddingTop_ = swiperPaddingTop;
     }
 
 private:
     double GetValidEdgeLength(double swiperLength, double indicatorLength, const Dimension& edge) const;
     double swiperWidth_ = 0.0;
     double swiperHeight_ = 0.0;
+    double swiperPaddingLeft_ = 0.0;
+    double swiperPaddingTop_ = 0.0;
     float indicatorWidth_ = 0.0f;
     float indicatorHeight_ = 0.0f;
-    double hotZoneMaxSize_ = 0.0;
-    double hotZoneMinSize_ = 0.0;
-    double hotZoneRealSize_ = 0.0;
 };
 
 } // namespace OHOS::Ace::NG
