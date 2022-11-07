@@ -616,6 +616,15 @@ EventManager::EventManager()
     LOGD("EventManger Constructor.");
     refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
+
+    auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
+        auto eventManager = weak.Upgrade();
+        CHECK_NULL_RETURN(eventManager, false);
+        auto refereeNG = eventManager->refereeNG_;
+        CHECK_NULL_RETURN(refereeNG, false);
+        return refereeNG->HasGestureAccepted(touchId);
+    };
+    referee_->SetQueryStateFunc(std::move(callback));
 }
 
 } // namespace OHOS::Ace
