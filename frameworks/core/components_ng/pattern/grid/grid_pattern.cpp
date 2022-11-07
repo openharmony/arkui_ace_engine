@@ -276,6 +276,7 @@ void GridPattern::AddScrollEvent()
 
 bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
+    /* Stop scroll controler animation */
     if (animator_) {
         animator_->Stop();
     }
@@ -303,7 +304,7 @@ bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
         }
         gridLayoutInfo_.reachStart_ = false;
     }
-    if (source == SCROLL_FROM_ANIMATION) {
+    if (source == SCROLL_FROM_JUMP) {
         gridLayoutInfo_.currentOffset_ = offset;
     } else {
         gridLayoutInfo_.currentOffset_ += offset;
@@ -506,7 +507,7 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         [offset = gridLayoutInfo_.currentOffset_, weakScroll = AceType::WeakClaim(this)](float value) {
             auto gridPattern = weakScroll.Upgrade();
             if (gridPattern) {
-                gridPattern->UpdateScrollPosition(offset + value, SCROLL_FROM_ANIMATION);
+                gridPattern->UpdateScrollPosition(offset + value, SCROLL_FROM_JUMP);
             }
         });
     animator_->AddInterpolator(animation);
