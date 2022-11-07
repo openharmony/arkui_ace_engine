@@ -52,7 +52,6 @@ public:
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
-    RefPtr<UINode> child_;
 };
 } // namespace OHOS::Ace::NG
 
