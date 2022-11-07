@@ -15,33 +15,27 @@
 
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_layout_algorithm.h"
 
-#include <algorithm>
-
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_paint_property.h"
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr Dimension INDICATOR_WIDTH = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_TOP_DEFAULT = 9.0_vp;
-constexpr double ZOOM_HOTZONE_MAX_RATE = 1.33;
+// TODO::add to theme
+constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
+constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
 
 } // namespace
+
 void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -65,36 +59,35 @@ void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto paintProperty = frameNode->GetPaintProperty<SwiperIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    float sizeHeigth = 0.0f;
-    float sizeWidth = 0.0f;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);
-    auto size = paintProperty->GetSizeValue(theme->GetSize());
-    sizeHeigth = static_cast<float>(size.ConvertToPx() + INDICATOR_PADDING_TOP_DEFAULT.ConvertToPx() * 2);
-    sizeWidth = static_cast<float>(size.ConvertToPx());
+    auto userSize = paintProperty->GetSizeValue(theme->GetSize()).ConvertToPx();
+    auto selectedSize = userSize * 2.0f;
 
-    auto indicatorWidth = static_cast<float>((sizeWidth + INDICATOR_WIDTH.ConvertToPx()) * itemCount);
-    auto selectedSize = static_cast<float>(theme->GetSelectedSize().ConvertToPx());
+    auto indicatorHeight = static_cast<float>(userSize + INDICATOR_PADDING_DEFAULT.ConvertToPx() * 2);
+    auto indicatorWidth = static_cast<float>((INDICATOR_PADDING_DEFAULT.ConvertToPx() * 2 +
+                                                 (userSize + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) +
+                                             selectedSize);
+
+    LOGI("Swiper Indicator userSize is %{public}f, selectedSize is %{public}f, indicatorHeight is %{public}f"
+         "indicatorWidth is %{public}f",
+        userSize, selectedSize, indicatorHeight, indicatorWidth);
 
     if (axis == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;
-        indicatorHeight_ = selectedSize;
+        indicatorHeight_ = indicatorHeight;
     } else {
-        indicatorWidth_ = selectedSize;
+        indicatorWidth_ = indicatorHeight;
         indicatorHeight_ = indicatorWidth;
     }
 
     SizeF frameSize = { -1.0f, -1.0f };
     do {
-        if (axis == Axis::VERTICAL) {
-            frameSize.SetSizeT(SizeF { sizeHeigth, indicatorWidth });
-            if (frameSize.IsNonNegative()) {
-                break;
-            }
-        } else {
-            frameSize.SetSizeT(SizeF { indicatorWidth, sizeHeigth });
+        frameSize.SetSizeT(SizeF { indicatorWidth_, indicatorHeight_ });
+        if (frameSize.IsNonNegative()) {
+            break;
         }
         frameSize.Constrain(minSize, maxSize);
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
@@ -125,9 +118,9 @@ void SwiperIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto right = layoutProperty->GetRight();
     auto top = layoutProperty->GetTop();
     auto bottom = layoutProperty->GetBottom();
-    hotZoneMaxSize_ = theme->GetHotZoneSize().ConvertToPx();
-    hotZoneMinSize_ = hotZoneMaxSize_ / ZOOM_HOTZONE_MAX_RATE;
-    double stableOffset = INDICATOR_PADDING_TOP_DEFAULT.ConvertToPx() + (hotZoneMaxSize_ + hotZoneMinSize_) * 0.5;
+
+    indicatorWidth_ = frameNode->GetGeometryNode()->GetFrameSize().Width();
+    indicatorHeight_ = frameNode->GetGeometryNode()->GetFrameSize().Height();
 
     Offset position;
     if (left.has_value()) {
@@ -138,9 +131,9 @@ void SwiperIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         position.SetX(swiperWidth_ - indicatorWidth_ - rightValue);
     } else {
         if (axis == Axis::HORIZONTAL) {
-            position.SetX((swiperWidth_ - indicatorWidth_) / 2.0);
+            position.SetX((swiperWidth_ - indicatorWidth_) / 2.0 + swiperPaddingLeft_);
         } else {
-            position.SetX(swiperWidth_ - stableOffset);
+            position.SetX(swiperWidth_ - indicatorWidth_ + swiperPaddingLeft_);
         }
     }
     if (top.has_value()) {
@@ -151,13 +144,12 @@ void SwiperIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         position.SetY(swiperHeight_ - indicatorHeight_ - bottomValue);
     } else {
         if (axis == Axis::HORIZONTAL) {
-            position.SetY(swiperHeight_ - stableOffset);
+            position.SetY(swiperHeight_ - indicatorHeight_ + swiperPaddingTop_);
         } else {
-            position.SetY((swiperHeight_ - indicatorHeight_) / 2.0);
+            position.SetY((swiperHeight_ - indicatorHeight_) / 2.0 + swiperPaddingTop_);
         }
     }
-    auto currentOffset = axis == Axis::HORIZONTAL ? OffsetF { position.GetX(), position.GetY() }
-                                                  : OffsetF { position.GetY(), position.GetX() };
+    auto currentOffset = OffsetF { static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
 
     layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
 }

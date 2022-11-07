@@ -61,36 +61,33 @@ void SwiperIndicatorPattern::SetIndicatorSize()
     auto swiperGeometryNode = swiperNode->GetGeometryNode();
     CHECK_NULL_VOID(swiperGeometryNode);
     auto frameSize = swiperGeometryNode->GetFrameSize();
-    float width = frameSize.Width();
-    float height = frameSize.Height();
-    swiperWidth_ = width;
-    swiperHeight_ = height;
+    swiperWidth_= frameSize.Width();
+    swiperHeight_ = frameSize.Height();
+    swiperPaddingLeft_ = swiperGeometryNode->GetPaddingOffset().GetX();
+    swiperPaddingTop_ = swiperGeometryNode->GetPaddingOffset().GetY();
+
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     itemCount_ = swiperPattern->TotalCount();
-    SetItemCount(itemCount_);
     axis_ = swiperPattern->GetDirection();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     if (swiperLayoutProperty->GetShowIndicator().has_value()) {
         showIndicator_ = swiperLayoutProperty->GetShowIndicator().value_or(true);
     }
 
-    auto indicatorNode = DynamicCast<FrameNode>(host);
-    CHECK_NULL_VOID(indicatorNode);
-    auto indicatorGeometryNode = indicatorNode->GetGeometryNode();
+    auto indicatorGeometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(indicatorGeometryNode);
     auto indicatorFrameSize = indicatorGeometryNode->GetFrameSize();
     auto indicatorWidth = indicatorFrameSize.Width();
     auto indicatorHeight = indicatorFrameSize.Height();
-    if (indicatorHeight > height) {
-        indicatorHeight = height;
+    if (indicatorHeight > swiperHeight_) {
+        indicatorHeight = swiperHeight_;
     }
-    if (indicatorWidth > width) {
-        indicatorWidth = width;
+    if (indicatorWidth > swiperWidth_) {
+        indicatorWidth = swiperWidth_;
     }
-
     indicatorGeometryNode->SetFrameSize(SizeF { indicatorWidth, indicatorHeight });
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
