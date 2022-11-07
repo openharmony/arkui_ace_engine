@@ -47,7 +47,10 @@ void CustomNode::Build()
         {
             ACE_SCOPED_TRACE("CustomNode:BuildItem");
             // first create child node and wrapper.
-            child_ = renderFunction_();
+            auto child = renderFunction_();
+            if (child) {
+                child->MountToParent(Claim(this));
+            }
         }
         renderFunction_ = nullptr;
     }
@@ -57,13 +60,7 @@ void CustomNode::Build()
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     Build();
-    if (child_) {
-        child_->MountToParent(Claim(this));
-        child_->AdjustLayoutWrapperTree(parent, true, true);
-        child_.Reset();
-    } else {
-        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
-    }
+    UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
 }
 
 } // namespace OHOS::Ace::NG
