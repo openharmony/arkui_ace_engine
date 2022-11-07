@@ -40,6 +40,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
+constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
+
 void ExitToDesktop()
 {
     auto container = Container::Current();
@@ -417,6 +419,10 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
     }
     if (!manifestParser_) {
         LOGE("the router manifest parser is null.");
+        return;
+    }
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
+        LOGE("router stack size is larger than max size 32.");
         return;
     }
     std::string url = target.url;
