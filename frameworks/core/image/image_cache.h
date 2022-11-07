@@ -31,9 +31,6 @@ namespace OHOS::Ace {
 
 struct CachedImage;
 class ImageObject;
-namespace NG {
-class ImageObject;
-}
 template<typename T>
 struct CacheNode {
     CacheNode(const std::string& key, const T& obj)
@@ -87,10 +84,6 @@ public:
 
     void CacheImageData(const std::string& key, const RefPtr<CachedImageData>& imageData);
     RefPtr<CachedImageData> GetCacheImageData(const std::string& key);
-
-    // cache interface for [NG::ImageObject]
-    RefPtr<NG::ImageObject> GetCacheImgObjNG(const std::string& key);
-    void CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj);
 
     void CacheImgObj(const std::string& key, const RefPtr<ImageObject>& imgObj);
     RefPtr<ImageObject> GetCacheImgObj(const std::string& key);
@@ -221,9 +214,6 @@ protected:
     std::mutex imgObjCacheMutex_;
     std::unordered_map<std::string, std::list<CacheNode<RefPtr<ImageObject>>>::iterator> imgObjCache_;
     std::atomic<size_t> imgObjCapacity_ = 2000; // imgObj is cached after clear image data.
-
-    std::list<CacheNode<RefPtr<NG::ImageObject>>> cacheImgObjListNG_;
-    std::unordered_map<std::string, std::list<CacheNode<RefPtr<NG::ImageObject>>>::iterator> imgObjCacheNG_;
 
     static std::shared_mutex cacheFilePathMutex_;
     static std::string cacheFilePath_;

@@ -20,7 +20,6 @@
 #include <sys/stat.h>
 
 #include "core/image/image_object.h"
-#include "core/components_ng/image_provider/image_object.h"
 
 namespace OHOS::Ace {
 
@@ -122,21 +121,6 @@ std::shared_ptr<CachedImage> ImageCache::GetCacheImage(const std::string& key)
 {
     std::scoped_lock lock(imageCacheMutex_, cacheListMutex_);
     return GetCacheObjWithCountLimitLRU<std::shared_ptr<CachedImage>>(key, cacheList_, imageCache_);
-}
-
-void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj)
-{
-    if (key.empty() || imgObjCapacity_ == 0) {
-        return;
-    }
-    std::scoped_lock lock(cacheImgObjListMutex_, imgObjCacheMutex_);
-    CacheWithCountLimitLRU<RefPtr<NG::ImageObject>>(key, imgObj, cacheImgObjListNG_, imgObjCacheNG_, imgObjCapacity_);
-}
-
-RefPtr<NG::ImageObject> ImageCache::GetCacheImgObjNG(const std::string& key)
-{
-    std::scoped_lock lock(cacheImgObjListMutex_, imgObjCacheMutex_);
-    return GetCacheObjWithCountLimitLRU<RefPtr<NG::ImageObject>>(key, cacheImgObjListNG_, imgObjCacheNG_);
 }
 
 void ImageCache::CacheImgObj(const std::string& key, const RefPtr<ImageObject>& imgObj)
