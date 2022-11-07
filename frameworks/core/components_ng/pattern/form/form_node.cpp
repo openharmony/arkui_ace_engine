@@ -45,7 +45,7 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
         context->SetTouchPipeline(WeakPtr<PipelineBase>(subContext));
     }
 
-    return HitTestResult::STOP_BUBBLING;
+    return HitTestResult::BUBBLING;
 }
 
 RefPtr<FormNode> FormNode::GetOrCreateFormNode(
