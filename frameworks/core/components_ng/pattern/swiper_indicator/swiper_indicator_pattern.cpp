@@ -57,17 +57,20 @@ void SwiperIndicatorPattern::SetIndicatorSize()
     CHECK_NULL_VOID(host);
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
+
     auto swiperGeometryNode = swiperNode->GetGeometryNode();
     CHECK_NULL_VOID(swiperGeometryNode);
     auto frameSize = swiperGeometryNode->GetFrameSize();
     float width = frameSize.Width();
     float height = frameSize.Height();
-
+    swiperWidth_ = width;
+    swiperHeight_ = height;
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     itemCount_ = swiperPattern->TotalCount();
     SetItemCount(itemCount_);
     axis_ = swiperPattern->GetDirection();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     if (swiperLayoutProperty->GetShowIndicator().has_value()) {
         showIndicator_ = swiperLayoutProperty->GetShowIndicator().value_or(true);

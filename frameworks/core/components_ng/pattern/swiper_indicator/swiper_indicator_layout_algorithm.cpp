@@ -39,6 +39,7 @@ namespace {
 
 constexpr Dimension INDICATOR_WIDTH = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_TOP_DEFAULT = 9.0_vp;
+constexpr double ZOOM_HOTZONE_MAX_RATE = 1.33;
 
 } // namespace
 void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -66,13 +67,25 @@ void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     float sizeHeigth = 0.0f;
     float sizeWidth = 0.0f;
-    auto size = paintProperty->GetSize();
-    if (size.has_value()) {
-        sizeHeigth = static_cast<float>(size->ConvertToPx() + INDICATOR_PADDING_TOP_DEFAULT.ConvertToPx() * 2);
-        sizeWidth = static_cast<float>(paintProperty->GetSize()->ConvertToPx());
-    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+    auto size = paintProperty->GetSizeValue(theme->GetSize());
+    sizeHeigth = static_cast<float>(size.ConvertToPx() + INDICATOR_PADDING_TOP_DEFAULT.ConvertToPx() * 2);
+    sizeWidth = static_cast<float>(size.ConvertToPx());
 
     auto indicatorWidth = static_cast<float>((sizeWidth + INDICATOR_WIDTH.ConvertToPx()) * itemCount);
+    auto selectedSize = static_cast<float>(theme->GetSelectedSize().ConvertToPx());
+
+    if (axis == Axis::HORIZONTAL) {
+        indicatorWidth_ = indicatorWidth;
+        indicatorHeight_ = selectedSize;
+    } else {
+        indicatorWidth_ = selectedSize;
+        indicatorHeight_ = indicatorWidth;
+    }
+
     SizeF frameSize = { -1.0f, -1.0f };
     do {
         if (axis == Axis::VERTICAL) {
@@ -104,37 +117,60 @@ void SwiperIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto axis = swiperPattern->GetDirection();
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto paintProperty = frameNode->GetPaintProperty<SwiperIndicatorPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
 
-    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
-    const auto& maxSize = layoutConstraint->maxSize;
-
-    float sizeWidth = 0.0f;
-    if (paintProperty->GetSize().has_value()) {
-        sizeWidth = static_cast<float>(paintProperty->GetSize()->ConvertToPx());
-    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     auto left = layoutProperty->GetLeft();
     auto right = layoutProperty->GetRight();
     auto top = layoutProperty->GetTop();
     auto bottom = layoutProperty->GetBottom();
-    auto indicatorPaddingX = Dimension(0.0);
-    auto indicatorPaddingY = Dimension(0.0);
+    hotZoneMaxSize_ = theme->GetHotZoneSize().ConvertToPx();
+    hotZoneMinSize_ = hotZoneMaxSize_ / ZOOM_HOTZONE_MAX_RATE;
+    double stableOffset = INDICATOR_PADDING_TOP_DEFAULT.ConvertToPx() + (hotZoneMaxSize_ + hotZoneMinSize_) * 0.5;
+
+    Offset position;
     if (left.has_value()) {
-        indicatorPaddingX = Dimension(left.value());
+        auto leftValue = GetValidEdgeLength(swiperWidth_, indicatorWidth_, Dimension(left->Value()));
+        position.SetX(leftValue);
     } else if (right.has_value()) {
-        indicatorPaddingX = Dimension(maxSize.Width() - right->Value());
+        auto rightValue = GetValidEdgeLength(swiperWidth_, indicatorWidth_, Dimension(right->Value()));
+        position.SetX(swiperWidth_ - indicatorWidth_ - rightValue);
+    } else {
+        if (axis == Axis::HORIZONTAL) {
+            position.SetX((swiperWidth_ - indicatorWidth_) / 2.0);
+        } else {
+            position.SetX(swiperWidth_ - stableOffset);
+        }
     }
     if (top.has_value()) {
-        indicatorPaddingY = Dimension(top->Value());
+        auto topValue = GetValidEdgeLength(swiperHeight_, indicatorHeight_, Dimension(top->Value()));
+        position.SetY(topValue);
     } else if (bottom.has_value()) {
-        indicatorPaddingY = Dimension(maxSize.Height() - bottom->Value());
+        auto bottomValue = GetValidEdgeLength(swiperHeight_, indicatorHeight_, Dimension(bottom->Value()));
+        position.SetY(swiperHeight_ - indicatorHeight_ - bottomValue);
+    } else {
+        if (axis == Axis::HORIZONTAL) {
+            position.SetY(swiperHeight_ - stableOffset);
+        } else {
+            position.SetY((swiperHeight_ - indicatorHeight_) / 2.0);
+        }
     }
-    auto currentOffset = axis == Axis::HORIZONTAL ? OffsetF(static_cast<float>(indicatorPaddingX.ConvertToPx()),
-                                                        static_cast<float>(indicatorPaddingY.ConvertToPx()))
-                                                  : OffsetF(static_cast<float>(indicatorPaddingY.ConvertToPx()),
-                                                        static_cast<float>(indicatorPaddingX.ConvertToPx()));
+    auto currentOffset = axis == Axis::HORIZONTAL ? OffsetF { position.GetX(), position.GetY() }
+                                                  : OffsetF { position.GetY(), position.GetX() };
 
     layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
+}
+
+double SwiperIndicatorLayoutAlgorithm::GetValidEdgeLength(double swiperLength, double indicatorLength, const Dimension& edge) const
+{
+    double edgeLength = edge.Unit() == DimensionUnit::PERCENT ? swiperLength * edge.Value() : edge.ConvertToPx();
+    if (!NearZero(edgeLength) && edgeLength > swiperLength - indicatorLength) {
+        edgeLength = swiperLength - indicatorLength;
+    }
+    if (edgeLength < 0.0) {
+        edgeLength = 0.0;
+    }
+    return edgeLength;
 }
 } // namespace OHOS::Ace::NG

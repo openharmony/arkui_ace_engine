@@ -59,6 +59,46 @@ public:
         return currentIndex_;
     }
 
+    void SetItemCount(int32_t itemCount)
+    {
+        itemCount_ = itemCount;
+    }
+
+    int32_t GetItemCount() const
+    {
+        return itemCount_;
+    }
+
+    void SetMainDelta(float mainDelta)
+    {
+        mainDelta_ = mainDelta;
+    }
+
+    float GetMainDelta() const
+    {
+        return mainDelta_;
+    }
+
+    void SetAxis(Axis axis)
+    {
+        axis_ = axis;
+    }
+
+    Axis GetAxis() const
+    {
+        return axis_;
+    }
+
+    void SetShowIndicator(bool showIndicator)
+    {
+        showIndicator_ = showIndicator;
+    }
+
+    bool GetShowIndicator() const
+    {
+        return showIndicator_;
+    }
+
 protected:
     struct IndicatorProperties final {
         IndicatorProperties(const Offset& normalPaddingStart, const Offset& normalPaddingEnd,

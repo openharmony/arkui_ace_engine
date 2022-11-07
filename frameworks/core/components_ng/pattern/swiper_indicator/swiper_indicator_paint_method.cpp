@@ -33,7 +33,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 // for indicator
-constexpr Dimension INDICATOR_POINT_PADDING_TOP = 9.0_vp;
 constexpr uint32_t GRADIENT_COLOR_SIZE = 3;
 } // namespace
 
@@ -41,15 +40,14 @@ CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapp
 {
     auto paintProperty = DynamicCast<SwiperIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(paintProperty, nullptr);
-
-    auto size = paintProperty->GetSize();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto size = paintProperty->GetSizeValue(theme->GetSize());
     auto geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
-
     SizeF contentSize;
-    if (size.has_value()) {
-        contentSize.SetHeight(static_cast<float>(size->ConvertToPx()));
-    }
+    contentSize.SetHeight(static_cast<float>(size.ConvertToPx()));
     auto contentOffset = geometryNode->GetContentOffset();
 
     auto paintFunc = [weak = WeakClaim(this), paintProperty, contentSize, showIndicator = showIndicator_,
@@ -122,7 +120,7 @@ void SwiperIndicatorPaintMethod::PaintContent(
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto swiperTheme = pipelineContext->GetTheme<SwitchTheme>();
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperTheme);
     auto height = contentSize.Height();
     float radius = 0.0f;
@@ -136,7 +134,7 @@ void SwiperIndicatorPaintMethod::PaintContent(
         if (i != targetIndex) {
             center += indicatorProperties.normalPaddingStart;
             RSBrush brush;
-            brush.SetColor(ToRSColor(paintProperty->GetColor().value_or(swiperTheme->GetPointColor())));
+            brush.SetColor(ToRSColor(paintProperty->GetColor().value_or(swiperTheme->GetColor())));
             canvas.AttachBrush(brush);
             rosen::Point point;
             if (axis_ == Axis::HORIZONTAL) {
@@ -152,7 +150,7 @@ void SwiperIndicatorPaintMethod::PaintContent(
         } else {
             center += indicatorProperties.normalPaddingStart;
             RSBrush brush;
-            brush.SetColor(ToRSColor(paintProperty->GetSelectedColor().value_or(swiperTheme->GetFocusColor())));
+            brush.SetColor(ToRSColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor())));
             canvas.AttachBrush(brush);
             rosen::Point point;
             if (axis_ == Axis::HORIZONTAL) {
@@ -179,10 +177,10 @@ SwiperIndicatorPaintMethod::IndicatorProperties SwiperIndicatorPaintMethod::Prep
     CHECK_NULL_RETURN(swiperTheme, IndicatorProperties(Offset(0.0, 0.0), Offset(0.0, 0.0), Offset(0.0, 0.0),
                                        Offset(0.0, 0.0), Offset(0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 0.0));
     scale_ = pipeline->GetDipScale();
-    uint32_t normalColor = paintProperty->GetColor()->GetValue();
-    uint32_t selectedColor = paintProperty->GetSelectedColor()->GetValue();
-    double normalPointRadius = pipeline->NormalizeToPx(paintProperty->GetSizeValue(Dimension(0.0))) / 2.0;
-    double selectedPointRadius = INDICATOR_POINT_PADDING_TOP.ConvertToPx();
+    uint32_t normalColor = paintProperty->GetColor().value_or(swiperTheme->GetColor()).GetValue();
+    uint32_t selectedColor = paintProperty->GetSelectedColor().value_or(swiperTheme->GetSelectedColor()).GetValue();
+    double normalPointRadius = pipeline->NormalizeToPx(paintProperty->GetSizeValue(swiperTheme->GetSize())) / 2.0;
+    double selectedPointRadius = swiperTheme->GetSelectedSize().ConvertToPx();
     double indicatorPointPadding = swiperTheme->GetIndicatorPointPadding().Value() * scale_;
     if (axis_ == Axis::HORIZONTAL) {
         return IndicatorProperties(Offset(normalPointRadius, 0.0),
