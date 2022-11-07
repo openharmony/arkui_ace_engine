@@ -556,7 +556,9 @@ void ViewAbstract::BindPopup(
     popupInfo.popupId = popupId;
     popupInfo.markNeedUpdate = isShow;
     popupInfo.popupNode = popupNode;
-    popupNode->MarkModifyDone();
+    if (popupNode) {
+        popupNode->MarkModifyDone();
+    }
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
     popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
     popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
