@@ -1630,11 +1630,11 @@ std::string TextFieldPattern::GetPlaceholderFont() const
             jsonValue->Put("placeholderFontWeight", "900");
             break;
         default:
-            jsonValue->Put("weight", V2::ConvertWrapFontWeightToStirng(weight).c_str());
+            jsonValue->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(weight).c_str());
     }
     auto family = layoutProperty->GetPlaceholderFontFamilyValue({ "sans-serif" });
     std::string jsonFamily = ConvertFontFamily(family);
-    jsonValue->Put("family", jsonFamily.c_str());
+    jsonValue->Put("fontFamily", jsonFamily.c_str());
     return jsonValue->ToString();
 }
 
@@ -1704,6 +1704,22 @@ std::string TextFieldPattern::GetInputFilter() const
     return layoutProperty->GetInputFilterValue("");
 }
 
+std::string TextFieldPattern::GetTextAlign() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "TextAlign::Start");
+    switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+        case TextAlign::START:
+            return "TextAlign.Start";
+        case TextAlign::CENTER:
+            return "TextAlign.Center";
+        case TextAlign::END:
+            return "TextAlign::End";
+        default:
+            return "TextAlign.Start";
+    }
+}
+
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("placeholder", GetPlaceholderColor().c_str());
@@ -1718,6 +1734,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto maxLength = GetMaxLength();
     json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
     json->Put("inputFilter", GetInputFilter().c_str());
+    json->Put("textAlign", GetTextAlign().c_str());
 }
 
 } // namespace OHOS::Ace::NG
