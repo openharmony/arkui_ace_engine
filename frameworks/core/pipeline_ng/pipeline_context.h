@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "base/memory/referenced.h"
+#include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
@@ -133,6 +134,10 @@ public:
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
     {
+        auto frontend = weakFrontend_.Upgrade();
+        if (frontend) {
+            frontend->OnSurfaceChanged(width, height);
+        }
         SetRootSize(density_, width, height);
     }
 
