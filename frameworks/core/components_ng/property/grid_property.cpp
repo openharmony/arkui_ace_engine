@@ -120,4 +120,30 @@ bool GridProperty::SetOffset(GridSizeType type, int32_t offset)
     return true;
 }
 
+void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    if (!gridInfo_) {
+        return;
+    }
+    const std::string sizeTypeStrs[] { "undefined", "xs", "sm", "md", "lg", "xl" };
+
+    auto gridOffset = gridInfo_->GetOffset(GridSizeType::UNDEFINED);
+    auto gridSpan = gridInfo_->GetColumns(GridSizeType::UNDEFINED);
+    json->Put("gridSpan", std::to_string(gridSpan).c_str());
+    json->Put("gridOffset", std::to_string(gridOffset).c_str());
+
+    auto useSizeType = JsonUtil::Create(false);
+    for (uint32_t i = 1; i < sizeof(sizeTypeStrs) / sizeof(std::string); i++) {
+        auto type = static_cast<GridSizeType>(i);
+        auto span = gridInfo_->GetColumns(type);
+        auto offset = gridInfo_->GetOffset(type);
+
+        auto typeStr = JsonUtil::Create(false);
+        typeStr->Put("span", std::to_string(span).c_str());
+        typeStr->Put("offset", std::to_string(offset).c_str());
+        useSizeType->Put(sizeTypeStrs[i].c_str(), typeStr);
+    }
+    json->Put("useSizeType", useSizeType);
+}
+
 } // namespace OHOS::Ace::NG
