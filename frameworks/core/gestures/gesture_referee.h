@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_REFEREE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_REFEREE_H
 
+#include <functional>
 #include <list>
 #include <unordered_map>
 
@@ -52,6 +53,11 @@ public:
 
     bool IsPending() const;
 
+    void SetQueryStateFunc(const std::function<bool(size_t)>& queryStateFunc)
+    {
+        queryStateFunc_ = queryStateFunc;
+    }
+
 private:
     bool Existed(const RefPtr<GestureRecognizer>& recognizer);
     const std::list<WeakPtr<GestureRecognizer>>& GetMembersByRecognizer(const RefPtr<GestureRecognizer>& recognizer);
@@ -69,6 +75,8 @@ private:
     std::list<WeakPtr<GestureRecognizer>> highRecognizers_;
     std::list<WeakPtr<GestureRecognizer>> lowRecognizers_;
     std::list<WeakPtr<GestureRecognizer>> parallelRecognizers_;
+
+    std::function<bool(size_t)> queryStateFunc_;
 };
 
 class GestureReferee : public virtual AceType {
@@ -93,9 +101,16 @@ public:
     // or reject)
     void Adjudicate(size_t touchId, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
 
+    void SetQueryStateFunc(std::function<bool(size_t)>&& queryStateFunc)
+    {
+        queryStateFunc_ = queryStateFunc;
+    }
+
 private:
     // Stores gesture recognizer collection according to Id.
     std::unordered_map<size_t, GestureScope> gestureScopes_;
+
+    std::function<bool(size_t)> queryStateFunc_;
 };
 
 } // namespace OHOS::Ace

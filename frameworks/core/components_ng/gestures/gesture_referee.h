@@ -71,12 +71,18 @@ public:
         isDelay_ = true;
     }
 
+    bool HasGestureAccepted() const
+    {
+        return hasGestureAccepted_;
+    }
+
 private:
     bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
     std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
 
     size_t touchId_ = 0;
     bool isDelay_ = false;
+    bool hasGestureAccepted_ = false;
 };
 
 class GestureReferee : public virtual AceType {
@@ -94,6 +100,8 @@ public:
     // Called by the gesture recognizer when the gesture recognizer has completed the recognition of the gesture (accept
     // or reject)
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
+
+    bool HasGestureAccepted(size_t touchId) const;
 
 private:
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
