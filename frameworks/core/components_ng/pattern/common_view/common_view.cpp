@@ -32,6 +32,9 @@ void CommonView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    if (nodeId == -1) {
+        nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    }
     auto blankNode = FrameNode::GetOrCreateFrameNode(
         V2::COMMON_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CommonViewPattern>(); });
     stack->Push(blankNode);
