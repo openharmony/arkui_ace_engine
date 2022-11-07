@@ -369,7 +369,6 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
     }
 
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnDragEnd(info);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
 }

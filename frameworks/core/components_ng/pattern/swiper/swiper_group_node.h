@@ -40,6 +40,18 @@ public:
     {
         return false;
     }
+
+    void MarkModifyDone() override
+    {
+        FrameNode::MarkModifyDone();
+
+        const auto& children = GetChildren();
+        for (const auto& child : children) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(frameNode);
+            frameNode->MarkModifyDone();
+        }
+    }
 };
 
 } // namespace OHOS::Ace::NG
