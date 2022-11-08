@@ -55,9 +55,11 @@ public:
     explicit LongPressEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~LongPressEventActuator() override = default;
 
-    void SetLongPressEvent(const RefPtr<LongPressEvent>& event)
+    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false)
     {
         longPressEvent_ = event;
+        isForDrag_ = isForDrag;
+        isDisableMouseLeft_ = isDisableMouseLeft;
     }
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -66,6 +68,8 @@ public:
     GestureEventFunc GetGestureEventFunc();
 
 private:
+    bool isForDrag_ = false;
+    bool isDisableMouseLeft_ = false;
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<LongPressEvent> longPressEvent_;
