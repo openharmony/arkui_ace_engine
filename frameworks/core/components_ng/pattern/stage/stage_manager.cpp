@@ -50,10 +50,10 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
     node->GetRenderContext()->SyncGeometryProperties(rect);
-    // build child before mount to stage node.
-    node->Build();
     // mount to parent and mark build render tree.
     node->MountToParent(stageNode_);
+    // then build the total child.
+    node->Build();
     stageNode_->RebuildRenderContextTree();
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
