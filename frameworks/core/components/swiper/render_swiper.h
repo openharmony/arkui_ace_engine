@@ -421,6 +421,7 @@ private:
     void HandleTouchDown(const TouchEventInfo& info);
     void HandleTouchUp(const TouchEventInfo& info);
     void HandleTouchMove(const TouchEventInfo& info);
+    void HandleTouchCancel(const TouchEventInfo& info);
     void HandleClick(const ClickInfo& clickInfo);
     void HandleRemoteMessage(const ClickInfo& clickInfo);
     void HandleDragStart(const DragStartInfo& info);
