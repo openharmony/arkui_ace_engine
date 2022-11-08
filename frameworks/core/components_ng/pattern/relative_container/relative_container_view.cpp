@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 void RelativeContainerView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    int32_t nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
