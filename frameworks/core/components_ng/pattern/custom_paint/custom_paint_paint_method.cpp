@@ -1006,8 +1006,8 @@ void CustomPaintPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& a
     double right = 0.0;
     double bottom = 0.0;
     if (isOffscreen_) {
-        right = args.para3;
-        bottom = args.para4;
+        right = args.para3 + args.para1;
+        bottom = args.para4 + args.para2;
     } else {
         right = args.para3 + args.para1 + offset.GetX();
         bottom = args.para4 + args.para2 + offset.GetY();
