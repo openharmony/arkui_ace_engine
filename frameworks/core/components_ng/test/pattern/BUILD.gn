@@ -32,6 +32,7 @@ group("pattern_unittest") {
     "shape:shape_pattern_unit_test",
     "text:text_pattern_test_ng",
     "textfield:textfield_pattern_test_ng",
+    "video:video_pattern_test_ng",
     "xcomponent:xcomponent_pattern_test_ng",
 
     # "stepper:stepper_pattern_test_ng",
