@@ -80,6 +80,7 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
 
     if (padding_) {
         json->Put("padding", padding_->ToJsonString().c_str());
@@ -272,6 +273,7 @@ void LayoutProperty::UpdateGridOffset(LayoutWrapper* layoutWrapper)
     if (!gridProperty_ || !gridProperty_->HasContainer()) {
         return;
     }
+
     auto optOffset = gridProperty_->GetOffset();
     if (optOffset == UNDEFINED_DIMENSION) {
         return;
