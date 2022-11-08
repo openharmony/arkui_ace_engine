@@ -43,19 +43,21 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
 
+    if (!paragraph_) {
+        return std::nullopt;
+    }
+
     bool skipMeasure = false;
-    if (paragraph_) {
-        // remeasure case, check text length and layout constrain.
-        auto width = contentConstraint.selfIdealSize.Width() ? contentConstraint.selfIdealSize.Width().value()
-                                                             : contentConstraint.maxSize.Width();
-        auto lineCount = paragraph_->GetLineCount();
-        if (lineCount == 1) {
-            if (LessOrEqual(GetTextWidth(), width)) {
-                skipMeasure = true;
-            }
-        } else {
-            skipMeasure = NearEqual(GetTextWidth(), width);
+    // remeasure case, check text length and layout constrain.
+    auto width = contentConstraint.selfIdealSize.Width() ? contentConstraint.selfIdealSize.Width().value()
+                                                            : contentConstraint.maxSize.Width();
+    auto lineCount = paragraph_->GetLineCount();
+    if (lineCount == 1) {
+        if (LessOrEqual(GetTextWidth(), width)) {
+            skipMeasure = true;
         }
+    } else {
+        skipMeasure = NearEqual(GetTextWidth(), width);
     }
 
     if (!skipMeasure) {
