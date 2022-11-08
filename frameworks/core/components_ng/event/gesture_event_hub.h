@@ -196,13 +196,13 @@ public:
 
     bool ActLongClick();
 
-    void SetLongPressEvent(const RefPtr<LongPressEvent>& event)
+    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false)
     {
         if (!longPressEventActuator_) {
             longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
             longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
         }
-        longPressEventActuator_->SetLongPressEvent(event);
+        longPressEventActuator_->SetLongPressEvent(event, isForDrag, isDisableMouseLeft);
     }
 
     // Set by user define, which will replace old one.
