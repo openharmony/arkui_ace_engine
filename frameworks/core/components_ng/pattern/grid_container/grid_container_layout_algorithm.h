@@ -44,7 +44,7 @@ public:
         gridContainerLayoutProperty->BuildWidth(width);
 
         auto curLayoutProp = layoutWrapper->GetHostNode()->GetLayoutProperty<GridContainerLayoutProperty>();
-        curLayoutProp->UpdateContainerInfo(gridContainerLayoutProperty->GetContainerInfoRef());
+        curLayoutProp->UpdateContainerInfo(gridContainerLayoutProperty->GetContainerInfoValue());
 
         LinearLayoutAlgorithm::Measure(layoutWrapper);
     }
