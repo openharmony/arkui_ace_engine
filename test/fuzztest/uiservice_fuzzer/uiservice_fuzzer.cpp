@@ -19,11 +19,20 @@
 #include "want.h"
 
 namespace OHOS {
-    bool RegisterCallBackTest(const AAFwk::Want& want)
+    bool RegisterCallBackTest(const uint8_t* data, const AAFwk::Want& want)
     {
         OHOS::Ace::UIServiceMgrClient client;
         sptr<Ace::IUIService> uiService = nullptr;
-        return client.RegisterCallBack(want, uiService) == ERR_OK;
+        std::string randomString = reinterpret_cast<const char*>(data);
+        int randomNumber = static_cast<int>(U32_AT(data));
+        DialogCallback callback;
+        int* id = nullptr;
+        client.RegisterCallBack(want, uiService);
+        client.ShowDialog(
+            randomString, randomString, OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
+            randomNumber, randomNumber, randomNumber, randomNumber, callback, id);
+        client.UpdateDialog(randomNumber, randomString);
+        return  client.CancelDialog(randomNumber) == ERR_OK;
     }
 
     bool UnregisterCallBackTest(const uint8_t* data, const AAFwk::Want& want)
@@ -61,7 +70,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::AAFwk::Want want;
     std::string randomString = reinterpret_cast<const char*>(data);
     want = want.SetUri(randomString);
-    OHOS::RegisterCallBackTest(want);
+    OHOS::RegisterCallBackTest(data, want);
     OHOS::PushTest(data, want);
     OHOS::RequestTest(data, want);
     OHOS::ReturnRequestTest(data, want);
