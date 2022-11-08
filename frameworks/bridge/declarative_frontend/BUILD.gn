@@ -278,6 +278,7 @@ template("declarative_js_engine") {
       "jsview/models/loading_progress_model_impl.cpp",
       "jsview/models/marquee_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
+      "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
       "jsview/models/patternlock_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
