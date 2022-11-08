@@ -21,6 +21,7 @@ group("pattern_unittest") {
     "checkboxgroup:checkboxgroup_pattern_test_ng",
     "common_view:common_view_test_ng",
     "custom_paint:custom_paint_pattern_test_ng",
+    "data_panel:data_panel_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "patternlock:patternlock_pattern_test_ng",
     "qrcode:qrcode_pattern_test_ng",
