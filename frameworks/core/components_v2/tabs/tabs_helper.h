@@ -197,7 +197,9 @@ public:
         newBarItemComponent->SetElementId(id);
 
         LOGD("setting id on tabContentItemComponent to %{public}d", id);
-        tabContentItemComponent->SetBarElementId(id);
+        if (tabContentItemComponent) {
+            tabContentItemComponent->SetBarElementId(id);
+        }
 
         // Add element to TabBar or store component to be added later
         if (tabBar) {
