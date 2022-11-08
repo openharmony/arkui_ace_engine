@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
+#include "core/components/theme/theme_manager.h"
 
-#include "gmock/gmock.h"
+namespace OHOS::Ace {
+ThemeManager::ThemeManager() = default;
 
-#include "core/components_ng/render/render_context.h"
-
-namespace OHOS::Ace::NG {
-class MockRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(MockRenderContext, RenderContext)
-public:
-    ~MockRenderContext() override = default;
-    MOCK_METHOD0(GetCanvas, RefPtr<Canvas>());
-    MOCK_METHOD0(Restore, void());
-};
-} // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
+RefPtr<Theme> ThemeManager::GetTheme(ThemeType type)
+{
+    return nullptr;
+}
+} // namespace OHOS::Ace

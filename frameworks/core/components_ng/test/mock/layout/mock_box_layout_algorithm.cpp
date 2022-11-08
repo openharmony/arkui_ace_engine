@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
-
-#include "gmock/gmock.h"
-
-#include "core/components_ng/render/render_context.h"
+#include "base/geometry/ng/size_t.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-class MockRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(MockRenderContext, RenderContext)
-public:
-    ~MockRenderContext() override = default;
-    MOCK_METHOD0(GetCanvas, RefPtr<Canvas>());
-    MOCK_METHOD0(Restore, void());
-};
+void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper) {}
+void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper) {}
+
+std::optional<SizeF> BoxLayoutAlgorithm::MeasureContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    return std::optional<SizeF>();
+}
+
+void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper) {}
+void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper) {}
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

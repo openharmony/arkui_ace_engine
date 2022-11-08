@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
-
-#include "gmock/gmock.h"
-
-#include "core/components_ng/render/render_context.h"
+#include "core/components_ng/render/render_property.h"
 
 namespace OHOS::Ace::NG {
-class MockRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(MockRenderContext, RenderContext)
-public:
-    ~MockRenderContext() override = default;
-    MOCK_METHOD0(GetCanvas, RefPtr<Canvas>());
-    MOCK_METHOD0(Restore, void());
-};
+void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void GradientProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
