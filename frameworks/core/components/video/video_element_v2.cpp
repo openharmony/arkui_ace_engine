@@ -23,10 +23,8 @@ namespace OHOS::Ace {
 
 RefPtr<Component> VideoElementV2::GetRootComponent()
 {
-    std::string componentNames[] = {
-        "flexItem", "display", "transform", "touch", "pan_gesture", "click_gesture",
-        "focusable", "box", "shared_transition"
-    };
+    std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_gesture", "click_gesture",
+        "focusable", "box", "shared_transition" };
     for (auto& name : componentNames) {
         auto iter = map_.find(name);
         if (iter != map_.end()) {
@@ -84,12 +82,69 @@ RefPtr<Component> VideoElementV2::FireFullscreen(
     return nullptr;
 }
 
+RefPtr<Component> VideoElementV2::FireFullscreen(bool isFullScreen, bool isPlaying, const WeakPtr<Texture>& texture)
+{
+    const auto& rootComponent = GetRootComponent();
+    if (!rootComponent) {
+        LOGE("VideoElementV2:rootComponent is null.");
+        return nullptr;
+    }
+
+    auto singleChild = AceType::DynamicCast<SingleChild>(rootComponent);
+    if (!singleChild) {
+        LOGE("VideoElementV2:singleChild is null.");
+        return nullptr;
+    }
+    if (isFullScreen) {
+        if (isFullScreen_) {
+            return nullptr;
+        }
+        originComponent_ = singleChild->GetChild();
+        videoComponent_->SetFullscreen(true);
+        videoComponent_->SetTexture(texture);
+        videoComponent_->SetPastPlayingStatus(isPlaying);
+        if (isPlaying) {
+            currentPos_ = currentPos_ + 1;
+        }
+        videoComponent_->SetStartTime(currentPos_);
+        videoComponent_->SetAutoPlay(false);
+        videoComponent_->SetMediaExitFullscreenEvent(
+            [weak = AceType::WeakClaim(this), singleChild](bool fullscreen, bool isPlaying, int32_t currentPos) {
+                auto client = weak.Upgrade();
+                if (client) {
+                    if (client->videoComponent_) {
+                        client->videoComponent_->SetFullscreen(fullscreen);
+                        client->videoComponent_->SetTexture(nullptr);
+                        client->videoComponent_->SetMediaPlayerFullStatus(false);
+
+                        auto controller = client->videoComponent_->GetVideoController();
+                        if (controller) {
+                            controller->ExitFullscreen(true);
+                        }
+                    }
+
+                    client->isFullScreen_ = fullscreen;
+                    client->isPlaying_ = isPlaying;
+                    client->SetCurrentTime(isPlaying ? currentPos + 1 : currentPos, SeekMode::SEEK_CLOSEST);
+                    client->UpdateChildInner(client->CreateChild());
+                    singleChild->SetChild(client->originComponent_);
+                    if (isPlaying) {
+                        client->Start();
+                    }
+                }
+            });
+        videoComponent_->SetMediaPlayerFullStatus(true);
+        isFullScreen_ = true;
+        singleChild->SetChild(GetEventComponents(videoComponent_));
+        return rootComponent;
+    }
+    return nullptr;
+}
+
 RefPtr<Component> VideoElementV2::GetEventComponents(const RefPtr<Component>& videoChild)
 {
     std::vector<RefPtr<Component>> components;
-    std::string componentNames[] = {
-        "display", "transform", "touch", "pan_gesture", "click_gesture", "focusable"
-    };
+    std::string componentNames[] = { "display", "transform", "touch", "pan_gesture", "click_gesture", "focusable" };
     for (auto& name : componentNames) {
         auto iter = map_.find(name);
         if (iter != map_.end()) {
@@ -116,6 +171,9 @@ RefPtr<Component> VideoElementV2::GetEventComponents(const RefPtr<Component>& vi
         }
     }
     box->SetChild(videoChild);
+    RefPtr<Decoration> decoration = AceType::MakeRefPtr<Decoration>();
+    decoration->SetBackgroundColor(Color::BLACK);
+    box->SetBackDecoration(decoration);
 
     if (!components.empty()) {
         const auto& lastEventComponent = AceType::DynamicCast<SingleChild>(components.back());
@@ -132,20 +190,34 @@ void VideoElementV2::SetNewComponent(const RefPtr<Component>& newComponent)
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(newComponent);
     if (!videoComponent_ && videoComponent) {
         videoComponent_ = videoComponent;
-        if (!videoComponent->GetPlayer().Upgrade() || !videoComponent->GetTexture().Upgrade()) {
-            videoComponent_->SetFullscreenEvent(
-                [weak = AceType::WeakClaim(this)](bool fullscreen, const WeakPtr<Player>& player,
-                                            const WeakPtr<Texture>& texture) {
+
+#ifdef OHOS_STANDARD_SYSTEM
+        if (!videoComponent->GetMediaPlayerFullStatus() || !videoComponent->GetTexture().Upgrade()) {
+            videoComponent_->SetMediaFullscreenEvent(
+                [weak = AceType::WeakClaim(this)](bool fullscreen, bool isPlaying, const WeakPtr<Texture>& texture) {
                     auto client = weak.Upgrade();
                     RefPtr<OHOS::Ace::Component> result;
                     if (client) {
-                        result = client->FireFullscreen(fullscreen, player, texture);
+                        result = client->FireFullscreen(fullscreen, isPlaying, texture);
                     }
                     return result;
                 });
         }
-    }
+#else
+        if (!videoComponent->GetPlayer().Upgrade() || !videoComponent->GetTexture().Upgrade()) {
+            videoComponent_->SetFullscreenEvent([weak = AceType::WeakClaim(this)](bool fullscreen,
+                                                    const WeakPtr<Player>& player, const WeakPtr<Texture>& texture) {
+                auto client = weak.Upgrade();
+                RefPtr<OHOS::Ace::Component> result;
+                if (client) {
+                    result = client->FireFullscreen(fullscreen, player, texture);
+                }
+                return result;
+            });
+        }
 
+#endif
+    }
     if (videoComponent) {
         UpdateVideoComponent(videoComponent);
         auto singleChild = AceType::DynamicCast<SingleChild>(videoComponent->GetParent().Upgrade());
