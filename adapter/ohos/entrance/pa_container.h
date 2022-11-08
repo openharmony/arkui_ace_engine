@@ -41,7 +41,7 @@ class PaContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(PaContainer, Container, JsMessageDispatcher);
 
 public:
-    PaContainer(int32_t instanceId, BackendType type, bool isArkApp, void* paAbility,
+    PaContainer(int32_t instanceId, BackendType type, void* paAbility,
         std::unique_ptr<PlatformEventCallback> callback);
     ~PaContainer() override = default;
 
@@ -142,7 +142,7 @@ public:
     void DumpHeapSnapshot(bool isPrivate) override;
 
     static bool Register();
-    static void CreateContainer(int32_t instanceId, BackendType type, bool isArkApp, void* paAbility,
+    static void CreateContainer(int32_t instanceId, BackendType type, void* paAbility,
         std::unique_ptr<PlatformEventCallback> callback);
     static void DestroyContainer(int32_t instanceId);
     static RefPtr<PaContainer> GetContainer(int32_t instanceId);
@@ -190,7 +190,6 @@ private:
 
     int32_t instanceId_ = 0;
     BackendType type_ = BackendType::SERVICE;
-    bool isArkApp_ = false;
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     void* paAbility_ = nullptr;
 

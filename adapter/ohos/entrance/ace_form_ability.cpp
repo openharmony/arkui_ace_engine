@@ -82,12 +82,9 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     packagePathStr += "/" + moduleInfo->package + "/";
 
     // init form ability
-    bool isHap = moduleInfo ? !moduleInfo->hapPath.empty() : false;
-    std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     BackendType backendType = BackendType::FORM;
-    bool isArkApp = GetIsArkFromConfig(packagePath, isHap);
-    
-    Platform::PaContainer::CreateContainer(instanceId_, backendType, isArkApp, this,
+
+    Platform::PaContainer::CreateContainer(instanceId_, backendType, this,
         std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
 
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();

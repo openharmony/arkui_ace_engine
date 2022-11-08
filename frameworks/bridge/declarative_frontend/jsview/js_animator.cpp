@@ -22,8 +22,6 @@
 
 #ifdef USE_V8_ENGINE
 #include "bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#elif USE_QUICKJS_ENGINE
-#include "bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
 #elif USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif
@@ -40,11 +38,6 @@ RefPtr<JsAcePage> GetCurrentPage()
 #ifdef USE_V8_ENGINE
     auto isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     auto page = V8DeclarativeEngineInstance::GetStagingPage(isolate);
-    return page;
-
-#elif USE_QUICKJS_ENGINE
-    auto context = QJSContext::Current();
-    auto page = QJSDeclarativeEngineInstance::GetRunningPage(context);
     return page;
 #elif USE_ARK_ENGINE
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());

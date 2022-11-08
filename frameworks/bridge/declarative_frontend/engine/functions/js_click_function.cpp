@@ -28,8 +28,6 @@ void JsClickFunction::Execute()
     // FlushBuild, FlushLayout and FlushRender on the dirty elements
 #ifdef USE_V8_ENGINE
     V8DeclarativeEngineInstance::TriggerPageUpdate();
-#elif USE_QUICKJS_ENGINE
-    QJSDeclarativeEngineInstance::TriggerPageUpdate(QJSDeclarativeEngineInstance::GetCurrentContext());
 #elif USE_ARK_ENGINE
     JsiDeclarativeEngineInstance::TriggerPageUpdate(JsiDeclarativeEngineInstance::GetCurrentRuntime());
 #endif

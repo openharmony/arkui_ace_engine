@@ -18,9 +18,7 @@
 
 #include "bindings_implementation.h"
 
-#ifdef USE_QUICKJS_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_bindings.h"
-#elif USE_V8_ENGINE
+#ifdef USE_V8_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_bindings.h"
 #elif USE_ARK_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_bindings.h"

@@ -59,9 +59,7 @@
 namespace OHOS::Ace::Platform {
 namespace {
 
-constexpr char QUICK_JS_ENGINE_SHARED_LIB[] = "libace_engine_qjs.z.so";
 constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
-constexpr char DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative.z.so";
 constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
 
 #ifdef _ARM64_
@@ -70,30 +68,22 @@ const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 const std::string ASSET_LIBARCH_PATH = "/lib/arm";
 #endif
 
-const char* GetEngineSharedLibrary(bool isArkApp)
+const char* GetEngineSharedLibrary()
 {
-    if (isArkApp) {
-        return ARK_ENGINE_SHARED_LIB;
-    } else {
-        return QUICK_JS_ENGINE_SHARED_LIB;
-    }
+    return ARK_ENGINE_SHARED_LIB;
 }
 
-const char* GetDeclarativeSharedLibrary(bool isArkApp)
+const char* GetDeclarativeSharedLibrary()
 {
-    if (isArkApp) {
-        return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
-    } else {
-        return DECLARATIVE_JS_ENGINE_SHARED_LIB;
-    }
+    return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
 } // namespace
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
     bool useCurrentEventRunner, bool useNewPipeline)
-    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), aceAbility_(aceAbility),
+    : instanceId_(instanceId), type_(type), aceAbility_(aceAbility),
       useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
@@ -105,11 +95,11 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     useStageModel_ = false;
 }
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
     bool useCurrentEventRunner, bool isSubAceContainer, bool useNewPipeline)
-    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), runtimeContext_(std::move(runtimeContext)),
+    : instanceId_(instanceId), type_(type), runtimeContext_(std::move(runtimeContext)),
       abilityInfo_(std::move(abilityInfo)), useCurrentEventRunner_(useCurrentEventRunner),
       isSubContainer_(isSubAceContainer)
 {
@@ -201,7 +191,7 @@ void AceContainer::InitializeFrontend()
     if (type_ == FrontendType::JS) {
         frontend_ = Frontend::Create();
         auto jsFrontend = AceType::DynamicCast<JsFrontend>(frontend_);
-        auto& loader = Framework::JsEngineLoader::Get(GetEngineSharedLibrary(isArkApp_));
+        auto& loader = Framework::JsEngineLoader::Get(GetEngineSharedLibrary());
         auto jsEngine = loader.CreateJsEngine(instanceId_);
         jsEngine->AddExtraNativeObject("ability", aceAbility.get());
         EngineHelper::AddEngine(instanceId_, jsEngine);
@@ -215,7 +205,7 @@ void AceContainer::InitializeFrontend()
         if (!isSubContainer_) {
             frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
+            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
             RefPtr<Framework::JsEngine> jsEngine;
             if (GetSettings().usingSharedRuntime) {
                 jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
@@ -694,12 +684,12 @@ void AceContainer::InitializeCallback()
     InitWindowCallback();
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type,
     const std::string& instanceName, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
     std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner, bool useNewPipeline)
 {
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
-        instanceId, type, isArkApp, aceAbility, std::move(callback), useCurrentEventRunner, useNewPipeline);
+        instanceId, type, aceAbility, std::move(callback), useCurrentEventRunner, useNewPipeline);
     AceEngine::Get().AddContainer(instanceId, aceContainer);
     ConnectServerManager::Get().SetDebugMode();
     HdcRegister::Get().StartHdcRegister(instanceId);

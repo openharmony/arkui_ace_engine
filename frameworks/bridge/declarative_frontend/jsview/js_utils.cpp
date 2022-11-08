@@ -48,8 +48,6 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     }
 #ifdef USE_V8_ENGINE
     v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_QUICKJS_ENGINE
-    JSValue value = obj.Get().GetHandle();
 #elif USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
@@ -90,8 +88,6 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
     }
 #ifdef USE_V8_ENGINE
     v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_QUICKJS_ENGINE
-    JSValue value = obj.Get().GetHandle();
 #elif USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
@@ -130,8 +126,6 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 
 #ifdef USE_V8_ENGINE
     v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_QUICKJS_ENGINE
-    JSValue value = obj.Get().GetHandle();
 #elif USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif

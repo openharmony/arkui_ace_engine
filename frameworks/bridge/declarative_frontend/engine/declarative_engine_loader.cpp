@@ -21,10 +21,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
 #endif
 
-#ifdef USE_QUICKJS_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine.h"
-#endif
-
 #ifdef USE_ARK_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif
@@ -38,10 +34,6 @@ RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngine(int32_t instanceId) con
 {
 #ifdef USE_V8_ENGINE
     return AceType::MakeRefPtr<V8DeclarativeEngine>(instanceId);
-#endif
-
-#ifdef USE_QUICKJS_ENGINE
-    return AceType::MakeRefPtr<QJSDeclarativeEngine>(instanceId);
 #endif
 
 #ifdef USE_ARK_ENGINE
