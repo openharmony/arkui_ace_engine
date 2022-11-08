@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/qrcode/qrcode_model.h"
 
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT QRCodeView {
+class ACE_EXPORT QRCodeModelNG : public OHOS::Ace::QRCodeModel {
 public:
-    static void Create(const std::string& value);
-    static void SetQRCodeColor(Color color);
-    static void SetQRBackgroundColor(Color color);
+    void Create(const std::string& value) override;
+    void SetQRCodeColor(Color color) override;
+    void SetQRBackgroundColor(Color color) override;
 };
-
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H
