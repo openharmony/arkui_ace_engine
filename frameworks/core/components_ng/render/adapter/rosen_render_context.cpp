@@ -46,13 +46,13 @@
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -336,7 +336,7 @@ void RosenRenderContext::OnBackgroundImagePositionUpdate(const BackgroundImagePo
 void RosenRenderContext::OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto dipScale_ = context->GetDipScale();
     auto backFilter =
@@ -599,7 +599,7 @@ void RosenRenderContext::PaintBorderImage()
             borderWidthProperty,
             paintRect.GetSize(),
             rsImage,
-            NG::PipelineContext::GetCurrentContext()->GetDipScale()
+            PipelineBase::GetCurrentContext()->GetDipScale()
         );
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
@@ -705,7 +705,7 @@ void RosenRenderContext::PaintBorderImageGradient()
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
         BorderImagePainter borderImagePainter(hasBorderWidthProperty,
             borderImageProperty, borderWidthProperty, paintSize, rsImage,
-            NG::PipelineContext::GetCurrentContext()->GetDipScale());
+            PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -1029,7 +1029,7 @@ void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto appTheme = pipeline->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
@@ -1060,7 +1060,7 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto appTheme = pipeline->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
@@ -1115,8 +1115,6 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 
 void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
 {
-    auto pipelineBase = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineBase);
     std::shared_ptr<Rosen::RSFilter> frontFilter = nullptr;
     if (radius.IsValid()) {
         float radiusPx = radius.ConvertToPx();
