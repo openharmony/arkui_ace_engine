@@ -91,6 +91,12 @@ void SlidingPanelPattern::Update()
                 ? PanelMode::FULL
                 : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     type_ = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto frameSize = host->GetGeometryNode()->GetFrameSize();
+    auto defaultFullHeight = Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx());
+    auto fullHeight = layoutProperty->GetFullHeight().value_or(defaultFullHeight).ConvertToPx();
+    UpdateCurrentOffsetOnAnimate(frameSize.Height() - fullHeight);
 }
 
 void SlidingPanelPattern::InitializeLayoutProps()
@@ -110,22 +116,21 @@ void SlidingPanelPattern::InitializeLayoutProps()
     auto halfHeight = layoutProperty->GetHalfHeight().value_or(Dimension(maxSize.Height() / 2)).ConvertToPx();
     auto miniHeight =
         layoutProperty->GetMiniHeight().value_or(Dimension(DRAG_UP_THRESHOLD.ConvertToPx())).ConvertToPx();
-    if (defaultBlankHeights_.empty()) {
-        defaultBlankHeights_[PanelMode::FULL] = maxSize.Height() - fullHeight;
-        defaultBlankHeights_[PanelMode::HALF] = maxSize.Height() - halfHeight;
-        defaultBlankHeights_[PanelMode::MINI] = maxSize.Height() - miniHeight;
-        CheckHeightValidity();
-        fullHalfBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
-                            (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
-        halfMiniBoundary_ = defaultBlankHeights_[PanelMode::HALF] +
-                            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::HALF]) / 2.0;
-        fullMiniBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
-                            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
-    }
+    defaultBlankHeights_[PanelMode::FULL] = maxSize.Height() - fullHeight;
+    defaultBlankHeights_[PanelMode::HALF] = maxSize.Height() - halfHeight;
+    defaultBlankHeights_[PanelMode::MINI] = maxSize.Height() - miniHeight;
+    CheckHeightValidity();
+    fullHalfBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
+                        (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
+    halfMiniBoundary_ = defaultBlankHeights_[PanelMode::HALF] +
+                        (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::HALF]) / 2.0;
+    fullMiniBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
+                        (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
     minBlankHeight_ = BLANK_MIN_HEIGHT.ConvertToPx();
 
     if (isFirstLayout_) {
         CheckPanelModeandType();
+        UpdateCurrentOffset(0); // Initialize firstLayout panel currentOffset_
         AnimateTo(defaultBlankHeights_[mode_], mode_);
         if (previousMode_ != mode_) {
             FireSizeChangeEvent();
