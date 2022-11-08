@@ -254,6 +254,10 @@ void RenderList::InitScrollable(Axis axis)
         if (proxy) {
             proxy->StartScrollBarAnimator();
         }
+        auto scrollBar = list->scrollBar_;
+        if (scrollBar) {
+            scrollBar->HandleScrollBarEnd();
+        }
         list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
         list->HandleListEvent();
     });
@@ -292,11 +296,13 @@ bool RenderList::IsReachStart()
 
 void RenderList::InitScrollBar()
 {
-    if (scrollBar_) {
-        scrollBar_->Reset();
+    if (!component_) {
+        LOGE("InitScrollBar failed, component_ is null.");
         return;
     }
-    if (!component_) {
+    if (scrollBar_) {
+        scrollBar_->SetDisplayMode(component_->GetScrollBar());
+        scrollBar_->Reset();
         return;
     }
     const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();

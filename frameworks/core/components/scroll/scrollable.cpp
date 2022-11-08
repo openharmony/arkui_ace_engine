@@ -310,6 +310,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     RelatedEventEnd();
     if (!moved_) {
         LOGI("It is not moved now,  no need to handle drag end motion");
+        if (scrollEndCallback_) {
+            scrollEndCallback_();
+        }
         return;
     }
     if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
