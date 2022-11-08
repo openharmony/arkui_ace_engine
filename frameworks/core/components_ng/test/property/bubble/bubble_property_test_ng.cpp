@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
+#include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -36,6 +37,10 @@ namespace OHOS::Ace::NG {
 namespace {
 const bool BUBBLE_PROPERTY_SHOW = true;
 const std::string BUBBLE_MESSAGE = "HelloWorld";
+constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
+const bool BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW = true;
+const bool BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW = false;
+const bool BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM = false;
 } // namespace
 class BubblePropertyTestNg : public testing::Test {
 public:
@@ -99,6 +104,136 @@ HWTEST_F(BubblePropertyTestNg, BubblePropertyTest003, TestSize.Level1)
     auto bubbleLayoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     EXPECT_FALSE(bubbleLayoutProperty == nullptr);
     EXPECT_EQ(bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM), Placement::TOP);
+}
+
+/**
+ * @tc.name: BubblePropertyTest004
+ * @tc.desc: set arrowOffset value into BubblePropertyTest004 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest004, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetArrowOffset(BUBBLE_PAINT_PROPERTY_ARROW_OFFSET);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto targetId = frameNode->GetId();
+    auto targetTag = frameNode->GetTag();
+    auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
+    EXPECT_FALSE(popupNode == nullptr);
+    auto bubblePaintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
+    EXPECT_FALSE(bubblePaintProperty == nullptr);
+    EXPECT_EQ(bubblePaintProperty->GetArrowOffset().value_or(0.0_px), BUBBLE_PAINT_PROPERTY_ARROW_OFFSET);
+}
+
+/**
+ * @tc.name: BubblePropertyTest005
+ * @tc.desc: set showInSubWindow value into BubblePropertyTest005 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest005, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto targetId = frameNode->GetId();
+    auto targetTag = frameNode->GetTag();
+    auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
+    EXPECT_FALSE(popupNode == nullptr);
+    auto bubbleLayoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_FALSE(bubbleLayoutProperty == nullptr);
+    EXPECT_EQ(bubbleLayoutProperty->GetShowInSubWindow().value_or(false), BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
+}
+
+/**
+ * @tc.name: BubblePropertyTest006
+ * @tc.desc: set enableArrow value into BubblePropertyTest006 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest006, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto popupNode = BubbleView::CreateBubbleNode(frameNode->GetTag(), frameNode->GetId(), popupParam);
+    EXPECT_FALSE(popupNode == nullptr);
+    auto bubbleLayoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_FALSE(bubbleLayoutProperty == nullptr);
+    EXPECT_EQ(bubbleLayoutProperty->GetEnableArrow().value_or(true), BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW);
+}
+
+/**
+ * @tc.name: BubblePropertyTest007
+ * @tc.desc: set primaryButton value into BubblePropertyTest007 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest007, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ButtonProperties properties;
+    properties.showButton = true;
+    properties.value = BUBBLE_MESSAGE;
+    popupParam->SetPrimaryButtonProperties(properties);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto primaryButton = popupParam->GetPrimaryButtonProperties();
+    EXPECT_EQ(primaryButton.showButton, true);
+    EXPECT_EQ(primaryButton.value, BUBBLE_MESSAGE);
+}
+
+/**
+ * @tc.name: BubblePropertyTest008
+ * @tc.desc: set secondaryButton value into BubblePropertyTest008 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest008, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ButtonProperties properties;
+    properties.showButton = true;
+    properties.value = BUBBLE_MESSAGE;
+    popupParam->SetSecondaryButtonProperties(properties);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto secondaryButton = popupParam->GetSecondaryButtonProperties();
+    EXPECT_EQ(secondaryButton.showButton, true);
+    EXPECT_EQ(secondaryButton.value, BUBBLE_MESSAGE);
+}
+
+/**
+ * @tc.name: BubblePropertyTest009
+ * @tc.desc: set UseCustom value into BubblePropertyTest009 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest009, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto popupNode = BubbleView::CreateBubbleNode(frameNode->GetTag(), frameNode->GetId(), popupParam);
+    EXPECT_FALSE(popupNode == nullptr);
+    auto bubbleLayoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_FALSE(bubbleLayoutProperty == nullptr);
+    EXPECT_EQ(bubbleLayoutProperty->GetUseCustom().value_or(true), BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM);
 }
 
 } // namespace OHOS::Ace::NG
