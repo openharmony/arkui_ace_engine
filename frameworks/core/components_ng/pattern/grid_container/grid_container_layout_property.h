@@ -66,11 +66,6 @@ public:
         return propContainerInfo_.value();
     }
 
-    void SwapchildrenFramenode(const RefPtr<GridContainerLayoutProperty>& other)
-    {
-        childrenFramenode_.swap(other->childrenFramenode_);
-    }
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContainerInfo, GridContainerInfo, PROPERTY_UPDATE_NORMAL);
 
 private:
