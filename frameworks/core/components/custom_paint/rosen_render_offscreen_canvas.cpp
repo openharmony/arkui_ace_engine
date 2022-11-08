@@ -689,7 +689,9 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradien
     SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetEndOffset().GetX()),
         SkDoubleToScalar(gradient.GetEndOffset().GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
-    auto gradientColors = gradient.GetColors();
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    std::stable_sort(gradientColors.begin(), gradientColors.end(),
+        [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
     uint32_t colorsSize = gradientColors.size();
     SkColor colors[gradientColors.size()];
     float pos[gradientColors.size()];
@@ -723,6 +725,11 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradien
 void RosenRenderOffscreenCanvas::BeginPath()
 {
     skPath_.reset();
+}
+
+void RosenRenderOffscreenCanvas::ResetTransform()
+{
+    skCanvas_->resetMatrix();
 }
 
 void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
@@ -1652,13 +1659,6 @@ bool RosenRenderOffscreenCanvas::IsPointInStroke(const RefPtr<CanvasPath2D>& pat
 {
     TranspareCmdToPath(path);
     return IsPointInPathByColor(x, y, skPath2d_, SK_ColorBLUE);
-}
-
-void RosenRenderOffscreenCanvas::ResetTransform()
-{
-    SkMatrix skMatrix;
-    skMatrix.setAll(1, 0, 0, 0, 1, 0, 0, 0, 1);
-    skCanvas_->setMatrix(skMatrix);
 }
 
 void RosenRenderOffscreenCanvas::InitFilterFunc()

@@ -618,7 +618,9 @@ void FlutterRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradi
     SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetEndOffset().GetX()),
         SkDoubleToScalar(gradient.GetEndOffset().GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
-    auto gradientColors = gradient.GetColors();
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    std::stable_sort(gradientColors.begin(), gradientColors.end(),
+        [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
     uint32_t colorsSize = gradientColors.size();
     SkColor colors[gradientColors.size()];
     float pos[gradientColors.size()];
@@ -652,6 +654,11 @@ void FlutterRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradi
 void FlutterRenderOffscreenCanvas::BeginPath()
 {
     skPath_.reset();
+}
+
+void FlutterRenderOffscreenCanvas::ResetTransform()
+{
+    skCanvas_->resetMatrix();
 }
 
 void FlutterRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
@@ -1580,13 +1587,6 @@ bool FlutterRenderOffscreenCanvas::IsPointInStroke(const RefPtr<CanvasPath2D>& p
 {
     TranspareCmdToPath(path);
     return IsPointInPathByColor(x, y, skPath2d_, SK_ColorBLUE);
-}
-
-void FlutterRenderOffscreenCanvas::ResetTransform()
-{
-    SkMatrix skMatrix;
-    skMatrix.setAll(1, 0, 0, 0, 1, 0, 0, 0, 1);
-    skCanvas_->setMatrix(skMatrix);
 }
 
 void FlutterRenderOffscreenCanvas::InitFilterFunc()

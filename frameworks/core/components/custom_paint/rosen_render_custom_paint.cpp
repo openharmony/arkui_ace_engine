@@ -1170,6 +1170,11 @@ void RosenRenderCustomPaint::BeginPath()
     skPath_.reset();
 }
 
+void RosenRenderCustomPaint::ResetTransform()
+{
+    skCanvas_->resetMatrix();
+}
+
 void RosenRenderCustomPaint::ClosePath()
 {
     skPath_.close();
