@@ -878,7 +878,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest008, TestSize
         CONTAINER_ID, AlignDirection::MIDDLE, HorizontalAlign::CENTER, firstItemAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, firstItemAlignRules);
-        RelativeContainerTestUtilsNG::AddAlignRule(
+    RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::CENTER, VerticalAlign::CENTER, firstItemAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, firstItemAlignRules);
@@ -902,7 +902,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest008, TestSize
         CONTAINER_ID, AlignDirection::MIDDLE, HorizontalAlign::START, secondItemAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::START, secondItemAlignRules);
-       RelativeContainerTestUtilsNG::AddAlignRule(
+    RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::CENTER, VerticalAlign::TOP, secondItemAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::TOP, secondItemAlignRules);
@@ -979,7 +979,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest009, TestSize
     std::map<AlignDirection, AlignRule> firstItemAlignRules;
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, firstItemAlignRules);
-        RelativeContainerTestUtilsNG::AddAlignRule(
+    RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, firstItemAlignRules);
     firstItemFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
     firstItemFrameNode->GetLayoutProperty()->UpdateAlignRules(firstItemAlignRules);
@@ -999,7 +999,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest009, TestSize
     std::map<AlignDirection, AlignRule> secondItemAlignRules;
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::START, secondItemAlignRules);
-        RelativeContainerTestUtilsNG::AddAlignRule(
+    RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::TOP, secondItemAlignRules);
     secondItemFrameNode->UpdateInspectorId(SECOND_ITEM_ID);
     secondItemFrameNode->GetLayoutProperty()->UpdateAlignRules(secondItemAlignRules);
