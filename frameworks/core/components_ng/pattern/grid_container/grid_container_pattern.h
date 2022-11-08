@@ -38,14 +38,6 @@ public:
     {
         return MakeRefPtr<GridContainerLayoutAlgorithm>();
     }
-
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& layoutWrapper, const DirtySwapConfig& config) override
-    {
-        auto layoutProperty = DynamicCast<GridContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        auto currentLayoutProperty = GetLayoutProperty<GridContainerLayoutProperty>();
-        layoutProperty->SwapchildrenFramenode(currentLayoutProperty);
-        return LinearLayoutPattern::OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    }
 };
 } // namespace OHOS::Ace::NG
 
