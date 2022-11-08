@@ -746,6 +746,40 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func, const
     return func->Call(runtime, global, argv, argv.size());
 }
 
+shared_ptr<JsValue> JsiPaEngine::CallFuncWithDefaultThis(
+    const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv)
+{
+    LOGD("JsiPaEngine CallFuncCallFuncWithDefaultThis");
+    ACE_DCHECK(engineInstance_);
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    ACE_DCHECK(runtime);
+    if (func == nullptr) {
+        LOGE("func is nullptr!");
+        return runtime->NewUndefined();
+    }
+    if (!func->IsFunction(runtime)) {
+        LOGE("func is not a function!");
+        return runtime->NewUndefined();
+    }
+
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> thisObject = global;
+    do {
+        shared_ptr<JsValue> exportsObject = global->GetProperty(runtime, "exports");
+        if (!exportsObject->IsObject(runtime)) {
+            LOGW("property \"exports\" is not a object");
+            break;
+        }
+        shared_ptr<JsValue> defaultObject = exportsObject->GetProperty(runtime, "default");
+        if (!defaultObject->IsObject(runtime)) {
+            LOGE("property \"default\" is not a object");
+            break;
+        }
+        thisObject = defaultObject;
+    } while (false);
+    return func->Call(runtime, thisObject, argv, argv.size());
+}
+
 shared_ptr<JsValue> JsiPaEngine::CallFunc(
     const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo)
 {
@@ -1375,7 +1409,7 @@ void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
 
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
     auto func = GetPaFunc("onCreate");
-    auto result = CallFunc(func, argv);
+    auto result = CallFuncWithDefaultThis(func, argv);
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine CallFunc FAILED!");
@@ -1419,7 +1453,7 @@ void JsiPaEngine::OnDelete(const int64_t formId)
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(std::to_string(formId)) };
     auto func = GetPaFunc("onDestroy");
-    CallFunc(func, argv);
+    CallFuncWithDefaultThis(func, argv);
 }
 
 void JsiPaEngine::OnTriggerEvent(const int64_t formId, const std::string& message)
@@ -1430,7 +1464,7 @@ void JsiPaEngine::OnTriggerEvent(const int64_t formId, const std::string& messag
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(std::to_string(formId)),
         runtime->NewString(message) };
     auto func = GetPaFunc("onEvent");
-    CallFunc(func, argv);
+    CallFuncWithDefaultThis(func, argv);
 }
 
 void JsiPaEngine::OnUpdate(const int64_t formId)
@@ -1440,7 +1474,7 @@ void JsiPaEngine::OnUpdate(const int64_t formId)
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(std::to_string(formId)) };
     auto func = GetPaFunc("onUpdate");
-    CallFunc(func, argv);
+    CallFuncWithDefaultThis(func, argv);
 }
 
 void JsiPaEngine::OnCastTemptoNormal(const int64_t formId)
@@ -1450,7 +1484,7 @@ void JsiPaEngine::OnCastTemptoNormal(const int64_t formId)
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(std::to_string(formId)) };
     auto func = GetPaFunc("onCastToNormal");
-    CallFunc(func, argv);
+    CallFuncWithDefaultThis(func, argv);
 }
 
 void JsiPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
@@ -1470,7 +1504,7 @@ void JsiPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->ParseJson(strJsonResult) };
     auto func = GetPaFunc("onVisibilityChange");
-    CallFunc(func, argv);
+    CallFuncWithDefaultThis(func, argv);
 }
 
 int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want& want)
@@ -1487,7 +1521,7 @@ int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want& want)
         return (int32_t)AppExecFwk::FormState::DEFAULT;
     }
 
-    auto result = CallFunc(func, argv);
+    auto result = CallFuncWithDefaultThis(func, argv);
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine CallFunc FAILED!");
@@ -1517,7 +1551,7 @@ bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 
     const std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(std::to_string(formId)) };
     auto func = GetPaFunc("onShare");
-    auto result = CallFunc(func, argv);
+    auto result = CallFuncWithDefaultThis(func, argv);
     if (result == nullptr) {
         LOGE("JsiPaEngine Call function result is nullptr!");
         return false;
