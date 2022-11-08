@@ -274,16 +274,16 @@ void GridPattern::AddScrollEvent()
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
-bool GridPattern::OnScrollCallback(float offset, int32_t source)
+bool GridPattern::OnScrollCallback(float offset, int32_t /* source */)
 {
     /* Stop scroll controler animation */
     if (animator_) {
         animator_->Stop();
     }
-    return UpdateScrollPosition(static_cast<float>(offset), source);
+    return UpdateScrollPosition(static_cast<float>(offset));
 }
 
-bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
+bool GridPattern::UpdateScrollPosition(float offset)
 {
     if (!isConfigScrollable_) {
         return false;
@@ -304,11 +304,7 @@ bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
         }
         gridLayoutInfo_.reachStart_ = false;
     }
-    if (source == SCROLL_FROM_JUMP) {
-        gridLayoutInfo_.currentOffset_ = offset;
-    } else {
-        gridLayoutInfo_.currentOffset_ += offset;
-    }
+    gridLayoutInfo_.currentOffset_ += offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -466,10 +462,10 @@ void GridPattern::ScrollPage(bool reverse)
     }
     if (!reverse) {
         LOGD("PgDn. Scroll offset is %{public}f", -GetMainContentSize());
-        UpdateScrollPosition(-GetMainContentSize(), SCROLL_FROM_UPDATE);
+        UpdateScrollPosition(-GetMainContentSize());
     } else {
         LOGD("PgUp. Scroll offset is %{public}f", GetMainContentSize());
-        UpdateScrollPosition(GetMainContentSize(), SCROLL_FROM_UPDATE);
+        UpdateScrollPosition(GetMainContentSize());
     }
 }
 
@@ -489,6 +485,12 @@ bool GridPattern::UpdateStartIndex(uint32_t index)
     return true;
 }
 
+void GridPattern::UpdateScrollerAnimation(float offset)
+{
+    UpdateScrollPosition(offset - animatorOffset_);
+    animatorOffset_ = offset;
+}
+
 bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
 {
     if (!isConfigScrollable_) {
@@ -500,6 +502,7 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     if (!animator_->IsStopped()) {
         animator_->Stop();
     }
+    animatorOffset_ = 0;
     animator_->ClearInterpolators();
 
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(0, position, curve);
@@ -507,7 +510,7 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         [offset = gridLayoutInfo_.currentOffset_, weakScroll = AceType::WeakClaim(this)](float value) {
             auto gridPattern = weakScroll.Upgrade();
             if (gridPattern) {
-                gridPattern->UpdateScrollPosition(offset + value, SCROLL_FROM_JUMP);
+                gridPattern->UpdateScrollPosition(value);
             }
         });
     animator_->AddInterpolator(animation);
