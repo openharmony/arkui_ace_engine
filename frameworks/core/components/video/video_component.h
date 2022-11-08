@@ -23,7 +23,6 @@
 #include "core/components/video/resource/player.h"
 #include "core/components/video/resource/texture.h"
 #include "core/components/video/texture_component.h"
-#include "core/components/video/video_controller_v2.h"
 #include "core/components/video/video_utils.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/element.h"
