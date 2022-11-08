@@ -100,51 +100,47 @@ void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
 
 void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gutter, bool isHorizontal)
 {
-    if (gutterObject->IsObject()) {
-        std::optional<Dimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
-        auto gutterParam = JSRef<JSObject>::Cast(gutterObject);
-        auto xs = gutterParam->GetProperty("xs");
-        Dimension xsDimension;
-        if (JSContainerBase::ParseJsDimensionVp(xs, xsDimension)) {
-            gutterOptions[0] = xsDimension;
-        }
-        auto sm = gutterParam->GetProperty("sm");
-        Dimension smDimension;
-        if (JSContainerBase::ParseJsDimensionVp(sm, smDimension)) {
-            gutterOptions[1] = smDimension;
-        }
-        auto md = gutterParam->GetProperty("md");
-        Dimension mdDimension;
-        if (JSContainerBase::ParseJsDimensionVp(md, mdDimension)) {
-            gutterOptions[2] = mdDimension;
-        }
-        auto lg = gutterParam->GetProperty("lg");
-        Dimension lgDimension;
-        if (JSContainerBase::ParseJsDimensionVp(lg, lgDimension)) {
-            gutterOptions[3] = lgDimension;
-        }
-        auto xl = gutterParam->GetProperty("xl");
-        Dimension xlDimension;
-        if (JSContainerBase::ParseJsDimensionVp(xl, xlDimension)) {
-            gutterOptions[4] = xlDimension;
-        }
-        auto xxl = gutterParam->GetProperty("xxl");
-        Dimension xxlDimension;
-        if (JSContainerBase::ParseJsDimensionVp(xxl, xxlDimension)) {
-            gutterOptions[5] = xxlDimension;
-        }
-        InheritGridRowGutterOption(gutter, gutterOptions, isHorizontal);
-    } else {
-        Dimension dim;
-        if (!JSContainerBase::ParseJsDimensionVp(gutterObject, dim)) {
-            return;
-        }
-        if (isHorizontal) {
-            gutter->SetXGutter(dim);
-        } else {
-            gutter->SetYGutter(dim);
-        }
+    Dimension dim;
+    if (JSContainerBase::ParseJsDimensionVp(gutterObject, dim)) {
+        isHorizontal ? gutter->SetXGutter(dim) : gutter->SetYGutter(dim);
+        return;
     }
+    if (!gutterObject->IsObject()) {
+        return;
+    }
+    std::optional<Dimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
+    auto gutterParam = JSRef<JSObject>::Cast(gutterObject);
+    auto xs = gutterParam->GetProperty("xs");
+    Dimension xsDimension;
+    if (JSContainerBase::ParseJsDimensionVp(xs, xsDimension)) {
+        gutterOptions[0] = xsDimension;
+    }
+    auto sm = gutterParam->GetProperty("sm");
+    Dimension smDimension;
+    if (JSContainerBase::ParseJsDimensionVp(sm, smDimension)) {
+        gutterOptions[1] = smDimension;
+    }
+    auto md = gutterParam->GetProperty("md");
+    Dimension mdDimension;
+    if (JSContainerBase::ParseJsDimensionVp(md, mdDimension)) {
+        gutterOptions[2] = mdDimension;
+    }
+    auto lg = gutterParam->GetProperty("lg");
+    Dimension lgDimension;
+    if (JSContainerBase::ParseJsDimensionVp(lg, lgDimension)) {
+        gutterOptions[3] = lgDimension;
+    }
+    auto xl = gutterParam->GetProperty("xl");
+    Dimension xlDimension;
+    if (JSContainerBase::ParseJsDimensionVp(xl, xlDimension)) {
+        gutterOptions[4] = xlDimension;
+    }
+    auto xxl = gutterParam->GetProperty("xxl");
+    Dimension xxlDimension;
+    if (JSContainerBase::ParseJsDimensionVp(xxl, xxlDimension)) {
+        gutterOptions[5] = xxlDimension;
+    }
+    InheritGridRowGutterOption(gutter, gutterOptions, isHorizontal);
 }
 
 RefPtr<V2::Gutter> ParserGutter(const JSRef<JSVal>& jsValue)
