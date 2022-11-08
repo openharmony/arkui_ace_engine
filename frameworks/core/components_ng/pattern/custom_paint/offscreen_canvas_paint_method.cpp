@@ -69,7 +69,7 @@ double GetQuality(const std::string& args, const double quality)
 } // namespace
 
 OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
-    const RefPtr<PipelineContext> context, int32_t width, int32_t height)
+    const RefPtr<PipelineBase> context, int32_t width, int32_t height)
 {
     isOffscreen_ = true;
     antiAlias_ = true;

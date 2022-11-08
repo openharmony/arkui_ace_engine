@@ -236,7 +236,10 @@ public:
 
     void FlushPipelineImmediately()
     {
-        context_->FlushPipelineImmediately();
+        auto context = AceType::DynamicCast<PipelineContext>(context_);
+        if (context) {
+            context->FlushPipelineImmediately();
+        }
     }
 
 protected:
@@ -287,7 +290,7 @@ protected:
     bool isOffscreen_ = false;
     std::unique_ptr<txt::Paragraph> paragraph_;
 
-    RefPtr<PipelineContext> context_;
+    RefPtr<PipelineBase> context_;
 
     SkPath skPath_;
     SkPath skPath2d_;
