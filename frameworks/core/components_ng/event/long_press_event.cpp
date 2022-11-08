@@ -39,7 +39,7 @@ void LongPressEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffse
     CHECK_NULL_VOID(frameNode);
 
     if (!longPressRecognizer_) {
-        longPressRecognizer_ = MakeRefPtr<LongPressRecognizer>();
+        longPressRecognizer_ = MakeRefPtr<LongPressRecognizer>(isForDrag_, isDisableMouseLeft_);
     }
 
     longPressRecognizer_->SetOnAction(GetGestureEventFunc());
