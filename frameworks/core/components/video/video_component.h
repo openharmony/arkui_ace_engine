@@ -126,8 +126,9 @@ class ACE_EXPORT VideoComponent : public TextureComponent {
     DECLARE_ACE_TYPE(VideoComponent, TextureComponent);
 
 public:
-    using FullscreenEvent =
-        std::function<RefPtr<Component>(bool, const WeakPtr<Player>&, const WeakPtr<Texture>&)>;
+    using FullscreenEvent = std::function<RefPtr<Component>(bool, const WeakPtr<Player>&, const WeakPtr<Texture>&)>;
+    using MediaExitFullscreenEvent = std::function<void(bool, bool, int32_t)>;
+    using MediaFullscreenEvent = std::function<RefPtr<Component>(bool, bool, const WeakPtr<Texture>&)>;
 
     explicit VideoComponent()
     {
@@ -358,6 +359,26 @@ public:
         return fullscreenEvent_;
     }
 
+    void SetMediaFullscreenEvent(MediaFullscreenEvent&& mediaFullscreenEvent)
+    {
+        mediaFullscreenEvent_ = std::move(mediaFullscreenEvent);
+    }
+
+    const MediaFullscreenEvent& GetMediaFullscreenEvent() const
+    {
+        return mediaFullscreenEvent_;
+    }
+
+    void SetMediaExitFullscreenEvent(MediaExitFullscreenEvent&& mediaExitFullscreenEvent)
+    {
+        mediaExitFullscreenEvent_ = mediaExitFullscreenEvent;
+    }
+
+    const MediaExitFullscreenEvent& GetMediaExitFullscreenEvent() const
+    {
+        return mediaExitFullscreenEvent_;
+    }
+
     bool IsFullscreen() const
     {
         return isFullscreen_;
@@ -395,6 +416,26 @@ public:
         }
     }
 
+    void SetPastPlayingStatus(bool pastPlayingStatus)
+    {
+        pastPlayingStatus_ = pastPlayingStatus;
+    }
+
+    bool GetPastPlayingStatus()
+    {
+        return pastPlayingStatus_;
+    }
+
+    void SetMediaPlayerFullStatus(bool isMediaPlayerFullStatus)
+    {
+        isMediaPlayerFullStatus_ = isMediaPlayerFullStatus;
+    }
+
+    bool GetMediaPlayerFullStatus()
+    {
+        return isMediaPlayerFullStatus_;
+    }
+
 private:
     std::string src_;
     std::string poster_;
@@ -403,6 +444,8 @@ private:
     bool isMute_ = false;
     bool isFullscreen_ = false;
     bool isLoop_ = false;
+    bool pastPlayingStatus_ = false;
+    bool isMediaPlayerFullStatus_ = false;
     int32_t startTime_ = 0;
     float speed_ = 1.0f;
     std::string direction_ = "auto";
@@ -418,6 +461,8 @@ private:
     EventMarker timeUpdateEventId_;
     EventMarker fullscreenChangeEventId_;
     FullscreenEvent fullscreenEvent_;
+    MediaExitFullscreenEvent mediaExitFullscreenEvent_;
+    MediaFullscreenEvent mediaFullscreenEvent_;
 
     RefPtr<ImageComponent> posterImage_;
     RefPtr<VideoController> videoController_;
