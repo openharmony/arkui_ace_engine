@@ -56,7 +56,8 @@ using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::A
 void onclickFunc(const BaseEventInfo* info) {};
 void onRemoteMessage() {};
 const CopyOptions copyOption = CopyOptions::None;
-DragDropBaseInfo OnDragStartFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {
+DragDropBaseInfo OnDragStartFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)
+{
     DragDropBaseInfo temp;
     return temp;
 };
