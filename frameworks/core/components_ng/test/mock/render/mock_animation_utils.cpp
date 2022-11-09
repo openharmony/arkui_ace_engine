@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
+#include "core/components_ng/render/animation_utils.h"
 
-#include "gmock/gmock.h"
+namespace OHOS::Ace {
+void AnimationUtils::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
+{}
 
-#include "core/components_ng/render/render_context.h"
+bool AnimationUtils::CloseImplicitAnimation()
+{
+    return false;
+}
 
-namespace OHOS::Ace::NG {
-class MockRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(MockRenderContext, RenderContext)
-public:
-    ~MockRenderContext() override = default;
-    MOCK_METHOD0(GetCanvas, RefPtr<Canvas>());
-    MOCK_METHOD0(Restore, void());
-};
-} // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
+void AnimationUtils::Animate(
+    const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
+{}
+} // namespace OHOS::Ace

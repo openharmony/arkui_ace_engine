@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/modifier_adapter.h"
+#include "core/components_ng/render/canvas.h"
 
 namespace OHOS::Ace::NG {
-
-#ifndef ENABLE_ROSEN_BACKEND
-void ModifierAdapter::RemoveModifier(int32_t modifierId) {}
-#endif
-
+RefPtr<Canvas> Canvas::Create(void* rawCanvas)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG
