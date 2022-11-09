@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 void GridColumnInfo::Builder::SetOffset(int32_t offset, GridSizeType type)
 {
     columnInfo_->hasColumnOffset_ = true;
-    if (isValid(type)) {
+    if (IsValid(type)) {
         columnInfo_->offsets_[type] = offset;
     }
 }
@@ -37,7 +37,7 @@ double GridColumnInfo::GetWidth() const
         return 0.0;
     }
     auto sizeType = parent_->GetSizeType();
-    uint32_t columns = isValid(sizeType) ? columns_[sizeType] : 0;
+    uint32_t columns = IsValid(sizeType) ? columns_[sizeType] : 0;
     return (columns <= 0) ? 0.0 : GetWidth(columns);
 }
 
@@ -62,7 +62,7 @@ double GridColumnInfo::GetMaxWidth() const
 
     uint32_t columns = 0;
     auto sizeType = parent_->GetSizeType();
-    if (isValid(sizeType)) {
+    if (IsValid(sizeType)) {
         columns = maxColumns_[sizeType];
         if (columns == 0) {
             columns = columns_[sizeType];
@@ -82,12 +82,12 @@ Dimension GridColumnInfo::GetOffset() const
     /* ace1.0 obsolete logic since 6 */
     auto sizeType = parent_->GetSizeType();
     if (!hasColumnOffset_) {
-        return isValid(sizeType) ? dimOffsets_[sizeType] : UNDEFINED_DIMENSION;
+        return IsValid(sizeType) ? dimOffsets_[sizeType] : UNDEFINED_DIMENSION;
     }
 
     /* ace2.0 */
     int32_t offset = INVALID_OFFSET;
-    if (isValid(sizeType)) {
+    if (IsValid(sizeType)) {
         offset = offsets_[sizeType];
     }
 

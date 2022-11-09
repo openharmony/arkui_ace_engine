@@ -24,12 +24,6 @@
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
-
-inline extern constexpr Dimension MAX_SCREEN_WIDTH_SM = 320.0_vp;
-inline extern constexpr Dimension MAX_SCREEN_WIDTH_MD = 600.0_vp;
-inline extern constexpr Dimension MAX_SCREEN_WIDTH_LG = 840.0_vp;
-inline extern constexpr Dimension MAX_SCREEN_WIDTH_XL = 1024.0_vp;
-
 enum class ScreenSizeType {
     UNDEFINED = 0,
     XS,
@@ -48,7 +42,7 @@ const inline std::map<ScreenSizeType, std::string> SCREEN_SIZE_VALUES = {
     {ScreenSizeType::XL, "xl"},
 };
 
-inline bool isValid(ScreenSizeType val)
+inline bool IsValid(ScreenSizeType val)
 {
     return static_cast<size_t>(val) < SCREEN_SIZE_COUNT;
 }
@@ -65,22 +59,7 @@ public:
         viewScale_ = density / dipScale;
     }
 
-    void OnSurfaceChanged(double width)
-    {
-        screenWidth_ = width;
-        if (width < MAX_SCREEN_WIDTH_SM.Value() * density_) {
-            currentSize_ = ScreenSizeType::XS;
-        } else if (width < MAX_SCREEN_WIDTH_MD.Value() * density_) {
-            currentSize_ = ScreenSizeType::SM;
-        } else if (width < MAX_SCREEN_WIDTH_LG.Value() * density_) {
-            currentSize_ = ScreenSizeType::MD;
-        } else if (width < MAX_SCREEN_WIDTH_XL.Value() * density_) {
-            currentSize_ = ScreenSizeType::LG;
-        } else {
-            currentSize_ = ScreenSizeType::XL;
-        }
-        LOGD("OnSurfaceChanged: %{public}f", width);
-    }
+    void OnSurfaceChanged(double width);
 
     double GetScreenWidth() const
     {
@@ -91,6 +70,8 @@ public:
     {
         return dipScale_;
     }
+
+    ScreenSizeType GetSize(double width) const;
 
     ScreenSizeType GetCurrentSize() const
     {

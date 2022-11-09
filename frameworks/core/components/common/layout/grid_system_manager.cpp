@@ -25,9 +25,6 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr Dimension COLUMN_2_AND_4_BREAKPOINT = MAX_SCREEN_WIDTH_SM;
-constexpr Dimension COLUMN_4_AND_8_BREAKPOINT = MAX_SCREEN_WIDTH_MD;
-constexpr Dimension COLUMN_8_AND_12_BREAKPOINT = MAX_SCREEN_WIDTH_LG;
 constexpr Dimension SMALL_GUTTER = 12.0_vp;
 constexpr Dimension SMALL_MARGIN = 12.0_vp;
 constexpr Dimension LARGE_GUTTER = 24.0_vp;
@@ -139,7 +136,7 @@ SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridSizeType& sizeType
         return GRID_COLUMNS_4;
     } else if (sizeType == GridSizeType::MD) {
         return GRID_COLUMNS_8;
-    } else if (sizeType == GridSizeType::LG) {
+    } else if (sizeType >= GridSizeType::LG) {
         return GRID_COLUMNS_12;
     }
 
@@ -148,39 +145,21 @@ SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridSizeType& sizeType
 
 const SystemGridInfo& GridSystemManager::GetCurrentGridInfo()
 {
-    const auto width = GetScreenWidth();
-    const auto density = GetDensity();
-    if (width < COLUMN_2_AND_4_BREAKPOINT.Value() * density) {
-        systemGridInfo_ = GRID_COLUMNS_2;
-    } else if (width < COLUMN_4_AND_8_BREAKPOINT.Value() * density) {
-        systemGridInfo_ = GRID_COLUMNS_4;
-    } else if (width < COLUMN_8_AND_12_BREAKPOINT.Value() * density) {
-        systemGridInfo_ = GRID_COLUMNS_8;
-    } else {
-        systemGridInfo_ = GRID_COLUMNS_12;
-    }
-    LOGD("GetCurrentGridInfo: %{public}f: sizeType = %{public}d", width, systemGridInfo_.sizeType);
+    GridSizeType sizeType = ScreenSystemManager::GetInstance().GetCurrentSize();
+    systemGridInfo_ = GetSystemGridInfo(sizeType);
+    LOGD("GetCurrentGridInfo: %{public}f: sizeType = %{public}d", GetScreenWidth(), systemGridInfo_.sizeType);
     return systemGridInfo_;
 }
 
 SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridTemplateType& templateType, double width)
 {
-    // Input width is normalized in px.
-    const auto dipScale = GetDipScale();
+    GridSizeType sizeType = ScreenSystemManager::GetInstance().GetSize(width);
     if (templateType == GridTemplateType::NORMAL) {
-        if (width < COLUMN_2_AND_4_BREAKPOINT.Value() * dipScale) {
-            return GRID_COLUMNS_2;
-        } else if (width < COLUMN_4_AND_8_BREAKPOINT.Value() * dipScale) {
-            return GRID_COLUMNS_4;
-        } else if (width < COLUMN_8_AND_12_BREAKPOINT.Value() * dipScale) {
-            return GRID_COLUMNS_8;
-        } else {
-            return GRID_COLUMNS_12;
-        }
+        return GetSystemGridInfo(sizeType);
     }
-    if (width < COLUMN_4_AND_8_BREAKPOINT.Value() * dipScale) {
+    if (sizeType == GridSizeType::XS || sizeType == GridSizeType::SM) {
         return GRID_TEMPLATE_COLUMNS_4;
-    } else if (width < COLUMN_8_AND_12_BREAKPOINT.Value() * dipScale) {
+    } else if (sizeType == GridSizeType::MD) {
         return GRID_TEMPLATE_COLUMNS_8;
     } else {
         return GRID_TEMPLATE_COLUMNS_12;

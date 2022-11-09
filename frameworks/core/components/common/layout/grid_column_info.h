@@ -117,7 +117,7 @@ public:
     }
     uint32_t GetColumns(GridSizeType type) const
     {
-        return isValid(type) ? columns_[type] : DEFAULT_GRID_COLUMN_SPAN;
+        return IsValid(type) ? columns_[type] : DEFAULT_GRID_COLUMN_SPAN;
     }
 
 private:

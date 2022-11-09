@@ -149,6 +149,7 @@ ohos_unittest("PipelineContextTest") {
     "//foundation/arkui/ace_engine/frameworks/core/components/common/layout/grid_column_info.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/common/layout/grid_container_info.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/common/layout/grid_system_manager.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/layout/screen_system_manager.cpp",
 
     # properties
     "//foundation/arkui/ace_engine/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
