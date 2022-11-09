@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/qrcode/qrcode_view.h"
+#include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -21,8 +21,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
-void QRCodeView::Create(const std::string& value)
+void QRCodeModelNG::Create(const std::string& value)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
@@ -35,15 +34,14 @@ void QRCodeView::Create(const std::string& value)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::WHITE);
 }
 
-void QRCodeView::SetQRCodeColor(Color color)
+void QRCodeModelNG::SetQRCodeColor(Color color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, color);
 }
 
-void QRCodeView::SetQRBackgroundColor(Color color)
+void QRCodeModelNG::SetQRBackgroundColor(Color color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color);
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
-
 } // namespace OHOS::Ace::NG

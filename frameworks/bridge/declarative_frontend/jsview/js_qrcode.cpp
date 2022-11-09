@@ -16,24 +16,40 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 
 #include "base/log/ace_trace.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components_ng/base/view_abstract.h"
-#include "frameworks/core/components_ng/pattern/qrcode/qrcode_view.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/models/qrcode_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/qrcode/qrcode_model.h"
+#include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<QRCodeModel> QRCodeModel::instance_ = nullptr;
+
+QRCodeModel* QRCodeModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ImageModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::QRCodeModelNG());
+        } else {
+            instance_.reset(new Framework::QRCodeModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 void JSQRCode::Create(const std::string& value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::QRCodeView::Create(value);
-        return;
-    }
-    RefPtr<QrcodeComponent> qrcodeComponent = AceType::MakeRefPtr<OHOS::Ace::QrcodeComponent>();
-    qrcodeComponent->SetValue(value);
-    qrcodeComponent->SetQrcodeColor(Color::BLACK);
-    qrcodeComponent->SetBackgroundColor(Color::WHITE);
-    ViewStackProcessor::GetInstance()->ClaimElementId(qrcodeComponent);
-    ViewStackProcessor::GetInstance()->Push(qrcodeComponent);
+    QRCodeModel::GetInstance()->Create(value);
 }
 
 void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
@@ -46,17 +62,7 @@ void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], qrcodeColor)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::QRCodeView::SetQRCodeColor(qrcodeColor);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto qrcode = AceType::DynamicCast<OHOS::Ace::QrcodeComponent>(component);
-    if (!qrcode) {
-        LOGE("qrcode is null");
-        return;
-    }
-    qrcode->SetQrcodeColor(qrcodeColor);
+    QRCodeModel::GetInstance()->SetQRCodeColor(qrcodeColor);
 }
 
 void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
@@ -70,18 +76,7 @@ void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::QRCodeView::SetQRBackgroundColor(backgroundColor);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto qrcode = AceType::DynamicCast<OHOS::Ace::QrcodeComponent>(component);
-    if (!qrcode) {
-        LOGE("qrcode is null");
-        return;
-    }
-    qrcode->SetBackgroundColor(backgroundColor);
+    QRCodeModel::GetInstance()->SetQRBackgroundColor(backgroundColor);
 }
 
 void JSQRCode::JSBind(BindingTarget globalObj)
