@@ -392,9 +392,6 @@ HWTEST_F(WebPatternTest, OnOverviewModeAccessEnabledUpdateTest008, TestSize.Leve
     webPattern->OnBackgroundColorUpdate(value);
     webPattern->OnInitialScaleUpdate(scale);
     webPattern->OnMultiWindowAccessEnabledUpdate(true);
-    g_webPattern->RegistVirtualKeyBoardListener();
-    g_webPattern->needUpdateWeb_ = false;
-    g_webPattern->RegistVirtualKeyBoardListener();
     g_webPattern->OnQuickMenuDismissed();
 #endif
 }

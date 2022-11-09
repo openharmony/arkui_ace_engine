@@ -22,6 +22,7 @@ ohos_unittest("web_pattern_test_ng") {
     defines = [ "OHOS_STANDARD_SYSTEM" ]
   }
   sources = [
+    "web_pattern_event_test.cpp",
     "web_pattern_test.cpp",
     "web_pattern_test_ng.cpp",
   ]
