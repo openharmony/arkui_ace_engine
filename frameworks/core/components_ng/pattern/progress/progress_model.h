@@ -28,13 +28,13 @@ public:
     static ProgressModel* GetInstance();
     virtual ~ProgressModel() = default;
 
-    virtual void Create(double min, double value, double cachedValue, double max, NG::ProgressType type);
-    virtual void SetValue(double value);
-    virtual void SetColor(const Color& value);
-    virtual void SetBackgroundColor(const Color& value);
-    virtual void SetStrokeWidth(const Dimension& value);
-    virtual void SetScaleCount(int32_t value);
-    virtual void SetScaleWidth(const Dimension& value);
+    virtual void Create(double min, double value, double cachedValue, double max, NG::ProgressType type) = 0;
+    virtual void SetValue(double value) = 0;
+    virtual void SetColor(const Color& value) = 0;
+    virtual void SetBackgroundColor(const Color& value) = 0;
+    virtual void SetStrokeWidth(const Dimension& value) = 0;
+    virtual void SetScaleCount(int32_t value) = 0;
+    virtual void SetScaleWidth(const Dimension& value) = 0;
 
 private:
     static std::unique_ptr<ProgressModel> instance_;

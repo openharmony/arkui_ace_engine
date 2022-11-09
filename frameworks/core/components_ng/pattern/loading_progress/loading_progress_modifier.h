@@ -24,7 +24,6 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-
 const Dimension RING_RADIUS = 10.5_vp;
 const Dimension ORBIT_RADIUS = 17.0_vp;
 const Dimension RING_WIDTH = 2.8_vp;
@@ -33,6 +32,8 @@ const float RING_MOVEMENT = 0.06f;
 const float FULL_COUNT = 100.0f;
 const float COUNT = 50.0f;
 const float HALF = 0.5f;
+const int32_t LOADING_DURATION = 300;
+const float LOADING_TEMPO = 0.2f;
 
 class LoadingProgressModifier : public ContentModifier {
     DECLARE_ACE_TYPE(LoadingProgressModifier, ContentModifier);
@@ -46,7 +47,7 @@ public:
         float date = date_->Get();
         scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + COMET_WIDTH.ConvertToPx())),
                      (context.height /
-                        (RING_RADIUS.ConvertToPx() * (1 + RING_MOVEMENT) + RING_WIDTH.ConvertToPx() * HALF))) *
+                         (RING_RADIUS.ConvertToPx() * (1 + RING_MOVEMENT) + RING_WIDTH.ConvertToPx() * HALF))) *
                  HALF;
         if (date > COUNT) {
             DrawRing(context, date, scale_);
@@ -65,14 +66,12 @@ public:
         if (date_) {
             AnimationOption option = AnimationOption();
             RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
-            option.SetDuration(300);
+            option.SetDuration(LOADING_DURATION);
             option.SetDelay(0);
             option.SetCurve(curve);
             option.SetIteration(-1);
-            option.SetTempo(0.2f);
-            AnimationUtils::Animate(option, [&]() {
-                date_->Set(date);
-            });
+            option.SetTempo(LOADING_TEMPO);
+            AnimationUtils::Animate(option, [&]() { date_->Set(date); });
         }
     }
 

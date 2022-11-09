@@ -13,19 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOADING_PROGRESS_LOADING_PROGRESS_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOADING_PROGRESS_LOADING_PROGRESS_MODEL_NG_H
 
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_style.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
 
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT LoadingProgressView {
+class  ACE_EXPORT LoadingProgressModelNG : public OHOS::Ace::LoadingProgressModel {
 public:
-    static void Create();
-    static void SetColor(const Color& value);
+    void Create() override;
+    void SetColor(const Color& value) override;
 };
-} // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_VIEW_H
+} // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOADING_PROGRESS_LOADING_PROGRESS_MODEL_NG_H
