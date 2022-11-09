@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline/pipeline_context.h"
 
