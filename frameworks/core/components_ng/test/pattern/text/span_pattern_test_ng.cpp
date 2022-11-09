@@ -29,7 +29,6 @@
 
 using namespace testing;
 using namespace testing::ext;
-
 namespace OHOS::Ace::NG {
 namespace {
 const std::string CREATE_VALUE = "Hello World";
@@ -41,9 +40,7 @@ const Ace::TextDecoration TEXT_DECORATION_VALUE = Ace::TextDecoration::INHERIT;
 const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
-
 void onclickFunc(const BaseEventInfo* info) {};
-
 } // namespace
 
 class SpanPatternTestNg : public testing::Test {
@@ -99,8 +96,6 @@ HWTEST_F(SpanPatternTestNg, SpanFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(spanNode->GetFontWeight(), FontWeight::W700);
     spanModelNG.SetFontWeight(FontWeight::BOLDER);
     EXPECT_EQ(spanNode->GetFontWeight(), FontWeight::W900);
-
     spanModelNG.SetOnClick(onclickFunc);
 }
-
 } // namespace OHOS::Ace::NG

@@ -30,15 +30,10 @@
 
 using namespace testing;
 using namespace testing::ext;
-
 namespace OHOS::Ace::NG {
-
 namespace {
-
 const Alignment alignMent = Alignment::TOP_CENTER;
-
 } // namespace
-
 class StackPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -62,5 +57,4 @@ HWTEST_F(StackPatternTestNg, StackPatternTest001, TestSize.Level1)
     EXPECT_FALSE(layoutWrapper == nullptr);
     EXPECT_EQ(alignMent, layoutProperty->GetPositionProperty()->GetAlignmentValue());
 }
-
 } // namespace OHOS::Ace::NG

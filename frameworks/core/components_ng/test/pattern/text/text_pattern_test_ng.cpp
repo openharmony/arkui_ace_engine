@@ -52,7 +52,6 @@ const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-
 void onclickFunc(const BaseEventInfo* info) {};
 void onRemoteMessage() {};
 const CopyOptions copyOption = CopyOptions::None;
@@ -62,7 +61,6 @@ DragDropBaseInfo OnDragStartFunction(const RefPtr<OHOS::Ace::DragEvent>&, const 
     return temp;
 };
 void OnDragDropFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {};
-
 } // namespace
 
 struct TestProperty {
@@ -307,5 +305,4 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator004, TestSize.Level1)
     textAccessibilityProperty->SetHost(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     EXPECT_EQ(textAccessibilityProperty->GetText(), CREATE_VALUE);
 }
-
 } // namespace OHOS::Ace::NG
