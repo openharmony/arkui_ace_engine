@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/loading_progress/loading_progress_view.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -22,8 +22,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-    
-void LoadingProgressView::Create()
+void LoadingProgressModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -32,7 +31,7 @@ void LoadingProgressView::Create()
     stack->Push(frameNode);
 }
 
-void LoadingProgressView::SetColor(const Color& value)
+void LoadingProgressModelNG::SetColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value);
 }
