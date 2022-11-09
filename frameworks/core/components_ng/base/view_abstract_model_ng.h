@@ -703,7 +703,9 @@ public:
         CHECK_NULL_VOID(hub);
 
         if (type == ResponseType::RIGHT_CLICK) {
-            OnMouseEventFunc event = [builder = std::move(buildFunc), targetNode](MouseInfo& info) mutable {
+            OnMouseEventFunc event = [builder = std::move(buildFunc), weak = Referenced::WeakClaim(Referenced::RawPtr(
+                                                                          targetNode))](MouseInfo& info) mutable {
+                auto targetNode = weak.Upgrade();
                 if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                     CreateCustomMenu(builder, targetNode, true,
                         NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
@@ -716,7 +718,9 @@ public:
             inputHub->AddOnMouseEvent(mouseCallback_);
         } else if (type == ResponseType::LONGPRESS) {
             // create or show menu on long press
-            auto event = [builder = std::move(buildFunc), targetNode](const GestureEvent& info) mutable {
+            auto event = [builder = std::move(buildFunc), weak = Referenced::WeakClaim(Referenced::RawPtr(targetNode))](
+                             const GestureEvent& info) mutable {
+                auto targetNode = weak.Upgrade();
                 CreateCustomMenu(builder, targetNode, true,
                     NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
             };
