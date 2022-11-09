@@ -225,6 +225,8 @@ RefPtr<RenderTaskHolder> ImageProvider::CreateRenderTaskHolder()
 void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
     std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder)
 {
+    callback(canvasImage);
+    return;
     CHECK_NULL_VOID(renderTaskHolder);
     auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
     CHECK_NULL_VOID(flutterRenderTaskHolder);
