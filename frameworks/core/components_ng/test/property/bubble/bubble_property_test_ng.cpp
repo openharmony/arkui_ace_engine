@@ -41,6 +41,20 @@ constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
 const bool BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW = true;
 const bool BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW = false;
 const bool BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM = false;
+const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENT = {
+    Placement::LEFT,
+    Placement::RIGHT,
+    Placement::TOP,
+    Placement::BOTTOM,
+    Placement::TOP_LEFT,
+    Placement::TOP_RIGHT,
+    Placement::BOTTOM_LEFT,
+    Placement::BOTTOM_RIGHT,
+    Placement::LEFT_BOTTOM,
+    Placement::LEFT_TOP,
+    Placement::RIGHT_BOTTOM,
+    Placement::RIGHT_TOP,
+};
 } // namespace
 class BubblePropertyTestNg : public testing::Test {
 public:
@@ -234,6 +248,29 @@ HWTEST_F(BubblePropertyTestNg, BubblePropertyTest009, TestSize.Level1)
     auto bubbleLayoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     EXPECT_FALSE(bubbleLayoutProperty == nullptr);
     EXPECT_EQ(bubbleLayoutProperty->GetUseCustom().value_or(true), BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM);
+}
+
+/**
+ * @tc.name: BubblePropertyTest0010
+ * @tc.desc: set a lot of placement value into BubblePropertyTest009 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest0010, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    for (const auto& placement : BUBBLE_LAYOUT_PROPERTY_PLACEMENT) {
+        popupParam->SetPlacement(placement);
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        EXPECT_FALSE(frameNode == nullptr);
+        ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+        auto popupNode = BubbleView::CreateBubbleNode(frameNode->GetTag(), frameNode->GetId(), popupParam);
+        EXPECT_FALSE(popupNode == nullptr);
+        auto bubbleLayoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+        EXPECT_FALSE(bubbleLayoutProperty == nullptr);
+        EXPECT_EQ(bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM), placement);
+    }
 }
 
 } // namespace OHOS::Ace::NG
