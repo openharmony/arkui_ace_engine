@@ -129,6 +129,7 @@ void SelectPopupComponent::HideDialog(uint32_t index)
     if (refreshAnimationCallback_ && animationController_) {
         hideOption_.ClearListeners();
         refreshAnimationCallback_(hideOption_, false);
+        animationController_->ClearStopListeners();
         animationController_->AddStopListener([weak = WeakClaim(this), index]() {
             auto refPtr = weak.Upgrade();
             if (!refPtr) {
@@ -187,6 +188,7 @@ void SelectPopupComponent::CloseContextMenu()
     if (refreshAnimationCallback_ && animationController_) {
         hideOption_.ClearListeners();
         refreshAnimationCallback_(hideOption_, false);
+        animationController_->ClearStopListeners();
         animationController_->AddStopListener([]() {
             SubwindowManager::GetInstance()->ClearMenu();
         });
