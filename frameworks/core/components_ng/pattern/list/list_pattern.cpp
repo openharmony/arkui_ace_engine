@@ -211,9 +211,14 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
             onReachStart();
         }
     }
-    if ((endIndex_ == maxListItemIndex_) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
-        auto onReachEnd = listEventHub->GetOnReachEnd();
-        if (onReachEnd) {
+    auto onReachEnd = listEventHub->GetOnReachEnd();
+    if (onReachEnd) {
+        float lastEndPos = endMainPos_ - (currentOffset_ - lastOffset_);
+        bool scrollUpToEnd = GreatNotEqual(lastEndPos, GetMainContentSize()) &&
+            LessOrEqual(endMainPos_, GetMainContentSize());
+        bool scrollDownToEnd = LessNotEqual(lastEndPos, GetMainContentSize()) &&
+            GreatOrEqual(endMainPos_, GetMainContentSize());
+        if ((endIndex_ == maxListItemIndex_) && (scrollUpToEnd || scrollDownToEnd)) {
             onReachEnd();
         }
     }
