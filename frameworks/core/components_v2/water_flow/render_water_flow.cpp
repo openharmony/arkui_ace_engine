@@ -278,6 +278,10 @@ void RenderWaterFlow::CreateScrollable()
             if (proxy) {
                 proxy->StartScrollBarAnimator();
             }
+            auto scrollBar = flow->scrollBar_;
+            if (scrollBar) {
+                scrollBar->HandleScrollBarEnd();
+            }
         }
     });
     scrollable_->Initialize(context_);

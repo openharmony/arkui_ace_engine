@@ -554,9 +554,11 @@ void RenderScroll::ResetScrollEventCallBack()
 void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
 {
     if (scrollBar_ != scrollBar) {
-        if (scrollBar_) {
+        if (scrollBar_ && scrollBar) {
             // Clear the old data.
+            scrollBar_->SetDisplayMode(scrollBar->GetDisplayMode());
             scrollBar_->Reset();
+            return;
         }
         scrollBar_ = scrollBar;
         if (!scrollBar_) {
