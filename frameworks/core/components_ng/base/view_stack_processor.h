@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/gestures/gesture_processor.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline/base/render_context.h"
 #define ACE_UPDATE_LAYOUT_PROPERTY(target, name, value)                         \
     do {                                                                        \

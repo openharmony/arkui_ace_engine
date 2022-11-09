@@ -59,6 +59,9 @@ public:
                 themeConstants->GetDimension(THEME_TAB_FOCUS_INDICATOR_HORIZONTAL_PADDING);
             theme->focusIndicatorVerticalPadding_ =
                 themeConstants->GetDimension(THEME_TAB_FOCUS_INDICATOR_VERTICAL_PADDING);
+            theme->subTabLineOnColor_ = themeConstants->GetColor(THEME_OHOS_SUBTAB_LINE_ON);
+            theme->subTabTextOnColor_ = themeConstants->GetColor(THEME_OHOS_SUBTAB_TEXT_ON);
+            theme->subTabTextOffColor_ = themeConstants->GetColor(THEME_OHOS_SUBTAB_TEXT_OFF);
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return theme;
@@ -68,7 +71,7 @@ public:
                 theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::WHITE);
                 theme->activeIndicatorColor_ = pattern->GetAttr<Color>("active_indicator_color", Color::WHITE);
                 theme->focusIndicatorColor_ = pattern->GetAttr<Color>("focus_indicator_color", Color::WHITE);
-                theme->focusIndicatorRadius_  = pattern->GetAttr<Dimension>("focus_indicator_radius", 0.0_vp);
+                theme->focusIndicatorRadius_ = pattern->GetAttr<Dimension>("focus_indicator_radius", 0.0_vp);
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -153,6 +156,21 @@ public:
         return focusIndicatorVerticalPadding_;
     }
 
+    const Color& GetSubTabLineOnColor() const
+    {
+        return subTabLineOnColor_;
+    }
+
+    const Color& GetSubTabTextOnColor() const
+    {
+        return subTabTextOnColor_;
+    }
+
+    const Color& GetSubTabTextOffColor() const
+    {
+        return subTabTextOffColor_;
+    }
+
 protected:
     TabTheme() = default;
 
@@ -172,6 +190,9 @@ private:
     Dimension focusIndicatorRadius_;
     Dimension focusIndicatorHorizontalPadding_;
     Dimension focusIndicatorVerticalPadding_;
+    Color subTabLineOnColor_;
+    Color subTabTextOnColor_;
+    Color subTabTextOffColor_;
 };
 
 } // namespace OHOS::Ace

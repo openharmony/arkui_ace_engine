@@ -101,7 +101,9 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<TabBarLayoutAlgorithm>();
+        layoutAlgorithm->SetChildrenMainSize(childrenMainSize_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
+        layoutAlgorithm->SetIndicator(indicator_);
         return layoutAlgorithm;
     }
 
@@ -113,6 +115,16 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         return MakeRefPtr<TabBarPaintMethod>();
+    }
+
+    void SetChildrenMainSize(float childrenMainSize)
+    {
+        childrenMainSize_ = childrenMainSize;
+    }
+
+    void SetIndicator(int32_t indicator)
+    {
+        indicator_ = indicator;
     }
 
     void UpdateCurrentOffset(float offset);
@@ -136,6 +148,8 @@ private:
     RefPtr<SwiperController> swiperController_;
 
     float currentOffset_ = 0.0f;
+    float childrenMainSize_ = 0.0f;
+    int32_t indicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     std::vector<OffsetF> tabItemOffsets_;
 

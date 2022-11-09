@@ -241,9 +241,11 @@ bool Scrollable::IsStopped() const
 void Scrollable::StopScrollable()
 {
     if (controller_) {
+        LOGE("zcb Scrollable controller_->Stop();");
         controller_->Stop();
     }
     if (springController_) {
+        LOGE("zcb Scrollable springController_->Stop();");
         springController_->Stop();
     }
 }

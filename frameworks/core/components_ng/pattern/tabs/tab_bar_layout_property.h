@@ -44,6 +44,8 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
         value->propTabBarProperty_ = CloneTabBarProperty();
         value->propAxis_ = CloneAxis();
+        value->propIndicator_ = CloneIndicator();
+        value->propIsBuilder_ = CloneIsBuilder();
         return value;
     }
 
@@ -52,6 +54,8 @@ public:
         LayoutProperty::Reset();
         ResetTabBarProperty();
         ResetAxis();
+        ResetIndicator();
+        ResetIsBuilder();
     }
 
     RectF GetIndicatorRect(int32_t index);
@@ -63,6 +67,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, int32_t, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsBuilder, bool, PROPERTY_UPDATE_LAYOUT);
 };
 
 } // namespace OHOS::Ace::NG

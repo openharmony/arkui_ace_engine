@@ -67,6 +67,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         V2::TAB_BAR_ETS_TAG, tabBarId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
     if (!hasTabBarNode) {
         tabBarNode->MountToParent(tabsNode);
+        ViewStackProcessor::GetInstance()->PushTabBarNode(tabBarNode);
     }
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);

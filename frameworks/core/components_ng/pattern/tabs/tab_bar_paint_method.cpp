@@ -17,7 +17,12 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
+#include "base/geometry/ng/point_t.h"
+#include "base/geometry/point.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -25,9 +30,16 @@ namespace {
 
 void PaintIndicator(RSCanvas& canvas, RectF indicator)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    LOGE("zcb   paint indicator");
+    LOGE("zcb   paint indicator rect %s", indicator.ToString().c_str());
     indicator.SetHeight(Dimension(4, DimensionUnit::VP).ConvertToPx());
     RSBrush brush;
-    brush.SetColor(ToRSColor(Color(0xFF254ff7)));
+    LOGE("indicater color %X", tabTheme->GetSubTabLineOnColor().GetValue());
+    brush.SetColor(ToRSColor(tabTheme->GetSubTabLineOnColor()));
     brush.SetBlendMode(RSBlendMode::SRC_OVER);
     canvas.AttachBrush(brush);
     canvas.DrawRect(ToRSRect(indicator));
