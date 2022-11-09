@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/polygon_model_ng.h"
+#include "core/components_ng/pattern/shape/polygon_pattern.h"
 #include "core/components_ng/test/pattern/shape/base_polygon_pattern_test_ng.h"
 
 using namespace testing;
@@ -21,31 +23,43 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 
-class PolylinePatternTestNg : public BasePolygonPatternTestNg {};
+class PolylinePatternTestNg : public BasePolygonPatternTestNg {
+public:
+    RefPtr<FrameNode> CreadFrameNode() override
+    {
+        PolygonModelNG().Create(false);
+        return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    }
 
-/**
- * @tc.name: Creator001
- * @tc.desc: create polyline with width and height
- * @tc.type: FUNC
- */
-
-HWTEST_F(PolylinePatternTestNg, Creator001, TestSize.Level1)
-{
-    PolygonModelNG().Create(false);
-    CheckSize();
-}
-
-/**
- * @tc.name: Creator002
- * @tc.desc: create polyline with no width or height
- * @tc.type: FUNC
- */
-
-HWTEST_F(PolylinePatternTestNg, Creator002, TestSize.Level1)
-{
-    PolygonModelNG().Create(false);
-    CheckNoSize();
-}
+    void Draw(RefPtr<FrameNode> frameNode) override
+    {
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto pattern = frameNode->GetPattern<PolygonPattern>();
+        EXPECT_EQ(pattern == nullptr, false);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        EXPECT_EQ(layoutProperty == nullptr, false);
+        auto layoutAlgorithm = AceType::DynamicCast<ShapeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+        EXPECT_EQ(layoutAlgorithm == nullptr, false);
+        LayoutConstraintF layoutConstraint;
+        layoutConstraint.percentReference.SetWidth(WIDTH);
+        layoutConstraint.percentReference.SetHeight(HEIGHT);
+        layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+        layoutProperty->UpdateContentConstraint();
+        auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);
+        EXPECT_EQ(size.has_value(), true);
+        auto paintMethod = pattern->CreateNodePaintMethod();
+        EXPECT_EQ(paintMethod == nullptr, false);
+        frameNode->GetGeometryNode()->SetContentSize(size.value());
+        auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode->GetRenderContext(),
+            frameNode->GetGeometryNode()->Clone(), frameNode->GetPaintProperty<ShapePaintProperty>());
+        EXPECT_EQ(paintWrapper == nullptr, false);
+        auto contentDraw = paintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
+        EXPECT_EQ(contentDraw == nullptr, false);
+        std::shared_ptr<SkCanvas> canvas = std::make_shared<SkCanvas>();
+        RSCanvas rsCavas(&canvas);
+        contentDraw(rsCavas);
+    }
+};
 
 /**
  * @tc.name: PolylinePaintProperty001
@@ -56,7 +70,12 @@ HWTEST_F(PolylinePatternTestNg, Creator002, TestSize.Level1)
 HWTEST_F(PolylinePatternTestNg, PolylinePaintProperty001, TestSize.Level1)
 {
     PolygonModelNG().Create(false);
-    CheckPoints();
+    auto shapeAbstactModel = ShapeAbstractModelNG();
+    SetSize(shapeAbstactModel);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
+    CheckPoints(frameNode);
+    Draw(frameNode);
 }
 
 } // namespace OHOS::Ace::NG

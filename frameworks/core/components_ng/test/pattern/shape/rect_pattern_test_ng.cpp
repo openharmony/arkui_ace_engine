@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
+#include "core/components_ng/pattern/shape/rect_pattern.h"
 #include "core/components_ng/test/pattern/shape/base_shape_pattern_test_ng.h"
 
 using namespace testing;
@@ -31,31 +32,43 @@ const std::array<std::array<float, 2>, 4> RADIUS = { { { 21, 4 }, { 3, 33 }, { 2
 const Dimension RADIUS_WIDTH = Dimension(20);
 const Dimension RADIUS_HEIGHT = Dimension(2);
 } // namespace
-class RectPatternTestNg : public BaseShapePatternTestNg {};
+class RectPatternTestNg : public BaseShapePatternTestNg {
+public:
+    RefPtr<FrameNode> CreadFrameNode() override
+    {
+        RectModelNG().Create();
+        return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    }
 
-/**
- * @tc.name: Creator001
- * @tc.desc: create rect with width and height
- * @tc.type: FUNC
- */
-
-HWTEST_F(RectPatternTestNg, Creator001, TestSize.Level1)
-{
-    RectModelNG().Create();
-    CheckSize();
-}
-
-/**
- * @tc.name: Creator002
- * @tc.desc: create rect with no width or height
- * @tc.type: FUNC
- */
-
-HWTEST_F(RectPatternTestNg, Creator002, TestSize.Level1)
-{
-    RectModelNG().Create();
-    CheckNoSize();
-}
+    void Draw(RefPtr<FrameNode> frameNode) override
+    {
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto pattern = frameNode->GetPattern<RectPattern>();
+        EXPECT_EQ(pattern == nullptr, false);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        EXPECT_EQ(layoutProperty == nullptr, false);
+        auto layoutAlgorithm = AceType::DynamicCast<ShapeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+        EXPECT_EQ(layoutAlgorithm == nullptr, false);
+        LayoutConstraintF layoutConstraint;
+        layoutConstraint.percentReference.SetWidth(WIDTH);
+        layoutConstraint.percentReference.SetHeight(HEIGHT);
+        layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+        layoutProperty->UpdateContentConstraint();
+        auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);
+        EXPECT_EQ(size.has_value(), true);
+        auto paintMethod = pattern->CreateNodePaintMethod();
+        EXPECT_EQ(paintMethod == nullptr, false);
+        frameNode->GetGeometryNode()->SetContentSize(size.value());
+        auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode->GetRenderContext(),
+            frameNode->GetGeometryNode()->Clone(), frameNode->GetPaintProperty<ShapePaintProperty>());
+        EXPECT_EQ(paintWrapper == nullptr, false);
+        auto contentDraw = paintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
+        EXPECT_EQ(contentDraw == nullptr, false);
+        std::shared_ptr<SkCanvas> canvas = std::make_shared<SkCanvas>();
+        RSCanvas rsCavas(&canvas);
+        contentDraw(rsCavas);
+    }
+};
 
 /**
  * @tc.name: RectPaintProperty001
@@ -65,12 +78,15 @@ HWTEST_F(RectPatternTestNg, Creator002, TestSize.Level1)
 
 HWTEST_F(RectPatternTestNg, RectPaintProperty001, TestSize.Level1)
 {
-    RectModelNG().Create();
+    auto rectModelNG = RectModelNG();
+    rectModelNG.Create();
     for (int i = 0; i < RADIUS.size(); i++) {
-        RectModelNG().SetRadiusValue(Dimension(RADIUS.at(i).at(0)), Dimension(RADIUS.at(i).at(1)), i);
+        rectModelNG.SetRadiusValue(Dimension(RADIUS.at(i).at(0)), Dimension(RADIUS.at(i).at(1)), i);
     }
-    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    auto shapeAbstactModel = ShapeAbstractModelNG();
+    SetSize(shapeAbstactModel);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
     EXPECT_EQ(frameNode == nullptr, false);
     auto paintProperty = frameNode->GetPaintProperty<RectPaintProperty>();
     EXPECT_EQ(paintProperty == nullptr, false);
@@ -86,6 +102,7 @@ HWTEST_F(RectPatternTestNg, RectPaintProperty001, TestSize.Level1)
     EXPECT_FLOAT_EQ(paintProperty->GetBottomRightRadiusValue().GetY().ConvertToPx(), RADIUS.at(2).at(1));
     EXPECT_FLOAT_EQ(paintProperty->GetBottomLeftRadiusValue().GetX().ConvertToPx(), RADIUS.at(3).at(0));
     EXPECT_FLOAT_EQ(paintProperty->GetBottomLeftRadiusValue().GetY().ConvertToPx(), RADIUS.at(3).at(1));
+    Draw(frameNode);
 }
 
 /**
