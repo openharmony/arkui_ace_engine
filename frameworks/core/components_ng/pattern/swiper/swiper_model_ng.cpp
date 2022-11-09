@@ -48,7 +48,9 @@ RefPtr<SwiperController> SwiperModelNG::Create()
         swiperNode = FrameNode::GetOrCreateFrameNode(
             V2::SWIPER_ETS_TAG, swiperNodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
         swiperGroupNode->AddChild(swiperNode);
-        swiperNode->MarkModifyDone();
+        if (swiperNode) {
+            swiperNode->MarkModifyDone();
+        }
     } else {
         auto swiperUINode = swiperGroupNode->GetChildren().front();
         CHECK_NULL_RETURN(swiperUINode, nullptr);

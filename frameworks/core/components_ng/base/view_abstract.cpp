@@ -555,7 +555,9 @@ void ViewAbstract::BindPopup(
     popupInfo.popupId = popupId;
     popupInfo.markNeedUpdate = isShow;
     popupInfo.popupNode = popupNode;
-    popupNode->MarkModifyDone();
+    if (popupNode) {
+        popupNode->MarkModifyDone();
+    }
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
