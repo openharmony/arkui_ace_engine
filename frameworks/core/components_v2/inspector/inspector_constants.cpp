@@ -472,4 +472,8 @@ const char POPUP_ETS_TAG[] = "Popup";
 // remote window
 const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 
+// Model
+ACE_EXPORT extern const char MODEL_COMPONENT_TAG[] = "ModelComponent";
+ACE_EXPORT extern const char MODEL_ETS_TAG[] = "Model";
+
 } // namespace OHOS::Ace::V2
