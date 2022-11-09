@@ -18,9 +18,15 @@
 #include "gtest/gtest.h"
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/circle_model_ng.h"
+#include "core/components_ng/pattern/shape/circle_pattern.h"
 #include "core/components_ng/pattern/shape/container_paint_property.h"
+#include "core/components_ng/pattern/shape/ellipse_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
 #include "core/components_ng/test/pattern/shape/base_shape_pattern_test_ng.h"
@@ -38,30 +44,48 @@ const int32_t ROW = 3;
 std::vector<double> MESH = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
 } // namespace
 
-class ShapePatternTestNg : public BaseShapePatternTestNg {};
+class ShapePatternTestNg : public BaseShapePatternTestNg {
+public:
+    RefPtr<FrameNode> CreadFrameNode() override
+    {
+        return nullptr;
+    }
+
+    void Draw(RefPtr<FrameNode> frameNode) override {}
+};
 
 /**
- * @tc.name: Creator001
- * @tc.desc: create rect with width and height
+ * @tc.name: LayoutAlgorithm001
+ * @tc.desc: create shape with  width And height
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, Creator001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, LayoutAlgorithm001, TestSize.Level1)
 {
     ShapeModelNG().Create();
-    CheckSize();
-}
-
-/**
- * @tc.name: Creator002
- * @tc.desc: create shape with no width or height
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, Creator002, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckNoSize();
+    auto width = Dimension(WIDTH);
+    auto height = Dimension(HEIGHT);
+    auto shapeAbstactModel = ShapeAbstractModelNG();
+    shapeAbstactModel.SetWidth(width);
+    shapeAbstactModel.SetHeight(height);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_EQ(frameNode == nullptr, false);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    EXPECT_EQ(pattern == nullptr, false);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty == nullptr, false);
+    auto layoutAlgorithm = AceType::DynamicCast<ShapeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm == nullptr, false);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.percentReference.SetWidth(WIDTH);
+    layoutConstraint.percentReference.SetHeight(HEIGHT);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);
+    EXPECT_EQ(size.has_value(), true);
+    EXPECT_FLOAT_EQ(size.value().Width(), WIDTH);
+    EXPECT_FLOAT_EQ(size.value().Height(), HEIGHT);
 }
 
 /**
@@ -75,9 +99,9 @@ HWTEST_F(ShapePatternTestNg, ContainerPaintProperty001, TestSize.Level1)
     auto shapeModel = ShapeModelNG();
     shapeModel.Create();
     shapeModel.SetViewPort(Dimension(LEFT), Dimension(TOP), Dimension(WIDTH), Dimension(HEIGHT));
-    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     EXPECT_EQ(frameNode == nullptr, false);
+    ViewStackProcessor::GetInstance()->Pop();
     auto paintProperty = frameNode->GetPaintProperty<ContainerPaintProperty>();
     EXPECT_EQ(paintProperty == nullptr, false);
     EXPECT_EQ(paintProperty->HasShapeViewBox(), true);
@@ -85,6 +109,12 @@ HWTEST_F(ShapePatternTestNg, ContainerPaintProperty001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetShapeViewBoxValue().Top().ConvertToPx(), TOP);
     EXPECT_EQ(paintProperty->GetShapeViewBoxValue().Width().ConvertToPx(), WIDTH);
     EXPECT_EQ(paintProperty->GetShapeViewBoxValue().Height().ConvertToPx(), HEIGHT);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    EXPECT_EQ(paintProperty == nullptr, false);
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    EXPECT_EQ(layoutWrapper == nullptr, false);
+    frameNode->SetActive(true);
+    frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
 }
 
 /**
@@ -107,143 +137,74 @@ HWTEST_F(ShapePatternTestNg, ContainerPaintProperty002, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetImageMeshValue().GetColumn(), COLUMN);
     EXPECT_EQ(paintProperty->GetImageMeshValue().GetRow(), ROW);
     auto mesh = paintProperty->GetImageMeshValue().GetMesh();
-    auto size = mesh.size();
+    auto size = static_cast<int32_t>(mesh.size());
     EXPECT_EQ(size, (COLUMN + 1) * (ROW + 1) * 2);
     EXPECT_EQ(size, MESH.size());
-    for (int i = 0; i < size; i++) {
+    for (int32_t i = 0; i < size; i++) {
         EXPECT_EQ(mesh.at(i), MESH.at(i));
     }
 }
 
 /**
- * @tc.name: ContainerPaintProperty003
- * @tc.desc: set fill and check
+ * @tc.name: InheritedProperty001
+ * @tc.desc: check property inherit
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty003, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, InheritedProperty001, TestSize.Level1)
 {
-    ShapeModelNG().Create();
-    CheckFill();
+    auto shapeModel1 = ShapeModelNG();
+    shapeModel1.Create();
+    shapeModel1.SetFill(Color::RED);
+    shapeModel1.SetFillOpacity(OPACITY);
+    auto shapeModel2 = ShapeModelNG();
+    shapeModel2.Create();
+    shapeModel2.SetStroke(Color::BLUE);
+    shapeModel2.SetStrokeWidth(Dimension(STROKE_WIDTH));
+    auto len = static_cast<int32_t>(STROKE_DASH_ARRAY.size());
+    std::vector<Dimension> strokeDashArray(len);
+    for (int32_t i = 0; i < len; i++) {
+        strokeDashArray[i] = Dimension(STROKE_DASH_ARRAY.at(i));
+    }
+    shapeModel2.SetStrokeDashArray(strokeDashArray);
+    shapeModel2.SetStrokeDashOffset(Dimension(DASHOFFSET));
+    shapeModel2.SetStrokeLineCap(LINE_CAP);
+    shapeModel2.SetStrokeLineJoin(LINE_JOIN);
+    shapeModel2.SetStrokeMiterLimit(STROKE_LIMIT);
+    shapeModel2.SetAntiAlias(ANTIALIAS);
+    shapeModel2.SetStrokeOpacity(OPACITY);
+    auto circleModel = CircleModelNG();
+    circleModel.Create();
+    auto shapeAbstactModel = ShapeAbstractModelNG();
+    SetSize(shapeAbstactModel);
+    auto circleFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Pop();
+    auto pattern = circleFrameNode->GetPattern<CirclePattern>();
+    EXPECT_EQ(pattern == nullptr, false);
+    auto layoutProperty = circleFrameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty == nullptr, false);
+    auto layoutAlgorithm = AceType::DynamicCast<ShapeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm == nullptr, false);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.percentReference.SetWidth(WIDTH);
+    layoutConstraint.percentReference.SetHeight(HEIGHT);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);
+    EXPECT_EQ(size.has_value(), true);
+    auto paintMethod = pattern->CreateNodePaintMethod();
+    EXPECT_EQ(paintMethod == nullptr, false);
+    circleFrameNode->GetGeometryNode()->SetContentSize(size.value());
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(circleFrameNode->GetRenderContext(),
+        circleFrameNode->GetGeometryNode()->Clone(), circleFrameNode->GetPaintProperty<ShapePaintProperty>());
+    EXPECT_EQ(paintWrapper == nullptr, false);
+    auto contentDraw = paintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(contentDraw == nullptr, false);
+    std::shared_ptr<SkCanvas> canvas = std::make_shared<SkCanvas>();
+    RSCanvas rsCavas(&canvas);
+    contentDraw(rsCavas);
 }
 
-/**
- * @tc.name: ContainerPaintProperty004
- * @tc.desc: set fill opacity and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty004, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckFillOpacity();
-}
-
-/**
- * @tc.name: ContainerPaintProperty005
- * @tc.desc: set stroke and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty005, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckStroke();
-}
-
-/**
- * @tc.name: ContainerPaintProperty006
- * @tc.desc: set stroke width and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty006, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckStrokeWidth();
-}
-
-/**
- * @tc.name: ContainerPaintProperty007
- * @tc.desc: set stroke opacity and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty007, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckStrokeOpacity();
-}
-
-/**
- * @tc.name: ContainerPaintProperty008
- * @tc.desc: set stroke dash array and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty008, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckStrokeDashArray();
-}
-
-/**
- * @tc.name: ContainerPaintProperty009
- * @tc.desc: set stroke dash offset and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty009, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckStrokeDashOffset();
-}
-
-/**
- * @tc.name: ContainerPaintProperty010
- * @tc.desc: set stroke line cap and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty010, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckStrokeLineCap();
-}
-
-/**
- * @tc.name: ContainerPaintProperty011
- * @tc.desc: set stroke line join and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty011, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckStrokeLineJoin();
-}
-
-/**
- * @tc.name: ContainerPaintProperty012
- * @tc.desc: set stroke miter and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty012, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckStrokeMiterLimit();
-}
-
-/**
- * @tc.name: ContainerPaintProperty013
- * @tc.desc: set antialias and check
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty013, TestSize.Level1)
-{
-    ShapeModelNG().Create();
-    CheckAntiAlias();
-}
 } // namespace OHOS::Ace::NG
