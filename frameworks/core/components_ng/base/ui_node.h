@@ -38,7 +38,9 @@ class ACE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
-    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false) : tag_(tag), nodeId_(nodeId), isRoot_(isRoot) {}
+    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false)
+        : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
+    {}
     ~UINode() override;
 
     // atomic node is like button, image, custom node and so on.
@@ -103,6 +105,11 @@ public:
     int32_t GetId() const
     {
         return nodeId_;
+    }
+
+    int32_t GetAccessibilityId() const
+    {
+        return accessibilityId_;
     }
 
     void SetDepth(int32_t depth)
@@ -241,9 +248,12 @@ private:
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
+    int32_t accessibilityId_ = -1;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = false;
+
+    static thread_local int32_t currentAccessibilityId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

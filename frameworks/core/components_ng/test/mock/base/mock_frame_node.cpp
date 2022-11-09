@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+thread_local int32_t UINode::currentAccessibilityId_ = 0;
 FrameNode::~FrameNode() {}
 void FrameNode::OnWindowShow() {}
 void FrameNode::OnWindowHide() {}
