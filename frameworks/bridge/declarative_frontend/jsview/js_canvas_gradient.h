@@ -44,6 +44,7 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasGradient);
 private:
     Gradient* gradient_ = nullptr;
+    bool isColorStopValid_ = false;
 };
 
 } // OHOS::Ace::Framework
