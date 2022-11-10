@@ -33,7 +33,6 @@ void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
         return;
     }
 
-    recognizer->BeginReferee(static_cast<int32_t>(touchId_));
     recognizers_.emplace_back(recognizer);
 }
 

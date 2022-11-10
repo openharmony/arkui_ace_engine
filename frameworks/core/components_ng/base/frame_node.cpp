@@ -729,7 +729,7 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     if (!isActive_ || !eventHub_->IsEnabled()) {
         LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
@@ -765,7 +765,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
 
         const auto& child = *iter;
-        auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets);
+        auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets, touchId);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
@@ -797,8 +797,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (gestureHub) {
             TouchTestResult finalResult;
             const auto coordinateOffset = globalPoint - localPoint;
-            preventBubbling =
-                gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets, finalResult);
+            preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset,
+                touchRestrict, newComingTargets, finalResult, touchId);
             newComingTargets.swap(finalResult);
         }
     }
@@ -807,7 +807,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     result.splice(result.end(), std::move(newComingTargets));
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (gestureHub) {
-        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result);
+        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result, touchId);
     }
 
     // consumed by children and return result.
