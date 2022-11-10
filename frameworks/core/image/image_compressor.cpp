@@ -505,4 +505,11 @@ void ImageCompressor::InitRecords()
     }
     openFile.close();
 }
+#ifdef FUZZTEST
+void ImageCompressor::PartDoing()
+{
+    InitPartition();
+    InitRecords();
+}
+#endif
 } // namespace OHOS::Ace
