@@ -28,17 +28,16 @@ const std::array<std::array<float, 2>, 5> POINTS = { { { 50, 0 }, { 0, 50 }, { 2
 
 } // namespace
 
-void BasePolygonPatternTestNg::CheckPoints()
+void BasePolygonPatternTestNg::CheckPoints(RefPtr<FrameNode> frameNode)
 {
+    EXPECT_EQ(frameNode == nullptr, false);
     ShapePoints shapePoints;
     auto size = static_cast<int32_t>(POINTS.size());
     for (int32_t i = 0; i < size; i++) {
         shapePoints.emplace_back(ShapePoint(Dimension(POINTS.at(i).at(0)), Dimension(POINTS.at(i).at(1))));
     }
     PolygonModelNG().SetPoints(shapePoints);
-    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-    EXPECT_EQ(frameNode == nullptr, false);
+    ViewStackProcessor::GetInstance()->Pop();
     auto polygonPaintProperty = frameNode->GetPaintProperty<PolygonPaintProperty>();
     EXPECT_EQ(polygonPaintProperty->HasPoints(), true);
     auto propLen = static_cast<int32_t>(polygonPaintProperty->GetPointsValue().size());

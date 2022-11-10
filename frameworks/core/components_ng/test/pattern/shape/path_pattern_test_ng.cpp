@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
+#include "core/components_ng/pattern/shape/path_pattern.h"
 #include "core/components_ng/test/pattern/shape/base_shape_pattern_test_ng.h"
 
 using namespace testing;
@@ -33,31 +34,43 @@ const std::string PATH_CMD = "M150 0 L300 300 L0 300 Z";
 
 } // namespace
 
-class PathPatternTestNg : public BaseShapePatternTestNg {};
+class PathPatternTestNg : public BaseShapePatternTestNg {
+public:
+    RefPtr<FrameNode> CreadFrameNode() override
+    {
+        PathModelNG().Create();
+        return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    }
 
-/**
- * @tc.name: Creator001
- * @tc.desc: create path with width and height
- * @tc.type: FUNC
- */
-
-HWTEST_F(PathPatternTestNg, Creator001, TestSize.Level1)
-{
-    PathModelNG().Create();
-    CheckSize();
-}
-
-/**
- * @tc.name: Creator002
- * @tc.desc: create path with no width or height
- * @tc.type: FUNC
- */
-
-HWTEST_F(PathPatternTestNg, Creator002, TestSize.Level1)
-{
-    PathModelNG().Create();
-    CheckNoSize();
-}
+    void Draw(RefPtr<FrameNode> frameNode) override
+    {
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto pattern = frameNode->GetPattern<PathPattern>();
+        EXPECT_EQ(pattern == nullptr, false);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        EXPECT_EQ(layoutProperty == nullptr, false);
+        auto layoutAlgorithm = AceType::DynamicCast<ShapeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+        EXPECT_EQ(layoutAlgorithm == nullptr, false);
+        LayoutConstraintF layoutConstraint;
+        layoutConstraint.percentReference.SetWidth(WIDTH);
+        layoutConstraint.percentReference.SetHeight(HEIGHT);
+        layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+        layoutProperty->UpdateContentConstraint();
+        auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);
+        EXPECT_EQ(size.has_value(), true);
+        auto paintMethod = pattern->CreateNodePaintMethod();
+        EXPECT_EQ(paintMethod == nullptr, false);
+        frameNode->GetGeometryNode()->SetContentSize(size.value());
+        auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode->GetRenderContext(),
+            frameNode->GetGeometryNode()->Clone(), frameNode->GetPaintProperty<ShapePaintProperty>());
+        EXPECT_EQ(paintWrapper == nullptr, false);
+        auto contentDraw = paintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
+        EXPECT_EQ(contentDraw == nullptr, false);
+        std::shared_ptr<SkCanvas> canvas = std::make_shared<SkCanvas>();
+        RSCanvas rsCavas(&canvas);
+        contentDraw(rsCavas);
+    }
+};
 
 /**
  * @tc.name: PathPaintProperty001
@@ -67,14 +80,18 @@ HWTEST_F(PathPatternTestNg, Creator002, TestSize.Level1)
 
 HWTEST_F(PathPatternTestNg, PathPaintProperty001, TestSize.Level1)
 {
-    PathModelNG().Create();
-    PathModelNG().SetCommands(PATH_CMD);
-    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    auto pathModelNG = PathModelNG();
+    pathModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     EXPECT_EQ(frameNode == nullptr, false);
+    pathModelNG.SetCommands(PATH_CMD);
+    auto shapeAbstactModel = ShapeAbstractModelNG();
+    SetSize(shapeAbstactModel);
+    ViewStackProcessor::GetInstance()->Pop();
     auto pathPaintProperty = frameNode->GetPaintProperty<PathPaintProperty>();
     EXPECT_EQ(pathPaintProperty->HasCommands(), true);
     EXPECT_STREQ(pathPaintProperty->GetCommandsValue().c_str(), PATH_CMD.c_str());
+    Draw(frameNode);
 }
 
 } // namespace OHOS::Ace::NG
