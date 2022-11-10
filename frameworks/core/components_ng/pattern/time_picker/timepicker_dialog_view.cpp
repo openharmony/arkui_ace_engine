@@ -144,7 +144,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(textConfirmNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("confirm");
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
@@ -166,14 +166,14 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
-    textCancelLayoutProperty->UpdateContent("cancel");
+    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     textCancelNode->MountToParent(buttonCancelNode);
     auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
-    buttonConfirmNode->MountToParent(contentRow);
     buttonCancelNode->MountToParent(contentRow);
+    buttonConfirmNode->MountToParent(contentRow);
     return contentRow;
 }
 

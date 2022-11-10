@@ -123,12 +123,6 @@ void TextPickerPattern::FlushCurrentOptions()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    Size optionSize = { 0, 0 };
-    optionSize = pickerTheme->GetOptionSize(textPickerPattern->GetSelected());
-    if (!NearZero(
-            context->NormalizeToPx(textPickerLayoutProperty->GetDefaultPickerItemHeight().value_or(Dimension(0))))) {
-        optionSize.SetHeight(context->NormalizeToPx(textPickerLayoutProperty->GetDefaultPickerItemHeightValue()));
-    }
     auto middleIndex = showCount / 2;
     auto child = host->GetChildren();
     auto iter = child.begin();
@@ -223,16 +217,16 @@ double TextPickerPattern::CalculateHeight()
     CHECK_NULL_RETURN(context, height);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, height);
-    Size optionSize = { 0, 0 };
-    ;
-    optionSize = pickerTheme->GetOptionSize(textPickerPattern->GetSelected());
     if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
-        auto defaultPickerItemHeightValue =
-            context->NormalizeToPx(textPickerLayoutProperty->GetDefaultPickerItemHeightValue());
-        if (defaultPickerItemHeightValue <= 0) {
+        auto defaultPickerItemHeightValue = textPickerLayoutProperty->GetDefaultPickerItemHeightValue();
+        if (context->NormalizeToPx(defaultPickerItemHeightValue) <= 0) {
             return height;
         }
-        height = context->NormalizeToPx(textPickerLayoutProperty->GetDefaultPickerItemHeightValue());
+        if (defaultPickerItemHeightValue.Unit() == DimensionUnit::PERCENT) {
+            height = pickerTheme->GetGradientHeight().Value() * defaultPickerItemHeightValue.Value();
+        } else {
+            height = context->NormalizeToPx(defaultPickerItemHeightValue);
+        }
     } else {
         height = pickerTheme->GetGradientHeight().Value();
     }
