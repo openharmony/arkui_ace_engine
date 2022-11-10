@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/loading_progress/loading_progress_modifer.h"
-
-#include <vector>
+#include "core/components_ng/pattern/loading_progress/loading_progress_modifier.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
@@ -24,9 +22,7 @@
 #include "core/components_ng/render/paint.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
 const float MOVE_ANGLE = 10.f;
 const float TOTAL_ANGLE = 360.0f;
 const float COMET_TAIL_ANGLE = 2.0f;
@@ -34,7 +30,6 @@ const float ROTATEX = 100.f;
 const float ROTATEZ = 30.f;
 const float DECAY_FACTOR = 2.f;
 const float HALF_COUNT = 25.0f;
-
 } // namespace
 
 LoadingProgressModifier::LoadingProgressModifier()

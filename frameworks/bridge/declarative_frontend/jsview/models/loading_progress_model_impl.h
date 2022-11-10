@@ -13,24 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_PROGRESS_MODEL_IMPL_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_PROGRESS_MODEL_IMPL_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_LOADING_PROGRESS_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_LOADING_PROGRESS_MODEL_IMPL_H
 
-#include "core/components_ng/pattern/progress/progress_model.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
-
-class ProgressModelImpl : public OHOS::Ace::ProgressModel {
+class LoadingProgressModelImpl : public OHOS::Ace::LoadingProgressModel {
 public:
-    void Create(double min, double value, double cachedValue, double max, NG::ProgressType type) override;
-    void SetValue(double value) override;
+    void Create() override;
     void SetColor(const Color& value) override;
-    void SetBackgroundColor(const Color& value) override;
-    void SetStrokeWidth(const Dimension& value) override;
-    void SetScaleCount(int32_t value) override;
-    void SetScaleWidth(const Dimension& value) override;
 };
-
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_IMAGE_MODEL_IMPL_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_LOADING_PROGRESS_MODEL_IMPL_H
