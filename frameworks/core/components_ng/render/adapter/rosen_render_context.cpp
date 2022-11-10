@@ -187,19 +187,19 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    SetPivot(0.5f, 0.5f); // default pivot is center
 
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
         NotifyTransitionInner(paintRect.GetSize(), true);
         firstTransitionIn_ = false;
     }
+
     if (propTransform_ && propTransform_->HasTransformCenter()) {
         auto vec = propTransform_->GetTransformCenterValue();
         float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
         float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
         SetPivot(xPivot, yPivot);
-    } else {
-        SetPivot(0.5f, 0.5f); // default pivot is center
     }
 
     if (bgLoadingCtx_ && bgLoadingCtx_->GetCanvasImage()) {
@@ -215,13 +215,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
 
     if (propGradient_) {
-        SizeF frameSize(paintRect.Width(), paintRect.Height());
-        PaintGradient(frameSize);
+        PaintGradient(paintRect.GetSize());
     }
 
     if (propClip_) {
-        SizeF frameSize(paintRect.Width(), paintRect.Height());
-        PaintClip(frameSize);
+        PaintClip(paintRect.GetSize());
     }
 
     if (propGraphics_) {
@@ -380,7 +378,16 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center) {}
+void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
+{
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        float xPivot = ConvertDimensionToScaleBySize(center.GetX(), rect.Width());
+        float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
+        SetPivot(xPivot, yPivot);
+    }
+    RequestNextFrame();
+}
 
 void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
 {
@@ -761,7 +768,6 @@ RectF RosenRenderContext::AdjustPaintRect()
                                                               : PipelineContext::GetCurrentRootWidth();
     auto heightPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Height()
                                                                : PipelineContext::GetCurrentRootHeight();
-
     auto anchor = GetAnchorValue({});
     auto anchorWidthReference = rect.Width();
     auto anchorHeightReference = rect.Height();
@@ -1466,7 +1472,6 @@ void RosenRenderContext::PaintOverlayText()
         auto modifier = std::make_shared<OverlayTextModifier>();
         modifier->SetCustomData(NG::OverlayTextData(overlayText));
         rsNode_->AddModifier(modifier);
-        // TODO: PaintOverlayText
     }
 }
 

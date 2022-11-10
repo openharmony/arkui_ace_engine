@@ -227,7 +227,6 @@ private:
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
-
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);
     void PaintGradient(const SizeF& frameSize);
@@ -237,7 +236,6 @@ private:
     void PaintBorderImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
-
 
     RectF AdjustPaintRect();
 
