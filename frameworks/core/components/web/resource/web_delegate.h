@@ -22,7 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
-#ifdef OHOS_STANDARD_SYSTEM
+#if defined (OHOS_STANDARD_SYSTEM) && defined (ENABLE_ROSEN_BACKEND)
 #include <ui/rs_surface_node.h>
 #endif
 
@@ -303,7 +303,11 @@ public:
 #ifdef OHOS_STANDARD_SYSTEM
     // TODO: add to separate this file into three file, base file, component impl and ng impl.
     void InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface);
+#ifdef ENABLE_ROSEN_BACKEND
     void InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface> surface = nullptr);
+#else
+    void InitOHOSWeb(const WeakPtr<PipelineBase>& context);
+#endif
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
