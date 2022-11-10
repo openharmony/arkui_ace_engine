@@ -36,6 +36,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
 
 const float BUTTON_WIDTH = 150.0f;
 const float BUTTON_HEIGHT = 75.0f;
@@ -47,8 +48,6 @@ const char CREATE_VALUE[] = "Hello World";
 const SizeF BUTTON_SIZE(BUTTON_WIDTH, BUTTON_HEIGHT);
 const SizeF TEXT_SIZE(TEXT_WIDTH, TEXT_HEIGHT);
 const SizeF BUTTON_ONLY_HAS_WIDTH_SIZE(BUTTON_ONLY_HAS_WIDTH_VALUE, BUTTON_ONLY_HAS_WIDTH_VALUE);
-
-namespace {
 
 } // namespace
 
@@ -66,7 +65,7 @@ public:
 HWTEST_F(ButtonLayoutTestNg, ButtonLayoutTest001, TestSize.Level1)
 {
     ButtonView::CreateWithLabel(CREATE_VALUE);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); 
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_FALSE(frameNode == nullptr);
     auto textNode = FrameNode::CreateFrameNode(
@@ -113,7 +112,7 @@ HWTEST_F(ButtonLayoutTestNg, ButtonLayoutTest001, TestSize.Level1)
 HWTEST_F(ButtonLayoutTestNg, ButtonLayoutTest002, TestSize.Level1)
 {
     ButtonView::CreateWithLabel(CREATE_VALUE);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); 
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_FALSE(frameNode == nullptr);
     auto textNode = FrameNode::CreateFrameNode(
@@ -151,7 +150,7 @@ HWTEST_F(ButtonLayoutTestNg, ButtonLayoutTest002, TestSize.Level1)
 HWTEST_F(ButtonLayoutTestNg, ButtonLayoutTest003, TestSize.Level1)
 {
     ButtonView::CreateWithLabel(CREATE_VALUE);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); 
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_FALSE(frameNode == nullptr);
     auto textNode = FrameNode::CreateFrameNode(
