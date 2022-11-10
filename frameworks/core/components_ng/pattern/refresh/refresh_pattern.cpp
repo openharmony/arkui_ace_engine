@@ -34,10 +34,8 @@ namespace {
 constexpr int32_t BASE_YEAR = 1900;
 const char LAST_UPDATE_FORMAT[] = "yyyy/M/d HH:mm"; // Date format for last updated
 constexpr float DIAMETER_HALF = 0.5;
-constexpr float DEFAULT_SHOW_TIME_HEIGHT = 300.0;               // Default time show height for time
-constexpr float PERCENT = 0.01;                                 // Percent
-constexpr char REFRESH_LAST_UPDATED[] = "refresh.last_updated"; // I18n for last updated
-constexpr int32_t DEFAULT_INDICATOR_OFFSET = 16.0;
+constexpr float DEFAULT_SHOW_TIME_HEIGHT = 300.0; // Default time show height for time
+constexpr float PERCENT = 0.01;                   // Percent
 constexpr int32_t CHILD_COUNT = 2;
 
 } // namespace
@@ -66,32 +64,13 @@ void RefreshPattern::OnModifyDone()
     timeOffset_ = layoutProperty->GetShowTimeOffsetValue();
 }
 
-void RefreshPattern::OnAttachToFrameNode()
-{
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateIndicatorOffset(Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
-    layoutProperty->UpdateIsUseOffset(true);
-    layoutProperty->UpdateIsShowLastTime(true);
-    layoutProperty->UpdateScrollableOffset(OffsetF(0.0, 0.0));
-    layoutProperty->UpdateShowTimeOffset(OffsetF(0.0, 0.0));
-    layoutProperty->UpdateRefreshStatus(RefreshStatus::INACTIVE);
-    auto renderProperty = GetPaintProperty<RefreshRenderProperty>();
-    CHECK_NULL_VOID(renderProperty);
-    auto lastTimeText = Localization::GetInstance()->GetEntryLetters(REFRESH_LAST_UPDATED);
-    renderProperty->UpdateLastTimeText(lastTimeText);
-    auto timeText = StringUtils::FormatString("");
-    renderProperty->UpdateTimeText(timeText);
-}
-
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
 {
     auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_RETURN(refreshLayoutProperty, false);
 
-    RefreshStatus nextStatus = GetNextStatus();
-    refreshLayoutProperty->UpdateRefreshStatus(nextStatus);
+    refreshStatus = GetNextStatus();
     return false;
 }
 
@@ -139,9 +118,8 @@ void RefreshPattern::HandleDragStart()
     CHECK_NULL_VOID(host);
     auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(refreshLayoutProperty);
-    auto refreshStatus = refreshLayoutProperty->GetRefreshStatusValue();
     if (refreshStatus != RefreshStatus::DRAG) {
-        refreshLayoutProperty->UpdateRefreshStatus(RefreshStatus::DRAG);
+        refreshStatus = RefreshStatus::DRAG;
         FireStateChange(static_cast<int>(RefreshStatus::DRAG));
     }
     if (host->TotalChildCount() < CHILD_COUNT) {
@@ -174,9 +152,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
     UpdateScrollableOffset(delta);
     refreshLayoutProperty->UpdateLoadingProcessOffset(GetLoadingOffset());
     refreshLayoutProperty->UpdateShowTimeOffset(GetShowTimeOffset());
-    auto lastTimeText = refreshRenderProperty->GetLastTimeTextValue();
-    auto timeText = StringUtils::FormatString(lastTimeText.c_str(), GetFormatDateTime().c_str());
-    refreshRenderProperty->UpdateTimeText(timeText);
+
     if (host->TotalChildCount() < CHILD_COUNT) {
         return;
     }
@@ -202,10 +178,14 @@ void RefreshPattern::HandleDragUpdate(float delta)
         textChildLayoutProperty->GetVisibilityValue() == VisibleType::INVISIBLE) {
         textChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
-
-    if (textChild_) {
-        auto textLayoutProperty = textChild_->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateContent(timeText);
+    if (refreshLayoutProperty->GetIsShowLastTimeValue()) {
+        auto lastTimeText = refreshRenderProperty->GetLastTimeTextValue();
+        auto timeText = StringUtils::FormatString(lastTimeText.c_str(), GetFormatDateTime().c_str());
+        refreshRenderProperty->UpdateTimeText(timeText);
+        if (textChild_) {
+            auto textLayoutProperty = textChild_->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateContent(timeText);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
@@ -219,22 +199,18 @@ void RefreshPattern::HandleDragEnd()
     CHECK_NULL_VOID(refreshLayoutProperty);
     auto refreshRenderProperty = host->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshLayoutProperty);
-    auto refreshStatus = refreshLayoutProperty->GetRefreshStatusValue();
     if (refreshStatus != RefreshStatus::DONE && refreshStatus != RefreshStatus::INACTIVE) {
         auto scrollableOffset = refreshLayoutProperty->GetScrollableOffsetValue();
         auto triggerRefreshDistance = refreshLayoutProperty->GetTriggerRefreshDistanceValue();
         if (scrollableOffset.GetY() > triggerRefreshDistance.ConvertToPx()) {
             FireChangeEvent("true");
             FireRefreshing();
-            FireStateChange(static_cast<int>(RefreshStatus::REFRESH));
-            refreshLayoutProperty->UpdateRefreshStatus(RefreshStatus::REFRESH);
+            refreshStatus = RefreshStatus::REFRESH;
         } else {
-            refreshLayoutProperty->UpdateRefreshStatus(RefreshStatus::INACTIVE);
-            FireStateChange(static_cast<int>(RefreshStatus::INACTIVE));
+            refreshStatus = RefreshStatus::INACTIVE;
         }
-    } else {
-        FireStateChange(static_cast<int>(refreshStatus));
     }
+    FireStateChange(static_cast<int>(refreshStatus));
     if (host->TotalChildCount() < CHILD_COUNT) {
         LOGI("%{public}s have %{public}d child", host->GetTag().c_str(), host->TotalChildCount());
         return;
@@ -290,7 +266,6 @@ RefreshStatus RefreshPattern::GetNextStatus()
     auto renderProperty = GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_RETURN(layoutProperty, RefreshStatus::INACTIVE);
     auto triggerRefreshDistance = layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx();
-    RefreshStatus refreshStatus = layoutProperty->GetRefreshStatusValue();
     auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
     switch (refreshStatus) {
         case RefreshStatus::INACTIVE:
@@ -328,10 +303,13 @@ RefreshStatus RefreshPattern::GetNextStatus()
             break;
         case RefreshStatus::REFRESH:
             if (!renderProperty->GetIsRefreshingValue()) {
-                auto refreshRenderProperty = GetHost()->GetPaintProperty<RefreshRenderProperty>();
-                auto timeText = StringUtils::FormatString(
-                    refreshRenderProperty->GetLastTimeTextValue().c_str(), GetFormatDateTime().c_str());
-                refreshRenderProperty->UpdateTimeText(timeText);
+                auto refreshLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
+                if (refreshLayoutProperty->GetIsShowLastTimeValue()) {
+                    auto refreshRenderProperty = host->GetPaintProperty<RefreshRenderProperty>();
+                    auto timeText = StringUtils::FormatString(
+                        refreshRenderProperty->GetLastTimeTextValue().c_str(), GetFormatDateTime().c_str());
+                    refreshRenderProperty->UpdateTimeText(timeText);
+                }
                 nextStatus = RefreshStatus::DONE;
                 break;
             }
@@ -406,7 +384,6 @@ double RefreshPattern::GetLoadingDiameter() const
 void RefreshPattern::UpdateScrollableOffset(float delta)
 {
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    auto refreshStatus = layoutProperty->GetRefreshStatusValue();
     if (refreshStatus == RefreshStatus::REFRESH && delta > 0.0) {
         LOGI("The refresh status is refreshing!");
         return;
@@ -498,8 +475,7 @@ void RefreshPattern::OnInActive()
     auto renderProperty = GetPaintProperty<RefreshRenderProperty>();
     renderProperty->UpdateIsRefreshing(false);
     FireChangeEvent("false");
-    layoutProperty->UpdateRefreshStatus(RefreshStatus::INACTIVE);
-
+    refreshStatus = RefreshStatus::INACTIVE;
     auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
     scrollableOffset.Reset();
     layoutProperty->UpdateScrollableOffset(scrollableOffset);
