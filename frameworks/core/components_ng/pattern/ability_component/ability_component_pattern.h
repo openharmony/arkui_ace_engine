@@ -34,7 +34,9 @@ public:
     AbilityComponentPattern() = default;
     ~AbilityComponentPattern() override
     {
-        adapter_->RemoveExtension();
+        if (adapter_) {
+            adapter_->RemoveExtension();
+        }
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override

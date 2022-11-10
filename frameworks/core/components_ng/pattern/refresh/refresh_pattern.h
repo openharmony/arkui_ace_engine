@@ -70,7 +70,6 @@ public:
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-    void OnAttachToFrameNode() override;
     void UpdateScrollableOffset(float delta);
     float GetFriction(float percentage) const;
     float GetOffset(float delta) const;
@@ -80,6 +79,7 @@ private:
     OffsetF GetShowTimeOffset() const;
     float GetOpacity() const;
     RefreshStatus GetNextStatus();
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
     void HandleDragUpdate(float delta);
