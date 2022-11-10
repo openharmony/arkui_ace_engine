@@ -50,5 +50,6 @@ group("pattern_unittest") {
     "xcomponent:xcomponent_pattern_test_ng",
 
     # "stepper:stepper_pattern_test_ng",
+    # "divider:divider_pattern_test_ng",
   ]
 }
