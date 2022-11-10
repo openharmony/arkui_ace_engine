@@ -153,6 +153,11 @@ public:
         removeSilently_ = removeSilently;
     }
 
+    void SetUndefinedNodeId()
+    {
+        nodeId_ = -1;
+    }
+
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result);
     virtual HitTestMode GetHitTestMode() const
