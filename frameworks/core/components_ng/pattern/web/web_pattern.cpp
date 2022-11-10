@@ -1161,4 +1161,29 @@ void WebPattern::UpdateLocale()
     CHECK_NULL_VOID(delegate_);
     delegate_->UpdateLocale();
 }
+
+void WebPattern::OnWindowShow()
+{
+    if (isWindowShow_) {
+        return;
+    }
+
+    LOGI("web OnWindowShow called");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->ShowWebView();
+    isWindowShow_ = true;
+}
+
+void WebPattern::OnWindowHide()
+{
+    if (!isWindowShow_) {
+        return;
+    }
+
+    LOGI("web OnWindowHide called");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->HideWebView();
+    needOnFocus_ = false;
+    isWindowShow_ = false;
+}
 } // namespace OHOS::Ace::NG
