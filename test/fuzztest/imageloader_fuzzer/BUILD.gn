@@ -101,6 +101,8 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
 
     #"$ace_root/frameworks/base/resource/internal_resource.cpp",
+    "$ace_root/frameworks/base/log/ace_tracker.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
     "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
     "$ace_root/frameworks/core/image/image_compressor.cpp",
@@ -109,7 +111,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/image/image_provider.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
     "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
-    "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
+    "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "imageloader_fuzzer.cpp",
   ]
 
@@ -150,6 +152,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
   ]
   part_name = ace_engine_part
 
+  #defined =["FUZZTEST"];
   include_dirs = [
     "$ace_root/frameworks/core/components/common/properties",
     "$ace_root/frameworks/core/components/theme",

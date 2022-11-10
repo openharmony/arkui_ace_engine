@@ -22,5 +22,4 @@
 #include <unistd.h>
 
 #define FUZZ_PROJECT_NAME "res_fuzzer"
-
 #endif // TEST_FUZZTEST_RES_LOADER_FUZZER_H

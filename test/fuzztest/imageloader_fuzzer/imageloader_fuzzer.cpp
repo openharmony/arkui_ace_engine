@@ -16,8 +16,11 @@
 #include "imageloader_fuzzer.h"
 
 #include "core/image/image_cache.h"
+#include "core/image/image_compressor.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_object.h"
+#include "core/image/image_provider.h"
+const uint32_t u16m = 65535;
 
 namespace OHOS::Ace {
 RefPtr<ImageObject> CreateAnimatedImageObject(
@@ -73,6 +76,30 @@ bool InternalImageLoad(const uint8_t* data, size_t size)
     Ace::InternalImageLoader internalImageLoader;
     return internalImageLoader.LoadImageData(info, context) != nullptr;
 }
+
+void MinorTest(const uint8_t* data, size_t size)
+{
+    OHOS::Ace::ImageSourceInfo i;
+    const sk_sp<SkImage> rawImage;
+    auto ri = size % u16m;
+    std::string s(reinterpret_cast<const char*>(data), ri);
+    i = ImageSourceInfo(s);
+    ImageSourceInfo::IsSVGSource(s, InternalResource::ResourceId::SVG_START);
+    ImageSourceInfo::IsPngSource(s, InternalResource::ResourceId::SVG_START);
+    ImageSourceInfo::ResolveURIType(s);
+    ImageSourceInfo::IsValidBase64Head(s, "example");
+    ImageSourceInfo::IsUriOfDataAbilityEncoded(s, "example");
+    auto k = ImageCompressor::GetInstance();
+    Size s2;
+    ImageProvider::ResizeSkImage(rawImage, s, s2) ;
+    SkPixmap  pixmap;
+    sk_sp<SkData> compressdImage;
+#ifdef FUZZTEST
+    k->PartDoing();
+#endif
+    k->GpuCompress(s, pixmap, 0, 0);
+    k->WriteToFile("", compressdImage, s2);
+}
 } // namespace OHOS::Ace
 
 using namespace OHOS;
@@ -80,13 +107,6 @@ using namespace OHOS::Ace;
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::Ace::ImageSourceInfo i;
-    auto c = ImageCache::Create();
-    c->SetCapacity(1);
-    /* Run your code on data */
-    FileImageLoaderTest(data, size);
-    AssetImageLoad(data, size);
-    NetworkImageLoad(data, size);
-    InternalImageLoad(data, size);
-    return i.IsSvg();
+    MinorTest(data, size);
+    return 0;
 }
