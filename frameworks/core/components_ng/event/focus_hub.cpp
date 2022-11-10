@@ -186,9 +186,10 @@ void FocusHub::UpdateAccessibilityFocusInfo()
     // Need update
 }
 
-void FocusHub::LostFocus()
+void FocusHub::LostFocus(BlurReason reason)
 {
     if (IsCurrentFocus()) {
+        blurReason_ = reason;
         currentFocus_ = false;
         UpdateAccessibilityFocusInfo();
         OnBlur();
@@ -717,6 +718,10 @@ void FocusHub::OnBlurNode()
     if (onBlurInternal_) {
         onBlurInternal_();
     }
+    if (onBlurReasonInternal_) {
+        LOGI("FocusHub: Node(%{public}s) 's blur reason is %{public}d", GetFrameName().c_str(), blurReason_);
+        onBlurReasonInternal_(blurReason_);
+    }
     auto onBlurCallback = GetOnBlurCallback();
     if (onBlurCallback) {
         onBlurCallback();
@@ -763,7 +768,7 @@ void FocusHub::OnBlurScope()
     FlushChildrenFocusHub();
     OnBlurNode();
     if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
-        (*itLastFocusNode_)->LostFocus();
+        (*itLastFocusNode_)->LostFocus(blurReason_);
     }
 }
 
