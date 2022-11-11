@@ -18,6 +18,7 @@ build_component("grid_v2") {
   sources = [
     "flutter_render_grid_scroll.cpp",
     "grid_element.cpp",
+    "grid_event.cpp",
     "grid_position_controller.cpp",
     "grid_scroll_controller.cpp",
     "render_grid_scroll.cpp",
