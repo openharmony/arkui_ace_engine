@@ -97,6 +97,7 @@ void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& 
     auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateImageSourceInfo(info);
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
 
     imgNode->MountToParent(parentNode);
     imgNode->MarkModifyDone();
