@@ -669,6 +669,16 @@ template("ace_core_ng_source_set") {
       ]
     }
 
+    if (defined(config.build_container_scope_lib) &&
+        config.build_container_scope_lib) {
+      sources -= [ "common/container_scope.cpp" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        deps += [ "$ace_napi:ace_container_scope_static" ]
+      } else {
+        deps += [ "$ace_napi:ace_container_scope" ]
+      }
+    }
+
     deps += [
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
