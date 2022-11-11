@@ -52,6 +52,7 @@ public:
     // implementation in adapter layer
     static sk_sp<SkData> QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo);
     static void CacheImageDataToImageCache(const std::string& key, const RefPtr<CachedImageData>& imageData);
+    static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string key, const std::string suffix);
 };
 
 // File image provider: read image from file.

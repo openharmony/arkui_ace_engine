@@ -284,6 +284,8 @@ void RosenRenderContext::PaintBackground()
     CHECK_NULL_VOID(skiaCanvasImage);
     auto skImage = skiaCanvasImage->GetCanvasImage();
     CHECK_NULL_VOID(skImage);
+    // use compress data to draw bg image
+    skiaCanvasImage->SetCompressData(nullptr, 0, 0);
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetImage(skImage);
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NOREPEAT)));
