@@ -13,24 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_ACCESSIBILITY_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_ACCESSIBILITY_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_ACCESSIBILITY_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_ACCESSIBILITY_PROPERTY_H
 
 #include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class TextAccessibilityProperty : public AccessibilityProperty {
-    DECLARE_ACE_TYPE(TextAccessibilityProperty, AccessibilityProperty);
+class SliderAccessibilityProperty : public AccessibilityProperty {
+    DECLARE_ACE_TYPE(SliderAccessibilityProperty, AccessibilityProperty);
 
 public:
-    TextAccessibilityProperty() = default;
+    SliderAccessibilityProperty() = default;
 
-    ~TextAccessibilityProperty() override = default;
+    ~SliderAccessibilityProperty() override = default;
 
     std::string GetText() const override;
 
+    bool HasRange() const override
+    {
+        return true;
+    }
+
+    AccessibilityValue GetAccessibilityValue() const override;
+
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(TextAccessibilityProperty);
+    ACE_DISALLOW_COPY_AND_MOVE(SliderAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG
 
