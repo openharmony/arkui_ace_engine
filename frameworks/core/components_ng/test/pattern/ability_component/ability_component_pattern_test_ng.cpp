@@ -53,24 +53,94 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentObjectTest001, TestSize.
     EXPECT_NE(eventHub, nullptr);
     RefPtr<AbilityComponentPattern> pattern = frameNode->GetPattern<AbilityComponentPattern>();
     EXPECT_NE(pattern, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    EXPECT_NE(layoutAlgorithm, nullptr);
 }
 
 /**
- * @tc.name: RefreshModelTest001
+ * @tc.name: AbilityComponentModelTest001
  * @tc.desc: Test setting of refresh.
  * @tc.type: FUNC
  */
 HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentModelTest001, TestSize.Level1)
 {
+    bool flagConnect = false;
+    auto onConnect = [&flagConnect]() { flagConnect = true; };
+    bool flagDisConnect = false;
+    auto onDisConnect = [&flagDisConnect]() { flagDisConnect = true; };
     AbilityComponentModelNG modelNG;
     modelNG.Create();
     string want = "abilityName:, bundleName:";
     modelNG.SetWant(want);
+    modelNG.SetOnConnect(std::move(onConnect));
+    modelNG.SetOnDisConnect(std::move(onDisConnect));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     RefPtr<AbilityComponentRenderProperty> paintProperty =
         frameNode->GetPaintProperty<AbilityComponentRenderProperty>();
     EXPECT_NE(paintProperty, nullptr);
     EXPECT_EQ(paintProperty->GetWantValue(), want);
+    RefPtr<AbilityComponentPattern> pattern = frameNode->GetPattern<AbilityComponentPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->FireConnect();
+    EXPECT_EQ(flagConnect, true);
+    pattern->FireDisConnect();
+    EXPECT_EQ(flagDisConnect, true);
+}
+
+/**
+ * @tc.name: AbilityComponentEventTest001
+ * @tc.desc: Test setting of refresh.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentEventTest001, TestSize.Level1)
+{
+    bool flagConnect = false;
+    auto onConnect = [&flagConnect]() { flagConnect = true; };
+    bool flagDisConnect = false;
+    auto onDisConnect = [&flagDisConnect]() { flagDisConnect = true; };
+    AbilityComponentModelNG modelNG;
+    modelNG.Create();
+    string want = "abilityName:, bundleName:";
+    modelNG.SetWant(want);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<AbilityComponentEventHub> eventHub = frameNode->GetEventHub<AbilityComponentEventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->SetOnConnect(std::move(onConnect));
+    eventHub->FireOnConnect();
+    EXPECT_EQ(flagConnect, true);
+    eventHub->SetOnDisConnect(std::move(onDisConnect));
+    eventHub->FireOnDisConnect();
+    EXPECT_EQ(flagDisConnect, true);
+}
+
+/**
+ * @tc.name: AbilityComponentEventTest002
+ * @tc.desc: Test setting of refresh.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentEventTest002, TestSize.Level1)
+{
+    bool flagConnect = false;
+    auto onConnect = [&flagConnect]() { flagConnect = true; };
+    bool flagDisConnect = false;
+    auto onDisConnect = [&flagDisConnect]() { flagDisConnect = true; };
+    AbilityComponentModelNG modelNG;
+    modelNG.Create();
+    string want = "abilityName:, bundleName:";
+    modelNG.SetWant(want);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<AbilityComponentEventHub> eventHub = frameNode->GetEventHub<AbilityComponentEventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->SetOnConnect(std::move(onConnect));
+    eventHub->SetOnDisConnect(std::move(onDisConnect));
+    RefPtr<AbilityComponentPattern> pattern = frameNode->GetPattern<AbilityComponentPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->FireConnect();
+    EXPECT_EQ(flagConnect, true);
+    pattern->FireDisConnect();
+    EXPECT_EQ(flagDisConnect, true);
 }
 } // namespace OHOS::Ace::NG
