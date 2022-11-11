@@ -22,7 +22,6 @@
 #include "ability_context.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
-#include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_ability.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
@@ -238,7 +237,7 @@ public:
         return "";
     }
 
-    void SetSharedRuntime(void* runtime)
+    void SetSharedRuntime(void* runtime) override
     {
         sharedRuntime_ = runtime;
     }
@@ -253,7 +252,7 @@ public:
         return isSubContainer_;
     }
 
-    void* GetSharedRuntime()
+    void* GetSharedRuntime() override
     {
         return sharedRuntime_;
     }
