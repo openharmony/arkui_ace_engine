@@ -659,8 +659,11 @@ public:
     {
         auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         GestureEventFunc event;
+        auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (!params.empty()) {
-            event = [params, targetNode](GestureEvent& info) mutable {
+            event = [params, weakTarget](GestureEvent& info) mutable {
+                auto targetNode = weakTarget.Upgrade();
+                CHECK_NULL_VOID(targetNode);
                 auto position = NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 // menu already created
                 if (params.empty()) {
@@ -671,7 +674,9 @@ public:
                 params.clear();
             };
         } else if (buildFunc) {
-            event = [builderFunc = std::move(buildFunc), targetNode](const GestureEvent& info) mutable {
+            event = [builderFunc = std::move(buildFunc), weakTarget](const GestureEvent& info) mutable {
+                auto targetNode = weakTarget.Upgrade();
+                CHECK_NULL_VOID(targetNode);
                 CreateCustomMenu(builderFunc, targetNode, false,
                     NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
             };
@@ -701,9 +706,11 @@ public:
         CHECK_NULL_VOID(targetNode);
         auto hub = targetNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(hub);
-
+        auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (type == ResponseType::RIGHT_CLICK) {
-            OnMouseEventFunc event = [builder = std::move(buildFunc), targetNode](MouseInfo& info) mutable {
+            OnMouseEventFunc event = [builder = std::move(buildFunc), weakTarget](MouseInfo& info) mutable {
+                auto targetNode = weakTarget.Upgrade();
+                CHECK_NULL_VOID(targetNode);
                 if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                     CreateCustomMenu(builder, targetNode, true,
                         NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
@@ -716,7 +723,9 @@ public:
             inputHub->AddOnMouseEvent(mouseCallback_);
         } else if (type == ResponseType::LONGPRESS) {
             // create or show menu on long press
-            auto event = [builder = std::move(buildFunc), targetNode](const GestureEvent& info) mutable {
+            auto event = [builder = std::move(buildFunc), weakTarget](const GestureEvent& info) mutable {
+                auto targetNode = weakTarget.Upgrade();
+                CHECK_NULL_VOID(targetNode);
                 CreateCustomMenu(builder, targetNode, true,
                     NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
             };

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+#include <string>
+
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -145,12 +147,13 @@ void FrameNode::DumpInfo()
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
                                                    : "NA"));
-    DumpLog::GetInstance().AddDesc(std::string("top: ").append(std::to_string(GetOffsetRelativeToWindow().GetY())));
-    DumpLog::GetInstance().AddDesc(std::string("left: ").append(std::to_string(GetOffsetRelativeToWindow().GetX())));
-    DumpLog::GetInstance().AddDesc(
-        std::string("width: ").append(std::to_string(geometryNode_->GetFrameRect().Width())));
-    DumpLog::GetInstance().AddDesc(
-        std::string("height: ").append(std::to_string(geometryNode_->GetFrameRect().Height())));
+    DumpLog::GetInstance().AddDesc(std::string("top: ")
+                                       .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
+                                       .append(" left: ")
+                                       .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+    DumpLog::GetInstance().AddDesc(std::string("Visible: ")
+                                       .append(std::to_string(static_cast<int32_t>(
+                                           layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
