@@ -84,6 +84,7 @@
                 "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/base/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/bridge/test:unittest",
+                "//foundation/arkui/ace_engine/frameworks/core/accessibility/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/animation/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/pipeline/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/pipeline_ng/test:unittest",
