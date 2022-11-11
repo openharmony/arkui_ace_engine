@@ -36,7 +36,6 @@ void ExclusiveRecognizer::OnAccepted()
         AceType::TypeName(activeRecognizer_));
     refereeState_ = RefereeState::SUCCEED;
     if (activeRecognizer_) {
-        activeRecognizer_->SetCoordinateOffset(coordinateOffset_);
         activeRecognizer_->OnAccepted();
     } else {
         LOGW("the active recognizer is null");

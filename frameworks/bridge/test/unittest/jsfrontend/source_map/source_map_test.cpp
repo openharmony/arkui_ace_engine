@@ -22,6 +22,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::Framework {
 namespace {
+const std::string FILESTR = "./pages/dfxtest.js";
+const std::string SOURCESTR = "source.json";
+const std::string NULLSTR = "";
 } // namespace
 
 class SourceMapTest : public testing::Test {
@@ -87,5 +90,86 @@ HWTEST_F(SourceMapTest, GetOriginalNames002, TestSize.Level1)
     pageMap.Init(pagemapStr);
     std::string result = pageMap.GetOriginalNames(sourceCode, errorPos);
     ASSERT_EQ(result, sourceCode);
+}
+
+/**
+ * @tc.name: FindSourcesString001
+ * @tc.desc: Test get file content when input pos is 2,2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SourceMapTest, FindSourcesString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set row > afterRow, input a string in mappings
+     * @tc.expected: step1. Get the content of file
+     */
+    std::string pagemapStr = "{\"version\":3,"
+                             "\"file\":\"./pages/dfxtest.js\","
+                             "\"mappings\":\"/A+b,\\0VAL;\","
+                             "\"sources\":\"webpack:///source.json\","
+                             "\"names\":[\"_ohos_router_1\",\"router\",\"_ohos_process_1\",\"process\"]}";
+    int32_t row = 2;
+    int32_t col = 2;
+
+    RevSourceMap pageMap;
+    pageMap.Init(pagemapStr);
+    auto pageMapInfo = pageMap.Find(row, col);
+    ASSERT_EQ(pageMapInfo.row, row);
+    ASSERT_EQ(pageMapInfo.col, col);
+    ASSERT_EQ(pageMapInfo.sources, FILESTR);
+}
+
+/**
+ * @tc.name: FindSourcesString002
+ * @tc.desc: Test get sources content when input pos is 1,1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SourceMapTest, FindSourcesString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set row <= afterRow, input a string in mappings
+     * @tc.expected: step1. Get the content of source
+     */
+    std::string pagemapStr = "{\"version\":3,"
+                             "\"file\":\"./pages/dfxtest.js\","
+                             "\"mappings\":\"V,B;QAABC,QAABC;\","
+                             "\"sources\":\"webpack:///source.json\","
+                             "\"names\":[\"_ohos_router_1\",\"router\",\"_ohos_process_1\",\"process\"]}";
+    int32_t row = 1;
+    int32_t col = 1;
+
+    RevSourceMap pageMap;
+    pageMap.Init(pagemapStr);
+    auto pageMapInfo = pageMap.Find(row, col);
+    ASSERT_EQ(pageMapInfo.row, row);
+    ASSERT_EQ(pageMapInfo.col, col);
+    ASSERT_EQ(pageMapInfo.sources, SOURCESTR);
+}
+
+/**
+ * @tc.name: FindSourcesString003
+ * @tc.desc: Test the input pos is wrong
+ * @tc.type: FUNC
+ */
+HWTEST_F(SourceMapTest, FindSourcesString003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Input a wrong pos
+     * @tc.expected: step1. Output is the default MappingInfo
+     */
+    std::string pagemapStr = "{\"version\":3,"
+                             "\"file\":\"./pages/dfxtest.js\","
+                             "\"mappings\":\"QAABC,QAABC;\","
+                             "\"sources\":\"webpack:///source.json\","
+                             "\"names\":[\"_ohos_router_1\",\"router\",\"_ohos_process_1\",\"process\"]}";
+    int32_t row = 0;
+    int32_t col = 0;
+
+    RevSourceMap pageMap;
+    pageMap.Init(pagemapStr);
+    auto pageMapInfo = pageMap.Find(row, col);
+    ASSERT_EQ(pageMapInfo.row, row);
+    ASSERT_EQ(pageMapInfo.col, col);
+    ASSERT_EQ(pageMapInfo.sources, NULLSTR);
 }
 } // namespace OHOS::Ace::Framework

@@ -100,6 +100,8 @@ enum class AccessibilityEventType : size_t {
     CHANGE = 0x00000800,
     SCROLL_END = 0x00001000,
     TEXT_SELECTION_UPDATE = 0x000002000,
+    ACCESSIBILITY_FOCUSED = 0x00008000,
+    ACCESSIBILITY_FOCUS_CLEARED = 0x00010000,
     TEXT_MOVE_UNIT = 0x00020000,
     SCROLL_START = 0x01000000,
     UNKNOWN,
@@ -155,7 +157,7 @@ struct AceCollectionItemInfo {
     int32_t column = 0;
 };
 
-bool CheckBetterRect(Rect nodeRect, const int direction, Rect itemRect, Rect tempBest);
+bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);
 
 } // namespace OHOS::Ace
 

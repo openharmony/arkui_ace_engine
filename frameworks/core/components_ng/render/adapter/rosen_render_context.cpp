@@ -46,13 +46,13 @@
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -187,19 +187,19 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    SetPivot(0.5f, 0.5f); // default pivot is center
 
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
         NotifyTransitionInner(paintRect.GetSize(), true);
         firstTransitionIn_ = false;
     }
+
     if (propTransform_ && propTransform_->HasTransformCenter()) {
         auto vec = propTransform_->GetTransformCenterValue();
         float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
         float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
         SetPivot(xPivot, yPivot);
-    } else {
-        SetPivot(0.5f, 0.5f); // default pivot is center
     }
 
     if (bgLoadingCtx_ && bgLoadingCtx_->GetCanvasImage()) {
@@ -215,13 +215,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
 
     if (propGradient_) {
-        SizeF frameSize(paintRect.Width(), paintRect.Height());
-        PaintGradient(frameSize);
+        PaintGradient(paintRect.GetSize());
     }
 
     if (propClip_) {
-        SizeF frameSize(paintRect.Width(), paintRect.Height());
-        PaintClip(frameSize);
+        PaintClip(paintRect.GetSize());
     }
 
     if (propGraphics_) {
@@ -286,6 +284,8 @@ void RosenRenderContext::PaintBackground()
     CHECK_NULL_VOID(skiaCanvasImage);
     auto skImage = skiaCanvasImage->GetCanvasImage();
     CHECK_NULL_VOID(skImage);
+    // use compress data to draw bg image
+    skiaCanvasImage->SetCompressData(nullptr, 0, 0);
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetImage(skImage);
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NOREPEAT)));
@@ -336,7 +336,7 @@ void RosenRenderContext::OnBackgroundImagePositionUpdate(const BackgroundImagePo
 void RosenRenderContext::OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto dipScale_ = context->GetDipScale();
     auto backFilter =
@@ -380,7 +380,16 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center) {}
+void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
+{
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        float xPivot = ConvertDimensionToScaleBySize(center.GetX(), rect.Width());
+        float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
+        SetPivot(xPivot, yPivot);
+    }
+    RequestNextFrame();
+}
 
 void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
 {
@@ -532,11 +541,13 @@ void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnAccessibilityFocusUpdate(bool /* isAccessibilityFocus */)
+void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
 {
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
     uiNode->MarkDirtyNode(false, true, PROPERTY_UPDATE_RENDER);
+    uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
+                                                      : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
     RequestNextFrame();
 }
 
@@ -599,7 +610,7 @@ void RosenRenderContext::PaintBorderImage()
             borderWidthProperty,
             paintRect.GetSize(),
             rsImage,
-            NG::PipelineContext::GetCurrentContext()->GetDipScale()
+            PipelineBase::GetCurrentContext()->GetDipScale()
         );
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
@@ -705,7 +716,7 @@ void RosenRenderContext::PaintBorderImageGradient()
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
         BorderImagePainter borderImagePainter(hasBorderWidthProperty,
             borderImageProperty, borderWidthProperty, paintSize, rsImage,
-            NG::PipelineContext::GetCurrentContext()->GetDipScale());
+            PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -761,7 +772,6 @@ RectF RosenRenderContext::AdjustPaintRect()
                                                               : PipelineContext::GetCurrentRootWidth();
     auto heightPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Height()
                                                                : PipelineContext::GetCurrentRootHeight();
-
     auto anchor = GetAnchorValue({});
     auto anchorWidthReference = rect.Width();
     auto anchorHeightReference = rect.Height();
@@ -1029,7 +1039,7 @@ void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto appTheme = pipeline->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
@@ -1060,7 +1070,7 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto appTheme = pipeline->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
@@ -1115,8 +1125,6 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 
 void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
 {
-    auto pipelineBase = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineBase);
     std::shared_ptr<Rosen::RSFilter> frontFilter = nullptr;
     if (radius.IsValid()) {
         float radiusPx = radius.ConvertToPx();
@@ -1468,7 +1476,6 @@ void RosenRenderContext::PaintOverlayText()
         auto modifier = std::make_shared<OverlayTextModifier>();
         modifier->SetCustomData(NG::OverlayTextData(overlayText));
         rsNode_->AddModifier(modifier);
-        // TODO: PaintOverlayText
     }
 }
 

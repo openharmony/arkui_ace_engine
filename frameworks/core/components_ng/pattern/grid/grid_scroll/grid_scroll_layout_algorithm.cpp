@@ -89,7 +89,12 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 continue;
             }
             itemIdex = iter->second;
-            auto crossOffset = itemsCrossPosition_.at(itemIdex);
+            auto crossIter = itemsCrossPosition_.find(itemIdex);
+            if (crossIter == itemsCrossPosition_.end()) {
+                LOGI("item %{public}d not in cross position", itemIdex);
+                continue;
+            }
+            auto crossOffset = crossIter->second;
             if (axis_ == Axis::VERTICAL) {
                 offset.SetX(crossOffset);
             } else {

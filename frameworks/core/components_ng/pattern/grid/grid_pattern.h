@@ -105,7 +105,7 @@ public:
 
     void OnMouseSelectAll();
 
-    bool UpdateScrollPosition(float offset, int32_t source);
+    bool UpdateScrollPosition(float offset);
 
     void SetPositionController(const RefPtr<ScrollController>& controller);
 
@@ -133,11 +133,13 @@ private:
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
+    void UpdateScrollerAnimation(float offset);
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<GridPositionController> positionController_;
     RefPtr<Animator> animator_;
+    float animatorOffset_ = 0.0f;
 
     bool multiSelectable_ = false;
     bool supportAnimation_ = false;

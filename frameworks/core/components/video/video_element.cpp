@@ -1105,7 +1105,7 @@ void VideoElement::OnPrepared(
         Start();
     } else if (isMediaPlayerFullStatus_ && pastPlayingStatus_) {
         Start();
-        pastPlayingStatus_ = isPlaying_;
+        pastPlayingStatus_ = false;
     }
 #endif
 }

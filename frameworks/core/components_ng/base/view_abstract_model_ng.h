@@ -703,23 +703,30 @@ public:
         CHECK_NULL_VOID(hub);
 
         if (type == ResponseType::RIGHT_CLICK) {
-            OnMouseEventFunc event = [builder = std::move(buildFunc), targetNode](MouseInfo& info) mutable {
+            OnMouseEventFunc event = [builder = std::move(buildFunc), weak = Referenced::WeakClaim(Referenced::RawPtr(
+                                                                          targetNode))](MouseInfo& info) mutable {
+                auto targetNode = weak.Upgrade();
                 if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                     CreateCustomMenu(builder, targetNode, true,
                         NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
+                    info.SetStopPropagation(true);
                 }
-                info.SetStopPropagation(true);
             };
-            NG::ViewAbstract::SetOnMouse(std::move(event));
+            auto inputHub = targetNode->GetOrCreateInputEventHub();
+            CHECK_NULL_VOID(inputHub);
+            mouseCallback_ = AceType::MakeRefPtr<InputEvent>(std::move(event));
+            inputHub->AddOnMouseEvent(mouseCallback_);
         } else if (type == ResponseType::LONGPRESS) {
             // create or show menu on long press
-            auto event = [builder = std::move(buildFunc), targetNode](const GestureEvent& info) mutable {
+            auto event = [builder = std::move(buildFunc), weak = Referenced::WeakClaim(Referenced::RawPtr(targetNode))](
+                             const GestureEvent& info) mutable {
+                auto targetNode = weak.Upgrade();
                 CreateCustomMenu(builder, targetNode, true,
                     NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
-            hub->SetLongPressEvent(longPress);
+            hub->SetLongPressEvent(longPress, false, true);
         } else {
             LOGE("The arg responseType is invalid.");
             return;
@@ -747,6 +754,7 @@ private:
         // nullify builder
         buildFunc = nullptr;
     }
+    RefPtr<InputEvent> mouseCallback_;
 };
 } // namespace OHOS::Ace::NG
 

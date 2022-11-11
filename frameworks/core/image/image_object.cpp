@@ -40,6 +40,8 @@ std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size t
            std::to_string(static_cast<int32_t>(targetImageSize.Height()));
 }
 
+
+
 RefPtr<ImageObject> ImageObject::BuildImageObject(
     ImageSourceInfo source,
     const RefPtr<PipelineBase> context,
@@ -57,8 +59,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
         }
         auto color = source.GetFillColor();
         if (!useSkiaSvg) {
-            auto svgDom = SvgDom::CreateSvgDom(*svgStream, DynamicCast<PipelineContext>(context), color);
-            return svgDom ? MakeRefPtr<SvgImageObject>(source, Size(), 1, svgDom) : nullptr;
+            return Ace::GetImageSvgDomObj(source, svgStream, context, color);
         } else {
             uint64_t colorValue = 0;
             if (color.has_value()) {
@@ -74,11 +75,10 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
 
     //if is png or apng check
 #ifdef APNG_IMAGE_SUPPORT
-    if (source.IsPng())
-    {
+    if (source.isPng()) {
         auto apngDecoder = AceType::MakeRefPtr<PNGImageDecoder>(skData);
-        if(apngDecoder && apngDecoder->isApng()){
-            if(!apngDecoder->DecodeImage()){
+        if (apngDecoder && apngDecoder->isApng()) {
+            if (!apngDecoder->DecodeImage()) {
                 return nullptr;
             }
 
@@ -109,7 +109,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
     if (totalFrames == 1) {
         return MakeRefPtr<StaticImageObject>(source, imageSize, totalFrames, skData);
     } else {
-        return MakeRefPtr<AnimatedImageObject>(source, imageSize, totalFrames, skData);
+        return CreateAnimatedImageObject(source, imageSize, totalFrames, skData);
     }
 }
 
@@ -258,7 +258,7 @@ void StaticImageObject::UploadToGpuForRender(
         } else {
             image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
         }
-        ImageProvider::UploadImageToGPUForRender(image, stripped, callback, renderTaskHolder, key);
+        ImageProvider::UploadImageToGPUForRender(pipelineContext, image, stripped, callback, renderTaskHolder, key);
         skData = nullptr;
     };
     if (syncMode) {
@@ -274,45 +274,7 @@ bool StaticImageObject::CancelBackgroundTasks()
     return uploadForPaintTask_ ? uploadForPaintTask_.Cancel(false) : false;
 }
 
-void AnimatedImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    const UploadSuccessCallback& successCallback,
-    const FailedCallback& failedCallback,
-    const Size& imageSize,
-    bool forceResize,
-    bool syncMode)
-{
-    constexpr float SizeOffset = 0.5f;
-    if (!animatedPlayer_ && skData_) {
-        auto codec = SkCodec::MakeFromData(skData_);
-        int32_t dstWidth = -1;
-        int32_t dstHeight = -1;
-        if (forceResize) {
-            dstWidth = static_cast<int32_t>(imageSize.Width() + SizeOffset);
-            dstHeight = static_cast<int32_t>(imageSize.Height() + SizeOffset);
-        }
-        animatedPlayer_ = MakeRefPtr<AnimatedImagePlayer>(
-            imageSource_,
-            successCallback,
-            context,
-            renderTaskHolder->ioManager,
-            renderTaskHolder->unrefQueue,
-            std::move(codec),
-            dstWidth,
-            dstHeight);
-        ClearData();
-    } else if (animatedPlayer_ && forceResize && imageSize.IsValid()) {
-        LOGI("animated player has been constructed, forceResize: %{public}s", imageSize.ToString().c_str());
-        int32_t dstWidth = static_cast<int32_t>(imageSize.Width() + SizeOffset);
-        int32_t dstHeight = static_cast<int32_t>(imageSize.Height() + SizeOffset);
-        animatedPlayer_->SetTargetSize(dstWidth, dstHeight);
-    } else if (!animatedPlayer_ && !skData_) {
-        LOGE("animated player is not constructed and image data is null, can not construct animated player!");
-    } else if (animatedPlayer_ && !forceResize) {
-        LOGI("animated player has been constructed, do nothing!");
-    }
-}
+
 
 void PixelMapImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image)
 {

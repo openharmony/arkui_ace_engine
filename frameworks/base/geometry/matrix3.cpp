@@ -92,7 +92,7 @@ Matrix3 Matrix3::Transpose() const
 
 std::vector<double> Matrix3::MapScalars(const std::vector<double>& src) const
 {
-    std::vector<double> value { DIMENSION, 0 };
+    std::vector<double> value(DIMENSION, 0);
     if (static_cast<int32_t>(src.size()) != DIMENSION) {
         return value;
     }
@@ -167,7 +167,7 @@ MatrixN3 Matrix3N::Transpose() const
 
 std::vector<double> Matrix3N::MapScalars(const std::vector<double>& src) const
 {
-    std::vector<double> value { DIMENSION, 0 };
+    std::vector<double> value(DIMENSION, 0);
     if (static_cast<int32_t>(src.size()) != columns_) {
         return value;
     }
@@ -225,7 +225,7 @@ Matrix3N MatrixN3::Transpose() const
 
 std::vector<double> MatrixN3::MapScalars(const std::vector<double>& src) const
 {
-    std::vector<double> value { rows_, 0 };
+    std::vector<double> value(rows_, 0);
     if (static_cast<int32_t>(src.size()) != DIMENSION) {
         return value;
     }

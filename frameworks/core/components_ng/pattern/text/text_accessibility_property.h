@@ -16,14 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_ACCESSIBILITY_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_ACCESSIBILITY_PROPERTY_H
 
-#include <optional>
-#include <string>
-
-#include "base/utils/utils.h"
 #include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class FrameNode;
 class TextAccessibilityProperty : public AccessibilityProperty {
     DECLARE_ACE_TYPE(TextAccessibilityProperty, AccessibilityProperty);
 
@@ -34,13 +29,7 @@ public:
 
     std::string GetText() const override;
 
-    void SetHost(const WeakPtr<FrameNode>& host)
-    {
-        host_ = host;
-    }
-
 private:
-    WeakPtr<FrameNode> host_;
     ACE_DISALLOW_COPY_AND_MOVE(TextAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

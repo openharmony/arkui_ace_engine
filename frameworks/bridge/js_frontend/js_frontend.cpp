@@ -736,6 +736,18 @@ void JsFrontend::DumpFrontend() const
     }
 }
 
+std::string JsFrontend::GetPagePath() const
+{
+    if (!delegate_) {
+        return "";
+    }
+    int32_t routerIndex = 0;
+    std::string routerName;
+    std::string routerPath;
+    delegate_->GetState(routerIndex, routerName, routerPath);
+    return routerPath + routerName;
+}
+
 void JsFrontend::TriggerGarbageCollection()
 {
     if (jsEngine_) {

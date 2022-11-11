@@ -303,11 +303,13 @@ void PipelineContext::SetupRootElement()
         rootNode_->AddChild(stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    auto rsWindow = static_cast<RosenWindow*>(GetWindow());
-    if (rsWindow) {
-        auto rsUIDirector = rsWindow->GetRsUIDirector();
-        if (rsUIDirector) {
-            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+    if (!IsJsCard()) {
+        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+        if (rsWindow) {
+            auto rsUIDirector = rsWindow->GetRsUIDirector();
+            if (rsUIDirector) {
+                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            }
         }
     }
 #endif
@@ -343,11 +345,13 @@ void PipelineContext::SetupSubRootElement()
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     rootNode_->AddChild(stageNode);
 #ifdef ENABLE_ROSEN_BACKEND
-    auto rsWindow = static_cast<RosenWindow*>(GetWindow());
-    if (rsWindow) {
-        auto rsUIDirector = rsWindow->GetRsUIDirector();
-        if (rsUIDirector) {
-            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+    if (!IsJsCard()) {
+        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+        if (rsWindow) {
+            auto rsUIDirector = rsWindow->GetRsUIDirector();
+            if (rsUIDirector) {
+                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            }
         }
     }
 #endif
@@ -739,11 +743,13 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     CHECK_NULL_VOID(containerNode);
     containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow);
 #ifdef ENABLE_ROSEN_BACKEND
-    auto rsWindow = static_cast<RosenWindow*>(GetWindow());
-    if (rsWindow) {
-        auto rsUIDirector = rsWindow->GetRsUIDirector();
-        if (rsUIDirector) {
-            rsUIDirector->SetContainerWindow(isShow); // set container window show state to render service
+    if (!IsJsCard()) {
+        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+        if (rsWindow) {
+            auto rsUIDirector = rsWindow->GetRsUIDirector();
+            if (rsUIDirector) {
+                rsUIDirector->SetContainerWindow(isShow); // set container window show state to render service
+            }
         }
     }
 #endif
@@ -753,11 +759,13 @@ void PipelineContext::SetAppBgColor(const Color& color)
 {
     appBgColor_ = color;
 #ifdef ENABLE_ROSEN_BACKEND
-    auto rsWindow = static_cast<RosenWindow*>(GetWindow());
-    if (rsWindow) {
-        auto rsUIDirector = rsWindow->GetRsUIDirector();
-        if (rsUIDirector) {
-            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+    if (!IsJsCard()) {
+        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+        if (rsWindow) {
+            auto rsUIDirector = rsWindow->GetRsUIDirector();
+            if (rsUIDirector) {
+                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            }
         }
     }
 #endif

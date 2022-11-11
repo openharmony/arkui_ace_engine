@@ -20,6 +20,7 @@
 #include <sstream>
 
 #include "base/log/log.h"
+#include "core/common/container.h"
 #include "frameworks/base/json/json_util.h"
 #include "frameworks/core/common/frontend.h"
 
@@ -28,6 +29,8 @@
 #include "form_host_client.h"
 #include "form_js_info.h"
 #include "form_mgr.h"
+#include "core/common/form_manager.h"
+#include "core/components/form/resource/form_utils.h"
 #endif
 
 namespace OHOS::Ace {
@@ -297,7 +300,7 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
     auto bundle = bundleName->GetString();
     auto ability = abilityName->GetString();
     LOGI("bundle:%{public}s ability:%{public}s, params:%{public}s", bundle.c_str(), ability.c_str(),
-        params->GetString().c_str());
+        params->ToString().c_str());
     if (bundle.empty()) {
         bundle = wantCache_.GetElement().GetBundleName();
     }
@@ -351,7 +354,12 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
         if (!ParseAction(action, want)) {
             LOGE("Failed to parse want");
         } else {
-            AppExecFwk::FormMgr::GetInstance().RouterEvent(runningCardId_, want);
+            auto contianerId = Container::CurrentId();
+            if (!formUtils_) {
+                LOGE("Failed to get formUtils");
+                return;
+            }
+            formUtils_->RouterEvent(runningCardId_, action, contianerId, wantCache_.GetElement().GetBundleName());
         }
         return;
     }
@@ -461,6 +469,13 @@ void FormManagerDelegate::OnDeathReceived()
 
     if (ret != 0) {
         LOGE("relink to form manager fail!!!");
+    }
+}
+
+void FormManagerDelegate::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils)
+{
+    if (formUtils) {
+        formUtils_ = formUtils;
     }
 }
 #endif

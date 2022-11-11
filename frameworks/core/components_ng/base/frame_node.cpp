@@ -116,6 +116,7 @@ void FrameNode::InitializePatternAndContext()
 {
     eventHub_->AttachHost(WeakClaim(this));
     pattern_->AttachToFrameNode(WeakClaim(this));
+    accessibilityProperty_->SetHost(WeakClaim(this));
     renderContext_->SetRequestFrame([weak = WeakClaim(this)] {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -866,6 +867,9 @@ bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::
 HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
 {
+    if (!isActive_ || !eventHub_->IsEnabled()) {
+        return HitTestResult::OUT_OF_REGION;
+    }
     const auto& rect = renderContext_->GetPaintRectWithTransform();
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
@@ -879,8 +883,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
     bool preventBubbling = false;
 
     const auto localPoint = parentLocalPoint - rect.GetOffset();
-    const auto& children = GetChildren();
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         const auto& child = *iter;
         auto childHitResult = child->MouseTest(globalPoint, localPoint, onMouseResult, onHoverResult, hoverNode);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
@@ -1011,7 +1014,7 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
         event.type = eventType;
-        event.nodeId = GetId();
+        event.nodeId = GetAccessibilityId();
         PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
     }
 }

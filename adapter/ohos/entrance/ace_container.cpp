@@ -93,6 +93,10 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     InitializeTask();
     platformEventCallback_ = std::move(callback);
     useStageModel_ = false;
+    auto ability = aceAbility_.lock();
+    if (ability) {
+        abilityInfo_ = ability->GetAbilityInfo();
+    }
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
@@ -680,8 +684,6 @@ void AceContainer::InitializeCallback()
             [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterDragEventCallback(dragEventCallback);
-
-    InitWindowCallback();
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type,
@@ -1054,7 +1056,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
             pipelineContext->SetIsSubPipeline(true);
         }
     }
-
+    InitWindowCallback();
     InitializeCallback();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
@@ -1314,39 +1316,33 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 void AceContainer::InitWindowCallback()
 {
     LOGD("AceContainer InitWindowCallback");
-    auto aceAbility = aceAbility_.lock();
-    if (aceAbility == nullptr) {
-        LOGD("AceContainer::InitWindowCallback failed, aceAbility is null.");
-        return;
+    if (windowModal_ == WindowModal::CONTAINER_MODAL && pipelineContext_) {
+        auto& windowManager = pipelineContext_->GetWindowManager();
+        std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
+        if (info != nullptr) {
+            windowManager->SetAppLabelId(info->labelId);
+            windowManager->SetAppIconId(info->iconId);
+        }
+        windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
+        windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
+        windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
+        windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
+        windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+        windowManager->SetWindowSplitCallBack(
+            [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+        windowManager->SetWindowGetModeCallBack(
+            [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
     }
-    if (pipelineContext_ == nullptr) {
-        LOGE("AceContainer::InitWindowCallback failed, pipelineContext_ is null.");
-        return;
-    }
-    auto& window = aceAbility->GetWindow();
-    if (window == nullptr) {
-        LOGE("AceContainer::InitWindowCallback failed, window is null.");
-        return;
-    }
-    auto& windowManager = pipelineContext_->GetWindowManager();
-    if (windowManager == nullptr) {
-        LOGE("AceContainer::InitWindowCallback failed, windowManager is null.");
-        return;
-    }
-    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility->GetAbilityInfo();
-    if (info != nullptr) {
-        windowManager->SetAppLabelId(info->labelId);
-        windowManager->SetAppIconId(info->iconId);
-    }
-    windowManager->SetWindowMinimizeCallBack([window]() { window->Minimize(); });
-    windowManager->SetWindowMaximizeCallBack([window]() { window->Maximize(); });
-    windowManager->SetWindowRecoverCallBack([window]() { window->Recover(); });
-    windowManager->SetWindowCloseCallBack([window]() { window->Close(); });
-    windowManager->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
-    windowManager->SetWindowSplitCallBack(
-        [window]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
-    windowManager->SetWindowGetModeCallBack(
-        [window]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+
+    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
+        Rect rect;
+        if (!window) {
+            return rect;
+        }
+        auto windowRect = window->GetRect();
+        rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        return rect;
+    });
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
@@ -1441,6 +1437,24 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition)
                 TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::SetToken(sptr<IRemoteObject>& token)
+{
+    std::lock_guard<std::mutex> lock(cardTokensMutex_);
+    if (token) {
+        token_ = token;
+    }
+}
+
+sptr<IRemoteObject> AceContainer::GetToken()
+{
+    std::lock_guard<std::mutex> lock(cardTokensMutex_);
+    if (token_) {
+        return token_;
+    }
+    LOGE("fail to get Token");
+    return nullptr;
 }
 
 extern "C" ACE_EXPORT void OHOS_ACE_HotReloadPage()

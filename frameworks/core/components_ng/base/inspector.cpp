@@ -15,12 +15,8 @@
 
 #include "core/components_ng/base/inspector.h"
 
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/group_node.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

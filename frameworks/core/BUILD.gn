@@ -180,6 +180,8 @@ template("ace_core_source_set") {
       "image/image_compressor.cpp",
       "image/image_loader.cpp",
       "image/image_object.cpp",
+      "image/image_object_animated.cpp",
+      "image/image_object_svg.cpp",
       "image/image_provider.cpp",
       "image/image_source_info.cpp",
 
@@ -582,6 +584,8 @@ template("ace_core_ng_source_set") {
       "image/image_compressor.cpp",
       "image/image_loader.cpp",
       "image/image_object.cpp",
+      "image/image_object_animated.cpp",
+      "image/image_object_svg.cpp",
       "image/image_provider.cpp",
       "image/image_source_info.cpp",
 
@@ -637,6 +641,7 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_utils.cpp",
 
       # v2 inspector
+      "components_v2/grid/grid_event.cpp",
       "components_v2/grid_layout/grid_container_utils.cpp",
       "components_v2/inspector/inspector_constants.cpp",
       "components_v2/inspector/utils.cpp",

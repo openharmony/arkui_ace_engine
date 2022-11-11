@@ -90,6 +90,8 @@ public:
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
     void SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId);
 
+    std::string GetPagePath();
+
 protected:
     void DumpHandleEvent(const std::vector<std::string>& params) override;
     void DumpProperty(const std::vector<std::string>& params) override;

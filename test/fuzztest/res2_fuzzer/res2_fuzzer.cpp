@@ -26,11 +26,13 @@
 #include "frameworks/core/components/theme/theme_constants.h"
 #include "core/components/test/unittest/theme/theme_mock.h"
 
+const uint32_t u16m = 65535;
+
 namespace OHOS {
 using namespace OHOS::Ace;
 using namespace std;
 
-int32_t WriteDataToFile(const string &path, const uint8_t* data, size_t size)
+int32_t WriteDataToFile(const string &path, const char* data, size_t size)
 {
     FILE *file = nullptr;
     file = fopen(path.c_str(), "w+");
@@ -49,6 +51,9 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     bool result = false;
     string cmd = "mkdir -p /data/test/arkui";
+    auto ri = size % u16m;
+    std::string s (reinterpret_cast<const char*>(data), ri);
+    WriteDataToFile("/data/test/arkui/123.png", s.c_str(), ri);
     auto res = AceType::MakeRefPtr<ResourceAdapterMock>();
     auto theme = AceType::MakeRefPtr<ThemeConstants>(res);
     auto file = AceType::MakeRefPtr<FileAssetProvider>(); 

@@ -43,7 +43,6 @@ void SequencedRecognizer::OnAccepted()
     if (iter != recognizers_.end()) {
         auto activeRecognizer = *iter;
         if (activeRecognizer) {
-            activeRecognizer->SetCoordinateOffset(coordinateOffset_);
             activeRecognizer->OnAccepted();
             UpdateCurrentIndex();
         }
@@ -83,12 +82,10 @@ void SequencedRecognizer::OnPending()
             return;
         }
         if (activeRecognizer->GetGestureDisposal() == GestureDisposal::ACCEPT) {
-            activeRecognizer->SetCoordinateOffset(coordinateOffset_);
             activeRecognizer->OnAccepted();
             UpdateCurrentIndex();
         }
         if (activeRecognizer->GetGestureDisposal() == GestureDisposal::PENDING) {
-            activeRecognizer->SetCoordinateOffset(coordinateOffset_);
             activeRecognizer->OnPending();
         }
     }

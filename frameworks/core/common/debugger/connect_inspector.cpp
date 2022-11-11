@@ -45,14 +45,23 @@ void OnMessage(const std::string& message)
     if (g_inspector != nullptr && g_inspector->connectServer_ != nullptr) {
         g_inspector->ideMsgQueue_.push(message);
         std::string checkMessage = "connected";
+        std::string openMessage = "layoutOpen";
+        std::string closeMessage = "layoutClose";
         std::string requestMessage = "tree";
         if (message.find(checkMessage, 0) != std::string::npos) {
             g_inspector->waitingForDebugger_ = false;
-            if (g_inspector->setConnectedStaus_ != nullptr) {
-                g_inspector->setConnectedStaus_(g_inspector->instanceId_);
-            }
             for (auto& info : g_inspector->infoBuffer_) {
                 g_inspector->connectServer_->SendMessage(info.second);
+            }
+        }
+        if (message.find(openMessage, 0) != std::string::npos) {
+            if (g_inspector->setSwitchStatus_ != nullptr) {
+                g_inspector->setSwitchStatus_(true);
+            }
+        }
+        if (message.find(closeMessage, 0) != std::string::npos) {
+            if (g_inspector->setSwitchStatus_ != nullptr) {
+                g_inspector->setSwitchStatus_(false);
             }
         }
         if (message.find(requestMessage, 0) != std::string::npos) {
@@ -62,10 +71,9 @@ void OnMessage(const std::string& message)
     }
 }
 
-void SetCreatTreeCallBack(const std::function<void(int32_t)>& setConnectedStaus, int32_t instanceId)
+void SetSwitchCallBack(const std::function<void (bool)> &setSwitchStatus)
 {
-    g_inspector->instanceId_ = instanceId;
-    g_inspector->setConnectedStaus_ = setConnectedStaus;
+    g_inspector->setSwitchStatus_ = setSwitchStatus;
 }
 
 void ResetService()

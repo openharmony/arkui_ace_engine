@@ -107,6 +107,7 @@ RefPtr<Component> VideoElementV2::FireFullscreen(bool isFullScreen, bool isPlayi
             currentPos_ = currentPos_ + 1;
         }
         videoComponent_->SetStartTime(currentPos_);
+        videoComponent_->SetAutoPlay(false);
         videoComponent_->SetMediaExitFullscreenEvent(
             [weak = AceType::WeakClaim(this), singleChild](bool fullscreen, bool isPlaying, int32_t currentPos) {
                 auto client = weak.Upgrade();
