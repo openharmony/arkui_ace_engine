@@ -55,6 +55,8 @@ const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENT = {
     Placement::RIGHT_BOTTOM,
     Placement::RIGHT_TOP,
 };
+const Color BUBBLE_PAINT_PROPERTY_MASK_COLOR = Color::BLUE;
+const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color::RED;
 } // namespace
 class BubblePropertyTestNg : public testing::Test {
 public:
@@ -252,7 +254,7 @@ HWTEST_F(BubblePropertyTestNg, BubblePropertyTest009, TestSize.Level1)
 
 /**
  * @tc.name: BubblePropertyTest0010
- * @tc.desc: set a lot of placement value into BubblePropertyTest009 and get it.
+ * @tc.desc: set a lot of placement value into BubblePropertyTest0010 and get it.
  * @tc.type: FUNC
  */
 HWTEST_F(BubblePropertyTestNg, BubblePropertyTest0010, TestSize.Level1)
@@ -271,6 +273,67 @@ HWTEST_F(BubblePropertyTestNg, BubblePropertyTest0010, TestSize.Level1)
         EXPECT_FALSE(bubbleLayoutProperty == nullptr);
         EXPECT_EQ(bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM), placement);
     }
+}
+
+/**
+ * @tc.name: BubblePropertyTest0011
+ * @tc.desc: set autoCancel value into BubblePropertyTest0011 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest0011, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetHasAction(false);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto popupNode = BubbleView::CreateBubbleNode(frameNode->GetTag(), frameNode->GetId(), popupParam);
+    EXPECT_FALSE(popupNode == nullptr);
+    auto bubblePaintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
+    EXPECT_FALSE(bubblePaintProperty == nullptr);
+    EXPECT_EQ(bubblePaintProperty->GetAutoCancel().value_or(true), !popupParam->HasAction());
+}
+
+/**
+ * @tc.name: BubblePropertyTest0012
+ * @tc.desc: set maskColor value into BubblePropertyTest0012 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest0012, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetMaskColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto popupNode = BubbleView::CreateBubbleNode(frameNode->GetTag(), frameNode->GetId(), popupParam);
+    EXPECT_FALSE(popupNode == nullptr);
+    auto bubblePaintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
+    EXPECT_FALSE(bubblePaintProperty == nullptr);
+    EXPECT_EQ(bubblePaintProperty->GetMaskColor().value_or(Color::WHITE), BUBBLE_PAINT_PROPERTY_MASK_COLOR);
+}
+
+/**
+ * @tc.name: BubblePropertyTest0013
+ * @tc.desc: set BackgroundColor value into BubblePropertyTest0013 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest0013, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetBackgroundColor(BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto popupNode = BubbleView::CreateBubbleNode(frameNode->GetTag(), frameNode->GetId(), popupParam);
+    EXPECT_FALSE(popupNode == nullptr);
+    auto bubblePaintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
+    EXPECT_FALSE(bubblePaintProperty == nullptr);
+    EXPECT_EQ(
+        bubblePaintProperty->GetBackgroundColor().value_or(Color::WHITE), BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR);
 }
 
 } // namespace OHOS::Ace::NG
