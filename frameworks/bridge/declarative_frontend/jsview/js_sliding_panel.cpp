@@ -21,13 +21,32 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/panel/sliding_events.h"
-#include "core/components/panel/sliding_panel_component_v2.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/panel/sliding_panel_view.h"
+#include "bridge/declarative_frontend/jsview/models/sliding_panel_model_impl.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/panel/sliding_panel_model.h"
+#include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
+namespace OHOS::Ace {
+
+std::unique_ptr<SlidingPanelModel> SlidingPanelModel::instance_ = nullptr;
+
+SlidingPanelModel* SlidingPanelModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::SlidingPanelModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::SlidingPanelModelNG());
+        } else {
+            instance_.reset(new Framework::SlidingPanelModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 namespace {
 
@@ -40,29 +59,11 @@ const std::vector<VisibleType> PANEL_VISIBLE_TYPES = { VisibleType::GONE, Visibl
 
 void JSSlidingPanel::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        bool isShow = true;
-        if (info.Length() > 0 && info[0]->IsBoolean()) {
-            isShow = info[0]->ToBoolean();
-        }
-        NG::SlidingPanelView::Create(isShow);
-        return;
-    }
-
-    auto slidingPanel = AceType::MakeRefPtr<SlidingPanelComponentV2>();
-    ViewStackProcessor::GetInstance()->ClaimElementId(slidingPanel);
-    slidingPanel->SetHasDragBar(true);
-    ViewStackProcessor::GetInstance()->Push(slidingPanel);
     if (info.Length() > 0 && info[0]->IsBoolean()) {
-        auto isShow = info[0]->ToBoolean();
-        slidingPanel->SetVisible(isShow);
-        auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-        auto display = AceType::DynamicCast<DisplayComponent>(component);
-        if (!display) {
-            LOGE("display is null");
-            return;
-        }
-        display->SetVisible(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
+        bool isShow = true;
+        isShow = info[0]->ToBoolean();
+        SlidingPanelModel::GetInstance()->Create(isShow);
+        return;
     }
 }
 
@@ -111,87 +112,54 @@ void JSSlidingPanel::SetBackgroundMask(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBackgroundColor(color);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
-    if (!panel) {
-        LOGE("Panel is null");
-        return;
-    }
-
-    auto displayComponent = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-    auto display = AceType::DynamicCast<DisplayComponent>(displayComponent);
-    if (!display) {
-        LOGE("display is null");
-        return;
-    }
-    if (ParseJsColor(info[0], color)) {
-        display->SetBackgroundMask(color);
-    }
+    SlidingPanelModel::GetInstance()->SetBackgroundMask(color);
 }
 
-void JSSlidingPanel::ParsePanelRadius(const JSRef<JSVal>& args)
+void JSSlidingPanel::ParsePanelRadius(const JSRef<JSVal>& args, BorderRadius& borderRadius)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
-    RefPtr<Decoration> tarDecoration = GetPanelDecoration();
-    Dimension radiusTopLeft;
-    Dimension radiusTopRight;
-    Dimension radiusBottomLeft;
-    Dimension radiusBottomRight;
-    Dimension borderRadius;
-    if (ParseJsDimensionVp(args, borderRadius)) {
-        radiusTopLeft = borderRadius;
-        radiusTopRight = borderRadius;
-        radiusBottomLeft = borderRadius;
-        radiusBottomRight = borderRadius;
-    } else if (args->IsObject()) {
+
+    Dimension radius;
+    if (ParseJsDimensionVp(args, radius)) {
+        borderRadius.radiusTopLeft = radius;
+        borderRadius.radiusTopRight = radius;
+        borderRadius.radiusBottomLeft = radius;
+        borderRadius.radiusBottomRight = radius;
+        return;
+    }
+    if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         auto valueTopLeft = object->GetProperty("topLeft");
         if (!valueTopLeft->IsUndefined()) {
-            ParseJsDimensionVp(valueTopLeft, radiusTopLeft);
+            ParseJsDimensionVp(valueTopLeft, borderRadius.radiusTopLeft);
         }
         auto valueTopRight = object->GetProperty("topRight");
         if (!valueTopRight->IsUndefined()) {
-            ParseJsDimensionVp(valueTopRight, radiusTopRight);
+            ParseJsDimensionVp(valueTopRight, borderRadius.radiusTopRight);
         }
         auto valueBottomLeft = object->GetProperty("bottomLeft");
         if (!valueBottomLeft->IsUndefined()) {
-            ParseJsDimensionVp(valueBottomLeft, radiusBottomLeft);
+            ParseJsDimensionVp(valueBottomLeft, borderRadius.radiusBottomLeft);
         }
         auto valueBottomRight = object->GetProperty("bottomRight");
         if (!valueBottomRight->IsUndefined()) {
-            ParseJsDimensionVp(valueBottomRight, radiusBottomRight);
+            ParseJsDimensionVp(valueBottomRight, borderRadius.radiusBottomRight);
         }
-    } else {
-        LOGE("args format error. %{public}s", args->ToString().c_str());
         return;
     }
-    auto border = tarDecoration->GetBorder();
-    border.SetTopLeftRadius(Radius(radiusTopLeft));
-    border.SetTopRightRadius(Radius(radiusTopRight));
-    border.SetBottomLeftRadius(Radius(radiusBottomLeft));
-    border.SetBottomRightRadius(Radius(radiusBottomRight));
-    tarDecoration->SetBorder(border);
+    LOGE("args format error. %{public}s", args->ToString().c_str());
 }
 
 void JSSlidingPanel::JsPanelBorderRadius(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorderRadius(info);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
-    ParsePanelRadius(info[0]);
-    panel->SetHasBorderStyle(true);
-    panel->SetHasDecorationStyle(true);
+    BorderRadius borderRadius;
+    ParsePanelRadius(info[0], borderRadius);
+
+    ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius.radiusTopLeft, borderRadius.radiusTopRight,
+        borderRadius.radiusBottomLeft, borderRadius.radiusBottomRight);
 }
 
 void JSSlidingPanel::JsBackgroundColor(const JSCallbackInfo& info)
@@ -204,52 +172,8 @@ void JSSlidingPanel::JsBackgroundColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], backgroundColor)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::SetBackgroundColor(backgroundColor);
-        return;
-    }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
-    auto box = JSSlidingPanel::GetPanelBox();
-    if (!panel || !box) {
-        LOGE("Not valid type for SlidingPanel");
-        return;
-    }
-    box->SetColor(backgroundColor);
-    panel->SetHasBgStyle(true);
-    panel->SetHasDecorationStyle(true);
-}
-
-RefPtr<BoxComponent> JSSlidingPanel::GetPanelBox()
-{
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
-    if (!panel) {
-        return nullptr;
-    }
-    if (panel->HasBoxStyle()) {
-        return panel->GetBoxStyle();
-    } else {
-        panel->SetHasBoxStyle(true);
-        auto box = AceType::MakeRefPtr<BoxComponent>();
-        panel->SetBoxStyle(box);
-        return box;
-    }
-}
-
-RefPtr<Decoration> JSSlidingPanel::GetPanelDecoration()
-{
-    auto box = JSSlidingPanel::GetPanelBox();
-    if (!box) {
-        return nullptr;
-    }
-    auto decoration = box->GetBackDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-        box->SetBackDecoration(decoration);
-    }
-    return decoration;
+    SlidingPanelModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 void JSSlidingPanel::JsPanelBorderColor(const JSCallbackInfo& info)
@@ -262,22 +186,8 @@ void JSSlidingPanel::JsPanelBorderColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], borderColor)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBorderColor(borderColor);
-        return;
-    }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
-    auto decoration = JSSlidingPanel::GetPanelDecoration();
-    if (!panel || !decoration) {
-        return;
-    }
-    auto border = decoration->GetBorder();
-    border.SetColor(borderColor);
-    decoration->SetBorder(border);
-    panel->SetHasBorderStyle(true);
-    panel->SetHasDecorationStyle(true);
+    SlidingPanelModel::GetInstance()->SetBorderColor(borderColor);
 }
 
 void JSSlidingPanel::JsPanelBorderWidth(const JSCallbackInfo& info)
@@ -290,22 +200,7 @@ void JSSlidingPanel::JsPanelBorderWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderWidth)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBorderWidth(borderWidth);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
-    auto decoration = JSSlidingPanel::GetPanelDecoration();
-    if (!panel || !decoration) {
-        return;
-    }
-    auto border = decoration->GetBorder();
-    border.SetWidth(borderWidth);
-    decoration->SetBorder(border);
-    panel->SetHasBorderStyle(true);
-    panel->SetHasDecorationStyle(true);
+    SlidingPanelModel::GetInstance()->SetBorderWidth(borderWidth);
 }
 
 void JSSlidingPanel::JsPanelBorderStyle(int32_t style)
@@ -314,22 +209,7 @@ void JSSlidingPanel::JsPanelBorderStyle(int32_t style)
     if (style > 0 && style < 4) {
         borderStyle = static_cast<BorderStyle>(style);
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBorderStyle(borderStyle);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
-    auto decoration = JSSlidingPanel::GetPanelDecoration();
-    if (!panel || !decoration) {
-        return;
-    }
-    auto border = decoration->GetBorder();
-    border.SetStyle(borderStyle);
-    decoration->SetBorder(border);
-    panel->SetHasBorderStyle(true);
-    panel->SetHasDecorationStyle(true);
+    SlidingPanelModel::GetInstance()->SetBorderStyle(borderStyle);
 }
 
 void JSSlidingPanel::JsPanelBorder(const JSCallbackInfo& info)
@@ -342,22 +222,17 @@ void JSSlidingPanel::JsPanelBorder(const JSCallbackInfo& info)
         LOGE("arg is not a object.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorder(info);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
-    if (!panel) {
-        LOGE("Panel is Null");
-        return;
-    }
-    auto decoration = JSSlidingPanel::GetPanelDecoration();
-    auto argsPtrItem = JSRef<JSObject>::Cast(info[0]);
 
+    auto argsPtrItem = JSRef<JSObject>::Cast(info[0]);
     Dimension width = Dimension(0.0, DimensionUnit::VP);
     ParseJsDimensionVp(argsPtrItem->GetProperty("width"), width);
-    ParsePanelRadius(argsPtrItem->GetProperty("radius"));
+    SlidingPanelModel::GetInstance()->SetBorderWidth(width);
+
+    BorderRadius borderRadius;
+    ParsePanelRadius(argsPtrItem->GetProperty("radius"), borderRadius);
+    ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius.radiusTopLeft, borderRadius.radiusTopRight,
+        borderRadius.radiusBottomLeft, borderRadius.radiusBottomRight);
+
     auto styleJsValue = argsPtrItem->GetProperty("style");
     auto borderStyle = BorderStyle::SOLID;
     if (!styleJsValue->IsUndefined() && styleJsValue->IsNumber()) {
@@ -366,16 +241,11 @@ void JSSlidingPanel::JsPanelBorder(const JSCallbackInfo& info)
             borderStyle = static_cast<BorderStyle>(styleValue);
         }
     }
-    auto border = decoration->GetBorder();
-    border.SetStyle(borderStyle);
-    border.SetWidth(width);
-    Color color;
-    if (ParseJsColor(argsPtrItem->GetProperty("color"), color)) {
-        border.SetColor(color);
-    }
-    decoration->SetBorder(border);
-    panel->SetHasBorderStyle(true);
-    panel->SetHasDecorationStyle(true);
+    SlidingPanelModel::GetInstance()->SetBorderStyle(borderStyle);
+
+    Color borderColor;
+    ParseJsColor(argsPtrItem->GetProperty("color"), borderColor);
+    SlidingPanelModel::GetInstance()->SetBorderColor(borderColor);
 }
 
 void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
@@ -383,40 +253,19 @@ void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto onSizeChangeNG = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                  const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
-            if (!eventInfo) {
-                return;
-            }
-            auto params = ConvertToJSValues(eventInfo->GetWidth(), eventInfo->GetHeight(), eventInfo->GetMode());
-            ACE_SCORING_EVENT("SlidingPanel.OnSizeChange");
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
 
-        NG::SlidingPanelView::SetOnSizeChange(std::move(onSizeChangeNG));
-        return;
-    }
-
-    auto onSizeChange = EventMarker(
-        [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
-            if (!eventInfo) {
-                return;
-            }
-            auto params = ConvertToJSValues(eventInfo->GetWidth(), eventInfo->GetHeight(), eventInfo->GetMode());
-            ACE_SCORING_EVENT("SlidingPanel.OnSizeChange");
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        });
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
-    if (panel) {
-        panel->SetOnSizeChanged(onSizeChange);
-    }
+    auto onSizeChangeNG = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                              const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
+        if (!eventInfo) {
+            return;
+        }
+        auto params = ConvertToJSValues(eventInfo->GetWidth(), eventInfo->GetHeight(), eventInfo->GetMode());
+        ACE_SCORING_EVENT("SlidingPanel.OnSizeChange");
+        func->Call(JSRef<JSObject>(), params.size(), params.data());
+    };
+    SlidingPanelModel::GetInstance()->SetOnSizeChange(onSizeChangeNG);
 
     args.ReturnSelf();
 }
@@ -440,54 +289,19 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
         func->ExecuteJS(1, &param);
     };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::SetOnHeightChange(std::move(onHeightChange));
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
-    if (panel) {
-        panel->SetOnHeightChanged(onHeightChange);
-    }
+    SlidingPanelModel::GetInstance()->SetOnHeightChange(std::move(onHeightChange));
 
     args.ReturnSelf();
 }
 
 void JSSlidingPanel::SetHasDragBar(bool hasDragBar)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::SetHasDragBar(hasDragBar);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
-    if (panel) {
-        panel->SetHasDragBar(hasDragBar);
-    }
+    SlidingPanelModel::GetInstance()->SetHasDragBar(hasDragBar);
 }
 
 void JSSlidingPanel::SetShow(bool isShow)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
-        NG::SlidingPanelView::SetIsShow(isShow);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-    auto display = AceType::DynamicCast<DisplayComponent>(component);
-    if (!display) {
-        LOGE("display is null");
-        return;
-    }
-    display->SetVisible(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
-    auto panelComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(panelComponent);
-    if (!panel) {
-        LOGE("Panel is null");
-        return;
-    }
-    panel->SetVisible(isShow);
+    SlidingPanelModel::GetInstance()->SetIsShow(isShow);
 }
 
 void JSSlidingPanel::SetPanelMode(int32_t mode)
@@ -495,22 +309,8 @@ void JSSlidingPanel::SetPanelMode(int32_t mode)
     if (mode < 0 || mode >= static_cast<int32_t>(PANEL_MODES.size())) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::SetPanelMode(PANEL_MODES[mode]);
-        return;
-    }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
-    if (panel) {
-        if (static_cast<int32_t>(PanelMode::HALF) == mode) {
-            panel->SetMode(PanelMode::HALF);
-        } else if (static_cast<int32_t>(PanelMode::MINI) == mode) {
-            panel->SetMode(PanelMode::MINI);
-        } else {
-            panel->SetMode(PanelMode::FULL);
-        }
-    }
+    SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);
 }
 
 void JSSlidingPanel::SetPanelType(int32_t type)
@@ -518,22 +318,8 @@ void JSSlidingPanel::SetPanelType(int32_t type)
     if (type < 0 || type >= static_cast<int32_t>(PANEL_TYPES.size())) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::SetPanelType(PANEL_TYPES[type]);
-        return;
-    }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
-    if (panel) {
-        if (static_cast<int32_t>(PanelType::MINI_BAR) == type) {
-            panel->SetType(PanelType::MINI_BAR);
-        } else if (static_cast<int32_t>(PanelType::TEMP_DISPLAY) == type) {
-            panel->SetType(PanelType::TEMP_DISPLAY);
-        } else {
-            panel->SetType(PanelType::FOLDABLE_BAR);
-        }
-    }
+    SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
 }
 
 void JSSlidingPanel::SetMiniHeight(const JSCallbackInfo& info)
@@ -542,20 +328,12 @@ void JSSlidingPanel::SetMiniHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension minHeight;
-    if (!ParseJsDimensionVp(info[0], minHeight)) {
-        return;
-    }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::SetMiniHeight(minHeight);
+    Dimension miniHeight;
+    if (!ParseJsDimensionVp(info[0], miniHeight)) {
         return;
     }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
-    if (panel) {
-        panel->SetMiniHeight(std::pair(minHeight, true));
-    }
+    SlidingPanelModel::GetInstance()->SetMiniHeight(miniHeight);
 }
 
 void JSSlidingPanel::SetHalfHeight(const JSCallbackInfo& info)
@@ -568,16 +346,7 @@ void JSSlidingPanel::SetHalfHeight(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], halfHeight)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::SetHalfHeight(halfHeight);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
-    if (panel) {
-        panel->SetHalfHeight(std::pair(halfHeight, true));
-    }
+    SlidingPanelModel::GetInstance()->SetHalfHeight(halfHeight);
 }
 
 void JSSlidingPanel::SetFullHeight(const JSCallbackInfo& info)
@@ -590,27 +359,12 @@ void JSSlidingPanel::SetFullHeight(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], fullHeight)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::SetFullHeight(fullHeight);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
-    if (panel) {
-        panel->SetFullHeight(std::pair(fullHeight, true));
-    }
+    SlidingPanelModel::GetInstance()->SetFullHeight(fullHeight);
 }
 
 void JSSlidingPanel::Pop()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SlidingPanelView::Pop();
-        NG::ViewStackProcessor::GetInstance()->PopContainer();
-        return;
-    }
-
-    JSContainerBase::Pop();
+    SlidingPanelModel::GetInstance()->Pop();
 }
 
 } // namespace OHOS::Ace::Framework

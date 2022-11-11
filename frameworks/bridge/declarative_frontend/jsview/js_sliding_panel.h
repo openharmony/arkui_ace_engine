@@ -23,6 +23,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
+struct BorderRadius {
+    Dimension radiusTopLeft;
+    Dimension radiusTopRight;
+    Dimension radiusBottomLeft;
+    Dimension radiusBottomRight;
+};
 
 class JSSlidingPanel : public JSContainerBase {
 public:
@@ -42,14 +48,10 @@ public:
     static void JsPanelBorderColor(const JSCallbackInfo& info);
     static void JsPanelBorderStyle(int32_t style);
     static void JsPanelBorderWidth(const JSCallbackInfo& info);
-    static void JsPanelBorderRadius(const JSCallbackInfo& info);
-    static void ParsePanelRadius(const JSRef<JSVal>& args);
+    static void ParsePanelRadius(const JSRef<JSVal>& args, BorderRadius& borderRadius);
     static void SetBackgroundMask(const JSCallbackInfo& info);
     static void SetOnHeightChange(const JSCallbackInfo& args);
-
-protected:
-    static RefPtr<BoxComponent> GetPanelBox();
-    static RefPtr<Decoration> GetPanelDecoration();
+    static void JsPanelBorderRadius(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

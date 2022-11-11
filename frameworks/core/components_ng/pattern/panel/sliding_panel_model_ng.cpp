@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/panel/sliding_panel_view.h"
+#include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -28,11 +28,12 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
 namespace {
 const Color BG_COLOR = Color(0xfff1f3f5);
 } // namespace
 
-void SlidingPanelView::Create(bool isShow)
+void SlidingPanelModelNG::Create(bool isShow)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -60,7 +61,7 @@ void SlidingPanelView::Create(bool isShow)
     }
 }
 
-RefPtr<SlidingPanelNode> SlidingPanelView::GetOrCreateSlidingPanelNode(
+RefPtr<SlidingPanelNode> SlidingPanelModelNG::GetOrCreateSlidingPanelNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto panelNode = ElementRegister::GetInstance()->GetSpecificItemById<SlidingPanelNode>(nodeId);
@@ -82,7 +83,7 @@ RefPtr<SlidingPanelNode> SlidingPanelView::GetOrCreateSlidingPanelNode(
     return panelNode;
 }
 
-RefPtr<LinearLayoutProperty> SlidingPanelView::GetLinearLayoutProperty()
+RefPtr<LinearLayoutProperty> SlidingPanelModelNG::GetLinearLayoutProperty()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -93,43 +94,49 @@ RefPtr<LinearLayoutProperty> SlidingPanelView::GetLinearLayoutProperty()
     return columnLayoutProperty;
 }
 
-void SlidingPanelView::SetPanelType(PanelType type)
+void SlidingPanelModelNG::SetPanelType(PanelType type)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, type);
 }
 
-void SlidingPanelView::SetPanelMode(PanelMode mode)
+void SlidingPanelModelNG::SetPanelMode(PanelMode mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, mode);
 }
 
-void SlidingPanelView::SetHasDragBar(bool hasDragBar)
+void SlidingPanelModelNG::SetHasDragBar(bool hasDragBar)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, hasDragBar);
 }
 
-void SlidingPanelView::SetMiniHeight(const Dimension& miniHeight)
+void SlidingPanelModelNG::SetMiniHeight(const Dimension& miniHeight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight);
 }
 
-void SlidingPanelView::SetHalfHeight(const Dimension& halfHeight)
+void SlidingPanelModelNG::SetHalfHeight(const Dimension& halfHeight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight);
 }
 
-void SlidingPanelView::SetFullHeight(const Dimension& fullHeight)
+void SlidingPanelModelNG::SetFullHeight(const Dimension& fullHeight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight);
 }
 
-void SlidingPanelView::SetIsShow(bool isShow)
+void SlidingPanelModelNG::SetIsShow(bool isShow)
 {
+    NG::ViewAbstract::SetVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 }
 
+void SlidingPanelModelNG::SetBackgroundMask(const Color& backgroundMask)
+{
+    NG::ViewAbstract::SetBackgroundColor(backgroundMask);
+}
+
 // Set the color of the panel content area
-void SlidingPanelView::SetBackgroundColor(Color backgroundColor)
+void SlidingPanelModelNG::SetBackgroundColor(const Color& backgroundColor)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -141,7 +148,7 @@ void SlidingPanelView::SetBackgroundColor(Color backgroundColor)
     }
 }
 
-void SlidingPanelView::SetOnSizeChange(ChangeEvent&& changeEvent)
+void SlidingPanelModelNG::SetOnSizeChange(ChangeEvent&& changeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -150,7 +157,7 @@ void SlidingPanelView::SetOnSizeChange(ChangeEvent&& changeEvent)
     eventHub->SetOnSizeChange(std::move(changeEvent));
 }
 
-void SlidingPanelView::SetOnHeightChange(HeightChangeEvent&& onHeightChange)
+void SlidingPanelModelNG::SetOnHeightChange(HeightChangeEvent&& onHeightChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -159,7 +166,7 @@ void SlidingPanelView::SetOnHeightChange(HeightChangeEvent&& onHeightChange)
     eventHub->SetOnHeightChange(std::move(onHeightChange));
 }
 
-void SlidingPanelView::Pop()
+void SlidingPanelModelNG::Pop()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -185,6 +192,21 @@ void SlidingPanelView::Pop()
     if (isFirstChildDragBar) {
         columnNode->RemoveChildAtIndex(0);
     }
+    NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
 
+void SlidingPanelModelNG::SetBorderColor(const Color& borderColor)
+{
+    NG::ViewAbstract::SetBorderColor(borderColor);
+}
+void SlidingPanelModelNG::SetBorderWidth(const Dimension& borderWidth)
+{
+    NG::ViewAbstract::SetBorderWidth(borderWidth);
+}
+void SlidingPanelModelNG::SetBorderStyle(const BorderStyle& borderStyle)
+{
+    NG::ViewAbstract::SetBorderStyle(borderStyle);
+}
+
+void SlidingPanelModelNG::SetBorder(const BorderStyle& borderStyle, const Dimension& borderWidth) {}
 } // namespace OHOS::Ace::NG
