@@ -94,6 +94,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     if (totalItemCount_ > 0) {
+        currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
         LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f, startMainPos: %{public}f, "
@@ -115,6 +116,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (!itemPosition_.empty()) {
             preStartPos_ = itemPosition_.begin()->second.startPos;
             preEndPos_ = itemPosition_.rbegin()->second.endPos;
+            preStartIndex_ = GetStartIndex();
+            preEndIndex_ = GetEndIndex();
             itemPosition_.clear();
         }
 
@@ -190,7 +193,7 @@ void ListLayoutAlgorithm::MeasureList(
         }
         jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
-            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0.0f);
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);
             float endPos = itemPosition_.begin()->second.startPos - spaceWidth_;
             if (jumpIndex_.value() > 0 && GreatNotEqual(endPos, startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
