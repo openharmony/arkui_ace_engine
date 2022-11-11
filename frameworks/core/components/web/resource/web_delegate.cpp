@@ -1467,7 +1467,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
     }
 }
 #else
-void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface> surface)
+void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     PrepareInitOHOSWeb(context);
     if (!isCreateWebView_) {
