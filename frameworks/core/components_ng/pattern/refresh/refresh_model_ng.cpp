@@ -35,6 +35,7 @@ namespace {
 constexpr int32_t CHILD_COUNT = 2;
 constexpr double DEFAULT_INDICATOR_OFFSET = 16.0;
 constexpr int32_t DEFAULT_FRICTION_RATIO = 42;
+constexpr char REFRESH_LAST_UPDATED[] = "refresh.last_updated"; // I18n for last updated
 
 } // namespace
 
@@ -49,6 +50,14 @@ void RefreshModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(
         RefreshLayoutProperty, IndicatorOffset, Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, DEFAULT_FRICTION_RATIO);
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsUseOffset, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsShowLastTime, false);
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ScrollableOffset, OffsetF(0.0, 0.0));
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ShowTimeOffset, OffsetF(0.0, 0.0));
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingProcessOffset, OffsetF(0.0, 0.0));
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, TriggerRefreshDistance, Dimension(0.0, DimensionUnit::VP));
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshDistance, Dimension(0.0, DimensionUnit::VP));
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefresh, true);
 }
 
 void RefreshModelNG::Pop()
@@ -69,7 +78,13 @@ void RefreshModelNG::Pop()
     refreshNode->AddChild(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(refreshRenderProperty->GetTimeTextValue());
+    if (layoutProperty->GetIsShowLastTimeValue()) {
+        textLayoutProperty->UpdateContent(refreshRenderProperty->GetTimeTextValue());
+        auto lastTimeText = Localization::GetInstance()->GetEntryLetters(REFRESH_LAST_UPDATED);
+        refreshRenderProperty->UpdateLastTimeText(lastTimeText);
+        auto timeText = StringUtils::FormatString("");
+        refreshRenderProperty->UpdateTimeText(timeText);
+    }
     auto textStyle = layoutProperty->GetTextStyle();
     CHECK_NULL_VOID(textStyle);
     textLayoutProperty->UpdateTextAlign(textStyle->GetTextAlign());
