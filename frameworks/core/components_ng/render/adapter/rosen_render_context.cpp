@@ -39,6 +39,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
+#include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
@@ -874,6 +875,65 @@ void RosenRenderContext::BlendBorderColor(const Color& color)
     RequestNextFrame();
 }
 
+void RosenRenderContext::PaintFocusState(Dimension focusPaddingVp)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto appTheme = context->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    Color focusColor = appTheme->GetFocusColor();
+    auto focusWidth = appTheme->GetFocusWidthVp().ConvertToPx();
+
+    auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
+    auto borderWidthPx = static_cast<float>(focusWidth);
+
+    auto frame = rsNode_->GetStagingProperties().GetFrame();
+    auto bounds = rsNode_->GetStagingProperties().GetBounds();
+    auto borderRadius = rsNode_->GetStagingProperties().GetCornerRadius();
+    auto rectLeft = -borderPaddingPx;
+    auto rectTop = -borderPaddingPx;
+    auto rectRight = rectLeft + bounds.z_ + 2 * borderPaddingPx;
+    auto rectBottom = rectTop + bounds.w_ + 2 * borderPaddingPx;
+    auto radiusTopLeft = borderRadius.x_ + borderPaddingPx;
+    auto radiusTopRight = borderRadius.y_ + borderPaddingPx;
+    auto radiusButtonLeft = borderRadius.w_ + borderPaddingPx;
+    auto radiusButtonRight = borderRadius.z_ + borderPaddingPx;
+    auto rect = rosen::Rect(rectLeft, rectTop, rectRight, rectBottom);
+
+    if (focusStateModifier_) {
+        rsNode_->AddModifier(focusStateModifier_);
+        focusStateModifier_->SetRoundRect(rect, radiusTopLeft, radiusTopRight, radiusButtonLeft, radiusButtonRight);
+        return;
+    }
+
+    auto paintTask = [focusColor, borderWidthPx](const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
+        // auto rrect = ToRS
+        RSPen pen;
+        pen.SetAntiAlias(true);
+        pen.SetColor(ToRSColor(focusColor));
+        pen.SetWidth(borderWidthPx);
+        rsCanvas.AttachPen(pen);
+        rsCanvas.DrawRoundRect(rrect);
+    };
+
+    focusStateModifier_ = std::make_shared<FocusStateModifier>();
+    focusStateModifier_->SetRoundRect(rect, radiusTopLeft, radiusTopRight, radiusButtonLeft, radiusButtonRight);
+    focusStateModifier_->SetPaintTask(std::move(paintTask));
+    rsNode_->AddModifier(focusStateModifier_);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::ClearFocusState()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(focusStateModifier_);
+    rsNode_->RemoveModifier(focusStateModifier_);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDraw)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -1111,8 +1171,7 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
     std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
     auto blurStyle = GetBackgroundBlurStyleValue(BlurStyle::NoMaterial);
     if (blurStyle != BlurStyle::NoMaterial) {
-        backFilter = Rosen::RSFilter::CreateMaterialFilter(
-            static_cast<int>(blurStyle), pipelineBase->GetDipScale());
+        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), pipelineBase->GetDipScale());
     } else if (radius.IsValid()) {
         float radiusPx = pipelineBase->NormalizeToPx(radius);
         float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
