@@ -38,7 +38,9 @@ enum class FrontendType {};
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
-    return AceType::MakeRefPtr<MockPipelineBase>();
+    auto pipeline = AceType::MakeRefPtr<MockPipelineBase>();
+    pipeline->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
+    return pipeline;
 }
 
 double PipelineBase::NormalizeToPx(const Dimension& /*dimension*/) const
