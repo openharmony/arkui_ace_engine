@@ -19,7 +19,10 @@ import(
 ohos_unittest("stepper_pattern_test_ng") {
   module_out_path = "$test_output_path/stepper"
 
-  sources = [ "stepper_pattern_test_ng.cpp" ]
+  sources = [
+    "stepper_item_pattern_test_ng.cpp",
+    "stepper_pattern_test_ng.cpp",
+  ]
 
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
