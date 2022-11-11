@@ -44,11 +44,6 @@ class MockAceApplicationInfo : public AceApplicationInfo {
         return true;
     }
 
-    const std::string& GetPackageName() const
-    {
-        return packageName_;
-    }
-
 public:
     static MockAceApplicationInfo& GetInstance()
     {
@@ -60,9 +55,23 @@ private:
     std::string packageName_;
 };
 
+const std::string& AceApplicationInfo::GetAbilityName() const 
+{
+    return abilityName_;
+}
+
+int32_t AceApplicationInfo::GetUid() const 
+{
+    return uid_;
+}
+
+const std::string& AceApplicationInfo::GetPackageName() const
+{
+    return packageName_;
+}
+
 AceApplicationInfo& AceApplicationInfo::GetInstance()
 {
     return MockAceApplicationInfo::GetInstance();
 }
-
 } // namespace OHOS::Ace
