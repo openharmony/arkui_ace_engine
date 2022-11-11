@@ -308,6 +308,7 @@ public:
 #else
     void InitOHOSWeb(const WeakPtr<PipelineBase>& context);
 #endif
+    void PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context);
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
