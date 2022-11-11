@@ -15,13 +15,10 @@
 
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 
-#include <cstddef>
-
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/tab_bar/tab_theme.h"
-#include "core/components/theme/theme_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -33,11 +30,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/syntax/for_each_node.h"
-#include "core/components_ng/syntax/syntax_item.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -136,7 +129,10 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateSpace(TAB_BAR_SPACE);
-
+    auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBarNode);
+    CHECK_NULL_VOID(tabBarFrameNode);
+    auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
     // Create tab bar with builder.
     if (tabBarParam.HasBuilder()) {
         ScopedViewStackProcessor builderViewStackProcessor;
@@ -144,6 +140,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         auto builderNode = ViewStackProcessor::GetInstance()->Finish();
         builderNode->MountToParent(columnNode);
         tabBarNode->ReplaceChild(tabsNode->GetBuilderByContentId(tabContentId, columnNode), columnNode);
+        tabBarPattern->AddTabBarItemType(tabContentId, true);
         return;
     }
 
@@ -175,9 +172,22 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(textNode);
     CHECK_NULL_VOID(imageNode);
 
+    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    int32_t indicator = tabBarLayoutProperty->GetIndicatorValue(0);
+
     // Update property of text.
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    if ((static_cast<int32_t>(tabBarNode->GetChildren().size()) - 1) == indicator) {
+        textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
+    } else {
+        textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
+    }
     textLayoutProperty->UpdateContent(tabBarParam.GetText());
     textLayoutProperty->UpdateFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -199,6 +209,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     columnNode->MarkModifyDone();
     textNode->MarkModifyDone();
     imageNode->MarkModifyDone();
+    tabBarPattern->AddTabBarItemType(tabContentId, false);
 }
 
 void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)

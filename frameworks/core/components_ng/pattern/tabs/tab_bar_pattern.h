@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAR_PATTERN_H
 
 #include <optional>
+#include <unordered_map>
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
@@ -34,9 +35,8 @@ namespace OHOS::Ace::NG {
 using TabBarBuilderFunc = std::function<void()>;
 class TabBarParam : public virtual Referenced {
 public:
-    explicit TabBarParam(const std::string& textParam, const std::string& iconParam,
-        TabBarBuilderFunc&& builderParam): text_(textParam), icon_(iconParam), builder_(std::move(builderParam))
-        {};
+    TabBarParam(const std::string& textParam, const std::string& iconParam, TabBarBuilderFunc&& builderParam)
+        : text_(textParam), icon_(iconParam), builder_(std::move(builderParam)) {};
 
     const std::string& GetIcon() const
     {
@@ -131,6 +131,15 @@ public:
 
     void UpdateIndicator(int32_t indicator);
 
+    void UpdateTextColor(int32_t indicator);
+
+    void AddTabBarItemType(int32_t tabContentId, bool isBuilder)
+    {
+        tabBarType_.emplace(std::make_pair(tabContentId, isBuilder));
+    }
+
+    bool IsContainsBuilder();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -152,6 +161,7 @@ private:
     int32_t indicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     std::vector<OffsetF> tabItemOffsets_;
+    std::unordered_map<int32_t, bool> tabBarType_;
 
     bool isRTL_ = false; // TODO Adapt RTL.
 };

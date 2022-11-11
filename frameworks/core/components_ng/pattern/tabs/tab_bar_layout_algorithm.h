@@ -55,9 +55,19 @@ public:
         childrenMainSize_ = childrenMainSize;
     }
 
+    float GetChildrenMainSize() const
+    {
+        return childrenMainSize_;
+    }
+
     void SetIndicator(int32_t indicator)
     {
         indicator_ = indicator;
+    }
+
+    int32_t GetIndicator() const
+    {
+        return indicator_;
     }
 
 private:

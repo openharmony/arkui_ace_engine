@@ -25,7 +25,8 @@ class ACE_EXPORT TabContentNode : public FrameNode {
 
 public:
     TabContentNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
-        : FrameNode(tag, nodeId, pattern, isRoot) {}
+        : FrameNode(tag, nodeId, pattern, isRoot)
+    {}
     ~TabContentNode() = default;
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;

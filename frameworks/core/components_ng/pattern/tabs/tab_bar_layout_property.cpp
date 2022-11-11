@@ -25,10 +25,8 @@ RectF TabBarLayoutProperty::GetIndicatorRect(int32_t index)
     CHECK_NULL_RETURN(node, RectF());
     auto childColumn = DynamicCast<FrameNode>(node->GetChildAtIndex(index));
     CHECK_NULL_RETURN(childColumn, RectF());
-    LOGE("childColumn tag %s", childColumn->GetTag().c_str());
     auto grandChildren = DynamicCast<FrameNode>(childColumn->GetChildren().back());
     CHECK_NULL_RETURN(grandChildren, RectF());
-    LOGE("grandChildren tag %s", grandChildren->GetTag().c_str());
     auto geometryNode = grandChildren->GetGeometryNode();
     RectF indicator = geometryNode->GetFrameRect();
 

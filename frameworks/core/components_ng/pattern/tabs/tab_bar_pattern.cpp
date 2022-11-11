@@ -135,10 +135,11 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(tabBarLayoutAlgorithm, false);
     tabItemOffsets_ = tabBarLayoutAlgorithm->GetTabItemOffset();
     currentOffset_ = tabBarLayoutAlgorithm->GetCurrentOffset();
+    childrenMainSize_ = tabBarLayoutAlgorithm->GetChildrenMainSize();
+    indicator_ = tabBarLayoutAlgorithm->GetIndicator();
     auto layoutProperty = DynamicCast<TabBarLayoutProperty>(dirty->GetLayoutProperty());
     int32_t indicator = layoutProperty->GetIndicatorValue(0);
     UpdateIndicator(indicator);
-    LOGE("OnDirtyLayoutWrapperSwap after update indicator");
     return false;
 }
 
@@ -192,20 +193,13 @@ void TabBarPattern::HandleClick(const GestureEvent& info) const
                        : (axis == Axis::VERTICAL ? LessNotEqual(a.GetY(), b.GetY()) : LessNotEqual(a.GetX(), b.GetX()));
         });
 
-    // for (int i = 0; i < tabItemOffsets_.size(); i++) {
-    //     LOGE("tabItemOffsets_ i %d  pos %f", i, tabItemOffsets_[i].GetX());
-    // }
-
     if (pos == tabItemOffsets_.end()) {
         return;
     }
     auto index = isRTL_ ? std::distance(tabItemOffsets_.begin(), pos) : std::distance(tabItemOffsets_.begin(), pos) - 1;
-    LOGE("click index %d", index);
     if (index >= 0 && index < totalCount && swiperController_) {
         swiperController_->SwipeToWithoutAnimation(index);
         layoutProperty->UpdateIndicator(index);
-        LOGE("layoutProperty->UpdateIndicator(index); %d", index);
-        LOGE("layoutProperty-> index; %d", layoutProperty->GetIndicatorValue(0));
     }
 }
 
@@ -227,18 +221,30 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
 {
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     layoutProperty->UpdateIndicator(indicator);
+
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    if (tabBarPattern->IsContainsBuilder()) {
+        return;
+    }
+
     RectF rect = layoutProperty->GetIndicatorRect(indicator);
     auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
     paintProperty->UpdateIndicator(rect);
-    LOGE("zcb UpdateIndicator rect  %s", rect.ToString().c_str());
+    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 
-    if (layoutProperty->GetIsBuilderValue(false) == true) {
-        auto tabBarNode = GetHost();
-        CHECK_NULL_VOID(tabBarNode);
-        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+void TabBarPattern::UpdateTextColor(int32_t indicator)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    if (tabBarPattern->IsContainsBuilder()) {
         return;
     }
-    auto tabBarNode = GetHost();
     auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator));
     CHECK_NULL_VOID(columnNode);
     auto selectedColumnId = columnNode->GetId();
@@ -249,27 +255,23 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     CHECK_NULL_VOID(tabTheme);
     for (const auto& columnNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(columnNode);
-        LOGE("columnNode tag %s", columnNode->GetTag().c_str());
         auto textNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
         CHECK_NULL_VOID(textNode);
-        LOGE("textNode tag %s", textNode->GetTag().c_str());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        LOGE("GetSubTabTextOnColor color %X", tabTheme->GetSubTabTextOnColor().GetValue());
         if (columnNode->GetId() == selectedColumnId) {
-            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
-            textNode->MarkModifyDone();
-            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            continue;
+            textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
+        } else {
+            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
         }
-        textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
         textNode->MarkModifyDone();
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        textNode->MarkDirtyNode();
     }
-    // };
-    // auto tabBarNode = GetHost();
-    // CHECK_NULL_VOID(tabBarNode);
-    // tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TabBarPattern::IsContainsBuilder()
+{
+    return std::any_of(tabBarType_.begin(), tabBarType_.end(), [](const auto& isBuilder) { return isBuilder.second; });
 }
 
 } // namespace OHOS::Ace::NG

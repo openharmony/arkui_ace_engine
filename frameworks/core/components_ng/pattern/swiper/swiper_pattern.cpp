@@ -569,7 +569,7 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
-    auto tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
+    const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
     if (tabBarFinishCallback) {
         tabBarFinishCallback();
     }
@@ -596,7 +596,7 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart()
 {
-    auto tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
+    const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
     if (tabBarFinishCallback) {
         tabBarFinishCallback();
     }

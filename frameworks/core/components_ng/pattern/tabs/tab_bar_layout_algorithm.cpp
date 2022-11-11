@@ -21,6 +21,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
@@ -28,6 +29,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,20 +42,28 @@ constexpr Dimension TAB_BAR_DEFAULT_SIZE = 56.0_vp;
 void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstraint,
     const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& ideaSize, int32_t childCount, Axis axis)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
     childConstraint.parentIdealSize = OptionalSizeF(ideaSize);
     const auto& barMode = layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED);
-    LOGE("zcb UpdateChildConstraint ideaSize %s", ideaSize.ToString().c_str());
     if (barMode == TabBarMode::FIXED) {
         auto childIdeaSize = ideaSize;
         if (axis == Axis::HORIZONTAL) {
             childIdeaSize.SetWidth(ideaSize.Width() / childCount);
+            childConstraint.maxSize.SetHeight(
+                childConstraint.maxSize.Height() - tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
         } else if (axis == Axis::VERTICAL) {
-            childIdeaSize.SetHeight(ideaSize.Height() / childCount - Dimension(4, DimensionUnit::VP).ConvertToPx());
+            childIdeaSize.SetHeight(
+                ideaSize.Height() / childCount - tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
         }
         childConstraint.selfIdealSize = OptionalSizeF(childIdeaSize);
     } else {
         if (axis == Axis::HORIZONTAL) {
             childConstraint.maxSize.SetWidth(Infinity<float>());
+            childConstraint.maxSize.SetHeight(
+                childConstraint.maxSize.Height() - tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
         } else if (axis == Axis::VERTICAL) {
             childConstraint.maxSize.SetHeight(Infinity<float>());
         }
@@ -62,6 +72,10 @@ void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstr
 
 void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -98,14 +112,9 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             childrenMainSize_ = childrenMainSize_ +
                                 childWrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis) +
-                                (Dimension(4, DimensionUnit::VP).ConvertToPx());
+                                tabTheme->GetSubTabIndicatorHeight().ConvertToPx();
         }
     }
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetChildrenMainSize(childrenMainSize_);
 }
 
 void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -116,29 +125,16 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto axis = GetAxis(layoutWrapper);
     auto frameSize = geometryNode->GetFrameSize();
-    LOGE("childrenMainSize_ %f", childrenMainSize_);
-    LOGE("frameMainSize_ %f", frameSize.MainSize(axis));
 
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     int32_t indicator = layoutProperty->GetIndicatorValue(0);
-    LOGE("zcb indicator_ %d", indicator_);
-    LOGE("zcb indicator %d", indicator);
-    LOGE("zcb  layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE %d",
-        layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE);
     if (indicator != indicator_ &&
         layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-        LOGE("zcb   enter if");
         indicator_ = indicator;
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(host);
-        auto pattern = host->GetPattern<TabBarPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetIndicator(indicator_);
         auto space = GetSpace(layoutWrapper, indicator, frameSize, axis);
         float frontChildrenMainSize = CalculateFrontChildrenMainSize(layoutWrapper, indicator, axis);
         if (frontChildrenMainSize < space) {
-            LOGE("frontChildrenMainSize < space");
             OffsetF childOffset = OffsetF(0.0f, 0.0f);
             currentOffset_ = 0.0f;
             LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
@@ -146,16 +142,13 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         float backChildrenMainSize = CalculateBackChildrenMainSize(layoutWrapper, indicator, axis);
         if (backChildrenMainSize < space) {
-            LOGE("backChildrenMainSize < space");
             auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
             currentOffset_ = -scrollableDistance;
-            LOGE("currentOffset_ %f", currentOffset_);
             OffsetF childOffset =
                 (axis == Axis::HORIZONTAL ? OffsetF(-scrollableDistance, 0.0f) : OffsetF(0.0f, -scrollableDistance));
             LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
             return;
         }
-        LOGE("zcb  center");
         auto scrollableDistance = std::max(frontChildrenMainSize - space, 0.0f);
         currentOffset_ = -scrollableDistance;
         OffsetF childOffset =
@@ -164,16 +157,9 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
-    LOGE("scrollableDistance %f", scrollableDistance);
     currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
     OffsetF childOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_));
     indicator_ = indicator;
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetIndicator(indicator_);
-    LOGE("after assign indicator %d", indicator_);
     LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
 }
 
@@ -214,6 +200,10 @@ float TabBarLayoutAlgorithm::CalculateFrontChildrenMainSize(LayoutWrapper* layou
 void TabBarLayoutAlgorithm::LayoutChildren(
     LayoutWrapper* layoutWrapper, const SizeF& frameSize, Axis axis, OffsetF& childOffset)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
     auto childCount = layoutWrapper->GetTotalChildCount();
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -234,7 +224,7 @@ void TabBarLayoutAlgorithm::LayoutChildren(
         if (axis == Axis::HORIZONTAL) {
             childOffset += OffsetF(childFrameSize.Width(), 0.0f);
         } else {
-            childOffset += OffsetF(0.0f, childFrameSize.Height() + (Dimension(4, DimensionUnit::VP).ConvertToPx()));
+            childOffset += OffsetF(0.0f, childFrameSize.Height() + tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
         }
     }
     tabItemOffset_.emplace_back(childOffset);

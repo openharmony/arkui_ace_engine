@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_layout_property.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
@@ -28,8 +29,9 @@ class ACE_EXPORT TabContentPattern : public Pattern {
     DECLARE_ACE_TYPE(TabContentPattern, Pattern);
 
 public:
-    explicit TabContentPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder),
-        tabBarParam_(std::string(""), std::string(""), nullptr) {}
+    explicit TabContentPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
+        : shallowBuilder_(shallowBuilder), tabBarParam_(std::string(""), std::string(""), nullptr)
+    {}
     ~TabContentPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -50,8 +52,7 @@ public:
         return MakeRefPtr<TabContentLayoutProperty>();
     }
 
-    void SetTabBar(const std::string& text, const std::string& icon,
-        TabBarBuilderFunc&& builder)
+    void SetTabBar(const std::string& text, const std::string& icon, TabBarBuilderFunc&& builder)
     {
         tabBarParam_.SetText(text);
         tabBarParam_.SetIcon(icon);

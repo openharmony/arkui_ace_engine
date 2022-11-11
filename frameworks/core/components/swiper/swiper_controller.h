@@ -115,7 +115,6 @@ public:
         return tabBarFinishCallback_;
     }
 
-
 private:
     SwipeToImpl swipeToImpl_;
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
