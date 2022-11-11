@@ -88,6 +88,7 @@ public:
     void SetCurrentDelta(float offset)
     {
         currentDelta_ = offset;
+        currentOffset_ = offset;
     }
 
     float GetCurrentOffset() const
