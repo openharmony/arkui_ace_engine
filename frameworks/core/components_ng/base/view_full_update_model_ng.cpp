@@ -27,11 +27,11 @@ RefPtr<AceType> ViewFullUpdateModelNG::CreateNode(NodeInfo&& info)
     // create component, return new something, need to set proper ID
     std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(info.viewId);
     auto composedNode = NG::CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), key);
-    if (info.updateNodeFunc) {
-        info.updateNodeFunc(composedNode);
-    }
     if (info.appearFunc) {
         info.appearFunc();
+    }
+    if (info.updateNodeFunc) {
+        info.updateNodeFunc(composedNode);
     }
 
     auto renderFunction = [internalRender = std::move(info.renderFunc)]() -> RefPtr<UINode> {
