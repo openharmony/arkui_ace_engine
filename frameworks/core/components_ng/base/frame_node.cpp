@@ -15,8 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 
-#include <string>
-
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
