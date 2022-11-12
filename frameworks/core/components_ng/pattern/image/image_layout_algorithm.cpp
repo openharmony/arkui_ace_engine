@@ -48,8 +48,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         //          if isFitMaxSize is false, use the parent component LayoutConstraint size as image component size
         const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
         SizeF layoutConstraintMaxSize = imageLayoutProperty->GetLayoutConstraint()->maxSize;
-        bool fitOriginalSize =
-            (imageLayoutProperty == nullptr) || imageLayoutProperty->GetFitOriginalSize().value_or(true);
+        bool fitOriginalSize = imageLayoutProperty->GetFitOriginalSize().value_or(true);
         if (contentConstraint.selfIdealSize.IsNull()) {
             if (!fitOriginalSize) {
                 componentSize.SetSizeT(layoutConstraintMaxSize);

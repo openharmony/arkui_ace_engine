@@ -49,4 +49,9 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty) {}
 
+void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
+{
+    layoutConstraint_ = parentConstraint;
+}
+
 } // namespace OHOS::Ace::NG

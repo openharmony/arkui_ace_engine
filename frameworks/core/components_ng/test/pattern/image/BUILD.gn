@@ -62,6 +62,7 @@ ohos_unittest("image_pattern_test") {
 
     # self
     "image_layout_algorithm_test.cpp",
+    "image_model_ng_test.cpp",
     "image_pattern_test.cpp",
   ]
 
