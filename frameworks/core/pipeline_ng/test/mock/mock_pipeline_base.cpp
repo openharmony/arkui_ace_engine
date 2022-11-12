@@ -46,4 +46,22 @@ double PipelineBase::NormalizeToPx(const Dimension& /*dimension*/) const
     return 1.0f;
 }
 
+PipelineBase::~PipelineBase() = default;
+
+uint64_t PipelineBase::GetTimeFromExternalTimer()
+{
+    return 1;
+}
+
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
+void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
+
+void PipelineBase::OnActionEvent(const std::string& action) {}
+
+RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
+{
+    return nullptr;
+}
+
 } // namespace OHOS::Ace

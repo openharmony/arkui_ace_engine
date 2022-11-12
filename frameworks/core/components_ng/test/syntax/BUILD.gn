@@ -13,5 +13,8 @@
 
 group("syntax_unittest") {
   testonly = true
-  deps = []
+  deps = [
+    "for_each:for_each_syntax_test_ng",
+    "if_else:if_else_syntax_test_ng",
+  ]
 }

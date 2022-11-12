@@ -57,6 +57,8 @@ public:
         return MakeRefPtr<SliderLayoutAlgorithm>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<SliderEventHub>();
@@ -64,7 +66,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::NODE, true, FocusStyle::OUTER_BORDER };
     }
 
 private:

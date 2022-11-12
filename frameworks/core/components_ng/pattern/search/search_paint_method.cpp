@@ -41,22 +41,25 @@ CanvasDrawFunction SearchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     if (!searchButton_.empty()) {
-        constexpr Dimension ICON_HEIGHT = 16.0_vp;
-        constexpr double SEARCH_DIVIDER_WIDTH = 1.0;
-        constexpr double DIVIDER_SPACE = 7.0;
-        const Color SEARCH_DIVIDER_COLOR = Color(0x33000000);
-
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto searchTheme = pipelineContext->GetTheme<SearchTheme>();
+        CHECK_NULL_VOID(searchTheme);
+        auto iconHeight = searchTheme->GetIconHeight();
+        auto dividerSpace = searchTheme->GetDividerSpace();
+        auto searchDividerWidth = searchTheme->GetSearchDividerWidth();
+        auto searchDividerColor = searchTheme->GetSearchDividerColor();
         auto searchSize = paintWrapper->GetGeometryNode()->GetFrameSize();
         // Paint divider.
-        double dividerVerticalOffset = (searchSize.Height() - ICON_HEIGHT.ConvertToPx()) / 2.0;
-        double dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - DIVIDER_SPACE;
+        double dividerVerticalOffset = (searchSize.Height() - iconHeight.ConvertToPx()) / 2.0;
+        double dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace;
         OffsetF dividerOffset = OffsetF(dividerHorizontalOffset, dividerVerticalOffset);
         float originX = dividerOffset.GetX();
         float originY = dividerOffset.GetY();
-        RSRect rect(originX, originY, originX + SEARCH_DIVIDER_WIDTH, originY + ICON_HEIGHT.ConvertToPx());
+        RSRect rect(originX, originY, originX + searchDividerWidth, originY + iconHeight.ConvertToPx());
         canvas.Save();
         RSPen pen;
-        pen.SetColor(ToRSColor(SEARCH_DIVIDER_COLOR));
+        pen.SetColor(ToRSColor(searchDividerColor));
         canvas.AttachPen(pen);
         canvas.DrawRect(rect);
         canvas.Restore();

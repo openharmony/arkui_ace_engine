@@ -15,15 +15,14 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("fuzztest") {
   testonly = true
-
+  deps = [
+    "arkressched_fuzzer:ArkResschedFuzzTest",
+    "res2_fuzzer:Res2FuzzTest",
+    "res_fuzzer:ResFuzzTest",
+    "uiservice_fuzzer:UiServiceFuzzTest",
+    "util_fuzzer:UtilFuzzTest",
+  ]
   if (!is_asan) {
-    deps = [
-      "arkressched_fuzzer:ArkResschedFuzzTest",
-      "imageloader_fuzzer:ImageLoaderFuzzTest",
-      "res2_fuzzer:Res2FuzzTest",
-      "res_fuzzer:ResFuzzTest",
-      "uiservice_fuzzer:UiServiceFuzzTest",
-      "util_fuzzer:UtilFuzzTest",
-    ]
+    deps += [ "imageloader_fuzzer:ImageLoaderFuzzTest" ]
   }
 }

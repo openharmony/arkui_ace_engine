@@ -38,11 +38,6 @@ constexpr double JUMP_INDEX_THRESHOLD = 2.0;
 
 } // namespace
 
-std::string GridEventInfo::ToJSONString() const
-{
-    return std::string("\"grid\",{\"first\":").append(std::to_string(scrollIndex_)).append("},null");
-}
-
 RenderGridScroll::~RenderGridScroll()
 {
     if (scrollBarProxy_) {

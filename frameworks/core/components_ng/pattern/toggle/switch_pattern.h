@@ -59,6 +59,11 @@ public:
         return MakeRefPtr<SwitchPaintMethod>(currentOffset_);
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true, FocusStyle::OUTER_BORDER };
+    }
+
 private:
     void OnModifyDone() override;
     void UpdateCurrentOffset(float offset);

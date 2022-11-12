@@ -18,6 +18,6 @@
 namespace OHOS::Ace::NG {
 class BasePolygonPatternTestNg : public BaseShapePatternTestNg {
 public:
-    void CheckPoints();
+    void CheckPoints(RefPtr<FrameNode> frameNode, bool hasValue);
 };
 } // namespace OHOS::Ace::NG

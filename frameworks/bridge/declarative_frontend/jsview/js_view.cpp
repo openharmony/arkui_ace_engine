@@ -266,22 +266,38 @@ void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
 void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
     std::string viewId = info[0]->ToString();
-    if (id_ == viewId) {
+    if (viewId_ == viewId) {
         info.SetReturnValue(this);
         return;
     }
-    for (auto i : customViewChildren_) {
-        std::string childId = i.first;
-        auto pos = i.first.find_last_of('_');
-        if (pos != std::string::npos) {
-            childId = i.first.substr(pos + 1);
-        }
-        if (childId == viewId) {
-            info.SetReturnValue(i.second);
-            return;
+    JSRef<JSObject> targetView = JSRef<JSObject>::New();
+    for (auto&& child : customViewChildren_) {
+        if (GetChildByViewId(viewId, child.second, targetView)) {
+            break;
         }
     }
-    LOGE("find child failed %{public}s", viewId.c_str());
+    auto view = targetView->Unwrap<JSViewFullUpdate>();
+    if (view) {
+        LOGD("find targetView success");
+        info.SetReturnValue(targetView);
+    }
+    return;
+}
+
+bool JSViewFullUpdate::GetChildByViewId(
+    const std::string& viewId, JSRef<JSObject>& childView, JSRef<JSObject>& targetView)
+{
+    auto* view = childView->Unwrap<JSViewFullUpdate>();
+    if (view && view->viewId_ == viewId) {
+        targetView = childView;
+        return true;
+    }
+    for (auto&& child : view->customViewChildren_) {
+        if (GetChildByViewId(viewId, child.second, targetView)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
@@ -649,8 +665,6 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("getDeletedElemtIds", &JSViewPartialUpdate::JsGetDeletedElemtIds);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "deletedElmtIdsHaveBeenPurged", &JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged);
-    JSClass<JSViewPartialUpdate>::CustomMethod(
-        "deletedElmtIdsSilently", &JSViewPartialUpdate::JsDeletedElmtIdsSilently);
     JSClass<JSViewPartialUpdate>::Method("elmtIdExists", &JSViewPartialUpdate::JsElementIdExists);
     JSClass<JSViewPartialUpdate>::CustomMethod("isLazyItemRender", &JSViewPartialUpdate::JSGetProxiedItemRenderState);
     JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
@@ -720,18 +734,6 @@ void JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& i
     for (size_t i = 0; i < jsArr->Length(); i++) {
         const JSRef<JSVal> strId = jsArr->GetValueAt(i);
         ElementRegister::GetInstance()->ClearRemovedItems(strId->ToNumber<int32_t>());
-    }
-}
-
-void JSViewPartialUpdate::JsDeletedElmtIdsSilently(const JSCallbackInfo& info)
-{
-    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
-    if (jsArr.IsEmpty() || !jsArr->IsArray()) {
-        return;
-    }
-    for (size_t i = 0; i < jsArr->Length(); i++) {
-        const JSRef<JSVal> strId = jsArr->GetValueAt(i);
-        ElementRegister::GetInstance()->ClearRemovedItemsSilently(strId->ToNumber<int32_t>());
     }
 }
 

@@ -26,7 +26,7 @@ class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    explicit CanvasPaintMethod(const RefPtr<NG::PipelineContext> context)
+    explicit CanvasPaintMethod(const RefPtr<PipelineBase> context)
     {
         context_ = context;
         isOffscreen_ = false;

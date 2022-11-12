@@ -20,9 +20,10 @@
 #include "core/image/image_loader.h"
 #include "core/image/image_object.h"
 #include "core/image/image_provider.h"
-const uint32_t u16m = 65535;
 
 namespace OHOS::Ace {
+constexpr uint32_t u16m = 65535;
+
 RefPtr<ImageObject> CreateAnimatedImageObject(
     ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const sk_sp<SkData>& data)
 {
@@ -37,10 +38,10 @@ RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_
 
 const Ace::ImageSourceInfo CreatImageSourceInfo(const uint8_t* data, size_t size)
 {
-    std::string randomString = reinterpret_cast<const char*>(data);
+    std::string randomString(reinterpret_cast<const char*>(data), size);
     Ace::InternalResource::ResourceId resourceId = Ace::InternalResource::ResourceId::NO_ID;
     Ace::RefPtr<Ace::PixelMap> pixmap = nullptr;
-    Ace::Dimension dimension(static_cast<double>(U32_AT(data)));
+    Ace::Dimension dimension(static_cast<double>(size % u16m));
     Ace::ImageSourceInfo info(randomString, dimension, dimension, resourceId, pixmap);
     return info;
 }
@@ -98,6 +99,7 @@ void MinorTest(const uint8_t* data, size_t size)
     k->PartDoing();
 #endif
     k->GpuCompress(s, pixmap, 0, 0);
+    k->WriteToFile("", compressdImage, s2);
 }
 } // namespace OHOS::Ace
 

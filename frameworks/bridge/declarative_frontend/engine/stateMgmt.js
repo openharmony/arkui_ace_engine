@@ -2946,6 +2946,15 @@ class ViewPU extends NativeViewPartialUpdate {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
+        // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the 
+        // updateDirtyElements function.
+        let removedElmtIds = [];
+        this.updateFuncByElmtId.forEach((value, key) => {
+            this.purgeVariableDependenciesOnElmtId(key);
+            removedElmtIds.push(key);
+        });
+        this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();

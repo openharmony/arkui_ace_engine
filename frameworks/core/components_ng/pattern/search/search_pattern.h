@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/components/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
@@ -25,7 +26,6 @@
 #include "core/components_ng/pattern/search/search_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
-#include "core/components/text_field/text_field_controller.h"
 
 namespace OHOS::Ace::NG {
 
@@ -93,7 +93,6 @@ private:
     SizeF buttonSize_;
     RefPtr<ClickEvent> imageClickListener_;
     RefPtr<ClickEvent> buttonClickListener_;
-
     RefPtr<TextFieldController> searchController_;
 };
 

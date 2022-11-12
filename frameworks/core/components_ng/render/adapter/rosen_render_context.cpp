@@ -39,6 +39,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
+#include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
@@ -187,19 +188,19 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    SetPivot(0.5f, 0.5f); // default pivot is center
 
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
         NotifyTransitionInner(paintRect.GetSize(), true);
         firstTransitionIn_ = false;
     }
+
     if (propTransform_ && propTransform_->HasTransformCenter()) {
         auto vec = propTransform_->GetTransformCenterValue();
         float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
         float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
         SetPivot(xPivot, yPivot);
-    } else {
-        SetPivot(0.5f, 0.5f); // default pivot is center
     }
 
     if (bgLoadingCtx_ && bgLoadingCtx_->GetCanvasImage()) {
@@ -215,13 +216,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
 
     if (propGradient_) {
-        SizeF frameSize(paintRect.Width(), paintRect.Height());
-        PaintGradient(frameSize);
+        PaintGradient(paintRect.GetSize());
     }
 
     if (propClip_) {
-        SizeF frameSize(paintRect.Width(), paintRect.Height());
-        PaintClip(frameSize);
+        PaintClip(paintRect.GetSize());
     }
 
     if (propGraphics_) {
@@ -286,6 +285,8 @@ void RosenRenderContext::PaintBackground()
     CHECK_NULL_VOID(skiaCanvasImage);
     auto skImage = skiaCanvasImage->GetCanvasImage();
     CHECK_NULL_VOID(skImage);
+    // use compress data to draw bg image
+    skiaCanvasImage->SetCompressData(nullptr, 0, 0);
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetImage(skImage);
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NOREPEAT)));
@@ -380,7 +381,16 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center) {}
+void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
+{
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        float xPivot = ConvertDimensionToScaleBySize(center.GetX(), rect.Width());
+        float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
+        SetPivot(xPivot, yPivot);
+    }
+    RequestNextFrame();
+}
 
 void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
 {
@@ -532,11 +542,13 @@ void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnAccessibilityFocusUpdate(bool /* isAccessibilityFocus */)
+void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
 {
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
     uiNode->MarkDirtyNode(false, true, PROPERTY_UPDATE_RENDER);
+    uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
+                                                      : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
     RequestNextFrame();
 }
 
@@ -761,7 +773,6 @@ RectF RosenRenderContext::AdjustPaintRect()
                                                               : PipelineContext::GetCurrentRootWidth();
     auto heightPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Height()
                                                                : PipelineContext::GetCurrentRootHeight();
-
     auto anchor = GetAnchorValue({});
     auto anchorWidthReference = rect.Width();
     auto anchorHeightReference = rect.Height();
@@ -861,6 +872,65 @@ void RosenRenderContext::BlendBorderColor(const Color& color)
         bottomColor = (GetBorderColor()->bottomColor.value_or(Color::TRANSPARENT).BlendColor(color)).GetValue();
     }
     rsNode_->SetBorderColor(leftColor, topColor, rightColor, bottomColor);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::PaintFocusState(Dimension focusPaddingVp)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto appTheme = context->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    Color focusColor = appTheme->GetFocusColor();
+    auto focusWidth = appTheme->GetFocusWidthVp().ConvertToPx();
+
+    auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
+    auto borderWidthPx = static_cast<float>(focusWidth);
+
+    auto frame = rsNode_->GetStagingProperties().GetFrame();
+    auto bounds = rsNode_->GetStagingProperties().GetBounds();
+    auto borderRadius = rsNode_->GetStagingProperties().GetCornerRadius();
+    auto rectLeft = -borderPaddingPx;
+    auto rectTop = -borderPaddingPx;
+    auto rectRight = rectLeft + bounds.z_ + 2 * borderPaddingPx;
+    auto rectBottom = rectTop + bounds.w_ + 2 * borderPaddingPx;
+    auto radiusTopLeft = borderRadius.x_ + borderPaddingPx;
+    auto radiusTopRight = borderRadius.y_ + borderPaddingPx;
+    auto radiusButtonLeft = borderRadius.w_ + borderPaddingPx;
+    auto radiusButtonRight = borderRadius.z_ + borderPaddingPx;
+    auto rect = rosen::Rect(rectLeft, rectTop, rectRight, rectBottom);
+
+    if (focusStateModifier_) {
+        rsNode_->AddModifier(focusStateModifier_);
+        focusStateModifier_->SetRoundRect(rect, radiusTopLeft, radiusTopRight, radiusButtonLeft, radiusButtonRight);
+        return;
+    }
+
+    auto paintTask = [focusColor, borderWidthPx](const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
+        // auto rrect = ToRS
+        RSPen pen;
+        pen.SetAntiAlias(true);
+        pen.SetColor(ToRSColor(focusColor));
+        pen.SetWidth(borderWidthPx);
+        rsCanvas.AttachPen(pen);
+        rsCanvas.DrawRoundRect(rrect);
+    };
+
+    focusStateModifier_ = std::make_shared<FocusStateModifier>();
+    focusStateModifier_->SetRoundRect(rect, radiusTopLeft, radiusTopRight, radiusButtonLeft, radiusButtonRight);
+    focusStateModifier_->SetPaintTask(std::move(paintTask));
+    rsNode_->AddModifier(focusStateModifier_);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::ClearFocusState()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(focusStateModifier_);
+    rsNode_->RemoveModifier(focusStateModifier_);
     RequestNextFrame();
 }
 
@@ -1101,8 +1171,7 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
     std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
     auto blurStyle = GetBackgroundBlurStyleValue(BlurStyle::NoMaterial);
     if (blurStyle != BlurStyle::NoMaterial) {
-        backFilter = Rosen::RSFilter::CreateMaterialFilter(
-            static_cast<int>(blurStyle), pipelineBase->GetDipScale());
+        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), pipelineBase->GetDipScale());
     } else if (radius.IsValid()) {
         float radiusPx = pipelineBase->NormalizeToPx(radius);
         float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
@@ -1466,7 +1535,6 @@ void RosenRenderContext::PaintOverlayText()
         auto modifier = std::make_shared<OverlayTextModifier>();
         modifier->SetCustomData(NG::OverlayTextData(overlayText));
         rsNode_->AddModifier(modifier);
-        // TODO: PaintOverlayText
     }
 }
 

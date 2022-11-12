@@ -29,6 +29,8 @@
 
 namespace OHOS::Ace::NG {
 
+thread_local int32_t UINode::currentAccessibilityId_ = 0;
+
 UINode::~UINode()
 {
     if (!removeSilently_) {

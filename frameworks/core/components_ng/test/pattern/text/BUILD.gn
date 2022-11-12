@@ -19,7 +19,10 @@ import(
 ohos_unittest("text_pattern_test_ng") {
   module_out_path = "$test_output_path/text"
 
-  sources = [ "text_pattern_test_ng.cpp" ]
+  sources = [
+    "span_pattern_test_ng.cpp",
+    "text_pattern_test_ng.cpp",
+  ]
 
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",

@@ -18,7 +18,7 @@ import(
 
 ohos_unittest("button_pattern_test_ng") {
   module_out_path = "$test_output_path/button"
-
+  platform = "ohos"
   sources = [ "button_pattern_test_ng.cpp" ]
 
   deps = [
@@ -26,10 +26,39 @@ ohos_unittest("button_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
   ]
 
+  if (enable_ng_build) {
+    deps += [
+      "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_ohos",
+      "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_ohos",
+    ]
+  } else {
+    deps += [
+      "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+      "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    ]
+  }
+
   configs = [
     ":config_button_test",
     "$ace_root:ace_config",
   ]
+  include_dirs = [
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//third_party/bounds_checking_function/include",
+  ]
+
+  if (platform == "ohos") {
+    deps += [
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    ]
+  } else {
+    deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
+  }
 }
 
 config("config_button_test") {

@@ -173,6 +173,7 @@ public:
 
     void FindChildById(const JSCallbackInfo& info);
     void FindChildByIdForPreview(const JSCallbackInfo& info);
+    bool GetChildByViewId(const std::string& viewId, JSRef<JSObject>& childView, JSRef<JSObject>& targetView);
 
     void ExecuteUpdateWithValueParams(const std::string& jsonData) override
     {
@@ -292,9 +293,6 @@ public:
     // have been deleted from partial updates book keeping
     // at this point ElementRegister can forget about the,
     void JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& info);
-
-    // when custom node is destroy, need to clean the ids.
-    void JsDeletedElmtIdsSilently(const JSCallbackInfo& info);
 
     /**
     JS exposed function to check from ElementRegister if given elmtId is (still) in use

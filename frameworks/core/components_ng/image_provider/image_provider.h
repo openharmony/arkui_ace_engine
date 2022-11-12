@@ -128,7 +128,9 @@ public:
         const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
     static void MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
     static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
-        std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder);
+        std::function<void(RefPtr<CanvasImage>)>&& callback,
+        const RefPtr<RenderTaskHolder>& renderTaskHolder, const std::string key,
+        const SizeF& resizeTarget, const RefPtr<ImageData>& data);
     static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& sourceInfo,
         const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
         const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks, ImageObjectType imageObjectType);

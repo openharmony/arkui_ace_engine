@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(context, width, height);
 }

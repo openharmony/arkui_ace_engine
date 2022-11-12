@@ -151,7 +151,7 @@ HWTEST_F(UtilsTest, UtilsTest002, TestSize.Level1)
     time_t nowTime;
     struct tm* localTime;
     time(&nowTime);
-    localTime = localtime(&nowTime);
+    localTime = gmtime(&nowTime);
     ASSERT_EQ(locaDay.year, localTime->tm_year + DEFAULT_YEAR);
     ASSERT_EQ(locaDay.month, localTime->tm_mon + ADD_ONE);
     ASSERT_EQ(locaDay.day, localTime->tm_mday);
@@ -214,7 +214,7 @@ HWTEST_F(UtilsTest, UtilsTest006, TestSize.Level1)
     time_t nowTime;
     struct tm* localTime;
     time(&nowTime);
-    localTime = localtime(&nowTime);
+    localTime = gmtime(&nowTime);
     int32_t localTimeHour12, localTimeHour24;
     auto theTimeOfNow = GetTimeOfNow(SET_HOURS_FOR_THE_FIRST_TIME);
     auto theTimeOfZone = GetTimeOfZone(SET_HOURS_FOR_THE_FIRST_TIME);
@@ -251,7 +251,7 @@ HWTEST_F(UtilsTest, UtilsTest007, TestSize.Level1)
     time_t nowTime;
     struct tm* localTime;
     time(&nowTime);
-    localTime = localtime(&nowTime);
+    localTime = gmtime(&nowTime);
     int32_t localTimeHour12, localTimeHour24;
     auto theTimeOfNow = GetTimeOfNow(SET_HOURS_FOR_THE_SECOND_TIME);
     auto theTimeOfZone = GetTimeOfZone(SET_HOURS_FOR_THE_SECOND_TIME);
@@ -297,7 +297,7 @@ HWTEST_F(UtilsTest, UtilsTest008, TestSize.Level1)
     time_t nowTime;
     struct tm* localTime;
     time(&nowTime);
-    localTime = localtime(&nowTime);
+    localTime = gmtime(&nowTime);
     int32_t localTimeHour12, localTimeHour24;
     auto theTimeOfNow = GetTimeOfNow(SET_HOURS_FOR_THE_THIRD_TIME);
     auto theTimeOfZone = GetTimeOfZone(SET_HOURS_FOR_THE_THIRD_TIME);

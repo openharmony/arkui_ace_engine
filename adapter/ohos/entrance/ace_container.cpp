@@ -1316,21 +1316,23 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 void AceContainer::InitWindowCallback()
 {
     LOGD("AceContainer InitWindowCallback");
-    auto& windowManager = pipelineContext_->GetWindowManager();
-    std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
-    if (info != nullptr) {
-        windowManager->SetAppLabelId(info->labelId);
-        windowManager->SetAppIconId(info->iconId);
+    if (windowModal_ == WindowModal::CONTAINER_MODAL && pipelineContext_) {
+        auto& windowManager = pipelineContext_->GetWindowManager();
+        std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
+        if (info != nullptr) {
+            windowManager->SetAppLabelId(info->labelId);
+            windowManager->SetAppIconId(info->iconId);
+        }
+        windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
+        windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
+        windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
+        windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
+        windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+        windowManager->SetWindowSplitCallBack(
+            [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+        windowManager->SetWindowGetModeCallBack(
+            [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
     }
-    windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
-    windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
-    windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
-    windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
-    windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
-    windowManager->SetWindowSplitCallBack(
-        [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
-    windowManager->SetWindowGetModeCallBack(
-        [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
