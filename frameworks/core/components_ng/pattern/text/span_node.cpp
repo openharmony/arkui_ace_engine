@@ -23,7 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -77,6 +77,24 @@ void SpanNode::MountToParagraph()
             auto textPattern = textNode->GetPattern<TextPattern>();
             if (textPattern) {
                 textPattern->AddChildSpanItem(Claim(this));
+                return;
+            }
+        }
+        parent = parent->GetParent();
+    }
+    LOGE("fail to find Text or Parent Span");
+}
+
+void SpanNode::RequestTextFlushDirty()
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto textNode = DynamicCast<FrameNode>(parent);
+        if (textNode) {
+            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            auto textPattern = textNode->GetPattern<TextPattern>();
+            if (textPattern) {
+                textPattern->OnModifyDone();
                 return;
             }
         }
