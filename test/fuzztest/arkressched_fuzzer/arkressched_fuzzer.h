@@ -17,4 +17,4 @@
 
 
 #define FUZZ_PROJECT_NAME "ressched_fuzzer"
-#endif //TEST_FUZZTEST_RESSCHED_FUZZER_H
+#endif // TEST_FUZZTEST_RESSCHED_FUZZER_H

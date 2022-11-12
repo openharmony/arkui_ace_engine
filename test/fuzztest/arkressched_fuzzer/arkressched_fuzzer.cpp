@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-#include "ressched_fuzzer.h"
+#include "arkressched_fuzzer.h"
 
 #include "base/ressched/ressched_report.h"
-#define U16 65535
-
 
 namespace OHOS::Ace {
-    using namespace std;
-    void veryfi(string& s, const uint8_t* data, size_t size){
+constexpr uint32_t u16m = 65535;
+using namespace std;
+    void veryfi(string& s, const uint8_t* data, size_t size)
+    {
         bool ok = true;
-        auto ri = size % U16;        
-        for ( size_t i = 0 ; i < size ; i++ ) {
-            if (( data[i] < '0' || data[i] > '9') && (data[i] < 'a' || data[i] > 'z' )) {
-                ok =false;
+        auto ri = size % u16m;        
+        for ( size_t i = 0 ; i < ri ; i++ ) {
+            if (( data[i] < '0' || data[i] > '9' ) && ( data[i] < 'a' || data[i] > 'z' )) {
+                ok = false;
                 break;
             }
         }
-        if( ri==0 || ok == false ){
+        if ( ri == 0 || ok == false ) {
             s = "123";
             return;
         }
-        s = string(s, ri);
+        s = string(reinterpret_cast<const char*>(data), ri);
     }
     
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
