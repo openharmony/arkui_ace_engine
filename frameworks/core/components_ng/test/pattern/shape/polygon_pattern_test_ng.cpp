@@ -59,23 +59,39 @@ public:
         RSCanvas rsCavas(&canvas);
         contentDraw(rsCavas);
     }
+
+    void CheckPolygonPoints(bool hasValue)
+    {
+        PolygonModelNG().Create(true);
+        auto shapeAbstactModel = ShapeAbstractModelNG();
+        SetSize(shapeAbstactModel);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        ViewStackProcessor::GetInstance()->Pop();
+        CheckPoints(frameNode, hasValue);
+        Draw(frameNode);
+    }
 };
 
 /**
- * @tc.name: PolygonPaintProperty001
+ * @tc.name: PolygonPoints001
  * @tc.desc: create path with points
  * @tc.type: FUNC
  */
 
-HWTEST_F(PolygonPatternTestNg, PolygonPaintProperty001, TestSize.Level1)
+HWTEST_F(PolygonPatternTestNg, PolygonPoints001, TestSize.Level1)
 {
-    PolygonModelNG().Create(true);
-    auto shapeAbstactModel = ShapeAbstractModelNG();
-    SetSize(shapeAbstactModel);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    ViewStackProcessor::GetInstance()->Pop();
-    CheckPoints(frameNode);
-    Draw(frameNode);
+    CheckPolygonPoints(true);
+}
+
+/**
+ * @tc.name: PolygonPoints002
+ * @tc.desc: create path with no points
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(PolygonPatternTestNg, PolygonPoints002, TestSize.Level1)
+{
+    CheckPolygonPoints(false);
 }
 
 } // namespace OHOS::Ace::NG
