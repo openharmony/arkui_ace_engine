@@ -69,7 +69,7 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxTest001, TestSize.Level1)
     ForEachModelNG forEach;
     forEach.Create();
     auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(forEachNode == nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
     EXPECT_EQ(forEachNode->IsAtomicNode(), IS_ATOMIC_NODE);
 }
 
@@ -101,7 +101,7 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxIdTest003, TestSize.Level1)
     forEach.SetNewIds(std::move(ids));
 
     auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(forEachNode == nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
 
     // tempIds_ is empty.
     auto tempIds = forEachNode->GetTempIds();
@@ -124,7 +124,7 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest004, TestSize.Level1)
     forEach.SetNewIds(std::move(ids));
 
     auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(forEachNode == nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
 
     /**
     // corresponding ets code:
