@@ -25,16 +25,18 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Dimension DEFALT_RING_DIAMETER = 72.0_vp;
+} // namespace
 ProgressLayoutAlgorithm::ProgressLayoutAlgorithm() = default;
 
 std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -43,9 +45,10 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth()
                        .value_or(progressTheme ? (type_ == ProgressType::SCALE ? progressTheme->GetScaleLength()
                                                                                : progressTheme->GetTrackThickness())
-                                               : Dimension(20))
+                                               : Dimension(strokeWidth_))
                        .ConvertToPx();
-    float radius = progressTheme ? progressTheme->GetRingRadius().ConvertToPx() : 20.0f;
+    float diameter =
+        progressTheme ? progressTheme->GetRingDiameter().ConvertToPx() : DEFALT_RING_DIAMETER.ConvertToPx();
     float width_ = progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.maxSize.Width();
     if (contentConstraint.selfIdealSize.Width()) {
         width_ = contentConstraint.selfIdealSize.Width().value();
@@ -56,7 +59,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     }
     if (type_ == ProgressType::RING || type_ == ProgressType::SCALE || type_ == ProgressType::MOON) {
         if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
-            width_ = 2 * radius;
+            width_ = diameter;
             height_ = width_;
         }
         if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
@@ -68,10 +71,10 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     }
     if (type_ == ProgressType::CAPSULE) {
         if (!contentConstraint.selfIdealSize.Height()) {
-            height_ = 2 * radius;
+            height_ = diameter;
         }
         if (!contentConstraint.selfIdealSize.Width()) {
-            width_ = 2 * radius;
+            width_ = diameter;
         }
     }
     height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));

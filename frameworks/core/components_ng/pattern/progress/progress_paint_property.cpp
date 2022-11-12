@@ -19,17 +19,16 @@
 #include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-
-const double PROGRSS_MAX_VALUE = 100.f;
+const float PROGRSS_MAX_VALUE = 100.f;
 
 void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     PaintProperty::ToJsonValue(json);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);

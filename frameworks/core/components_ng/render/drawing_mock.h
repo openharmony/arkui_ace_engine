@@ -29,6 +29,7 @@
 #include "core/components_ng/test/mock/rosen/testing_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_mask_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_path.h"
+#include "core/components_ng/test/mock/rosen/testing_path_effect.h"
 #include "core/components_ng/test/mock/rosen/testing_pen.h"
 #include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
 
@@ -38,6 +39,9 @@ using RSPen = Testing::TestingPen;
 using RSBrush = Testing::TestingBrush;
 using RSPath = Testing::TestingPath;
 using RSShaderEffect = Testing::TestingShaderEffect;
+using RSPathDashStyle = Testing::TestingPathDashStyle;
+using RSPathDirection = Testing::TestingPathDirection;
+using RSPathEffect = Testing::TestingPathEffect;
 using RSFilter = Testing::TestingFilter;
 using RSColor = Testing::TestingColor;
 using RSMaskFilter = Testing::TestingMaskFilter;

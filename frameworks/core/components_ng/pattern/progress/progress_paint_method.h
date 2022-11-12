@@ -21,7 +21,6 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"

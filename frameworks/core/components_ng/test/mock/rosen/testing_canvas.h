@@ -1,4 +1,5 @@
-/*
+ /*
+>>>>>>> ng_progress TDD1
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +18,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
 
 #include "draw/clip.h"
+
 #include "testing_bitmap.h"
+
 #include "testing_brush.h"
 #include "testing_path.h"
 #include "testing_pen.h"
@@ -28,6 +31,7 @@ namespace OHOS::Ace::Testing {
 using Point = Rosen::Drawing::Point;
 using RoundRect = Rosen::Drawing::RoundRect;
 using ClipOp = Rosen::Drawing::ClipOp;
+
 class TestingCanvas {
 public:
     TestingCanvas() = default;
@@ -35,7 +39,7 @@ public:
     virtual ~TestingCanvas() = default;
 
     virtual void DrawLine(const Point& startPt, const Point& endPt) {}
-    
+
     virtual void DrawPath(const TestingPath& path) {}
     virtual void DrawArc(const Rect& oval, scalar startAngle, scalar sweepAngle) {}
     virtual void DrawRect(const Rect& rect) {}
@@ -44,6 +48,7 @@ public:
 
     virtual void Rotate(scalar deg, scalar sx, scalar sy) {}
     virtual void Translate(scalar dx, scalar dy) {}
+
     virtual void DrawBitmap(const TestingBitmap& bitmap, const scalar px, const scalar py) {}
 
     virtual TestingCanvas& AttachPen(const TestingPen& pen)
@@ -60,7 +65,7 @@ public:
     {
         return *this;
     }
-    
+
     virtual TestingCanvas& DetachBrush()
     {
         return *this;
