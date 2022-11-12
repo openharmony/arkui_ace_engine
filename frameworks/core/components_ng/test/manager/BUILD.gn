@@ -13,5 +13,8 @@
 
 group("manager_unittest") {
   testonly = true
-  deps = [ "full_screen:full_screen_manager_test_ng" ]
+  deps = [
+    "full_screen:full_screen_manager_test_ng",
+    "select_overlay:select_overlay_manager_test_ng",
+  ]
 }
