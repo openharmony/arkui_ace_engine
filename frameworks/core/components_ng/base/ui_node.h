@@ -256,7 +256,7 @@ private:
     int32_t accessibilityId_ = -1;
     bool isRoot_ = false;
     bool onMainTree_ = false;
-    bool removeSilently_ = false;
+    bool removeSilently_ = true;
 
     static thread_local int32_t currentAccessibilityId_;
 
