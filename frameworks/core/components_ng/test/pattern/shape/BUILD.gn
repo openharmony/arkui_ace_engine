@@ -67,6 +67,22 @@ ohos_unittest("ellipse_pattern_test_ng") {
   ]
 }
 
+ohos_unittest("line_pattern_test_ng") {
+  module_out_path = "$test_output_path/shape"
+  sources = [
+    "base_shape_pattern_test_ng.cpp",
+    "line_pattern_test_ng.cpp",
+  ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+  configs = [
+    ":config_shape_test",
+    "$ace_root:ace_config",
+  ]
+}
+
 ohos_unittest("rect_pattern_test_ng") {
   module_out_path = "$test_output_path/shape"
   sources = [
@@ -154,6 +170,7 @@ group("shape_pattern_unit_test") {
   deps = [
     ":circle_pattern_test_ng",
     ":ellipse_pattern_test_ng",
+    ":line_pattern_test_ng",
     ":path_pattern_test_ng",
     ":polygon_pattern_test_ng",
     ":polyline_pattern_test_ng",
