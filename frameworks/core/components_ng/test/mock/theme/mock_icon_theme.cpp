@@ -13,28 +13,19 @@
  * limitations under the License.
  */
 
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/icon_theme.h"
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
 
-float PipelineContext::GetCurrentRootWidth()
+RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
 {
-    return 1.0f;
+    return nullptr;
 }
 
-float PipelineContext::GetCurrentRootHeight()
+void IconTheme::Builder::ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<IconTheme>& theme) const {}
+
+std::string IconTheme::GetIconPath(const InternalResource::ResourceId& resourceId) const
 {
-    return 1.0f;
+    return "";
 }
-
-void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId) {}
-
-void PipelineContext::FlushMessages() {}
-
-void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId) {}
-
-void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
-
-void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
-
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace

@@ -19,7 +19,6 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/image/image_object.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,7 +26,6 @@ class ACE_EXPORT ImageLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(ImageLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    // ImageLayoutAlgorithm(const RefPtr<ImageLoadingContext>& loadingCtx) : loadingCtx_(loadingCtx) {}
     ImageLayoutAlgorithm(
         const RefPtr<ImageLoadingContext>& loadingCtx, const RefPtr<ImageLoadingContext>& altLoadingCtx = nullptr)
         : loadingCtx_(loadingCtx), altLoadingCtx_(altLoadingCtx)
