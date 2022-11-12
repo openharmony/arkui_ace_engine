@@ -826,7 +826,6 @@ void PipelineContext::Destroy()
     drawDelegate_.reset();
     touchEvents_.clear();
     buildFinishCallbacks_.clear();
-    ElementRegister::GetInstance()->ClearInstance();
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
