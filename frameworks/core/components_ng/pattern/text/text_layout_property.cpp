@@ -63,7 +63,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("textBaseline",
         TEXT_BASE_LINE_TO_STRING.at(static_cast<int32_t>(GetTextBaseline().value_or(TextBaseline::ALPHABETIC)))
             .c_str());
-    json->Put("baselineOffset", GetBaselineOffset().value_or(0.0_vp).ToString().c_str());
+    json->Put(
+        "baselineOffset", std::to_string(static_cast<int32_t>(GetBaselineOffset().value_or(0.0_vp).Value())).c_str());
     json->Put("textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign().value_or(TextAlign::START)).c_str());
     json->Put(
         "textOverflow", V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());

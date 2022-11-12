@@ -723,7 +723,8 @@ public:
             inputHub->AddOnMouseEvent(mouseCallback_);
         } else if (type == ResponseType::LONGPRESS) {
             // create or show menu on long press
-            auto event = [builder = std::move(buildFunc), weakTarget](const GestureEvent& info) mutable {
+            auto event = [builder = std::move(buildFunc), weakTarget](
+                             const GestureEvent& info) mutable {
                 auto targetNode = weakTarget.Upgrade();
                 CHECK_NULL_VOID(targetNode);
                 CreateCustomMenu(builder, targetNode, true,

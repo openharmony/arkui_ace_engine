@@ -84,16 +84,11 @@ public:
     std::unordered_set<ElementIdType>& GetRemovedItems();
     void ClearRemovedItems(ElementIdType elmtId);
 
-    void ClearRemovedItemsSilently(ElementIdType elmtId);
-
     /**
      * does a complete reset
      * clears the Map of Elements and Set of removed Elements
      */
     void Clear();
-
-    // clear current instance elemt map.
-    void ClearInstance();
 
     ElementIdType MakeUniqueId()
     {
@@ -113,11 +108,15 @@ private:
     // first to Component, then synced to Element
     ElementIdType nextUniqueElementId_ = 0;
 
-    // Map for created elements with instanceId
-    std::unordered_map<int32_t, std::unordered_map<ElementIdType, WeakPtr<AceType>>> itemMap_;
+    // Map for created elements
+    std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;
 
-    // Set of removed Elements (not in itemMap_ anymore) with instanceId
-    std::unordered_map<int32_t, std::unordered_set<ElementIdType>> removedItems_;
+    // Set of removed Elements (not in itemMap_ anymore)
+    std::unordered_set<ElementIdType> removedItems_;
+
+    // Cache IDs that are referenced by other object
+    // which causes delayed destruction  when custom node is destoryed.
+    std::unordered_set<ElementIdType> deletedCachedItems_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };

@@ -37,6 +37,7 @@
 namespace OHOS::Ace::NG {
 class BorderImageModifier;
 class MouseSelectModifier;
+class FocusStateModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -66,6 +67,10 @@ public:
     void ResetBlendBorderColor() override;
 
     void BlendBorderColor(const Color& color) override;
+
+    void PaintFocusState(Dimension focusPaddingVp) override;
+
+    void ClearFocusState() override;
 
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
@@ -227,7 +232,6 @@ private:
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
-
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);
     void PaintGradient(const SizeF& frameSize);
@@ -237,7 +241,6 @@ private:
     void PaintBorderImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
-
 
     RectF AdjustPaintRect();
 
@@ -261,6 +264,7 @@ private:
 
     std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_ = nullptr;
+    std::shared_ptr<FocusStateModifier> focusStateModifier_ = nullptr;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;

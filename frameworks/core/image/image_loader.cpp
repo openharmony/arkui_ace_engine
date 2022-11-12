@@ -169,6 +169,22 @@ void ImageLoader::CacheImageDataToImageCache(const std::string& key, const RefPt
     imageCache->CacheImageData(key, imageData);
 }
 
+RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string key, const std::string suffix)
+{
+    ACE_FUNCTION_TRACE();
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineCtx, nullptr);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_RETURN(imageCache, nullptr);
+    std::string filePath = ImageCache::GetImageCacheFilePath(key) + suffix;
+    auto data = imageCache->GetDataFromCacheFile(filePath);
+    CHECK_NULL_RETURN(data, nullptr);
+    // add adapter layer to replace [SkiaCachedImageData]
+    auto skdata = AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
+    CHECK_NULL_RETURN(skdata, nullptr);
+    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skdata));
+}
+
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {

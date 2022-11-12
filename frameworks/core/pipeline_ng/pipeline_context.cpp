@@ -175,7 +175,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         RequestFrame();
     }
     FlushMessages();
-    FlushFocus();
+    if (onShow_ && onFocus_) {
+        FlushFocus();
+    }
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -628,10 +630,12 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
     // Need update while key tab pressed
     if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
-        (event.code == KeyCode::KEY_TAB || event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_LEFT ||
-            event.code == KeyCode::KEY_DPAD_DOWN || event.code == KeyCode::KEY_DPAD_RIGHT)) {
+        (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {
         isNeedShowFocus_ = true;
-        FlushFocus();
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        if (rootFocusHub) {
+            rootFocusHub->PaintFocusState();
+        }
         return true;
     }
     auto lastPage = stageManager_->GetLastPage();
@@ -683,6 +687,14 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
     window_->RequestFrame();
 }
 
+void PipelineContext::RootLostFocus(BlurReason reason) const
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto focusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->LostFocus(reason);
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     // Need develop here: CTRL+AXIS = Pinch event
@@ -709,6 +721,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
 void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
+    onShow_ = true;
     window_->OnShow();
     window_->RequestFrame();
     FlushWindowStateChangedCallback(true);
@@ -717,6 +730,7 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     CHECK_RUN_ON(UI);
+    onShow_ = false;
     window_->RequestFrame();
     window_->OnHide();
     OnVirtualKeyboardAreaChange(Rect());
@@ -726,7 +740,9 @@ void PipelineContext::OnHide()
 void PipelineContext::WindowFocus(bool isFocus)
 {
     CHECK_RUN_ON(UI);
+    onFocus_ = isFocus;
     if (!isFocus) {
+        RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
@@ -812,7 +828,6 @@ void PipelineContext::Destroy()
     drawDelegate_.reset();
     touchEvents_.clear();
     buildFinishCallbacks_.clear();
-    ElementRegister::GetInstance()->ClearInstance();
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)

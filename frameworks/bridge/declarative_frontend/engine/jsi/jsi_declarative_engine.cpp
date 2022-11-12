@@ -1345,6 +1345,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         delegate->PostSyncTaskToPage(task);
         return;
     }
+#ifndef NG_BUILD
     if (isDestroy) {
         XComponentComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
@@ -1437,6 +1438,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         return;
     }
     delegate->PostSyncTaskToPage(task);
+#endif
 }
 
 void JsiDeclarativeEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)

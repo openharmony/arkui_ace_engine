@@ -517,6 +517,11 @@ void SwiperPattern::HandleTouchDown()
 
     // Stop auto play when touch down.
     StopAutoPlay();
+
+    if (springController_ && !springController_->IsStopped()) {
+        springController_->ClearStopListeners();
+        springController_->Stop();
+    }
 }
 
 void SwiperPattern::HandleTouchUp()

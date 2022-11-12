@@ -14,105 +14,100 @@
  */
 
 #include "imageloader_fuzzer.h"
+
+#include "core/image/image_cache.h"
+#include "core/image/image_compressor.h"
 #include "core/image/image_loader.h"
+#include "core/image/image_object.h"
+#include "core/image/image_provider.h"
 
-namespace OHOS {
-    const Ace::ImageSourceInfo CreatImageSourceInfo(const uint8_t* data, size_t size)
-    {
-        std::string randomString = reinterpret_cast<const char*>(data);
-        Ace::InternalResource::ResourceId resourceId = Ace::InternalResource::ResourceId::NO_ID;
-        Ace::RefPtr<Ace::PixelMap> pixmap = nullptr;
-        Ace::Dimension dimension(static_cast<double>(U32_AT(data)));
-        Ace::ImageSourceInfo info(randomString, dimension, dimension, resourceId, pixmap);
-        return info;
-    }
+namespace OHOS::Ace {
+constexpr uint32_t u16m = 65535;
 
-    bool FileImageLoaderTest(const uint8_t* data, size_t size)
-    {
-        auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
-        Ace::FileImageLoader fileImageLoader;
-        return fileImageLoader.LoadImageData(info, context) != nullptr;
-    }
-
-    bool DataProviderImageLoaderTest(const uint8_t* data, size_t size)
-    {
-        auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
-        Ace::DataProviderImageLoader dataProviderImageLoader;
-        Ace::Base64ImageLoader base64ImageLoader;
-        auto base64Image = base64ImageLoader.LoadImageData(info, context) != nullptr;
-        return dataProviderImageLoader.LoadImageData(info, context) != nullptr && base64Image;
-    }
-
-    bool DecodedDataProviderImageLoaderTest(const uint8_t* data, size_t size)
-    {
-        auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
-        Ace::DecodedDataProviderImageLoader decodedDataProviderImageLoader;
-        auto skData = decodedDataProviderImageLoader.LoadImageData(info, context);
-        auto ngData = decodedDataProviderImageLoader.LoadDecodedImageData(info, context);
-        return skData != nullptr && ngData != nullptr;
-    }
-
-    bool PixelMapImageLoaderTest(const uint8_t* data, size_t size)
-    {
-        auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
-        Ace::PixelMapImageLoader pixelMapImageLoader;
-        auto skData = pixelMapImageLoader.LoadImageData(info, context);
-        auto ngData = pixelMapImageLoader.LoadDecodedImageData(info, context);
-        return skData != nullptr && ngData != nullptr;
-    }
-
-    bool ResourceImageLoaderTest(const uint8_t* data, size_t size)
-    {
-        auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
-        Ace::ResourceImageLoader resourceImageLoader;
-        auto skData = resourceImageLoader.LoadImageData(info, context);
-        return skData != nullptr;
-    }
-
-    bool AssetImageLoader(const uint8_t* data, size_t size)
-    {
-        auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
-        Ace::AssetImageLoader assetImageLoader;
-        std::string randomString = reinterpret_cast<const char*>(data);
-        auto jsonString = assetImageLoader.LoadJsonData(randomString);
-        return assetImageLoader.LoadImageData(info, context) != nullptr && jsonString.empty();
-    }
-
-    bool NetworkImageLoader(const uint8_t* data, size_t size)
-    {
-        auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
-        Ace::NetworkImageLoader networkImageLoader;
-        return networkImageLoader.LoadImageData(info, context) != nullptr;
-    }
-
-    bool InternalImageLoader(const uint8_t* data, size_t size)
-    {
-        auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
-        Ace::InternalImageLoader internalImageLoader;
-        return internalImageLoader.LoadImageData(info, context) != nullptr;
-    }
+RefPtr<ImageObject> CreateAnimatedImageObject(
+    ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const sk_sp<SkData>& data)
+{
+    return Referenced::MakeRefPtr<StaticImageObject>(source, imageSize, frameCount, data);
 }
 
+RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream > &svgStream,
+                                      const RefPtr<PipelineBase>& context, std::optional<Color>& color)
+{
+    return nullptr;
+}
+
+const Ace::ImageSourceInfo CreatImageSourceInfo(const uint8_t* data, size_t size)
+{
+    std::string randomString(reinterpret_cast<const char*>(data), size);
+    Ace::InternalResource::ResourceId resourceId = Ace::InternalResource::ResourceId::NO_ID;
+    Ace::RefPtr<Ace::PixelMap> pixmap = nullptr;
+    Ace::Dimension dimension(static_cast<double>(size % u16m));
+    Ace::ImageSourceInfo info(randomString, dimension, dimension, resourceId, pixmap);
+    return info;
+}
+
+bool FileImageLoaderTest(const uint8_t* data, size_t size)
+{
+    auto info = CreatImageSourceInfo(data, size);
+    Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
+    Ace::DataProviderImageLoader dataProviderImageLoader;
+    return dataProviderImageLoader.LoadImageData(info, context) != nullptr;
+}
+
+bool AssetImageLoad(const uint8_t* data, size_t size)
+{
+    auto info = CreatImageSourceInfo(data, size);
+    WeakPtr<Ace::PipelineBase> context = nullptr;
+    AssetImageLoader assetImageLoader;
+    return assetImageLoader.LoadImageData(info, context) != nullptr;
+}
+
+bool NetworkImageLoad(const uint8_t* data, size_t size)
+{
+    auto info = CreatImageSourceInfo(data, size);
+    WeakPtr<Ace::PipelineBase> context = nullptr;
+    NetworkImageLoader networkImageLoader;
+    return networkImageLoader.LoadImageData(info, context) != nullptr;
+}
+
+bool InternalImageLoad(const uint8_t* data, size_t size)
+{
+    auto info = CreatImageSourceInfo(data, size);
+    Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
+    Ace::InternalImageLoader internalImageLoader;
+    return internalImageLoader.LoadImageData(info, context) != nullptr;
+}
+
+void MinorTest(const uint8_t* data, size_t size)
+{
+    OHOS::Ace::ImageSourceInfo i;
+    const sk_sp<SkImage> rawImage;
+    auto ri = size % u16m;
+    std::string s(reinterpret_cast<const char*>(data), ri);
+    i = ImageSourceInfo(s);
+    ImageSourceInfo::IsSVGSource(s, InternalResource::ResourceId::SVG_START);
+    ImageSourceInfo::IsPngSource(s, InternalResource::ResourceId::SVG_START);
+    ImageSourceInfo::ResolveURIType(s);
+    ImageSourceInfo::IsValidBase64Head(s, "example");
+    ImageSourceInfo::IsUriOfDataAbilityEncoded(s, "example");
+    auto k = ImageCompressor::GetInstance();
+    Size s2;
+    ImageProvider::ResizeSkImage(rawImage, s, s2) ;
+    SkPixmap  pixmap;
+    sk_sp<SkData> compressdImage;
+#ifdef FUZZTEST
+    k->PartDoing();
+#endif
+    k->GpuCompress(s, pixmap, 0, 0);
+    k->WriteToFile("", compressdImage, s2);
+}
+} // namespace OHOS::Ace
+
+using namespace OHOS;
+using namespace OHOS::Ace;
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    OHOS::FileImageLoaderTest(data, size);
-    OHOS::DataProviderImageLoaderTest(data, size);
-    OHOS::DecodedDataProviderImageLoaderTest(data, size);
-    OHOS::AssetImageLoader(data, size);
-    OHOS::NetworkImageLoader(data, size);
-    OHOS::InternalImageLoader(data, size);
-    OHOS::ResourceImageLoaderTest(data, size);
-    OHOS::PixelMapImageLoaderTest(data, size);
+    MinorTest(data, size);
     return 0;
 }
-

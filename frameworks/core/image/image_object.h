@@ -230,58 +230,10 @@ private:
     CancelableTask uploadForPaintTask_;
 };
 
-class AnimatedImageObject : public ImageObject {
-    DECLARE_ACE_TYPE(AnimatedImageObject, ImageObject);
-public:
-    AnimatedImageObject(
-        ImageSourceInfo source,
-        const Size& imageSize,
-        int32_t frameCount,
-        const sk_sp<SkData>& data)
-        : ImageObject(source, imageSize, frameCount), skData_(data)
-    {}
 
-    ~AnimatedImageObject() override = default;
 
-    void UploadToGpuForRender(
-        const WeakPtr<PipelineBase>& context,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        const UploadSuccessCallback& successCallback,
-        const FailedCallback& failedCallback,
-        const Size& imageSize,
-        bool forceResize,
-        bool syncMode = false) override;
-
-    void Pause() override
-    {
-        if (animatedPlayer_) {
-            LOGI("animated image Paused");
-            animatedPlayer_->Pause();
-        }
-    }
-
-    void Resume() override
-    {
-        if (animatedPlayer_) {
-            LOGI("animated image Resume");
-            animatedPlayer_->Resume();
-        }
-    }
-
-    void ClearData() override
-    {
-        skData_ = nullptr;
-    }
-
-    RefPtr<ImageObject> Clone() override
-    {
-        return MakeRefPtr<AnimatedImageObject>(imageSource_, imageSize_, frameCount_, skData_);
-    }
-
-private:
-    sk_sp<SkData> skData_;
-    RefPtr<AnimatedImagePlayer> animatedPlayer_;
-};
+RefPtr<ImageObject> CreateAnimatedImageObject(ImageSourceInfo source, const Size& imageSize,
+        int32_t frameCount, const sk_sp<SkData>& data);
 
 class PixelMapImageObject : public ImageObject {
     DECLARE_ACE_TYPE(PixelMapImageObject, ImageObject);
@@ -320,7 +272,8 @@ public:
 private:
     RefPtr<PixelMap> pixmap_;
 };
-
+RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream >& svgStream,
+    const RefPtr<PipelineBase>& context, std::optional<Color>& color);
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H

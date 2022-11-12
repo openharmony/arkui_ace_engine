@@ -105,6 +105,10 @@ public:
 
     virtual void BlendBorderColor(const Color& color) {}
 
+    virtual void PaintFocusState(Dimension focusPaddingVp) {}
+
+    virtual void ClearFocusState() {}
+
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
     // clip node without padding

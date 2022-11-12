@@ -46,7 +46,7 @@ void StepperPattern::OnModifyDone()
     CHECK_NULL_VOID(swiperNode);
     auto stepperLayoutProperty = hostNode->GetLayoutProperty<StepperLayoutProperty>();
     index_ = static_cast<int32_t>(stepperLayoutProperty->GetIndex().value_or(0));
-    maxIndex_ = TotalCount();
+    maxIndex_ = TotalCount() - 1;
     InitButtonClickEvent(leftGestureHub, rightGestureHub, swiperNode);
     UpdateButtonText();
 }
@@ -159,9 +159,16 @@ void StepperPattern::UpdateButtonText()
     leftTextNode->MarkModifyDone();
     // Set the text of the rightButton
     std::string buttonStartText = Localization::GetInstance()->GetEntryLetters("stepper.start");
-    std::string buttonNextText = Localization::GetInstance()->GetEntryLetters("stepper.next") + " >";
-    auto rightLabel =
-        stepperItemLayoutProperty->GetRightLabel().value_or(index_ == maxIndex_ ? buttonStartText : buttonNextText);
+    std::string buttonNextText = Localization::GetInstance()->GetEntryLetters("stepper.next");
+    std::string buttonSkipText = Localization::GetInstance()->GetEntryLetters("stepper.skip");
+    std::string rightLabel;
+    if (stepperItemLayoutProperty->GetLabelStatus().value_or("normal") == "skip") {
+        rightLabel = buttonSkipText;
+    } else if (index_ == maxIndex_) {
+        rightLabel = stepperItemLayoutProperty->GetRightLabel().value_or(buttonStartText);
+    } else {
+        rightLabel = stepperItemLayoutProperty->GetRightLabel().value_or(buttonNextText) + " >";
+    }
     rightTextNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(rightLabel);
     rightTextNode->MarkModifyDone();
 

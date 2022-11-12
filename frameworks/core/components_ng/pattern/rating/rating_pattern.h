@@ -79,7 +79,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::NODE, true, FocusStyle::INNER_BORDER };
     }
 
 private:
@@ -100,6 +100,10 @@ private:
 
     // Init touch event, update render when click.
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+
+    // Init on key event
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
 
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd();

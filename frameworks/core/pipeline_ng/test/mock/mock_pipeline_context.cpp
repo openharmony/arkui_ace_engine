@@ -27,4 +27,14 @@ float PipelineContext::GetCurrentRootHeight()
     return 1.0f;
 }
 
+void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::FlushMessages() {}
+
+void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
+
+void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
+
 } // namespace OHOS::Ace::NG

@@ -13,29 +13,45 @@
  * limitations under the License.
  */
 
+#include <array>
+
 #include "gtest/gtest.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
 class BaseShapePatternTestNg : public testing::Test {
 public:
-    void CheckSize();
-    void CheckNoSize();
-    void CheckLayoutAlgorithom();
-    void CheckFill();
-    void CheckFillOpacity();
-    void CheckStroke();
-    void CheckStrokeWidth();
-    void CheckStrokeOpacity();
-    void CheckStrokeDashArray();
-    void CheckStrokeDashOffset();
-    void CheckStrokeLineCap();
-    void CheckStrokeLineJoin();
-    void CheckStrokeMiterLimit();
-    void CheckAntiAlias();
+    BaseShapePatternTestNg() = default;
+    void CheckSize(bool hasValue);
+    void CheckFill(bool hasValue);
+    void CheckFillOpacity(bool hasValue);
+    void CheckStroke(bool hasValue);
+    void CheckStrokeWidth(bool hasValue);
+    void CheckStrokeOpacity(bool hasValue);
+    void CheckStrokeDashArray(bool hasValue);
+    void CheckStrokeDashOffset(bool hasValue);
+    void CheckStrokeLineCap(bool hasValue);
+    void CheckStrokeLineJoin(bool hasValue);
+    void CheckStrokeMiterLimit(bool hasValue);
+    void CheckAntiAlias(bool hasValue);
+    void SetSize(ShapeAbstractModelNG& shapeAbstractModelNG) const;
+    virtual RefPtr<FrameNode> CreadFrameNode();
+    virtual void Draw(RefPtr<FrameNode> frameNode);
+    ~BaseShapePatternTestNg() = default;
 
-    const float WIDTH = 200.0f;
-    const float HEIGHT = 300.0f;
+    static constexpr float WIDTH = 200.0f;
+    static constexpr float HEIGHT = 300.0f;
+    static constexpr float OPACITY = 0.5f;
+    static constexpr float STROKE_WIDTH = 3.0f;
+    static constexpr bool ANTIALIAS = false;
+    static constexpr float STROKE_LIMIT = 5.0f;
+    static constexpr float DASHOFFSET = 3;
+    static constexpr int32_t LINE_JOIN = 1;
+    static constexpr int32_t LINE_CAP = 1;
+    static constexpr std::array<float, 2> STROKE_DASH_ARRAY = { 3, 5 };
 };
 
 } // namespace OHOS::Ace::NG
