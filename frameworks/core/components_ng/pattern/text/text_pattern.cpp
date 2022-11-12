@@ -151,7 +151,7 @@ void TextPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    if (CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag())) {
+    if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
         paragraph_.Reset();
     }
