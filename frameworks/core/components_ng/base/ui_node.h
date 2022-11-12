@@ -243,7 +243,7 @@ private:
     int32_t nodeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
-    bool removeSilently_ = false;
+    bool removeSilently_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
