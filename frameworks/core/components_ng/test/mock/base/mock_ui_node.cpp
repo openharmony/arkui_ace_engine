@@ -17,10 +17,8 @@
 
 namespace OHOS::Ace::NG {
 UINode::~UINode() {}
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot) {}
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode) {}
 void UINode::Clean() {}
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot) {}
 void UINode::OnRemoveFromParent() {}
 void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const {}
 void UINode::AttachToMainTree() {}
@@ -39,6 +37,18 @@ void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool f
 void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
 void UINode::Build() {}
 void UINode::SetActive(bool active) {}
+
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */)
+{
+    CHECK_NULL_VOID(child);
+    child->SetParent(Claim(this));
+}
+
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
+{
+    CHECK_NULL_VOID(parent);
+    parent->AddChild(AceType::Claim(this), slot);
+}
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
 {
