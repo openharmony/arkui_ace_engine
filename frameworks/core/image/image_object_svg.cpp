@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef TEST_FUZZTEST_IMAGE_LOADER_FUZZER_H
-#define TEST_FUZZTEST_IMAGE_LOADER_FUZZER_H
+#include <memory>
+#include "core/image/image_object.h"
 
-#define FUZZ_PROJECT_NAME "imageloader_fuzzer"
-
-#endif // TEST_FUZZTEST_IMAGE_LOADER_FUZZER_H
-
+namespace OHOS::Ace {
+RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream >& svgStream,
+    const RefPtr<PipelineBase>& context, std::optional<Color>& color)
+{
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, AceType::DynamicCast<PipelineContext>(context), color);
+    return svgDom ? AceType::MakeRefPtr<SvgImageObject>(source, Size(), 1, svgDom) : nullptr;
+}
+}

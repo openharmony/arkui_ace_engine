@@ -19,12 +19,15 @@
 #include "want.h"
 
 namespace OHOS {
-    bool RegisterCallBackTest(const uint8_t* data, const AAFwk::Want& want)
+constexpr size_t MAXBYTELEN = 65535;
+
+    bool RegisterCallBackTest(const uint8_t* data, const size_t size)
     {
+        OHOS::AAFwk::Want want;
         OHOS::Ace::UIServiceMgrClient client;
         sptr<Ace::IUIService> uiService = nullptr;
-        std::string randomString = reinterpret_cast<const char*>(data);
-        int randomNumber = static_cast<int>(U32_AT(data));
+        std::string randomString(reinterpret_cast<const char*>(data), size);
+        int randomNumber = static_cast<int>(size % MAXBYTELEN);
         DialogCallback callback;
         int* id = nullptr;
         client.RegisterCallBack(want, uiService);
@@ -35,29 +38,33 @@ namespace OHOS {
         return  client.CancelDialog(randomNumber) == ERR_OK;
     }
 
-    bool UnregisterCallBackTest(const uint8_t* data, const AAFwk::Want& want)
+    bool UnregisterCallBackTest(const uint8_t* data, const size_t size)
     {
+        OHOS::AAFwk::Want want;
         OHOS::Ace::UIServiceMgrClient client;
         return client.UnregisterCallBack(want) == ERR_OK;
     }
 
-    bool PushTest(const uint8_t* data, const AAFwk::Want& want)
+    bool PushTest(const uint8_t* data, const size_t size)
     {
-        std::string randomString = reinterpret_cast<const char*>(data);
+        OHOS::AAFwk::Want want;
+        std::string randomString(reinterpret_cast<const char*>(data), size);
         OHOS::Ace::UIServiceMgrClient client;
         return client.Push(want, randomString, randomString, randomString, randomString) == ERR_OK;
     }
 
-    bool RequestTest(const uint8_t* data, const AAFwk::Want& want)
+    bool RequestTest(const uint8_t* data, const size_t size)
     {
-        std::string randomString = reinterpret_cast<const char*>(data);
+        OHOS::AAFwk::Want want;
+        std::string randomString(reinterpret_cast<const char*>(data), size);
         OHOS::Ace::UIServiceMgrClient client;
         return client.Request(want, randomString, randomString) == ERR_OK;
     }
 
-    bool ReturnRequestTest(const uint8_t* data, const AAFwk::Want& want)
+    bool ReturnRequestTest(const uint8_t* data, const size_t size)
     {
-        std::string randomString = reinterpret_cast<const char*>(data);
+        OHOS::AAFwk::Want want;
+        std::string randomString(reinterpret_cast<const char*>(data), size);
         OHOS::Ace::UIServiceMgrClient client;
         return client.ReturnRequest(want, randomString, randomString, randomString) == ERR_OK;
     }
@@ -67,14 +74,11 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AAFwk::Want want;
-    std::string randomString = reinterpret_cast<const char*>(data);
-    want = want.SetUri(randomString);
-    OHOS::RegisterCallBackTest(data, want);
-    OHOS::PushTest(data, want);
-    OHOS::RequestTest(data, want);
-    OHOS::ReturnRequestTest(data, want);
-    OHOS::UnregisterCallBackTest(data, want);
+    OHOS::RegisterCallBackTest(data, size);
+    OHOS::PushTest(data, size);
+    OHOS::RequestTest(data, size);
+    OHOS::ReturnRequestTest(data, size);
+    OHOS::UnregisterCallBackTest(data, size);
     return 0;
 }
 
