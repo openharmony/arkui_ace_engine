@@ -52,7 +52,9 @@ public:
     std::function<void()> ScheduleReleaseTask();
     void WriteToFile(std::string key, sk_sp<SkData> compressdImage, Size size);
     static sk_sp<SkData> StripFileHeader(sk_sp<SkData> fileData);
-
+#ifdef FUZZTEST
+    void PartDoing();
+#endif
 private:
     static std::shared_ptr<ImageCompressor> instance_;
     static std::mutex instanceMutex_;

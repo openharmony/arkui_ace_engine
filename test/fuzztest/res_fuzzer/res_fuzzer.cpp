@@ -17,22 +17,34 @@
 #include "json_util.h"
 #include <string>
 
+const uint32_t u16m = 65535;
+
 namespace OHOS {
 using namespace OHOS::Ace;
+
+void vfi(std::string& s);
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     bool result = false;
     auto r = JsonUtil::Create(true);
     auto r1 = JsonUtil::Create(false);
-    std::string s = reinterpret_cast<const char*>(data);
+    auto ri = size % u16m;
+    std::string s (reinterpret_cast<const char*>(data), ri);
+    vfi(s);
     JsonUtil::ParseJsonString(s);
     JsonUtil::ParseJsonString(s.c_str());
     JsonUtil::CreateArray(true);
     JsonUtil::CreateArray(false);
-    r->Put("123",111); 
+    r->Put("123", 111); 
     r->Replace("1234", false);
     r->Replace("123", 123);
     return result;
+}
+
+void vfi(std::string& s)
+{
+    s = "{ key:123 }";
 }
 }
 
@@ -43,4 +55,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
-
