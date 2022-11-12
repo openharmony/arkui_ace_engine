@@ -27,8 +27,9 @@
 #include "core/pipeline/base/render_element.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
-#include "core/components/video/media_player_callback.h"
 #include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
+
+#include "core/components/video/media_player_callback.h"
 #endif
 
 namespace OHOS::Ace {
@@ -44,6 +45,8 @@ class VideoElement : public RenderElement, public FocusNode {
 public:
     using EventCallback = std::function<void(const std::string&)>;
     using FullscreenEvent = std::function<RefPtr<Component>(bool, const WeakPtr<Player>&, const WeakPtr<Texture>&)>;
+    using MediaExitFullscreenEvent = std::function<void(bool, bool, int32_t)>;
+    using MediaFullscreenEvent = std::function<RefPtr<Component>(bool, bool, const WeakPtr<Texture>&)>;
     using ErrorCallback = std::function<void(const std::string&, const std::string&)>;
 
     VideoElement() = default;
@@ -67,16 +70,20 @@ protected:
     virtual void InitStatus(const RefPtr<VideoComponent>& videoComponent);
     bool IsDeclarativePara();
     virtual void OnPreFullScreen(bool isPortrait) {}
+    void UpdateChildInner(const RefPtr<Component>& childComponent);
+    const RefPtr<Component> CreateChild();
 
     bool isFullScreen_ = false;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to true.
     bool isError_ = false;
     std::string direction_ = "auto";
     bool isExternalResource_ = false;
+    bool isPlaying_ = false;
     RefPtr<Player> player_;
     RefPtr<Texture> texture_;
     EventCallback onFullScreenChange_;
     int32_t currentPlatformVersion_ = 0;
+    uint32_t currentPos_ = 0;
 
 private:
     void OnError(const std::string& errorId, const std::string& param);
@@ -97,7 +104,6 @@ private:
     void CreatePlatformResource();
     void CreatePlayer(int64_t id, ErrorCallback&& errorCallback);
     void ReleasePlatformResource();
-    void UpdateChildInner(const RefPtr<Component>& childComponent);
     void InitListener();
     void ResetStatus();
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
@@ -108,7 +114,6 @@ private:
     void OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
     void EnableLooping(bool loop);
 
-    const RefPtr<Component> CreateChild();
     const RefPtr<Component> CreatePoster();
     const RefPtr<Component> CreateControl();
     const RefPtr<Component> CreateCurrentText();
@@ -140,9 +145,8 @@ private:
     std::string poster_;
     RefPtr<ImageComponent> posterImage_;
     uint32_t duration_ = 0;
-    uint32_t currentPos_ = 0;
-    bool isPlaying_ = false;
     bool pastPlayingStatus_ = false; // Record the player status before dragging the progress bar.
+    bool isMediaPlayerFullStatus_ = false;
     bool isReady_ = false;
     bool isElementPrepared_ = false;
     double videoWidth_ = 0.0;
@@ -181,6 +185,8 @@ private:
     VoiceEvent exitFullscreenVoiceEvent_;
 
     FullscreenEvent fullscreenEvent_;
+    MediaFullscreenEvent mediaFullscreenEvent_;
+    MediaExitFullscreenEvent mediaExitFullscreenEvent_;
 
 #ifdef OHOS_STANDARD_SYSTEM
     void RegisterMediaPlayerEvent();

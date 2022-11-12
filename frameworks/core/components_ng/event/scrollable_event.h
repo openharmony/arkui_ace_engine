@@ -32,7 +32,8 @@ using ScrollEndCallback = std::function<void()>;
 
 class GestureEventHub;
 
-class ScrollableEvent : public Referenced {
+class ScrollableEvent : public AceType {
+    DECLARE_ACE_TYPE(ScrollableEvent, AceType)
 public:
     explicit ScrollableEvent(Axis axis) : axis_(axis) {};
     ~ScrollableEvent() override = default;
@@ -110,6 +111,9 @@ public:
     void SetAxis(Axis axis)
     {
         axis_ = axis;
+        if (scrollable_) {
+            scrollable_->SetAxis(axis);
+        }
     }
 
     void SetScrollable(const RefPtr<Scrollable>& scrollable)
@@ -130,6 +134,14 @@ public:
     bool GetEnable() const
     {
         return enable_;
+    }
+
+    bool Idle() const
+    {
+        if (scrollable_) {
+            return scrollable_->Idle();
+        }
+        return true;
     }
 
 private:

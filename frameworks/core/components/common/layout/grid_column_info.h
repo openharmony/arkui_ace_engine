@@ -27,6 +27,7 @@ class GridColumnInfo : public GridLayoutInfo {
 
 public:
     class Builder : public AceType {
+        DECLARE_ACE_TYPE(Builder, AceType)
     public:
         Builder()
         {
@@ -105,7 +106,6 @@ public:
         RefPtr<GridColumnInfo> columnInfo_;
     };
 
-public:
     ~GridColumnInfo() override = default;
     double GetWidth() const;
     double GetWidth(uint32_t columns) const;

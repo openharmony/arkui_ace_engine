@@ -102,7 +102,7 @@ void ImagePattern::OnImageLoadSuccess()
     lastAltSrcRect_.reset();
     // TODO: only do paint task when the pattern is active
     // figure out why here is always inactive
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::CacheImageObject()
@@ -163,7 +163,8 @@ void ImagePattern::SetImagePaintConfig(
     imagePaintConfig.imageInterpolation_ =
         imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
+
+    auto pipelineCtx = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
     imagePaintConfig.needFlipCanvasHorizontally_ =
         isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
@@ -171,7 +172,18 @@ void ImagePattern::SetImagePaintConfig(
     if (colorFilterMatrix.has_value()) {
         imagePaintConfig.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
     }
-    imagePaintConfig.isSvg = isSvg;
+    if (imageRenderProperty->GetNeedBorderRadiusValue(false)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto borderRadius = host->GetRenderContext()->GetBorderRadius();
+        std::vector<PointF> radiusXY = { { borderRadius->radiusTopLeft->ConvertToPx(),
+                                             borderRadius->radiusTopLeft->ConvertToPx() },
+            { borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx() },
+            { borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx() },
+            { borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx() } };
+        imagePaintConfig.borderRadiusXY_ = std::make_shared<std::vector<PointF>>(std::move(radiusXY));
+    }
+    imagePaintConfig.isSvg_ = isSvg;
 
     canvasImage->SetImagePaintConfig(imagePaintConfig);
 }
@@ -277,6 +289,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->altLoadingCtx_);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {
@@ -303,7 +316,8 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     if (!sourceInfo.IsInternalResource()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -356,7 +370,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
 
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
 }
@@ -370,6 +384,13 @@ void ImagePattern::OnWindowShow()
 {
     isShow_ = true;
     LoadImageDataIfNeed();
+}
+
+void ImagePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 } // namespace OHOS::Ace::NG

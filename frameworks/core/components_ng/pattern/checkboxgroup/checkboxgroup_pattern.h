@@ -53,7 +53,19 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<CheckBoxGroupPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        auto enabled = eventHub->IsEnabled();
+        auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(enabled);
+        return paintMethod;
+    }
+
+    bool OnDirtyLayoutWrapperSwap(
+        const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/) override
+    {
+        return true;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -81,6 +93,16 @@ public:
         isAddToMap_ = isAddToMap;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxGroupEventHub>();
+        auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
+        json->Put("group", group.c_str());
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -91,12 +113,12 @@ private:
     void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select);
     void UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& frameNode, bool select);
     void UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, std::string group,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, const std::string& group,
         bool select);
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
-
+    
     RefPtr<ClickEvent> clickListener_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);

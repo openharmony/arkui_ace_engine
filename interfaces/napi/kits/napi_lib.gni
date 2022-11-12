@@ -17,11 +17,13 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 common_napi_libs = [
   "configuration",
   "device",
+  "font",
   "grid",
   "mediaquery",
   "prompt",
   "promptaction",
   "router",
+  "animator",
 ]
 
 template("ace_napi_lib") {

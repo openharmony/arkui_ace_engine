@@ -20,4 +20,6 @@ declare class NativeViewFullUpdate {
   syncInstanceId(): void;
   restoreInstanceId(): void;
   static create(newView: NativeViewFullUpdate): void;
+  setCardId(cardId: number): void;
+  getCardId(): number;
 }

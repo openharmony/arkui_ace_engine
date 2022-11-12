@@ -73,12 +73,21 @@ public:
         return dividerNode_;
     }
 
-private:
-    void AddNavDestinationToNavigation(const RefPtr<UINode>& child);
+    void MarkIsFirstNavDestination(bool isFirstNavDestination)
+    {
+        isFirstNavDestination_ = isFirstNavDestination;
+    }
 
+    bool IsFirstNavDestination() const
+    {
+        return isFirstNavDestination_;
+    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    bool isFirstNavDestination_ = true;
 };
 
 } // namespace OHOS::Ace::NG

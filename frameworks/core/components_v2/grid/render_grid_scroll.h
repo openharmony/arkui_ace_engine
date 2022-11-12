@@ -29,28 +29,10 @@
 #include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_v2/grid/grid_event.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
-
-class GridEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(GridEventInfo, BaseEventInfo, EventToJSONStringAdapter);
-
-public:
-    explicit GridEventInfo(int32_t scrollIndex) : BaseEventInfo("grid"), scrollIndex_(scrollIndex) {}
-
-    ~GridEventInfo() = default;
-
-    std::string ToJSONString() const override;
-
-    int32_t GetScrollIndex() const
-    {
-        return scrollIndex_;
-    }
-
-private:
-    int32_t scrollIndex_ = 0;
-};
 
 class RenderGridScroll : public RenderGridLayout, public RenderRefreshTarget {
     DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout, RenderRefreshTarget);
@@ -199,14 +181,13 @@ protected:
     void DealCache(int32_t start, int32_t end);
     void DeleteItems(int32_t index, bool isTail);
 
-    void GetMinAndMaxIndex(int32_t& min, int32_t& max);
     int32_t GetItemMainIndex(int32_t index);
 
     bool NeedUpdate(const RefPtr<Component>& component);
 
     void CalculateWholeSize(double drawLength);
 
-    void InitScrollBar(const RefPtr<Component>& component);
+    void InitScrollBar();
     void InitScrollBarProxy();
 
     void DoJump(double position, int32_t source);
@@ -273,7 +254,7 @@ protected:
     int32_t scrollBarOpacity_ = 0;
     double estimateHeight_ = 0.0;
     double estimatePos_ = 0.0;
-    double estimateAverageHight_ = 0.0;
+    double estimateAverageHeight_ = 0.0;
     bool totalCountFlag_ = false;
     bool animatorJumpFlag_ = false;
     Color scrollBarColor_;

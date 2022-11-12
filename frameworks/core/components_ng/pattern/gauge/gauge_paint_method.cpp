@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 
+#include <cmath>
+
 #include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
@@ -48,21 +50,16 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     RenderRingInfo data;
     data.radius = std::min(frameSize.Width(), frameSize.Height()) / 2.0f;
     data.center = Offset(frameSize.Width() / 2.0f + offset.GetX(), frameSize.Height() / 2.0f + offset.GetY());
-    auto startAngle = paintProperty->GetStartAngle();
-    auto endAngle = paintProperty->GetEndAngle();
-    float startDegree = DEFAULT_START_DEGREE;
-    if (startAngle.has_value()) {
-        startDegree = startAngle.value();
+    float startAngle = DEFAULT_START_DEGREE;
+    float endAngle = DEFAULT_END_DEGREE;
+    if (paintProperty->GetStartAngle().has_value() && !std::isnan(paintProperty->GetStartAngle().value())) {
+        startAngle = paintProperty->GetStartAngle().value();
     }
-    float sweepDegree = DEFAULT_END_DEGREE - DEFAULT_START_DEGREE;
-    if (startAngle.has_value() && endAngle.has_value()) {
-        sweepDegree = endAngle.value() - startAngle.value();
-    } else if (startAngle.has_value()) {
-        sweepDegree = DEFAULT_END_DEGREE - startAngle.value();
-    } else if (endAngle.has_value()) {
-        sweepDegree = endAngle.value() - DEFAULT_START_DEGREE;
+    if (paintProperty->GetEndAngle().has_value() && !std::isnan(paintProperty->GetEndAngle().value())) {
+        endAngle = paintProperty->GetEndAngle().value();
     }
-    // Correct sweepDegree between 0 and 360
+    float startDegree = startAngle;
+    float sweepDegree = endAngle - startAngle;
     if (sweepDegree > 360.0f || sweepDegree < 0.0f) {
         sweepDegree = sweepDegree - floor(sweepDegree / 360.0f) * 360.0f;
     }
@@ -71,7 +68,7 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     }
     auto theme = pipelineContext->GetTheme<ProgressTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
-    if (paintProperty->GetStrokeWidth().has_value()) {
+    if (paintProperty->GetStrokeWidth().has_value() && paintProperty->GetStrokeWidth()->Value() > 0) {
         data.thickness = paintProperty->GetStrokeWidth()->ConvertToPx();
     }
     std::vector<float> weights;
@@ -138,8 +135,9 @@ void GaugePaintMethod::DrawGauge(RSCanvas& canvas, RenderRingInfo data) const
 
     canvas.AttachPen(pen);
     RSPath path;
-    RSRect rRect(data.center.GetX() - data.radius + thickness / 2.0f, data.center.GetY() - data.radius + thickness / 2.0f,
-        data.center.GetX() + data.radius - thickness / 2.0f, data.center.GetY() + data.radius - thickness / 2.0f);
+    RSRect rRect(data.center.GetX() - data.radius + thickness / 2.0f,
+        data.center.GetY() - data.radius + thickness / 2.0f, data.center.GetX() + data.radius - thickness / 2.0f,
+        data.center.GetY() + data.radius - thickness / 2.0f);
     path.AddArc(rRect, data.startDegree - 90.0f, data.sweepDegree);
     canvas.DrawPath(path);
     canvas.DetachPen();

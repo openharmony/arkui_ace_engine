@@ -67,6 +67,7 @@ void TextPickerView::SetSelected(uint32_t value)
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->SetSelected(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selected, value);
 }
 
 void TextPickerView::SetRange(const std::vector<std::string>& value)
@@ -75,6 +76,7 @@ void TextPickerView::SetRange(const std::vector<std::string>& value)
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->SetRange(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Range, value);
 }
 
 void TextPickerView::SetDefaultPickerItemHeight(const Dimension& value)

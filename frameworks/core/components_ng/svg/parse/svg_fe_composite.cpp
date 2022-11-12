@@ -51,7 +51,7 @@ void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
 
     imageFilter = SkArithmeticImageFilter::Make(
-        declaration->GetK1(), declaration->GetK2(),declaration->GetK3(), declaration->GetK4(),
+        declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4(),
         true, backImageFilter, foreImageFilter, nullptr);
 
     ConverImageFilterColor(imageFilter, srcColor, currentColor);

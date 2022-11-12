@@ -68,7 +68,9 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSOffscreenRenderingContext>::CustomMethod("save", &JSCanvasRenderer::JsSave);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("rotate", &JSCanvasRenderer::JsRotate);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("scale", &JSCanvasRenderer::JsScale);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("getTransform", &JSCanvasRenderer::JsGetTransform);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("setTransform", &JSCanvasRenderer::JsSetTransform);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("resetTransform", &JSCanvasRenderer::JsResetTransform);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("transform", &JSCanvasRenderer::JsTransform);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("translate", &JSCanvasRenderer::JsTranslate);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("setLineDash", &JSCanvasRenderer::JsSetLineDash);
@@ -80,6 +82,9 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSOffscreenRenderingContext>::CustomMethod("getImageData", &JSCanvasRenderer::JsGetImageData);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("getJsonData", &JSCanvasRenderer::JsGetJsonData);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("setPixelMap", &JSCanvasRenderer::JsSetPixelMap);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("filter", &JSCanvasRenderer::JsFilter);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("direction", &JSCanvasRenderer::JsDirection);
 
     JSClass<JSOffscreenRenderingContext>::CustomProperty("fillStyle", &JSCanvasRenderer::JsGetFillStyle,
         &JSCanvasRenderer::JsSetFillStyle);
@@ -130,12 +135,18 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
 
     if (args.Length() >= 3) {
         if (args[0]->IsNumber() && args[1]->IsNumber()) {
-            double width = 0.0;
-            double height = 0.0;
-            JSViewAbstract::ParseJsDouble(args[0], width);
-            JSViewAbstract::ParseJsDouble(args[1], height);
-            width = SystemProperties::Vp2Px(width);
-            height = SystemProperties::Vp2Px(height);
+            double fWidth = 0.0;
+            double fHeight = 0.0;
+            int width = 0;
+            int height = 0;
+            JSViewAbstract::ParseJsDouble(args[0], fWidth);
+            JSViewAbstract::ParseJsDouble(args[1], fHeight);
+
+            fWidth = SystemProperties::Vp2Px(fWidth);
+            fHeight = SystemProperties::Vp2Px(fHeight);
+            width = round(fWidth);
+            height = round(fHeight);
+
             auto container = Container::Current();
             if (container) {
                 if (Container::IsCurrentUseNewPipeline()) {
@@ -161,13 +172,8 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
                 return;
             }
             bool anti = jsContextSetting->GetAntialias();
-
-            if (Container::IsCurrentUseNewPipeline()) {
-                jsRenderContext->SetAnti(anti);
-            } else {
-                jsRenderContext->SetAnti(anti);
-                jsRenderContext->SetAntiAlias();
-            }
+            jsRenderContext->SetAnti(anti);
+            jsRenderContext->SetAntiAlias();
         }
     }
 }

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CONTAINER_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CONTAINER_PATTERN_H
 
 #include <cstddef>
 #include <optional>
@@ -45,6 +45,10 @@ public:
     {
         return MakeRefPtr<ContainerPaintProperty>();
     }
+
+    void OnModifyDone() override;
+
+    void MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode);
 
     bool NeedOverridePaintRect() override
     {
@@ -91,9 +95,10 @@ public:
 
 private:
     void ViewPortTansform();
+    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     ACE_DISALLOW_COPY_AND_MOVE(ShapeContainerPattern);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CONTAINER_PATTERN_H

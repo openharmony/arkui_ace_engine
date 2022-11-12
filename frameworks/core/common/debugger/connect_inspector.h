@@ -42,7 +42,7 @@ void RemoveMessage(int32_t instanceId);
 
 bool WaitForDebugger();
 
-void SetCreatTreeCallBack(const std::function<void(int32_t)>& setConnectedStaus, int32_t instanceId);
+void SetSwitchCallBack(const std::function<void(bool)>& setSwitchStatus);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -66,8 +66,7 @@ public:
     std::unique_ptr<ConnectServer> connectServer_;
     std::atomic<bool> waitingForDebugger_ = true;
     std::queue<const std::string> ideMsgQueue_;
-    std::function<void(int32_t)> setConnectedStaus_;
-    int32_t instanceId_ = -1;
+    std::function<void(bool)> setSwitchStatus_;
 };
 } // namespace OHOS::Ace
 

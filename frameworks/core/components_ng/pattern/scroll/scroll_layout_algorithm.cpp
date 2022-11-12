@@ -88,8 +88,8 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(childWrapper);
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
-
     auto size = geometryNode->GetFrameSize();
+
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
@@ -98,6 +98,8 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (scrollEffect && scrollEffect->IsRestrictBoundary()) {
         currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
     }
+    viewPort_ = size;
+    viewPortExtent_ = childSize;
     viewPortLength_ = GetMainAxisSize(size, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset);

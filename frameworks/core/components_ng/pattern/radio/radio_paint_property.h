@@ -42,6 +42,12 @@ public:
         ResetRadioCheck();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put("checked", GetRadioCheck().value_or(false) ? "true" : "false");
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RadioCheck, bool, PROPERTY_UPDATE_RENDER);
 };
 

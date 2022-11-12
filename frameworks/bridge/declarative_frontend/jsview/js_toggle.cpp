@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <string>
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
 #include "core/common/container.h"
@@ -92,7 +93,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
 
     auto toggleTypeInt = static_cast<int32_t>(toggleType);
-
+    
     ToggleModel::GetInstance()->Create(NG::ToggleType(toggleTypeInt), isOn);
 }
 

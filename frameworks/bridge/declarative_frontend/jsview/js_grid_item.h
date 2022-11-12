@@ -32,28 +32,28 @@ public:
     static void Create(const JSCallbackInfo& args);
 
 protected:
-    #define ACE_DEFINE_SET_GRID_ITEM_SIZE(name)                                                                       \
-        static void SetGridItem##name(const JSCallbackInfo &info)                                                     \
-        {                                                                                                             \
-            if (info.Length() < 1) {                                                                                  \
-                LOGE("The arg is wrong when set %{public}s of grid item", #name);                                     \
-                return;                                                                                               \
-            }                                                                                                         \
-            if (!JSViewAbstract::Js##name(info[0])) {                                                                 \
-                LOGE("JSViewAbstract fail to parse %{public}s of grid item", #name);                                  \
-                return;                                                                                               \
-            }                                                                                                         \
-            Dimension item##name;                                                                                     \
-            if (!ParseJsDimensionVp(info[0], item##name)) {                                                           \
-                LOGE("Fail to parse %{public}s of grid item in Dimension unit", #name);                               \
-                return;                                                                                               \
-            }                                                                                                         \
-            auto gridItem =                                                                                           \
-                AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent()); \
-            if (gridItem) {                                                                                           \
-                gridItem->SetGridItem##name(item##name);                                                              \
-            }                                                                                                         \
-        }                                                                                                             \
+#define ACE_DEFINE_SET_GRID_ITEM_SIZE(name)                                                                       \
+    static void SetGridItem##name(const JSCallbackInfo& info)                                                     \
+    {                                                                                                             \
+        if (info.Length() < 1) {                                                                                  \
+            LOGE("The arg is wrong when set %{public}s of grid item", #name);                                     \
+            return;                                                                                               \
+        }                                                                                                         \
+        if (!JSViewAbstract::Js##name(info[0])) {                                                                 \
+            LOGE("JSViewAbstract fail to parse %{public}s of grid item", #name);                                  \
+            return;                                                                                               \
+        }                                                                                                         \
+        Dimension item##name;                                                                                     \
+        if (!ParseJsDimensionVp(info[0], item##name)) {                                                           \
+            LOGE("Fail to parse %{public}s of grid item in Dimension unit", #name);                               \
+            return;                                                                                               \
+        }                                                                                                         \
+        auto gridItem =                                                                                           \
+            AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent()); \
+        if (gridItem) {                                                                                           \
+            gridItem->SetGridItem##name(item##name);                                                              \
+        }                                                                                                         \
+    }
 
     ACE_DEFINE_SET_GRID_ITEM_SIZE(Width);
     ACE_DEFINE_SET_GRID_ITEM_SIZE(Height);
@@ -64,8 +64,7 @@ protected:
     static void ForceRebuild(bool forceRebuild);
     static void SetSelectable(bool selectable);
     static void SelectCallback(const JSCallbackInfo& args);
-
-    static void CreateForNGPartialUpdate(const JSCallbackInfo& args);
+    static void CreateForPartialUpdate(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

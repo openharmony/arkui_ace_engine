@@ -15,42 +15,40 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 
-#include "core/components/box/box_component.h"
-#include "core/components_ng/pattern/divider/divider_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/divider_model_impl.h"
+#include "core/components_ng/pattern/divider/divider_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<DividerModel> DividerModel::instance_ = nullptr;
+
+DividerModel* DividerModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::DividerModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::DividerModelNG());
+        } else {
+            instance_.reset(new Framework::DividerModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSDivider::Create()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::DividerView::Create();
-        return;
-    }
-
-    RefPtr<Component> dividerComponent = AceType::MakeRefPtr<OHOS::Ace::DividerComponent>();
-    ViewStackProcessor::GetInstance()->ClaimElementId(dividerComponent);
-    ViewStackProcessor::GetInstance()->Push(dividerComponent);
+    DividerModel::GetInstance()->Create();
 }
 
 void JSDivider::SetVertical(bool isVertical)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::DividerView::Vertical(isVertical);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetVertical(isVertical);
-    }
-
-    auto box = stack->GetBoxComponent();
-    if (isVertical) {
-        box->SetFlex(BoxFlex::FLEX_Y);
-    } else {
-        box->SetFlex(BoxFlex::FLEX_X);
-    }
+    DividerModel::GetInstance()->Vertical(isVertical);
 }
 
 void JSDivider::SetLineCap(int lineCap)
@@ -65,16 +63,7 @@ void JSDivider::SetLineCap(int lineCap)
         // default linecap of divider
         lineCapStyle = LineCap::BUTT;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::DividerView::LineCap(lineCapStyle);
-        return;
-    }
-
-    auto *stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetLineCap(lineCapStyle);
-    }
+    DividerModel::GetInstance()->LineCap(lineCapStyle);
 }
 
 void JSDivider::SetDividerColor(const JSCallbackInfo& info)
@@ -87,16 +76,7 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], dividerColor)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::DividerView::DividerColor(dividerColor);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetDividerColor(dividerColor);
-    }
+    DividerModel::GetInstance()->DividerColor(dividerColor);
 }
 
 void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
@@ -109,16 +89,7 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::DividerView::StrokeWidth(strokeWidth);
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetStrokeWidth(strokeWidth);
-    }
+    DividerModel::GetInstance()->StrokeWidth(strokeWidth);
 }
 
 void JSDivider::JSBind(BindingTarget globalObj)

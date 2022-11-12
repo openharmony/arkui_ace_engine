@@ -16,8 +16,10 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -25,7 +27,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 void ButtonView::CreateWithLabel(const std::string& label)
@@ -35,12 +36,15 @@ void ButtonView::CreateWithLabel(const std::string& label)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(frameNode);
+    SetDefaultAttributes(frameNode);
     if (frameNode->GetChildren().empty()) {
-        auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(label);
+        textNode->SetInternal();
         frameNode->AddChild(textNode);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -49,7 +53,11 @@ void ButtonView::CreateWithLabel(const std::string& label)
         ACE_DCHECK(textLayoutProperty);
         textLayoutProperty->UpdateContent(label);
     }
+    auto buttonAccessibilityProperty = frameNode->GetAccessibilityProperty<ButtonAccessibilityProperty>();
+    CHECK_NULL_VOID(buttonAccessibilityProperty);
+    buttonAccessibilityProperty->SetText(label);
     stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, label);
 }
 
 void ButtonView::Create(const std::string& tagName)
@@ -58,7 +66,25 @@ void ButtonView::Create(const std::string& tagName)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    SetDefaultAttributes(frameNode);
     stack->Push(frameNode);
+}
+
+void ButtonView::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto castButtonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    if (castButtonLayoutProperty) {
+        castButtonLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
+    renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
+    buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
 }
 
 void ButtonView::SetType(ButtonType buttonType)
@@ -73,11 +99,13 @@ void ButtonView::SetStateEffect(bool stateEffect)
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->SetStateEffect(stateEffect);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, StateEffect, stateEffect);
 }
 
 void ButtonView::SetFontSize(const Dimension& fontSize)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
         return;
     }
@@ -86,6 +114,7 @@ void ButtonView::SetFontSize(const Dimension& fontSize)
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     ACE_DCHECK(textLayoutProperty);
     textLayoutProperty->UpdateFontSize(fontSize);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize);
 }
 
 void ButtonView::SetFontWeight(Ace::FontWeight fontWeight)
@@ -99,6 +128,7 @@ void ButtonView::SetFontWeight(Ace::FontWeight fontWeight)
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     ACE_DCHECK(textLayoutProperty);
     textLayoutProperty->UpdateFontWeight(fontWeight);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, fontWeight);
 }
 
 void ButtonView::SetItalicFontStyle(Ace::FontStyle fontStyle)
@@ -138,6 +168,7 @@ void ButtonView::SetTextColor(const Color& textColor)
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     ACE_DCHECK(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(textColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextColor, textColor);
 }
 
 } // namespace OHOS::Ace::NG

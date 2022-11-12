@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_BAR_SCROLL_BAR_PROXY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_BAR_SCROLL_BAR_PROXY_H
 
+#include "core/components/scroll_bar/scroll_proxy.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -31,8 +32,8 @@ struct ScrollableNodeInfo {
 };
 
 class RenderScrollBar;
-class ACE_EXPORT ScrollBarProxy : public AceType {
-    DECLARE_ACE_TYPE(ScrollBarProxy, AceType);
+class ACE_EXPORT ScrollBarProxy : public ScrollProxy {
+    DECLARE_ACE_TYPE(ScrollBarProxy, ScrollProxy);
 
 public:
     ScrollBarProxy() = default;

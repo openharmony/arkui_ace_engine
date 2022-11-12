@@ -34,6 +34,34 @@ enum class ProgressType {
     CAPSULE = 9,
 };
 
+class ProgressTypeUtils {
+public:
+    static std::string ConvertProgressTypeToString(ProgressType progressType)
+    {
+        std::string progressTypeUtils = "";
+        switch (progressType) {
+            case ProgressType::LINEAR:
+                progressTypeUtils = "ProgressStyle.Linear";
+                break;
+            case ProgressType::MOON:
+                progressTypeUtils = "ProgressStyle.Eclipse";
+                break;
+            case ProgressType::SCALE:
+                progressTypeUtils = "ProgressStyle.ScaleRing";
+                break;
+            case ProgressType::RING:
+                progressTypeUtils = "ProgressStyle.Ring";
+                break;
+            case ProgressType::CAPSULE:
+                progressTypeUtils = "ProgressStyle.Capsule";
+                break;
+            default:
+                progressTypeUtils = "ProgressStyle.Linear";
+        }
+        return progressTypeUtils;
+    }
+};
+
 struct ProgressDate {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxValue, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Value, double);

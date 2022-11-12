@@ -59,9 +59,9 @@ RenderDialogTween::RenderDialogTween()
             dialog->lastPositionY_ = startInfo.GetLocalLocation().GetY();
             dialog->init_ = false;
             if (dialog->maskDragRegion_.ContainsInRegion(dialog->dragX_, dialog->dragY_)) {
-                dialog->isDraging_ = true;
+                dialog->isDragging_ = true;
             } else {
-                dialog->isDraging_ = false;
+                dialog->isDragging_ = false;
             }
         }
     });
@@ -69,7 +69,7 @@ RenderDialogTween::RenderDialogTween()
         auto dialog = weak.Upgrade();
         if (dialog) {
             double dragEnd = endInfo.GetLocalLocation().GetX();
-            if (!dialog->isDraging_ &&
+            if (!dialog->isDragging_ &&
                 GreatOrEqual(dragEnd - dialog->dragStart_, dialog->GetLayoutSize().Width() * DIALOG_DRAG_RATIO)) {
                 dialog->PopDialog();
             }
@@ -80,7 +80,7 @@ RenderDialogTween::RenderDialogTween()
     dragDetector_->SetOnDragUpdate([weak = WeakClaim(this)](const DragUpdateInfo& info) {
         auto dialog = weak.Upgrade();
         if (dialog) {
-            if (dialog->isDragable_ && dialog->isDraging_) {
+            if (dialog->isDragable_ && dialog->isDragging_) {
                 dialog->HandleDragUpdate(info.GetLocalLocation());
             }
         }
@@ -215,7 +215,6 @@ void RenderDialogTween::HandleDragUpdate(const Offset& currentPoint)
 void RenderDialogTween::CallOnSuccess(int32_t successType)
 {
     if (onStatusChanged_) {
-        onStatusChanged_(false);
         popDialog_ = true;
     }
     const auto context = context_.Upgrade();
@@ -241,6 +240,9 @@ void RenderDialogTween::CallOnSuccess(int32_t successType)
             if (dialog->onComplete_) {
                 dialog->onComplete_();
             }
+            if (dialog->onStatusChanged_) {
+                dialog->onStatusChanged_(false);
+            }
         });
         animator_->Play();
     } else {
@@ -250,6 +252,9 @@ void RenderDialogTween::CallOnSuccess(int32_t successType)
         }
         if (onComplete_) {
             onComplete_();
+        }
+        if (onStatusChanged_) {
+            onStatusChanged_(false);
         }
     }
     RemoveAccessibilityNode();
@@ -390,7 +395,7 @@ Offset RenderDialogTween::ComputeChildPosition(const Size& childSize) const
             maxSize = parent->GetChildViewPort();
         }
     }
-    if (isDraging_) {
+    if (isDragging_) {
         topLeftPoint =
             Offset(topLeftPoint_.GetX() + (dragX_ - lastPositionX_), topLeftPoint_.GetY() + (dragY_ - lastPositionY_));
         return topLeftPoint;
@@ -526,7 +531,6 @@ void RenderDialogTween::OnTouchTestHit(
 bool RenderDialogTween::PopDialog()
 {
     if (onStatusChanged_) {
-        onStatusChanged_(false);
         popDialog_ = true;
     }
     const auto context = context_.Upgrade();
@@ -552,6 +556,9 @@ bool RenderDialogTween::PopDialog()
             if (dialog->onComplete_) {
                 dialog->onComplete_();
             }
+            if (dialog->onStatusChanged_) {
+                dialog->onStatusChanged_(false);
+            }
         });
         animator_->Play();
     } else {
@@ -561,6 +568,9 @@ bool RenderDialogTween::PopDialog()
         }
         if (onComplete_) {
             onComplete_();
+        }
+        if (onStatusChanged_) {
+            onStatusChanged_(false);
         }
     }
     RemoveAccessibilityNode();

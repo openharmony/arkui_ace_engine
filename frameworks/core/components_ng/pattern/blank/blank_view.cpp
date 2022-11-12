@@ -46,7 +46,7 @@ void BlankView::SetBlankMin(const Dimension& blankMin)
     auto layoutProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     // TODO: Use flex basis
-    layoutProperty->UpdateMinSize(blankMin);    
+    layoutProperty->UpdateMinSize(blankMin);
 }
 
 } // namespace OHOS::Ace::NG

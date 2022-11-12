@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -26,6 +27,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -55,7 +57,7 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontSize(fontSize);
         textStyle.SetAdaptTextSize(fontSize, fontSize);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 
     auto stack = ViewStackProcessor::GetInstance();
@@ -68,7 +70,7 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
     }
 }
 
-void JSButton::SetFontWeight(std::string value)
+void JSButton::SetFontWeight(const std::string& value)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ButtonView::SetFontWeight(ConvertStrToFontWeight(value));
@@ -78,7 +80,7 @@ void JSButton::SetFontWeight(std::string value)
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 }
 
@@ -97,7 +99,7 @@ void JSButton::SetFontStyle(int32_t value)
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontStyle(fontStyles[value]);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 }
 
@@ -120,7 +122,7 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontFamilies(fontFamilies);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 }
 
@@ -142,7 +144,7 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetTextColor(textColor);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
     }
 }
 
@@ -225,6 +227,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("backgroundColor", &JSButton::JsBackgroundColor);
     JSClass<JSButton>::StaticMethod("width", &JSButton::JsWidth);
     JSClass<JSButton>::StaticMethod("height", &JSButton::JsHeight);
+    JSClass<JSButton>::StaticMethod("aspectRatio", &JSButton::JsAspectRatio);
     JSClass<JSButton>::StaticMethod("borderRadius", &JSButton::JsRadius);
     JSClass<JSButton>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -262,7 +265,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         auto textStyle = buttonTheme ? buttonTheme->GetTextStyle() : textComponent->GetTextStyle();
         textStyle.SetMaxLines(buttonTheme->GetTextMaxLines());
         textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-        textComponent->SetTextStyle(std::move(textStyle));
+        textComponent->SetTextStyle(textStyle);
         auto padding = AceType::MakeRefPtr<PaddingComponent>();
         padding->SetPadding(buttonTheme ? buttonTheme->GetPadding() : Edge());
         padding->SetChild(textComponent);
@@ -449,8 +452,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     auto impl = inspector->GetInspectorFunctionImpl();
 
     RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
-                        GestureEvent& info) {
+    auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         if (impl) {
             impl->UpdateEventInfo(info);
@@ -470,19 +472,18 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     }
 
     RefPtr<JsClickFunction> jsClickEventFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    EventMarker clickEventId([execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](
-                                    const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-        auto newInfo = *clickInfo;
-        if (impl) {
-            impl->UpdateEventInfo(newInfo);
-        }
-        ACE_SCORING_EVENT("Button.onClick");
-        func->Execute(newInfo);
-    });
-    auto buttonComponent =
-        AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    EventMarker clickEventId(
+        [execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            auto newInfo = *clickInfo;
+            if (impl) {
+                impl->UpdateEventInfo(newInfo);
+            }
+            ACE_SCORING_EVENT("Button.onClick");
+            func->Execute(newInfo);
+        });
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (buttonComponent) {
         buttonComponent->SetKeyEnterEventId(clickEventId);
     }
@@ -591,6 +592,29 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
     }
 }
 
+void JSButton::JsAspectRatio(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsAspectRatio(info);
+        return;
+    }
+    JSViewAbstract::JsAspectRatio(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    double value = 0.0;
+    if (!ParseJsDouble(info[0], value)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (!buttonComponent) {
+        return;
+    }
+    buttonComponent->SetAspectRatio(value);
+}
+
 void JSButton::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 0) {
@@ -668,7 +692,7 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     buttonComponent->SetRadiusState(true);
     if (!stack->IsVisualStateSet()) {
         buttonComponent->SetRectRadius(radius);
-        JSViewAbstract::SetBorderRadius(radius, option);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(radius);
     } else {
         buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
             ButtonStateAttribute::RADIUS, AnimatableDimension(radius, option), stack->GetVisualState());

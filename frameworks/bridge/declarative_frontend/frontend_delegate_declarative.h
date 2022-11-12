@@ -147,15 +147,11 @@ public:
     void Push(const std::string& uri, const std::string& params) override;
     void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
     void PushWithCallback(const std::string& uri, const std::string& params,
-        const std::function<void(const std::string&, int32_t)>& errorCallback) override;
-    void PushWithModeAndCallback(const std::string& uri, const std::string& params, uint32_t routerMode,
-        const std::function<void(const std::string&, int32_t)>& errorCallback) override;
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
     void ReplaceWithCallback(const std::string& uri, const std::string& params,
-        const std::function<void(const std::string&, int32_t)>& errorCallback) override;
-    void ReplaceWithModeAndCallback(const std::string& uri, const std::string& params, uint32_t routerMode,
-        const std::function<void(const std::string&, int32_t)>& errorCallback) override;
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
     void Clear() override;
     int32_t GetStackSize() const override;

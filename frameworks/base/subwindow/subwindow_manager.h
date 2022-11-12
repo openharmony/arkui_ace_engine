@@ -25,6 +25,8 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace {
 
@@ -61,19 +63,31 @@ public:
     const RefPtr<Subwindow>& GetCurrentWindow();
 
     void ShowMenu(const RefPtr<Component>& newComponent);
+    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset);
+    void HideMenuNG(int32_t targetId);
+    void HideMenuNG();
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
+    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo);
+    void HidePopupNG(int32_t targetId);
+    void HidePopupNG();
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
 
     void SetHotAreas(const std::vector<Rect>& rects);
 
+    void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
+    // Get the dialog subwindow of instance, return the window or nullptr.
+    const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
+    void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
+    const RefPtr<Subwindow>& GetCurrentDialogWindow();
+
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom);
-    void ShowDialog(const std::string& title, const std::string& message,
-        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
+    void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
+        bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
-    void ShowActionMenu(const std::string& title,
-        const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
@@ -95,6 +109,12 @@ private:
     std::string currentSubwindowName_;
 
     RefPtr<Subwindow> currentSubwindow_;
+
+    // Used to save the relationship between container and dialog subwindow, it is 1:1
+    std::mutex dialogSubwindowMutex_;
+    SubwindowMap dialogSubwindowMap_;
+    std::mutex currentDialogSubwindowMutex_;
+    RefPtr<Subwindow> currentDialogSubwindow_;
 };
 
 } // namespace OHOS::Ace

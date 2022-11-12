@@ -47,7 +47,6 @@ ScrollModel* ScrollModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE };
 } // namespace
 
@@ -62,7 +61,7 @@ void JSScroll::Create(const JSCallbackInfo& info)
             // Init scroll bar proxy.
             auto proxy = jsScroller->GetScrollBarProxy();
             if (!proxy) {
-                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+                proxy = ScrollModel::GetInstance()->CreateScrollBarProxy();
                 jsScroller->SetScrollBarProxy(proxy);
             }
             ScrollModel::GetInstance()->SetScrollBarProxy(proxy);
@@ -189,9 +188,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
 
 void JSScroll::SetScrollBar(int displayMode)
 {
-    if (displayMode >= 0 && displayMode < static_cast<int32_t>(DISPLAY_MODE.size())) {
-        ScrollModel::GetInstance()->SetDisplayMode(DISPLAY_MODE[displayMode]);
-    }
+    ScrollModel::GetInstance()->SetDisplayMode(displayMode);
 }
 
 void JSScroll::SetScrollBarWidth(const std::string& scrollBarWidth)

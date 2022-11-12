@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
@@ -27,7 +28,8 @@ namespace OHOS::Ace::NG {
 
 class GestureEventHub;
 
-class ClickEvent : public Referenced {
+class ClickEvent : public AceType {
+    DECLARE_ACE_TYPE(ClickEvent, AceType)
 public:
     explicit ClickEvent(GestureEventFunc&& callback) : callback_(std::move(callback)) {}
     ~ClickEvent() override = default;

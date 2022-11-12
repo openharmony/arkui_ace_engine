@@ -124,6 +124,7 @@ void SwiperElement::OnDataSourceUpdated(size_t startIndex)
     if (context) {
         context->AddPostFlushListener(AceType::Claim(this));
     }
+    ElementProxyHost::OnDataSourceUpdated(startIndex);
 }
 
 void SwiperElement::OnPostFlush()

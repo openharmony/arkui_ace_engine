@@ -13,79 +13,41 @@
  * limitations under the License.
  */
 
-#include "core/components/test/unittest/water_flow/water_flow_test_utils.h"
-#include "core/components_v2/water_flow/render_water_flow_item.h"
 #include "core/components/box/box_component.h"
+#include "core/components/box/render_box.h"
+#include "core/components/test/unittest/water_flow/water_flow_test_utils.h"
 
 namespace OHOS::Ace {
-RefPtr<Component> WaterFlowTestUtils::CreateComponent(FlexDirection direction, int32_t cols)
+Dimension WaterFlowTestUtils::rowGap = 100.0_px;
+Dimension WaterFlowTestUtils::columnsGap = 100.0_px;
+RefPtr<Component>  WaterFlowTestUtils::CreateComponent(std::string columnsArgs,
+    std::string rowsArgs, FlexDirection direction)
 {
     std::list<RefPtr<Component>> children;
-    Dimension RowGap = 50.0_px;
-    Dimension ColumnsGap = 50.0_px;
-    RefPtr<V2::WaterFlowComponent> component = AceType::MakeRefPtr<V2::WaterFlowComponent>(children, cols);
-    component->SetRowsGap(RowGap);
-    component->SetColumnsGap(ColumnsGap);
-    component->SetLayoutDirection(direction);
+    RefPtr<V2::WaterFlowComponent> component = AceType::MakeRefPtr<V2::WaterFlowComponent>(children);
+    if (component) {
+        component->SetRowsGap(rowGap);
+        component->SetColumnsGap(columnsGap);
+        component->SetLayoutDirection(direction);
+        component->SetColumnsArgs(columnsArgs);
+        component->SetRowsArgs(rowsArgs);
+    }
     return component;
 }
 
-RefPtr<Component> WaterFlowTestUtils::CreateComponentItem(const int32_t& itemMainSpan, const int32_t& itemCrossSpan)
+RefPtr<V2::RenderWaterFlowItem> WaterFlowTestUtils::CreateRenderItem(const RefPtr<PipelineContext>& context)
 {
-    RefPtr<BoxComponent> box = AceType::MakeRefPtr<BoxComponent>();
-    RefPtr<V2::WaterFlowItemComponent> ComponentItem = AceType::MakeRefPtr<V2::WaterFlowItemComponent>(box);
-    auto flowItem = AceType::DynamicCast<V2::WaterFlowItemComponent>(ComponentItem);
-    if (flowItem) {
-        flowItem->SetRowSpan(itemMainSpan);
-        flowItem->SetColumnSpan(itemCrossSpan);
-        return flowItem;
-    }
-    return nullptr;
-}
-
-RefPtr<V2::RenderWaterFlowItem> WaterFlowTestUtils::CreateRenderItem(
-    int32_t rowSpan, int32_t colSpan, int32_t index, const RefPtr<PipelineContext>& context)
-{
-    constexpr double DIM_SIZE_VALUE_TEST = 150.0;
     RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
     RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<RenderBox>();
-    boxComponent->SetWidth(DIM_SIZE_VALUE_TEST);
-    boxComponent->SetHeight(DIM_SIZE_VALUE_TEST);
+    boxComponent->SetWidth(ITEM_WIDTH);
+    boxComponent->SetHeight(ITEM_HEIGHT);
     renderBox->Update(boxComponent);
     renderBox->Attach(context);
-    RefPtr<V2::RenderWaterFlowItem> Renderitem = AceType::MakeRefPtr<V2::RenderWaterFlowItem>();
-    if (Renderitem) {
-        auto itemComponent = CreateComponentItem(rowSpan, colSpan);
-        if (itemComponent) {
-            Renderitem->Update(itemComponent);
-            Renderitem->SetBoundary();
-            Renderitem->SetIndex(index);
-            Renderitem->Attach(context);
-            Renderitem->SetHidden(false);
-            Renderitem->AddChild(renderBox);
-            return Renderitem;
-        }
+    RefPtr<V2::RenderWaterFlowItem> renderWaterflowItem = AceType::MakeRefPtr<V2::RenderWaterFlowItem>();
+    if (renderWaterflowItem) {
+        renderWaterflowItem->Attach(context);
+        renderWaterflowItem->AddChild(renderBox);
     }
-    return nullptr;
-}
-
-RefPtr<RenderNode> WaterFlowTestUtils::CreateRenderItem(
-    double width, double height, int32_t rowspan, int32_t colspan, const RefPtr<PipelineContext>& context)
-{
-    RefPtr<RenderBox> parent = AceType::MakeRefPtr<RenderBox>();
-    RefPtr<V2::RenderWaterFlowItem> child = AceType::MakeRefPtr<V2::RenderWaterFlowItem>();
-    RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<RenderBox>();
-    parent->Attach(context);
-    child->Attach(context);
-    renderBox->Attach(context);
-    RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
-    boxComponent->SetWidth(width);
-    boxComponent->SetHeight(height);
-    renderBox->Update(boxComponent);
-    child->SetRowSpan(rowspan);
-    child->SetColumnSpan(colspan);
-    parent->AddChild(child);
-    child->AddChild(renderBox);
-    return parent;
+    return renderWaterflowItem;
 }
 } // namespace OHOS::Ace

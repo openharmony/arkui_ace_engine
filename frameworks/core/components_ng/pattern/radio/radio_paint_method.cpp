@@ -33,7 +33,14 @@ CanvasDrawFunction RadioPaintMethod::GetContentDrawFunction(PaintWrapper* paintW
 
     auto paintProperty = DynamicCast<RadioPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(paintProperty, nullptr);
-    auto checked = paintProperty->GetRadioCheckValue();
+
+    bool checked = false;
+    if (paintProperty->HasRadioCheck()) {
+        checked = paintProperty->GetRadioCheckValue();
+    } else {
+        paintProperty->UpdateRadioCheck(false);
+    }
+
     auto contentSize = paintWrapper->GetContentSize();
     auto offset = paintWrapper->GetContentOffset();
 
@@ -63,6 +70,8 @@ void RadioPaintMethod::PaintRadio(RSCanvas& canvas, bool checked, const SizeF& c
     const float totalScale = 1.0f;
     const float pointScale = 0.5f;
     float outCircleRadius = contentSize.Width() / 2;
+    constexpr uint8_t ENABLED_ALPHA = 255;
+    constexpr uint8_t DISABLED_ALPHA = 102;
 
     float centerX = outCircleRadius + offset.GetX();
     float centerY = outCircleRadius + offset.GetY();
@@ -75,11 +84,15 @@ void RadioPaintMethod::PaintRadio(RSCanvas& canvas, bool checked, const SizeF& c
         brush.SetColor(ToRSColor(activeColor_));
         pen.SetAntiAlias(true);
         pen.SetColor(ToRSColor(activeColor_));
+        if (!enabled_) {
+            brush.SetColor(ToRSColor(activeColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            pen.SetColor(ToRSColor(activeColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+        }
         canvas.AttachBrush(brush);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale);
         canvas.AttachPen(pen);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale);
-        // // draw shadow
+        // draw shadow
         if (!NearZero(pointScale) && !NearEqual(pointScale, 1.0)) {
             brush.SetColor(ToRSColor(shadowColor_));
             canvas.AttachBrush(brush);
@@ -96,7 +109,6 @@ void RadioPaintMethod::PaintRadio(RSCanvas& canvas, bool checked, const SizeF& c
         // draw inner circle
         RSPen pen = RSPen();
         RSBrush brush = RSBrush();
-        brush.SetAlpha(50);
         brush.SetColor(ToRSColor(Color::WHITE));
         brush.SetAntiAlias(true);
         canvas.AttachBrush(brush);
@@ -104,6 +116,10 @@ void RadioPaintMethod::PaintRadio(RSCanvas& canvas, bool checked, const SizeF& c
         // draw border with unselected color
         pen.SetAntiAlias(true);
         pen.SetColor(ToRSColor(inactiveColor_));
+        if (!enabled_) {
+            brush.SetColor(ToRSColor(inactiveColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+        }
         pen.SetWidth(borderWidth_);
         canvas.AttachPen(pen);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_ / 2.0);

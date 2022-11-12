@@ -220,7 +220,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         return;
     }
     fadeColor_ = swiper->GetFadeColor();
-    scale_ = context->GetDipScale();
+    if (context) {
+        scale_ = context->GetDipScale();
+    }
 
     curve_ = swiper->GetCurve();
     if (curve_) {
@@ -478,6 +480,8 @@ void RenderSwiper::InitRecognizer(bool catchMode)
         auto pipeline = context_.Upgrade();
         if (!catchMode && pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
             clickRecognizer_->SetUseCatchMode(false);
+        } else if (!showIndicator_) {
+            clickRecognizer_->SetUseCatchMode(false);
         } else {
             clickRecognizer_->SetUseCatchMode(true);
         }
@@ -511,6 +515,12 @@ void RenderSwiper::InitRawDragRecognizer()
             auto client = weak.Upgrade();
             if (client) {
                 client->HandleTouchMove(info);
+            }
+        });
+        rawRecognizer_->SetOnTouchCancel([weak](const TouchEventInfo& info) {
+            auto client = weak.Upgrade();
+            if (client) {
+                client->HandleTouchCancel(info);
             }
         });
     }
@@ -738,6 +748,14 @@ void RenderSwiper::HandleTouchMove(const TouchEventInfo& info)
             }
         }
     }
+}
+
+// TouchCancel event is triggered by Input, it is similar to touchUp event.
+void RenderSwiper::HandleTouchCancel(const TouchEventInfo& info)
+{
+    LOGI("Handle touchCancel start.");
+    // TouchCancel is same to touchUp.
+    HandleTouchUp(info);
 }
 
 void RenderSwiper::HandleClick(const ClickInfo& clickInfo)
@@ -1128,6 +1146,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
             swiper->RestoreAutoPlay();
             swiper->FireItemChangedEvent(!needRestore);
             swiper->ResetCachedChildren();
+            swiper->ResetIndicatorPosition();
             swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
@@ -1307,6 +1326,11 @@ double RenderSwiper::CalculateEndOffset(int32_t fromIndex, int32_t toIndex, bool
     return end;
 }
 
+void RenderSwiper::ResetScrollOffset()
+{
+    scrollOffset_ = 0.0;
+}
+
 void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool reverse)
 {
     if (!swipeToController_ || isIndicatorAnimationStart_ || fromIndex == toIndex) {
@@ -1346,6 +1370,7 @@ void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool r
             swiper->outItemIndex_ = fromIndex;
             swiper->currentIndex_ = toIndex;
             swiper->moveStatus_ = false;
+            swiper->ResetScrollOffset();
             swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
@@ -2383,7 +2408,8 @@ void RenderSwiper::StartIndicatorSpringAnimation(double start, double end)
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->ResetIndicatorSpringStatus();
+            swiper->UpdateIndicatorSpringStatus(SpringStatus::SPRING_STOP);
+            swiper->UpdateIndicatorTailPosition(DRAG_OFFSET_MIN);
         }
     });
 }

@@ -26,7 +26,9 @@ public:
     static void Create();
     static void SetHideTitleBar(bool hideTitleBar);
     static void SetTitle(const std::string& title);
+    static void SetSubtitle(const std::string& subtitle);
     static void SetCustomTitle(const RefPtr<UINode>& customTitle);
+    static void SetTitleHeight(const Dimension& height);
 };
 
 } // namespace OHOS::Ace::NG

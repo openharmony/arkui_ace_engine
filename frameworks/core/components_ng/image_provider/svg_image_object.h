@@ -30,10 +30,13 @@ public:
     {}
     ~SvgImageObject() override = default;
 
+    static RefPtr<SvgImageObject> Create(const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo,
+        const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks);
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 
     void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) override;
     bool MakeSvgDom(const std::optional<Color>& svgFillColor);
+
 private:
     RefPtr<SvgDomBase> svgDomBase_;
 };

@@ -39,7 +39,7 @@ bool ParseResourceParam(napi_env env, napi_value value, int32_t& id, int32_t& ty
 
 bool ParseString(int32_t resId, int32_t type, std::vector<std::string>& params, std::string& result);
 
-std::string ErrorToMessage(int32_t);
+std::string ErrorToMessage(int32_t code);
 
 } // namespace OHOS::Ace::Napi
 

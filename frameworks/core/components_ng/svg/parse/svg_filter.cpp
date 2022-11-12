@@ -60,7 +60,6 @@ void SvgFilter::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, con
 
 void SvgFilter::OnAsPaint()
 {
-    // SkPaint skPaint;
     filterPaint_.setAntiAlias(true);
     sk_sp<SkImageFilter> imageFilter = nullptr;
     ColorInterpolationType currentColor = ColorInterpolationType::SRGB;

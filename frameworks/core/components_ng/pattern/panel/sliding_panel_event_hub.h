@@ -16,13 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PANEL_SLIDING_PANEL_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PANEL_SLIDING_PANEL_EVENT_HUB_H
 
+#include <memory>
+
 #include "base/memory/ace_type.h"
+#include "core/components/panel/sliding_events.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
-using ChangeEvent = std::function<void(const float, const float, PanelMode)>;
+using ChangeEvent = std::function<void(const BaseEventInfo*)>;
 using HeightChangeEvent = std::function<void(const float)>;
 
 class SlidingPanelEventHub : public EventHub {
@@ -32,7 +35,7 @@ public:
     SlidingPanelEventHub() = default;
     ~SlidingPanelEventHub() override = default;
 
-    void SetOnChange(ChangeEvent&& changeEvent)
+    void SetOnSizeChange(ChangeEvent&& changeEvent)
     {
         changeEvent_ = std::move(changeEvent);
     }
@@ -42,10 +45,11 @@ public:
         heightChangeEvent_ = std::move(heightChangeEvent);
     }
 
-    void FireSizeChangeEvent(float width, float height, PanelMode mode) const
+    void FireSizeChangeEvent(PanelMode mode, float width, float height) const
     {
         if (changeEvent_) {
-            changeEvent_(width, height, mode);
+            auto changEvent = std::make_shared<SlidingPanelSizeChangeEvent>(mode, width, height);
+            changeEvent_(changEvent.get());
         }
     }
 

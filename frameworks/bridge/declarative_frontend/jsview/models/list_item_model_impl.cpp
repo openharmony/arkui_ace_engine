@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components_v2/list/list_item_component.h"
 
 namespace OHOS::Ace::Framework {
@@ -116,10 +117,10 @@ void ListItemModelImpl::SetSelectCallback(OnSelectFunc&& selectCallback)
     JSViewSetProperty(&V2::ListItemComponent::SetOnSelectId, std::move(selectCallback));
 }
 
-void ListItemModelImpl::SetOnDragStart(OnDragFunc &&onDragStart)
+void ListItemModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnDragStartId(onDragStart);
+    box->SetOnDragStartId(ViewAbstractModelImpl::ToDragFunc(std::move(onDragStart)));
     JSViewSetProperty(&V2::ListItemComponent::MarkIsDragStart, true);
 }
 

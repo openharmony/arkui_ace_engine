@@ -98,6 +98,11 @@ public:
         return badgeFontSize_;
     }
 
+    const Dimension& GetBadgeCircleSize()
+    {
+        return badgeSize_;
+    }
+
 protected:
     BadgeTheme() = default;
 
@@ -108,6 +113,7 @@ private:
     BadgePosition badgePosition_;
     bool showMessage_;
     Dimension badgeFontSize_;
+    Dimension badgeSize_ = 16.0_vp;
 };
 
 } // namespace OHOS::Ace

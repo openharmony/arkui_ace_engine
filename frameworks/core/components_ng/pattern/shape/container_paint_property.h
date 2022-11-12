@@ -61,6 +61,19 @@ public:
         ResetShapeViewBox();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        ShapePaintProperty::ToJsonValue(json);
+        auto viewBoxJson = JsonUtil::Create(true);
+        if (propShapeViewBox_.has_value()) {
+            viewBoxJson->Put("x", propShapeViewBox_.value().Left().ToString().c_str());
+            viewBoxJson->Put("y", propShapeViewBox_.value().Top().ToString().c_str());
+            viewBoxJson->Put("width", propShapeViewBox_.value().Width().ToString().c_str());
+            viewBoxJson->Put("height", propShapeViewBox_.value().Height().ToString().c_str());
+        }
+        json->Put("viewPort", viewBoxJson);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageMesh, ImageMesh, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShapeViewBox, ShapeViewBox, PROPERTY_UPDATE_RENDER);
 

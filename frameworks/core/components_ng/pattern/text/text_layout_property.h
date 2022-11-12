@@ -16,9 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_PROPERTY_H
 
+#include <string>
+
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
@@ -44,6 +47,8 @@ public:
         ResetContent();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextColor, Color, PROPERTY_UPDATE_MEASURE);
@@ -64,6 +69,25 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
+
+    // for XTS inspector
+    std::string InspectorGetTextFont() const
+    {
+        TextStyle font;
+        if (GetFontFamily().has_value()) {
+            font.SetFontFamilies(GetFontFamily().value());
+        }
+        if (GetFontSize().has_value()) {
+            font.SetFontSize(GetFontSize().value());
+        }
+        if (GetItalicFontStyle().has_value()) {
+            font.SetFontStyle(GetItalicFontStyle().value());
+        }
+        if (GetFontWeight().has_value()) {
+            font.SetFontWeight(GetFontWeight().value());
+        }
+        return V2::GetTextStyleInJson(font);
+    }
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override

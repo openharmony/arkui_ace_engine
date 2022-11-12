@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG {
 
-SvgUse::SvgUse() : SvgGroup()
+SvgUse::SvgUse() : SvgGraphic()
 {
     declaration_ = AceType::MakeRefPtr<SvgDeclaration>();
     declaration_->Init();

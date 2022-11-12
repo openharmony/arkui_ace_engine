@@ -18,13 +18,14 @@
 
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_modifer.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
-    
+
 class ACE_EXPORT LoadingProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(LoadingProgressPaintMethod, NodePaintMethod)
 public:
@@ -36,21 +37,23 @@ public:
     RefPtr<Modifier> GetModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(loadingProgressModifier_, nullptr);
-        auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
-        if (paintProperty) {
-            color_ = paintProperty->GetColor().value_or(color_);
-        }
-        loadingProgressModifier_->SetColor(color_);
         return loadingProgressModifier_;
     }
 
     void UpdateModifier(PaintWrapper* paintWrapper) override
     {
-        constexpr float speedOfModifier = 0.1f;
-        if (loadingProgressModifier_) {
-            loadingProgressModifier_->UpdateModifier(
-                { .speed = speedOfModifier, .repeatTimes = -1, .autoReverse = false }, FULL_COUNT);
+        CHECK_NULL_VOID(loadingProgressModifier_);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(progressTheme);
+
+        auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
+        if (paintProperty) {
+            color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
         }
+        loadingProgressModifier_->SetDate(FULL_COUNT);
+        loadingProgressModifier_->SetColor(LinearColor(color_));
     }
 
 private:

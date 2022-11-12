@@ -36,7 +36,7 @@ public:
     ~RotationGesture() override = default;
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer() override;
+    RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
 private:
     double angle_ = 1.0;

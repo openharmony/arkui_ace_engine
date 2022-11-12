@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -27,7 +28,8 @@ namespace OHOS::Ace::NG {
 class EventHub;
 
 // The gesture event hub is mainly used to handle common gesture events.
-class ACE_EXPORT InputEventHub : public Referenced {
+class ACE_EXPORT InputEventHub : public virtual AceType {
+    DECLARE_ACE_TYPE(InputEventHub, AceType)
 public:
     explicit InputEventHub(const WeakPtr<EventHub>& eventHub);
     ~InputEventHub() override = default;

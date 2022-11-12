@@ -72,6 +72,12 @@ public:
 
     ~WebPattern() override = default;
 
+    enum class VkState {
+        VK_NONE,
+        VK_SHOW,
+        VK_HIDE
+    };
+
     std::optional<std::string> GetSurfaceNodeName() const override
     {
         return "RosenWeb";
@@ -113,6 +119,16 @@ public:
     const std::optional<std::string>& GetWebData() const
     {
         return webData_;
+    }
+
+    void SetCustomScheme(const std::string& scheme)
+    {
+        customScheme_ = scheme;
+    }
+
+    const std::optional<std::string>& GetCustomScheme() const
+    {
+        return customScheme_;
     }
 
     void SetWebController(const RefPtr<WebController>& webController)
@@ -192,9 +208,14 @@ public:
     void UpdateLocale();
 
 private:
+    void RegistVirtualKeyBoardListener();
+    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
+    void UpdateWebLayoutSize();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
+    void OnWindowShow() override;
+    void OnWindowHide() override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
@@ -222,6 +243,13 @@ private:
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragCancel();
+    bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void HandleAxisEvent(AxisInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
@@ -253,6 +281,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void CloseSelectOverlay();
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
+    std::optional<OffsetF> GetCoordinatePoint();
 
     struct TouchInfo {
         float x = -1.0f;
@@ -263,6 +292,7 @@ private:
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
+    std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
@@ -276,8 +306,18 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
     float selectHotZone_ = 10.0f;
+    RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
+    bool needOnFocus_ = false;
+    Size drawSize_;
+    Size drawSizeCache_;
+    bool needUpdateWeb_ = true;
+    bool isFocus_ = false;
+    VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
+    bool isDragging_ = false;
+    bool isW3cDragEvent_ = false;
+    bool isWindowShow_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };

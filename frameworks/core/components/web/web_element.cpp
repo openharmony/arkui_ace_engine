@@ -57,7 +57,11 @@ void WebElement::OnFocus()
         LOGE("Delegate is nullptr.");
         return;
     }
-    renderWeb->GetDelegate()->OnFocus();
+    if (needOnFocus_) {
+        renderWeb->GetDelegate()->OnFocus();
+    } else {
+        needOnFocus_ = true;
+    }
     renderWeb->SetWebIsFocus(true);
     FocusNode::OnFocus();
 }

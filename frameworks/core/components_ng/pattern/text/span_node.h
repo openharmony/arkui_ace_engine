@@ -23,7 +23,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
@@ -72,7 +71,9 @@ struct SpanItem : public Referenced {
     GestureEventFunc onClick;
     std::list<RefPtr<SpanItem>> children;
 
-    void UpdateParagraph(RSParagraphBuilder* builder);
+    void UpdateParagraph(const RefPtr<Paragraph>& builder);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 class ACE_EXPORT SpanNode : public UINode {
@@ -97,7 +98,7 @@ public:
     void UpdateContent(const std::string& content)
     {
         if (spanItem_->content == content) {
-            LOGD("the =content is same, just ignore");
+            LOGD("the content is same, just ignore");
             return;
         }
         spanItem_->content = content;
@@ -130,6 +131,11 @@ public:
     void CleanSpanItemChildren()
     {
         spanItem_->children.clear();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        spanItem_->ToJsonValue(json);
     }
 
 private:

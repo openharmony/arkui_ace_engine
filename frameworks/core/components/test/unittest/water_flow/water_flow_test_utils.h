@@ -16,22 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_WATER_FLOW_WARER_FLOW_TEST_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_WATER_FLOW_WARER_FLOW_TEST_UTILS_H
 
-#include "core/components_v2/water_flow/water_flow_component.h"
 #include "core/components_v2/water_flow/render_water_flow.h"
+#include "core/components_v2/water_flow/render_water_flow_item.h"
+#include "core/components_v2/water_flow/water_flow_component.h"
 #include "core/components_v2/water_flow/water_flow_item_component.h"
-#include "core/components/box/render_box.h"
-#include "core/components/image/render_image.h"
-#include "core/components/image/image_component.h"
 
 namespace OHOS::Ace {
+constexpr double ITEM_WIDTH = 150.0;
+constexpr double ITEM_HEIGHT = 150.0;
 class WaterFlowTestUtils {
 public:
-    static RefPtr<RenderNode> CreateRenderItem(
-        double width, double height, int32_t rowspan, int32_t colspan, const RefPtr<PipelineContext>& context);
-    static RefPtr<V2::RenderWaterFlowItem> CreateRenderItem(
-        int32_t rowspan, int32_t colspan, int32_t index, const RefPtr<PipelineContext>& contex);
-    static RefPtr<Component> CreateComponent(FlexDirection direction, int32_t cols);
-    static RefPtr<Component> CreateComponentItem(const int32_t& itemMainSpan, const int32_t& itemCrossSpan);
+    static RefPtr<V2::RenderWaterFlowItem> CreateRenderItem(const RefPtr<PipelineContext>& contex);
+    static RefPtr<Component> CreateComponent(std::string columnsArgs, std::string rowsArgs, FlexDirection direction);
+    static Dimension rowGap;
+    static Dimension columnsGap;
 };
 } // namespace OHOS::Ace
 

@@ -20,6 +20,7 @@
 #include <optional>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -58,9 +59,27 @@ public:
         return isFirstLayout_;
     }
 
+    Dimension GetFullHeight()
+    {
+        return fullHeight_;
+    }
+
+    Dimension GetHalfHeight()
+    {
+        return halfHeight_;
+    }
+
+    Dimension GetMiniHeight()
+    {
+        return miniHeight_;
+    }
+
 private:
     float currentOffset_ = 0.0f;
     bool isFirstLayout_ = true;
+    Dimension fullHeight_;
+    Dimension halfHeight_;
+    Dimension miniHeight_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelLayoutAlgorithm);
 };

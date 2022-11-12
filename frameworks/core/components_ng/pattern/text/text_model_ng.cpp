@@ -19,6 +19,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -68,6 +69,10 @@ void TextModelNG::Create(const std::string& content)
 
 void TextModelNG::SetFontSize(const Dimension& value)
 {
+    if (!value.IsValid()) {
+        LOGE("FontSize value is not valid");
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
 
@@ -168,29 +173,38 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
     LOGE("no support CopyOption");
 }
 
-void TextModelNG::SetOnDragStartId(const OnDragFunc& onDragStartId)
+void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
-    LOGE("no support SetOnDragStartId");
+    auto dragStart = [dragStartFunc = std::move(onDragStart)](
+                         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        auto dragInfo = dragStartFunc(event, extraParams);
+        DragDropInfo info;
+        info.extraInfo = dragInfo.extraInfo;
+        info.pixelMap = dragInfo.pixelMap;
+        info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
+        return info;
+    };
+    ViewAbstract::SetOnDragStart(std::move(dragStart));
 }
 
-void TextModelNG::SetOnDragEnterId(const OnDropFunc& onDragEnterId)
+void TextModelNG::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
 {
-    LOGE("no support SetOnDragEnterId");
+    ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
 }
 
-void TextModelNG::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+void TextModelNG::SetOnDragMove(NG::OnDragDropFunc&& onDragMove)
 {
-    LOGE("no support SetOnDragMoveId");
+    ViewAbstract::SetOnDragMove(std::move(onDragMove));
 }
 
-void TextModelNG::SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
+void TextModelNG::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
 {
-    LOGE("no support SetOnDragLeaveId");
+    ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
 }
 
-void TextModelNG::SetOnDropId(const OnDropFunc& onDropId)
+void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 {
-    LOGE("no support SetOnDropId");
+    ViewAbstract::SetOnDrop(std::move(onDrop));
 }
 
 } // namespace OHOS::Ace::NG

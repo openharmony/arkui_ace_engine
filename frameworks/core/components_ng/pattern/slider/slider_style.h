@@ -28,14 +28,6 @@ struct SliderLayoutStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Direction, Axis)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Thickness, Dimension)
 };
-struct SliderLayoutThemeStyle {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(OutsetBlockSize, Dimension)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(OutsetBlockHotSize, Dimension)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(OutsetTrackThickness, Dimension)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(InsetBlockSize, Dimension)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(InsetBlockHotSize, Dimension)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(InsetTrackThickness, Dimension)
-};
 struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Value, float)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Min, float)
@@ -48,13 +40,6 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowSteps, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowTips, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Direction, Axis)
-};
-struct SliderPaintThemeStyle {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(MarkerSize, Dimension)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockHoverColor, Color)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TipColor, Color)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TipTextColor, Color)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(MarkerColor, Color)
 };
 
 } // namespace OHOS::Ace::NG

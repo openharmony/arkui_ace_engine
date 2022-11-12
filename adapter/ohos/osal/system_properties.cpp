@@ -37,8 +37,10 @@ const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+#ifdef ENABLE_ROSEN_BACKEND
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
+#endif
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 
@@ -365,6 +367,11 @@ bool SystemProperties::GetDebugEnabled()
     return debugEnabled_;
 }
 
+bool SystemProperties::GetResourceUseHapPathEnable()
+{
+    return system::GetBoolParameter("compress", false);
+}
+
 std::string SystemProperties::GetLanguage()
 {
     return system::GetParameter("const.global.language", INVALID_PARAM);
@@ -393,7 +400,7 @@ std::string SystemProperties::GetPartialUpdatePkg()
 
 int32_t SystemProperties::GetSvgMode()
 {
-    return system::GetIntParameter<int>("persist.ace.svg.mode", 0);
+    return system::GetIntParameter<int>("persist.ace.svg.mode", 1);
 }
 
 } // namespace OHOS::Ace

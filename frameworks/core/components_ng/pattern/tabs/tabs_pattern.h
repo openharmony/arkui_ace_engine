@@ -32,6 +32,9 @@ class TabsPattern : public Pattern {
     DECLARE_ACE_TYPE(TabsPattern, Pattern);
 
 public:
+    using ChangeEvent = std::function<void(int32_t)>;
+    using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
+
     TabsPattern() = default;
     ~TabsPattern() override = default;
 
@@ -50,8 +53,14 @@ public:
         return MakeRefPtr<TabsLayoutAlgorithm>();
     }
 
+    void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
+
+    void OnModifyDone() override;
+
 private:
     void OnAttachToFrameNode() override;
+
+    ChangeEventPtr onChangeEvent_;
 };
 
 } // namespace OHOS::Ace::NG

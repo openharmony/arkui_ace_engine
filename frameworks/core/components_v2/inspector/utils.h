@@ -21,6 +21,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/align_declaration.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 
 namespace OHOS::Ace::V2 {
@@ -34,7 +35,7 @@ const char* AXIS_TYPE[] = {
     "Axis.NONE",
 };
 
-}
+} // namespace
 
 inline std::string ConvertStackFitToString(StackFit stackFit)
 {
@@ -219,7 +220,7 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
             { ImageFit::FITWIDTH, "ImageFit.FitWidth" },
             { ImageFit::FITHEIGHT, "ImageFit.FitHeight" },
             { ImageFit::NONE, "ImageFit.None" },
-            { ImageFit::SCALEDOWN, "ImageFit.ScaleDown" },
+            { ImageFit::SCALE_DOWN, "ImageFit.ScaleDown" },
         };
 
         auto index = BinarySearchFindIndex(imageFitTable, ArraySize(imageFitTable), imageFit);
@@ -369,6 +370,20 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
             return "Edge::Center";
         }
     }
+
+    inline std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
+    {
+        std::string result;
+        for (const auto& item : fontFamily) {
+            result += item;
+            result += ",";
+        }
+        result = result.substr(0, result.size() - 1);
+        return result;
+    }
+
+    std::string GetTextStyleInJson(const TextStyle& textStyle);
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_UTILS_H

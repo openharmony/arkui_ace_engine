@@ -57,6 +57,7 @@ const char STAGE_ETS_TAG[] = "stage";
 const char PAGE_ETS_TAG[] = "page";
 // js custom view
 const char JS_VIEW_ETS_TAG[] = "JsView";
+const char JS_VIEW_COMPONENT_TAG[] = "ProxyComponent";
 // js lazy foreach node
 const char JS_LAZY_FOR_EACH_ETS_TAG[] = "LazyForEach";
 // js lazy foreach node
@@ -90,6 +91,7 @@ const char STACK_ETS_TAG[] = "Stack";
 // swiper
 const char SWIPER_COMPONENT_TAG[] = "SwiperComponent";
 const char SWIPER_ETS_TAG[] = "Swiper";
+const char SWIPER_INDICATOR_ETS_TAG[] = "SwiperIndicator";
 
 // tabs
 const char TABS_COMPONENT_TAG[] = "TabsComponent";
@@ -123,6 +125,12 @@ const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestinationView";
 const char NAVDESTINATION_TITLE_BAR_ETS_TAG[] = "NavDestinationTitleBar";
 const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 
+// navigation title view
+const char NAVIGATION_TITLE_COMPONENT_TAG[] = "NavigationTitle";
+
+// navigation menus view
+const char NAVIGATION_MENUS_COMPONENT_TAG[] = "NavigationMenus";
+
 // row split
 const char ROW_SPLIT_COMPONENT_TAG[] = "RowSplitComponent";
 const char ROW_SPLIT_ETS_TAG[] = "RowSplit";
@@ -148,6 +156,14 @@ const char GRID_ETS_TAG[] = "Grid";
 // grid-item
 const char GRID_ITEM_COMPONENT_TAG[] = "GridLayoutItemComponent";
 const char GRID_ITEM_ETS_TAG[] = "GridItem";
+
+// waterFlow
+const char WATERFLOW_COMPONENT_TAG[] = "WaterFlowComponent";
+const char WATERFLOW_ETS_TAG[] = "WaterFlow";
+
+// flow-item
+const char FLOW_ITEM_COMPONENT_TAG[] = "WaterFlowItemComponent";
+const char FLOW_ITEM_ETS_TAG[] = "FlowItem";
 
 // list
 const char LIST_COMPONENT_TAG[] = "V2::ListComponent";
@@ -353,7 +369,7 @@ ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
 ACE_EXPORT extern const char GRID_ROW_ETS_TAG[] = "GridRowComponent";
 
 // relativeContainer
-ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainer";
+ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainerComponent";
 ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
 
 // menu
@@ -403,22 +419,23 @@ ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
 ACE_EXPORT extern const char CANVAS_ETS_TAG[] = "Canvas";
 
 // ActionSheet
-ACE_EXPORT extern const char ACTIONSHEETDIALOG_COMPONENT_TAG[] = "ActionSheet";
-ACE_EXPORT extern const char ACTIONSHEETDIALOG_ETS_TAG[] = "ActionSheet";
+ACE_EXPORT extern const char ACTION_SHEET_DIALOG_COMPONENT_TAG[] = "ActionSheet";
+ACE_EXPORT extern const char ACTION_SHEET_DIALOG_ETS_TAG[] = "ActionSheet";
 
 // AlertDialog
-ACE_EXPORT extern const char ALERTDIALOG_COMPONENT_TAG[] = "AlertDialog";
-ACE_EXPORT extern const char ALERTDIALOG_ETS_TAG[] = "AlertDialog";
+ACE_EXPORT extern const char ALERT_DIALOG_COMPONENT_TAG[] = "AlertDialog";
+ACE_EXPORT extern const char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
 
 // customdialog
-ACE_EXPORT extern const char CUSTOMDIALOG_COMPONENT_TAG[] = "CustomDialog";
-ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[] = "CustomDialog";
+ACE_EXPORT extern const char CUSTOM_DIALOG_COMPONENT_TAG[] = "CustomDialog";
+ACE_EXPORT extern const char CUSTOM_DIALOG_ETS_TAG[] = "CustomDialog";
 
 // datePickerdialog
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
 
 // Normal dialog
+ACE_EXPORT extern const char DIALOG_COMPONENT_TAG[] = "Dialog";
 ACE_EXPORT extern const char DIALOG_ETS_TAG[] = "Dialog";
 
 // sideBar

@@ -20,10 +20,13 @@
 #include <iterator>
 #include <string>
 
+#include "base/i18n/localization.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/source_map.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
+#include "bridge/js_frontend/frontend_delegate.h"
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
@@ -34,6 +37,27 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+
+constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
+
+void ExitToDesktop()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [] {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->Finish(false);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+} // namespace
 
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
@@ -50,7 +74,7 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     LoadPage(GenerateNextPageId(), info, params);
 }
 
-void PageRouterManager::RunCard(const std::string& url, const std::string& params, uint64_t cardId)
+void PageRouterManager::RunCard(const std::string& url, const std::string& params, int64_t cardId)
 {
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url };
@@ -80,6 +104,24 @@ void PageRouterManager::Push(const RouterPageInfo& target, const std::string& pa
     StartPush(target, params, mode);
 }
 
+void PageRouterManager::PushWithCallback(const RouterPageInfo& target, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, RouterMode mode)
+{
+    CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGI("in router opt, post push router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent([weak = WeakClaim(this), target, params, mode, errorCallback]() {
+            auto router = weak.Upgrade();
+            CHECK_NULL_VOID(router);
+            router->PushWithCallback(target, params, errorCallback, mode);
+        });
+        return;
+    }
+    StartPush(target, params, mode, errorCallback);
+}
+
 void PageRouterManager::Replace(const RouterPageInfo& target, const std::string& params, RouterMode mode)
 {
     CHECK_RUN_ON(JS);
@@ -95,6 +137,24 @@ void PageRouterManager::Replace(const RouterPageInfo& target, const std::string&
         return;
     }
     StartReplace(target, params, mode);
+}
+
+void PageRouterManager::ReplaceWithCallback(const RouterPageInfo& target, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, RouterMode mode)
+{
+    CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGI("in router opt, post replace router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent([weak = WeakClaim(this), target, params, mode, errorCallback]() {
+            auto router = weak.Upgrade();
+            CHECK_NULL_VOID(router);
+            router->ReplaceWithCallback(target, params, errorCallback, mode);
+        });
+        return;
+    }
+    StartReplace(target, params, mode, errorCallback);
 }
 
 void PageRouterManager::BackWithTarget(const RouterPageInfo& target, const std::string& params)
@@ -130,6 +190,61 @@ void PageRouterManager::Clear()
         return;
     }
     StartClean();
+}
+
+void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback)
+{
+    auto currentPage = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+    ClearAlertCallback(pageInfo);
+
+    DialogProperties dialogProperties = {
+        .content = message,
+        .autoCancel = false,
+        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
+            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .onSuccess =
+            [weak = AceType::WeakClaim(this), callback](int32_t successType, int32_t successIndex) {
+                LOGI("showDialog successType: %{public}d, successIndex: %{public}d", successType, successIndex);
+                if (!successType) {
+                    callback(successIndex);
+                    if (successIndex) {
+                        auto router = weak.Upgrade();
+                        CHECK_NULL_VOID(router);
+                        router->StartBack(router->ngBackUri_, router->backParam_);
+                    }
+                }
+            },
+    };
+
+    pageInfo->SetDialogProperties(dialogProperties);
+    pageInfo->SetAlertCallback(std::move(callback));
+}
+
+void PageRouterManager::DisableAlertBeforeBackPage()
+{
+    auto currentPage = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+    ClearAlertCallback(pageInfo);
+    pageInfo->SetAlertCallback(nullptr);
+}
+
+void PageRouterManager::ClearAlertCallback(const RefPtr<PageInfo>& pageInfo)
+{
+    if (pageInfo->GetAlertCallback()) {
+        // notify to clear js reference
+        auto alertCallback = pageInfo->GetAlertCallback();
+        alertCallback(static_cast<int32_t>(Framework::AlertState::RECOVERY));
+        pageInfo->SetAlertCallback(nullptr);
+    }
 }
 
 void PageRouterManager::StartClean()
@@ -196,8 +311,16 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
     CHECK_NULL_VOID(pagePattern);
     auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_VOID(pageInfo);
-    name = pageInfo->GetPageUrl();
-    path = pageInfo->GetPagePath();
+    auto url = pageInfo->GetPageUrl();
+    auto pos = url.rfind(".js");
+    if (pos == url.length() - 3) {
+        url = url.substr(0, pos);
+    }
+    pos = url.rfind("/");
+    if (pos != std::string::npos) {
+        name = url.substr(pos + 1);
+        path = url.substr(0, pos + 1);
+    }
 }
 
 std::string PageRouterManager::GetParams() const
@@ -285,7 +408,8 @@ std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const s
     return { std::distance(iter, pageRouterStack_.rend()) - 1, iter->Upgrade() };
 }
 
-void PageRouterManager::StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode)
+void PageRouterManager::StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     CHECK_RUN_ON(JS);
     RouterOptScope scope(this);
@@ -297,11 +421,18 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
         LOGE("the router manifest parser is null.");
         return;
     }
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
+        LOGE("router stack size is larger than max size 32.");
+        return;
+    }
     std::string url = target.url;
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(url);
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (pagePath.empty()) {
         LOGE("[Engine Log] this uri not support in route push.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
+        }
         return;
     }
 
@@ -319,7 +450,8 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
     LoadPage(GenerateNextPageId(), info, params);
 }
 
-void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode)
+void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     CHECK_RUN_ON(JS);
     RouterOptScope scope(this);
@@ -336,6 +468,9 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (pagePath.empty()) {
         LOGE("[Engine Log] this uri not support in route push.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR_LITE);
+        }
         return;
     }
 
@@ -361,7 +496,8 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         std::string pagePath;
         size_t pageRouteSize = pageRouterStack_.size();
         if (pageRouteSize < 2) {
-            LOGE("fail to back page due to page size is only one");
+            LOGI("router stack is only one, back to desktop");
+            ExitToDesktop();
             return;
         }
         // TODO: restore page operation.
@@ -386,7 +522,8 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         PopPageToIndex(pageInfo.first, params, true, true);
         return;
     }
-    LOGW("fail to find specified page to pop");
+    LOGI("fail to find specified page to pop");
+    ExitToDesktop();
 }
 
 void PageRouterManager::BackCheckAlert(const RouterPageInfo& target, const std::string& params)
@@ -396,7 +533,24 @@ void PageRouterManager::BackCheckAlert(const RouterPageInfo& target, const std::
         LOGI("page route stack is empty");
         return;
     }
-    // TODO: popup back check alert
+    auto currentPage = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+    if (pageInfo->GetAlertCallback()) {
+        ngBackUri_ = target;
+        backParam_ = params;
+
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipelineContext ? pipelineContext->GetOverlayManager() : nullptr;
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->ShowDialog(
+            pageInfo->GetDialogProperties(), nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        return;
+    }
+
     StartBack(target, params);
 }
 
@@ -410,6 +564,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
     auto pageNode =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
     auto result = loadJs_(target.path);
     if (!result) {
@@ -425,14 +580,15 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
     LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s. success", pageId, target.url.c_str());
 }
 
-void PageRouterManager::LoadCard(
-    int32_t pageId, const RouterPageInfo& target, const std::string& params, uint64_t cardId, bool /*isRestore*/, bool needHideLast)
+void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
+    int64_t cardId, bool /*isRestore*/, bool needHideLast)
 {
     CHECK_RUN_ON(JS);
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, params);
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
     auto pageNode =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
 
     if (!loadCard_) {
@@ -446,7 +602,7 @@ void PageRouterManager::LoadCard(
         return;
     }
 
-    if (!OnPageReady(pageNode, needHideLast, needHideLast, isCardRouter, cardId)) {
+    if (!OnPageReady(pageNode, needHideLast, false, isCardRouter_, cardId)) {
         LOGE("fail to mount page");
         pageRouterStack_.pop_back();
         return;
@@ -579,8 +735,8 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
     pageInfo->ReplacePageParams(tempParam);
 }
 
-bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
-    bool isCardRouter, uint64_t cardId)
+bool PageRouterManager::OnPageReady(
+    const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition, bool isCardRouter, int64_t cardId)
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);

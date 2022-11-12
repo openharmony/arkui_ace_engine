@@ -53,8 +53,9 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
 
 void LayoutWrapper::SetCacheCount(int32_t cacheCount)
 {
-    CHECK_NULL_VOID(layoutWrapperBuilder_);
-    layoutWrapperBuilder_->SetCacheCount(cacheCount);
+    if (layoutWrapperBuilder_) {
+        layoutWrapperBuilder_->SetCacheCount(cacheCount);
+    }
 }
 
 const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
@@ -103,6 +104,11 @@ RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
     return hostNode_.Upgrade();
 }
 
+WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
+{
+    return hostNode_;
+}
+
 std::string LayoutWrapper::GetHostTag() const
 {
     auto host = GetHostNode();
@@ -138,15 +144,14 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 
     auto preConstraint = layoutProperty_->GetLayoutConstraint();
     auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
+    layoutProperty_->BuildGridProperty(host);
     if (parentConstraint) {
         geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
-        layoutProperty_->UpdateGridConstraint(GetHostNode());
         layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
     } else {
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
         layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
-        layoutProperty_->UpdateGridConstraint(GetHostNode());
         layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     }
     layoutProperty_->UpdateContentConstraint();
@@ -235,9 +240,8 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
 
-    // TODO: add grid container offset prop.
-
     layoutAlgorithm_->Layout(this);
+    layoutProperty_->UpdateGridOffset(this);
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
 }

@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_LAYOUT_PROPERTY_H
 
+#include <memory>
+#include <unordered_map>
+
 #include "base/geometry/axis.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
@@ -48,6 +51,20 @@ public:
     {
         LayoutProperty::Reset();
         ResetAxis();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        std::unordered_map<Axis, std::string> scrollableMap { { Axis::VERTICAL, "ScrollDirection.Vertical" },
+            { Axis::HORIZONTAL, "ScrollDirection.Horizontal" }, { Axis::FREE, "ScrollDirection.Free" },
+            { Axis::NONE, "ScrollDirection.None" } };
+        Axis axis = GetAxisValue(Axis::VERTICAL);
+        json->Put("scrollable", scrollableMap[axis].c_str());
+        std::unordered_map<EdgeEffect, std::string> edgeEffectMap { { EdgeEffect::SPRING, "EdgeEffect.Spring" },
+            { EdgeEffect::FADE, "EdgeEffect.Fade" }, { EdgeEffect::NONE, "EdgeEffect.None" } };
+        EdgeEffect edgeEffect = scrollEffect_ ? scrollEffect_->GetEdgeEffect() : EdgeEffect::NONE;
+        json->Put("edgeEffect", edgeEffectMap[edgeEffect].c_str());
     }
 
     void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)

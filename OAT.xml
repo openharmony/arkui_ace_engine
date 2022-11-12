@@ -57,6 +57,7 @@ Note:If the text contains special characters, please escape them according to th
         <policylist>
             <policy name="projectPolicy" desc="">
                 <policyitem type="license" name="BSD-3-Clause" path="frameworks/core/pipeline/LICENSE" desc="三方软件许可证， 与Apache兼容"/>
+                <policyitem type="copyright" name="Shenzhen Kaihong Digital Industry Development Co., Ltd." path=".*" rule="may" group="defaultGroup" filefilter="copyrightPolicyFilter" desc="Developed By Kaihong"/>
             </policy>
         </policylist>
         <filefilterlist>

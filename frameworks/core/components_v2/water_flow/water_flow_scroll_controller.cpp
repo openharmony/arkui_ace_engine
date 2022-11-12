@@ -47,7 +47,7 @@ bool WaterFlowScrollController::UpdateScrollPosition(const double offset, int32_
         return false;
     }
     double activeHeight = height * height / estimateHeight;
-    if (!NearEqual(height, activeHeight)) {
+    if (!NearEqual(activeHeight, height)) {
         if (NearZero(height)) {
             return false;
         }

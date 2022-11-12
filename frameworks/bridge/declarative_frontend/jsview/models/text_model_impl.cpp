@@ -18,9 +18,11 @@
 #include <utility>
 
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/declaration/text/text_declaration.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
@@ -275,39 +277,39 @@ void TextModelImpl::SetCopyOption(CopyOptions copyOption)
     component->SetCopyOption(copyOption);
 }
 
-void TextModelImpl::SetOnDragStartId(const OnDragFunc& onDragStartId)
+void TextModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetOnDragStartId(onDragStartId);
+    component->SetOnDragStartId(ViewAbstractModelImpl::ToDragFunc(std::move(onDragStart)));
 }
 
-void TextModelImpl::SetOnDragEnterId(const OnDropFunc& onDragEnterId)
+void TextModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetOnDragEnterId(onDragEnterId);
+    component->SetOnDragEnterId(onDragEnter);
 }
 
-void TextModelImpl::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+void TextModelImpl::SetOnDragMove(NG::OnDragDropFunc&& onDragMove)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetOnDragMoveId(onDragMoveId);
+    component->SetOnDragMoveId(onDragMove);
 }
 
-void TextModelImpl::SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
+void TextModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetOnDragLeaveId(onDragLeaveId);
+    component->SetOnDragLeaveId(onDragLeave);
 }
 
-void TextModelImpl::SetOnDropId(const OnDropFunc& onDropId)
+void TextModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetOnDropId(onDropId);
+    component->SetOnDropId(onDrop);
 }
 
 } // namespace OHOS::Ace::Framework

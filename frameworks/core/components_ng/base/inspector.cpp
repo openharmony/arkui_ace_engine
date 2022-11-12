@@ -16,6 +16,7 @@
 #include "core/components_ng/base/inspector.h"
 
 #include "base/utils/utils.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -32,20 +33,18 @@ const char INSPECTOR_CHILDREN[] = "$children";
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 
-RefPtr<FrameNode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
+RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
 {
     std::queue<RefPtr<UINode>> elements;
     elements.push(root);
-    RefPtr<FrameNode> inspectorElement;
+    RefPtr<UINode> inspectorElement;
     while (!elements.empty()) {
         auto current = elements.front();
         elements.pop();
-        inspectorElement = AceType::DynamicCast<FrameNode>(current);
-        if (inspectorElement != nullptr && inspectorElement->HasInspectorId()) {
-            if (key == inspectorElement->GetInspectorIdValue()) {
-                return inspectorElement;
-            }
+        if (key == current->GetInspectorId().value_or("")) {
+            return current;
         }
+
         const auto& children = current->GetChildren();
         for (const auto& child : children) {
             elements.push(child);
@@ -83,7 +82,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     CHECK_NULL_RETURN(rootNode, "");
 
     auto inspectorElement = GetInspectorByKey(rootNode, key);
-    if (inspectorElement == nullptr) {
+    if (!inspectorElement) {
         LOGE("no inspector with key:%{public}s is found", key.c_str());
         return "";
     }
@@ -91,7 +90,10 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
-    jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetGeometryNode()->GetFrameRect().ToBounds().c_str());
+    if (AceType::InstanceOf<FrameNode>(inspectorElement)) {
+        jsonNode->Put(INSPECTOR_RECT,
+            AceType::DynamicCast<FrameNode>(inspectorElement)->GetGeometryNode()->GetFrameRect().ToBounds().c_str());
+    }
     auto jsonAttrs = JsonUtil::Create(true);
     inspectorElement->ToJsonValue(jsonAttrs);
     jsonNode->Put(INSPECTOR_ATTRS, jsonAttrs);
@@ -180,13 +182,15 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
     auto rootNode = context->GetRootElement();
     CHECK_NULL_RETURN(rootNode, false);
 
-    auto inspectorElement = GetInspectorByKey(rootNode, key);
-    if (inspectorElement == nullptr) {
+    auto inspectorElement = AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key));
+    if (!inspectorElement) {
         LOGE("no inspector with key:%{public}s is found", key.c_str());
         return false;
     }
 
-    auto rect = inspectorElement->GetGeometryNode()->GetFrameRect();
+    auto size = inspectorElement->GetGeometryNode()->GetFrameSize();
+    auto offset = inspectorElement->GetOffsetRelativeToWindow();
+    Rect rect { offset.GetX(), offset.GetY(), size.Width(), size.Height() };
     context->GetTaskExecutor()->PostTask(
         [weak = AceType::WeakClaim(AceType::RawPtr(context)), rect, action, params]() {
             auto context = weak.Upgrade();
@@ -198,11 +202,11 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
                 .y = (rect.Top() + rect.Height() / 2),
                 .type = TouchType::DOWN,
                 .time = std::chrono::high_resolution_clock::now() };
-            context->OnTouchEvent(point);
+            context->OnTouchEvent(point.UpdatePointers());
 
             switch (action) {
                 case static_cast<int>(AceAction::ACTION_CLICK): {
-                    context->OnTouchEvent(GetUpPoint(point));
+                    context->OnTouchEvent(GetUpPoint(point).UpdatePointers());
                     break;
                 }
                 case static_cast<int>(AceAction::ACTION_LONG_CLICK): {
@@ -210,7 +214,7 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
                     auto&& callback = [weak, point]() {
                         auto refPtr = weak.Upgrade();
                         if (refPtr) {
-                            refPtr->OnTouchEvent(GetUpPoint(point));
+                            refPtr->OnTouchEvent(GetUpPoint(point).UpdatePointers());
                         }
                     };
                     inspectorTimer.Reset(callback);

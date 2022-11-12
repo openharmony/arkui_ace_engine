@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components/svg/render_svg_fe_colormatrix.h"
 
-#include "commonlibrary/c_utils/base/include/securec.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 
 #include "frameworks/core/components/svg/svg_fe_colormatrix_component.h"
 

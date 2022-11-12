@@ -37,8 +37,7 @@ public:
         float stepRatio = 0.0f;
         float valueRatio = 0.0f;
     };
-    explicit SliderPaintMethod(const Parameters& parameters)
-        : parameters_(parameters) {};
+    explicit SliderPaintMethod(const Parameters& parameters) : parameters_(parameters) {};
     ~SliderPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
@@ -60,11 +59,14 @@ private:
         float radius;
     };
 
-    LinePenAndSize GetBackgroundPen(
-        const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset) const;
-    MarkerPenAndPath GetMarkerPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset) const;
-    LinePenAndSize GetSelectPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset) const;
-    CirclePenAndSize GetCirclePen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset) const;
+    LinePenAndSize GetBackgroundPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
+        const RefPtr<SliderTheme>& theme) const;
+    MarkerPenAndPath GetMarkerPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
+        const RefPtr<SliderTheme>& theme) const;
+    LinePenAndSize GetSelectPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
+        const RefPtr<SliderTheme>& theme) const;
+    CirclePenAndSize GetCirclePen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
+        const RefPtr<SliderTheme>& theme) const;
 
     Parameters parameters_;
 

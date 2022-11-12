@@ -46,10 +46,17 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
         return 0.0f;
     }
 
+    if (hostNode->GetSubtitle()) {
+        constraint.selfIdealSize = OptionalSizeF(
+            size.Width(), static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+        titleBarWrapper->Measure(constraint);
+        return static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    }
+
     constraint.selfIdealSize = OptionalSizeF(
-        size.Width(), static_cast<float>(TITLEBAR_HEIGHT_WITHOUT_SUBTITLE.ConvertToPx()));
+        size.Width(), static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
     titleBarWrapper->Measure(constraint);
-    return static_cast<float>(TITLEBAR_HEIGHT_WITHOUT_SUBTITLE.ConvertToPx());
+    return static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
 }
 
 void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
@@ -78,6 +85,8 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGr
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
+    auto titleBarOffset = OffsetT<float>(0.0f, 0.0f);
+    geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
 }
@@ -91,12 +100,15 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
-    if (!navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
+    if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
+        auto contentOffset = OffsetT<float>(0.0f, 0.0f);
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
     }
+
+    auto contentOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
+    geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 }
 
@@ -115,6 +127,7 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
+
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
     MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
@@ -127,6 +140,7 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto navDestinationLayoutProperty =
         AceType::DynamicCast<NavDestinationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navDestinationLayoutProperty);
+
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty);
     LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, titlebarHeight);
 }

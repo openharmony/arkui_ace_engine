@@ -16,6 +16,7 @@
 #include "core/components/rating/render_rating.h"
 
 #include <cmath>
+#include <sstream>
 
 #include "base/log/log.h"
 #include "base/utils/utils.h"
@@ -453,8 +454,10 @@ void RenderRating::FireChangeEvent()
         std::string param = std::string(R"("change",{"rating":)").append(std::to_string(drawScore_).append("}"));
         onScoreChange_(param);
     }
+    std::stringstream ss;
+    ss << std::setprecision(2) << drawScore_;
     if (onChangeRating) {
-        onChangeRating(static_cast<double>(drawScore_));
+        onChangeRating(ss.str());
     }
 }
 

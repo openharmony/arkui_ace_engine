@@ -21,6 +21,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/event/ace_event_handler.h"
@@ -49,8 +50,12 @@ std::optional<std::string> FocusHub::GetInspectorKey() const
     return std::nullopt;
 }
 
-RefPtr<FocusHub> FocusHub::GetParentFocusHub() const
+RefPtr<FocusHub> FocusHub::GetParentFocusHub(FrameNode* node) const
 {
+    if (node) {
+        auto parentNode = node->GetFocusParent();
+        return parentNode ? parentNode->GetFocusHub() : nullptr;
+    }
     auto frameNode = GetFrameNode();
     if (frameNode) {
         auto parentNode = frameNode->GetFocusParent();
@@ -181,9 +186,10 @@ void FocusHub::UpdateAccessibilityFocusInfo()
     // Need update
 }
 
-void FocusHub::LostFocus()
+void FocusHub::LostFocus(BlurReason reason)
 {
     if (IsCurrentFocus()) {
+        blurReason_ = reason;
         currentFocus_ = false;
         UpdateAccessibilityFocusInfo();
         OnBlur();
@@ -198,15 +204,15 @@ void FocusHub::LostSelfFocus()
     }
 }
 
-void FocusHub::RemoveSelf()
+void FocusHub::RemoveSelf(FrameNode* node)
 {
-    auto parent = GetParentFocusHub();
+    auto parent = GetParentFocusHub(node);
     if (parent) {
-        parent->RemoveChild(AceType::Claim(this));
+        parent->RemoveChild(this);
     }
 }
 
-void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
+void FocusHub::RemoveChild(FocusHub* focusNode)
 {
     // Not belong to this focus scope.
     if (!focusNode || focusNode->GetParentFocusHub() != this) {
@@ -252,6 +258,12 @@ bool FocusHub::IsFocusable()
     return false;
 }
 
+bool FocusHub::IsEnabled() const
+{
+    auto eventHub = eventHub_.Upgrade();
+    return eventHub ? eventHub->IsEnabled() : true;
+}
+
 bool FocusHub::IsFocusableScope()
 {
     if (!IsFocusableNode()) {
@@ -265,7 +277,9 @@ bool FocusHub::IsFocusableScope()
 
 bool FocusHub::IsFocusableNode()
 {
-    return enabled_ && show_ && focusable_ && parentFocusable_;
+    auto eventHub = eventHub_.Upgrade();
+    auto enabled = eventHub ? eventHub->IsEnabled() : true;
+    return enabled && show_ && focusable_ && parentFocusable_;
 }
 
 void FocusHub::SetFocusable(bool focusable)
@@ -289,7 +303,6 @@ void FocusHub::SetEnabled(bool enabled)
 
 void FocusHub::SetEnabledNode(bool enabled)
 {
-    enabled_ = enabled;
     if (!enabled) {
         RefreshFocus();
     }
@@ -335,6 +348,7 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
     focusCallbackEvents_->SetIsFocusOnTouch(isFocusOnTouch);
 
     auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto gesture = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
 
@@ -542,10 +556,8 @@ void FocusHub::OnClick(const KeyEvent& event)
         auto info = GestureEvent();
         info.SetTimeStamp(event.timeStamp);
         auto rect = GetGeometryNode()->GetFrameRect();
-        info.SetGlobalLocation(
-            Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
-        info.SetLocalLocation(
-            Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
+        info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
+        info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
         LOGD("FocusHub::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
@@ -706,6 +718,10 @@ void FocusHub::OnBlurNode()
     if (onBlurInternal_) {
         onBlurInternal_();
     }
+    if (onBlurReasonInternal_) {
+        LOGI("FocusHub: Node(%{public}s) 's blur reason is %{public}d", GetFrameName().c_str(), blurReason_);
+        onBlurReasonInternal_(blurReason_);
+    }
     auto onBlurCallback = GetOnBlurCallback();
     if (onBlurCallback) {
         onBlurCallback();
@@ -752,7 +768,7 @@ void FocusHub::OnBlurScope()
     FlushChildrenFocusHub();
     OnBlurNode();
     if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
-        (*itLastFocusNode_)->LostFocus();
+        (*itLastFocusNode_)->LostFocus(blurReason_);
     }
 }
 
@@ -770,7 +786,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
     return false;
 }
 
-bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF &rect)
+bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF& rect)
 {
     return IsFocusable();
 }

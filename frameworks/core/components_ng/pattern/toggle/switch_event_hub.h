@@ -38,9 +38,14 @@ public:
 
     void UpdateChangeEvent(bool isOn) const
     {
-        if (changeEvent_) {
-            changeEvent_(isOn);
-        }
+        auto task = [changeEvent = changeEvent_, isOn]() {
+            if (changeEvent) {
+                changeEvent(isOn);
+            }
+        };
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent(task, TaskExecutor::TaskType::UI);
     }
 
 private:

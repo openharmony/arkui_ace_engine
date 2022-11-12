@@ -37,6 +37,7 @@ public:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
 private:
     std::string webSrc_;
+    bool needOnFocus_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -52,7 +52,8 @@ void RenderColumnSplit::HandleDragUpdate(const Offset& currentPoint)
     if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
         return;
     }
-    if (!GetPaintRect().IsInRegion(Point(currentPoint.GetX(), currentPoint.GetY()))) {
+    Rect dragRect(Offset(0.0, 0.0), GetPaintRect().GetSize());
+    if (!dragRect.IsInRegion(Point(currentPoint.GetX(), currentPoint.GetY()))) {
         return;
     }
     dragSplitOffset_[dragedSplitIndex_] += (currentPoint.GetY() - startY_);

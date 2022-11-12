@@ -47,6 +47,13 @@ public:
         ResetBackgroundColor();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put(
+            "placeholderColor", propCursorColor_.value_or(Color()).ColorToString().c_str());
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CursorColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputStyle, InputStyle, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);

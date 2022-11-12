@@ -72,10 +72,11 @@ public:
     void OnWindowShow() override;
 
 private:
+    void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override
     {
         auto id = frameNode->GetId();
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
         CHECK_NULL_VOID(pipeline);
         pipeline->RemoveWindowStateChangedCallback(id);
         pipeline->RemoveNodesToNotifyMemoryLevel(id);

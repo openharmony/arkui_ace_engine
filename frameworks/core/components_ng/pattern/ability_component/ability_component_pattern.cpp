@@ -66,12 +66,14 @@ void AbilityComponentPattern::UpdateWindowRect()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetFrameSize();
-    auto offset = host->GetGeometryNode()->GetFrameOffset() + host->GetGeometryNode()->GetParentGlobalOffset();
+    auto offset = host->GetGeometryNode()->GetFrameOffset() + host->GetOffsetRelativeToWindow();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rect = pipeline->GetDisplayWindowRectInfo();
 
     LOGI("ConnectExtension: %{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(), size.Width(),
         size.Height());
-    Rect rect;
-    rect.SetRect(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+    rect.SetRect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
     if (adapter_) {
         adapter_->UpdateRect(rect);
     }

@@ -36,8 +36,8 @@ class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm {
 public:
     TextLayoutAlgorithm();
 
-    explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren)
-        : spanItemChildren_(std::move(spanItemChildren))
+    TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren, const RefPtr<Paragraph>& paragraph)
+        : spanItemChildren_(std::move(spanItemChildren)), paragraph_(paragraph)
     {}
 
     ~TextLayoutAlgorithm() override = default;
@@ -47,7 +47,7 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    const std::shared_ptr<RSParagraph>& GetParagraph();
+    const RefPtr<Paragraph>& GetParagraph();
     float GetBaselineOffset() const;
 
 private:
@@ -56,12 +56,13 @@ private:
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline);
-    bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
+    bool DidExceedMaxLines(const SizeF& maxSize);
     static TextDirection GetTextDirection(const std::string& content);
     float GetTextWidth() const;
+    SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const;
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
-    std::shared_ptr<RSParagraph> paragraph_;
+    RefPtr<Paragraph> paragraph_;
     float baselineOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);

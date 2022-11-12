@@ -110,7 +110,7 @@ void TimePickerRowPattern::FireChangeEvent(bool refresh) const
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         timePickerEventHub->FireChangeEvent(info.get());
-        timePickerEventHub->FireDailogChangeEvent(str);
+        timePickerEventHub->FireDialogChangeEvent(str);
     }
 }
 

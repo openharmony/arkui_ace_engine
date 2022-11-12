@@ -85,4 +85,12 @@ void ContainerModalElement::SetAppBgColor(const Color& color)
 void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
 }
+
+void ContainerModalElement::SetAppTitle(const std::string& title)
+{
+}
+
+void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
+{
+}
 } // namespace OHOS::Ace

@@ -52,6 +52,8 @@ public:
         LayoutProperty::Reset();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Columns, V2::GridContainerSize, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Gutter, V2::Gutter, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BreakPoints, V2::BreakPoints, PROPERTY_UPDATE_MEASURE);

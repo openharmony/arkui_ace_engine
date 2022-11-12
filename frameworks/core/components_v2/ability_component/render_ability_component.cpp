@@ -95,7 +95,7 @@ void RenderAbilityComponent::ConnectOrUpdateExtension()
     auto parentWindowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     Offset containerModalOffset;
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        pipelineContext->GetWindowManager()->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+        pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         containerModalOffset = Offset((NormalizeToPx(CONTAINER_BORDER_WIDTH) + NormalizeToPx(CONTENT_PADDING)),
             NormalizeToPx(CONTAINER_TITLE_HEIGHT));

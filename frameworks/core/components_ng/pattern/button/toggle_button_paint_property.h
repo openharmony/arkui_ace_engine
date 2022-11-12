@@ -46,6 +46,13 @@ public:
         ResetBackgroundColor();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        json->Put("type", "ToggleType.Button");
+        json->Put("isOn", propIsOn_.value_or(false) ? "true" : "false");
+        json->Put("selectedColor", propSelectedColor_.value_or(Color()).ColorToString().c_str());
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsOn, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);

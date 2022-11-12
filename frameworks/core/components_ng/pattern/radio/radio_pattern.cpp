@@ -24,6 +24,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -57,6 +58,24 @@ void RadioPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+
+    if (!layoutProperty->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.left = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
+        margin.right = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
+        margin.top = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
+        margin.bottom = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
+        layoutProperty->UpdateMargin(margin);
+    }
+
     if (clickListener_) {
         return;
     }
@@ -79,7 +98,12 @@ void RadioPattern::OnClick()
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    bool check = paintProperty->GetRadioCheckValue();
+    bool check = false;
+    if (paintProperty->HasRadioCheck()) {
+        check = paintProperty->GetRadioCheckValue();
+    } else {
+        paintProperty->UpdateRadioCheck(false);
+    }
 
     if (!preCheck_ && !check) {
         paintProperty->UpdateRadioCheck(true);
@@ -127,7 +151,13 @@ void RadioPattern::UpdateState()
 
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    bool check = paintProperty->GetRadioCheckValue();
+
+    bool check = false;
+    if (paintProperty->HasRadioCheck()) {
+        check = paintProperty->GetRadioCheckValue();
+    } else {
+        paintProperty->UpdateRadioCheck(false);
+    }
 
     if (preCheck_ != check) {
         UpdateGroupCheckStatus(host, check);

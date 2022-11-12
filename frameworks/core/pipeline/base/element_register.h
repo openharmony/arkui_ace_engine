@@ -82,10 +82,7 @@ public:
      * should be followed by ClearRemovedElements() call
      */
     std::unordered_set<ElementIdType>& GetRemovedItems();
-    void ClearRemovedItems(ElementIdType elmtId)
-    {
-        removedItems_.erase(elmtId);
-    }
+    void ClearRemovedItems(ElementIdType elmtId);
 
     /**
      * does a complete reset
@@ -116,6 +113,10 @@ private:
 
     // Set of removed Elements (not in itemMap_ anymore)
     std::unordered_set<ElementIdType> removedItems_;
+
+    // Cache IDs that are referenced by other object
+    // which causes delayed destruction  when custom node is destoryed.
+    std::unordered_set<ElementIdType> deletedCachedItems_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };

@@ -26,7 +26,9 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -119,20 +121,28 @@ public:
 
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
+
     virtual void UpdateTransition(const TransitionOptions& options) {}
+    virtual void OnNodeDisappear(FrameNode* host) {}
+    virtual void OnNodeAppear() {}
+
     virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
     {
         return false;
     }
 
+    virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
+    virtual void ResetSharedTranslate() {}
+
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
-    virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}
 
     virtual void ClipWithRect(const RectF& rectF) {}
+
+    virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
 
     virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
 
@@ -153,6 +163,36 @@ public:
     virtual void NotifyTransition(
         const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
     {}
+
+    void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
+    {
+        sharedTransitionOption_ = option;
+    }
+    const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const
+    {
+        return sharedTransitionOption_;
+    }
+    void SetShareId(const ShareId& shareId)
+    {
+        shareId_ = shareId;
+    }
+    const ShareId& GetShareId() const
+    {
+        return shareId_;
+    }
+    bool HasSharedTransition() const
+    {
+        return !shareId_.empty();
+    }
+    bool HasSharedTransitionOption() const
+    {
+        return sharedTransitionOption_ != nullptr;
+    }
+
+    virtual void PaintAccessibilityFocus() {};
+
+    virtual void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) {}
+    virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -187,9 +227,7 @@ public:
 
     // Decoration
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
-    ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
-    // Border
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBrightness, Dimension);
@@ -200,6 +238,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBlurRadius, Dimension);
 
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
@@ -222,8 +261,9 @@ public:
 
     // Clip
     ACE_DEFINE_PROPERTY_GROUP(Clip, ClipProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, ClipPathNG);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, RefPtr<BasicShape>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipEdge, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipMask, RefPtr<BasicShape>);
 
     // Gradient
     ACE_DEFINE_PROPERTY_GROUP(Gradient, GradientProperty);
@@ -231,8 +271,21 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, RadialGradient, NG::Gradient);
 
+    // Overlay
+    ACE_DEFINE_PROPERTY_GROUP(Overlay, OverlayProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Overlay, OverlayText, OverlayOptions)
+
+    // MotionPath
+    ACE_DEFINE_PROPERTY_GROUP(Motion, MotionPathProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
+
+    // accessibility
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+
 protected:
     RenderContext() = default;
+    std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
+    ShareId shareId_;
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
@@ -264,8 +317,9 @@ protected:
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
-    virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
+    virtual void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
+    virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
 
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
@@ -279,6 +333,11 @@ protected:
     virtual void OnFrontInvertUpdate(const Dimension& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
+    virtual void OnFrontBlurRadiusUpdate(const Dimension& value) {}
+
+    virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
+    virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
+    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {}
 
 private:
     std::function<void()> requestFrame_;

@@ -122,10 +122,7 @@ bool RosenMediaPlayer::SetSource(const std::string& src)
         CHECK_NULL_RETURN(context, false);
         auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(context->GetDataProviderManager());
         CHECK_NULL_RETURN(dataProvider, false);
-        auto dataAbilityHelper = dataProvider->GetDataAbilityHelper();
-        if (dataAbilityHelper) {
-            fd = dataAbilityHelper->OpenFile(videoSrc, "r");
-        }
+        fd = dataProvider->GetDataProviderFile(videoSrc, "r");
     } else if (!StringUtils::StartWith(videoSrc, "http")) {
         videoSrc = GetAssetAbsolutePath(videoSrc);
         fd = open(videoSrc.c_str(), O_RDONLY);

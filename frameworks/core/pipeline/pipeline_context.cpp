@@ -1714,17 +1714,6 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
         return false;
     }
-    if (!isKeyEvent_ && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        if (KeyCode::KEY_DPAD_UP <= event.code && event.code <= KeyCode::KEY_DPAD_RIGHT) {
-            if (event.action == KeyAction::UP) {
-                SetIsKeyEvent(true);
-            }
-        } else if (event.code == KeyCode::KEY_ENTER) {
-            if (event.action == KeyAction::CLICK) {
-                SetIsKeyEvent(true);
-            }
-        }
-    }
     rootElement_->HandleSpecifiedKey(event);
 
     SetShortcutKey(event);
@@ -2602,27 +2591,17 @@ bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
 {
     CHECK_NULL_RETURN(rootElement_, false);
-    return rootElement_->RequestFocusImmediatelyById(targetNodeId);
-}
-
-RefPtr<AccessibilityManager> PipelineContext::GetAccessibilityManager() const
-{
-    auto frontend = weakFrontend_.Upgrade();
-    if (!frontend) {
-        LOGE("frontend is nullptr");
-        EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return nullptr;
+    auto currentFocusChecked =  rootElement_->RequestFocusImmediatelyById(targetNodeId);
+    if (!isSubPipeline_ || currentFocusChecked) {
+        LOGI("Request focus finish currentFocus is %{public}d", currentFocusChecked);
+        return currentFocusChecked;
     }
-    return frontend->GetAccessibilityManager();
-}
-
-void PipelineContext::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent)
-{
-    auto accessibilityManager = GetAccessibilityManager();
-    if (!accessibilityManager) {
-        return;
-    }
-    accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
+    LOGI("Search focus in main pipeline");
+    auto parentPipelineBase = parentPipeline_.Upgrade();
+    CHECK_NULL_RETURN(parentPipelineBase, false);
+    auto parentPipelineContext = AceType::DynamicCast<PipelineContext>(parentPipelineBase);
+    CHECK_NULL_RETURN(parentPipelineContext, false);
+    return parentPipelineContext->RequestFocus(targetNodeId);
 }
 
 RefPtr<RenderFocusAnimation> PipelineContext::GetRenderFocusAnimation() const
@@ -2879,10 +2858,10 @@ void PipelineContext::FlushBuildAndLayoutBeforeSurfaceReady()
         TaskExecutor::TaskType::UI);
 }
 
-void PipelineContext::RootLostFocus() const
+void PipelineContext::RootLostFocus(BlurReason reason) const
 {
     if (rootElement_) {
-        rootElement_->LostFocus();
+        rootElement_->LostFocus(reason);
     }
 }
 
@@ -2890,7 +2869,7 @@ void PipelineContext::WindowFocus(bool isFocus)
 {
     onFocus_ = isFocus;
     if (!isFocus) {
-        RootLostFocus();
+        RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
@@ -2970,13 +2949,7 @@ void PipelineContext::DumpAccessibility(const std::vector<std::string>& params) 
     if (!accessibilityManager) {
         return;
     }
-    if (params.size() == 1) {
-        accessibilityManager->DumpTree(0, 0);
-    } else if (params.size() == 2) {
-        accessibilityManager->DumpProperty(params);
-    } else if (params.size() == 3 || params.size() == 4) {
-        accessibilityManager->DumpHandleEvent(params);
-    }
+    accessibilityManager->OnDumpInfo(params);
 }
 
 void PipelineContext::UpdateWindowBlurRegion(

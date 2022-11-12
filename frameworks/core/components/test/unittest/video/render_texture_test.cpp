@@ -738,7 +738,7 @@ HWTEST_F(RenderTextureTest, RenderTextureTest017, TestSize.Level1)
     component->SetTextureId(TEXTURE_ID_DEFAULT);
     component->SetSrcWidth(VIDEO_WIDTH_SMALL_PORTRAIT);
     component->SetSrcHeight(VIDEO_HEIGHT_SMALL_PORTRAIT);
-    component->SetFit(ImageFit::SCALEDOWN);
+    component->SetFit(ImageFit::SCALE_DOWN);
 
     /**
      * @tc.steps: step2. construct RenderTexture, update it with component.
@@ -781,7 +781,7 @@ HWTEST_F(RenderTextureTest, RenderTextureTest018, TestSize.Level1)
     component->SetTextureId(TEXTURE_ID_DEFAULT);
     component->SetSrcWidth(VIDEO_WIDTH_SMALL_LANDSCAPE);
     component->SetSrcHeight(VIDEO_HEIGHT_SMALL_LANDSCAPE);
-    component->SetFit(ImageFit::SCALEDOWN);
+    component->SetFit(ImageFit::SCALE_DOWN);
 
     /**
      * @tc.steps: step2. construct RenderTexture, update it with component.
@@ -823,7 +823,7 @@ HWTEST_F(RenderTextureTest, RenderTextureTest019, TestSize.Level1)
     component->SetTextureId(TEXTURE_ID_DEFAULT);
     component->SetSrcWidth(VIDEO_WIDTH_LARGE_PORTRAIT);
     component->SetSrcHeight(VIDEO_HEIGHT_LARGE_PORTRAIT);
-    component->SetFit(ImageFit::SCALEDOWN);
+    component->SetFit(ImageFit::SCALE_DOWN);
 
     /**
      * @tc.steps: step2. construct RenderTexture, update it with component.
@@ -865,7 +865,7 @@ HWTEST_F(RenderTextureTest, RenderTextureTest020, TestSize.Level1)
     component->SetTextureId(TEXTURE_ID_DEFAULT);
     component->SetSrcWidth(VIDEO_WIDTH_LARGE_LANDSCAPE);
     component->SetSrcHeight(VIDEO_HEIGHT_LARGE_LANDSCAPE);
-    component->SetFit(ImageFit::SCALEDOWN);
+    component->SetFit(ImageFit::SCALE_DOWN);
 
     /**
      * @tc.steps: step2. construct RenderTexture, update it with component.

@@ -54,6 +54,8 @@
 #include "core/components_v2/inspector/marquee_composed_element.h"
 #include "core/components_v2/inspector/menu_composed_element.h"
 #include "core/components_v2/inspector/navigation_composed_element.h"
+#include "core/components_v2/inspector/navigation_menus_composed_element.h"
+#include "core/components_v2/inspector/navigation_title_composed_element.h"
 #include "core/components_v2/inspector/navigator_composed_element.h"
 #include "core/components_v2/inspector/panel_composed_element.h"
 #include "core/components_v2/inspector/pattern_lock_composed_element.h"
@@ -63,6 +65,7 @@
 #include "core/components_v2/inspector/radio_composed_element.h"
 #include "core/components_v2/inspector/rating_composed_element.h"
 #include "core/components_v2/inspector/refresh_composed_element.h"
+#include "core/components_v2/inspector/relative_container_composed_element.h"
 #include "core/components_v2/inspector/row_composed_element.h"
 #include "core/components_v2/inspector/row_split_composed_element.h"
 #include "core/components_v2/inspector/scroll_bar_composed_element.h"
@@ -91,6 +94,8 @@
 #include "core/components_v2/inspector/time_picker_composed_element.h"
 #include "core/components_v2/inspector/time_picker_dialog_composed_element.h"
 #include "core/components_v2/inspector/toggle_composed_element.h"
+#include "core/components_v2/inspector/water_flow_composed_element.h"
+#include "core/components_v2/inspector/water_flow_item_composed_element.h"
 #include "core/components_v2/inspector/wrap_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -121,6 +126,10 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { GRID_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::GridComposedElement>(id); } },
     { GRID_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::GridItemComposedElement>(id); } },
+    { WATERFLOW_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::WaterFlowComposedElement>(id); } },
+    { FLOW_ITEM_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::WaterFlowItemComposedElement>(id); } },
     { LIST_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ListComposedElement>(id); } },
     { LIST_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ListItemComposedElement>(id); } },
@@ -209,11 +218,13 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::PickerTextDialogComposedElement>(id); } },
     { CANVAS_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { ACTIONSHEETDIALOG_COMPONENT_TAG,
+    { DIALOG_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { ACTION_SHEET_DIALOG_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ActionSheetDialogComposedElement>(id); } },
-    { ALERTDIALOG_COMPONENT_TAG,
+    { ALERT_DIALOG_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::AlertDialogComposedElement>(id); } },
-    { CUSTOMDIALOG_COMPONENT_TAG,
+    { CUSTOM_DIALOG_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CustomDialogComposedElement>(id); } },
     { DATE_PICKER_DIALOG_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::DatePickerDialogComposedElement>(id); } },
@@ -229,6 +240,14 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { RICH_TEXT_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { XCOMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { NAVIGATION_TITLE_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationTitleComposedElement>(id); } },
+    { NAVIGATION_MENUS_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationMenusComposedElement>(id); } },
+    { JS_VIEW_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { RELATIVE_CONTAINER_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::RelativeContainerComposedElement>(id); } },
 };
 
 } // namespace
@@ -248,6 +267,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { WRAP_COMPONENT_TAG, WRAP_ETS_TAG },
     { GRID_COMPONENT_TAG, GRID_ETS_TAG },
     { GRID_ITEM_COMPONENT_TAG, GRID_ITEM_ETS_TAG },
+    { WATERFLOW_COMPONENT_TAG, WATERFLOW_ETS_TAG },
+    { FLOW_ITEM_COMPONENT_TAG, FLOW_ITEM_ETS_TAG },
     { LIST_COMPONENT_TAG, LIST_ETS_TAG },
     { LIST_ITEM_COMPONENT_TAG, LIST_ITEM_ETS_TAG },
     { LIST_ITEM_GROUP_COMPONENT_TAG, LIST_ITEM_GROUP_ETS_TAG },
@@ -304,9 +325,9 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { TEXT_PICKER_COMPONENT_TAG, TEXT_PICKER_ETS_TAG },
     { PICKER_TEXT_DIALOG_COMPONENT_TAG, PICKER_TEXT_DIALOG_ETS_TAG },
     { CANVAS_COMPONENT_TAG, CANVAS_ETS_TAG },
-    { ACTIONSHEETDIALOG_COMPONENT_TAG, ACTIONSHEETDIALOG_ETS_TAG },
-    { ALERTDIALOG_COMPONENT_TAG, ALERTDIALOG_ETS_TAG },
-    { CUSTOMDIALOG_COMPONENT_TAG, CUSTOMDIALOG_ETS_TAG },
+    { ACTION_SHEET_DIALOG_COMPONENT_TAG, ACTION_SHEET_DIALOG_ETS_TAG },
+    { ALERT_DIALOG_COMPONENT_TAG, ALERT_DIALOG_ETS_TAG },
+    { CUSTOM_DIALOG_COMPONENT_TAG, CUSTOM_DIALOG_ETS_TAG },
     { DATE_PICKER_DIALOG_COMPONENT_TAG, DATE_PICKER_DIALOG_ETS_TAG },
     { SIDE_BAR_COMPONENT_TAG, SIDE_BAR_ETS_TAG },
     { LOADING_PROGRESS_COMPONENT_TAG, LOADING_PROGRESS_ETS_TAG },
@@ -315,6 +336,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { WEB_COMPONENT_TAG, WEB_ETS_TAG },
     { RICH_TEXT_COMPONENT_TAG, RICH_TEXT_ETS_TAG },
     { XCOMPONENT_TAG, XCOMPONENT_ETS_TAG },
+    { JS_VIEW_COMPONENT_TAG, JS_VIEW_ETS_TAG },
+    { RELATIVE_CONTAINER_COMPONENT_TAG, RELATIVE_CONTAINER_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;

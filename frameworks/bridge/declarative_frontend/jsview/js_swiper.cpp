@@ -18,19 +18,41 @@
 #include <algorithm>
 #include <iterator>
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/swiper/swiper_component.h"
-#include "core/components_ng/pattern/swiper/swiper_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_view.h"
 
+namespace OHOS::Ace {
+
+std::unique_ptr<SwiperModel> SwiperModel::instance_ = nullptr;
+
+SwiperModel* SwiperModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::SwiperModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::SwiperModelNG());
+        } else {
+            instance_.reset(new Framework::SwiperModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 namespace {
-
-constexpr int32_t DEFAULT_SWIPER_CACHED_COUNT = 1;
 
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR };
@@ -44,46 +66,22 @@ JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 
 void JSSwiper::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto controller = NG::SwiperView::Create();
-        if (info.Length() > 0 && info[0]->IsObject()) {
-            auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSwiperController>();
-            if (jsController) {
-                jsController->SetController(controller);
-            }
-        }
-        return;
-    }
+    auto controller = SwiperModel::GetInstance()->Create();
 
-    std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-    RefPtr<OHOS::Ace::SwiperComponent> component = AceType::MakeRefPtr<OHOS::Ace::SwiperComponent>(componentChildren);
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSwiperController>();
         if (jsController) {
-            jsController->SetController(component->GetSwiperController());
+            jsController->SetController(controller);
         }
     }
-    component->SetIndicator(InitIndicatorStyle());
-    component->SetMainSwiperSize(MainSwiperSize::MIN);
-    component->SetCachedSize(DEFAULT_SWIPER_CACHED_COUNT);
-    component->SetCurve(Curves::LINEAR);
-    ViewStackProcessor::GetInstance()->ClaimElementId(component);
-    ViewStackProcessor::GetInstance()->Push(component);
-    JSInteractableView::SetFocusNode(true);
 }
 
 void JSSwiper::JsRemoteMessage(const JSCallbackInfo& info)
 {
     RemoteCallback remoteCallback;
     JSInteractableView::JsRemoteMessage(info, remoteCallback);
-    EventMarker remoteMessageEventId(std::move(remoteCallback));
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperComponent = AceType::DynamicCast<SwiperComponent>(stack->GetMainComponent());
-    if (!swiperComponent) {
-        LOGE("swiperComponent is null");
-        return;
-    }
-    swiperComponent->SetRemoteMessageEventId(remoteMessageEventId);
+
+    SwiperModel::GetInstance()->SetRemoteMessageEventId(std::move(remoteCallback));
 }
 
 void JSSwiper::JSBind(BindingTarget globalObj)
@@ -99,7 +97,6 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("loop", &JSSwiper::SetLoop, opt);
     JSClass<JSSwiper>::StaticMethod("vertical", &JSSwiper::SetVertical, opt);
     JSClass<JSSwiper>::StaticMethod("indicator", &JSSwiper::SetIndicator, opt);
-    JSClass<JSSwiper>::StaticMethod("cancelSwipeOnOtherAxis", &JSSwiper::SetCancelSwipeOnOtherAxis, opt);
     JSClass<JSSwiper>::StaticMethod("displayMode", &JSSwiper::SetDisplayMode);
     JSClass<JSSwiper>::StaticMethod("effectMode", &JSSwiper::SetEffectMode);
     JSClass<JSSwiper>::StaticMethod("displayCount", &JSSwiper::SetDisplayCount);
@@ -128,16 +125,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
 
 void JSSwiper::SetAutoPlay(bool autoPlay)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetAutoPlay(autoPlay);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetAutoPlay(autoPlay);
-    }
+    SwiperModel::GetInstance()->SetAutoPlay(autoPlay);
 }
 
 void JSSwiper::SetEnabled(const JSCallbackInfo& info)
@@ -153,30 +141,12 @@ void JSSwiper::SetEnabled(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetEnabled(info[0]->IsBoolean());
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetDisabledStatus(!(info[0]->ToBoolean()));
-    }
+    SwiperModel::GetInstance()->SetEnabled(info[0]->IsBoolean());
 }
 
 void JSSwiper::SetDisableSwipe(bool disableSwipe)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetDisableSwipe(disableSwipe);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->DisableSwipe(disableSwipe);
-    }
+    SwiperModel::GetInstance()->SetDisableSwipe(disableSwipe);
 }
 
 void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
@@ -191,30 +161,13 @@ void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto edgeEffect = info[0]->ToNumber<int32_t>();
-        if (edgeEffect < 0 || edgeEffect >= static_cast<int32_t>(EDGE_EFFECT.size())) {
-            LOGE("Edge effect: %{public}d illegal value", edgeEffect);
-            return;
-        }
-        NG::SwiperView::SetEdgeEffect(EDGE_EFFECT[edgeEffect]);
+    auto edgeEffect = info[0]->ToNumber<int32_t>();
+    if (edgeEffect < 0 || edgeEffect >= static_cast<int32_t>(EDGE_EFFECT.size())) {
+        LOGE("Edge effect: %{public}d illegal value", edgeEffect);
         return;
     }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (!swiper) {
-        return;
-    }
-
-    auto swiperMode = static_cast<EdgeEffect>(info[0]->ToNumber<int32_t>());
-    if (swiperMode == EdgeEffect::SPRING) {
-        swiper->SetEdgeEffect(EdgeEffect::SPRING);
-    } else if (swiperMode == EdgeEffect::FADE) {
-        swiper->SetEdgeEffect(EdgeEffect::FADE);
-    } else {
-        swiper->SetEdgeEffect(EdgeEffect::NONE);
-    }
+    SwiperModel::GetInstance()->SetEdgeEffect(EDGE_EFFECT[edgeEffect]);
 }
 
 void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
@@ -224,38 +177,16 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsString() && info[0]->ToString() == "auto") {
-            NG::SwiperView::SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-        } else if (info[0]->IsNumber()) {
-            NG::SwiperView::SetDisplayCount(info[0]->ToNumber<int32_t>());
-        }
-        LOGE("display count is not valid");
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (!swiper) {
-        return;
-    }
-
-    if (info[0]->ToString() == "auto") {
-        swiper->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    }
-
-    if (info[0]->IsNumber()) {
-        swiper->SetDisplayCount(info[0]->ToNumber<int32_t>());
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+        SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    } else if (info[0]->IsNumber()) {
+        SwiperModel::GetInstance()->SetDisplayCount(info[0]->ToNumber<int32_t>());
     }
 }
 
 void JSSwiper::SetDigital(bool digitalIndicator)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetDigitalIndicator(digitalIndicator);
-    }
+    SwiperModel::GetInstance()->SetDigital(digitalIndicator);
 }
 
 void JSSwiper::SetDuration(int32_t duration)
@@ -265,16 +196,7 @@ void JSSwiper::SetDuration(int32_t duration)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetDuration(duration);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetDuration(duration);
-    }
+    SwiperModel::GetInstance()->SetDuration(duration);
 }
 
 void JSSwiper::SetIndex(int32_t index)
@@ -284,16 +206,7 @@ void JSSwiper::SetIndex(int32_t index)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetIndex(index);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetIndex(index);
-    }
+    SwiperModel::GetInstance()->SetIndex(index);
 }
 
 void JSSwiper::SetInterval(int32_t interval)
@@ -303,79 +216,27 @@ void JSSwiper::SetInterval(int32_t interval)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetAutoPlayInterval(interval);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetAutoPlayInterval(interval);
-    }
+    SwiperModel::GetInstance()->SetAutoPlayInterval(interval);
 }
 
 void JSSwiper::SetLoop(bool loop)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetLoop(loop);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetLoop(loop);
-    }
+    SwiperModel::GetInstance()->SetLoop(loop);
 }
 
 void JSSwiper::SetVertical(bool isVertical)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetDirection(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetAxis(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
-    }
+    SwiperModel::GetInstance()->SetDirection(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
 }
 
 void JSSwiper::SetIndicator(bool showIndicator)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetShowIndicator(showIndicator);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetShowIndicator(showIndicator);
-        if (!showIndicator) {
-            swiper->SetIndicator(nullptr);
-        }
-    }
-}
-
-void JSSwiper::SetCancelSwipeOnOtherAxis(bool cancel)
-{
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    SwiperModel::GetInstance()->SetShowIndicator(showIndicator);
 }
 
 void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        auto indictor = swiper->GetIndicator();
-        if (!indictor) {
-            return;
-        }
-
+    if (Container::IsCurrentUseNewPipeline()) {
         if (info[0]->IsObject()) {
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
             JSRef<JSVal> leftValue = obj->GetProperty("left");
@@ -389,38 +250,87 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
 
             Dimension dimLeft;
             if (ParseJsDimensionPx(leftValue, dimLeft)) {
-                indictor->SetLeft(dimLeft);
+                NG::SwiperIndicatorView::SetLeft(dimLeft);
             }
             Dimension dimTop;
             if (ParseJsDimensionPx(topValue, dimTop)) {
-                indictor->SetTop(dimTop);
+                NG::SwiperIndicatorView::SetTop(dimTop);
             }
             Dimension dimRight;
             if (ParseJsDimensionPx(rightValue, dimRight)) {
-                indictor->SetRight(dimRight);
+                NG::SwiperIndicatorView::SetRight(dimRight);
             }
             Dimension dimBottom;
             if (ParseJsDimensionPx(bottomValue, dimBottom)) {
-                indictor->SetBottom(dimBottom);
+                NG::SwiperIndicatorView::SetBottom(dimBottom);
             }
             Dimension dimSize;
             if (ParseJsDimensionPx(sizeValue, dimSize)) {
-                indictor->SetSize(dimSize);
+                NG::SwiperIndicatorView::SetSize(dimSize);
             }
             if (maskValue->IsBoolean()) {
                 auto mask = maskValue->ToBoolean();
-                indictor->SetIndicatorMask(mask);
+                NG::SwiperIndicatorView::SetIndicatorMask(mask);
             }
             Color colorVal;
             if (ParseJsColor(colorValue, colorVal)) {
-                indictor->SetColor(colorVal);
+                NG::SwiperIndicatorView::SetColor(colorVal);
             }
             Color selectedColorVal;
             if (ParseJsColor(selectedColorValue, selectedColorVal)) {
-                indictor->SetSelectedColor(selectedColorVal);
+                NG::SwiperIndicatorView::SetSelectedColor(selectedColorVal);
             }
         }
+        return;
     }
+    SwiperParameters swiperParameters;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> leftValue = obj->GetProperty("left");
+        JSRef<JSVal> topValue = obj->GetProperty("top");
+        JSRef<JSVal> rightValue = obj->GetProperty("right");
+        JSRef<JSVal> bottomValue = obj->GetProperty("bottom");
+        JSRef<JSVal> sizeValue = obj->GetProperty("size");
+        JSRef<JSVal> maskValue = obj->GetProperty("mask");
+        JSRef<JSVal> colorValue = obj->GetProperty("color");
+        JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
+
+        Dimension dimLeft;
+        if (ParseJsDimensionPx(leftValue, dimLeft)) {
+            swiperParameters.dimLeft = dimLeft;
+        }
+        Dimension dimTop;
+        if (ParseJsDimensionPx(topValue, dimTop)) {
+            swiperParameters.dimTop = dimTop;
+        }
+        Dimension dimRight;
+        if (ParseJsDimensionPx(rightValue, dimRight)) {
+            swiperParameters.dimRight = dimRight;
+        }
+        Dimension dimBottom;
+        if (ParseJsDimensionPx(bottomValue, dimBottom)) {
+            swiperParameters.dimBottom = dimBottom;
+        }
+        Dimension dimSize;
+        if (ParseJsDimensionPx(sizeValue, dimSize)) {
+            swiperParameters.dimSize = dimSize;
+        }
+        if (maskValue->IsBoolean()) {
+            auto mask = maskValue->ToBoolean();
+            swiperParameters.maskValue = mask;
+        }
+        Color colorVal;
+        if (ParseJsColor(colorValue, colorVal)) {
+            swiperParameters.colorVal = colorVal;
+        }
+        Color selectedColorVal;
+        if (ParseJsColor(selectedColorValue, selectedColorVal)) {
+            swiperParameters.selectedColorVal = selectedColorVal;
+        }
+    }
+
+    SwiperModel::GetInstance()->SetIndicatorStyle(swiperParameters);
+
     info.ReturnSelf();
 }
 
@@ -440,16 +350,7 @@ void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetItemSpace(value);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetItemSpace(value);
-    }
+    SwiperModel::GetInstance()->SetItemSpace(value);
 }
 
 void JSSwiper::SetDisplayMode(int32_t index)
@@ -459,44 +360,19 @@ void JSSwiper::SetDisplayMode(int32_t index)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetDisplayMode(DISPLAY_MODE[index]);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetDisplayMode(static_cast<SwiperDisplayMode>(index));
-    }
+    SwiperModel::GetInstance()->SetDisplayMode(DISPLAY_MODE[index]);
 }
 
 void JSSwiper::SetCachedCount(int32_t cachedCount)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetCachedCount(cachedCount);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetCachedSize(cachedCount);
-    }
+    SwiperModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
 void JSSwiper::SetCurve(const std::string& curveStr)
 {
     RefPtr<Curve> curve = CreateCurve(curveStr);
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetCurve(curve);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    swiper->SetCurve(curve);
+    SwiperModel::GetInstance()->SetCurve(curve);
 }
 
 void JSSwiper::SetOnChange(const JSCallbackInfo& info)
@@ -519,51 +395,28 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& info)
         func->Execute(*swiperInfo);
     };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::SetOnChange(std::move(onChange));
-        return;
-    }
-
-    auto onChangeEvent = EventMarker(std::move(onChange));
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetChangeEventId(onChangeEvent);
-    }
+    SwiperModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
-EventMarker GetClickEventMarker(const JSCallbackInfo& info)
+void JSSwiper::SetOnClick(const JSCallbackInfo& info)
 {
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("fail to get inspector for on get click event marker");
-        return EventMarker();
-    }
-    auto impl = inspector->GetInspectorFunctionImpl();
-    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onClickId = EventMarker(
-        [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](const BaseEventInfo* info) {
+    if (info[0]->IsFunction()) {
+        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onClick = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
+                           const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
             auto newInfo = *clickInfo;
             if (impl) {
                 impl->UpdateEventInfo(newInfo);
             }
             ACE_SCORING_EVENT("onClick");
             func->Execute(newInfo);
-        });
-    return onClickId;
-}
+        };
 
-void JSSwiper::SetOnClick(const JSCallbackInfo& info)
-{
-    if (info[0]->IsFunction()) {
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-        if (swiper) {
-            swiper->SetClickEventId(GetClickEventMarker(info));
-        }
+        SwiperModel::GetInstance()->SetOnClick(onClick);
     }
+
     info.SetReturnValue(info.This());
 }
 
@@ -594,47 +447,29 @@ void JSSwiper::SetWidth(const JSRef<JSVal>& jsValue)
         return;
     }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        JSViewAbstract::JsWidth(jsValue);
-        if (swiper->GetMainSwiperSize() == MainSwiperSize::MAX ||
-            swiper->GetMainSwiperSize() == MainSwiperSize::MAX_Y) {
-            swiper->SetMainSwiperSize(MainSwiperSize::MAX);
-        } else {
-            swiper->SetMainSwiperSize(MainSwiperSize::MAX_X);
-        }
+    JSViewAbstract::JsWidth(jsValue);
+    SwiperModel::GetInstance()->SetMainSwiperSizeWidth();
+}
+
+void JSSwiper::SetHeight(const JSRef<JSVal>& jsValue)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(jsValue);
+        return;
     }
+
+    JSViewAbstract::JsHeight(jsValue);
+    SwiperModel::GetInstance()->SetMainSwiperSizeHeight();
 }
 
 void JSSwiper::SetHeight(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsHeight(info);
-        return;
-    }
-
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     SetHeight(info[0]);
-}
-
-void JSSwiper::SetHeight(const JSRef<JSVal>& jsValue)
-{
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        JSViewAbstract::JsHeight(jsValue);
-        if (swiper->GetMainSwiperSize() == MainSwiperSize::MAX ||
-            swiper->GetMainSwiperSize() == MainSwiperSize::MAX_X) {
-            swiper->SetMainSwiperSize(MainSwiperSize::MAX);
-        } else {
-            swiper->SetMainSwiperSize(MainSwiperSize::MAX_Y);
-        }
-    }
 }
 
 void JSSwiper::SetSize(const JSCallbackInfo& info)

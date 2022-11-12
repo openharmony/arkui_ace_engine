@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -54,11 +55,22 @@ public:
         return MakeRefPtr<ButtonLayoutProperty>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ButtonAccessibilityProperty>();
+    }
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
+    }
+
+    void SetClickedColor(const Color& color)
+    {
+        clickedColor_ = color;
+        isSetClickedColor_ = true;
     }
 
 protected:
@@ -68,6 +80,9 @@ protected:
 private:
     void OnTouchDown();
     void OnTouchUp();
+    Color clickedColor_;
+    Color backgroundColor_;
+    bool isSetClickedColor_ = false;
 
     RefPtr<TouchEventImpl> touchListener_;
 

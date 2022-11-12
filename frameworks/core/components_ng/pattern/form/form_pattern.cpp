@@ -97,6 +97,10 @@ void FormPattern::InitFormManagerDelegate()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
+    auto formUtils = FormManager::GetInstance().GetFormUtils();
+    if (formUtils) {
+        formManagerBridge_->SetFormUtils(formUtils);
+    }
     int32_t instanceID = context->GetInstanceId();
     formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id, const std::string& path,
                                                    const std::string& module, const std::string& data,
@@ -306,7 +310,6 @@ void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) co
 
 void FormPattern::OnActionEvent(const std::string& action) const
 {
-    LOGI("OnActionEvent action: %{public}s", action.c_str());
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         LOGE("get event action failed");

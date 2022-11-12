@@ -56,6 +56,8 @@ public:
         canvasSize_ = canvasSize;
     }
 
+    void SetAntiAlias(bool isEnabled);
+
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
     void ClearRect(const Rect& rect);

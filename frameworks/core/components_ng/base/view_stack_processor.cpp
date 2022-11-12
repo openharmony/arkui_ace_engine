@@ -48,10 +48,13 @@ RefPtr<UINode> ViewStackProcessor::GetMainElementNode() const
     return elementsStack_.top();
 }
 
-void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView*/)
+void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool isCustomView)
 {
     if (ShouldPopImmediately()) {
         Pop();
+    }
+    if (!isCustomView) {
+        element->SetRemoveSilently(false);
     }
     elementsStack_.push(element);
 }
@@ -119,7 +122,7 @@ void ViewStackProcessor::Pop()
     if (currentFrameNode) {
         currentFrameNode->OnMountToParentDone();
     }
-    LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
+    LOGD("ViewStackProcessor Pop size %{public}d", static_cast<int32_t>(elementsStack_.size()));
 }
 
 void ViewStackProcessor::PopContainer()

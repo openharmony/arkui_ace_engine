@@ -19,8 +19,6 @@ namespace OHOS::Ace::Framework {
 
 const int32_t JS_CALL_FAIL = -1;
 const int32_t JS_CALL_SUCCESS = 0;
-// To solve the problem of stack overflow when qjs runs JS_Eval() after the context is generated.
-const int32_t MAX_STACK_SIZE = -1;
 
 // for pc preview
 #if defined(PREVIEW)

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_CPP_ACE_CONTAINER_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_CPP_ACE_CONTAINER_H
 
+#include <cstddef>
 #include <memory>
 #include <mutex>
 
@@ -40,10 +41,10 @@ class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatch
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    AceContainer(int32_t instanceId, FrontendType type,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
-    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    AceContainer(int32_t instanceId, FrontendType type,
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
@@ -70,13 +71,13 @@ public:
         return frontend_;
     }
 
-    void SetCardFrontend(WeakPtr<Frontend> frontend, uint64_t cardId) override
+    void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) override
     {
         std::lock_guard<std::mutex> lock(cardFrontMutex_);
         cardFrontendMap_.try_emplace(cardId, frontend);
     }
 
-    WeakPtr<Frontend> GetCardFrontend(uint64_t cardId) const override
+    WeakPtr<Frontend> GetCardFrontend(int64_t cardId) const override
     {
         std::lock_guard<std::mutex> lock(cardFrontMutex_);
         auto it = cardFrontendMap_.find(cardId);
@@ -86,13 +87,13 @@ public:
         return nullptr;
     }
 
-    void SetCardPipeline(WeakPtr<PipelineBase> pipeline, uint64_t cardId) override
+    void SetCardPipeline(WeakPtr<PipelineBase> pipeline, int64_t cardId) override
     {
         std::lock_guard<std::mutex> lock(cardPipelineMutex_);
         cardPipelineMap_.try_emplace(cardId, pipeline);
     }
 
-    WeakPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const override
+    WeakPtr<PipelineBase> GetCardPipeline(int64_t cardId) const override
     {
         std::lock_guard<std::mutex> lock(cardPipelineMutex_);
         auto it = cardPipelineMap_.find(cardId);
@@ -268,7 +269,7 @@ public:
         return parentId_;
     }
 
-    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, const std::string& instanceName,
+    static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
 
@@ -288,7 +289,6 @@ public:
     static void OnRemoteTerminated(int32_t instanceId);
     static void OnConfigurationUpdated(int32_t instanceId, const std::string& configuration);
     static void OnNewRequest(int32_t instanceId, const std::string& data);
-    static void OnDialogUpdated(int32_t instanceId, const std::string& data);
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
         const std::vector<std::string>& paths);
     static void AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath);
@@ -350,6 +350,14 @@ public:
         return useStageModel_;
     }
 
+    void GetCardFrontendMap(std::unordered_map<int64_t, WeakPtr<Frontend>>& cardFrontendMap) const override
+    {
+        cardFrontendMap = cardFrontendMap_;
+    }
+
+    void SetToken(sptr<IRemoteObject>& token);
+    sptr<IRemoteObject> GetToken();
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -368,11 +376,10 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
-    std::unordered_map<uint64_t, WeakPtr<Frontend>> cardFrontendMap_;
-    std::unordered_map<uint64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
+    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap_;
+    std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
 
     FrontendType type_ = FrontendType::JS;
-    bool isArkApp_ = false;
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     WindowModal windowModal_ { WindowModal::NORMAL };
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };
@@ -387,6 +394,7 @@ private:
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
     std::string windowName_;
     uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
+    sptr<IRemoteObject> token_;
 
     bool isSubContainer_ = false;
     int32_t parentId_ = 0;
@@ -394,6 +402,7 @@ private:
 
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
+    mutable std::mutex cardTokensMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

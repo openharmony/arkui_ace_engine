@@ -23,9 +23,13 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_position_controller.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+}
 
 void ScrollModelNG::Create()
 {
@@ -55,9 +59,23 @@ RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController()
     return pattern->GetScrollPositionController();
 }
 
+RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
+{
+    return AceType::MakeRefPtr<ScrollBarProxy>();
+}
+
 void ScrollModelNG::SetAxis(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis);
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollPaintProperty, Axis, axis);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->SetScrollBarPositionMode(axis);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetPosition();
 }
 
 void ScrollModelNG::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
@@ -96,17 +114,49 @@ void ScrollModelNG::SetOnScrollEnd(NG::ScrollEndEvent&& event)
     eventHub->SetOnScrollEnd(std::move(event));
 }
 
-void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& proxy) {}
+void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(proxy);
+    CHECK_NULL_VOID(scrollBarProxy);
+    pattern->SetScrollBarProxy(scrollBarProxy);
+}
 
 void ScrollModelNG::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
     const std::pair<bool, Dimension>& width, EdgeEffect effect)
 {}
 
-void ScrollModelNG::SetDisplayMode(DisplayMode displayMode) {}
+void ScrollModelNG::SetDisplayMode(int displayMode)
+{
+    if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->SetDisplayMode(DISPLAY_MODE[displayMode]);
+}
 
-void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension) {}
+void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
+    paintProperty->SetScrollBarWidth(dimension);
+}
 
-void ScrollModelNG::SetScrollBarColor(const Color& color) {}
+void ScrollModelNG::SetScrollBarColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->SetScrollBarColor(color);
+}
 
 void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
 {

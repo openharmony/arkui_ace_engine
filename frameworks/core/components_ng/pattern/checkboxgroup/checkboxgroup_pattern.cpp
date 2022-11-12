@@ -146,7 +146,7 @@ void CheckBoxGroupPattern::UpdateState()
         pageEventHub->AddCheckBoxGroupToGroup(group, host->GetId());
         auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
-        if (paintProperty->GetCheckBoxGroupSelectValue()) {
+        if (paintProperty->HasCheckBoxGroupSelect() && paintProperty->GetCheckBoxGroupSelectValue()) {
             paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
         }
     } else {
@@ -156,8 +156,13 @@ void CheckBoxGroupPattern::UpdateState()
         } else {
             auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
-            bool isSelected = paintProperty->GetCheckBoxGroupSelectValue();
 
+            if (!paintProperty->HasCheckBoxGroupSelect()) {
+                pattern->SetPreGroup(group);
+                return;
+            }
+            bool isSelected = paintProperty->GetCheckBoxGroupSelectValue();
+            paintProperty->ResetCheckBoxGroupSelect();
             if (pattern->GetIsAddToMap()) {
                 UpdateGroupCheckStatus(host, isSelected);
             } else {
@@ -197,7 +202,8 @@ void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frame
 }
 
 void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode,
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, std::string group, bool select)
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, const std::string& group,
+    bool select)
 {
     std::vector<std::string> vec;
     auto status =
@@ -226,7 +232,6 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     eventHub->UpdateChangeEvent(&groupResult);
-
     for (auto&& item : list) {
         auto node = item.Upgrade();
         if (node == frameNode) {

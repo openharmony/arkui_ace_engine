@@ -27,10 +27,10 @@ namespace OHOS::Ace {
 namespace {
 
 #if !defined(PREVIEW)
-using ThumbnaiNapiEntry = void* (*)(const char*, void*);
-ThumbnaiNapiEntry GetThumbnailNapiEntry()
+using ThumbnailNapiEntry = void* (*)(const char*, void*);
+ThumbnailNapiEntry GetThumbnailNapiEntry()
 {
-    static ThumbnaiNapiEntry thumbnailNapiEntry = nullptr;
+    static ThumbnailNapiEntry thumbnailNapiEntry = nullptr;
     if (!thumbnailNapiEntry) {
 #ifdef _ARM64_
         std::string prefix = "/system/lib64/module/";
@@ -46,7 +46,7 @@ ThumbnaiNapiEntry GetThumbnailNapiEntry()
             LOGE("Failed to open shared library %{public}s, reason: %{public}s", napiPluginPath.c_str(), dlerror());
             return nullptr;
         }
-        thumbnailNapiEntry = reinterpret_cast<ThumbnaiNapiEntry>(dlsym(handle, "OHOS_MEDIA_NativeGetThumbnail"));
+        thumbnailNapiEntry = reinterpret_cast<ThumbnailNapiEntry>(dlsym(handle, "OHOS_MEDIA_NativeGetThumbnail"));
         if (thumbnailNapiEntry == nullptr) {
             dlclose(handle);
             LOGE("Failed to get symbol OHOS_MEDIA_NativeGetThumbnail in %{public}s", napiPluginPath.c_str());
@@ -68,7 +68,7 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
 #if !defined(PREVIEW)
         dataAbilityThumbnailQueryImpl_ = [runtimeContextWp = runtimeContext_](
                                              const std::string& uri) -> std::unique_ptr<Media::PixelMap> {
-            ThumbnaiNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry();
+            ThumbnailNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry();
             if (!thumbnailNapiEntry) {
                 LOGE("thumbnailNapiEntry is null");
                 return nullptr;
@@ -142,8 +142,9 @@ int32_t DataAbilityHelperStandard::OpenFileWithDataAbility(const std::string& ur
 
 int32_t DataAbilityHelperStandard::OpenFileWithDataShare(const std::string& uriStr, const std::string& mode)
 {
-    if (useStageModel_ && !dataShareHelper_) {
-        dataShareHelper_ = DataShare::DataShareHelper::Creator(runtimeContext_.lock(), uriStr);
+    auto context = runtimeContext_.lock();
+    if (useStageModel_ && !dataShareHelper_ && context) {
+        dataShareHelper_ = DataShare::DataShareHelper::Creator(context->GetToken(), uriStr);
     }
 
     if (dataShareHelper_) {

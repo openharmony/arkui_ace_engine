@@ -1,0 +1,46 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PATTERNLOCK_PATTERNLOCK_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PATTERNLOCK_PATTERNLOCK_MODEL_H
+
+#include "core/components_ng/pattern/patternlock/patternlock_event_hub.h"
+#include "core/components_v2/pattern_lock/pattern_lock_controller.h"
+
+namespace OHOS::Ace {
+
+class PatternLockModel {
+public:
+    static PatternLockModel* GetInstance();
+    virtual ~PatternLockModel() = default;
+
+    virtual RefPtr<V2::PatternLockController> Create();
+    virtual void SetPatternComplete(std::function<void(const BaseEventInfo* info)>&& onComplete);
+    virtual void SetSelectedColor(const Color& selectedColor);
+    virtual void SetAutoReset(bool isAutoReset);
+    virtual void SetPathColor(const Color& pathColor);
+    virtual void SetActiveColor(const Color& activeColor);
+    virtual void SetRegularColor(const Color& regularColor);
+    virtual void SetCircleRadius(const Dimension& radius);
+    virtual void SetSideLength(const Dimension& sideLength);
+    virtual void SetStrokeWidth(const Dimension& lineWidth);
+
+private:
+    static std::unique_ptr<PatternLockModel> instance_;
+};
+
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PATTERNLOCK_PATTERNLOCK_MODEL_H

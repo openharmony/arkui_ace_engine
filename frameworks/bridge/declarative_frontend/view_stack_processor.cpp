@@ -873,6 +873,12 @@ RefPtr<Component> ViewStackProcessor::GetScoringComponent() const
     return nullptr;
 }
 
+RefPtr<ComposedComponent> ViewStackProcessor::CreateInspectorWrapper(const std::string& inspectorTag)
+{
+    return AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+        V2::InspectorComposedComponent::GenerateId(), inspectorTag);
+}
+
 void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)
 {
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {

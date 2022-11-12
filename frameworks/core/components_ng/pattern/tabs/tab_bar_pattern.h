@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -60,7 +62,19 @@ public:
         return layoutAlgorithm;
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<TabBarPaintProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<TabBarPaintMethod>();
+    }
+
     void UpdateCurrentOffset(float offset);
+
+    void UpdateIndicator(int32_t indicator);
 
 private:
     void OnModifyDone() override;

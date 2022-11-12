@@ -36,6 +36,9 @@ public:
     static void SetItalicFontStyle(Ace::FontStyle fontStyle);
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
     static void SetTextColor(const Color& textColor);
+
+private:
+    static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode);
 };
 } // namespace OHOS::Ace::NG
 

@@ -94,6 +94,7 @@ public:
     virtual void Clip() = 0;
     virtual void Clip(const RefPtr<CanvasPath2D>& path) = 0;
     virtual void BeginPath() = 0;
+    virtual void ResetTransform() = 0;
     virtual void ClosePath() = 0;
 
     // in render node, restore and save are used for clip and matrix operation
@@ -201,12 +202,11 @@ public:
     void SetLineDash(const std::vector<double>& segments)
     {
         strokeState_.SetLineDash(segments);
-        lineDash_ = segments;
     }
 
-    const std::vector<double>& GetLineDash() const
+    LineDashParam GetLineDash() const
     {
-        return lineDash_;
+        return strokeState_.GetLineDash();
     }
 
     void SetTextAlign(TextAlign align)
@@ -316,7 +316,6 @@ protected:
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
-    std::vector<double> lineDash_;
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     std::stack<PaintHolder> saveStates_;

@@ -89,7 +89,11 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     auto rect = GetOptionsRect(offset, anchorColumn);
     auto dividerSpacing = NormalizeToPx(theme->GetDividerSpacing());
     if (!NearZero(NormalizeToPx(data_->GetColumnHeight()))) {
-        dividerSpacing = NormalizeToPx(data_->GetColumnHeight());
+        if (data_->GetColumnHeight().Unit() == DimensionUnit::PERCENT) {
+            dividerSpacing = data_->GetColumnHeight().Value() * dividerSpacing;
+        } else {
+            dividerSpacing = NormalizeToPx(data_->GetColumnHeight());
+        }
     }
     double upperLine = rect.Top() + rect.Height() / 2.0 - dividerSpacing / 2.0;
     double downLine = rect.Top() + rect.Height() / 2.0 + dividerSpacing / 2.0;
@@ -127,7 +131,7 @@ void RosenRenderPickerBase::PaintGradient(
     Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
 
     auto renderBox = GetBgColorBox();
-    if (data_->GetHasBackgroundColor() && renderBox) {
+    if (data_ && data_->GetHasBackgroundColor() && renderBox) {
         endColor = renderBox->GetColor();
     }
 

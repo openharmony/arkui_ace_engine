@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 
+#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
@@ -34,10 +35,28 @@ void ImageModelImpl::SetAlt(const std::string& src)
 
 void ImageModelImpl::SetBorder(const Border& border)
 {
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto decoration = box->GetFrontDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+        box->SetFrontDecoration(decoration);
+    }
+    decoration->SetBorder(border);
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
         image->SetBorder(border);
     }
+}
+
+void ImageModelImpl::SetBackBorder()
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto decoration = box->GetBackDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+        box->SetBackDecoration(decoration);
+    }
+    SetBorder(decoration->GetBorder());
 }
 
 void ImageModelImpl::SetBlur(double blur)
@@ -176,43 +195,43 @@ void ImageModelImpl::SetColorFilterMatrix(const std::vector<float>& matrix)
     }
 }
 
-void ImageModelImpl::SetOnDragStartId(const OnDragFunc& onDragStartId)
+void ImageModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
-        image->SetOnDragStartId(onDragStartId);
+        image->SetOnDragStartId(ViewAbstractModelImpl::ToDragFunc(std::move(onDragStart)));
     }
 }
 
-void ImageModelImpl::SetOnDragEnterId(const OnDropFunc& onDragStartId)
+void ImageModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragStartId)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
-        image->SetOnDragEnterId(onDragStartId);
+        image->SetOnDragEnterId(std::move(onDragStartId));
     }
 }
 
-void ImageModelImpl::SetOnDragLeaveId(const OnDropFunc& onDragStartId)
+void ImageModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragStartId)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
-        image->SetOnDragLeaveId(onDragStartId);
+        image->SetOnDragLeaveId(std::move(onDragStartId));
     }
 }
 
-void ImageModelImpl::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+void ImageModelImpl::SetOnDragMove(NG::OnDragDropFunc&& onDragMoveId)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
-        image->SetOnDragMoveId(onDragMoveId);
+        image->SetOnDragMoveId(std::move(onDragMoveId));
     }
 }
 
-void ImageModelImpl::SetOnDropId(const OnDropFunc& onDropId)
+void ImageModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDropId)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
-        image->SetOnDropId(onDropId);
+        image->SetOnDropId(std::move(onDropId));
     }
 }
 

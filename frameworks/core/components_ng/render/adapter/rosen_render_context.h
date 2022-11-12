@@ -35,6 +35,8 @@
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+class BorderImageModifier;
+class MouseSelectModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -45,7 +47,7 @@ public:
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
-    void SyncGeometryProperties(const RectF& rectF) override;
+    void SyncGeometryProperties(const RectF& paintRect) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
@@ -117,7 +119,6 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
-    void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateBackShadow(const Shadow& shadow) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
@@ -126,15 +127,20 @@ public:
     void UpdateTransition(const TransitionOptions& options) override;
     bool HasAppearingTransition() const
     {
-        return transitionAppearingEffect_ != nullptr;
+        return propTransitionAppearing_ != nullptr;
     }
     bool HasDisappearingTransition() const
     {
-        return transitionDisappearingEffect_ != nullptr;
+        return propTransitionDisappearing_ != nullptr;
     }
+    void OnNodeAppear() override;
+    void OnNodeDisappear(FrameNode* host) override;
     void ClipWithRect(const RectF& rectF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const override;
+
+    void SetSharedTranslate(float xTranslate, float yTranslate) override;
+    void ResetSharedTranslate() override;
 
     static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren);
@@ -155,6 +161,13 @@ public:
 
     void NotifyTransition(
         const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) override;
+
+    void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
+
+    void PaintAccessibilityFocus() override;
+
+    void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) override;
+    void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -186,8 +199,9 @@ private:
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
 
-    void OnClipShapeUpdate(const ClipPathNG& clipPath) override;
+    void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) override;
     void OnClipEdgeUpdate(bool isClip) override;
+    void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) override;
 
     void OnLinearGradientUpdate(const NG::Gradient& value) override;
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
@@ -201,17 +215,27 @@ private:
     void OnFrontInvertUpdate(const Dimension& invert) override;
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
+    void OnFrontBlurRadiusUpdate(const Dimension& radius) override;
+
+    void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
+    void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
+
+    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
-    bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
-        std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
-        std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex);
 
+    void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
+    void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
+    void SetPivot(float xPivot, float yPivot);
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);
     void PaintGradient(const SizeF& frameSize);
     void PaintGraphics();
     void OnPaintGraphics();
+    void PaintOverlayText();
+    void PaintBorderImage();
+    void PaintBorderImageGradient();
+    void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
 
     RectF AdjustPaintRect();
 
@@ -219,8 +243,6 @@ private:
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
-    void PaintBorderImage();
-    void PaintBorderImageGradient();
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
@@ -231,12 +253,15 @@ private:
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
+    bool firstTransitionIn_ = false;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
-    std::shared_ptr<Rosen::RSTransitionEffect> transitionAppearingEffect_ = nullptr;
-    std::shared_ptr<Rosen::RSTransitionEffect> transitionDisappearingEffect_ = nullptr;
 
+    std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
+    std::shared_ptr<MouseSelectModifier> mouseSelectModifier_ = nullptr;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
+    std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
+    std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

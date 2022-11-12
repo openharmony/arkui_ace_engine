@@ -36,6 +36,19 @@ void SwiperLayoutAlgorithm::InitItemRange()
 {
     ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::InitItemRange");
     itemRange_.clear();
+
+    /* Load next index while swiping */
+    int32_t nextIndex = currentIndex_;
+    if (GreatNotEqual(currentOffset_, 0)) {
+        --nextIndex;
+    } else if (LessNotEqual(currentOffset_, 0)) {
+        ++nextIndex;
+    }
+    if (nextIndex != currentIndex_) {
+        nextIndex = isLoop_ ? (nextIndex + totalCount_) % totalCount_ : std::clamp(nextIndex, 0, totalCount_ - 1);
+        itemRange_.insert(nextIndex);
+    }
+
     if (startIndex_ <= endIndex_) {
         for (auto index = startIndex_; index <= endIndex_; ++index) {
             itemRange_.insert(index);
@@ -95,6 +108,10 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         idealSize = CreateIdealSize(
             constraint.value(), axis, swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS));
     }
+
+    auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, idealSize);
+
     InitItemRange();
 
     // Measure children.
@@ -133,6 +150,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
+    AddPaddingToSize(padding, idealSize);
+
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(idealSize.ConvertToSizeT());
@@ -149,6 +168,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childrenSize = layoutWrapper->GetTotalChildCount();
     auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
+    auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
+    OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
     // Effect when difference between current index and target index is greater than 1.
     // eg. Current index is 0, call swipeTo method to jump to index 2,
@@ -160,7 +181,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // Layout current item.
         auto currentWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex_);
         if (currentWrapper && currentWrapper->GetGeometryNode()) {
-            currentWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset + itemSpaceOffset);
+            currentWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset + itemSpaceOffset + paddingOffset);
             currentWrapper->Layout();
         }
 
@@ -170,7 +191,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             axis == Axis::HORIZONTAL ? OffsetF(targetMainOffset, 0.0f) : OffsetF(0.0f, targetMainOffset);
         auto targetWrapper = layoutWrapper->GetOrCreateChildByIndex(targetIndex_.value());
         if (targetWrapper && targetWrapper->GetGeometryNode()) {
-            targetWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset + targetOffset + itemSpaceOffset);
+            targetWrapper->GetGeometryNode()->SetMarginFrameOffset(
+                currentOffset + targetOffset + itemSpaceOffset + paddingOffset);
             targetWrapper->Layout();
         }
         return;
@@ -199,7 +221,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto geometryNode = wrapper->GetGeometryNode();
         auto frameSize = geometryNode->GetMarginFrameSize();
         preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
-        geometryNode->SetMarginFrameOffset(preOffset);
+        geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
         wrapper->Layout();
         preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
     }
@@ -213,7 +235,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto geometryNode = wrapper->GetGeometryNode();
-        geometryNode->SetMarginFrameOffset(nextOffset);
+        geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset);
         wrapper->Layout();
         auto frameSize = geometryNode->GetMarginFrameSize();
         nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width() + itemSpace, 0)
@@ -230,14 +252,14 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto geometryNode = lastWrapper->GetGeometryNode();
             auto frameSize = geometryNode->GetMarginFrameSize();
             preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
-            geometryNode->SetMarginFrameOffset(preOffset);
+            geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
             lastWrapper->Layout();
         }
     } else if (currentIndex_ == childrenSize - 1 && LessNotEqual(currentOffset_, 0.0)) {
         auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         if (firstWrapper) {
             auto geometryNode = firstWrapper->GetGeometryNode();
-            geometryNode->SetMarginFrameOffset(nextOffset);
+            geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset);
             firstWrapper->Layout();
         }
     }

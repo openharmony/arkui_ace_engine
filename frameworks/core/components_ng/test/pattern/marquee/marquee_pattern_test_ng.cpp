@@ -97,20 +97,20 @@ HWTEST_F(MarqueePatternTestNg, MarqueeFrameNodeCreator001, TestSize.Level1)
     testProperty.scrollAmount = std::make_optional(MARQUEE_SCROLL_AMOUNT);
 
     auto frameNode = CreateMarqueeParagraph(testProperty);
-    EXPECT_EQ(frameNode == nullptr, false);
+    EXPECT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProperty == nullptr, false);
+    EXPECT_NE(layoutProperty, nullptr);
     auto marqueeLayoutProperty = AceType::DynamicCast<MarqueeLayoutProperty>(layoutProperty);
-    EXPECT_EQ(marqueeLayoutProperty == nullptr, false);
+    EXPECT_NE(marqueeLayoutProperty, nullptr);
     EXPECT_EQ(marqueeLayoutProperty->GetLoop(), MARQUEE_LOOP);
     EXPECT_EQ(marqueeLayoutProperty->GetDirection(), MarqueeDirection::LEFT);
     EXPECT_EQ(marqueeLayoutProperty->GetPlayerStatus(), false);
     EXPECT_EQ(marqueeLayoutProperty->GetScrollAmount(), MARQUEE_SCROLL_AMOUNT);
 
     auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    EXPECT_EQ(textChild == nullptr, false);
+    EXPECT_NE(textChild, nullptr);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(textLayoutProperty == nullptr, false);
+    EXPECT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetContent(), MARQUEE_SRC);
 }
 
@@ -126,15 +126,15 @@ HWTEST_F(MarqueePatternTestNg, MarqueeFrameNodeCreator002, TestSize.Level1)
     testProperty.playerStatus = std::make_optional(false);
 
     auto frameNode = CreateMarqueeParagraph(testProperty);
-    EXPECT_EQ(frameNode == nullptr, false);
+    EXPECT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<MarqueePattern>();
-    EXPECT_EQ(pattern == nullptr, false);
+    EXPECT_NE(pattern, nullptr);
     auto layoutProperty = pattern->CreateLayoutProperty();
-    EXPECT_EQ(layoutProperty == nullptr, false);
+    EXPECT_NE(layoutProperty, nullptr);
     auto event = pattern->CreateEventHub();
-    EXPECT_EQ(event == nullptr, false);
+    EXPECT_NE(event, nullptr);
     auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
-    EXPECT_EQ(layoutAlgorithm == nullptr, false);
+    EXPECT_NE(layoutAlgorithm, nullptr);
 }
 
 /**
@@ -157,9 +157,9 @@ HWTEST_F(MarqueePatternTestNg, MarqueeFrameNodeCreator003, TestSize.Level1)
     marqueeModel.SetOnFinish(onChangeFinish);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_EQ(frameNode == nullptr, false);
+    EXPECT_NE(frameNode, nullptr);
     RefPtr<MarqueeEventHub> eventHub = frameNode->GetEventHub<NG::MarqueeEventHub>();
-    EXPECT_EQ(eventHub == nullptr, false);
+    EXPECT_NE(eventHub, nullptr);
     eventHub->FireStartEvent();
     EXPECT_EQ(isStart, true);
     eventHub->FireBounceEvent();

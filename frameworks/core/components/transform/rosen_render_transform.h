@@ -72,6 +72,7 @@ private:
 
     bool pendingAppearingTransition_ = false;
     bool pendingUpdateTransformLayer_ = false;
+    bool firstUpdateTransform_ = true;
 };
 
 } // namespace OHOS::Ace

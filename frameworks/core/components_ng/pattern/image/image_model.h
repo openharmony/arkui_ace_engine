@@ -24,6 +24,7 @@
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/image/image_event.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace {
 
@@ -35,6 +36,7 @@ public:
     virtual void SetAlt(const std::string& src) = 0;
     virtual void SetBlur(double blur) = 0;
     virtual void SetBorder(const Border& border) = 0;
+    virtual void SetBackBorder() = 0;
     virtual void SetImageFit(int32_t value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitMaxSize(bool value) = 0;
@@ -51,11 +53,11 @@ public:
     virtual void SetAutoResize(bool autoResize) = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
     virtual void SetColorFilterMatrix(const std::vector<float>& matrix) = 0;
-    virtual void SetOnDragStartId(const OnDragFunc& onDragStartId) = 0;
-    virtual void SetOnDragEnterId(const OnDropFunc& onDragStartId) = 0;
-    virtual void SetOnDragLeaveId(const OnDropFunc& onDragStartId) = 0;
-    virtual void SetOnDragMoveId(const OnDropFunc& onDragMoveId) = 0;
-    virtual void SetOnDropId(const OnDropFunc& onDropId) = 0;
+    virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
+    virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
+    virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
+    virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
+    virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetCopyOption(const CopyOptions& copyOption) = 0;
     virtual bool UpdateDragItemInfo(DragItemInfo& itemInfo) = 0;
 

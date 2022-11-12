@@ -2159,6 +2159,7 @@ class View extends NativeViewFullUpdate {
         if (parent) {
             // this View is not a top-level View
             
+            this.setCardId(parent.getCardId());
             this.localStorage_ = parent.localStorage_;
         }
         else if (localStorage) {
@@ -2891,6 +2892,8 @@ class ViewPU extends NativeViewPartialUpdate {
     */
     constructor(parent, localStorage) {
         super();
+        this.parent_ = undefined;
+        this.childrenWeakrefMap_ = new Map();
         this.watchedProps = new Map();
         // Set of dependent elmtIds that need partial update
         // during next re-render
@@ -2908,7 +2911,9 @@ class ViewPU extends NativeViewPartialUpdate {
         if (parent) {
             // this View is not a top-level View
             
+            this.setCardId(parent.getCardId());
             this.localStorage_ = parent.localStorage_;
+            parent.addChild(this);
         }
         else if (localStorage) {
             this.localStorage_ = localStorage;
@@ -2941,22 +2946,104 @@ class ViewPU extends NativeViewPartialUpdate {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
+        // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the 
+        // updateDirtyElements function.
+        let removedElmtIds = [];
+        this.updateFuncByElmtId.forEach((value, key) => {
+            this.purgeVariableDependenciesOnElmtId(key);
+            removedElmtIds.push(key);
+        });
+        this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
+        if (this.parent_) {
+            this.parent_.removeChild(this);
+        }
+    }
+    setParent(parent) {
+        if (this.parent_ && parent) {
+            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).setChild: changing parent to '${parent.constructor.name}', id ${parent.id__()} (unsafe operation)`);
+        }
+        this.parent_ = parent;
+    }
+    /**
+     * add given child and set 'this' as its parent
+     * @param child child to add
+     * @returns returns false if child with given child's id already exists
+     *
+     * framework internal function
+     * Note: Use of WeakRef ensures child and parent do not generate a cycle dependency.
+     * The add. Set<ids> is required to reliably tell what children still exist.
+     */
+    addChild(child) {
+        if (this.childrenWeakrefMap_.has(child.id__())) {
+            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).addChild '${child.constructor.name}' id already exists ${child.id__()} !`);
+            return false;
+        }
+        this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
+        child.setParent(this);
+        return true;
+    }
+    /**
+     * remove given child and remove 'this' as its parent
+     * @param child child to add
+     * @returns returns false if child with given child's id does not exist
+     */
+    removeChild(child) {
+        const hasBeenDeleted = this.childrenWeakrefMap_.delete(child.id__());
+        if (!hasBeenDeleted) {
+            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).removeChild '${child.constructor.name}', child id ${child.id__()} not known!`);
+        }
+        else {
+            child.setParent(undefined);
+        }
+        return hasBeenDeleted;
     }
     initialRenderView() {
         this.initialRender();
+    }
+    /**
+     * force a complete rerender / update by executing all update functions
+     * exec a regular rerender first
+     *
+     * @param deep recurse all children as well
+     *
+     * framework internal functions, apps must not call
+     */
+    forceCompleteRerender(deep = false) {
+        stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - start.`);
+        // request list of all (gloabbly) deleted elmtIds;
+        let deletedElmtIds = [];
+        this.getDeletedElemtIds(deletedElmtIds);
+        // see which elmtIds are managed by this View
+        // and clean up all book keeping for them
+        this.purgeDeletedElmtIds(deletedElmtIds);
+        Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => {
+            const updateFunc = this.updateFuncByElmtId.get(elmtId);
+            if (updateFunc == undefined) {
+                stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+            }
+            else {
+                updateFunc(elmtId, /* isFirstRender */ false);
+                this.finishUpdateFunc(elmtId);
+            }
+        });
+        if (deep) {
+            this.childrenWeakrefMap_.forEach((weakRefChild) => {
+                const child = weakRefChild.deref();
+                if (child) {
+                    child.forceCompleteRerender(true);
+                }
+            });
+        }
+        stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - end`);
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
         
         this.syncInstanceId();
-        let cb = this.watchedProps.get(varName);
-        if (cb) {
-            
-            cb.call(this, varName);
-        }
         if (dependentElmtIds.size) {
             if (!this.dirtDescendantElementIds_.size) {
                 // mark Composedelement dirty when first elmtIds are added
@@ -2967,6 +3054,11 @@ class ViewPU extends NativeViewPartialUpdate {
             const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
             this.dirtDescendantElementIds_ = union;
             
+        }
+        let cb = this.watchedProps.get(varName);
+        if (cb) {
+            
+            cb.call(this, varName);
         }
         this.restoreInstanceId();
     }
@@ -3023,7 +3115,7 @@ class ViewPU extends NativeViewPartialUpdate {
     markElemenDirtyById(elmtId) {
         // TODO ace-ets2bundle, framework, compilated apps need to update together
         // this function will be removed after a short transiition periode
-        stateMgmtConsole.error(`markElemenDirtyById no longer supported. 
+        stateMgmtConsole.error(`markElemenDirtyById no longer supported.
         Please update your ace-ets2bundle and recompile your application!`);
     }
     /**
@@ -3036,10 +3128,6 @@ class ViewPU extends NativeViewPartialUpdate {
             
             return;
         }
-        // Array.sort() converts array items to string to compare them, sigh!
-        var compareNumber = (a, b) => {
-            return (a < b) ? -1 : (a > b) ? 1 : 0;
-        };
         
         // request list of all (gloabbly) deleteelmtIds;
         let deletedElmtIds = [];
@@ -3050,7 +3138,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // process all elmtIds marked as needing update in ascending order.
         // ascending order ensures parent nodes will be updated before their children
         // prior cleanup ensure no already deleted Elements have their update func executed
-        Array.from(this.dirtDescendantElementIds_).sort(compareNumber).forEach(elmtId => {
+        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
             // do not process an Element that has been marked to be deleted
             const updateFunc = this.updateFuncByElmtId.get(elmtId);
             if (updateFunc == undefined) {
@@ -3108,75 +3196,58 @@ class ViewPU extends NativeViewPartialUpdate {
         If.branchId(branchId);
         branchfunc();
     }
-    /*
-       Partial updates for ForEach (no index in itemGenFunc)
-       1. Generate IDs for new array.
-       2. Set new IDs and get diff to old one stored in C++.
-       3. Create new elements.
+    /**
+     Partial updates for ForEach.
+     * @param elmtId ID of element.
+     * @param itemArray Array of items for use of itemGenFunc.
+     * @param itemGenFunc Item generation function to generate new elements. If index parameter is
+     *                    given set itemGenFuncUsesIndex to true.
+     * @param idGenFunc   ID generation function to generate unique ID for each element. If index parameter is
+     *                    given set idGenFuncUsesIndex to true.
+     * @param itemGenFuncUsesIndex itemGenFunc optional index parameter is given or not.
+     * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
      */
-    forEachUpdateFunction(elmtId, _arr, itemGenFunc, idGenFunc) {
+    forEachUpdateFunction(elmtId, itemArray, itemGenFunc, idGenFunc, itemGenFuncUsesIndex = false, idGenFuncUsesIndex = false) {
         
         if (idGenFunc === undefined) {
             
-            idGenFunc = function makeIdGenFunction() {
-                let index = 0;
-                // Developer should give ID gen function. If not use this default.
-                return (item) => `${index++}_${JSON.stringify(item)}`;
-            }();
+            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
+            idGenFuncUsesIndex = true;
         }
         let diffIndexArray = []; // New indexes compared to old one.
         let newIdArray = [];
-        const arr = _arr; // just to trigger a 'get' onto the array
-        // Create array of new ids.
-        arr.forEach((item) => {
-            newIdArray.push(idGenFunc(item));
-        });
-        // set new array on C++ side
-        // C++ returns array of indexes of newly added array items
-        // these are indexes in new child list.
-        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
-        
-        // Create new elements if any.
-        diffIndexArray.forEach((indx) => {
-            ForEach.createNewChildStart(newIdArray[indx], this);
-            itemGenFunc(arr[indx]);
-            ForEach.createNewChildFinish(newIdArray[indx], this);
-        });
-    }
-    /*
-        Partial updates for ForEach (index in itemGenFunc)
-        1. Generate IDs for new array.
-        2. Set new IDs and get diff to old one stored in C++.
-        3. Create new elements.
-      */
-    forEachWithIndexUpdateFunction(elmtId, _arr, itemGenFunc, _idGenFunc) {
-        
-        if (_idGenFunc == undefined) {
+        const arr = itemArray; // just to trigger a 'get' onto the array
+        // ID gen is with index.
+        if (idGenFuncUsesIndex) {
             
+            // Create array of new ids.
+            arr.forEach((item, indx) => {
+                newIdArray.push(idGenFunc(item, indx));
+            });
         }
-        let idGenFunc = function makeIdGenFunction() {
-            // index in local scope
-            // this works as long as idGenFunc in incrementing loop like below
-            let index = 0;
-            // include the index to generate default idGenFunc and also to supplement the given idGenFunc
-            return (item) => `${index++}__${_idGenFunc ? _idGenFunc(item) : JSON.stringify(item)}`;
-        }();
-        let diffIndexArray = []; // New indexes compared to old one.
-        let newIdArray = [];
-        const arr = _arr; // just to trigger a 'get' onto the array
-        // Create array of new ids.
-        arr.forEach((item) => {
-            newIdArray.push(idGenFunc(item));
-        });
-        // set new array on C++ side
-        // C++ returns array of indexes of newly added array items
+        else {
+            // Create array of new ids.
+            
+            arr.forEach((item, index) => {
+                newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
+            });
+        }
+        // set new array on C++ side.
+        // C++ returns array of indexes of newly added array items.
         // these are indexes in new child list.
         ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
+        
+        // Item gen is with index.
         
         // Create new elements if any.
         diffIndexArray.forEach((indx) => {
             ForEach.createNewChildStart(newIdArray[indx], this);
-            itemGenFunc(arr[indx], indx);
+            if (itemGenFuncUsesIndex) {
+                itemGenFunc(arr[indx], indx);
+            }
+            else {
+                itemGenFunc(arr[indx]);
+            }
             ForEach.createNewChildFinish(newIdArray[indx], this);
         });
     }
@@ -3215,6 +3286,10 @@ class ViewPU extends NativeViewPartialUpdate {
             : undefined);
     }
 }
+// Array.sort() converts array items to string to compare them, sigh!
+ViewPU.compareNumber = (a, b) => {
+    return (a < b) ? -1 : (a > b) ? 1 : 0;
+};
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

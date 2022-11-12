@@ -48,8 +48,8 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
     static void DatePickerDialogShow(const JSRef<JSObject>& paramObj,
-        const std::map<std::string, NG::DailogEvent>& dialogEvent,
-        const std::map<std::string, NG::DailogGestureEvent>& dialogCancalEvent);
+        const std::map<std::string, NG::DialogEvent>& dialogEvent,
+        const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
 
 private:
     static void CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
@@ -78,8 +78,8 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
     static void TimePickerDialogShow(const JSRef<JSObject>& paramObj,
-        const std::map<std::string, NG::DailogEvent>& dialogEvent,
-        const std::map<std::string, NG::DailogGestureEvent>& dialogCancalEvent);
+        const std::map<std::string, NG::DialogEvent>& dialogEvent,
+        const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
 
 private:
     static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);

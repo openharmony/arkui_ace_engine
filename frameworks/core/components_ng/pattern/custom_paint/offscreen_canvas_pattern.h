@@ -62,6 +62,7 @@ public:
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void PutImageData(const Ace::ImageData& imageData);
 
+    void SetAntiAlias(bool isEnabled);
     void SetFillRuleForPath(const CanvasFillRule rule);
     void SetFillRuleForPath2D(const CanvasFillRule rule);
     void SetFillPattern(const Ace::Pattern& pattern);

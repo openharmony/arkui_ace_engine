@@ -25,6 +25,9 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+} // namespace
 
 void ScrollModelImpl::Create()
 {
@@ -44,6 +47,11 @@ RefPtr<ScrollControllerBase> ScrollModelImpl::GetOrCreateController()
         component->SetScrollPositionController(AceType::MakeRefPtr<ScrollPositionController>());
     }
     return component->GetScrollPositionController();
+}
+
+RefPtr<ScrollProxy> ScrollModelImpl::CreateScrollBarProxy()
+{
+    return AceType::MakeRefPtr<ScrollBarProxy>();
 }
 
 void ScrollModelImpl::SetAxis(Axis axis)
@@ -98,9 +106,10 @@ void ScrollModelImpl::SetOnScrollEnd(NG::ScrollEndEvent&& event)
     JSViewSetProperty(&ScrollComponent::SetOnScrollEnd, std::move(onScrollEnd));
 }
 
-void ScrollModelImpl::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& proxy)
+void ScrollModelImpl::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
 {
-    JSViewSetProperty(&ScrollComponent::SetScrollBarProxy, proxy);
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(proxy);
+    JSViewSetProperty(&ScrollComponent::SetScrollBarProxy, scrollBarProxy);
 }
 
 void ScrollModelImpl::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
@@ -111,9 +120,11 @@ void ScrollModelImpl::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const s
     component->InitScrollBar(theme, color, width, effect);
 }
 
-void ScrollModelImpl::SetDisplayMode(DisplayMode displayMode)
+void ScrollModelImpl::SetDisplayMode(int displayMode)
 {
-    JSViewSetProperty(&ScrollComponent::SetDisplayMode, displayMode);
+    if (displayMode >= 0 && displayMode < static_cast<int32_t>(DISPLAY_MODE.size())) {
+        JSViewSetProperty(&ScrollComponent::SetDisplayMode, DISPLAY_MODE[displayMode]);
+    }
 }
 
 void ScrollModelImpl::SetScrollBarWidth(const Dimension& dimension)

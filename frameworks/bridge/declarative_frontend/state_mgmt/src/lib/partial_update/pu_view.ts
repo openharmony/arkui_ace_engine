@@ -13,6 +13,18 @@
  * limitations under the License.
  */
 
+/**
+ * WeakRef
+ * ref to an Object that does not prevent the Object from getting GC'ed
+ * current version of tsc does not know about WeakRef
+ * but Ark runtime supports it
+ *
+ */
+declare class WeakRef<T extends Object> {
+  constructor(o: T);
+  deref(): T;
+}
+
 type ProvidedVarsMapPU = Map<string, ObservedPropertyAbstractPU<any>>;
 
 // denotes a missing elemntId, this is the case during initial render
@@ -27,7 +39,15 @@ type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 abstract class ViewPU extends NativeViewPartialUpdate
   implements IViewPropertiesChangeSubscriber {
 
+  // Array.sort() converts array items to string to compare them, sigh!
+  static readonly compareNumber = (a: number, b: number): number => {
+    return (a < b) ? -1 : (a > b) ? 1 : 0;
+  };
+
   private id_: number;
+
+  private parent_: ViewPU = undefined;
+  private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
@@ -93,7 +113,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if (parent) {
       // this View is not a top-level View
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+      this.setCardId(parent.getCardId());
       this.localStorage_ = parent.localStorage_;
+      parent.addChild(this);
     } else if (localStorage) {
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
@@ -116,9 +138,63 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
+    // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
+    // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the 
+    // updateDirtyElements function.
+    let removedElmtIds: number[] = [];
+    this.updateFuncByElmtId.forEach((value: UpdateFunc, key: number) => {
+      this.purgeVariableDependenciesOnElmtId(key);
+      removedElmtIds.push(key);
+    });
+    this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
+
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
+    if (this.parent_) {
+      this.parent_.removeChild(this);
+    }
+  }
+
+  private setParent(parent: ViewPU) {
+    if (this.parent_ && parent) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).setChild: changing parent to '${parent.constructor.name}', id ${parent.id__()} (unsafe operation)`);
+    }
+    this.parent_ = parent;
+  }
+
+  /**
+   * add given child and set 'this' as its parent
+   * @param child child to add
+   * @returns returns false if child with given child's id already exists
+   * 
+   * framework internal function
+   * Note: Use of WeakRef ensures child and parent do not generate a cycle dependency.
+   * The add. Set<ids> is required to reliably tell what children still exist.
+   */
+  public addChild(child: ViewPU): boolean {
+    if (this.childrenWeakrefMap_.has(child.id__())) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).addChild '${child.constructor.name}' id already exists ${child.id__()} !`);
+      return false;
+    }
+    this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
+    child.setParent(this);
+    return true;
+  }
+
+  /**
+   * remove given child and remove 'this' as its parent
+   * @param child child to add
+   * @returns returns false if child with given child's id does not exist
+   */
+  public removeChild(child: ViewPU): boolean {
+    const hasBeenDeleted = this.childrenWeakrefMap_.delete(child.id__());
+    if (!hasBeenDeleted) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).removeChild '${child.constructor.name}', child id ${child.id__()} not known!`);
+    } else {
+      child.setParent(undefined);
+    }
+    return hasBeenDeleted;
   }
 
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
@@ -129,16 +205,51 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.initialRender();
   }
 
+  /**
+   * force a complete rerender / update by executing all update functions
+   * exec a regular rerender first
+   * 
+   * @param deep recurse all children as well
+   * 
+   * framework internal functions, apps must not call
+   */
+  public forceCompleteRerender(deep: boolean = false): void {
+    stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - start.`);
+
+    // request list of all (gloabbly) deleted elmtIds;
+    let deletedElmtIds: number[] = [];
+    this.getDeletedElemtIds(deletedElmtIds);
+
+    // see which elmtIds are managed by this View
+    // and clean up all book keeping for them
+    this.purgeDeletedElmtIds(deletedElmtIds);
+
+    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => {
+      const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
+      if (updateFunc == undefined) {
+        stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+      } else {
+        updateFunc(elmtId, /* isFirstRender */ false);
+        this.finishUpdateFunc(elmtId);
+      }
+    });
+
+    if (deep) {
+      this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
+        const child = weakRefChild.deref();
+        if (child) {
+          (child as ViewPU).forceCompleteRerender(true);
+        }
+      });
+    }
+    stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - end`);
+  }
+
+
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
     this.syncInstanceId();
-
-    let cb = this.watchedProps.get(varName)
-    if (cb) {
-      stateMgmtConsole.debug(`   .. calling @Watch function`);
-      cb.call(this, varName);
-    }
 
     if (dependentElmtIds.size) {
       if (!this.dirtDescendantElementIds_.size) {
@@ -151,6 +262,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.dirtDescendantElementIds_ = union;
       stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
     }
+
+    let cb = this.watchedProps.get(varName)
+    if (cb) {
+      stateMgmtConsole.debug(`   .. calling @Watch function`);
+      cb.call(this, varName);
+    }
+  
     this.restoreInstanceId();
   }
 
@@ -229,12 +347,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return;
     }
 
-    // Array.sort() converts array items to string to compare them, sigh!
-    var compareNumber = (a: number, b: number): number => {
-      return (a < b) ? -1 : (a > b) ? 1 : 0;
-    };
-
-    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(compareNumber))}, starting ....`);
+    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
 
     // request list of all (gloabbly) deleteelmtIds;
     let deletedElmtIds: number[] = [];
@@ -247,7 +360,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // process all elmtIds marked as needing update in ascending order.
     // ascending order ensures parent nodes will be updated before their children
     // prior cleanup ensure no already deleted Elements have their update func executed
-    Array.from(this.dirtDescendantElementIds_).sort(compareNumber).forEach(elmtId => {
+    Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
       // do not process an Element that has been marked to be deleted
       const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
       if (updateFunc == undefined) {
@@ -316,99 +429,71 @@ abstract class ViewPU extends NativeViewPartialUpdate
     branchfunc();
   }
 
- /*
-    Partial updates for ForEach (no index in itemGenFunc)
-    1. Generate IDs for new array.
-    2. Set new IDs and get diff to old one stored in C++.
-    3. Create new elements.
-  */
-forEachUpdateFunction(elmtId : number,
-  _arr : Array<any>,
-  itemGenFunc : (item : any) => void,
-  idGenFunc : (item : any) => string) : void {
-  stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction ... `);
-
-  if (idGenFunc === undefined) {
-      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
-      idGenFunc = function makeIdGenFunction() {
-          let index = 0;
-        // Developer should give ID gen function. If not use this default.
-        return (item) => `${index++}_${JSON.stringify(item)}`;
-      }();
-    }
-
-    let diffIndexArray = []; // New indexes compared to old one.
-    let newIdArray = [];
-    const arr = _arr; // just to trigger a 'get' onto the array
-
-    // Create array of new ids.
-    arr.forEach((item) => {
-      newIdArray.push(idGenFunc(item));
-    });
-
-    // set new array on C++ side
-    // C++ returns array of indexes of newly added array items
-    // these are indexes in new child list.
-    ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
-
-    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
-
-    // Create new elements if any.
-    diffIndexArray.forEach((indx) => {
-      ForEach.createNewChildStart(newIdArray[indx], this);
-      itemGenFunc(arr[indx]);
-      ForEach.createNewChildFinish(newIdArray[indx], this);
-    });
-  }
-
-  /*
-      Partial updates for ForEach (index in itemGenFunc)
-      1. Generate IDs for new array.
-      2. Set new IDs and get diff to old one stored in C++.
-      3. Create new elements.
+   /**
+    Partial updates for ForEach.
+    * @param elmtId ID of element.
+    * @param itemArray Array of items for use of itemGenFunc.
+    * @param itemGenFunc Item generation function to generate new elements. If index parameter is
+    *                    given set itemGenFuncUsesIndex to true.
+    * @param idGenFunc   ID generation function to generate unique ID for each element. If index parameter is
+    *                    given set idGenFuncUsesIndex to true.
+    * @param itemGenFuncUsesIndex itemGenFunc optional index parameter is given or not.
+    * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
     */
-  forEachWithIndexUpdateFunction(elmtId: number,
-    _arr: Array<any>,
-    itemGenFunc: (item: any, index: number) => void,
-    _idGenFunc: (item: any) => string): void {
-    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction (with item gen index param)... `);
+  public forEachUpdateFunction(elmtId : number,
+    itemArray: Array<any>,
+    itemGenFunc: (item: any, index?: number) => void,
+    idGenFunc?: (item: any, index?: number) => string,
+    itemGenFuncUsesIndex: boolean = false,
+    idGenFuncUsesIndex: boolean = false) : void {
 
-    if (_idGenFunc == undefined) {
-      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction `);
+
+      if (idGenFunc === undefined) {
+        stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
+        idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
+        idGenFuncUsesIndex = true;
+      }
+
+      let diffIndexArray = []; // New indexes compared to old one.
+      let newIdArray = [];
+      const arr = itemArray; // just to trigger a 'get' onto the array
+
+      // ID gen is with index.
+      if (idGenFuncUsesIndex) {
+        stateMgmtConsole.debug(`ID Gen with index parameter or with default id gen func`);
+        // Create array of new ids.
+        arr.forEach((item, indx) => {
+          newIdArray.push(idGenFunc(item, indx));
+        });
+      }
+      else {
+        // Create array of new ids.
+        stateMgmtConsole.debug(`ID Gen without index parameter`);
+        arr.forEach((item, index) => {
+          newIdArray.push(`${itemGenFuncUsesIndex ? index + '_':''}` + idGenFunc(item));
+        });
+      }
+
+      // set new array on C++ side.
+      // C++ returns array of indexes of newly added array items.
+      // these are indexes in new child list.
+      ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
+
+      // Item gen is with index.
+      stateMgmtConsole.debug(`Item Gen ${itemGenFuncUsesIndex ? 'with' : "without"} index`);
+      // Create new elements if any.
+      diffIndexArray.forEach((indx) => {
+        ForEach.createNewChildStart(newIdArray[indx], this);
+        if (itemGenFuncUsesIndex) {
+          itemGenFunc(arr[indx], indx);
+        } else {
+          itemGenFunc(arr[indx]);
+        }
+        ForEach.createNewChildFinish(newIdArray[indx], this);
+      });
     }
-
-    let idGenFunc: (item: any) => string = function makeIdGenFunction() {
-      // index in local scope
-      // this works as long as idGenFunc in incrementing loop like below
-      let index = 0;
-      // include the index to generate default idGenFunc and also to supplement the given idGenFunc
-      return (item) => `${index++}__${_idGenFunc ? _idGenFunc(item) : JSON.stringify(item)}`;
-    }();
-
-    let diffIndexArray = []; // New indexes compared to old one.
-    let newIdArray = [];
-    const arr = _arr; // just to trigger a 'get' onto the array
-
-    // Create array of new ids.
-    arr.forEach((item) => {
-      newIdArray.push(idGenFunc(item));
-    });
-
-    // set new array on C++ side
-    // C++ returns array of indexes of newly added array items
-    // these are indexes in new child list.
-    ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
-
-    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
-
-    // Create new elements if any.
-    diffIndexArray.forEach((indx) => {
-      ForEach.createNewChildStart(newIdArray[indx], this);
-      itemGenFunc(arr[indx], indx);
-      ForEach.createNewChildFinish(newIdArray[indx], this);
-    });
-  }
-
 
   /**
      * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and

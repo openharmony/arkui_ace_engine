@@ -82,6 +82,10 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePath, const s
         return FrontendType::JS;
     }
     auto rootJson = JsonUtil::ParseJsonString(jsonStr);
+    if (rootJson == nullptr) {
+        LOGE("return default frontend: JS frontend.");
+        return FrontendType::JS;
+    }
     auto mode = rootJson->GetObject("mode");
     if (mode != nullptr) {
         if (mode->GetString("syntax") == "ets" || mode->GetString("type") == "pageAbility") {
@@ -292,9 +296,10 @@ void AceAbility::OnStart(const Want& want)
 
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->package + "/";
+    if (moduleInfo == nullptr) {
+        return;
     }
+    packagePathStr += "/" + moduleInfo->package + "/";
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     std::string srcPath;
     if (info != nullptr && !info->srcPath.empty()) {
@@ -304,10 +309,9 @@ void AceAbility::OnStart(const Want& want)
         AceApplicationInfo::GetInstance().SetPackageName(info->bundleName);
     }
 
-    bool isHap = !moduleInfo->hapPath.empty();
+    bool isHap = moduleInfo ? !moduleInfo->hapPath.empty() : false;
     std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePath, srcPath, isHap);
-    bool isArkApp = GetIsArkFromConfig(packagePath, isHap);
 
     AceApplicationInfo::GetInstance().SetAbilityName(info ? info->name : "");
     std::string moduleName = info ? info->moduleName : "";
@@ -344,7 +348,7 @@ void AceAbility::OnStart(const Want& want)
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
 
     // create container
-    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, shared_from_this(),
+    Platform::AceContainer::CreateContainer(abilityId_, frontendType, srcPath, shared_from_this(),
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); },
             [this](const std::string& address) {
                 AAFwk::Want want;
@@ -717,18 +721,12 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
     ContainerScope scope(abilityId_);
     taskExecutor->PostTask(
         [container, mode]() {
-            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("OnModeChange failed, pipeline context is null.");
                 return;
             }
-            if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
-                mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-                pipelineContext->ShowContainerTitle(false);
-            } else {
-                pipelineContext->ShowContainerTitle(true);
-            }
+            pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -919,7 +917,7 @@ uint32_t AceAbility::GetBackgroundColor()
                 LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
                 return;
             }
-            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
                 return;

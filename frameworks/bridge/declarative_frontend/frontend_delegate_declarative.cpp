@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/resource/ace_res_config.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "bridge/common/manifest/manifest_parser.h"
@@ -33,6 +34,7 @@
 #include "bridge/js_frontend/js_ace_page.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/thread_checker.h"
 #include "core/components/dialog/dialog_component.h"
@@ -40,6 +42,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/common/ace_engine.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -63,6 +66,30 @@ const char I18N_FOLDER[] = "i18n/";
 const char RESOURCES_FOLDER[] = "resources/";
 const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/string.json";
+
+// helper function to run OverlayManager task
+// ensures that the task runs in main window instead of subWindow
+void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
+{
+    auto currentId = Container::CurrentId();
+    if (Container::Current()->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    }
+    ContainerScope scope(currentId);
+    auto container = AceEngine::Get().GetContainer(currentId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    context->GetTaskExecutor()->PostTask(
+        [task = std::move(task), weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            task(overlayManager);
+        },
+        TaskExecutor::TaskType::UI);
+}
 
 } // namespace
 
@@ -807,14 +834,14 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
 }
 
 void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
-    Push(PageTarget(uri), params, errorCallback);
-}
-
-void FrontendDelegateDeclarative::PushWithModeAndCallback(const std::string& uri, const std::string& params,
-    uint32_t routerMode, const std::function<void(const std::string&, int32_t)>& errorCallback)
-{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->PushWithCallback({ uri }, params, errorCallback, static_cast<NG::RouterMode>(routerMode));
+        OnMediaQueryUpdate();
+        return;
+    }
     Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
 }
 
@@ -840,14 +867,14 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
 }
 
 void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
-    Replace(PageTarget(uri), params, errorCallback);
-}
-
-void FrontendDelegateDeclarative::ReplaceWithModeAndCallback(const std::string& uri, const std::string& params,
-    uint32_t routerMode, const std::function<void(const std::string&, int32_t)>& errorCallback)
-{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->ReplaceWithCallback(
+            { uri }, params, errorCallback, static_cast<NG::RouterMode>(routerMode));
+        return;
+    }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
 }
 
@@ -1296,20 +1323,14 @@ void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t 
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    auto pipelineContext = pipelineContextHolder_.Get();
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("Toast IsCurrentUseNewPipeline.");
-        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
-        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-        taskExecutor_->PostTask(
-            [durationTime, message, bottom, isRightToLeft, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
-                overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
-            },
-            TaskExecutor::TaskType::UI);
+        auto task = [durationTime, message, bottom, isRightToLeft](const RefPtr<NG::OverlayManager>& overlayManager) {
+            CHECK_NULL_VOID(overlayManager);
+            LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
+            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
+        };
+        MainWindowOverlay(std::move(task));
         return;
     }
     auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
@@ -1328,6 +1349,22 @@ void FrontendDelegateDeclarative::SetToastStopListenerCallback(std::function<voi
 void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProperties,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Dialog IsCurrentUseNewPipeline.");
+        dialogProperties.onSuccess = std::move(callback);
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
+        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+        taskExecutor_->PostTask(
+            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ShowDialog(
+                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            },
+            TaskExecutor::TaskType::UI);
+        return;
+    }
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     if (callbacks.find(COMMON_SUCCESS) != callbacks.end()) {
         auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
@@ -1359,21 +1396,6 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);
     }
     dialogProperties.callbacks = std::move(callbackMarkers);
-    auto pipelineContext = pipelineContextHolder_.Get();
-    if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("Dialog IsCurrentUseNewPipeline.");
-        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
-        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-        taskExecutor_->PostTask(
-            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->ShowDialog(
-                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
-            },
-            TaskExecutor::TaskType::UI);
-        return;
-    }
     auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(context);
     context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
@@ -1409,6 +1431,24 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
+    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
+    dialogProperties.buttons.emplace_back(buttonInfo);
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Dialog IsCurrentUseNewPipeline.");
+        dialogProperties.onSuccess = std::move(callback);
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+        taskExecutor_->PostTask(
+            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ShowDialog(
+                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            },
+            TaskExecutor::TaskType::UI);
+        return;
+    }
+
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
     BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
@@ -1434,15 +1474,13 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
         });
     callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
     dialogProperties.callbacks = std::move(callbackMarkers);
-    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
-    dialogProperties.buttons.emplace_back(buttonInfo);
     auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(context);
     context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
-void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
-    std::function<void(int32_t, int32_t)>&& callback)
+void FrontendDelegateDeclarative::ShowActionMenu(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     DialogProperties dialogProperties = {
         .title = title,
@@ -1469,6 +1507,13 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
     const std::string& message, std::function<void(int32_t)>&& callback)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("EnableAlertBeforeBackPage IsCurrentUseNewPipeline.");
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->EnableAlertBeforeBackPage(message, std::move(callback));
+        return;
+    }
+
     if (!taskExecutor_) {
         LOGE("task executor is null.");
         return;
@@ -1516,6 +1561,13 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
 
 void FrontendDelegateDeclarative::DisableAlertBeforeBackPage()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("DisableAlertBeforeBackPage IsCurrentUseNewPipeline.");
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->DisableAlertBeforeBackPage();
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(mutex_);
     if (pageRouteStack_.empty()) {
         LOGE("page stack is null.");

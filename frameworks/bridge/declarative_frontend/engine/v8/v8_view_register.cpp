@@ -710,8 +710,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"TextClockController", JSTextClockController::JSBind},
     {"Checkbox", JSCheckbox::JSBind},
     {"CheckboxGroup", JSCheckboxGroup::JSBind},
-    {"WaterFlow", JSWaterFLow::JSBind},
-    {"FlowItem", JSFLowItem::JSBind},
+    {"WaterFlow", JSWaterFlow::JSBind},
+    {"FlowItem", JSWaterFlowItem::JSBind},
     {"RelativeContainer", JSRelativeContainer::JSBind},
     {"__Common__", JSCommonView::JSBind},
 };

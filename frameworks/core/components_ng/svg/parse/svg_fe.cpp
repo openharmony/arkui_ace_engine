@@ -68,7 +68,7 @@ sk_sp<SkImageFilter> SvgFe::MakeImageFilter(const FeInType& in, sk_sp<SkImageFil
 {
     switch (in) {
         case FeInType::SOURCE_GRAPHIC:
-        return nullptr;
+            return nullptr;
         case FeInType::SOURCE_ALPHA:
             SkColorMatrix m;
             m.setScale(0, 0, 0, 1.0f);

@@ -15,8 +15,9 @@
 
 #include "gtest/gtest.h"
 
-#include "frameworks/bridge/js_frontend/engine/quickjs/animation_bridge.h"
-
+#include <unordered_map>
+#include "frameworks/bridge/common/dom/dom_type.h"
+#include "frameworks/bridge/js_frontend/engine/common/base_animation_bridge.h"
 using namespace testing;
 using namespace testing::ext;
 

@@ -161,6 +161,41 @@ public:
         return blockRightShade_;
     }
 
+    float GetDividerSpace() const
+    {
+        return dividerSpace_;
+    }
+
+    float GetSearchDividerWidth() const
+    {
+        return searchDividerWidth_;
+    }
+
+    float GetTextPadding() const
+    {
+        return textPadding_;
+    }
+
+    const Dimension& GetSearchSpacing() const
+    {
+        return searchSpacing_;
+    }
+
+    const Dimension& GetIconHeight() const
+    {
+        return iconHeight_;
+    }
+
+    const Dimension& GetIconWidthOffset() const
+    {
+        return iconWidthOffset_;
+    }
+
+    const Color& GetSearchDividerColor() const
+    {
+        return searchDividerColor_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -180,6 +215,13 @@ private:
     FontWeight fontWeight_ = FontWeight::NORMAL;
     Radius borderRadius_;
     bool blockRightShade_ = false;
+    float dividerSpace_ = 7.0f;
+    float searchDividerWidth_ = 1.0f;
+    float textPadding_ = 18.0f;
+    Dimension searchSpacing_ = 2.0_vp;
+    Dimension iconHeight_ = 16.0_vp;
+    Dimension iconWidthOffset_ = 14.0_vp;
+    Color searchDividerColor_ = Color(0x33000000);
 };
 
 } // namespace OHOS::Ace

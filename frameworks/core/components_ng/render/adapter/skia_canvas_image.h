@@ -47,11 +47,51 @@ public:
 #endif
         return nullptr;
     }
+    virtual sk_sp<SkData> GetCompressData() const
+    {
+#ifndef NG_BUILD
+        if (image_) {
+            return image_->compressData();
+        }
+#endif
+        return nullptr;
+    }
+    void SetCompressData(sk_sp<SkData> data, int32_t w, int32_t h)
+    {
+#ifndef NG_BUILD
+        if (image_) {
+            image_->setCompress(data, w, h);
+        }
+#endif
+    }
+    virtual int32_t GetCompressWidth() const
+    {
+#ifndef NG_BUILD
+        if (image_) {
+            return image_->compressWidth();
+        }
+#endif
+        return 0;
+    }
+    virtual int32_t GetCompressHeight() const
+    {
+#ifndef NG_BUILD
+        if (image_) {
+            return image_->compressHeight();
+        }
+#endif
+        return 0;
+    }
     void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
     void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
+
+    static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
+    static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
+    static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
+    static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
 
 private:
     // TODO: should not deps on flutter.

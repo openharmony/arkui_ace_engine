@@ -53,6 +53,11 @@ public:
         return axis == Axis::HORIZONTAL ? x_ : y_;
     }
 
+    T GetCrossOffset(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? y_ : x_;
+    }
+
     void SetX(T x)
     {
         x_ = x;
@@ -61,6 +66,16 @@ public:
     void SetY(T y)
     {
         y_ = y;
+    }
+
+    void AddX(T x)
+    {
+        x_ += x;
+    }
+
+    void AddY(T y)
+    {
+        y_ += y;
     }
 
     OffsetT operator+(const OffsetT& offset) const

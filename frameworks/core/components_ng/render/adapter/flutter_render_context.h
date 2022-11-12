@@ -63,6 +63,10 @@ public:
 
     void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
 
+    RectF GetPaintRectWithTransform() override;
+
+    RectF GetPaintRectWithoutTransform() override;
+
     const std::shared_ptr<FlutterNode>& GetNode()
     {
         return flutterNode_;

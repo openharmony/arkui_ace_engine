@@ -255,11 +255,6 @@ std::string InspectorComposedElement::GetBackgroundImagePosition() const
     return std::string();
 }
 
-std::string InspectorComposedElement::GetAlignmentType(double width, double height) const
-{
-    return std::string();
-}
-
 RefPtr<Decoration> InspectorComposedElement::GetFrontDecoration() const
 {
     return nullptr;

@@ -17,83 +17,99 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_GESTURE_REFEREE_H
 
 #include <list>
+#include <set>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/singleton.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
-class GestureRecognizer;
+class NGGestureRecognizer;
 
 enum class GestureDisposal {
     ACCEPT = 0,
     REJECT,
     PENDING,
+    NONE,
 };
 
-class GestureScope {
+class GestureScope : public AceType {
+    DECLARE_ACE_TYPE(GestureScope, AceType);
+
 public:
     explicit GestureScope(size_t touchId) : touchId_(touchId) {}
-    ~GestureScope() = default;
+    ~GestureScope() override = default;
 
-    void AddMember(const RefPtr<GestureRecognizer>& recognizer);
-    void DelMember(const RefPtr<GestureRecognizer>& recognizer);
+    void AddMember(const RefPtr<NGGestureRecognizer>& recognizer);
+    void DelMember(const RefPtr<NGGestureRecognizer>& recognizer);
 
-    void ForceClose();
+    void Close();
 
-    void HandleGestureDisposal(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
+    bool IsPending();
 
     bool IsEmpty() const
     {
-        return highRecognizers_.empty() && lowRecognizers_.empty() && parallelRecognizers_.empty();
+        return recognizers_.empty();
     }
 
-    bool IsPending() const;
+    bool CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognizer);
+
+    void OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer);
+
+    RefPtr<NGGestureRecognizer> UnBlockGesture();
+
+    bool IsDelayClosed() const
+    {
+        return isDelay_;
+    }
+
+    void SetDelayClose()
+    {
+        isDelay_ = true;
+    }
+
+    bool HasGestureAccepted() const
+    {
+        return hasGestureAccepted_;
+    }
 
 private:
-    bool Existed(const RefPtr<GestureRecognizer>& recognizer);
-    const std::list<WeakPtr<GestureRecognizer>>& GetMembersByRecognizer(const RefPtr<GestureRecognizer>& recognizer);
-    bool CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer);
-    void AcceptGesture(const RefPtr<GestureRecognizer>& recognizer);
-    void UnBlockGesture(std::list<WeakPtr<GestureRecognizer>>& members);
-    void HandleParallelDisposal(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
-    void HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void RemoveAndUnBlockGesture(bool isPrevPending, const WeakPtr<GestureRecognizer>& recognizer);
+    bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
+    std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
 
     size_t touchId_ = 0;
-
-    std::list<WeakPtr<GestureRecognizer>> highRecognizers_;
-    std::list<WeakPtr<GestureRecognizer>> lowRecognizers_;
-    std::list<WeakPtr<GestureRecognizer>> parallelRecognizers_;
+    bool isDelay_ = false;
+    bool hasGestureAccepted_ = false;
 };
 
 class GestureReferee : public virtual AceType {
     DECLARE_ACE_TYPE(GestureReferee, AceType);
+
 public:
     GestureReferee() = default;
-    ~GestureReferee() = default;
+    ~GestureReferee() override = default;
 
-    // Each gesture recognizer should add itself to the gesture scope at the beginning of the gesture sequence
-    // (touch down event) for gesture adjudicating.
-    void AddGestureRecognizer(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
-
-    // In multi finger recognizers, touch up one finger does not result to the whole gesture failed. Recognizer should
-    // remove the recognizer out of the referee.
-    void DelGestureRecognizer(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
+    void AddGestureToScope(size_t touchId, const TouchTestResult& result);
 
     // Try to clean gesture scope when receive cancel event.
     void CleanGestureScope(size_t touchId);
 
     // Called by the gesture recognizer when the gesture recognizer has completed the recognition of the gesture (accept
     // or reject)
-    void Adjudicate(size_t touchId, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
+    void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
+
+    bool HasGestureAccepted(size_t touchId) const;
 
 private:
+    void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
+    void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
+    void HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
+
     // Stores gesture recognizer collection according to Id.
-    std::unordered_map<size_t, GestureScope> gestureScopes_;
+    std::unordered_map<size_t, RefPtr<GestureScope>> gestureScopes_;
 };
 
 } // namespace OHOS::Ace::NG

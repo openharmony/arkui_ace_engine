@@ -38,7 +38,6 @@ void CheckBoxModelNG::Create(
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
     }
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CheckBoxModelNG::SetSelect(bool isSelected)

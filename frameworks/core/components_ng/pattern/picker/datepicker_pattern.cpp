@@ -241,7 +241,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh) const
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
-        datePickerEventHub->FireDailogChangeEvent(str);
+        datePickerEventHub->FireDialogChangeEvent(str);
     }
 }
 

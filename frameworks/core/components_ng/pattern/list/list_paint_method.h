@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
 
+#include <stdint.h>
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -29,10 +30,9 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ListPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListPaintMethod, NodePaintMethod)
 public:
-    ListPaintMethod(const V2::ItemDivider& divider, int32_t startIndex, int32_t endIndex, bool vertical,
+    ListPaintMethod(const V2::ItemDivider& divider, bool vertical, int32_t lanes, float space,
         ListLayoutAlgorithm::PositionMap& itemPosition)
-        : divider_(divider), startIndex_(startIndex), endIndex_(endIndex), vertical_(vertical),
-          itemPosition_(itemPosition)
+        : divider_(divider), vertical_(vertical), lanes_(lanes), space_(space), itemPosition_(itemPosition)
     {}
     ~ListPaintMethod() override = default;
 
@@ -40,9 +40,9 @@ public:
 
 private:
     V2::ItemDivider divider_;
-    int32_t startIndex_ = 0;
-    int32_t endIndex_ = 0;
     bool vertical_ = false;
+    int32_t lanes_ = 1;
+    float space_;
     ListLayoutAlgorithm::PositionMap itemPosition_;
 };
 } // namespace OHOS::Ace::NG

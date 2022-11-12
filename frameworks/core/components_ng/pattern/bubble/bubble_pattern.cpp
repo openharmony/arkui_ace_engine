@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 
+#include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/event/touch_event.h"
@@ -51,6 +54,13 @@ void BubblePattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
 
     InitTouchEvent(gestureHub);
+}
+
+void BubblePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 void BubblePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -106,7 +116,17 @@ void BubblePattern::PopBubble()
         return;
     }
     popupInfo.markNeedUpdate = true;
-    overlayManager->UpdatePopupNode(targetNodeId_, popupInfo);
+    popupInfo.popupId = -1;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    if (showInSubWindow) {
+        SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+    } else {
+        overlayManager->UpdatePopupNode(targetNodeId_, popupInfo);
+    }
 }
 
 } // namespace OHOS::Ace::NG

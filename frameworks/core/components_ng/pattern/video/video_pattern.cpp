@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -435,8 +436,7 @@ void VideoPattern::AddPreviewNodeIfNeeded()
         }
         if (!isExist) {
             auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
-            auto posterNode =
-                FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+            auto posterNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
             CHECK_NULL_VOID(posterNode);
             auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
             posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
@@ -525,7 +525,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
     auto controlBar = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(controlBar, nullptr);
 
-    auto playButton = CreateButton();
+    auto playButton = CreateSVG();
     CHECK_NULL_RETURN(playButton, nullptr);
     bool playing = mediaPlayer_->IsMediaPlayerValid() ? mediaPlayer_->IsPlaying() : false;
     ChangePlayButtonTag(playing, playButton);
@@ -543,7 +543,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
     CHECK_NULL_RETURN(durationText, nullptr);
     controlBar->AddChild(durationText);
 
-    auto fullScreenButton = CreateButton();
+    auto fullScreenButton = CreateSVG();
     CHECK_NULL_RETURN(fullScreenButton, nullptr);
     ChangeFullScreenButtonTag(false, fullScreenButton);
     controlBar->AddChild(fullScreenButton);
@@ -573,8 +573,6 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     padding.top = CalcLength(sliderEdge.Top());
     padding.bottom = CalcLength(sliderEdge.Bottom());
     sliderLayoutProperty->UpdatePadding(padding);
-    sliderLayoutProperty->UpdateInsetBlockHotSize(sliderTheme->GetInsetBlockHotSize());
-    sliderLayoutProperty->UpdateInsetBlockSize(sliderTheme->GetInsetBlockSize());
     sliderLayoutProperty->UpdateLayoutWeight(1.0);
 
     SliderOnChangeEvent sliderOnChangeEvent = [weak = WeakClaim(this)](float value, int32_t mode) {
@@ -619,19 +617,16 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
     return textNode;
 }
 
-RefPtr<FrameNode> VideoPattern::CreateButton()
+RefPtr<FrameNode> VideoPattern::CreateSVG()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_RETURN(textNode, nullptr);
-    buttonNode->AddChild(textNode);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto svgNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(svgNode, nullptr);
+    auto svgLayoutProperty = svgNode->GetLayoutProperty<ImageLayoutProperty>();
 
     auto btnEdge = videoTheme->GetBtnEdge();
     PaddingProperty padding;
@@ -639,14 +634,17 @@ RefPtr<FrameNode> VideoPattern::CreateButton()
     padding.right = CalcLength(btnEdge.Right());
     padding.top = CalcLength(btnEdge.Top());
     padding.bottom = CalcLength(btnEdge.Bottom());
-    buttonLayoutProperty->UpdatePadding(padding);
-    buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+    svgLayoutProperty->UpdatePadding(padding);
 
     auto btnSize = videoTheme->GetBtnSize();
     SizeF size { static_cast<float>(btnSize.Width()), static_cast<float>(btnSize.Height()) };
-    buttonLayoutProperty->UpdateMarginSelfIdealSize(size);
-    return buttonNode;
+    svgLayoutProperty->UpdateMarginSelfIdealSize(size);
+    CalcSize idealSize = { CalcLength(btnSize.Width()), CalcLength(btnSize.Height()) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    svgNode->UpdateLayoutConstraint(layoutConstraint);
+    return svgNode;
 }
 
 void VideoPattern::SetMethodCall()
@@ -815,12 +813,13 @@ void VideoPattern::ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn)
     };
     auto playBtnEvent = playBtn->GetOrCreateGestureEventHub();
     playBtnEvent->SetClickEvent(std::move(playClickCallback));
-    auto textNode = DynamicCast<FrameNode>(playBtn->GetChildAtIndex(0));
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(playing ? "P" : "S");
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto svgLayoutProperty = playBtn->GetLayoutProperty<ImageLayoutProperty>();
+    auto resourceId = playing ? InternalResource::ResourceId::PAUSE_SVG : InternalResource::ResourceId::PLAY_SVG;
+    auto svgSourceInfo = ImageSourceInfo("");
+    svgSourceInfo.SetResourceId(resourceId);
+    svgLayoutProperty->UpdateImageSourceInfo(svgSourceInfo);
+    playBtn->MarkModifyDone();
+    playBtn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn)
@@ -837,11 +836,14 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
     };
     auto fullScreenBtnEvent = fullScreenBtn->GetOrCreateGestureEventHub();
     fullScreenBtnEvent->SetClickEvent(std::move(fsClickCallback));
-    auto textNode = DynamicCast<FrameNode>(fullScreenBtn->GetChildAtIndex(0));
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(isFullScreen ? "x" : "X");
+    auto svgLayoutProperty = fullScreenBtn->GetLayoutProperty<ImageLayoutProperty>();
+    auto resourceId =
+        isFullScreen ? InternalResource::ResourceId::QUIT_FULLSCREEN_SVG : InternalResource::ResourceId::FULLSCREEN_SVG;
+    auto svgSourceInfo = ImageSourceInfo("");
+    svgSourceInfo.SetResourceId(resourceId);
+    svgLayoutProperty->UpdateImageSourceInfo(svgSourceInfo);
+    fullScreenBtn->MarkModifyDone();
+    fullScreenBtn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode)

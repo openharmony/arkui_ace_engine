@@ -15,18 +15,26 @@
 
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 
+#include <climits>
+#include <cstdint>
+
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/divider/divider_view.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -35,19 +43,38 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 
-const char SEPARATE[] = " ";
-
-constexpr Dimension SHEET_IMAGE_SIZE = 40.0_vp;
 constexpr Dimension SHEET_IMAGE_PADDING = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
+const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
+
+RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& color)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    textNode->SetInternal();
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textProps, nullptr);
+    textProps->UpdateContent(text);
+    if (!color.empty()) {
+        textProps->UpdateTextColor(Color::FromString(color));
+    } else {
+        textProps->UpdateTextColor(Color::BLUE);
+    }
+    textNode->SetInternal();
+    return textNode;
+}
 
 } // namespace
 
@@ -84,7 +111,6 @@ void DialogPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void DialogPattern::HandleTouchUp(const Offset& clickPosition)
 {
-    // TODO: need to check click position
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto dialogRenderProp = host->GetPaintProperty<DialogRenderProperty>();
@@ -96,12 +122,12 @@ void DialogPattern::HandleTouchUp(const Offset& clickPosition)
         auto contentRect = content->GetGeometryNode()->GetFrameRect();
         // close dialog if clicked outside content rect
         if (!contentRect.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {
-            PopDialog();
+            PopDialog(-1);
         }
     }
 }
 
-void DialogPattern::PopDialog()
+void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
     LOGI("DialogPattern::PopDialog from click");
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -111,9 +137,13 @@ void DialogPattern::PopDialog()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    // trigger onCancel callback
     auto hub = host->GetEventHub<DialogEventHub>();
-    hub->FireChangeEvent();
+    if (buttonIdx != -1) {
+        hub->FireSuccessEvent(buttonIdx);
+    } else {
+        // trigger onCancel callback
+        hub->FireCancelEvent();
+    }
 
     overlayManager->CloseDialog(host);
 }
@@ -139,28 +169,30 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
         auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(contentWrapper);
-        UpdateContentRenderContext(contentWrapper, dialogTheme_);
+        if (!dialogProperties.customStyle) {
+            UpdateContentRenderContext(contentWrapper, dialogTheme_);
+        }
         customNode_->MountToParent(contentWrapper);
         auto dialog = GetHost();
         contentWrapper->MountToParent(dialog);
         return;
     }
 
-    std::string data;
-    // TODO: need to check if Focusable is need in DialogView
-    // TODO: need to check if FocusCollaboration is need in DialogView
     // Make dialog Content Column
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(contentColumn);
 
-    auto title = BuildTitle(data, dialogProperties);
+    auto title = BuildTitle(dialogProperties);
     CHECK_NULL_VOID(title);
     contentColumn->AddChild(title);
 
-    auto content = BuildContent(data, dialogProperties);
+    auto content = BuildContent(dialogProperties);
     CHECK_NULL_VOID(content);
     contentColumn->AddChild(content);
-    UpdateContentRenderContext(contentColumn, dialogTheme_);
+    if (!dialogProperties.customStyle) {
+        UpdateContentRenderContext(contentColumn, dialogTheme_);
+    }
 
     auto columnProp = AceType::DynamicCast<LinearLayoutProperty>(contentColumn->GetLayoutProperty());
     CHECK_NULL_VOID(columnProp);
@@ -171,11 +203,9 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     } else {
         columnProp->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     }
-    // TODO: Content box need animation
-    // TODO: need to check TextDirection.
 
     // build ActionSheet child
-    if (dialogProperties.type == DialogType::ACTION_SHEET) {
+    if (dialogProperties.type == DialogType::ACTION_SHEET && !dialogProperties.sheetsInfo.empty()) {
         auto sheetContainer = BuildSheet(dialogProperties.sheetsInfo);
         CHECK_NULL_VOID(sheetContainer);
         sheetContainer->MountToParent(contentColumn);
@@ -184,19 +214,23 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
 
     // Make Menu node if hasMenu
     if (dialogProperties.isMenu) {
-        // TODO: make menu node
-        LOGD("Menu is not Completed");
+        auto menu = BuildMenu(dialogProperties.buttons);
+        CHECK_NULL_VOID(menu);
+        menu->MountToParent(contentColumn);
     } else {
-        auto buttonContainer = BuildButtons(dialogProperties.buttons);
-        CHECK_NULL_VOID(buttonContainer);
-        buttonContainer->MountToParent(contentColumn);
+        // build buttons
+        if (!dialogProperties.buttons.empty()) {
+            auto buttonContainer = BuildButtons(dialogProperties.buttons);
+            CHECK_NULL_VOID(buttonContainer);
+            buttonContainer->MountToParent(contentColumn);
+        }
     }
 
     auto dialog = GetHost();
     contentColumn->MountToParent(dialog);
 }
 
-RefPtr<FrameNode> DialogPattern::BuildTitle(std::string& data, const DialogProperties& dialogProperties)
+RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProperties)
 {
     // Make Title node
     auto title = FrameNode::CreateFrameNode(
@@ -208,7 +242,6 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(std::string& data, const DialogPrope
     titleProp->UpdateAdaptMaxFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
     titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleMinFontSize());
     titleProp->UpdateContent(dialogProperties.title);
-    data += dialogProperties.title + SEPARATE;
     PaddingProperty titlePadding;
     auto paddingInTheme = (dialogProperties.content.empty() && dialogProperties.buttons.empty())
                               ? dialogTheme_->GetTitleDefaultPadding()
@@ -218,10 +251,27 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(std::string& data, const DialogPrope
     titlePadding.top = CalcLength(paddingInTheme.Top());
     titlePadding.bottom = CalcLength(paddingInTheme.Bottom());
     titleProp->UpdatePadding(titlePadding);
+
+    // XTS inspector value
+    title_ = dialogProperties.title;
+
+    // actionSheet title needs to align flex start
+    if (dialogProperties.type == DialogType::ACTION_SHEET) {
+        auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(row, nullptr);
+        auto rowProps = row->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(rowProps, nullptr);
+        rowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+        rowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        title->MountToParent(row);
+        return row;
+    }
+
     return title;
 }
 
-RefPtr<FrameNode> DialogPattern::BuildContent(std::string& data, const DialogProperties& dialogProperties)
+RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& dialogProperties)
 {
     // Make Content node
     auto contentNode = FrameNode::CreateFrameNode(
@@ -235,7 +285,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(std::string& data, const DialogPro
     }
     contentProp->UpdateContent(dialogProperties.content);
     LOGD("content = %s", dialogProperties.content.c_str());
-    data += dialogProperties.content + SEPARATE;
+    // update padding
     Edge contentPaddingInTheme;
     if (!dialogProperties.title.empty()) {
         contentPaddingInTheme =
@@ -249,67 +299,53 @@ RefPtr<FrameNode> DialogPattern::BuildContent(std::string& data, const DialogPro
     contentPadding.right = CalcLength(contentPaddingInTheme.Right());
     contentPadding.top = CalcLength(contentPaddingInTheme.Top());
     contentPadding.bottom = CalcLength(contentPaddingInTheme.Bottom());
-    // Make scroll node
-    auto contentScroll = FrameNode::CreateFrameNode(
-        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    contentProp->UpdatePadding(contentPadding);
 
-    if (deviceType == DeviceType::WATCH) {
-        contentProp->UpdatePadding(contentPadding);
-    } else {
-        auto scrollProp = contentScroll->GetLayoutProperty();
-        scrollProp->UpdatePadding(contentPadding);
-        // TODO: shrink need to be completed
-        scrollProp->UpdateFlexShrink(1.0);
-    }
-    contentNode->MountToParent(contentScroll);
-    contentScroll->MarkModifyDone();
-    return contentScroll;
+    // XTS inspector value
+    message_ = dialogProperties.content;
+    return contentNode;
 }
 
-// to close dialog when clicked
-void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub)
+// to close dialog when clicked, use button index in Prompt to trigger success callback
+void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx)
 {
     auto host = GetHost();
-    auto closeCallback = [weak = WeakClaim(RawPtr(host))](GestureEvent& /*info*/) {
+    auto closeCallback = [weak = WeakClaim(RawPtr(host)), buttonIdx](GestureEvent& /*info*/) {
         auto dialog = weak.Upgrade();
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-
-        overlayManager->CloseDialog(dialog);
+        CHECK_NULL_VOID(dialog);
+        dialog->GetPattern<DialogPattern>()->PopDialog(buttonIdx);
     };
 
     hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(closeCallback));
 }
 
-RefPtr<UINode> DialogPattern::CreateButton(const ButtonInfo& params)
+RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t index)
 {
-    ButtonView::CreateWithLabel(params.text);
-    if (!params.textColor.empty()) {
-        ButtonView::SetTextColor(Color::FromString(params.textColor));
-    }
-    auto buttonNode = ViewStackProcessor::GetInstance()->Finish();
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
+    // append text inside button
+    auto textNode = CreateButtonText(params.text, params.textColor);
+    CHECK_NULL_RETURN(textNode, nullptr);
+    textNode->MountToParent(buttonNode);
 
-    // bind click event
-    auto buttonFrame = AceType::DynamicCast<FrameNode>(buttonNode);
-    auto hub = buttonFrame->GetOrCreateGestureEventHub();
+    auto hub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
-    hub->AddClickEvent(params.action);
+    // bind click event
+    if (params.action) {
+        hub->AddClickEvent(params.action);
+    }
 
     // to close dialog when clicked inside button rect
-    BindCloseCallBack(hub);
+    BindCloseCallBack(hub, index);
 
     // update background color
     if (params.isBgColorSetted) {
-        auto renderContext = buttonFrame->GetRenderContext();
+        auto renderContext = buttonNode->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, nullptr);
         renderContext->UpdateBackgroundColor(params.bgColor);
     }
+    buttonNode->SetInternal();
     return buttonNode;
 }
 
@@ -322,9 +358,11 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
         container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     } else {
         container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-        auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
-        layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
-        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        if (container) {
+            auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
+            layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        }
     }
 
     CHECK_NULL_RETURN(container, nullptr);
@@ -337,9 +375,11 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
     actionPadding.bottom = CalcLength(padding.Bottom());
     container->GetLayoutProperty()->UpdatePadding(actionPadding);
 
-    for (auto&& params : buttons) {
-        auto buttonNode = CreateButton(params);
+    for (size_t i = 0; i < buttons.size(); ++i) {
+        auto buttonNode = CreateButton(buttons[i], i);
+        CHECK_NULL_RETURN(buttonNode, nullptr);
         buttonNode->MountToParent(container);
+        buttonNode->MarkModifyDone();
     }
     return container;
 }
@@ -358,7 +398,6 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     CHECK_NULL_RETURN(itemRow, nullptr);
     auto layoutProps = itemRow->GetLayoutProperty<LinearLayoutProperty>();
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    layoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
 
     // mount icon
@@ -376,10 +415,12 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
         };
         auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         iconProps->UpdatePadding(imagePadding);
-        auto imageSrc = ImageSourceInfo(item.icon, SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE);
+        LOGD("item icon src = %s", item.icon.c_str());
+        auto imageSrc = ImageSourceInfo(item.icon);
         iconProps->UpdateImageSourceInfo(imageSrc);
-
+        iconProps->UpdateUserDefinedIdealSize(CalcSize(SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE));
         iconNode->MountToParent(itemRow);
+        iconNode->MarkModifyDone();
     }
 
     // mount title
@@ -400,9 +441,11 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     }
     // set sheetItem action
     auto hub = itemRow->GetOrCreateGestureEventHub();
-    hub->AddClickEvent(item.action);
+    if (item.action) {
+        hub->AddClickEvent(item.action);
+    }
     // close dialog when clicked
-    BindCloseCallBack(hub);
+    BindCloseCallBack(hub, -1);
 
     itemRow->MountToParent(itemNode);
     return itemNode;
@@ -441,6 +484,34 @@ RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& 
     props->UpdateDivider(divider);
     props->UpdateListDirection(Axis::VERTICAL);
     return list;
+}
+
+RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& buttons)
+{
+    auto menu = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
+    // column -> button
+    for (size_t i = 0; i < buttons.size(); ++i) {
+        auto button = CreateButton(buttons[i], i);
+        CHECK_NULL_RETURN(button, nullptr);
+        auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
+        props->UpdateFlexGrow(1);
+        props->UpdateFlexShrink(1);
+
+        button->MountToParent(menu);
+    }
+    return menu;
+}
+
+// XTS inspector
+void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() == V2::ALERT_DIALOG_ETS_TAG || host->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {
+        json->Put("title", title_.c_str());
+        json->Put("message", message_.c_str());
+    }
 }
 
 } // namespace OHOS::Ace::NG

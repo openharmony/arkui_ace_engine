@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/blank/blank_pattern.h"
 
+#include <string>
+
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
@@ -68,6 +71,19 @@ void BlankPattern::OnMountToParentDone()
         layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(layoutProperty->GetMinSizeValue())));
         return;
     }
+}
+
+std::string BlankPattern::GetColorString() const
+{
+    std::string color;
+    auto renderContext = GetHost()->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, "NA");
+    return renderContext->GetBackgroundColor().value_or(Color::WHITE).ColorToString();
+}
+
+void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("color", GetColorString().c_str());
 }
 
 } // namespace OHOS::Ace::NG

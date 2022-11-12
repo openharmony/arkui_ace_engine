@@ -55,7 +55,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
-    LayoutConstraintF childLayoutConstraint;
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
     ComputeInnerLayoutParam(childLayoutConstraint);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -102,6 +102,8 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO);
     }
+    // update percentRef
+    innerLayout.percentReference = innerLayout.maxSize;
 }
 
 double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(

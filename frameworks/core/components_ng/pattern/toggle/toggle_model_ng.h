@@ -15,6 +15,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOGGLE_TOGGLE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOGGLE_TOGGLE_MODEL_NG_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 
 namespace OHOS::Ace::NG {
@@ -30,6 +31,13 @@ public:
     void SetBackgroundColor(const Color& color) override;
     bool IsToggle() override;
     void SetPadding(const NG::PaddingPropertyF& args) override;
+
+private:
+    static void CreateCheckbox(int32_t nodeId);
+    static void CreateSwitch(int32_t nodeId);
+    static void CreateButton(int32_t nodeId);
+    static void AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index);
+    static int32_t RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId);
 };
 
 } // namespace OHOS::Ace::NG

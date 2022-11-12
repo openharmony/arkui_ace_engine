@@ -53,6 +53,8 @@ public:
     {
         return MakeRefPtr<NavigationLayoutAlgorithm>();
     }
+
+    void OnModifyDone() override;
 };
 
 } // namespace OHOS::Ace::NG

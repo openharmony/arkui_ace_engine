@@ -23,6 +23,7 @@
 namespace OHOS::Ace {
 
 class MessageBridge : public virtual AceType {
+    DECLARE_ACE_TYPE(MessageBridge, AceType);
 public:
     virtual void SendMessage(const std::string& action, const std::function<void(const std::string&)>& handler) = 0;
 };

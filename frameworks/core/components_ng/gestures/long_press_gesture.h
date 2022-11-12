@@ -39,7 +39,7 @@ public:
     ~LongPressGesture() override = default;
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer() override;
+    RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
 private:
     bool repeat_ = false;

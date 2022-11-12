@@ -16,6 +16,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 
 #include <cstdint>
+#include <list>
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
@@ -37,44 +38,62 @@ RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     TouchTestResult& innerTargets, TouchTestResult& finalResult)
 {
-    std::list<RefPtr<GestureRecognizer>> innerRecognizers;
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    if (scrollableActuator_) {
+        scrollableActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+    }
+    if (touchEventActuator_) {
+        touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+    }
+    if (clickEventActuator_) {
+        clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+    }
+    if (panEventActuator_) {
+        panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+    }
+
+    TouchTestResult dragTargets;
+    if (longPressEventActuator_) {
+        longPressEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets);
+    }
+    if (dragEventActuator_) {
+        dragEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets);
+    }
+
+    std::list<RefPtr<NGGestureRecognizer>> longPressRecognizers;
+    for (const auto& item : dragTargets) {
+        longPressRecognizers.emplace_back(AceType::DynamicCast<NGGestureRecognizer>(item));
+    }
+    if (!longPressRecognizers.empty()) {
+        // this node has long press and drag event, combine into parallelRecognizer.
+        if (!nodeParallelRecognizer_) {
+            nodeParallelRecognizer_ = MakeRefPtr<ParallelRecognizer>(std::move(longPressRecognizers));
+        } else {
+            nodeParallelRecognizer_->AddChildren(longPressRecognizers);
+        }
+        innerTargets.emplace_back(nodeParallelRecognizer_);
+    } else {
+        nodeParallelRecognizer_.Reset();
+    }
+
+    std::list<RefPtr<NGGestureRecognizer>> innerRecognizers;
     for (auto const& eventTarget : innerTargets) {
-        auto recognizer = AceType::DynamicCast<GestureRecognizer>(eventTarget);
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(eventTarget);
         if (recognizer) {
             innerRecognizers.push_back(std::move(recognizer));
         } else {
             finalResult.push_back(eventTarget);
         }
     }
-    ProcessTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, finalResult);
 
-    auto eventHub = eventHub_.Upgrade();
-    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
-    if (scrollableActuator_) {
-        // TODO: need to change scrollable to be gesture recognizer to make gesture referee works.
-        scrollableActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
-    }
-    if (touchEventActuator_) {
-        touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
-    }
-    if (longPressEventActuator_) {
-        longPressEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
-    }
-    if (clickEventActuator_) {
-        clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
-    }
-    if (panEventActuator_) {
-        panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
-    }
-    if (dragEventActuator_) {
-        dragEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
-    }
+    ProcessTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, finalResult);
 
     return false;
 }
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    std::list<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult)
+    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult)
 {
     auto host = GetFrameNode();
     if (!host) {
@@ -86,7 +105,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     }
 
     auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
-    RefPtr<GestureRecognizer> current;
+    RefPtr<NGGestureRecognizer> current;
 
     // Pack inner recognizer include self inner recognizer and children.
     if (innerRecognizers.size() == 1) {
@@ -95,7 +114,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         if (!innerExclusiveRecognizer_) {
             innerExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(innerRecognizers));
         } else {
-            innerExclusiveRecognizer_->ReplaceChildren(innerRecognizers);
+            innerExclusiveRecognizer_->AddChildren(innerRecognizers);
         }
         innerExclusiveRecognizer_->SetCoordinateOffset(offset);
         current = innerExclusiveRecognizer_;
@@ -121,18 +140,17 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             continue;
         }
         auto priority = recognizer->GetPriority();
-        std::list<RefPtr<GestureRecognizer>> recognizers { 1, recognizer };
+        std::list<RefPtr<NGGestureRecognizer>> recognizers { 1, recognizer };
         if (priority == GesturePriority::Parallel) {
             if (current) {
                 recognizers.push_front(current);
             }
-
             if (recognizers.size() > 1) {
                 if ((static_cast<int32_t>(externalParallelRecognizer_.size()) <= parallelIndex)) {
                     externalParallelRecognizer_.emplace_back(
                         AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
                 } else {
-                    externalParallelRecognizer_[parallelIndex]->ReplaceChildren(recognizers);
+                    externalParallelRecognizer_[parallelIndex]->AddChildren(recognizers);
                 }
                 externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
                 current = externalParallelRecognizer_[parallelIndex];
@@ -154,7 +172,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                     externalExclusiveRecognizer_.emplace_back(
                         AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
                 } else {
-                    externalExclusiveRecognizer_[exclusiveIndex]->ReplaceChildren(recognizers);
+                    externalExclusiveRecognizer_[exclusiveIndex]->AddChildren(recognizers);
                 }
                 externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
                 current = externalExclusiveRecognizer_[exclusiveIndex];
@@ -226,11 +244,11 @@ void GestureEventHub::CombineIntoExclusiveRecognizer(
     const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result)
 {
     TouchTestResult finalResult;
-    std::list<RefPtr<GestureRecognizer>> recognizers;
+    std::list<RefPtr<NGGestureRecognizer>> recognizers;
     const auto coordinateOffset = globalPoint - localPoint;
     auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
     for (auto const& eventTarget : result) {
-        auto recognizer = AceType::DynamicCast<GestureRecognizer>(eventTarget);
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(eventTarget);
         if (recognizer) {
             recognizers.push_back(std::move(recognizer));
         } else {
@@ -238,14 +256,14 @@ void GestureEventHub::CombineIntoExclusiveRecognizer(
         }
     }
 
-    RefPtr<GestureRecognizer> current;
+    RefPtr<NGGestureRecognizer> current;
     if (recognizers.size() == 1) {
         current = *recognizers.begin();
     } else if (recognizers.size() > 1) {
         if (!nodeExclusiveRecognizer_) {
             nodeExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers));
         } else {
-            nodeExclusiveRecognizer_->ReplaceChildren(recognizers);
+            nodeExclusiveRecognizer_->AddChildren(recognizers);
         }
         nodeExclusiveRecognizer_->SetCoordinateOffset(offset);
         current = nodeExclusiveRecognizer_;
@@ -289,7 +307,7 @@ void GestureEventHub::InitDragDropEvent()
 
     auto dragEvent = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    AddDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
@@ -324,7 +342,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
     }
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo);
+    dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo, GetFrameNode());
 }
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
@@ -350,8 +368,6 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
         eventHub->FireOnDrop(event, "");
     }
 
-    pipeline->SetIsDragged(false);
-
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
@@ -359,10 +375,6 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
 
 void GestureEventHub::HandleOnDragCancel()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetIsDragged(false);
-
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->onDragCancel();
     dragDropProxy_->DestroyDragWindow();
@@ -379,4 +391,68 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
     }
 }
 
+void GestureEventHub::SetClickEvent(GestureEventFunc&& clickEvent)
+{
+    if (!clickEventActuator_) {
+        clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
+        clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
+    }
+    clickEventActuator_->ReplaceClickEvent(std::move(clickEvent));
+
+    SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
+void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
+{
+    if (!clickEventActuator_) {
+        clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
+        clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
+    }
+    clickEventActuator_->AddClickEvent(clickEvent);
+
+    SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
+OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
+{
+    auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
+        auto gestureHub = weak.Upgrade();
+        if (!gestureHub) {
+            return;
+        }
+        auto node = gestureHub->GetFrameNode();
+        if (node) {
+            node->OnAccessibilityEvent(eventType);
+        }
+    };
+    return callback;
+}
+
+bool GestureEventHub::ActClick()
+{
+    if (!clickEventActuator_) {
+        return false;
+    }
+
+    auto click = clickEventActuator_->GetClickEvent();
+    if (click) {
+        GestureEvent info;
+        click(info);
+    }
+    return true;
+}
+
+bool GestureEventHub::ActLongClick()
+{
+    if (!longPressEventActuator_) {
+        return false;
+    }
+
+    auto click = longPressEventActuator_->GetGestureEventFunc();
+    if (click) {
+        GestureEvent info;
+        click(info);
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

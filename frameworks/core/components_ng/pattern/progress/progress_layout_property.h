@@ -17,10 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_LAYOUT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
+#include "core/common/container.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT ProgressLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ProgressLayoutProperty, LayoutProperty);
 
@@ -43,6 +46,20 @@ public:
         LayoutProperty::Reset();
         ResetType();
         ResetStrokeWidth();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(progressTheme);
+
+        json->Put(
+            "type", (ProgressTypeUtils::ConvertProgressTypeToString(propType_.value_or(ProgressType::LINEAR))).c_str());
+        json->Put("strokeWidth", propStrokeWidth_.value_or(progressTheme->GetTrackThickness()).ToString().c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Type, ProgressType, PROPERTY_UPDATE_MEASURE);

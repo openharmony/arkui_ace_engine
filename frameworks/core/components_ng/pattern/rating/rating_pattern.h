@@ -109,6 +109,7 @@ private:
     void FireChangeEvent() const;
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX);
     bool IsIndicator();
+    void UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -125,11 +126,19 @@ private:
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
+    ImagePaintConfig singleStarImagePaintConfig_;
     RectF singleStarDstRect_;
     RectF singleStarRect_;
     int32_t imageReadyStateCode_ = 0;
     int32_t imageSuccessStateCode_ = 0;
+    bool hasInit_ = false;
+    double lastRatingScore_ = 0.0;
 
+    bool isForegroundImageInfoFromTheme_ = false;
+    bool isSecondaryImageInfoFromTheme_ = false;
+    bool isBackgroundImageInfoFromTheme_ = false;
+    // get XTS inspector value
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
 };
 

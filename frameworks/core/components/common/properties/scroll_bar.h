@@ -36,51 +36,6 @@ constexpr double DEFAULT_MINANGLE = 10.0;
 constexpr double STRAIGHT_ANGLE = 180.0;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 
-enum class ShapeMode {
-    /*
-     * unspecified, follow theme.
-     */
-    DEFAULT = 0,
-    /*
-     * rect scrollbar.
-     */
-    RECT,
-    /*
-     * round scrollbar.
-     */
-    ROUND,
-};
-
-enum class DisplayMode {
-    /*
-     * do not display scrollbar.
-     */
-    OFF = 0,
-    /*
-     * display scrollbar on demand.
-     */
-    AUTO,
-    /*
-     * always display scrollbar.
-     */
-    ON,
-};
-
-enum class PositionMode {
-    /*
-     * display scrollbar on right.
-     */
-    RIGHT = 0,
-    /*
-     * display scrollbar on left.
-     */
-    LEFT,
-    /*
-     * display scrollbar on bottom.
-     */
-    BOTTOM,
-};
-
 class ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
 
@@ -104,10 +59,9 @@ public:
     void AddScrollBarController(const Offset& coordinateOffset, TouchTestResult& result);
     void SetActive(bool isActive);
     bool IsActive() const;
-    void SetUndisplay();
     Size GetRootSize() const;
 
-    void Reset();
+    void Reset(const RefPtr<ScrollBar>& scrollBar = nullptr);
 
     ShapeMode GetShapeMode() const
     {
@@ -209,6 +163,11 @@ public:
         inactiveWidth_ = inactiveWidth;
     }
 
+    const Dimension& GetInactiveWidth() const
+    {
+        return inactiveWidth_;
+    }
+
     void SetActiveWidth(const Dimension& activeWidth)
     {
         activeWidth_ = activeWidth;
@@ -222,6 +181,11 @@ public:
     void SetNormalWidth(const Dimension& normalWidth)
     {
         normalWidth_ = normalWidth;
+    }
+
+    const Dimension& GetNormalWidth() const
+    {
+        return normalWidth_;
     }
 
     const Rect& GetActiveRect() const
@@ -252,16 +216,6 @@ public:
     bool IsScrollable() const
     {
         return isScrollable_;
-    }
-
-    void SetFirstLoad(bool firstLoad)
-    {
-        firstLoad_ = firstLoad;
-    }
-
-    bool GetFirstLoad() const
-    {
-        return firstLoad_;
     }
 
     void SetPositionMode(PositionMode positionMode)
@@ -349,7 +303,6 @@ private:
     double outBoundary_ = 0.0;
 
     bool isScrollable_ = false;
-    bool firstLoad_ = true;
 
     WeakPtr<PipelineContext> pipelineContext_;
     RefPtr<ScrollBarController> barController_;

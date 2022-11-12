@@ -24,7 +24,6 @@
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -185,15 +184,25 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
     type_ = type;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeFrontendDelegate(taskExecutor);
-    taskExecutor->PostTask(
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
-            auto jsEngine = weakEngine.Upgrade();
-            if (!jsEngine) {
-                return;
-            }
-            jsEngine->Initialize(delegate);
-        },
-        TaskExecutor::TaskType::JS);
+
+    bool needPostJsTask = true;
+    auto container = Container::Current();
+    if (container) {
+        const auto& setting = container->GetSettings();
+        needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread);
+    }
+    auto initJSEngineTask = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->Initialize(delegate);
+    };
+    if (needPostJsTask) {
+        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS);
+    } else {
+        initJSEngineTask();
+    }
 
     LOGD("DeclarativeFrontend initialize end.");
     return true;
@@ -871,6 +880,18 @@ void DeclarativeFrontend::DumpFrontend() const
         DumpLog::GetInstance().AddDesc("Length: " + std::to_string(routerIndex));
         DumpLog::GetInstance().Print(0, routerName, 0);
     }
+}
+
+std::string DeclarativeFrontend::GetPagePath() const
+{
+    if (!delegate_) {
+        return "";
+    }
+    int32_t routerIndex = 0;
+    std::string routerName;
+    std::string routerPath;
+    delegate_->GetState(routerIndex, routerName, routerPath);
+    return routerPath + routerName;
 }
 
 void DeclarativeFrontend::TriggerGarbageCollection()

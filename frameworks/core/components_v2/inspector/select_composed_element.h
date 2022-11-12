@@ -48,8 +48,6 @@ public:
 
 private:
     OHOS::Ace::RefPtr<OHOS::Ace::RenderSelect> GetRenderSelect() const;
-    std::string ConvertFontFamily(const std::vector<std::string>& fontFamily) const;
-    std::string GetTextStyle(TextStyle textStyle) const;
 };
 
 } // namespace OHOS::Ace::V2

@@ -28,10 +28,13 @@ bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<
         return false;
     }
 
+    runtimeExtractor_ = AbilityRuntime::RuntimeExtractor::Create(hapPath);
+    if (!runtimeExtractor_) {
+        return false;
+    }
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
     LOGD("hapPath_:%{public}s", hapPath_.c_str());
-    runtimeExtractor_ = AbilityRuntime::RuntimeExtractor::Create(hapPath_);
     return true;
 }
 
@@ -74,19 +77,19 @@ std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& 
         std::string fileName = basePath + assetName;
         bool hasFile = runtimeExtractor_->HasEntry(fileName);
         if (!hasFile) {
-            LOGW("HasEntry failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
+            LOGD("HasEntry failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
             continue;
         }
         std::ostringstream osstream;
         hasFile = runtimeExtractor_->GetFileBuffer(fileName, osstream);
         if (!hasFile) {
-            LOGW("GetFileBuffer failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
+            LOGD("GetFileBuffer failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
             continue;
         }
         LOGD("GetFileBuffer Success: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
         return std::make_unique<HapAssetMapping>(osstream);
     }
-    LOGE("Cannot find base path of %{public}s", assetName.c_str());
+    LOGI("Cannot find base path of %{public}s", assetName.c_str());
     return nullptr;
 }
 
@@ -101,7 +104,7 @@ std::string HapAssetProvider::GetAssetPath(const std::string& assetName)
         }
         return hapPath_ + "/" + basePath;
     }
-    LOGE("Cannot find base path of %{public}s", assetName.c_str());
+    LOGI("Cannot find base path of %{public}s", assetName.c_str());
     return "";
 }
 
@@ -112,17 +115,17 @@ void HapAssetProvider::GetAssetList(const std::string& path, std::vector<std::st
         std::string assetPath = basePath + path;
         bool res = runtimeExtractor_->IsDirExist(assetPath);
         if (!res) {
-            LOGW("IsDirExist failed: %{public}s %{public}s", hapPath_.c_str(), assetPath.c_str());
+            LOGD("IsDirExist failed: %{public}s %{public}s", hapPath_.c_str(), assetPath.c_str());
             continue;
         }
         res = runtimeExtractor_->GetFileList(assetPath, assetList);
         if (!res) {
-            LOGW("GetAssetList failed: %{public}s %{public}s", hapPath_.c_str(), assetPath.c_str());
+            LOGD("GetAssetList failed: %{public}s %{public}s", hapPath_.c_str(), assetPath.c_str());
             continue;
         }
         return;
     }
-    LOGE("Cannot Get File List from %{public}s", path.c_str());
+    LOGI("Cannot Get File List from %{public}s", path.c_str());
 }
 
 } // namespace OHOS::Ace

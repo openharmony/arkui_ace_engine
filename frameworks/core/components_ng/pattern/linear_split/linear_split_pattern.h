@@ -19,7 +19,9 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_algorithm.h"
+#include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "core/components_ng/pattern/linear_split/linear_split_paint_method.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -42,6 +44,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType_);
+    }
+
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<LinearSplitLayoutProperty>();
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override

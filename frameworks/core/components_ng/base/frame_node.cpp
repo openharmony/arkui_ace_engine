@@ -15,8 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 
-#include <list>
-
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -26,6 +24,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -43,10 +42,13 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
+    if (renderContext_) {
+        renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
+    }
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
+    accessibilityProperty_ = pattern->CreateAccessibilityProperty();
     // first create make layout property dirty.
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
@@ -55,9 +57,12 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
 FrameNode::~FrameNode()
 {
     pattern_->DetachFromFrameNode(this);
+    if (IsOnMainTree()) {
+        OnDetachFromMainTree();
+    }
     auto focusHub = GetFocusHub();
     if (focusHub) {
-        focusHub->RemoveSelf();
+        focusHub->RemoveSelf(this);
     }
 }
 
@@ -111,6 +116,7 @@ void FrameNode::InitializePatternAndContext()
 {
     eventHub_->AttachHost(WeakClaim(this));
     pattern_->AttachToFrameNode(WeakClaim(this));
+    accessibilityProperty_->SetHost(WeakClaim(this));
     renderContext_->SetRequestFrame([weak = WeakClaim(this)] {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -158,19 +164,43 @@ void FrameNode::DumpInfo()
     }
 }
 
+void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    bool enabled = true;
+    bool focusable = false;
+    bool focused = false;
+    auto focusHub = GetFocusHub();
+    if (focusHub) {
+        enabled = focusHub->IsEnabled();
+        focusable = focusHub->IsFocusable();
+        focused = focusHub->IsCurrentFocus();
+    }
+    json->Put("enabled", enabled);
+    json->Put("focusable", focusable);
+    json->Put("focused", focused);
+}
+
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    // scrollable in AccessibilityProperty
+    ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
     if (renderContext_) {
         renderContext_->ToJsonValue(json);
     }
+    if (eventHub_) {
+        eventHub_->ToJsonValue(json);
+    }
+    FocusToJsonValue(json);
 }
 
 void FrameNode::OnAttachToMainTree()
 {
     UINode::OnAttachToMainTree();
     eventHub_->FireOnAppear();
+    renderContext_->OnNodeAppear();
     if (!hasPendingRequest_) {
         return;
     }
@@ -194,6 +224,7 @@ void FrameNode::OnAttachToMainTree()
 void FrameNode::OnDetachFromMainTree()
 {
     eventHub_->FireOnDisappear();
+    renderContext_->OnNodeDisappear(this);
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -201,6 +232,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     ACE_FUNCTION_TRACE();
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
+
+    // update new layout constrain.
+    layoutProperty_->UpdateLayoutConstraint(dirty->GetLayoutProperty());
 
     // active change flag judge.
     SetActive(dirty->IsActive());
@@ -414,11 +448,11 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
-    isLayoutDirtyMarked_ = false;
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         auto layoutWrapper =
             MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
+        isLayoutDirtyMarked_ = false;
         return layoutWrapper;
     }
 
@@ -430,7 +464,10 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     }
     auto flag = layoutProperty_->GetPropertyChangeFlag();
-    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_);
+    // It is necessary to copy the layoutProperty property to prevent the layoutProperty property from being modified
+    // during the layout process, resulting in the problem of judging whether the front-end setting value changes the
+    // next time js is executed.
+    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
         forceLayout);
     do {
@@ -449,10 +486,9 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
     } while (false);
     // check position flag.
-    if (renderContext_->HasPosition()) {
-        layoutWrapper->SetOutOfLayout(true);
-    }
+    layoutWrapper->SetOutOfLayout(renderContext_->HasPosition());
     layoutWrapper->SetActive(isActive_);
+    isLayoutDirtyMarked_ = false;
     return layoutWrapper;
 }
 
@@ -476,9 +512,17 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
     auto paintMethod = pattern_->CreateNodePaintMethod();
+    // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being modified
+    // during the paint process, resulting in the problem of judging whether the front-end setting value changes the
+    // next time js is executed.
     if (paintMethod) {
-        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_);
-        paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());
+        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
+        paintWrapper->SetNodePaintMethod(paintMethod);
+        return paintWrapper;
+    }
+    if (renderContext_->GetAccessibilityFocus().value_or(false)) {
+        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
+        paintWrapper->SetNodePaintMethod(MakeRefPtr<NodePaintMethod>());
         return paintWrapper;
     }
     return nullptr;
@@ -553,40 +597,17 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame() const
     return nullptr;
 }
 
-void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
+void FrameNode::MarkNeedRenderOnly()
 {
-    layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
-    paintProperty_->UpdatePropertyChangeFlag(extraFlag);
-    auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
-    auto paintFlag = paintProperty_->GetPropertyChangeFlag();
-    if (CheckNoChanged(layoutFlag | paintFlag)) {
-        LOGD("MarkDirtyNode: flag not changed");
-        return;
-    }
+    MarkNeedRender(IsRenderBoundary());
+}
+
+void FrameNode::MarkNeedRender(bool isRenderBoundary)
+{
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-
-    if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
-        if (isLayoutDirtyMarked_) {
-            LOGD("MarkDirtyNode: isLayoutDirtyMarked is true");
-            return;
-        }
-        isLayoutDirtyMarked_ = true;
-        if (!isMeasureBoundary && CheckNeedRequestParentMeasure(layoutFlag)) {
-            auto parent = GetAncestorNodeOfFrame();
-            if (parent) {
-                parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            } else {
-                context->AddDirtyLayoutNode(Claim(this));
-            }
-            return;
-        }
-        context->AddDirtyLayoutNode(Claim(this));
-        return;
-    }
-    layoutProperty_->CleanDirty();
-
     // If it has dirtyLayoutBox, need to mark dirty after layout done.
+    paintProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
         LOGD("this node has already mark dirty, %{public}s, %{public}d, %{public}d", GetTag().c_str(),
             isRenderDirtyMarked_, isLayoutDirtyMarked_);
@@ -601,6 +622,58 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     if (parent) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
     }
+}
+
+void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
+{
+    if (CheckNeedRender(extraFlag)) {
+        paintProperty_->UpdatePropertyChangeFlag(extraFlag);
+    }
+    layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
+    paintProperty_->UpdatePropertyChangeFlag(extraFlag);
+    auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
+    auto paintFlag = paintProperty_->GetPropertyChangeFlag();
+    if (CheckNoChanged(layoutFlag | paintFlag)) {
+        LOGD("MarkDirtyNode: flag not changed, node tag: %{public}s", GetTag().c_str());
+        return;
+    }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+
+    if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
+        if (isLayoutDirtyMarked_) {
+            LOGD("MarkDirtyNode: isLayoutDirtyMarked is true");
+            return;
+        }
+        isLayoutDirtyMarked_ = true;
+        if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
+            auto parent = GetAncestorNodeOfFrame();
+            if (parent) {
+                parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            } else {
+                context->AddDirtyLayoutNode(Claim(this));
+            }
+            return;
+        }
+        context->AddDirtyLayoutNode(Claim(this));
+        return;
+    }
+    layoutProperty_->CleanDirty();
+    MarkNeedRender(isRenderBoundary);
+}
+
+bool FrameNode::IsNeedRequestParentMeasure() const
+{
+    auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
+    if (layoutFlag == PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+        const auto& calcLayoutConstraint = layoutProperty_->GetCalcLayoutConstraint();
+        if (calcLayoutConstraint && calcLayoutConstraint->selfIdealSize &&
+            calcLayoutConstraint->selfIdealSize->IsValid()) {
+            LOGD("make self measure boundary");
+            return false;
+        }
+    }
+    return CheckNeedRequestParentMeasure(layoutFlag);
 }
 
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
@@ -659,7 +732,7 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (!isActive_) {
+    if (!isActive_ || !eventHub_->IsEnabled()) {
         LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
@@ -795,6 +868,9 @@ bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::
 HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
 {
+    if (!isActive_ || !eventHub_->IsEnabled()) {
+        return HitTestResult::OUT_OF_REGION;
+    }
     const auto& rect = renderContext_->GetPaintRectWithTransform();
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
@@ -808,8 +884,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
     bool preventBubbling = false;
 
     const auto localPoint = parentLocalPoint - rect.GetOffset();
-    const auto& children = GetChildren();
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         const auto& child = *iter;
         auto childHitResult = child->MouseTest(globalPoint, localPoint, onMouseResult, onHoverResult, hoverNode);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
@@ -933,6 +1008,16 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
+}
+
+void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = GetAccessibilityId();
+        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+    }
 }
 
 } // namespace OHOS::Ace::NG

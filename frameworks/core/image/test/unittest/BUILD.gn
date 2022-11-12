@@ -209,9 +209,12 @@ ohos_unittest("ImageCompressorTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    # ":ImageCacheTest",
-    # ":ImageProviderTest",
-    ":ImageCompressorTest",
-  ]
+  deps = []
+  if (!is_asan) {
+    deps += [
+      # ":ImageCacheTest",
+      # ":ImageProviderTest",
+      ":ImageCompressorTest",
+    ]
+  }
 }

@@ -455,6 +455,7 @@ void RenderButton::Update(const RefPtr<Component>& component)
     hoverAnimationType_ = buttonComponent_->GetMouseAnimationType();
     width_ = buttonComponent_->GetWidth();
     height_ = buttonComponent_->GetHeight();
+    aspectRatio_ = buttonComponent_->GetAspectRatio();
     buttonComponent_->FitTextHeight(height_);
     layoutFlag_ = button->GetLayoutFlag();
     // No animation happens on first setting, will animate from background color on click
@@ -547,6 +548,14 @@ Size RenderButton::CalculateLayoutSize()
     if (NeedAdaptiveChild()) {
         double layoutWidth = widthDefined_ ? layoutSize_.Width() : childrenSize_.Width();
         double layoutHeight = heightDefined_ ? layoutSize_.Height() : childrenSize_.Height();
+        if (GreatNotEqual(aspectRatio_, 0.0)) {
+            // only when height is determined and width is not determined, aspectRatio is calculated base on height
+            if (heightDefined_ && !widthDefined_) {
+                layoutWidth = layoutHeight * aspectRatio_;
+            } else {
+                layoutHeight = layoutWidth / aspectRatio_;
+            }
+        }
         layoutSize = Size(layoutWidth, layoutHeight);
     } else {
         if (NearEqual(buttonSize_.Width(), 0.0)) {

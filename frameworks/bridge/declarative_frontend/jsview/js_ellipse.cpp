@@ -15,24 +15,38 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 
+#include "bridge/declarative_frontend/jsview/models/ellipse_model_impl.h"
 #include "core/common/container.h"
-#include "core/components/box/box_component.h"
-#include "core/components/shape/shape_component.h"
-#include "core/components_ng/pattern/shape/ellipse_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/ellipse_model.h"
+#include "core/components_ng/pattern/shape/ellipse_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<EllipseModel> EllipseModel::instance_ = nullptr;
+
+EllipseModel* EllipseModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::EllipseModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::EllipseModelNG());
+        } else {
+            instance_.reset(new Framework::EllipseModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 void JSEllipse::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::EllipseView::Create();
-        JSShapeAbstract::SetNgSize(info);
-        return;
-    }
-    RefPtr<Component> ellipseComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::ELLIPSE);
-    ViewStackProcessor::GetInstance()->ClaimElementId(ellipseComponent);
-    ViewStackProcessor::GetInstance()->Push(ellipseComponent);
+    EllipseModel::GetInstance()->Create();
     JSShapeAbstract::SetSize(info);
 }
 

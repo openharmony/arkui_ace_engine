@@ -28,11 +28,10 @@ public:
     ~WaterFlowPositionController() override = default;
     Axis GetScrollDirection() const override;
 
-    void JumpTo(int32_t index, int32_t source = SCROLL_FROM_JUMP) override;
-    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
+    void JumpTo(int32_t index, int32_t source) override;
 
-    Offset GetCurrentOffset() const override;
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(WaterFlowPositionController);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_POSITION_CONTROLLER_H

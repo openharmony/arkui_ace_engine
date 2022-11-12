@@ -35,8 +35,8 @@ void TextFieldModelNG::CreateNode(
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     stack->Push(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
@@ -72,7 +72,9 @@ void TextFieldModelNG::CreateNode(
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
-    pattern->SetBasicPadding(static_cast<float>(radius.GetX().ConvertToPx()));
+    // TODO: basic padding check ux
+    pattern->SetBasicPaddingLeft(static_cast<float>(radius.GetX().ConvertToPx() / 2.0f));
+    pattern->InitEditingValueText(textFieldLayoutProperty->GetValueValue(""));
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
@@ -110,7 +112,7 @@ void TextFieldModelNG::SetPlaceholderColor(const Color& value)
 
 void TextFieldModelNG::SetPlaceholderFont(const Font& value)
 {
-    if (value.fontSize) {
+    if (value.fontSize.has_value() && value.fontSize.value().IsNonNegative()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value());
     }
     if (value.fontStyle) {
@@ -151,6 +153,9 @@ void TextFieldModelNG::SetMaxLines(uint32_t value)
 }
 void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
+    if (value.IsNegative()) {
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
 }

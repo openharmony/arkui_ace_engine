@@ -17,6 +17,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -60,18 +61,15 @@ void ShapePainter::SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProper
         pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
     }
 
+    Color strokeColor = Color::BLACK;
     if (shapePaintProperty.HasStroke()) {
-        Color strokeColor = shapePaintProperty.GetStrokeValue();
-        RSColor rSColor(strokeColor.GetRed(), strokeColor.GetGreen(), strokeColor.GetBlue(), strokeColor.GetAlpha());
-        if (shapePaintProperty.HasStrokeOpacity()) {
-            rSColor.SetAlphaF(shapePaintProperty.GetStrokeOpacityValue());
-        } else {
-            rSColor.SetAlphaF(shapePaintProperty.STOKE_OPACITY_DEFAULT);
-        }
-        pen.SetColor(rSColor);
-    } else {
-        pen.SetColor(Color::BLACK.GetValue());
+        strokeColor = shapePaintProperty.GetStrokeValue();
     }
+    RSColor rSColor(strokeColor.GetRed(), strokeColor.GetGreen(), strokeColor.GetBlue(), strokeColor.GetAlpha());
+    if (shapePaintProperty.HasStrokeOpacity()) {
+        rSColor.SetAlphaF(static_cast<RSScalar>(shapePaintProperty.GetStrokeOpacityValue()));
+    }
+    pen.SetColor(rSColor);
 
     if (shapePaintProperty.HasStrokeDashArray()) {
         auto lineDashState = shapePaintProperty.GetStrokeDashArrayValue();
@@ -93,17 +91,14 @@ void ShapePainter::SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProper
 
 void ShapePainter::SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty)
 {
+    Color fillColor = Color::BLACK;
     if (shapePaintProperty.HasFill()) {
-        Color strokeColor = shapePaintProperty.GetFillValue();
-        RSColor rSColor(strokeColor.GetRed(), strokeColor.GetGreen(), strokeColor.GetBlue(), strokeColor.GetAlpha());
-        if (shapePaintProperty.HasFillOpacity()) {
-            rSColor.SetAlphaF(shapePaintProperty.GetFillOpacityValue());
-        } else {
-            rSColor.SetAlphaF(shapePaintProperty.STOKE_OPACITY_DEFAULT);
-        }
-        brush.SetColor(rSColor);
-    } else {
-        brush.SetColor(Color::BLACK.GetValue());
+        fillColor = shapePaintProperty.GetFillValue();
     }
+    RSColor rSColor(fillColor.GetRed(), fillColor.GetGreen(), fillColor.GetBlue(), fillColor.GetAlpha());
+    if (shapePaintProperty.HasFillOpacity()) {
+        rSColor.SetAlphaF(static_cast<RSScalar>(shapePaintProperty.GetFillOpacityValue()));
+    }
+    brush.SetColor(rSColor);
 }
 } // namespace OHOS::Ace::NG

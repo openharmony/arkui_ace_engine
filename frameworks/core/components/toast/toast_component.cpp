@@ -179,7 +179,7 @@ void ToastComponent::Show(const RefPtr<PipelineContext>& context, const std::str
     duration = duration > barrierfreeDuration ? duration : barrierfreeDuration;
     // get toast animation playing time
     toastDurationTime_ = duration;
-    Dimension bottomPosition = StringUtils::StringToDimension(bottom);
+    Dimension bottomPosition = StringUtils::StringToDimension(bottom, true);
     RefPtr<TweenComponent> tween =
         AceType::MakeRefPtr<TweenComponent>(TweenComponent::AllocTweenComponentId(), TOAST_TWEEN_NAME, box);
     InitToastAnimation();

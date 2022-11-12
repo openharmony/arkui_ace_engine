@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
+#include "core/components_ng/pattern/picker/datepicker_paint_method.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -50,6 +51,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<DataPickerLayoutProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<DatePickerPaintMethod>(dividerSpacingWidth_, gradientHeight_, dividerHeight_);
     }
 
     void FlushCurrentOptions();
@@ -141,6 +147,8 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void SetDividerHeight(uint32_t showOptionCount);
 
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     ColumnChangeCallback changeCallback_;
@@ -153,6 +161,9 @@ private:
     double yOffset_ = 0.0;
     Dimension jumpInterval_;
     uint32_t showCount_ = 0;
+    float gradientHeight_;
+    float dividerHeight_;
+    float dividerSpacingWidth_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
 };

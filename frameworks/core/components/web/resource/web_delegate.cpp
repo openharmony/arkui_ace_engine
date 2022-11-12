@@ -30,7 +30,9 @@
 #include "core/components/web/web_event.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
+#endif
 #include "core/event/ace_event_helper.h"
 #include "core/event/ace_events.h"
 #include "core/event/back_end_event_manager.h"
@@ -1330,6 +1332,7 @@ void WebDelegate::HideWebView()
 
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(context);
     auto rosenRenderSurface = DynamicCast<NG::RosenRenderSurface>(surface);
     if (!rosenRenderSurface) {
@@ -1339,9 +1342,10 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
     }
     auto rosenSurface = rosenRenderSurface->GetSurface();
     InitOHOSWeb(context, rosenSurface);
+#endif
 }
 
-void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface> surface)
+void WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     state_ = State::CREATING;
     // obtain hap data path
@@ -1389,15 +1393,6 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
         return;
     }
     state_ = State::CREATED;
-
-    if (!isCreateWebView_) {
-        isCreateWebView_ = true;
-        if (surface != nullptr) {
-            InitWebViewWithSurface(surface);
-        } else {
-            InitWebViewWithWindow();
-        }
-    }
 
     SetWebCallBack();
     if (!pipelineContext->GetIsDeclarative()) {
@@ -1461,6 +1456,26 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
                                         : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                             webCom->GetWindowExitEventId(), oldContext);
 }
+
+#ifdef ENABLE_ROSEN_BACKEND
+void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface> surface)
+{
+    PrepareInitOHOSWeb(context);
+    if (!isCreateWebView_) {
+        isCreateWebView_ = true;
+        InitWebViewWithSurface(surface);
+    }
+}
+#else
+void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
+{
+    PrepareInitOHOSWeb(context);
+    if (!isCreateWebView_) {
+        isCreateWebView_ = true;
+        InitWebViewWithWindow();
+    }
+}
+#endif
 
 void WebDelegate::RegisterOHOSWebEventAndMethord()
 {
@@ -1968,6 +1983,26 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
 }
 
 #if defined(ENABLE_ROSEN_BACKEND)
+std::string WebDelegate::GetCustomScheme()
+{
+    std::string customScheme;
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        if (webPattern) {
+            auto webData = webPattern->GetCustomScheme();
+            if (webData) {
+                customScheme = webData.value();
+            }
+        }
+    } else {
+        auto webCom = webComponent_.Upgrade();
+        if (webCom) {
+            customScheme = webCom->GetCustomScheme();
+        }
+    }
+    return customScheme;
+}
+
 void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
 {
     LOGI("Create webview with surface");
@@ -1988,6 +2023,12 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
+            std::string customScheme = delegate->GetCustomScheme();
+            if (!customScheme.empty()) {
+                LOGI("custome scheme %{public}s", customScheme.c_str());
+                initArgs.web_engine_args_to_add.push_back(
+                    std::string("--ohos-custom-scheme=").append(customScheme));
+            }
             sptr<Surface> surface = surfaceWeak.promote();
             CHECK_NULL_VOID(surface);
             delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);

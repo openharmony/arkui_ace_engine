@@ -24,31 +24,17 @@ namespace OHOS::Ace::NG {
 
 void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     screenSize_ = SizeF(pipeline->GetRootWidth(), pipeline->GetRootHeight());
 
-    // calculate menu position based on target FrameNode
+    // currently using click point as menu position
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    std::string tag = props->GetTargetTag().value_or("");
-    int32_t Id = props->GetTargetId().value_or(-1);
-    LOGD("targetId = %{public}d, targetTag = %{public}s", Id, tag.c_str());
-
-    auto targetNode = FrameNode::GetFrameNode(tag, Id);
-    if (!targetNode) {
-        // targetId = -1, set position to center top of the screen
-        position_ = OffsetF(screenSize_.Width() / 2.0, 0);
-        return;
-    }
-
-    SizeF size = targetNode->GetGeometryNode()->GetFrameSize();
-    OffsetF offset = targetNode->GetGeometryNode()->GetFrameOffset();
-    LOGD("offset = %{public}f, %{public}f", offset.GetX(), offset.GetY());
-    // set position to bottom center point of targetNode
-    position_ = offset + OffsetF(size.Width() / 2.0, size.Height());
-    LOGD("menu position set to %{public}f, %{public}f", position_.GetX(), position_.GetY());
+    CHECK_NULL_VOID(props);
+    position_ = props->GetMenuOffset().value();
 }
 
 // Called to perform layout render node and child.
@@ -67,8 +53,10 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     LOGD("Measure Menu Position = %{public}f %{public}f", position_.GetX(), position_.GetY());
     auto leftSpace = position_.GetX();
     auto rightSpace = screenSize_.Width() - leftSpace;
+    float maxWidth = std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding;
     auto childConstraint = props->CreateChildConstraint();
-    childConstraint.maxSize.SetWidth(std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding);
+    childConstraint.maxSize.SetWidth(maxWidth);
+    childConstraint.percentReference.SetWidth(maxWidth);
 
     // measure children (options/customNode)
     SizeF menuSize;
@@ -102,13 +90,12 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     LOGD("MenuLayout: clickPosition = %{public}f, %{public}f", position_.GetX(), position_.GetY());
+    CHECK_NULL_VOID(props);
+
     float x = HorizontalLayout(size, position_.GetX());
     float y = VerticalLayout(size, position_.GetY());
 
-    // set content offset, frame offset remains (0,0)
-    OffsetF parentOffset(x, y);
-    layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(parentOffset);
-    LOGD("Menu Layout: global offset = %{public}f, %{public}f", x, y);
+    layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(NG::OffsetF(x, y));
 
     // translate each option by the height of previous options
     auto outPadding = OUT_PADDING.ConvertToPx();

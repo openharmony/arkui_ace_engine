@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -690,6 +691,22 @@ void RenderNode::MarkNeedRender(bool overlay)
     }
 }
 
+void RenderNode::SetVisible(bool visible, bool inRecursion)
+{
+    if (visible_ != visible) {
+        visible_ = visible;
+        AddDirtyRenderBoundaryNode();
+        OnVisibleChanged();
+        CheckIfNeedUpdateTouchRect();
+        if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
+            MarkParentNeedRender();
+        }
+    }
+    for (auto& child : children_) {
+        child->SetVisible(visible, true);
+    }
+}
+
 bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
     TouchTestResult& result)
 {
@@ -1228,7 +1245,7 @@ Offset RenderNode::GetGlobalOffset() const
         return globalOffset;
     }
     auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        context->GetWindowManager()->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+        context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         globalOffset = globalOffset + Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
             -CONTAINER_TITLE_HEIGHT.ConvertToPx());
@@ -1314,6 +1331,14 @@ void RenderNode::UpdateAccessibilityPosition()
     accessibilityNode->SetPositionInfo(positionInfo);
 }
 
+void RenderNode::UpdateAccessibilityEnable(bool isEnabled)
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetEnabledState(isEnabled);
+    }
+}
+
 void RenderNode::UpdateAll(const RefPtr<Component>& component)
 {
     if (!component) {
@@ -1323,12 +1348,10 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     hitTestMode_ = component->GetHitTestMode();
     touchable_ = component->IsTouchable();
     disabled_ = component->IsDisabledStatus();
+    UpdateAccessibilityEnable(!disabled_);
     isFirstNode_ = component->IsFirstNode();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-    if (!renderComponent) {
-        LOGE("renderComponent is null");
-        return;
-    }
+    CHECK_NULL_VOID(renderComponent);
     positionParam_ = renderComponent->GetPositionParam();
     motionPathOption_ = renderComponent->GetMotionPathOption();
 #ifdef ENABLE_ROSEN_BACKEND

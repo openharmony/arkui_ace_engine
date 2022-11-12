@@ -57,10 +57,17 @@ public:
     void SetValue(T value)
     {
         value_ = value;
+        hasValue_ = true;
+    }
+
+    bool HasValue() const
+    {
+        return hasValue_;
     }
 
 private:
     T value_;
+    bool hasValue_ = false;
 };
 
 class ACE_EXPORT CheckableComponent : public RenderComponent {

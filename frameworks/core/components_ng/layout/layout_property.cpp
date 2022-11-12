@@ -28,6 +28,36 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string VisibleTypeToString(VisibleType type)
+{
+    static const LinearEnumMapNode<VisibleType, std::string> visibilityMap[] = {
+        { VisibleType::VISIBLE, "Visibility.Visible" },
+        { VisibleType::INVISIBLE, "Visibility.Hidden" },
+        { VisibleType::GONE, "Visibility.None" },
+    };
+    auto idx = BinarySearchFindIndex(visibilityMap, ArraySize(visibilityMap), type);
+    if (idx >= 0) {
+        return visibilityMap[idx].value;
+    }
+    return "Visibility.Visible";
+}
+
+std::string TextDirectionToString(TextDirection type)
+{
+    static const LinearEnumMapNode<TextDirection, std::string> toStringMap[] = {
+        { TextDirection::LTR, "Direction.Ltr" },
+        { TextDirection::RTL, "Direction.Rtl" },
+        { TextDirection::INHERIT, "Direction.Inherit" },
+        { TextDirection::AUTO, "Direction.Auto" },
+    };
+    auto idx = BinarySearchFindIndex(toStringMap, ArraySize(toStringMap), type);
+    if (idx >= 0) {
+        return toStringMap[idx].value;
+    }
+    return "Direction.Ltr";
+}
+} // namespace
 
 void LayoutProperty::Reset()
 {
@@ -50,6 +80,22 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
+
+    if (padding_) {
+        json->Put("padding", padding_->ToJsonString().c_str());
+    } else {
+        json->Put("padding", "0.0");
+    }
+
+    if (margin_) {
+        json->Put("margin", margin_->ToJsonString().c_str());
+    } else {
+        json->Put("margin", "0.0");
+    }
+
+    json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
+    json->Put("direction", TextDirectionToString(GetLayoutDirection()).c_str());
 }
 
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
@@ -120,6 +166,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         auto margin = CreateMargin();
         MinusPaddingToSize(margin, layoutConstraint_->maxSize);
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
+        MinusPaddingToSize(margin, layoutConstraint_->percentReference);
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
     }
     if (calcLayoutConstraint_) {
@@ -141,7 +188,31 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     }
 
     CheckSelfIdealSize();
+    CheckBorderAndPadding();
     CheckAspectRatio();
+}
+
+void LayoutProperty::CheckBorderAndPadding()
+{
+    auto selfWidth = layoutConstraint_->selfIdealSize.Width();
+    auto selfHeight = layoutConstraint_->selfIdealSize.Height();
+    if (!selfWidth && !selfHeight) {
+        return;
+    }
+    auto selfWidthFloat = selfWidth.value_or(Infinity<float>());
+    auto selfHeightFloat = selfHeight.value_or(Infinity<float>());
+    auto paddingWithBorder = CreatePaddingAndBorder();
+    auto deflateWidthF = paddingWithBorder.Width();
+    auto deflateHeightF = paddingWithBorder.Height();
+    if (LessOrEqual(deflateWidthF, selfWidthFloat) && LessOrEqual(deflateHeightF, selfHeightFloat)) {
+        return;
+    }
+    if (GreatNotEqual(deflateWidthF, selfWidthFloat)) {
+        layoutConstraint_->selfIdealSize.SetWidth(deflateWidthF);
+    }
+    if (GreatNotEqual(deflateHeightF, selfHeightFloat)) {
+        layoutConstraint_->selfIdealSize.SetHeight(deflateHeightF);
+    }
 }
 
 void LayoutProperty::CheckAspectRatio()
@@ -170,14 +241,6 @@ void LayoutProperty::CheckAspectRatio()
         selfWidth = selfHeight.value() * aspectRatio;
     }
 
-    if (selfWidth.value_or(0) > maxWidth) {
-        selfWidth = maxWidth;
-        selfHeight = selfWidth.value() / aspectRatio;
-    }
-    if (selfHeight.value_or(0) > maxHeight) {
-        selfHeight = maxHeight;
-        selfWidth = selfHeight.value() * aspectRatio;
-    }
     if (selfHeight) {
         layoutConstraint_->selfIdealSize.SetHeight(selfHeight);
     }
@@ -187,25 +250,45 @@ void LayoutProperty::CheckAspectRatio()
     // TODO: after measure done, need to check AspectRatio again.
 }
 
-void LayoutProperty::UpdateGridConstraint(const RefPtr<FrameNode>& host)
+void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
-    const auto& gridProperty = GetGridProperty();
-    if (!gridProperty) {
+    if (!gridProperty_) {
         return;
     }
-    bool gridflag = false;
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
             auto containerLayout = AceType::DynamicCast<FrameNode>(parent)->GetLayoutProperty();
-            gridflag = gridProperty->UpdateContainer(containerLayout, host);
+            gridProperty_->UpdateContainer(containerLayout, host);
+            SetHost(host);
+            UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty_->GetWidth()), std::nullopt));
             break;
         }
         parent = parent->GetParent();
     }
-    if (gridflag) {
-        UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty->GetWidth()), std::nullopt));
+}
+
+void LayoutProperty::UpdateGridOffset(LayoutWrapper* layoutWrapper)
+{
+    if (!gridProperty_ || !gridProperty_->HasContainer()) {
+        return;
     }
+
+    auto optOffset = gridProperty_->GetOffset();
+    if (optOffset == UNDEFINED_DIMENSION) {
+        return;
+    }
+    float offset = 0;
+    auto host = layoutWrapper->GetHostNode();
+    for (auto node = DynamicCast<FrameNode>(host->GetParent()); (node && node->GetTag() != V2::GRIDCONTAINER_ETS_TAG);
+         node = DynamicCast<FrameNode>(node->GetParent())) {
+        auto geometryNode = node->GetGeometryNode();
+        offset += geometryNode->GetFrameOffset().GetX();
+    }
+    const auto& currentGeometryNode = layoutWrapper->GetGeometryNode();
+    auto frameOffset = currentGeometryNode->GetFrameOffset();
+    frameOffset.SetX(optOffset.ConvertToPx() - offset);
+    currentGeometryNode->SetFrameOffset(frameOffset);
 }
 
 void LayoutProperty::CheckSelfIdealSize()
@@ -298,6 +381,32 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder()
         padding.right.value_or(0) + borderWidth.rightDimen.value_or(0),
         padding.top.value_or(0) + borderWidth.topDimen.value_or(0),
         padding.bottom.value_or(0) + borderWidth.bottomDimen.value_or(0) };
+}
+
+PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault,
+    float paddingVerticalDefault, float borderHorizontalDefault, float borderVerticalDefault)
+{
+    if (layoutConstraint_.has_value()) {
+        auto padding = ConvertToPaddingPropertyF(
+            padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        auto borderWidth = ConvertToBorderWidthPropertyF(
+            borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        return PaddingPropertyF { padding.left.value_or(paddingHorizontalDefault) +
+                                      borderWidth.leftDimen.value_or(borderHorizontalDefault),
+            padding.right.value_or(paddingHorizontalDefault) + borderWidth.rightDimen.value_or(borderHorizontalDefault),
+            padding.top.value_or(paddingVerticalDefault) + borderWidth.topDimen.value_or(borderVerticalDefault),
+            padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
+    }
+    auto padding = ConvertToPaddingPropertyF(
+        padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    auto borderWidth = ConvertToBorderWidthPropertyF(
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+
+    return PaddingPropertyF { padding.left.value_or(paddingHorizontalDefault) +
+                                  borderWidth.leftDimen.value_or(borderHorizontalDefault),
+        padding.right.value_or(paddingHorizontalDefault) + borderWidth.rightDimen.value_or(borderHorizontalDefault),
+        padding.top.value_or(paddingVerticalDefault) + borderWidth.topDimen.value_or(borderVerticalDefault),
+        padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
 }
 
 PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()

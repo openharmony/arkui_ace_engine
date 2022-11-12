@@ -53,6 +53,8 @@ using RSClipOp = Rosen::Drawing::ClipOp;
 using RSSkCanvas = Rosen::Drawing::SkiaCanvas;
 using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
+using RSMaskFilter = Rosen::Drawing::MaskFilter;
+using RSBlurType = Rosen::Drawing::BlurType;
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;

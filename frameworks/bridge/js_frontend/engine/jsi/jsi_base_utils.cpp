@@ -26,10 +26,6 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
-#if defined(PREVIEW)
-const int32_t OFFSET_PREVIEW = 9;
-#endif
-
 namespace OHOS::Ace::Framework {
 std::string JsiBaseUtils::GenerateSummaryBody(
     const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
@@ -51,6 +47,8 @@ std::string JsiBaseUtils::GenerateSummaryBody(
     std::string pageUrl;
     RefPtr<RevSourceMap> pageMap;
     RefPtr<RevSourceMap> appMap;
+    std::unordered_map<std::string, RefPtr<RevSourceMap>> sourceMaps;
+    auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
         auto frontEnd = container->GetFrontend();
@@ -63,8 +61,12 @@ std::string JsiBaseUtils::GenerateSummaryBody(
         auto runningPage = GetRunningPage(data);
         if (runningPage) {
             pageUrl = runningPage->GetUrl();
-            pageMap = runningPage->GetPageMap();
             appMap = runningPage->GetAppMap();
+            if (!JSNApi::IsBundle(vm)) {
+                sourceMaps = runningPage->GetSourceMap();
+            } else {
+                pageMap = runningPage->GetPageMap();
+            }
         }
     }
     if (!pageUrl.empty()) {
@@ -90,14 +92,21 @@ std::string JsiBaseUtils::GenerateSummaryBody(
     auto errorPos = GetErrorPos(rawStack);
     std::string sourceCodeInfo = GetSourceCodeInfo(runtime, errorFunc, errorPos);
 
-    std::string runningPageTag = "app_.js";
-    bool isAppPage = rawStack.find(runningPageTag, 1) != std::string::npos && appMap;
-    sourceCodeInfo = isAppPage ? appMap->GetOriginalNames(sourceCodeInfo, errorPos.second)
-                               : pageMap->GetOriginalNames(sourceCodeInfo, errorPos.second);
-
     std::string stackHead = "Stacktrace:\n";
-    if (pageMap || appMap) {
-        std::string showStack = TranslateStack(rawStack, pageUrl, pageMap, appMap, data);
+    if (pageMap || appMap || !sourceMaps.empty()) {
+        std::string runningPageTag = "app_.js";
+        bool isAppPage = rawStack.find(runningPageTag, 1) != std::string::npos && appMap;
+        if (isAppPage) {
+            sourceCodeInfo = appMap->GetOriginalNames(sourceCodeInfo, errorPos.second);
+        } else if (pageMap) {
+            sourceCodeInfo = pageMap->GetOriginalNames(sourceCodeInfo, errorPos.second);
+        }
+        std::string showStack;
+        if (!JSNApi::IsBundle(vm)) {
+            showStack = TranslateBySourceMap(rawStack, pageUrl, sourceMaps, appMap, data);
+        } else {
+            showStack = TranslateStack(rawStack, pageUrl, pageMap, appMap, data);
+        }
         summaryBody.append(sourceCodeInfo).append(stackHead).append(showStack);
         // show raw stack for troubleshooting in the frame
         LOGI("JS Stack:\n%{public}s", TranslateRawStack(rawStack).c_str());
@@ -284,6 +293,60 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
     return ans;
 }
 
+std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, const std::string& pageUrl,
+    const std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps,
+    const RefPtr<RevSourceMap>& appMap, const AceType* data)
+{
+    const std::string closeBrace = ")";
+    const std::string openBrace = "(";
+    std::string ans;
+    std::string tempStack = stackStr;
+    std::string runningPageTag = "app_.js";
+    auto appFlag = static_cast<int32_t>(tempStack.find(runningPageTag));
+    bool isAppPage = appFlag > 0 && appMap;
+    if (!isAppPage) {
+        std::string tag = std::as_const(pageUrl);
+        char* ch = strrchr((char*)tag.c_str(), '.');
+        int index = ch - tag.c_str();
+        tag.insert(index, "_");
+        runningPageTag = tag;
+    }
+    // find per line of stack
+    std::vector<std::string> res;
+    ExtractEachInfo(tempStack, res);
+
+    // collect error info first
+    for (uint32_t i = 0; i < res.size(); i++) {
+        std::string temp = res[i];
+        uint32_t start = temp.find(openBrace);
+        uint32_t end  = temp.find(":");
+        std::string key = temp.substr(start + 1, end - start - 1);
+        auto closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
+        auto openBracePos = static_cast<int32_t>(temp.find(openBrace));
+        std::string line;
+        std::string column;
+        GetPosInfo(temp, closeBracePos, line, column);
+        if (line.empty() || column.empty()) {
+            LOGI("the stack without line info");
+            break;
+        }
+        std::string sourceInfo;
+        auto iter = sourceMaps.find(key);
+        if (iter != sourceMaps.end()) {
+            sourceInfo = GetSourceInfo(line, column, iter->second, appMap, isAppPage, data);
+        }
+        if (sourceInfo.empty()) {
+            break;
+        }
+        temp.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
+        ans = ans + temp + "\n";
+    }
+    if (ans.empty()) {
+        return tempStack;
+    }
+    return ans;
+}
+
 void JsiBaseUtils::ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res)
 {
     std::string tempStr;
@@ -329,11 +392,7 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
     if (isAppPage) {
         mapInfo = appMap->Find(StringToInt(line) - offSet, StringToInt(column));
     } else {
-#if defined(PREVIEW)
-        mapInfo = pageMap->Find(StringToInt(line) - offSet + OFFSET_PREVIEW, StringToInt(column));
-#else
         mapInfo = pageMap->Find(StringToInt(line) - offSet, StringToInt(column));
-#endif
     }
     if (mapInfo.row == 0 || mapInfo.col == 0) {
         return "";

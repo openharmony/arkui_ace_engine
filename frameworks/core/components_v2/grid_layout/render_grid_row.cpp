@@ -177,12 +177,12 @@ void RenderGridRow::PerformLayout()
             double childSpanPlusOffsetWidth = 0.0;
             if (newLineOffset.newLineCount > 0) {
                 childSpanPlusOffsetWidth = ((currentChildSpan + newLineOffset.offset) * columnUnitWidth +
-                    ((currentChildSpan + newLineOffset.offset) - 1) * gutterInDouble.first);
+                                            ((currentChildSpan + newLineOffset.offset) - 1) * gutterInDouble.first);
                 position.SetX(lastLength - childSpanPlusOffsetWidth);
             } else {
                 childSpanPlusOffsetWidth =
                     ((currentChildSpan + GetRelativeOffset(gridColChild, sizeType)) * columnUnitWidth +
-                    ((currentChildSpan + GetRelativeOffset(gridColChild, sizeType)) - 1) * gutterInDouble.first);
+                        ((currentChildSpan + GetRelativeOffset(gridColChild, sizeType)) - 1) * gutterInDouble.first);
                 offset += GetRelativeOffset(gridColChild, sizeType);
             }
             position.SetX(lastLength - childSpanPlusOffsetWidth);
@@ -231,34 +231,21 @@ void RenderGridRow::LayoutEachChild(
     gridColChildren_ = SortChildrenByOrder(gridColChildren);
 }
 
-bool RenderGridRow::ParseNewLineForLargeOffset(int32_t childSpan, int32_t childOffset, int32_t restColumnNum,
-    int32_t totalColumnNum, NewLineOffset& newLineOffset) const
+void RenderGridRow::ParseNewLineForLargeOffset(int32_t childSpan, int32_t childOffset, int32_t restColumnNum,
+    int32_t totalColumnNum, NewLineOffset& newLineOffset)
 {
-    if (childOffset <= totalColumnNum) {
-        return false;
-    }
-    auto totalOffsetStartFromNewLine = childOffset - restColumnNum;
-    int32_t lineCountForLargeChildOffset = static_cast<int32_t>(totalOffsetStartFromNewLine / totalColumnNum);
-    if (totalOffsetStartFromNewLine > totalColumnNum) {
-        // ex. totalColumn 12, restColumn is 4, child offset 26, span 6. Offsets of next 2 lines are 12 and 10
-        // then the child will be placed at the third new line with offset 0.
-        if ((totalOffsetStartFromNewLine % totalColumnNum) + childSpan > totalColumnNum) {
-            newLineOffset.offset = 0;
-            lineCountForLargeChildOffset++;
-        } else {
-            // ex. totalColumn 12, restColumn is 4, child offset 20, span 6. Offsets of next 2 lines are 12 and 4
-            // then the child will be placed at the second new line with offset 4.
-            newLineOffset.offset = totalOffsetStartFromNewLine % totalColumnNum;
-        }
-        newLineOffset.newLineCount = lineCountForLargeChildOffset;
-        return true;
-    }
-    if (totalOffsetStartFromNewLine + childSpan > totalColumnNum) {
-        newLineOffset.newLineCount += 1;
+    int32_t totalOffsetStartFromNewLine = childOffset - restColumnNum;
+    newLineOffset.newLineCount = totalOffsetStartFromNewLine / totalColumnNum + 1;
+    // ex. totalColumn 12, restColumn is 4, child offset 26, span 6. Offsets of next 2 lines are 12 and 10
+    // then the child will be placed at the third new line with offset 0.
+    if ((totalOffsetStartFromNewLine % totalColumnNum) + childSpan > totalColumnNum) {
         newLineOffset.offset = 0;
-        return true;
+        ++newLineOffset.newLineCount;
+    } else {
+        // ex. totalColumn 12, restColumn is 4, child offset 20, span 6. Offsets of next 2 lines are 12 and 4
+        // then the child will be placed at the second new line with offset 4.
+        newLineOffset.offset = totalOffsetStartFromNewLine % totalColumnNum;
     }
-    return false;
 }
 
 void RenderGridRow::CalculateOffsetOfNewline(const RefPtr<RenderNode>& node, int32_t currentChildSpan,
@@ -270,36 +257,21 @@ void RenderGridRow::CalculateOffsetOfNewline(const RefPtr<RenderNode>& node, int
         return;
     }
     newLineOffset.isValid = true;
-    if (restColumnNum < gridCol->GetOffset(sizeType) + currentChildSpan) {
-        newLineOffset.newLineCount = 1;
-        // ex. if there are 7 columns left and chile span is 4 or 8(< or > than restColumnNum), offset is 5,
-        // child will be set on a new row with offset 0
-        if (restColumnNum >= gridCol->GetOffset(sizeType)) {
-            newLineOffset.offset = 0;
-            return;
-        }
-        // in this case, child will be set on a new row with offset (child offset - restColumnNum)
-        if (restColumnNum < gridCol->GetOffset(sizeType) && restColumnNum > currentChildSpan) {
-            if (ParseNewLineForLargeOffset(currentChildSpan, gridCol->GetOffset(sizeType), restColumnNum,
-                totalColumnNum, newLineOffset)) {
-                return;
-            }
-            newLineOffset.offset = gridCol->GetOffset(sizeType) - restColumnNum;
-            return;
-        }
-        // in this case, empty line(s) will be placed
-        if (restColumnNum < gridCol->GetOffset(sizeType) && restColumnNum < currentChildSpan) {
-            if (ParseNewLineForLargeOffset(currentChildSpan, gridCol->GetOffset(sizeType), restColumnNum,
-                totalColumnNum, newLineOffset)) {
-                return;
-            }
-            newLineOffset.offset = gridCol->GetOffset(sizeType) - restColumnNum;
-            return;
-        }
+    auto offset = gridCol->GetOffset(sizeType);
+    if (restColumnNum >= offset + currentChildSpan) {
+        // in this case, child can be place at current row
+        newLineOffset.offset = gridCol->GetOffset(sizeType);
+        newLineOffset.newLineCount = 0;
+        return;
     }
-    // in this case, child can be place at current row
-    newLineOffset.offset = gridCol->GetOffset(sizeType);
-    return;
+    // ex. if there are 7 columns left and chile span is 4 or 8(< or > than restColumnNum), offset is 5,
+    // child will be set on a new row with offset 0
+    if (restColumnNum >= offset) {
+        newLineOffset.offset = 0;
+        newLineOffset.newLineCount = 1;
+    } else {
+        ParseNewLineForLargeOffset(currentChildSpan, offset, restColumnNum, totalColumnNum, newLineOffset);
+    }
 }
 
 int32_t RenderGridRow::GetRelativeOffset(const RefPtr<RenderNode>& node, GridSizeType sizeType) const

@@ -27,10 +27,9 @@ void GestureScope::AddMember(const RefPtr<GestureRecognizer>& recognizer)
     }
 
     if (Existed(recognizer)) {
-        LOGE("gesture recognizer has already been added.");
+        LOGW("gesture recognizer has already been added.");
         return;
     }
-
 
     recognizer->SetRefereeState(RefereeState::DETECTING);
 
@@ -113,11 +112,20 @@ void GestureScope::HandleParallelDisposal(const RefPtr<GestureRecognizer>& recog
         parallelRecognizers_.remove(recognizer);
         recognizer->SetRefereeState(RefereeState::SUCCEED);
         recognizer->OnAccepted(touchId_);
+    } else if (disposal == GestureDisposal::PENDING) {
+        recognizer->SetRefereeState(RefereeState::PENDING);
+        recognizer->OnPending(touchId_);
     }
 }
 
 void GestureScope::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
+    if (queryStateFunc_ && queryStateFunc_(touchId_)) {
+        LOGI("gesture has accepted in NG.");
+        recognizer->SetRefereeState(RefereeState::FAIL);
+        return;
+    }
+
     if (CheckNeedBlocked(recognizer)) {
         LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
         recognizer->SetRefereeState(RefereeState::BLOCKED);
@@ -130,6 +138,12 @@ void GestureScope::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recogni
 
 void GestureScope::HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
+    if (queryStateFunc_ && queryStateFunc_(touchId_)) {
+        LOGI("gesture has accepted in NG.");
+        recognizer->SetRefereeState(RefereeState::FAIL);
+        return;
+    }
+
     if (CheckNeedBlocked(recognizer)) {
         LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
         recognizer->SetRefereeState(RefereeState::BLOCKED);
@@ -366,6 +380,7 @@ void GestureReferee::AddGestureRecognizer(size_t touchId, const RefPtr<GestureRe
     } else {
         GestureScope gestureScope(touchId);
         gestureScope.AddMember(recognizer);
+        gestureScope.SetQueryStateFunc(queryStateFunc_);
         gestureScopes_.try_emplace(touchId, std::move(gestureScope));
     }
 }

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVIGATION_NAVIGATION_LAYOUT_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVIGATION_NAVIGATION_LAYOUT_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_LAYOUT_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_LAYOUT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
@@ -22,6 +22,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,6 +38,10 @@ public:
         auto copy = MakeRefPtr<NavDestinationLayoutProperty>();
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         copy->propHideTitleBar_ = CloneHideTitleBar();
+        copy->propTitleBarHeight_ = CloneTitleBarHeight();
+        copy->propNoPixMap_ = CloneNoPixMap();
+        copy->propImageSource_ = CloneImageSource();
+        copy->propPixelMap_ = ClonePixelMap();
         return copy;
     }
 
@@ -44,11 +49,20 @@ public:
     {
         LayoutProperty::Reset();
         ResetHideTitleBar();
+        ResetTitleBarHeight();
+        ResetNoPixMap();
+        ResetImageSource();
+        ResetPixelMap();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleBarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    // back button icon
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PixelMap, RefPtr<PixelMap>, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVIGATION_NAVIGATION_LAYOUT_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_LAYOUT_PROPERTY_H

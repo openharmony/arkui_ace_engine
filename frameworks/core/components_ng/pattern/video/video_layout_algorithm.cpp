@@ -119,8 +119,6 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraintForControlBar.UpdateMaxSizeWithCheck(controlBarSize);
             layoutConstraintForControlBar.UpdateMinSizeWithCheck(controlBarSize);
             child->Measure(layoutConstraintForControlBar);
-        } else {
-            child->Measure(layoutConstraint);
         }
     }
     PerformMeasureSelf(layoutWrapper);
@@ -153,7 +151,7 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
         case ImageFit::NONE:
             contentSize = CalculateFitNone(videoSize);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             contentSize = CalculateFitScaleDown(videoSize, layoutSize);
             break;
         default:

@@ -141,7 +141,6 @@ public:
     virtual std::string GetBackgroundColor() const = 0;
     virtual std::string GetBackgroundImageSize() const = 0;
     virtual std::string GetBackgroundImagePosition() const = 0;
-    virtual std::string GetAlignmentType(double width, double height) const = 0;
 
     // front decoration settings
     virtual RefPtr<Decoration> GetFrontDecoration() const = 0;

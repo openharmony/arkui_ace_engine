@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
@@ -34,10 +35,10 @@
 
 namespace OHOS::Ace::NG {
 // GeometryNode acts as a physical property of the size and position of the component
-class ACE_EXPORT GeometryNode : public Referenced {
+class ACE_EXPORT GeometryNode : public AceType {
+    DECLARE_ACE_TYPE(GeometryNode, AceType)
 public:
     GeometryNode() = default;
-
     ~GeometryNode() override = default;
 
     void Reset();
@@ -93,6 +94,11 @@ public:
     OffsetF GetFrameOffset() const
     {
         return frame_.rect_.GetOffset();
+    }
+
+    void SetFrameOffset(const OffsetF& offset)
+    {
+        frame_.rect_.SetOffset(offset);
     }
 
     void SetFrameSize(const SizeF& size)
@@ -233,20 +239,6 @@ public:
         return parentLayoutConstraint_;
     }
 
-    bool Measure(NG::LayoutWrapper* layoutWrapper);
-
-    bool Layout(NG::LayoutWrapper* layoutWrapper);
-
-    void SetLayoutFunction(std::function<void(NG::LayoutWrapper* layoutWrapper)>&& layoutFunc)
-    {
-        layoutFunc_ = std::move(layoutFunc);
-    }
-
-    void SetMeasureFunction(std::function<void(NG::LayoutWrapper* layoutWrapper)>&& measureFunc)
-    {
-        measureFunc_ = std::move(measureFunc);
-    }
-
     void SetBaselineDistance(float baselineDistance)
     {
         baselineDistance_ = baselineDistance;
@@ -273,9 +265,6 @@ private:
     std::unique_ptr<GeometryProperty> content_;
 
     OffsetF parentGlobalOffset_;
-
-    std::function<void(NG::LayoutWrapper* layoutWrapper)> layoutFunc_;
-    std::function<void(NG::LayoutWrapper* layoutWrapper)> measureFunc_;
 };
 } // namespace OHOS::Ace::NG
 

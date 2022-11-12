@@ -50,6 +50,8 @@ public:
         return currentOffset_;
     }
 
+    RectF GetIndicatorRect(const RefPtr<LayoutWrapper>& dirty) const;
+
 private:
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
     void UpdateChildConstraint(LayoutConstraintF& childConstraint, const RefPtr<TabBarLayoutProperty>& layoutProperty,

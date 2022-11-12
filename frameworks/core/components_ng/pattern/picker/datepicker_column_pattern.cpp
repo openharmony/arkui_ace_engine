@@ -27,18 +27,38 @@
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+
 namespace {
+
 // TODO datepicker style modification
 constexpr float LAYOUT_WEIGHT = 30.0f;
 constexpr float PADDING_WEIGHT = 10.0f;
+const Dimension FONT_SIZE = Dimension(2.0);
+const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+const int32_t DIVIDER_SIZE = 2;
+const float TEXT_HEIGHT_NUMBER = 3.0f;
+const float TEXT_WEIGHT_NUMBER = 6.0f;
+
 } // namespace
 
 void DatePickerColumnPattern::OnAttachToFrameNode()
 {
     ScrollColumn();
+}
+
+bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (!config.frameSizeChange) {
+        return false;
+    }
+    CHECK_NULL_RETURN(dirty, false);
+    return true;
 }
 
 void DatePickerColumnPattern::FlushCurrentOptions()
@@ -67,7 +87,14 @@ void DatePickerColumnPattern::FlushCurrentOptions()
     if (child.size() != showOptionCount) {
         return;
     }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto middleIndex = showOptionCount / 2;
+    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     SetCurrentIndex(currentIndex);
+    SetDividerHeight(showOptionCount);
     for (uint32_t index = 0; index < showOptionCount; index++) {
         currentChildIndex_ = index;
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
@@ -78,10 +105,57 @@ void DatePickerColumnPattern::FlushCurrentOptions()
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        if (index < middleIndex) {
+            if (index == 0) {
+                textLayoutProperty->UpdateFontSize(normalOptionSize);
+            } else {
+                textLayoutProperty->UpdateFontSize(focusOptionSize);
+            }
+            textLayoutProperty->UpdateMaxLines(1);
+            textLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
+                    CalcLength(pickerTheme->GetGradientHeight())));
+            textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+        }
+        if (index == middleIndex) {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+            textLayoutProperty->UpdateMaxLines(1);
+            textLayoutProperty->UpdateFontSize(selectedOptionSize);
+            textLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
+                    CalcLength(pickerTheme->GetDividerSpacing())));
+            textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        }
+        if (index > middleIndex) {
+            if (index == showOptionCount - 1) {
+                textLayoutProperty->UpdateFontSize(normalOptionSize);
+            } else {
+                textLayoutProperty->UpdateFontSize(focusOptionSize);
+            }
+            textLayoutProperty->UpdateMaxLines(1);
+            textLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
+                    CalcLength(pickerTheme->GetGradientHeight())));
+            textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+        }
         textLayoutProperty->UpdateContent(optionValue);
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        textNode->MarkDirtyNode();
         iter++;
     }
+}
+
+void DatePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE) {
+        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
+    } else {
+        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value());
+    }
+    dividerHeight_ = static_cast<float>(
+        gradientHeight_ + pickerTheme->GetDividerSpacing().Value() + pickerTheme->GetGradientHeight().Value());
+    dividerSpacingWidth_ = static_cast<float>(pickerTheme->GetDividerSpacing().Value() * TEXT_WEIGHT_NUMBER);
 }
 
 bool DatePickerColumnPattern::NotLoopOptions() const

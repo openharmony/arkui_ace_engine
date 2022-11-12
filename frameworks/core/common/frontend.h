@@ -126,6 +126,8 @@ public:
     // dump frontend info
     virtual void DumpFrontend() const = 0;
 
+    virtual std::string GetPagePath() const = 0;
+
     // send the message by js callback
     virtual void SendCallbackMessage(const std::string& callbackId, const std::string& data) const = 0;
 
@@ -200,8 +202,6 @@ public:
     virtual void OnNewRequest(const std::string& data) = 0;
 
     virtual void OnNewWant(const std::string& data) = 0;
-
-    virtual void OnDialogUpdated(const std::string& data) = 0;
 
     // call router back
     virtual void CallRouterBack() = 0;

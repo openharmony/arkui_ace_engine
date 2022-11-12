@@ -42,34 +42,21 @@ std::string ConvertSizeTypeToString(GridSizeType sizeType)
     return refs[index];
 }
 
-bool ParseNewLineForLargeOffset(
+void ParseNewLineForLargeOffset(
     int32_t childSpan, int32_t childOffset, int32_t restColumnNum, int32_t totalColumnNum, NewLineOffset& newLineOffset)
 {
-    if (childOffset <= totalColumnNum) {
-        return false;
-    }
-    auto totalOffsetStartFromNewLine = childOffset - restColumnNum;
-    auto lineCountForLargeChildOffset = static_cast<int32_t>(totalOffsetStartFromNewLine / totalColumnNum);
-    if (totalOffsetStartFromNewLine > totalColumnNum) {
-        // ex. totalColumn 12, restColumn is 4, child offset 26, span 6. Offsets of next 2 lines are 12 and 10
-        // then the child will be placed at the third new line with offset 0.
-        if ((totalOffsetStartFromNewLine % totalColumnNum) + childSpan > totalColumnNum) {
-            newLineOffset.offset = 0;
-            lineCountForLargeChildOffset++;
-        } else {
-            // ex. totalColumn 12, restColumn is 4, child offset 20, span 6. Offsets of next 2 lines are 12 and 4
-            // then the child will be placed at the second new line with offset 4.
-            newLineOffset.offset = totalOffsetStartFromNewLine % totalColumnNum;
-        }
-        newLineOffset.newLineCount = lineCountForLargeChildOffset;
-        return true;
-    }
-    if (totalOffsetStartFromNewLine + childSpan > totalColumnNum) {
-        newLineOffset.newLineCount += 1;
+    int32_t totalOffsetStartFromNewLine = childOffset - restColumnNum;
+    newLineOffset.newLineCount = totalOffsetStartFromNewLine / totalColumnNum + 1;
+    // ex. totalColumn 12, restColumn is 4, child offset 26, span 6. Offsets of next 2 lines are 12 and 10
+    // then the child will be placed at the third new line with offset 0.
+    if ((totalOffsetStartFromNewLine % totalColumnNum) + childSpan > totalColumnNum) {
         newLineOffset.offset = 0;
-        return true;
+        ++newLineOffset.newLineCount;
+    } else {
+        // ex. totalColumn 12, restColumn is 4, child offset 20, span 6. Offsets of next 2 lines are 12 and 4
+        // then the child will be placed at the second new line with offset 4.
+        newLineOffset.offset = totalOffsetStartFromNewLine % totalColumnNum;
     }
-    return false;
 }
 
 void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int32_t currentChildSpan,
@@ -77,33 +64,20 @@ void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int3
 {
     newLineOffset.span = currentChildSpan;
     int32_t offset = gridCol->GetOffset(sizeType);
-    if (restColumnNum < offset + currentChildSpan) {
-        newLineOffset.newLineCount = 1;
+    if (restColumnNum < (offset + currentChildSpan)) {
         // ex. if there are 7 columns left and chile span is 4 or 8(< or > than restColumnNum), offset is 5,
         // child will be set on a new row with offset 0
         if (restColumnNum >= offset) {
+            newLineOffset.newLineCount = 1;
             newLineOffset.offset = 0;
-            return;
+        } else {
+            ParseNewLineForLargeOffset(currentChildSpan, offset, restColumnNum, totalColumnNum, newLineOffset);
         }
-        // in this case, child will be set on a new row with offset (child offset - restColumnNum)
-        if (restColumnNum < offset && restColumnNum > currentChildSpan) {
-            if (ParseNewLineForLargeOffset(currentChildSpan, offset, restColumnNum, totalColumnNum, newLineOffset)) {
-                return;
-            }
-            newLineOffset.offset = offset - restColumnNum;
-            return;
-        }
-        // in this case, empty line(s) will be placed
-        if (restColumnNum < offset && restColumnNum < currentChildSpan) {
-            if (ParseNewLineForLargeOffset(currentChildSpan, offset, restColumnNum, totalColumnNum, newLineOffset)) {
-                return;
-            }
-            newLineOffset.offset = offset - restColumnNum;
-            return;
-        }
+    } else {
+        // in this case, child can be place at current row
+        newLineOffset.newLineCount = 0;
+        newLineOffset.offset = offset;
     }
-    // in this case, child can be place at current row
-    newLineOffset.offset = offset;
 }
 
 } // namespace

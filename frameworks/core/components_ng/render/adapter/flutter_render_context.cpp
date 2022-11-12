@@ -129,6 +129,9 @@ void FlutterRenderContext::Restore()
 void FlutterRenderContext::RebuildFrame(FrameNode* node, const std::list<RefPtr<FrameNode>>& children)
 {
     LOGD("RebuildFrame");
+    if (!flutterNode_) {
+        return;
+    }
     flutterNode_->ClearChildren();
     for (const auto& child : children) {
         auto flutterRenderContext = DynamicCast<FlutterRenderContext>(child->GetRenderContext());
@@ -136,10 +139,24 @@ void FlutterRenderContext::RebuildFrame(FrameNode* node, const std::list<RefPtr<
             continue;
         }
         auto flutterNode = flutterRenderContext->GetNode();
-        if (flutterNode_) {
-            flutterNode_->AddChild(flutterNode);
-        }
+        flutterNode_->AddChild(flutterNode);
     }
+}
+
+RectF FlutterRenderContext::GetPaintRectWithTransform()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(flutterNode_, rect);
+    // TODO: support transform
+    rect = GetPaintRectWithoutTransform();
+    return rect;
+}
+
+RectF FlutterRenderContext::GetPaintRectWithoutTransform()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(flutterNode_, rect);
+    return flutterNode_->FrameRect();
 }
 
 } // namespace OHOS::Ace::NG

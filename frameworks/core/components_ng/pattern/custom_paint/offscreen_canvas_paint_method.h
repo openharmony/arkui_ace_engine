@@ -25,7 +25,7 @@ class OffscreenCanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(OffscreenCanvasPaintMethod, CustomPaintPaintMethod)
 public:
     OffscreenCanvasPaintMethod() = default;
-    OffscreenCanvasPaintMethod(const RefPtr<PipelineContext> context, int32_t width, int32_t height);
+    OffscreenCanvasPaintMethod(const RefPtr<PipelineBase> context, int32_t width, int32_t height);
     ~OffscreenCanvasPaintMethod() override = default;
 
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
@@ -66,7 +66,7 @@ private:
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
 
-    void ImageObjReady(const RefPtr<ImageObject>& imageObj) override;
+    void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
 
     sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }

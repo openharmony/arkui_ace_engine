@@ -22,6 +22,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -39,6 +40,10 @@ public:
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         copy->propTitleMode_ = CloneTitleMode();
         copy->propHideBackButton_ = CloneHideBackButton();
+        copy->propTitleBarParentType_ = CloneTitleBarParentType();
+        copy->propNoPixMap_ = CloneNoPixMap();
+        copy->propImageSource_ = CloneImageSource();
+        copy->propPixelMap_ = ClonePixelMap();
         return copy;
     }
 
@@ -47,11 +52,20 @@ public:
         LayoutProperty::Reset();
         ResetTitleMode();
         ResetHideBackButton();
+        ResetTitleBarParentType();
+        ResetNoPixMap();
+        ResetImageSource();
+        ResetPixelMap();
     }
 
 private:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleBarParentType, TitleBarParentType, PROPERTY_UPDATE_MEASURE);
+    // back button icon
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PixelMap, RefPtr<PixelMap>, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@ build_component("panel") {
     "panel_component.cpp",
     "panel_element.cpp",
     "render_sliding_panel.cpp",
+    "sliding_events.cpp",
     "sliding_panel_component.cpp",
     "sliding_panel_component_v2.cpp",
   ]

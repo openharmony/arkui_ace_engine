@@ -28,6 +28,11 @@ protected:
     static void SetColumnsGap(const JSCallbackInfo& info);
     static void SetRowsGap(const JSCallbackInfo& info);
     static void SetLayoutDirection(int32_t value);
+    static void SetColumnsTemplate(const std::string& value);
+    static void SetItemConstraintSize(const JSCallbackInfo& info);
+    static void SetRowsTemplate(const std::string& value);
+    static void ReachStartCallback(const JSCallbackInfo& args);
+    static void ReachEndCallback(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WATER_FLOW_H

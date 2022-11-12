@@ -28,9 +28,12 @@
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/tween/tween_component.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "resource_manager.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Rosen {
 class Window;
@@ -49,7 +52,13 @@ public:
 
     void InitContainer() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
+    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
+    void HideMenuNG(int32_t targetId) override;
+    void HideMenuNG() override;
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
+    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override;
+    void HidePopupNG(int32_t targetId) override;
+    void HidePopupNG() override;
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
@@ -70,6 +79,14 @@ public:
     {
         return dialogWindow_;
     }
+    bool IsToastWindow() const
+    {
+        return isToastWindow_;
+    }
+    void SetIsToastWindow(bool isToastWindow)
+    {
+        isToastWindow_ = isToastWindow;
+    }
 
 private:
     RefPtr<StackElement> GetStack();
@@ -83,7 +100,7 @@ private:
     bool CreateEventRunner();
     void GetToastDialogWindowProperty(
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
-    bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY);
+    bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
 
     static int32_t id_;
@@ -97,6 +114,9 @@ private:
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
+    int32_t targetId_ = -1;
+    bool isToastWindow_ = false;
+    int32_t popupTargetId_ = -1;
 };
 
 } // namespace OHOS::Ace

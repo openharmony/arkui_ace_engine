@@ -48,6 +48,15 @@ public:
         ResetAxis();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("vertical", propAxis_.value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL ? "false" : "true");
+        json->Put("barPosition", propTabBarPosition_.value_or(BarPosition::START) == BarPosition::START
+                                     ? "BarPosition.Start"
+                                     : "BarPosition.End");
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarPosition, BarPosition, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_LAYOUT);
 };

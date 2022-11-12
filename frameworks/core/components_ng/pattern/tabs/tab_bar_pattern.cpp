@@ -37,7 +37,6 @@ void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
     if (clickEvent_) {
         return;
     }
-
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto tabBar = weak.Upgrade();
         if (tabBar) {
@@ -118,6 +117,11 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(tabBarLayoutAlgorithm, false);
     tabItemOffsets_ = tabBarLayoutAlgorithm->GetTabItemOffset();
     currentOffset_ = tabBarLayoutAlgorithm->GetCurrentOffset();
+
+    RectF indicatorRect = tabBarLayoutAlgorithm->GetIndicatorRect(dirty);
+    auto paintProperty = GetHost()->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    paintProperty->UpdateIndicator(indicatorRect);
     return false;
 }
 
@@ -192,6 +196,19 @@ void TabBarPattern::UpdateCurrentOffset(float offset)
     CHECK_NULL_VOID(host);
     currentOffset_ = currentOffset_ + offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void TabBarPattern::UpdateIndicator(int32_t indicator)
+{
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    layoutProperty->UpdateIndicator(indicator);
+    RectF rect = layoutProperty->GetIndicatorRect(indicator);
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    paintProperty->UpdateIndicator(rect);
+
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 } // namespace OHOS::Ace::NG

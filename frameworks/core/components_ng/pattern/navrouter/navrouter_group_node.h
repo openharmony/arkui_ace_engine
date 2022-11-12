@@ -51,7 +51,20 @@ public:
         return navDestinationNode_;
     }
 
+    void OnDetachFromMainTree() override;
+    void OnAttachToMainTree() override;
+
 private:
+    void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
+    void SetDestinationChangeEvent(const RefPtr<UINode>& parent);
+    void InitNavigationContent(const RefPtr<UINode>& parent);
+    void SetBackButtonEvent(const RefPtr<UINode>& parent);
+    void SetOnStateChangeFalse(const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation);
+    void BackToNavBar(const RefPtr<UINode>& parent);
+    void BackToPreNavDestination(const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation);
+    void AddBackButtonIconToNavDestination(const RefPtr<UINode>& parent);
+    bool CleanNodeInNavigation(const RefPtr<UINode>& parent);
+
     RefPtr<UINode> navDestinationNode_;
 };
 

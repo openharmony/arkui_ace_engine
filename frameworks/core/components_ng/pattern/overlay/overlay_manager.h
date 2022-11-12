@@ -30,22 +30,14 @@
 
 namespace OHOS::Ace::NG {
 
-struct ToastInfo {
-    int32_t toastId = -1;
-    RefPtr<FrameNode> toastNode;
-
-    bool operator==(const ToastInfo& value) const
-    {
-        return toastId == value.toastId && toastNode == value.toastNode;
-    }
-};
-
 struct PopupInfo {
     int32_t popupId = -1;
     WeakPtr<FrameNode> target;
     RefPtr<FrameNode> popupNode;
     bool markNeedUpdate = false;
     bool isCurrentOnShow = false;
+    SizeF targetSize;
+    OffsetF targetOffset;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -61,34 +53,42 @@ public:
     }
 
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
+    void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
         return popupMap_[targetId];
     }
 
-    void ShowMenu(int32_t targetId, RefPtr<FrameNode> menu = nullptr);
+    void ShowMenu(
+        int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
     void HideMenu(int32_t targetId);
+    void DeleteMenu(int32_t targetId);
+    void ShowMenuInSubWindow(int32_t targetId, bool isMenu = true, const NG::OffsetF& offset = NG::OffsetF(),
+        RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
+    void CleanMenuInSubWindow();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
-    void PopToast(int32_t toastId);
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
+
     void ShowDateDialog(const DialogProperties& dialogProps, std::map<std::string, PickerDate> datePickerProperty,
-        bool isLunar, std::map<std::string, NG::DailogEvent> dialogEvent,
-        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
-    void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> datePickerProperty,
-        bool isUseMilitaryTime, std::map<std::string, NG::DailogEvent> dialogEvent,
-        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
+        bool isLunar, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> timePickerProperty,
+        bool isUseMilitaryTime, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextEvent> dialogEvent,
-        std::map<std::string, NG::DailogGestureEvent> dialogCancalEvent);
-    void CloseDialog(RefPtr<FrameNode> dialogNode);
+        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    void CloseDialog(const RefPtr<FrameNode>& dialogNode);
 
 private:
-    NG::ToastInfo toastInfo_;
+    void PopToast();
+
+    WeakPtr<FrameNode> toast_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode

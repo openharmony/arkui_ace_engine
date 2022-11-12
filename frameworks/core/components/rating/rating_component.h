@@ -20,10 +20,10 @@
 #include "base/utils/utils.h"
 #include "core/components/image/image_component.h"
 #include "core/components/rating/rating_theme.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/element.h"
-#include "core/components_v2/common/common_def.h"
 
 namespace OHOS::Ace {
 
@@ -270,8 +270,8 @@ public:
         return starColorInactive_;
     }
 
-    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double));
-    
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(std::string));
+
     HoverAnimationType GetMouseAnimationType() const
     {
         return animationType_;

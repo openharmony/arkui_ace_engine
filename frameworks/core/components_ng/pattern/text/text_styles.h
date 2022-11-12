@@ -19,6 +19,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 

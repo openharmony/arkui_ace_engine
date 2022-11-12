@@ -97,6 +97,21 @@ bool IsDirExist(const std::string& path)
     return false;
 }
 
+DimensionUnit ParseDimensionUnit(const std::string& unit)
+{
+    if (unit == "px") {
+        return DimensionUnit::PX;
+    } else if (unit == "fp") {
+        return DimensionUnit::FP;
+    } else if (unit == "lpx") {
+        return DimensionUnit::LPX;
+    } else if (unit == "%") {
+        return DimensionUnit::PERCENT;
+    } else {
+        return DimensionUnit::VP;
+    }
+};
+
 } // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
@@ -119,7 +134,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
         resConfig->GetColorMode(), resConfig->GetInputDevice());
     sysResourceManager_ = newResMgr;
     resourceManager_ = sysResourceManager_;
-    packagePathStr_ = IsDirExist(resPath) ? resPath : std::string();
+    packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
     resConfig_ = resConfig;
 }
 
@@ -181,6 +196,18 @@ Color ResourceAdapterImpl::GetColor(uint32_t resId)
 
 Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        float dimensionFloat = 0.0f;
+        std::string unit;
+        if (resourceManager_) {
+            auto state = resourceManager_->GetFloatById(resId, dimensionFloat, unit);
+            if (state != Global::Resource::SUCCESS) {
+                LOGE("NG: GetDimension error, id=%{public}u", resId);
+            }
+        }
+        return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
+    }
+
     float dimensionFloat = 0.0f;
     if (resourceManager_) {
         auto state = resourceManager_->GetFloatById(resId, dimensionFloat);
@@ -280,16 +307,24 @@ bool ResourceAdapterImpl::GetBoolean(uint32_t resId) const
 
 std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
 {
+    if (resourceManager_ == nullptr) {
+        return "";
+    }
     std::string mediaPath = "";
-    if (resourceManager_) {
-        auto state = resourceManager_->GetMediaById(resId, mediaPath);
-        if (state != Global::Resource::SUCCESS) {
-            LOGE("GetMediaPath error, id=%{public}u", resId);
-            return "";
-        }
+    auto state = resourceManager_->GetMediaById(resId, mediaPath);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("GetMediaById error, id=%{public}u, errorCode=%{public}u", resId, state);
+        return "";
+    }
+    if (SystemProperties::GetUnZipHap()) {
         return "file:///" + mediaPath;
     }
-    return "";
+    auto pos = mediaPath.find_last_of('.');
+    if (pos == std::string::npos) {
+        LOGE("GetMediaById error, return mediaPath[%{private}s] format error", mediaPath.c_str());
+        return "";
+    }
+    return "resource:///" + std::to_string(resId) + mediaPath.substr(pos);
 }
 
 std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)

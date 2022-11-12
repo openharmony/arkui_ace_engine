@@ -33,6 +33,13 @@ namespace {
 // TODO timepicker style modification
 constexpr Dimension LAYOUT_WEIGHT = 30.0_vp;
 constexpr Dimension PADDING_WEIGHT = 10.0_vp;
+const Dimension FONT_SIZE = Dimension(2.0);
+const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+const int32_t DIVIDER_SIZE = 2;
+const int32_t CHILD_SIZE = 2;
+const float TEXT_HEIGHT_NUMBER = 3.0f;
+const float TEXT_HOUR24_HEIGHT_NUMBER = 9.0f;
+const float TEXT_WEIGHT_NUMBER = 6.0f;
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
@@ -47,6 +54,16 @@ void TimePickerColumnPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+}
+
+bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (!config.frameSizeChange) {
+        return false;
+    }
+    CHECK_NULL_RETURN(dirty, false);
+    return true;
 }
 
 void TimePickerColumnPattern::FlushCurrentOptions()
@@ -68,13 +85,18 @@ void TimePickerColumnPattern::FlushCurrentOptions()
     uint32_t currentIndex = host->GetPattern<TimePickerColumnPattern>()->GetCurrentIndex();
     currentIndex = currentIndex % totalOptionCount;
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
-
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto middleIndex = showOptionCount / 2;
     auto child = host->GetChildren();
     auto iter = child.begin();
-
+    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     if (child.size() != showOptionCount) {
         return;
     }
+    SetDividerHeight(showOptionCount);
 
     for (uint32_t index = 0; index < showOptionCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
@@ -85,10 +107,62 @@ void TimePickerColumnPattern::FlushCurrentOptions()
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        if (index < middleIndex) {
+            if (index == 0) {
+                textLayoutProperty->UpdateFontSize(normalOptionSize);
+            } else {
+                textLayoutProperty->UpdateFontSize(focusOptionSize);
+            }
+            textLayoutProperty->UpdateMaxLines(1);
+            textLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
+                    CalcLength(pickerTheme->GetGradientHeight())));
+            textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+        }
+        if (index == middleIndex) {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+            textLayoutProperty->UpdateMaxLines(1);
+            textLayoutProperty->UpdateFontSize(selectedOptionSize);
+            textLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
+                    CalcLength(pickerTheme->GetDividerSpacing())));
+            textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        }
+        if (index > middleIndex) {
+            if (index == showOptionCount - 1) {
+                textLayoutProperty->UpdateFontSize(normalOptionSize);
+            } else {
+                textLayoutProperty->UpdateFontSize(focusOptionSize);
+            }
+            textLayoutProperty->UpdateMaxLines(1);
+            textLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
+                    CalcLength(pickerTheme->GetGradientHeight())));
+            textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+        }
         textLayoutProperty->UpdateContent(optionValue);
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        textNode->MarkDirtyNode();
         iter++;
     }
+}
+
+void TimePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto childSize = host->GetChildren().size();
+    if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE && childSize != CHILD_SIZE) {
+        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
+    } else if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE && childSize == CHILD_SIZE) {
+        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() - TEXT_HOUR24_HEIGHT_NUMBER);
+    } else {
+        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value());
+    }
+    dividerHeight_ = static_cast<float>(
+        gradientHeight_ + pickerTheme->GetDividerSpacing().Value() + pickerTheme->GetGradientHeight().Value());
+    dividerSpacingWidth_ = static_cast<float>(pickerTheme->GetDividerSpacing().Value() * TEXT_WEIGHT_NUMBER);
 }
 
 bool TimePickerColumnPattern::NotLoopOptions() const

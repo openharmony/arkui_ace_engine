@@ -20,17 +20,27 @@
 #include "base/resource/internal_resource.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 struct RatingPropertyGroup {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(RatingScore, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Indicator, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Stars, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(StepSize, double);
 
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundImageSourceInfo, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SecondaryImageSourceInfo, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSourceInfo, ImageSourceInfo);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("indicator", GetIndicator().value_or(false) ? "true" : "false");
+        json->Put("stars", std::to_string(GetStars().value_or(DEFAULT_RATING_STAR_NUM)).c_str());
+        auto jsonStarStyle = JsonUtil::Create(true);
+        jsonStarStyle->Put("backgroundUri", propBackgroundImageSourceInfo.value_or(ImageSourceInfo()).GetSrc().c_str());
+        jsonStarStyle->Put("foregroundUri", propForegroundImageSourceInfo.value_or(ImageSourceInfo()).GetSrc().c_str());
+        jsonStarStyle->Put("secondaryUri", propSecondaryImageSourceInfo.value_or(ImageSourceInfo()).GetSrc().c_str());
+        json->Put("starStyle", jsonStarStyle->ToString().c_str());
+    }
 };
 
 } // namespace OHOS::Ace::NG

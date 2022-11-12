@@ -143,13 +143,21 @@ bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
     }
     auto event = std::make_shared<TouchEventInfo>("touchEvent");
     event->SetTimeStamp(changedPoint.time);
-    TouchLocationInfo changedInfo(changedPoint.id);
+    TouchLocationInfo changedInfo("onTouch", changedPoint.id);
     float localX = changedPoint.x - coordinateOffset_.GetX();
     float localY = changedPoint.y - coordinateOffset_.GetY();
     changedInfo.SetLocalLocation(Offset(localX, localY));
     changedInfo.SetGlobalLocation(Offset(changedPoint.x, changedPoint.y));
     changedInfo.SetScreenLocation(Offset(changedPoint.screenX, changedPoint.screenY));
     changedInfo.SetTouchType(changedPoint.type);
+    changedInfo.SetForce(changedPoint.force);
+    if (changedPoint.tiltX.has_value()) {
+        changedInfo.SetTiltX(changedPoint.tiltX.value());
+    }
+    if (changedPoint.tiltY.has_value()) {
+        changedInfo.SetTiltY(changedPoint.tiltY.value());
+    }
+    changedInfo.SetSourceTool(changedPoint.sourceTool);
     event->AddChangedTouchLocationInfo(std::move(changedInfo));
 
     // all fingers collection
@@ -160,14 +168,30 @@ bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
         float screenY = pointPair.second.screenY;
         float localX = pointPair.second.x - coordinateOffset_.GetX();
         float localY = pointPair.second.y - coordinateOffset_.GetY();
-        TouchLocationInfo info(pointPair.second.id);
+        TouchLocationInfo info("onTouch", pointPair.second.id);
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));
         info.SetTouchType(pointPair.second.type);
+        info.SetForce(pointPair.second.force);
+        if (pointPair.second.tiltX.has_value()) {
+            info.SetTiltX(pointPair.second.tiltX.value());
+        }
+        if (pointPair.second.tiltY.has_value()) {
+            info.SetTiltY(pointPair.second.tiltY.value());
+        }
+        info.SetSourceTool(pointPair.second.sourceTool);
         event->AddTouchLocationInfo(std::move(info));
     }
     event->SetSourceDevice(changedPoint.sourceType);
+    event->SetForce(changedPoint.force);
+    if (changedPoint.tiltX.has_value()) {
+        event->SetTiltX(changedPoint.tiltX.value());
+    }
+    if (changedPoint.tiltY.has_value()) {
+        event->SetTiltY(changedPoint.tiltY.value());
+    }
+    event->SetSourceTool(changedPoint.sourceTool);
     if (onTouchEventCallback_) {
         onTouchEventCallback_(event);
     }

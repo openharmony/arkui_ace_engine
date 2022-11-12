@@ -126,9 +126,9 @@ private:
     void UpdatePixmap(const RefPtr<PixelMap>& pixmap);
     void UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context);
     void ProcessPixmapForPaint();
-    std::string GetSvgImageKey();
     std::function<void()> GenerateThumbnailLoadTask();
 
+    RefPtr<ImageObject> imageObj_;
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;
     fml::RefPtr<flutter::CanvasImage> image_;
@@ -141,13 +141,12 @@ private:
     UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
-    RefPtr<ImageObject> imageObj_;
     RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     SvgRenderTree svgRenderTree_;
 
     CancelableTask fetchImageObjTask_;
-    bool backgroundTaskCancled_ = false;
+    bool backgroundTaskCanceled_ = false;
 };
 
 } // namespace OHOS::Ace

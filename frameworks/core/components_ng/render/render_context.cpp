@@ -43,6 +43,29 @@ RefPtr<FrameNode> RenderContext::GetHost() const
 void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(propBorder_, BorderProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propBackDecoration_, DecorationProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propOverlay_, OverlayProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propPositionProperty_, RenderPositionProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propBackground_, BackgroundProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propGraphics_, GraphicsProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propGradient_, GradientProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propTransform_, TransformProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propClip_, ClipProperty);
+    if (propTransformMatrix_.has_value()) {
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("type", "matrix");
+        auto matrixString = propTransformMatrix_->ToString();
+        while (matrixString.find("\n") != std::string::npos) {
+            auto num = matrixString.find("\n");
+            matrixString.replace(num, 1, "");
+        }
+        jsonValue->Put("matrix", matrixString.c_str());
+        json->Put("transform", jsonValue);
+    } else {
+        json->Put("transform", JsonUtil::Create(true));
+    }
+    json->Put("backgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
     json->Put("zIndex", propZIndex_.value_or(0));
+    json->Put("opacity", propOpacity_.value_or(1));
 }
 } // namespace OHOS::Ace::NG

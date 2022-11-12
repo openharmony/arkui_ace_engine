@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(context, width, height);
 }
@@ -168,6 +168,11 @@ void OffscreenCanvasPattern::PutImageData(const Ace::ImageData& imageData)
     offscreenPaintMethod_->PutImageData(nullptr, imageData);
 }
 
+void OffscreenCanvasPattern::SetAntiAlias(bool isEnabled)
+{
+    offscreenPaintMethod_->SetAntiAlias(isEnabled);
+}
+
 void OffscreenCanvasPattern::SetFillColor(const Color& color)
 {
     offscreenPaintMethod_->SetFillColor(color);
@@ -286,12 +291,10 @@ void OffscreenCanvasPattern::SetMiterLimit(double limit)
 void OffscreenCanvasPattern::SetTextAlign(TextAlign align)
 {
     offscreenPaintMethod_->SetTextAlign(align);
-    offscreenPaintMethod_->SetTextAlign(align);
 }
 
 void OffscreenCanvasPattern::SetTextBaseline(TextBaseline baseline)
 {
-    offscreenPaintMethod_->SetTextBaseline(baseline);
     offscreenPaintMethod_->SetTextBaseline(baseline);
 }
 
@@ -343,24 +346,20 @@ void OffscreenCanvasPattern::SetStrokeColor(const Color& color)
 void OffscreenCanvasPattern::SetFontWeight(FontWeight weight)
 {
     offscreenPaintMethod_->SetFontWeight(weight);
-    offscreenPaintMethod_->SetFontWeight(weight);
 }
 
 void OffscreenCanvasPattern::SetFontStyle(FontStyle style)
 {
-    offscreenPaintMethod_->SetFontStyle(style);
     offscreenPaintMethod_->SetFontStyle(style);
 }
 
 void OffscreenCanvasPattern::SetFontFamilies(const std::vector<std::string>& fontFamilies)
 {
     offscreenPaintMethod_->SetFontFamilies(fontFamilies);
-    offscreenPaintMethod_->SetFontFamilies(fontFamilies);
 }
 
 void OffscreenCanvasPattern::SetFontSize(const Dimension& size)
 {
-    offscreenPaintMethod_->SetFontSize(size);
     offscreenPaintMethod_->SetFontSize(size);
 }
 

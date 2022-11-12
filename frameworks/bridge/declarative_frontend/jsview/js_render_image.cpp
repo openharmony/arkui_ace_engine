@@ -48,9 +48,9 @@ void JSRenderImage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRenderImage>::Declare("ImageBitmap");
     JSClass<JSRenderImage>::CustomProperty("width", &JSRenderImage::JsGetWidth,
-                                    &JSRenderImage::JsSetWidth);
+        &JSRenderImage::JsSetWidth);
     JSClass<JSRenderImage>::CustomProperty("height", &JSRenderImage::JsGetHeight,
-                                    &JSRenderImage::JsSetHeight);
+        &JSRenderImage::JsSetHeight);
     JSClass<JSRenderImage>::CustomMethod("close", &JSRenderImage::JsClose);
     JSClass<JSRenderImage>::Bind(globalObj, JSRenderImage::Constructor, JSRenderImage::Destructor);
 }

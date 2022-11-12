@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_node.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/pipeline/base/base_composed_component.h"
 
 namespace OHOS::Ace {
@@ -28,6 +29,7 @@ struct AccessibilityEvent {
     std::string componentType;
     double currentItemIndex = 0.0;
     double itemCount = 0.0;
+    AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
 };
 
 enum class AccessibilityVersion {
@@ -58,9 +60,7 @@ public:
     virtual void TrySaveTargetAndIdNode(
         const std::string& id, const std::string& target, const RefPtr<AccessibilityNode>& node) = 0;
     virtual void HandleComponentPostBinding() = 0;
-    virtual void DumpHandleEvent(const std::vector<std::string>& params) = 0;
-    virtual void DumpProperty(const std::vector<std::string>& params) = 0;
-    virtual void DumpTree(int32_t depth, NodeId nodeID) = 0;
+    virtual void OnDumpInfo(const std::vector<std::string>& params) = 0;
     virtual void SetCardViewPosition(int id, float offsetX, float offsetY) = 0;
     virtual void SetCardViewParams(const std::string& key, bool focus) = 0;
     virtual void SetSupportAction(uint32_t action, bool isEnable) = 0;

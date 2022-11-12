@@ -69,7 +69,7 @@ void FlutterRenderSingleChildScroll::Paint(RenderContext& context, const Offset&
     // paint scrollBar
     if (scrollBar_ && scrollBar_->NeedPaint()) {
         bool needPaint = false;
-        if (scrollBar_->GetFirstLoad() || scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
+        if (scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
             scrollBarOpacity_ = UINT8_MAX;
             needPaint = true;
         } else {
@@ -82,10 +82,6 @@ void FlutterRenderSingleChildScroll::Paint(RenderContext& context, const Offset&
             RefPtr<FlutterScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<FlutterScrollBarPainter>();
             scrollBarPainter->PaintBar(
                 canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
-            if (scrollBar_->GetFirstLoad()) {
-                scrollBar_->SetFirstLoad(false);
-                scrollBar_->HandleScrollBarEnd();
-            }
         }
     }
 

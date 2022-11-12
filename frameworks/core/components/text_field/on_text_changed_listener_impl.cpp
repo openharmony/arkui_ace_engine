@@ -19,6 +19,7 @@ namespace OHOS::Ace {
 
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
 {
+    LOGI("[OnTextChangedListenerImpl] insert value %{private}s", StringUtils::Str16ToStr8(text).c_str());
     if (text.length() <= 0) {
         LOGE("the text is null");
         return;
@@ -36,6 +37,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         textEditingValue->text =
             value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
         textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
+        client->UpdateInsertText(StringUtils::Str16ToStr8(text));
         client->UpdateEditingValue(textEditingValue, true);
     };
     PostTaskToUI(task);

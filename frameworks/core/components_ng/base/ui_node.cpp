@@ -29,9 +29,15 @@
 
 namespace OHOS::Ace::NG {
 
+thread_local int32_t UINode::currentAccessibilityId_ = 0;
+
 UINode::~UINode()
 {
-    ElementRegister::GetInstance()->RemoveItem(nodeId_);
+    if (!removeSilently_) {
+        ElementRegister::GetInstance()->RemoveItem(nodeId_);
+    } else {
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
+    }
     if (!onMainTree_) {
         return;
     }
@@ -94,7 +100,7 @@ void UINode::RemoveChildAtIndex(int32_t index)
     MarkNeedSyncRenderTree();
 }
 
-RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
+RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
     if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
         return nullptr;
@@ -139,6 +145,9 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 {
     CHECK_NULL_VOID(parent);
     parent->AddChild(AceType::Claim(this), slot);
+    if (parent->GetPageId() != 0) {
+        SetHostPageId(parent->GetPageId());
+    }
 }
 
 void UINode::OnRemoveFromParent()

@@ -212,11 +212,13 @@ public:
     }
 
     static bool GetDebugEnabled();
-    
+
     static bool GetGpuUploadEnabled()
     {
         return gpuUploadEnabled_;
     }
+
+    static bool GetResourceUseHapPathEnable();
 
     /*
      * Set device orientation.

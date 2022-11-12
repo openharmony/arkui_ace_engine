@@ -704,13 +704,6 @@ void JsFrontend::OnNewRequest(const std::string& data)
     }
 }
 
-void JsFrontend::OnDialogUpdated(const std::string& data)
-{
-    if (delegate_) {
-        delegate_->OnDialogUpdated(data);
-    }
-}
-
 void JsFrontend::CallRouterBack()
 {
     if (delegate_) {
@@ -741,6 +734,18 @@ void JsFrontend::DumpFrontend() const
         DumpLog::GetInstance().AddDesc("Length: " + std::to_string(routerIndex));
         DumpLog::GetInstance().Print(0, routerName, 0);
     }
+}
+
+std::string JsFrontend::GetPagePath() const
+{
+    if (!delegate_) {
+        return "";
+    }
+    int32_t routerIndex = 0;
+    std::string routerName;
+    std::string routerPath;
+    delegate_->GetState(routerIndex, routerName, routerPath);
+    return routerPath + routerName;
 }
 
 void JsFrontend::TriggerGarbageCollection()

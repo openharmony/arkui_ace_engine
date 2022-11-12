@@ -19,10 +19,12 @@ build_component_ng("image_provider_ng") {
     "adapter/flutter_image_provider.cpp",
     "adapter/skia_image_data.cpp",
     "adapter/skia_svg_dom.cpp",
+    "image_data.cpp",
     "image_loading_context.cpp",
     "image_object.cpp",
     "image_provider.cpp",
     "image_state_manager.cpp",
+    "pixel_map_image_object.cpp",
     "static_image_object.cpp",
     "svg_image_object.cpp",
   ]

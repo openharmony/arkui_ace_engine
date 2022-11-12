@@ -43,16 +43,25 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
     type_ = type;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeDelegate(taskExecutor);
+    bool needPostJsTask = true;
+    auto container = Container::Current();
+    if (container) {
+        const auto& setting = container->GetSettings();
+        needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread);
+    }
+    auto initJSEngineTask = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->Initialize(delegate);
+    };
+    if (needPostJsTask) {
+        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS);
+    } else {
+        initJSEngineTask();
+    }
     taskExecutor_ = taskExecutor;
-    taskExecutor->PostTask(
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
-            auto jsEngine = weakEngine.Upgrade();
-            if (!jsEngine) {
-                return;
-            }
-            jsEngine->Initialize(delegate);
-        },
-        TaskExecutor::TaskType::JS);
     LOGI("DeclarativeFrontendNG initialize end.");
     return true;
 }
@@ -204,6 +213,18 @@ void DeclarativeFrontendNG::OnSurfaceChanged(int32_t width, int32_t height)
 }
 
 void DeclarativeFrontendNG::DumpFrontend() const {}
+
+std::string DeclarativeFrontendNG::GetPagePath() const
+{
+    if (!delegate_) {
+        return "";
+    }
+    int32_t routerIndex = 0;
+    std::string routerName;
+    std::string routerPath;
+    delegate_->GetState(routerIndex, routerName, routerPath);
+    return routerPath + routerName;
+}
 
 void DeclarativeFrontendNG::TriggerGarbageCollection()
 {

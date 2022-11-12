@@ -25,12 +25,12 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
-
 namespace OHOS::Ace::NG {
 
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -89,7 +89,12 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 continue;
             }
             itemIdex = iter->second;
-            auto crossOffset = itemsCrossPosition_.at(itemIdex);
+            auto crossIter = itemsCrossPosition_.find(itemIdex);
+            if (crossIter == itemsCrossPosition_.end()) {
+                LOGI("item %{public}d not in cross position", itemIdex);
+                continue;
+            }
+            auto crossOffset = crossIter->second;
             if (axis_ == Axis::VERTICAL) {
                 offset.SetX(crossOffset);
             } else {

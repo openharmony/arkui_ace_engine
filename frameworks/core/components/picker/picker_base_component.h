@@ -273,7 +273,7 @@ public:
 
     void ShowDialog(const RefPtr<StackElement>& stack, bool disableTouchEvent = true);
     bool HideDialog();
-    void OpenDialog(DialogProperties& properties);
+    void OpenDialog(const DialogProperties& properties);
     void CloseDialog();
 
     bool IsDialogShowed()

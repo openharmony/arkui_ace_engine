@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/dialog/dialog_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,10 +51,33 @@ public:
         return path_;
     }
 
+    const std::function<void(int32_t)>& GetAlertCallback() const
+    {
+        return alertCallback_;
+    }
+
+    const DialogProperties& GetDialogProperties() const
+    {
+        return dialogProperties_;
+    }
+
+    void SetAlertCallback(std::function<void(int32_t)>&& callback)
+    {
+        alertCallback_ = callback;
+    }
+
+    void SetDialogProperties(const DialogProperties& dialogProperties)
+    {
+        dialogProperties_ = dialogProperties;
+    }
+
 private:
     int32_t pageId_ = 0;
     std::string url_;
     std::string path_;
+
+    std::function<void(int32_t)> alertCallback_;
+    DialogProperties dialogProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PageInfo);
 };

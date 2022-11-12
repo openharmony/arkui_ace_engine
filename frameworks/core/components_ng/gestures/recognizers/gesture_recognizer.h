@@ -16,10 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_GESTURE_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_GESTURE_RECOGNIZER_H
 
-#include <map>
 #include <memory>
-#include <set>
 
+#include "base/memory/referenced.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
@@ -27,28 +26,52 @@
 
 namespace OHOS::Ace::NG {
 
-enum class DetectState { READY, DETECTING, DETECTED };
+enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
-enum class RefereeState { DETECTING, PENDING, BLOCKED, SUCCEED, FAIL };
-
-class ACE_EXPORT GestureRecognizer : public TouchEventTarget {
-    DECLARE_ACE_TYPE(GestureRecognizer, TouchEventTarget)
+class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
+    DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
 
 public:
+    // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
+    void BeginReferee(int32_t touchId)
+    {
+        OnBeginGestureReferee(touchId);
+    }
+
+    // Triggered when the Gesture referee ends a gesture referee.
+    void FinishReferee(int32_t touchId)
+    {
+        OnFinishGestureReferee(touchId);
+    }
+
     // Called when request of handling gesture sequence is accepted by gesture referee.
-    virtual void OnAccepted(size_t touchId) = 0;
+    virtual void OnAccepted() = 0;
 
     // Called when request of handling gesture sequence is rejected by gesture referee.
-    virtual void OnRejected(size_t touchId) = 0;
+    virtual void OnRejected() = 0;
 
-    // Called when request of handling gesture sequence is rejected by gesture referee.
-    virtual void OnPending(size_t touchId) {}
+    // Called when request of handling gesture sequence is pending by gesture referee.
+    virtual void OnPending()
+    {
+        refereeState_ = RefereeState::PENDING;
+    }
 
-    // Reconiciles the state from the given recognizer into this. The
+    // Called when request of handling gesture sequence is blocked by gesture referee.
+    virtual void OnBlocked()
+    {
+        if (disposal_ == GestureDisposal::ACCEPT) {
+            refereeState_ = RefereeState::SUCCEED_BLOCKED;
+        }
+        if (disposal_ == GestureDisposal::PENDING) {
+            refereeState_ = RefereeState::PENDING_BLOCKED;
+        }
+    }
+
+    // Reconcile the state from the given recognizer into this. The
     // implementation must check that the given recognizer type matches the
     // current one. The return value should be false if the reconciliation fails
     // and true if it succeeds
-    virtual bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+    virtual bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     {
         return true;
     }
@@ -80,22 +103,17 @@ public:
         priorityMask_ = priorityMask;
     }
 
+    GestureDisposal GetGestureDisposal() const
+    {
+        return disposal_;
+    }
+
     RefereeState GetRefereeState() const
     {
         return refereeState_;
     }
 
-    void SetRefereeState(RefereeState refereeState)
-    {
-        refereeState_ = refereeState;
-    }
-
-    DetectState GetDetectState() const
-    {
-        return state_;
-    }
-
-    void SetGestureGroup(const WeakPtr<GestureRecognizer>& gestureGroup)
+    void SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
     {
         gestureGroup_ = gestureGroup;
     }
@@ -142,7 +160,42 @@ public:
         return isExternalGesture_;
     }
 
+    bool IsPending() const
+    {
+        return (refereeState_ == RefereeState::PENDING) || (refereeState_ == RefereeState::PENDING_BLOCKED);
+    }
+
+    bool IsRefereeFinished() const
+    {
+        return (refereeState_ == RefereeState::SUCCEED) || (refereeState_ == RefereeState::FAIL) ||
+               (refereeState_ == RefereeState::SUCCEED_BLOCKED);
+    }
+
+    // called when gesture scope is closed.
+    void ResetStatusOnFinish()
+    {
+        refereeState_ = RefereeState::READY;
+        OnResetStatus();
+    }
+
+    // called to reset status manually without rejected callback.
+    void ResetStatus()
+    {
+        refereeState_ = RefereeState::READY;
+        OnResetStatus();
+    }
+
 protected:
+    void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
+    {
+        disposal_ = disposal;
+        BatchAdjudicate(recognizer, disposal);
+    }
+    virtual void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
+
+    virtual void OnBeginGestureReferee(int32_t touchId) {}
+    virtual void OnFinishGestureReferee(int32_t touchId) {}
+
     virtual void HandleTouchDownEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchMoveEvent(const TouchEvent& event) = 0;
@@ -152,18 +205,16 @@ protected:
     virtual void HandleTouchMoveEvent(const AxisEvent& event) {}
     virtual void HandleTouchCancelEvent(const AxisEvent& event) {}
 
-    virtual void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
-    virtual void DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
-    virtual void BatchAdjudicate(
-        const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
+    virtual void OnResetStatus() = 0;
 
-    DetectState state_ { DetectState::READY };
-    RefereeState refereeState_ { RefereeState::DETECTING };
+    RefereeState refereeState_ = RefereeState::READY;
+
+    GestureDisposal disposal_ = GestureDisposal::NONE;
+
     GesturePriority priority_ = GesturePriority::Low;
+
     GestureMask priorityMask_ = GestureMask::Normal;
 
-    int32_t fingers_ = 1;
-    std::list<FingerInfo> fingerList_;
     bool isExternalGesture_ = false;
 
     std::unique_ptr<GestureEventFunc> onAction_;
@@ -176,7 +227,7 @@ protected:
     SourceType deviceType_ = SourceType::NONE;
 
 private:
-    WeakPtr<GestureRecognizer> gestureGroup_;
+    WeakPtr<NGGestureRecognizer> gestureGroup_;
 };
 
 } // namespace OHOS::Ace::NG

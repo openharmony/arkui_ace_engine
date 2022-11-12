@@ -689,7 +689,9 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradien
     SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetEndOffset().GetX()),
         SkDoubleToScalar(gradient.GetEndOffset().GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
-    auto gradientColors = gradient.GetColors();
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    std::stable_sort(gradientColors.begin(), gradientColors.end(),
+        [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
     uint32_t colorsSize = gradientColors.size();
     SkColor colors[gradientColors.size()];
     float pos[gradientColors.size()];
@@ -723,6 +725,11 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradien
 void RosenRenderOffscreenCanvas::BeginPath()
 {
     skPath_.reset();
+}
+
+void RosenRenderOffscreenCanvas::ResetTransform()
+{
+    skCanvas_->resetMatrix();
 }
 
 void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
@@ -807,6 +814,11 @@ void RosenRenderOffscreenCanvas::Arc(const ArcParam& param)
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
         skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(half), false);
         skPath_.arcTo(rect, SkDoubleToScalar(half + startAngle), SkDoubleToScalar(half), false);
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(half), false);
+        skPath_.arcTo(rect, SkDoubleToScalar(half + startAngle), SkDoubleToScalar(half), false);
+        skPath_.arcTo(rect, SkDoubleToScalar(half + half + startAngle), SkDoubleToScalar(sweepAngle), false);
     } else {
         skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(sweepAngle), false);
     }
@@ -981,6 +993,10 @@ void RosenRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
         skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
         skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle, false);
     } else {
         skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
     }
@@ -1068,8 +1084,8 @@ void RosenRenderOffscreenCanvas::Path2DRect(const PathArgs& args)
 {
     double left = args.para1;
     double top = args.para2;
-    double right = args.para3;
-    double bottom = args.para4;
+    double right = args.para3 + args.para1;
+    double bottom = args.para4 + args.para2;
     skPath2d_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
 }
 
@@ -1643,13 +1659,6 @@ bool RosenRenderOffscreenCanvas::IsPointInStroke(const RefPtr<CanvasPath2D>& pat
 {
     TranspareCmdToPath(path);
     return IsPointInPathByColor(x, y, skPath2d_, SK_ColorBLUE);
-}
-
-void RosenRenderOffscreenCanvas::ResetTransform()
-{
-    SkMatrix skMatrix;
-    skMatrix.setAll(1, 0, 0, 0, 1, 0, 0, 0, 1);
-    skCanvas_->setMatrix(skMatrix);
 }
 
 void RosenRenderOffscreenCanvas::InitFilterFunc()

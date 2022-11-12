@@ -35,8 +35,10 @@ NumberFormatter::NumberFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d
 // Only allow \d-+
 PhoneNumberFormatter::PhoneNumberFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d\\-\\+\\*\\#]+")) {}
 
-// Only allow \d\w-_.@
-EmailFormatter::EmailFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d\\w\\-\\._@]+")) {}
+// Use Common specifications
+EmailFormatter::EmailFormatter()
+    : BlackListCharsFormatter(std::wregex(L"^([0-9a-zA-Z]+[-._+&amp;])*[0-9a-zA-Z]+@([-0-9a-zA-Z]+[.])+[a-zA-Z]{1,}$"))
+{}
 
 // Allow \d\w-_.~!*'();:@&=+$,/?#[]
 UriFormatter::UriFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d\\w-_.~!*'();:@&=+$,/?#[\\]]+")) {}

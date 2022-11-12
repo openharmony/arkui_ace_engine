@@ -492,7 +492,16 @@ public:
                 linearGradientInfo_ == other.GetLinearGradientInfo() &&
                 radialGradientInfo_ == other.GetRadialGradientInfo());
     }
-    
+
+    bool operator!=(const Gradient& other) const
+    {
+        return !(*this == other);
+    }
+
+    std::unique_ptr<JsonValue> LinearGradientToJson() const;
+    std::unique_ptr<JsonValue> SweepGradientToJson() const;
+    std::unique_ptr<JsonValue> RadialGradientToJson() const;
+
 private:
     GradientType type_ = GradientType::LINEAR;
     bool repeat_ = false;

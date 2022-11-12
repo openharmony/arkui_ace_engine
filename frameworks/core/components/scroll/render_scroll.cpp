@@ -496,7 +496,10 @@ void RenderScroll::ResetScrollEventCallBack()
                     std::make_shared<ScrollEventInfo>(ScrollEvent::SCROLL_END, 0.0, 0.0, -1));
             }
             // Send scroll none when scroll is end.
-            scroll->HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
+            auto context = scroll->GetContext().Upgrade();
+            if (!(context && context->GetIsDeclarative())) {
+                scroll->HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
+            }
             scroll->HandleScrollBarEnd();
 
             auto proxy = scroll->scrollBarProxy_;
@@ -524,26 +527,29 @@ void RenderScroll::ResetScrollEventCallBack()
 
 void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
 {
-    if (scrollBar_ != scrollBar) {
-        if (scrollBar_) {
-            // Clear the old data.
-            scrollBar_->Reset();
-        }
-        scrollBar_ = scrollBar;
-        if (!scrollBar_) {
-            scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
-        }
-        if (axis_ == Axis::HORIZONTAL) {
-            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
-        }
-        if (axis_ == Axis::VERTICAL) {
-            if (rightToLeft_) {
-                scrollBar_->SetPositionMode(PositionMode::LEFT);
-            }
-        }
-        scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
-        SetBarCallBack(axis_ == Axis::VERTICAL);
+    if (scrollBar_ == scrollBar) {
+        return;
     }
+
+    if (scrollBar_) {
+        // Clear the old data.
+        scrollBar_->Reset(scrollBar);
+        return;
+    }
+    scrollBar_ = scrollBar;
+    if (!scrollBar_) {
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
+    }
+    if (axis_ == Axis::HORIZONTAL) {
+        scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    }
+    if (axis_ == Axis::VERTICAL) {
+        if (rightToLeft_) {
+            scrollBar_->SetPositionMode(PositionMode::LEFT);
+        }
+    }
+    scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
+    SetBarCallBack(axis_ == Axis::VERTICAL);
 }
 
 void RenderScroll::ResetScrollable()
@@ -646,10 +652,10 @@ void RenderScroll::OnTouchTestHit(
     if (!GetVisible() || axis_ == Axis::NONE) {
         return;
     }
-    if (!scrollable_ || !scrollable_->Available()) {
+    if (!scrollable_) {
         return;
     }
-    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
+    if (scrollable_->Available() && scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
         scrollBar_->AddScrollBarController(coordinateOffset, result);
     } else {
         scrollable_->SetCoordinateOffset(coordinateOffset);

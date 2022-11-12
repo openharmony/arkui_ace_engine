@@ -19,7 +19,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/components/scroll_bar/scroll_bar_proxy.h"
+#include "core/components/scroll_bar/scroll_proxy.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -49,19 +49,19 @@ public:
         controller_ = controller;
     }
 
-    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& proxy)
+    void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
     {
         scrollBarProxy_ = proxy;
     }
 
-    const RefPtr<ScrollBarProxy>& GetScrollBarProxy()
+    const RefPtr<ScrollProxy>& GetScrollBarProxy()
     {
         return scrollBarProxy_;
     }
 
 private:
     RefPtr<ScrollControllerBase> controller_;
-    RefPtr<ScrollBarProxy> scrollBarProxy_;
+    RefPtr<ScrollProxy> scrollBarProxy_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JSScroller);
 };

@@ -127,7 +127,7 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, context is null.");
         return;
     }
-    windowMode_ = context->GetWindowManager()->FireWindowGetModeCallBack();
+    windowMode_ = context->GetWindowManager()->GetWindowMode();
 
     // full screen need to hide border and padding.
     auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
@@ -250,7 +250,7 @@ void ContainerModalElement::PerformBuild()
     ChangeTitleIcon();
 
     // The first time it starts up, it needs to hide title if mode as follows.
-    windowMode_ = context_.Upgrade()->GetWindowManager()->FireWindowGetModeCallBack();
+    windowMode_ = context_.Upgrade()->GetWindowManager()->GetWindowMode();
     if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         ShowTitle(false);
@@ -301,47 +301,22 @@ void ContainerModalElement::Update()
         density_ = (float)context->GetDensity();
     }
 
-    containerBox->SetOnTouchDownId([week = WeakClaim(this)](const TouchEventInfo& info) {
-        auto containerElement = week.Upgrade();
-        if (containerElement && info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <=
-                                    (TITLE_POPUP_DISTANCE * containerElement->density_)) {
-            containerElement->moveX_ = (float)info.GetChangedTouches().begin()->GetGlobalLocation().GetX();
-            containerElement->moveY_ = (float)info.GetChangedTouches().begin()->GetGlobalLocation().GetY();
-        }
-    });
-
-    // touch top to pop-up title bar.
-    containerBox->SetOnTouchMoveId([week = WeakClaim(this)](const TouchEventInfo& info) {
-        auto containerElement = week.Upgrade();
-        if (!containerElement || !containerElement->CanShowFloatingTitle()) {
-            return;
-        }
-        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() >
-            (TITLE_POPUP_DISTANCE * containerElement->density_)) {
-            return;
-        }
-        auto deltaMoveX = fabs(info.GetChangedTouches().begin()->GetGlobalLocation().GetX() - containerElement->moveX_);
-        auto deltaMoveY = info.GetChangedTouches().begin()->GetGlobalLocation().GetY() - containerElement->moveY_;
-        if (deltaMoveX <= MOVE_POPUP_DISTANCE_X && deltaMoveY >= MOVE_POPUP_DISTANCE_Y) {
-            containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
-            containerElement->controller_->ClearStopListeners();
-            containerElement->controller_->Forward();
-        }
-    });
-
-    // mouse move top to pop up title bar and move other area to hide title bar.
-    containerBox->SetOnMouseId([weak = WeakClaim(this)](MouseInfo& info) {
+    containerBox->SetOnTouchDownId([weak = WeakClaim(this), context = context_](const TouchEventInfo& info) {
         auto containerElement = weak.Upgrade();
-        if (!containerElement || info.GetAction() != MouseAction::MOVE) {
+        auto pipeline = context.Upgrade();
+        if (!pipeline || !containerElement) {
             return;
         }
-        if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && containerElement->CanShowFloatingTitle()) {
-            containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
-            containerElement->controller_->ClearStopListeners();
-            containerElement->controller_->Forward();
+        auto viewScale = pipeline->GetViewScale();
+        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() * viewScale <=
+            (TITLE_POPUP_DISTANCE * containerElement->density_)) {
+            containerElement->moveX_ = info.GetChangedTouches().begin()->GetGlobalLocation().GetX() * viewScale;
+            containerElement->moveY_ = info.GetChangedTouches().begin()->GetGlobalLocation().GetY() * viewScale;
+            return;
         }
-        if (info.GetLocalLocation().GetY() > (TITLE_POPUP_DISTANCE * containerElement->density_) &&
-            containerElement->CanHideFloatingTitle()) {
+
+        // touch other area to hide floating title
+        if (containerElement->CanHideFloatingTitle()) {
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
                 container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
@@ -350,20 +325,52 @@ void ContainerModalElement::Update()
         }
     });
 
-    // touch other area of screen to hide title bar.
-    auto tapGesture = AceType::MakeRefPtr<TapGesture>();
-    tapGesture->SetOnActionId([weak = WeakClaim(this)](GestureEvent& info) {
+    // touch top to pop-up title bar.
+    containerBox->SetOnTouchMoveId([weak = WeakClaim(this), context = context_](const TouchEventInfo& info) {
         auto containerElement = weak.Upgrade();
-        if (!containerElement || !containerElement->CanHideFloatingTitle()) {
+        auto pipeline = context.Upgrade();
+        if (!pipeline || !containerElement || !containerElement->CanShowFloatingTitle()) {
             return;
         }
-        containerElement->controller_->AddStopListener([weak] {
-            auto container = weak.Upgrade();
-            container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
-        });
-        containerElement->controller_->Backward();
+        auto viewScale = pipeline->GetViewScale();
+        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() * viewScale >
+            (TITLE_POPUP_DISTANCE * containerElement->density_)) {
+            return;
+        }
+        auto deltaMoveX =
+            fabs(info.GetChangedTouches().begin()->GetGlobalLocation().GetX() * viewScale - containerElement->moveX_);
+        auto deltaMoveY =
+            info.GetChangedTouches().begin()->GetGlobalLocation().GetY() * viewScale - containerElement->moveY_;
+        if (deltaMoveX <= MOVE_POPUP_DISTANCE_X && deltaMoveY >= MOVE_POPUP_DISTANCE_Y) {
+            containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
+            containerElement->controller_->ClearStopListeners();
+            containerElement->controller_->Forward();
+        }
     });
-    containerBox->SetOnClick(tapGesture);
+
+    // mouse move top to pop up title bar and move other area to hide title bar.
+    containerBox->SetOnMouseId([weak = WeakClaim(this), context = context_](MouseInfo& info) {
+        auto containerElement = weak.Upgrade();
+        auto pipeline = context.Upgrade();
+        if (!pipeline || !containerElement || info.GetAction() != MouseAction::MOVE) {
+            return;
+        }
+        auto viewScale = pipeline->GetViewScale();
+        if (info.GetLocalLocation().GetY() * viewScale <= MOUSE_MOVE_POPUP_DISTANCE &&
+            containerElement->CanShowFloatingTitle()) {
+            containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
+            containerElement->controller_->ClearStopListeners();
+            containerElement->controller_->Forward();
+        }
+        if (info.GetLocalLocation().GetY() * viewScale > (TITLE_POPUP_DISTANCE * containerElement->density_) &&
+            containerElement->CanHideFloatingTitle()) {
+            containerElement->controller_->AddStopListener([weak] {
+                auto container = weak.Upgrade();
+                container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+            });
+            containerElement->controller_->Backward();
+        }
+    });
 }
 
 bool ContainerModalElement::CanShowFloatingTitle()

@@ -26,62 +26,6 @@
 
 namespace OHOS::Ace::NG {
 
-void BadgeView::Pop()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
-
-    auto lastFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back());
-    CHECK_NULL_VOID(lastFrameNode);
-    std::string textNodeName("text");
-    if (lastFrameNode->GetNodeName() != textNodeName) {
-        auto* stack = ViewStackProcessor::GetInstance();
-        int32_t textNodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-        lastFrameNode = FrameNode::GetOrCreateFrameNode(
-            V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
-        CHECK_NULL_VOID(lastFrameNode);
-        lastFrameNode->MountToParent(frameNode);
-        lastFrameNode->SetNodeName(textNodeName);
-    }
-    auto textLayoutProperty = lastFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto badgeCount = layoutProperty->GetBadgeCount();
-    auto badgeValue = layoutProperty->GetBadgeValue();
-    if (badgeCount.has_value()) {
-        auto maxCount = 99;
-        auto badgeMaxCount = layoutProperty->GetBadgeMaxCount();
-        if (badgeMaxCount.has_value()) {
-            maxCount = badgeMaxCount.value();
-        }
-        if (badgeCount.value() > maxCount) {
-            badgeCount.value() = maxCount;
-            textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()) + "+");
-        } else {
-            textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()));
-        }
-    } else {
-        if (!badgeValue.value().empty()) {
-            textLayoutProperty->UpdateContent(badgeValue.value());
-        } else {
-            textLayoutProperty->UpdateContent(" ");
-        }
-    }
-
-    auto badgeTextColor = layoutProperty->GetBadgeTextColor();
-    if (badgeTextColor.has_value()) {
-        textLayoutProperty->UpdateTextColor(badgeTextColor.value());
-    }
-    auto badgeFontSize = layoutProperty->GetBadgeFontSize();
-    if (badgeFontSize.has_value()) {
-        textLayoutProperty->UpdateFontSize(badgeFontSize.value());
-    }
-    lastFrameNode->MarkModifyDone();
-}
-
 void BadgeView::Create(BadgeParameters& badgeParameters)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -100,9 +44,9 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
     }
     if (badgeParameters.badgeCount.has_value()) {
         layoutProperty->UpdateBadgeCount(badgeParameters.badgeCount.value());
-        if (badgeParameters.badgeMaxCount.has_value()) {
-            layoutProperty->UpdateBadgeMaxCount(badgeParameters.badgeMaxCount.value());
-        }
+    }
+    if (badgeParameters.badgeMaxCount.has_value()) {
+        layoutProperty->UpdateBadgeMaxCount(badgeParameters.badgeMaxCount.value());
     }
 
     if (badgeParameters.badgePosition.has_value()) {

@@ -15,9 +15,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_FOREGROUND_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_FOREGROUND_MODIFIER_H
 
-#include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_property.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,8 +27,7 @@ using RSPropertyBase = Rosen::RSPropertyBase;
 
 class RS_EXPORT RSForegroundStyleModifier : public RSExtendedModifier {
 public:
-    RSForegroundStyleModifier() : RSExtendedModifier(RSModifierType::FOREGROUND_STYLE)
-    {}
+    RSForegroundStyleModifier() : RSExtendedModifier(RSModifierType::FOREGROUND_STYLE) {}
 
     RSModifierType GetModifierType() const override
     {

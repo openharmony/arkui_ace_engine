@@ -28,6 +28,9 @@
 #include "base/utils/string_utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/image_provider/image_data.h"
+#include "core/image/flutter_image_cache.h" // TODO: add adapter layer and use FlutterImageCache there
 #include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
@@ -98,6 +101,9 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
         case SrcType::DATA_ABILITY: {
             return MakeRefPtr<DataProviderImageLoader>();
         }
+        case SrcType::DATA_ABILITY_DECODED: {
+            return MakeRefPtr<DecodedDataProviderImageLoader>();
+        }
         case SrcType::MEMORY: {
             LOGE("Image source type: shared memory. image data is not come from image loader.");
             return nullptr;
@@ -105,8 +111,12 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
         case SrcType::RESOURCE_ID: {
             return MakeRefPtr<InternalImageLoader>();
         }
+        case SrcType::PIXMAP: {
+            return MakeRefPtr<PixelMapImageLoader>();
+        }
         default: {
-            LOGE("Image source type not supported!");
+            LOGE("Image source type not supported!  srcType: %{public}d, sourceInfo: %{public}s", srcType,
+                imageSourceInfo.ToString().c_str());
             return nullptr;
         }
     }
@@ -136,15 +146,68 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
     return nullptr;
 }
 
+sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineCtx, nullptr);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_RETURN(imageCache, nullptr);
+    auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetSrc());
+    CHECK_NULL_RETURN(cacheData, nullptr);
+    // TODO: add adapter layer and use [SkiaCachedImageData] there
+    auto skiaCachedImageData = AceType::DynamicCast<SkiaCachedImageData>(cacheData);
+    CHECK_NULL_RETURN(skiaCachedImageData, nullptr);
+    return skiaCachedImageData->imageData;
+}
+
+void ImageLoader::CacheImageDataToImageCache(const std::string& key, const RefPtr<CachedImageData>& imageData)
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineCtx);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_VOID(imageCache);
+    imageCache->CacheImageData(key, imageData);
+}
+
+RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string key, const std::string suffix)
+{
+    ACE_FUNCTION_TRACE();
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineCtx, nullptr);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_RETURN(imageCache, nullptr);
+    std::string filePath = ImageCache::GetImageCacheFilePath(key) + suffix;
+    auto data = imageCache->GetDataFromCacheFile(filePath);
+    CHECK_NULL_RETURN(data, nullptr);
+    // add adapter layer to replace [SkiaCachedImageData]
+    auto skdata = AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
+    CHECK_NULL_RETURN(skdata, nullptr);
+    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skdata));
+}
+
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
-    sk_sp<SkData> skData = LoadImageData(imageSourceInfo, context);
+    if (imageSourceInfo.IsPixmap()) {
+        return LoadDecodedImageData(imageSourceInfo, context);
+    }
+    sk_sp<SkData> skData;
+    do {
+        skData = ImageLoader::QueryImageDataFromImageCache(imageSourceInfo);
+        if (skData) {
+            break;
+        }
+        skData = LoadImageData(imageSourceInfo, context);
+        CHECK_NULL_RETURN(skData, nullptr);
+        // TODO: add adapter layer and use [SkiaCachedImageData] there
+        ImageLoader::CacheImageDataToImageCache(
+            imageSourceInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(skData));
+    } while (0);
     return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skData));
 }
 
 sk_sp<SkData> FileImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     ACE_FUNCTION_TRACE();
     auto src = imageSourceInfo.GetSrc();
@@ -185,7 +248,7 @@ sk_sp<SkData> FileImageLoader::LoadImageData(
 }
 
 sk_sp<SkData> DataProviderImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     auto src = imageSourceInfo.GetSrc();
     auto skData = ImageLoader::LoadDataFromCachedFile(src);
@@ -216,7 +279,7 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(
 }
 
 sk_sp<SkData> AssetImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     ACE_FUNCTION_TRACE();
     auto src = imageSourceInfo.GetSrc();
@@ -279,11 +342,11 @@ std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr
         LOGE("No asset data!");
         return "";
     }
-    return std::string((char *)assetData->GetData(), assetData->GetSize());
+    return std::string((char*)assetData->GetData(), assetData->GetSize());
 }
 
 sk_sp<SkData> NetworkImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     auto uri = imageSourceInfo.GetSrc();
     // 1. find in cache file path.
@@ -307,7 +370,7 @@ sk_sp<SkData> NetworkImageLoader::LoadImageData(
 }
 
 sk_sp<SkData> InternalImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     size_t imageSize = 0;
     const uint8_t* internalData =
@@ -320,7 +383,7 @@ sk_sp<SkData> InternalImageLoader::LoadImageData(
 }
 
 sk_sp<SkData> Base64ImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     std::string_view base64Code = GetBase64ImageCode(imageSourceInfo.GetSrc());
     if (base64Code.size() == 0) {
@@ -414,7 +477,7 @@ bool ResourceImageLoader::GetResourceName(const std::string& uri, std::string& r
 }
 
 sk_sp<SkData> ResourceImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     auto uri = imageSourceInfo.GetSrc();
     auto pipelineContext = context.Upgrade();
@@ -462,6 +525,59 @@ sk_sp<SkData> ResourceImageLoader::LoadImageData(
     }
     LOGE("load image data failed, as uri is invalid:%{private}s", uri.c_str());
     return nullptr;
+}
+
+sk_sp<SkData> DecodedDataProviderImageLoader::LoadImageData(
+    const ImageSourceInfo& /* imageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
+{
+    return nullptr;
+}
+
+RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+{
+#if !defined(PIXEL_MAP_SUPPORTED)
+    return nullptr;
+#else
+    auto pipelineContext = context.Upgrade();
+    if (!pipelineContext) {
+        LOGE("pipeline context is null when try start thumbnailLoadTask, uri: %{public}s",
+            imageSourceInfo.ToString().c_str());
+        return nullptr;
+    }
+    auto dataProvider = pipelineContext->GetDataProviderManager();
+    if (!dataProvider) {
+        LOGE("the data provider is null when try load thumbnail resource, uri: %{public}s",
+            imageSourceInfo.ToString().c_str());
+        return nullptr;
+    }
+    void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(imageSourceInfo.GetSrc());
+    auto pixmapOhos = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
+    if (!pixmapOhos) {
+        return nullptr;
+    }
+    return MakeRefPtr<NG::ImageData>(pixmapOhos);
+#endif
+}
+
+sk_sp<SkData> PixelMapImageLoader::LoadImageData(
+    const ImageSourceInfo& /* imageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
+{
+    return nullptr;
+}
+
+RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+{
+#if !defined(PIXEL_MAP_SUPPORTED)
+    return nullptr;
+#else
+    if (!imageSourceInfo.GetPixmap()) {
+        LOGW("no pixel map in imageSourceInfo, imageSourceInfo: %{public}s", imageSourceInfo.ToString().c_str());
+        return nullptr;
+    }
+    return MakeRefPtr<NG::ImageData>(imageSourceInfo.GetPixmap());
+#endif
 }
 
 } // namespace OHOS::Ace

@@ -18,10 +18,12 @@
 #include "inspector_composed_element.h"
 #include "shape_composed_element.h"
 
+#include "core/components/page/page_element.h"
 #include "core/components/root/root_element.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
+const char IFELSE_ELEMENT_TAG[] = "IfElseElement";
 const char INSPECTOR_TYPE[] = "$type";
 const char INSPECTOR_ROOT[] = "root";
 const char INSPECTOR_WIDTH[] = "width";
@@ -65,8 +67,12 @@ void DumpElementTree(
         return;
     }
     const auto& children = element->GetChildren();
-    depthElementMap[depth].insert(depthElementMap[depth].end(), children.begin(), children.end());
     for (auto& depthElement : children) {
+        if (strcmp(AceType::TypeName(depthElement), IFELSE_ELEMENT_TAG) == 0) {
+            DumpElementTree(depth, depthElement, depthElementMap);
+            continue;
+        }
+        depthElementMap[depth].insert(depthElementMap[depth].end(), depthElement);
         DumpElementTree(depth + 1, depthElement, depthElementMap);
     }
 }
@@ -113,7 +119,12 @@ std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context)
 
     std::map<int32_t, std::list<RefPtr<Element>>> depthElementMap;
     depthElementMap[0].emplace_back(root);
-    DumpElementTree(1, root, depthElementMap);
+
+    auto pageElement = AceType::DynamicCast<Element>(context->GetLastPage());
+    if (pageElement == nullptr) {
+        return jsonRoot->ToString();
+    }
+    DumpElementTree(1, pageElement, depthElementMap);
 
     size_t height = 0;
     std::unordered_map<int32_t, std::vector<std::pair<RefPtr<Element>, std::string>>> elementJSONInfoMap;

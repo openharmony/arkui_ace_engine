@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
@@ -77,7 +78,8 @@ struct ScopeFocusAlgorithm final {
     GetNextFocusNodeFunc getNextFocusNode;
 };
 
-class ACE_EXPORT FocusCallbackEvents : public AceType {
+class ACE_EXPORT FocusCallbackEvents : public virtual AceType {
+    DECLARE_ACE_TYPE(FocusCallbackEvents, AceType)
 public:
     explicit FocusCallbackEvents() = default;
     ~FocusCallbackEvents() override = default;
@@ -187,19 +189,17 @@ private:
     int32_t tabIndex_ = 0;
 };
 
-class ACE_EXPORT FocusHub : public Referenced {
+class ACE_EXPORT FocusHub : public virtual AceType {
+    DECLARE_ACE_TYPE(FocusHub, AceType)
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
-    {
-        eventHub_ = eventHub;
-        focusType_ = type;
-        focusable_ = focusable;
-    }
+        : eventHub_(eventHub), focusable_(focusable), focusType_(type)
+    {}
     ~FocusHub() override = default;
 
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
-    RefPtr<FocusHub> GetParentFocusHub() const;
+    RefPtr<FocusHub> GetParentFocusHub(FrameNode* node = nullptr) const;
     std::string GetFrameName() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
@@ -208,10 +208,10 @@ public:
     void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
-    void LostFocus();
+    void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
-    void RemoveSelf();
-    void RemoveChild(const RefPtr<FocusHub>& focusNode);
+    void RemoveSelf(FrameNode* frameNode);
+    void RemoveChild(FocusHub* focusNode);
     bool GoToNextFocusLinear(bool reverse, const RectF& rect = RectF());
     bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect);
 
@@ -262,10 +262,8 @@ public:
     {
         return show_;
     }
-    bool IsEnabled() const
-    {
-        return enabled_;
-    }
+
+    bool IsEnabled() const;
 
     bool IsCurrentFocus() const
     {
@@ -327,6 +325,10 @@ public:
     void SetOnBlurInternal(OnBlurFunc&& onBlurInternal)
     {
         onBlurInternal_ = std::move(onBlurInternal);
+    }
+    void SetOnBlurReasonInternal(OnBlurReasonFunc&& onBlurReasonInternal)
+    {
+        onBlurReasonInternal_ = std::move(onBlurReasonInternal);
     }
     void SetOnPreFocusCallback(OnPreFocusFunc&& onPreFocusCallback)
     {
@@ -442,7 +444,7 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    void SetScopeFocusAlgorithm(ScopeFocusAlgorithm focusAlgorithm)
+    void SetScopeFocusAlgorithm(const ScopeFocusAlgorithm& focusAlgorithm)
     {
         focusAlgorithm_ = focusAlgorithm;
     }
@@ -473,6 +475,7 @@ private:
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
+    OnBlurReasonFunc onBlurReasonInternal_;
     OnKeyEventFunc onKeyEventInternal_;
     OnPreFocusFunc onPreFocusCallback_;
 
@@ -491,11 +494,11 @@ private:
     bool currentFocus_ { false };
     bool isFirstFocusInPage_ { true };
     bool show_ { true };
-    bool enabled_ { true };
 
     FocusType focusType_ = FocusType::DISABLE;
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;
+    BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
 };
 } // namespace OHOS::Ace::NG
 

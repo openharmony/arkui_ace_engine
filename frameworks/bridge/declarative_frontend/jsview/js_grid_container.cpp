@@ -16,13 +16,31 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_container.h"
 
 #include "base/log/ace_trace.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/grid_container_model_impl.h"
 #include "frameworks/core/components/common/layout/grid_system_manager.h"
-#include "frameworks/core/components_ng/pattern/grid_container/grid_container_view.h"
+#include "frameworks/core/components_ng/pattern/grid_container/grid_container_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<GridContainerModel> GridContainerModel::instance_;
+GridContainerModel* GridContainerModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::GridContainerModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::GridContainerModelNG());
+        } else {
+            instance_.reset(new Framework::GridContainerModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
-thread_local std::vector<RefPtr<GridContainerInfo>> JSGridContainer::gridContainerStack_;
 
 void JSGridContainer::Create(const JSCallbackInfo& info)
 {
@@ -56,31 +74,12 @@ void JSGridContainer::Create(const JSCallbackInfo& info)
         }
     }
     auto gridContainerInfo = gridContainerInfoBuilder.Build();
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::GridContainerView::Create(gridContainerInfo);
-        return;
-    }
-
-    JSColumn::SetInspectorTag("GridContainer");
-    JSColumn::Create(info);
-    JSColumn::ClearInspectorTag();
-
-    gridContainerStack_.emplace_back(gridContainerInfo);
-    ViewStackProcessor::GetInstance()->GetBoxComponent()->SetGridLayoutInfo(gridContainerInfo);
-
-    auto main = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto column = AceType::DynamicCast<FlexComponent>(main);
-    if (column) {
-        column->SetCrossAxisSize(CrossAxisSize::MAX);
-    }
+    GridContainerModel::GetInstance()->Create(gridContainerInfo);
 }
 
 void JSGridContainer::Pop()
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        gridContainerStack_.pop_back();
-    }
+    GridContainerModel::GetInstance()->Pop();
     JSColumn::Pop();
 }
 

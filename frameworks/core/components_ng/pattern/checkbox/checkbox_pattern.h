@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -53,7 +54,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<CheckBoxPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        auto enabled = eventHub->IsEnabled();
+        auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(enabled);
+        return paintMethod;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -86,10 +93,24 @@ public:
         return { FocusType::NODE, true };
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
+        auto name = checkBoxEventHub ? checkBoxEventHub->GetName() : "";
+        auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
+        json->Put("name", name.c_str());
+        json->Put("group", group.c_str());
+        json->Put("type", "ToggleType.Checkbox");
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnClick();
 
     void UpdateState();

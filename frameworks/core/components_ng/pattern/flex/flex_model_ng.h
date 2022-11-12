@@ -22,19 +22,30 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT FlexModelNG : public FlexModel {
 public:
-    void SetFillParent() override {}
+    void CreateFlexRow() override;
 
-    void SetWrapContent() override {}
+    void CreateWrap() override;
 
-    void SetJustifyContent(int32_t value) override {}
+    void SetDirection(FlexDirection direction) override;
+    void SetWrapDirection(WrapDirection direction) override;
 
-    void SetAlignItems(int32_t value) override {}
+    void SetMainAxisAlign(FlexAlign align) override;
+    void SetWrapMainAlignment(WrapAlignment value) override;
 
-    void SetAlignContent(int32_t value) override {}
+    void SetCrossAxisAlign(FlexAlign align) override;
+    void SetWrapCrossAlignment(WrapAlignment value) override;
 
-    void SetHasHeight() override {}
+    void SetAlignItems(int32_t value) override;
+    void SetWrapAlignment(WrapAlignment value) override;
 
-    void SetHasWidth() override {}
+    void SetHasHeight() override {};
+    void SetHasWidth() override {};
+    void SetFlexWidth() override {};
+    void SetFlexHeight() override {};
+
+    void SetJustifyContent(int32_t value) override;
+
+    void SetAlignContent(int32_t value) override;
 };
 
 } // namespace OHOS::Ace::NG

@@ -18,8 +18,6 @@
 
 #include <functional>
 
-#include "third_party/skia/include/core/SkData.h"
-
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
@@ -28,6 +26,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+enum class ImageObjectType {
+    UNKNOWN = -1,
+    STATIC_IMAGE_OBJECT,
+    PIXEL_MAP_IMAGE_OBJECT,
+    SVG_IMAGE_OBJECT,
+};
 
 using DataReadyNotifyTask = std::function<void(const ImageSourceInfo& sourceInfo)>;
 using LoadSuccessNotifyTask = std::function<void(const ImageSourceInfo& sourceInfo)>;
@@ -74,8 +79,12 @@ public:
     ImageEncodedInfo(const SizeF& imageSize, int32_t frameCount) : imageSize_(imageSize), frameCount_(frameCount) {}
     ~ImageEncodedInfo() override = default;
 
-    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfo(const RefPtr<NG::ImageData>& data);
-    static RefPtr<ImageEncodedInfo> CreateSvgEncodedInfo(const RefPtr<NG::ImageData>& data);
+    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfo(
+        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo, ImageObjectType imageObjectType);
+    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForStaticImage(const RefPtr<NG::ImageData>& data);
+    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForSvg(const RefPtr<NG::ImageData>& data);
+    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForDecodedPixelMap(
+        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& sourceInfo);
     const SizeF& GetImageSize() const
     {
         return imageSize_;
@@ -117,10 +126,17 @@ public:
         const std::optional<Color>& svgFillColor);
     static void MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
         const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
-    static void MakeCanvasImageForSVG(
-        const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
+    static void MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
     static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
-        std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder);
+        std::function<void(RefPtr<CanvasImage>)>&& callback,
+        const RefPtr<RenderTaskHolder>& renderTaskHolder, const std::string key,
+        const SizeF& resizeTarget, const RefPtr<ImageData>& data);
+    static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& sourceInfo,
+        const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
+        const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks, ImageObjectType imageObjectType);
+    static ImageObjectType ParseImageObjectType(
+        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo);
+    static bool QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks, const ImageSourceInfo& sourceInfo);
 
 protected:
     static void WrapTaskAndPostTo(

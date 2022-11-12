@@ -25,8 +25,8 @@
 #include "core/components/image/image_event.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/stack/stack_element.h"
-#include "core/components/theme/icon_theme.h"
 #include "core/components/text_overlay/text_overlay_component.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -287,8 +287,8 @@ void RenderImage::RegisterCallbacksToOverlay()
         }
     });
 
-    auto callback = [weak = WeakClaim(this), pipelineContext = context_,
-        textOverlay = textOverlay_](const RefPtr<PixelMap>& pixmap) {
+    auto callback = [weak = WeakClaim(this), pipelineContext = context_, textOverlay = textOverlay_](
+                        const RefPtr<PixelMap>& pixmap) {
         auto context = pipelineContext.Upgrade();
         if (!context) {
             return;
@@ -386,8 +386,9 @@ void RenderImage::PerformLayout()
         imageComponentSize_ = maxSize;
         formerMaxSize_ = imageComponentSize_;
     }
-    SetLayoutSize(GetLayoutParam().Constrain(imageComponentSize_.IsValid() && !imageComponentSize_.IsInfinite() ?
-        imageComponentSize_ : CalculateBackupImageSize(pictureSize)));
+    SetLayoutSize(GetLayoutParam().Constrain(imageComponentSize_.IsValid() && !imageComponentSize_.IsInfinite()
+                                                 ? imageComponentSize_
+                                                 : CalculateBackupImageSize(pictureSize)));
     if (rawImageSizeUpdated_) {
         previousLayoutSize_ = GetLayoutSize();
     }
@@ -508,7 +509,7 @@ void RenderImage::ApplyImageFit(Rect& srcRect, Rect& dstRect)
         case ImageFit::FITHEIGHT:
             ApplyFitHeight(srcRect, dstRect, rawPicSize, layoutSize);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             if (srcRect.GetSize() < dstRect.GetSize()) {
                 ApplyNone(srcRect, dstRect, rawPicSize, layoutSize);
             } else {
@@ -584,12 +585,12 @@ void RenderImage::FireLoadEvent(const Size& picSize, const std::string& errorMsg
         if (loadImgSuccessEvent_ && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS)) {
             // here the last param of [loadImgSuccessEvent_] is [1],
             // which means the callback is triggered by [OnLoadSuccess]
-            loadImgSuccessEvent_(std::make_shared<LoadImageSuccessEvent>(picSize.Width(), picSize.Height(),
-                GetLayoutSize().Width(), GetLayoutSize().Height(), 1));
+            loadImgSuccessEvent_(std::make_shared<LoadImageSuccessEvent>(
+                picSize.Width(), picSize.Height(), GetLayoutSize().Width(), GetLayoutSize().Height(), 1));
         }
         if (loadImgFailEvent_ && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL)) {
-            loadImgFailEvent_(std::make_shared<LoadImageFailEvent>(
-                GetLayoutSize().Width(), GetLayoutSize().Height(), errorMsg));
+            loadImgFailEvent_(
+                std::make_shared<LoadImageFailEvent>(GetLayoutSize().Width(), GetLayoutSize().Height(), errorMsg));
         }
         return;
     }
@@ -630,9 +631,8 @@ void RenderImage::SetRadius(const Border& border)
 
 bool RenderImage::IsSVG(const std::string& src, InternalResource::ResourceId resourceId)
 {
-    return ImageComponent::IsSvgSuffix(src) ||
-           (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
-               resourceId < InternalResource::ResourceId::SVG_END);
+    return ImageComponent::IsSvgSuffix(src) || (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
+                                                   resourceId < InternalResource::ResourceId::SVG_END);
 }
 
 void RenderImage::PerformLayoutBgImage()
@@ -897,7 +897,7 @@ void RenderImage::ClearRenderObject()
     imageRenderPosition_ = Offset();
     forceResize_ = false;
     forceReload_ = false;
-    imageSizeForEvent_ =  { 0.0, 0.0 };
+    imageSizeForEvent_ = { 0.0, 0.0 };
     retryCnt_ = 0;
 }
 
@@ -959,10 +959,11 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
         if (!dragWindow_) {
             auto rect = pipelineContext->GetCurrentWindowRect();
             dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
-                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
-                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Top(), initRenderNode->GetPaintRect().Width(),
-                initRenderNode->GetPaintRect().Height());
-            dragWindow_->SetOffset(rect.Left(), rect.Top());
+                static_cast<int32_t>(info.GetGlobalPoint().GetX() + rect.Left()),
+                static_cast<int32_t>(info.GetGlobalPoint().GetY() + rect.Top()),
+                static_cast<uint32_t>(initRenderNode->GetPaintRect().Width()),
+                static_cast<uint32_t>(initRenderNode->GetPaintRect().Height()));
+            dragWindow_->SetOffset(static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()));
             auto image = initRenderNode->GetSkImage();
             dragWindow_->DrawImage(image);
         }
@@ -1002,9 +1003,9 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
     auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
     positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
     positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
-    SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
+    SetLocalPoint(startPoint_ - GetGlobalOffset());
     auto updatePosition = [renderBox = AceType::Claim(this)](
-                                const std::function<void(const Dimension&, const Dimension&)>& func) {
+                              const std::function<void(const Dimension&, const Dimension&)>& func) {
         if (!renderBox) {
             return;
         }
@@ -1021,6 +1022,10 @@ void RenderImage::PanOnActionUpdate(const GestureEvent& info)
     if (isDragDropNode_ && dragWindow_) {
         int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
         int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+        if (lastDragMoveOffset_ == Offset(x, y)) {
+            return;
+        }
+        lastDragMoveOffset_ = Offset(x, y);
         if (dragWindow_) {
             dragWindow_->MoveTo(x, y);
         }

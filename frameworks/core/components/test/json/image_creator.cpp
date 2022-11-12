@@ -80,7 +80,7 @@ ImageFit ImageCreator::ConvertStrToFit(const std::string& fit)
     } else if (fit == "fitheight") {
         imageFit = ImageFit::FITHEIGHT;
     } else if (fit == "scaledown") {
-        imageFit = ImageFit::SCALEDOWN;
+        imageFit = ImageFit::SCALE_DOWN;
     } else {
         imageFit = ImageFit::CONTAIN;
     }

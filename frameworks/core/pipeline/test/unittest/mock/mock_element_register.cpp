@@ -86,9 +86,12 @@ std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
     return removedItems_;
 }
 
+void ElementRegister::ClearRemovedItems(ElementIdType elmtId) {}
+
 void ElementRegister::Clear()
 {
     itemMap_.clear();
     removedItems_.clear();
 }
+
 } // namespace OHOS::Ace

@@ -52,7 +52,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<RadioPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        auto enabled = eventHub->IsEnabled();
+        auto paintMethod = MakeRefPtr<RadioPaintMethod>(enabled);
+        return paintMethod;
     }
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*config*/) override
@@ -90,6 +96,20 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
+        auto value = radioEventHub ? radioEventHub->GetValue() : "";
+        auto group = radioEventHub ? radioEventHub->GetGroup() : "";
+        auto resultJson = JsonUtil::Create(true);
+        resultJson->Put("value", value.c_str());
+        resultJson->Put("group", group.c_str());
+        json->Put("value", resultJson->ToString().c_str());
     }
 
 private:

@@ -17,7 +17,9 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "core/accessibility/accessibility_node.h"
 #include "core/animation/curve_animation.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
@@ -85,6 +87,8 @@ void RenderDisplay::PerformLayout()
     if (visible_ == VisibleType::GONE) {
         layoutParam.SetMinSize(Size());
         layoutParam.SetMaxSize(Size());
+        SetVisible(false);
+    } else if (visible_ == VisibleType::INVISIBLE) {
         SetVisible(false);
     }
     Size childSize;
@@ -257,6 +261,25 @@ void RenderDisplay::OnVisibleChange(VisibleType type)
                 break;
         }
     }
+    auto accessibilityNode = GetAccessibilityNode().Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetVisible(GetVisible());
+    }
+}
+
+void RenderDisplay::UpdateVisibleType(VisibleType type)
+{
+    if (visible_ != type) {
+        visible_ = type;
+        SetVisible(visible_ == VisibleType::VISIBLE);
+        MarkNeedLayout();
+        OnVisibleChange(type);
+    }
+}
+
+void RenderDisplay::SetVisible(bool visible, bool inRecursion)
+{
+    RenderNode::SetVisible(visible, inRecursion);
 }
 
 } // namespace OHOS::Ace

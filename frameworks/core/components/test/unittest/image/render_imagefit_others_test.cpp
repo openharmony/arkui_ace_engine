@@ -393,7 +393,7 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers025, TestSize.Level1)
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers026, TestSize.Level1)
 {
-    VerifyImageFit(ImageFitConfig(Alignment::TOP_LEFT, ImageFit::SCALEDOWN, Size(SMALL_LENGTH, MIDDLE_LENGTH),
+    VerifyImageFit(ImageFitConfig(Alignment::TOP_LEFT, ImageFit::SCALE_DOWN, Size(SMALL_LENGTH, MIDDLE_LENGTH),
                        Size(LARGE_LENGTH, EXTRA_LARGE_LENGTH)),
         Rect(Offset(0.0, 0.0), Size(SMALL_LENGTH, MIDDLE_LENGTH)),
         Rect(Offset(0.0, 0.0), Size(SMALL_LENGTH, MIDDLE_LENGTH)));
@@ -407,7 +407,7 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers026, TestSize.Level1)
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers027, TestSize.Level1)
 {
-    VerifyImageFit(ImageFitConfig(Alignment::TOP_LEFT, ImageFit::SCALEDOWN, Size(LARGE_LENGTH, SMALL_LENGTH),
+    VerifyImageFit(ImageFitConfig(Alignment::TOP_LEFT, ImageFit::SCALE_DOWN, Size(LARGE_LENGTH, SMALL_LENGTH),
                        Size(SMALL_LENGTH, MIDDLE_LENGTH)),
         Rect(Offset(0.0, 0.0), Size(LARGE_LENGTH, SMALL_LENGTH)),
         Rect(Offset(0.0, 0.0), Size(SMALL_LENGTH, EXTRA_SMALL_LENGTH)));

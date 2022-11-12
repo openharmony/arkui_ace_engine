@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
-#include "commonlibrary/c_utils/base/include/securec.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 
 int32_t OH_NativeXComponent::GetXComponentId(char* id, uint64_t* size)
 {
@@ -90,6 +90,33 @@ int32_t OH_NativeXComponent::GetTouchEvent(const void* window, OH_NativeXCompone
         return OH_NATIVEXCOMPONENT_RESULT_FAILED;
     }
     (*touchEvent) = xcomponentImpl_->GetTouchEvent();
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::GetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*toolType) = xcomponentImpl_->GetToolType(pointIndex);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::GetTiltX(size_t pointIndex, float* tiltX)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*tiltX) = xcomponentImpl_->GetTiltX(pointIndex);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::GetTiltY(size_t pointIndex, float* tiltY)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*tiltY) = xcomponentImpl_->GetTiltX(pointIndex);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 

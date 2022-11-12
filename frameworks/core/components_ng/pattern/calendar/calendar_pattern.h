@@ -115,6 +115,7 @@ public:
 
     void FireFirstRequestData();
     void FireGoToRequestData(int32_t year, int32_t month, int32_t day);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
 private:
     void OnAttachToFrameNode() override;

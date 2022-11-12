@@ -23,6 +23,7 @@
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/gestures/drag_recognizer.h"
+#include "core/gestures/pan_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -45,23 +46,24 @@ void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context, bo
 {
     context_ = context;
     isVertical_ = isVertical;
-    if (isVertical) {
-        dragRecognizer_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
-    } else {
-        dragRecognizer_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
-    }
-    dragRecognizer_->SetOnDragUpdate([weakBar = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
+
+    PanDirection panDirection;
+    panDirection.type = isVertical ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
+    panRecognizer_ =
+        AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+    panRecognizer_->SetOnActionUpdate([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {
             scrollBar->HandleDragUpdate(info);
         }
     });
-    dragRecognizer_->SetOnDragEnd([weakBar = AceType::WeakClaim(this)](const DragEndInfo& info) {
+    panRecognizer_->SetOnActionEnd([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {
             scrollBar->HandleDragEnd(info);
         }
     });
+
     // use RawRecognizer to receive next touch down event to stop animation.
     rawRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
     rawRecognizer_->SetOnTouchDown([weakBar = AceType::WeakClaim(this)](const TouchEventInfo&) {
@@ -79,7 +81,7 @@ void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context, bo
 
     touchAnimator_ = AceType::MakeRefPtr<Animator>(context);
     dragEndAnimator_ = AceType::MakeRefPtr<Animator>(context);
-    scrollEndAnimator_ = AceType::MakeRefPtr<Animator>(context);
+    InitBarEndAnimation(context);
 
     // when touching down, it need vibrate, last 100ms
     auto vibratorContext = context.Upgrade();
@@ -188,13 +190,17 @@ void ScrollBarController::HandleTouchUp()
     isActive_ = false;
 }
 
-void ScrollBarController::HandleDragUpdate(const DragUpdateInfo& info)
+void ScrollBarController::HandleDragUpdate(const GestureEvent& info)
 {
     LOGD("handle drag update, offset is %{public}lf", info.GetMainDelta());
-    UpdateScrollPosition(-info.GetMainDelta(), SCROLL_FROM_BAR);
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_AXIS);
+    } else {
+        UpdateScrollPosition(-info.GetMainDelta(), SCROLL_FROM_BAR);
+    }
 }
 
-void ScrollBarController::HandleDragEnd(const DragEndInfo& info)
+void ScrollBarController::HandleDragEnd(const GestureEvent& info)
 {
     LOGI("handle drag end, position is %{public}lf and %{public}lf, velocity is %{public}lf",
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetMainVelocity());
@@ -250,12 +256,12 @@ bool ScrollBarController::UpdateScrollPosition(const double offset, int32_t sour
     if (callback_) {
         auto scroll = AceType::DynamicCast<RenderScroll>(scroll_.Upgrade());
         if (scroll && !NearZero(scroll->GetEstimatedHeight())) {
-            double mainSize = isVertical_ ? scroll->GetLayoutSize().Height(): scroll->GetLayoutSize().Width();
+            double mainSize = isVertical_ ? scroll->GetLayoutSize().Height() : scroll->GetLayoutSize().Width();
             double estimatedHeight = scroll->GetEstimatedHeight();
             double activeHeight = mainSize * mainSize / estimatedHeight;
             if (!NearEqual(mainSize, activeHeight)) {
                 double value = offset * (estimatedHeight - mainSize) / (mainSize - activeHeight);
-                ret = callback_(value, source);
+                ret = source == SCROLL_FROM_AXIS ? callback_(offset, source) : callback_(value, source);
             }
         }
     }
@@ -265,41 +271,52 @@ bool ScrollBarController::UpdateScrollPosition(const double offset, int32_t sour
 void ScrollBarController::HandleScrollBarEnd()
 {
     isActive_ = false;
-    if (scrollEndAnimator_ && barEndCallback_) {
-        if (!scrollEndAnimator_->IsStopped()) {
-            scrollEndAnimator_->Stop();
-        }
-        scrollEndAnimator_->ClearInterpolators();
-
-        auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_START, UINT8_MAX);
-        auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_MIDDLE, UINT8_MAX);
-        auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_END, 0);
-        hiddenMiddleKeyframe->SetCurve(Curves::LINEAR);
-        hiddenEndKeyframe->SetCurve(Curves::FRICTION);
-
-        auto animation = AceType::MakeRefPtr<KeyframeAnimation<int32_t>>();
-        animation->AddKeyframe(hiddenStartKeyframe);
-        animation->AddKeyframe(hiddenMiddleKeyframe);
-        animation->AddKeyframe(hiddenEndKeyframe);
-        animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
-            auto scrollBar = weakBar.Upgrade();
-            if (scrollBar && scrollBar->barEndCallback_) {
-                scrollBar->barEndCallback_(value);
-            }
-        });
-        scrollEndAnimator_->AddInterpolator(animation);
-        scrollEndAnimator_->SetDuration(STOP_DURATION);
-        scrollEndAnimator_->Play();
+    if (!scrollEndAnimator_) {
+        LOGE("scrollEndAnimator_ is not exist.");
+        return;
     }
+    if (!scrollEndAnimator_->IsStopped()) {
+        scrollEndAnimator_->Stop();
+    }
+    scrollEndAnimator_->Play();
+}
+
+void ScrollBarController::InitBarEndAnimation(const WeakPtr<PipelineContext>& context)
+{
+    if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
+        scrollEndAnimator_->Stop();
+    }
+    if (scrollEndAnimator_) {
+        scrollEndAnimator_->Play();
+        return;
+    }
+
+    scrollEndAnimator_ = AceType::MakeRefPtr<Animator>(context);
+    auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_START, UINT8_MAX);
+    auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_MIDDLE, UINT8_MAX);
+    auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_END, 0);
+    hiddenMiddleKeyframe->SetCurve(Curves::LINEAR);
+    hiddenEndKeyframe->SetCurve(Curves::FRICTION);
+
+    auto animation = AceType::MakeRefPtr<KeyframeAnimation<int32_t>>();
+    animation->AddKeyframe(hiddenStartKeyframe);
+    animation->AddKeyframe(hiddenMiddleKeyframe);
+    animation->AddKeyframe(hiddenEndKeyframe);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar && scrollBar->barEndCallback_) {
+            scrollBar->barEndCallback_(value);
+        }
+    });
+    scrollEndAnimator_->AddInterpolator(animation);
+    scrollEndAnimator_->SetDuration(STOP_DURATION);
+    scrollEndAnimator_->Play();
 }
 
 void ScrollBarController::Reset()
 {
-    if (scrollEndAnimator_) {
-        if (!scrollEndAnimator_->IsStopped()) {
-            scrollEndAnimator_->Stop();
-        }
-        scrollEndAnimator_->ClearInterpolators();
+    if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
+        scrollEndAnimator_->Stop();
     }
 }
 
@@ -307,7 +324,6 @@ bool ScrollBarController::CheckScroll()
 {
     auto scroll = AceType::DynamicCast<RenderScroll>(scroll_.Upgrade());
     return scroll != nullptr;
-
 }
 
 void ScrollBarController::SetIsHover(bool isHover)
@@ -331,6 +347,20 @@ void ScrollBarController::SetIsHover(bool isHover)
             HandleScrollBarEnd();
         }
         isActive_ = false;
+    }
+}
+
+void ScrollBarController::OnFlushTouchEventsBegin()
+{
+    if (panRecognizer_) {
+        panRecognizer_->OnFlushTouchEventsBegin();
+    }
+}
+
+void ScrollBarController::OnFlushTouchEventsEnd()
+{
+    if (panRecognizer_) {
+        panRecognizer_->OnFlushTouchEventsEnd();
     }
 }
 

@@ -25,6 +25,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
@@ -57,12 +58,11 @@ public:
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
 
-    // TODO: OnDragFunc has component defines.
-    virtual void SetOnDragStartId(const OnDragFunc& onDragStartId) = 0;
-    virtual void SetOnDragEnterId(const OnDropFunc& onDragEnterId) = 0;
-    virtual void SetOnDragMoveId(const OnDropFunc& onDragMoveId) = 0;
-    virtual void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId) = 0;
-    virtual void SetOnDropId(const OnDropFunc& onDropId) = 0;
+    virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
+    virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
+    virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
+    virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
+    virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

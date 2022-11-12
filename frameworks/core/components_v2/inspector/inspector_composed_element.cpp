@@ -687,11 +687,6 @@ std::string InspectorComposedElement::GetRect()
     if (accessibilityNode_ && GetClipFlag()) {
         accessibilityNode_->SetClipFlagToChild(true);
     }
-    auto parent = GetElementParent().Upgrade();
-    while (parent && rect.IsValid()) {
-        rect = rect.IntersectRect(parent->GetRenderRect());
-        parent = parent->GetElementParent().Upgrade();
-    }
 
     isRectValid_ = rect.IsValid();
     if (!isRectValid_) {
@@ -864,20 +859,8 @@ std::string InspectorComposedElement::GetBackgroundImageSize() const
     if (!image) {
         return "ImageSize.Auto";
     }
-    auto widthType = image->GetImageSize().GetSizeTypeX();
-    if (widthType == BackgroundImageSizeType::CONTAIN) {
-        return "ImageSize.Contain";
-    } else if (widthType == BackgroundImageSizeType::COVER) {
-        return "ImageSize.Cover";
-    } else if (widthType == BackgroundImageSizeType::AUTO) {
-        return "ImageSize.Auto";
-    }
-    auto jsonValue = JsonUtil::Create(true);
-    Dimension width = Dimension((image->GetImageSize().GetSizeValueX()), DimensionUnit::VP);
-    Dimension height = Dimension((image->GetImageSize().GetSizeValueY()), DimensionUnit::VP);
-    jsonValue->Put("width", width.ToString().c_str());
-    jsonValue->Put("height", height.ToString().c_str());
-    return jsonValue->ToString();
+
+    return image->GetImageSize().ToString();
 }
 
 std::string InspectorComposedElement::GetBackgroundImagePosition() const
@@ -895,47 +878,8 @@ std::string InspectorComposedElement::GetBackgroundImagePosition() const
         jsonValue->Put("y", 0.0);
         return jsonValue->ToString();
     }
-    if (image->GetImagePosition().GetSizeTypeX() == BackgroundImagePositionType::PX) {
-        auto width = image->GetImagePosition().GetSizeValueX();
-        auto height = image->GetImagePosition().GetSizeValueY();
-        jsonValue->Put("x", width);
-        jsonValue->Put("y", height);
-        return jsonValue->ToString();
-    } else {
-        auto width = image->GetImagePosition().GetSizeValueX();
-        auto height = image->GetImagePosition().GetSizeValueY();
-        return GetAlignmentType(width, height);
-    }
-}
 
-std::string InspectorComposedElement::GetAlignmentType(double width, double height) const
-{
-    auto jsonValue = JsonUtil::Create(true);
-    if (NearZero(width)) {
-        if (NearZero(height)) {
-            return "Alignment.TopStart";
-        } else if (NearEqual(height, 50.0)) { // Determine whether the vertical element is centered
-            return "Alignment.Start";
-        } else {
-            return "Alignment.BottomStart";
-        }
-    } else if (NearEqual(width, 50.0)) { // Judge whether the horizontal element is centered
-        if (NearZero(height)) {
-            return "Alignment.Top";
-        } else if (NearEqual(height, 50)) {
-            return "Alignment.Center";
-        } else {
-            return "Alignment.Bottom";
-        }
-    } else {
-        if (NearZero(height)) {
-            return "Alignment.TopEnd";
-        } else if (NearEqual(height, 50.0)) {
-            return "Alignment.End";
-        } else {
-            return "Alignment.BottomEnd";
-        }
-    }
+    return image->GetImagePosition().ToString();
 }
 
 RefPtr<Decoration> InspectorComposedElement::GetFrontDecoration() const

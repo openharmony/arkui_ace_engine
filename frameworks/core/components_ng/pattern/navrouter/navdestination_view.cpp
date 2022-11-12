@@ -20,6 +20,8 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
@@ -29,6 +31,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,6 +50,25 @@ void NavDestinationView::Create()
             V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
         navDestinationNode->AddChild(titleBarNode);
         navDestinationNode->SetTitleBarNode(titleBarNode);
+
+        int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto backButtonNode = FrameNode::CreateFrameNode(
+            V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ImagePattern>());
+        titleBarNode->AddChild(backButtonNode);
+        titleBarNode->SetBackButton(backButtonNode);
+
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        ImageSourceInfo imageSourceInfo;
+        imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        backButtonNode->MarkModifyDone();
+
+        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+        CHECK_NULL_VOID(titleBarLayoutProperty);
+        titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
     }
     
     // content node
@@ -106,10 +128,56 @@ void NavDestinationView::SetTitle(const std::string& title)
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(title);
-    textLayoutProperty->UpdateFontSize(TITLE_FONT_SIZE);
-    textLayoutProperty->UpdateTextColor(TITLE_COLOR);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
+    textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navDestinationNode->SetTitle(titleNode);
     navDestinationNode->UpdatePrevTitleIsCustom(false);
+}
+
+void NavDestinationView::SetSubtitle(const std::string& subtitle)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    do {
+        if (!navDestinationNode->GetSubtitle()) {
+            navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::ADD);
+            break;
+        }
+        auto subtitleNode = AceType::DynamicCast<FrameNode>(navDestinationNode->GetSubtitle());
+        if (!subtitleNode) {
+            navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::REPLACE);
+            break;
+        }
+        auto subtitleProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
+        if (!subtitleProperty) {
+            navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::REPLACE);
+            break;
+        }
+        if (subtitleProperty->GetContentValue() == subtitle) {
+            navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::NONE);
+            return;
+        }
+        subtitleProperty->UpdateContent(subtitle);
+        navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::NONE);
+        return;
+    } while (false);
+    int32_t subtitleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto subtitleNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, subtitleNodeId, AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(subtitle);
+    textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
+    textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
+    textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    navDestinationNode->SetSubtitle(subtitleNode);
 }
 
 void NavDestinationView::SetCustomTitle(const RefPtr<UINode>& customTitle)
@@ -130,6 +198,11 @@ void NavDestinationView::SetCustomTitle(const RefPtr<UINode>& customTitle)
     navDestinationNode->SetTitle(customTitle);
     navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::ADD);
     navDestinationNode->UpdatePrevTitleIsCustom(true);
+}
+
+void NavDestinationView::SetTitleHeight(const Dimension& height)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, height);
 }
 
 } // namespace OHOS::Ace::NG

@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class Interpolator : public TimeEvent {
+class ACE_EXPORT_WITH_PREVIEW Interpolator : public TimeEvent {
     DECLARE_ACE_TYPE(Interpolator, TimeEvent);
 
 public:

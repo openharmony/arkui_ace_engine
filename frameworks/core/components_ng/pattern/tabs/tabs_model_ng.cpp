@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
@@ -70,6 +71,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
     }
+
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 
     SetTabBarPosition(barPosition);
@@ -131,6 +133,10 @@ void TabsModelNG::SetIndex(int32_t index)
     auto swiperLayoutProperty = GetSwiperLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateIndex(index);
+
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateIndicator(index);
 }
 
 void TabsModelNG::SetScrollable(bool scrollable)
@@ -151,11 +157,9 @@ void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChan
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
-    CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChange(std::move(onChange));
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnChangeEvent(std::move(onChange));
 }
 
 RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty()

@@ -15,30 +15,40 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 
+#include "bridge/declarative_frontend/jsview/models/path_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/shape/shape_component.h"
-#include "core/components_ng/pattern/shape/path_view.h"
+#include "core/components_ng/pattern/shape/path_model.h"
+#include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<PathModel> PathModel::instance_ = nullptr;
+
+PathModel* PathModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::PathModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::PathModelNG());
+        } else {
+            instance_.reset(new Framework::PathModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 void JSPath::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::PathView::Create();
-        JSShapeAbstract::SetNgSize(info);
-        if (info.Length() > 0 && info[0]->IsObject()) {
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-            JSRef<JSVal> commands = obj->GetProperty("commands");
-            if (commands->IsString()) {
-                NG::PathView::SetCommands(commands->ToString());
-            }
-        }
-        return;
-    }
-    RefPtr<Component> component = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::PATH);
-    ViewStackProcessor::GetInstance()->ClaimElementId(component);
-    ViewStackProcessor::GetInstance()->Push(component);
+    PathModel::GetInstance()->Create();
     JSShapeAbstract::SetSize(info);
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -51,16 +61,7 @@ void JSPath::Create(const JSCallbackInfo& info)
 
 void JSPath::SetCommands(const std::string& commands)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::PathView::SetCommands(commands);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::ShapeComponent>(stack->GetMainComponent());
-    if (component) {
-        AnimationOption option = stack->GetImplicitAnimationOption();
-        component->SetPathCmd(commands, option);
-    }
+    PathModel::GetInstance()->SetCommands(commands);
 }
 
 void JSPath::ObjectCommands(const JSCallbackInfo& info)

@@ -18,23 +18,56 @@
 namespace OHOS::Ace::NG {
 CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
-    double constrainStrokeWidth = divider_.strokeWidth.ConvertToPx();
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetFrameSize();
-    double dividerLength = 0.0;
-    if (vertical_) {
-        dividerLength = frameSize.Height() - divider_.startMargin.ConvertToPx() - divider_.endMargin.ConvertToPx();
-    } else {
-        dividerLength = frameSize.Width() - divider_.startMargin.ConvertToPx() - divider_.endMargin.ConvertToPx();
-    }
-    DividerPainter dividerPainter(constrainStrokeWidth, dividerLength, vertical_, divider_.color, LineCap::SQUARE);
+    struct DividerInfo {
+        float constrainStrokeWidth;
+        float crossSize;
+        float startMargin;
+        float endMargin;
+        float halfSpaceWidth;
+        bool isVertical;
+        int32_t lanes;
+        Color color;
+    } dividerInfo = {
+        .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
+        .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
+        .startMargin = divider_.startMargin.ConvertToPx(),
+        .endMargin = divider_.endMargin.ConvertToPx(),
+        .halfSpaceWidth = space_ / 2.0f, /* 2.0f half */
+        .isVertical = vertical_,
+        .lanes = lanes_ > 1 ? lanes_ : 1,
+        .color = divider_.color
+    };
 
-    int32_t startIndex = startIndex_;
-    int32_t endIndex = endIndex_;
-    float startMargin = divider_.startMargin.ConvertToPx();
+    return [dividerInfo, itemPosition = std::move(itemPosition_)](RSCanvas& canvas) {
+        float laneLen = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
+        float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
+        DividerPainter dividerPainter(dividerInfo.constrainStrokeWidth, crossLen,
+            dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
 
-    return [dividerPainter, startIndex, endIndex,
-        itemPosition = std::move(itemPosition_), startMargin](RSCanvas& canvas)
-        { dividerPainter.DrawListLines(canvas, startIndex, endIndex, itemPosition, startMargin); };
+        int32_t lanes = dividerInfo.lanes;
+        int32_t laneIdx = 0;
+        bool lastIsItemGroup = false;
+        bool isFirstItem = (itemPosition.begin()->first == 0);
+
+        for (const auto& child : itemPosition) {
+            if (!isFirstItem) {
+                float mainPos = child.second.startPos - dividerInfo.halfSpaceWidth;
+                float crossPos = dividerInfo.startMargin;
+                if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
+                    crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
+                    dividerPainter.SetDividerLength(laneLen);
+                } else {
+                    dividerPainter.SetDividerLength(crossLen);
+                }
+                OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+                dividerPainter.DrawLine(canvas, offset);
+            }
+            lastIsItemGroup = child.second.isGroup;
+            laneIdx = (lanes <= 1 || (laneIdx + 1) >= lanes || child.second.isGroup) ? 0 : laneIdx + 1;
+            isFirstItem = isFirstItem ? laneIdx > 0 : false;
+        }
+    };
 }
 } // namespace OHOS::Ace::NG

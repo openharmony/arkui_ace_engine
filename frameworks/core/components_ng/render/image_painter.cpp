@@ -92,6 +92,21 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
                                       0,     0,     0,     1.0f, 0}; // alpha transparency
 } // namespace
 
+void ImagePainter::DrawImage(
+    RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize, const ImagePaintConfig& imagePaintConfig) const
+{
+    if (imagePaintConfig.isSvg_) {
+        DrawSVGImage(canvas, offset, contentSize, imagePaintConfig);
+        return;
+    }
+    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
+        DrawStaticImage(canvas, offset, imagePaintConfig);
+        return;
+    }
+    DrawImageWithRepeat(
+        canvas, imagePaintConfig, RectF(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height()));
+}
+
 void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize,
     const ImagePaintConfig& imagePaintConfig) const
 {
@@ -112,7 +127,8 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
     canvas.Restore();
 }
 
-void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
+void ImagePainter::DrawStaticImage(
+    RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
 {
     CHECK_NULL_VOID(canvasImage_);
     RSBrush brush;
@@ -131,7 +147,15 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Imag
     }
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
-
+    if (imagePaintConfig.borderRadiusXY_) {
+        RSRect rsRect(ToRSRect(imagePaintConfig.dstRect_));
+        std::vector<RSPoint> radiusXY;
+        for (auto radiusPoint : *imagePaintConfig.borderRadiusXY_) {
+            radiusXY.emplace_back(RSPoint(radiusPoint.GetX(), radiusPoint.GetY()));
+        }
+        RSRoundRect roundRect(rsRect, radiusXY);
+        canvas.ClipRoundRect(roundRect, rosen::ClipOp::INTERSECT);
+    }
     if (imagePaintConfig.needFlipCanvasHorizontally_) {
         ImagePainter::FlipHorizontal(canvas, offset.GetX(), imagePaintConfig.dstRect_.Width());
     }
@@ -187,13 +211,13 @@ void ImagePainter::DrawImageWithRepeat(
         float downNum = (dir == 0) ? -1 : 1;
         for (size_t j = 0; j < dirRepeatNum[dir] && imageRepeatY; j++) {
             offsetTempY.SetY(static_cast<float>(offsetTempY.GetY() + singleImageHeight * downNum));
-            DrawImage(canvas, offsetTempY, imagePaintConfig);
+            DrawStaticImage(canvas, offsetTempY, imagePaintConfig);
         }
     };
     auto offsetTempX = offset;
     // right
     for (size_t i = 0; i < dirRepeatNum[right]; i++) {
-        DrawImage(canvas, offsetTempX, imagePaintConfig);
+        DrawStaticImage(canvas, offsetTempX, imagePaintConfig);
         DrawRepeatYTask(offsetTempX, up);
         DrawRepeatYTask(offsetTempX, down);
         offsetTempX.SetX(static_cast<float>(offsetTempX.GetX() + singleImageWidth));
@@ -202,7 +226,7 @@ void ImagePainter::DrawImageWithRepeat(
     offsetTempX = offset;
     for (size_t i = 0; i < dirRepeatNum[left] && imageRepeatX; i++) {
         offsetTempX.SetX(static_cast<float>(offsetTempX.GetX() - singleImageWidth));
-        DrawImage(canvas, offsetTempX, imagePaintConfig);
+        DrawStaticImage(canvas, offsetTempX, imagePaintConfig);
         DrawRepeatYTask(offsetTempX, up);
         DrawRepeatYTask(offsetTempX, down);
     }
@@ -235,7 +259,7 @@ void ImagePainter::ApplyImageFit(
         case ImageFit::FITHEIGHT:
             ApplyFitHeight(rawPicSize, dstSize, srcRect, dstRect);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             if (srcRect.GetSize() < dstRect.GetSize()) {
                 ApplyNone(rawPicSize, dstSize, srcRect, dstRect);
             } else {

@@ -27,39 +27,6 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT SlidingPanelSizeChangeEvent : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(SlidingPanelSizeChangeEvent, BaseEventInfo, EventToJSONStringAdapter);
-
-public:
-    SlidingPanelSizeChangeEvent(PanelMode mode, double width, double height)
-        : BaseEventInfo("SlidingPanelSizeChangeEvent"), mode_(mode), width_(width), height_(height)
-    {}
-
-    ~SlidingPanelSizeChangeEvent() = default;
-
-    double GetWidth() const
-    {
-        return width_;
-    }
-
-    double GetHeight() const
-    {
-        return height_;
-    }
-
-    PanelMode GetMode() const
-    {
-        return mode_;
-    }
-
-    std::string ToJSONString() const override;
-
-private:
-    PanelMode mode_ = PanelMode::HALF;
-    double width_ = 0.0;
-    double height_ = 0.0;
-};
-
 class RenderSlidingPanel : public RenderNode {
     DECLARE_ACE_TYPE(RenderSlidingPanel, RenderNode);
 

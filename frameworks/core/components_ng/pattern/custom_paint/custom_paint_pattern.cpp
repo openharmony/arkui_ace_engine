@@ -27,7 +27,7 @@ void CustomPaintPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context);
 }
@@ -46,6 +46,16 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(customPaintEventHub, true);
     customPaintEventHub->FireReadyEvent();
     return true;
+}
+
+void CustomPaintPattern::SetAntiAlias(bool isEnabled)
+{
+    auto task = [isEnabled](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetAntiAlias(isEnabled);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::FillRect(const Rect& rect)
@@ -320,7 +330,7 @@ void CustomPaintPattern::PutImageData(const Ace::ImageData& imageData)
 void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern)
 {
     auto task = [offscreenCanvasPattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.TransferFromImageBitmap(offscreenCanvasPattern);
+        paintMethod.TransferFromImageBitmap(paintWrapper, offscreenCanvasPattern);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -330,7 +340,7 @@ void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPat
 void CustomPaintPattern::UpdateGlobalAlpha(double alpha)
 {
     auto task = [alpha](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.SetAlpha(alpha); ;
+        paintMethod.SetAlpha(alpha);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();

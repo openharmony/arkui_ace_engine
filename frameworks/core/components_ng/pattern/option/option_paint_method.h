@@ -38,10 +38,7 @@ public:
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
-    void PaintBackground(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper);
-
-    bool hover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPaintMethod);
 };

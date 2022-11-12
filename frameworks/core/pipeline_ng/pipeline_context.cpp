@@ -15,6 +15,11 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
+#endif
+
 #include <algorithm>
 #include <cinttypes>
 #include <cstdint>
@@ -37,6 +42,7 @@
 #include "core/common/window.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -169,7 +175,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         RequestFrame();
     }
     FlushMessages();
-    FlushFocus();
+    if (onShow_ && onFocus_) {
+        FlushFocus();
+    }
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -296,12 +304,64 @@ void PipelineContext::SetupRootElement()
     } else {
         rootNode_->AddChild(stageNode);
     }
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!IsJsCard()) {
+        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+        if (rsWindow) {
+            auto rsUIDirector = rsWindow->GetRsUIDirector();
+            if (rsUIDirector) {
+                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            }
+        }
+    }
+#endif
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
     LOGI("SetupRootElement success!");
+}
+
+void PipelineContext::SetupSubRootElement()
+{
+    CHECK_RUN_ON(UI);
+    appBgColor_ = Color::TRANSPARENT;
+    rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
+    rootNode_->SetHostRootId(GetInstanceId());
+    rootNode_->SetHostPageId(-1);
+    CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    rootNode_->UpdateLayoutConstraint(layoutConstraint);
+    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
+    rootFocusHub->SetFocusType(FocusType::SCOPE);
+    rootFocusHub->SetFocusable(true);
+    window_->SetRootFrameNode(rootNode_);
+    rootNode_->AttachToMainTree();
+
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    rootNode_->AddChild(stageNode);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!IsJsCard()) {
+        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+        if (rsWindow) {
+            auto rsUIDirector = rsWindow->GetRsUIDirector();
+            if (rsUIDirector) {
+                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            }
+        }
+    }
+#endif
+    stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
+    selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    dragDropManager_ = MakeRefPtr<DragDropManager>();
 }
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
@@ -476,6 +536,14 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     ACE_DCHECK(!params.empty());
 
     if (params[0] == "-element") {
+        if (params.size() > 1 && params[1] == "-lastpage") {
+            auto lastPage = stageManager_->GetLastPage();
+            if (lastPage) {
+                lastPage->DumpTree(0);
+            }
+        } else {
+            rootNode_->DumpTree(0);
+        }
     } else if (params[0] == "-render") {
     } else if (params[0] == "-focus") {
         if (rootNode_->GetFocusHub()) {
@@ -487,13 +555,9 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-multimodal") {
 #endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
-        if (params.size() > 1 && params[1] == "-lastpage") {
-            auto lastPage = stageManager_->GetLastPage();
-            if (lastPage) {
-                lastPage->DumpTree(0);
-            }
-        } else {
-            rootNode_->DumpTree(0);
+        auto accessibilityManager = GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->OnDumpInfo(params);
         }
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
@@ -547,7 +611,6 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
         auto touchPoint = event.CreateTouchPoint();
-        LOGD("Mouse event to touch: button is %{public}d, action is %{public}d", event.button, event.action);
         OnTouchEvent(touchPoint);
     }
 
@@ -622,6 +685,14 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
     window_->RequestFrame();
 }
 
+void PipelineContext::RootLostFocus(BlurReason reason) const
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto focusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->LostFocus(reason);
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     // Need develop here: CTRL+AXIS = Pinch event
@@ -641,13 +712,14 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
 
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
         eventManager_->AxisTest(scaleEvent, rootNode_);
-        eventManager_->DispatchAxisEvent(scaleEvent);
+        eventManager_->DispatchAxisEventNG(scaleEvent);
     }
 }
 
 void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
+    onShow_ = true;
     window_->OnShow();
     window_->RequestFrame();
     FlushWindowStateChangedCallback(true);
@@ -656,6 +728,7 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     CHECK_RUN_ON(UI);
+    onShow_ = false;
     window_->RequestFrame();
     window_->OnHide();
     OnVirtualKeyboardAreaChange(Rect());
@@ -665,11 +738,77 @@ void PipelineContext::OnHide()
 void PipelineContext::WindowFocus(bool isFocus)
 {
     CHECK_RUN_ON(UI);
+    onFocus_ = isFocus;
     if (!isFocus) {
+        RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
     FlushWindowFocusChangedCallback(isFocus);
+}
+
+void PipelineContext::ShowContainerTitle(bool isShow)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("ShowContainerTitle failed, Window modal is not container.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!IsJsCard()) {
+        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+        if (rsWindow) {
+            auto rsUIDirector = rsWindow->GetRsUIDirector();
+            if (rsUIDirector) {
+                rsUIDirector->SetContainerWindow(isShow); // set container window show state to render service
+            }
+        }
+    }
+#endif
+}
+
+void PipelineContext::SetAppBgColor(const Color& color)
+{
+    appBgColor_ = color;
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!IsJsCard()) {
+        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+        if (rsWindow) {
+            auto rsUIDirector = rsWindow->GetRsUIDirector();
+            if (rsUIDirector) {
+                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            }
+        }
+    }
+#endif
+    CHECK_NULL_VOID(rootNode_);
+    auto rootPattern = rootNode_->GetPattern<RootPattern>();
+    CHECK_NULL_VOID(rootPattern);
+    rootPattern->SetAppBgColor(appBgColor_, windowModal_ == WindowModal::CONTAINER_MODAL);
+}
+
+void PipelineContext::SetAppTitle(const std::string& title)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("SetAppTitle failed, Window modal is not container.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    containerNode->GetPattern<ContainerModalPattern>()->SetAppTitle(title);
+}
+
+void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("SetAppIcon failed, Window modal is not container.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    containerNode->GetPattern<ContainerModalPattern>()->SetAppIcon(icon);
 }
 
 void PipelineContext::Destroy()
@@ -680,6 +819,13 @@ void PipelineContext::Destroy()
     rootNode_.Reset();
     stageManager_.Reset();
     overlayManager_.Reset();
+    sharedTransitionManager_.Reset();
+    dragDropManager_.Reset();
+    selectOverlayManager_.Reset();
+    fullScreenManager_.Reset();
+    drawDelegate_.reset();
+    touchEvents_.clear();
+    buildFinishCallbacks_.clear();
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
@@ -745,12 +891,12 @@ void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
 
 void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 {
-    if (isDragged_) {
-        return;
-    }
-
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        LOGI("current context is the source of drag");
+        return;
+    }
 
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
@@ -802,6 +948,17 @@ void PipelineContext::OnIdle(int64_t deadline)
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_.FlushPredictTask(deadline - TIME_THRESHOLD);
+}
+
+void PipelineContext::Finish(bool /*autoFinish*/) const
+{
+    CHECK_RUN_ON(UI);
+    if (finishEventHandler_) {
+        LOGI("call finishEventHandler");
+        finishEventHandler_();
+    } else {
+        LOGE("fail to finish current context due to handler is nullptr");
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
+#include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/event/click_event.h"
@@ -28,23 +29,34 @@ void MenuWrapperPattern::OnModifyDone()
     auto gestureHub = host->GetOrCreateGestureEventHub();
 
     // close menu when clicked outside the menu region
-    auto callback = [targetId = targetId_, host](const TouchEventInfo& info) {
-        auto touch = info.GetTouches().front();
-        // only hide menu when touch DOWN occurs
-        if (touch.GetTouchType() != TouchType::DOWN) {
+    auto callback = [targetId = targetId_, weak = WeakClaim(RawPtr(host))](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
             return;
         }
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
 
-        // get menuNode's touch region
         auto menuNode = host->GetChildAtIndex(0);
         CHECK_NULL_VOID(menuNode);
         if (!InstanceOf<FrameNode>(menuNode)) {
             LOGW("MenuWrapper's child is not a Menu! type = %{public}s", menuNode->GetTag().c_str());
             return;
         }
-        auto menuZone = DynamicCast<FrameNode>(menuNode)->GetGeometryNode()->GetFrameRect();
+        auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
+        CHECK_NULL_VOID(menuFrameNode);
+        auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        // ContextMenu: close subwindow whenever touch event calls
+        if (menuPattern->IsContextMenu()) {
+            SubwindowManager::GetInstance()->HideMenuNG(targetId);
+            return;
+        }
 
-        auto position = touch.GetGlobalLocation();
+        // get menuNode's touch region
+        auto menuGeometryNode = menuFrameNode->GetGeometryNode();
+        CHECK_NULL_VOID(menuGeometryNode);
+        auto menuZone = menuGeometryNode->GetFrameRect();
+        const auto& position = info.GetTouches().front().GetGlobalLocation();
         // if DOWN-touched outside the menu region, then hide menu
         if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
             auto pipeline = host->GetContext();
@@ -58,6 +70,38 @@ void MenuWrapperPattern::OnModifyDone()
     };
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(callback));
     gestureHub->AddTouchEvent(touchEvent);
+}
+
+bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
+{
+    // setup contextMenu's subWindow hotZone
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+
+    auto menuNode = host->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(menuNode, false);
+    if (!InstanceOf<FrameNode>(menuNode)) {
+        LOGW("MenuWrapper's child is not a Menu! type = %{public}s", menuNode->GetTag().c_str());
+        return false;
+    }
+    auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
+    CHECK_NULL_RETURN(menuFrameNode, false);
+    auto menuGeometryNode = menuFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(menuGeometryNode, false);
+    auto menuZone = menuGeometryNode->GetFrameRect();
+    auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+
+    if (menuPattern->IsContextMenu()) {
+        std::vector<Rect> rects;
+        rects.emplace_back(Rect(Offset(menuFrameNode->GetOffsetRelativeToWindow().GetX(),
+                                    menuFrameNode->GetOffsetRelativeToWindow().GetY()),
+            Size(menuZone.Width(), menuZone.Height())));
+        SubwindowManager::GetInstance()->SetHotAreas(rects);
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

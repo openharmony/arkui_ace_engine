@@ -15,15 +15,15 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/engine/functions/js_webview_function.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
-void ParseWebViewValueToJsValue(
-    std::shared_ptr<WebJSValue> value, std::vector<JSRef<JSVal>>& argv)
+void ParseWebViewValueToJsValue(std::shared_ptr<WebJSValue> value, std::vector<JSRef<JSVal>>& argv)
 {
     auto type = value->GetType();
     switch (type) {
@@ -48,8 +48,7 @@ void ParseWebViewValueToJsValue(
     }
 }
 
-std::shared_ptr<WebJSValue> ParseValue(
-    const JSRef<JSVal>& resultValue, std::shared_ptr<WebJSValue> webviewValue)
+std::shared_ptr<WebJSValue> ParseValue(const JSRef<JSVal>& resultValue, std::shared_ptr<WebJSValue> webviewValue)
 {
     webviewValue->error_ = static_cast<int>(WebJavaScriptBridgeError::NO_ERROR);
     if (resultValue->IsBoolean()) {
@@ -69,7 +68,7 @@ std::shared_ptr<WebJSValue> ParseValue(
     }
     return webviewValue;
 }
-}
+} // namespace
 
 class JSWebCookie : public Referenced {
 public:
@@ -209,15 +208,11 @@ JSWebController::JSWebController()
     instanceId_ = Container::CurrentId();
 }
 
-
-std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(
-    const std::string& objectName,
-    const std::string& objectMethod,
-    const std::vector<std::shared_ptr<WebJSValue>>& args)
+std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(const std::string& objectName,
+    const std::string& objectMethod, const std::vector<std::shared_ptr<WebJSValue>>& args)
 {
     std::vector<JSRef<JSVal>> argv = {};
-    std::shared_ptr<WebJSValue> jsResult =
-        std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
+    std::shared_ptr<WebJSValue> jsResult = std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
     if (objectorMap_.find(objectName) == objectorMap_.end()) {
         return jsResult;
     }
@@ -225,7 +220,7 @@ std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(
     if (jsObject->IsEmpty()) {
         return jsResult;
     }
-    for (std::shared_ptr<WebJSValue> input: args) {
+    for (std::shared_ptr<WebJSValue> input : args) {
         ParseWebViewValueToJsValue(input, argv);
     }
     JSRef<JSFunc> func = JSRef<JSFunc>::Cast(jsObject->GetProperty(objectMethod.c_str()));
@@ -273,8 +268,7 @@ public:
         JSRef<JSVal> tsCallback = JSRef<JSVal>::Cast(obj);
         std::function<void(std::string)> callback = nullptr;
         if (tsCallback->IsFunction()) {
-            auto jsCallback =
-                AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
+            auto jsCallback = AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
             callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback)](std::string result) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("onMessageEvent CallBack");
@@ -357,7 +351,7 @@ public:
         std::vector<RefPtr<WebMessagePort>> sendPorts;
         if (jsPorts->IsArray()) {
             JSRef<JSArray> array = JSRef<JSArray>::Cast(jsPorts);
-            for (size_t i = 0; i <  array->Length(); i++) {
+            for (size_t i = 0; i < array->Length(); i++) {
                 JSRef<JSVal> jsValue = array->GetValueAt(i);
                 if (!jsValue->IsObject()) {
                     LOGW("invalid not object");
@@ -381,7 +375,7 @@ public:
         JSRef<JSArray> jsPorts = JSRef<JSArray>::New();
         JSRef<JSObject> jsObj;
         RefPtr<JSWebMessagePort> jswebPort;
-        for (size_t i = 0; i <  ports_.size(); i++) {
+        for (size_t i = 0; i < ports_.size(); i++) {
             jsObj = JSClass<JSWebMessagePort>::NewInstance();
             jswebPort = Referenced::Claim(jsObj->Unwrap<JSWebMessagePort>());
             jswebPort->SetWebMessagePort(ports_[i]->GetWebMessagePort());
@@ -460,7 +454,8 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
     JSClass<JSWebController>::CustomMethod("clearHistory", &JSWebController::ClearHistory);
     JSClass<JSWebController>::CustomMethod("clearSslCache", &JSWebController::ClearSslCache);
-    JSClass<JSWebController>::CustomMethod("clearClientAuthenticationCache", &JSWebController::ClearClientAuthenticationCache);
+    JSClass<JSWebController>::CustomMethod(
+        "clearClientAuthenticationCache", &JSWebController::ClearClientAuthenticationCache);
     JSClass<JSWebController>::CustomMethod("getCookieManager", &JSWebController::GetCookieManager);
     JSClass<JSWebController>::CustomMethod("getHitTestValue", &JSWebController::GetHitTestValue);
     JSClass<JSWebController>::CustomMethod("backOrForward", &JSWebController::BackOrForward);
@@ -642,8 +637,7 @@ void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
     JSRef<JSVal> tsCallback = obj->GetProperty("callback");
     std::function<void(std::string)> callback = nullptr;
     if (tsCallback->IsFunction()) {
-        auto jsCallback =
-            AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
+        auto jsCallback = AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
         callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback)](std::string result) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("ExecuteTypeScript CallBack");
@@ -917,10 +911,9 @@ void JSWebController::SetJavascriptCallBackImpl()
     }
 
     LOGI("JSWebController set webview javascript CallBack");
-    WebController::JavaScriptCallBackImpl callback =
-        [weak = WeakClaim(this)](
-        const std::string& objectName, const std::string& objectMethod,
-        const std::vector<std::shared_ptr<WebJSValue>>& args) {
+    WebController::JavaScriptCallBackImpl callback = [weak = WeakClaim(this)](const std::string& objectName,
+                                                         const std::string& objectMethod,
+                                                         const std::vector<std::shared_ptr<WebJSValue>>& args) {
         auto jsWebController = weak.Upgrade();
         if (jsWebController == nullptr) {
             return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);

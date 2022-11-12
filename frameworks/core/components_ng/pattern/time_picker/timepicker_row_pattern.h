@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 class TimePickerRowPattern : public LinearLayoutPattern {
@@ -236,6 +237,12 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        json->Put("selectedTime", selectedTime_.ToString(false, false).c_str());
+        json->Put("isUseMilitaryTime", V2::ConvertBoolToString(hour24_).c_str());
     }
 
 private:
