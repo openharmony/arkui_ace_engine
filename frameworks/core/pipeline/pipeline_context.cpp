@@ -2858,10 +2858,10 @@ void PipelineContext::FlushBuildAndLayoutBeforeSurfaceReady()
         TaskExecutor::TaskType::UI);
 }
 
-void PipelineContext::RootLostFocus() const
+void PipelineContext::RootLostFocus(BlurReason reason) const
 {
     if (rootElement_) {
-        rootElement_->LostFocus();
+        rootElement_->LostFocus(reason);
     }
 }
 
@@ -2869,7 +2869,7 @@ void PipelineContext::WindowFocus(bool isFocus)
 {
     onFocus_ = isFocus;
     if (!isFocus) {
-        RootLostFocus();
+        RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }

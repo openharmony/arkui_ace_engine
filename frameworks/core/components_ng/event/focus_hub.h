@@ -208,7 +208,7 @@ public:
     void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
-    void LostFocus();
+    void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
     void RemoveSelf(FrameNode* frameNode);
     void RemoveChild(FocusHub* focusNode);
@@ -325,6 +325,10 @@ public:
     void SetOnBlurInternal(OnBlurFunc&& onBlurInternal)
     {
         onBlurInternal_ = std::move(onBlurInternal);
+    }
+    void SetOnBlurReasonInternal(OnBlurReasonFunc&& onBlurReasonInternal)
+    {
+        onBlurReasonInternal_ = std::move(onBlurReasonInternal);
     }
     void SetOnPreFocusCallback(OnPreFocusFunc&& onPreFocusCallback)
     {
@@ -471,6 +475,7 @@ private:
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
+    OnBlurReasonFunc onBlurReasonInternal_;
     OnKeyEventFunc onKeyEventInternal_;
     OnPreFocusFunc onPreFocusCallback_;
 
@@ -493,6 +498,7 @@ private:
     FocusType focusType_ = FocusType::DISABLE;
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;
+    BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
 };
 } // namespace OHOS::Ace::NG
 

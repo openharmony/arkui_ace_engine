@@ -328,9 +328,10 @@ void FocusNode::UpdateAccessibilityFocusInfo()
     accessibilityNode->SetFocusedState(currentFocus_);
 }
 
-void FocusNode::LostFocus()
+void FocusNode::LostFocus(BlurReason reason)
 {
     if (IsCurrentFocus()) {
+        blurReason_ = reason;
         currentFocus_ = false;
         UpdateAccessibilityFocusInfo();
         OnBlur();
@@ -779,7 +780,7 @@ void FocusGroup::OnBlur()
     FocusNode::OnBlur();
 
     if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
-        (*itLastFocusNode_)->LostFocus();
+        (*itLastFocusNode_)->LostFocus(blurReason_);
     }
 }
 

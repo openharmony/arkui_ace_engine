@@ -226,6 +226,7 @@ public:
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
+    void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
     {
@@ -308,6 +309,8 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
+    bool onShow_ = true;
+    bool onFocus_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
