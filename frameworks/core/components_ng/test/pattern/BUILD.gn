@@ -40,7 +40,9 @@ group("pattern_unittest") {
     "shape:shape_pattern_unit_test",
     "stack:stack_pattern_test_ng",
     "text:text_pattern_test_ng",
+    "text_clock:text_clock_pattern_unit_test",
     "textfield:textfield_pattern_test_ng",
+    "texttimer:text_timer_pattern_unit_test",
     "video:video_pattern_test_ng",
     "xcomponent:xcomponent_pattern_test_ng",
 
