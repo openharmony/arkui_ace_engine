@@ -64,7 +64,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::NODE, true, FocusStyle::OUTER_BORDER };
     }
 
     void SetClickedColor(const Color& color)

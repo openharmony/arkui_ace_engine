@@ -50,15 +50,24 @@ enum class FocusStep : int32_t {
     RIGHT = 2,
     DOWN = 3,
 };
+enum class FocusStyle : int32_t {
+    NONE = -1,
+    INNER_BORDER = 0,
+    OUTER_BORDER = 1,
+};
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
 struct FocusPattern final {
     FocusPattern() = default;
     FocusPattern(FocusType focusType, bool focusable) : focusType(focusType), focusable(focusable) {}
+    FocusPattern(FocusType focusType, bool focusable, FocusStyle focusState)
+        : focusType(focusType), focusable(focusable), focusState(focusState)
+    {}
     ~FocusPattern() = default;
 
     FocusType focusType = FocusType::DISABLE;
     bool focusable = false;
+    FocusStyle focusState = FocusStyle::NONE;
 };
 
 struct ScopeFocusAlgorithm final {
@@ -192,8 +201,9 @@ private:
 class ACE_EXPORT FocusHub : public virtual AceType {
     DECLARE_ACE_TYPE(FocusHub, AceType)
 public:
-    explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
-        : eventHub_(eventHub), focusable_(focusable), focusType_(type)
+    explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false,
+        FocusStyle focusState = FocusStyle::NONE)
+        : eventHub_(eventHub), focusable_(focusable), focusType_(type), focusStyle_(focusState)
     {}
     ~FocusHub() override = default;
 
@@ -449,6 +459,9 @@ public:
         focusAlgorithm_ = focusAlgorithm;
     }
 
+    void PaintFocusState();
+    void ClearFocusState();
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -496,6 +509,7 @@ private:
     bool show_ { true };
 
     FocusType focusType_ = FocusType::DISABLE;
+    FocusStyle focusStyle_ = FocusStyle::NONE;
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;
     BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;

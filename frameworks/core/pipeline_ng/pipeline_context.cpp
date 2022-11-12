@@ -630,10 +630,12 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
     // Need update while key tab pressed
     if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
-        (event.code == KeyCode::KEY_TAB || event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_LEFT ||
-            event.code == KeyCode::KEY_DPAD_DOWN || event.code == KeyCode::KEY_DPAD_RIGHT)) {
+        (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {
         isNeedShowFocus_ = true;
-        FlushFocus();
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        if (rootFocusHub) {
+            rootFocusHub->PaintFocusState();
+        }
         return true;
     }
     auto lastPage = stageManager_->GetLastPage();
