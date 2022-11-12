@@ -33,9 +33,7 @@ void FrameNode::OnAttachToMainTree() {}
 void FrameNode::OnDetachFromMainTree() {}
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty) {}
 void FrameNode::SetActive(bool active) {}
-void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node) {}
 void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType) {}
-void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint) {}
 void FrameNode::RebuildRenderContextTree() {}
 void FrameNode::MarkModifyDone() {}
 void FrameNode::OnMountToParentDone() {}
@@ -53,7 +51,19 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion) {}
 
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
-{}
+{
+    layoutProperty_ = MakeRefPtr<LayoutProperty>();
+}
+
+void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
+{
+    geometryNode_ = node;
+}
+
+void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint)
+{
+    layoutProperty_->UpdateCalcLayoutProperty(calcLayoutConstraint);
+}
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
