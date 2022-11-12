@@ -24,6 +24,14 @@ ohos_unittest("js_inspector_test") {
     "inspect_canvas_test.cpp",
     "inspect_chart_test.cpp",
     "inspect_dialog_test.cpp",
+    "inspect_div_test.cpp",
+    "inspect_divider_test.cpp",
+    "inspect_form_test.cpp",
+    "inspect_grid_column_test.cpp",
+    "inspect_grid_container_test.cpp",
+    "inspect_grid_row_test.cpp",
+    "inspect_image_animator_test.cpp",
+    "inspect_image_test.cpp",
   ]
 
   deps = [
