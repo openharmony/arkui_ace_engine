@@ -221,6 +221,7 @@ protected:
     std::unordered_map<int32_t, RefPtr<RenderNode>> items_;
     std::set<int32_t> showItem_;
     std::set<int32_t> inCache_;
+    std::set<int32_t> inRankCache_;
     std::list<RefPtr<RenderNode>> childrenInRect_;
 
     RefPtr<Scrollable> scrollable_;
