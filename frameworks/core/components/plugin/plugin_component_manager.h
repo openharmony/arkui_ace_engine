@@ -68,11 +68,6 @@ public:
             callbackVec_.clear();
         };
 
-        std::map<std::shared_ptr<PluginComponentCallBack>, CallBackType>& GetPluginComponentCallBack()
-        {
-            return callbackVec_;
-        }
-
         void ResgisterListener(const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType);
         void OnPushCallBack(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
             const std::string& data, const std::string& extraData) override;

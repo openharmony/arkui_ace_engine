@@ -16,6 +16,7 @@
 #include "core/components/plugin/plugin_sub_container.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
 #include "core/components/plugin/file_asset_provider.h"
@@ -44,26 +45,29 @@ void PluginSubContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
 
-    if (!outSidePipelineContext_.Upgrade()) {
+    auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
+    if (!outSidePipelineContext) {
         LOGE("no pipeline context for create plugin component container.");
         return;
     }
 
-    auto executor = outSidePipelineContext_.Upgrade()->GetTaskExecutor();
+    auto executor = outSidePipelineContext->GetTaskExecutor();
     if (!executor) {
         LOGE("could not got main pipeline executor");
         return;
     }
-    auto taskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(executor);
-    if (!taskExecutor) {
-        LOGE("main pipeline context executor is not flutter taskexecutor");
-        return;
-    }
-    taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskExecutor);
+
+    taskExecutor_ = executor;
 
     frontend_ = AceType::MakeRefPtr<PluginFrontend>();
     if (!frontend_) {
         LOGE("PluginSubContainer::Initialize:frontend_ is nullptr");
+        return;
+    }
+
+    auto container = AceEngine::Get().GetContainer(outSidePipelineContext->GetInstanceId());
+    if (!container) {
+        LOGE("no container for create plugin component container.");
         return;
     }
 
@@ -73,7 +77,14 @@ void PluginSubContainer::Initialize()
         loader = &Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
         PluginManager::GetInstance().SetJsEngineLoader(loader);
     }
-    auto jsEngine = loader->CreateJsEngine(instanceId_);
+
+    RefPtr<Framework::JsEngine> jsEngine;
+    if (container->GetSettings().usingSharedRuntime) {
+        jsEngine = loader->CreateJsEngineUsingSharedRuntime(instanceId_, container->GetSharedRuntime());
+        LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
+    } else {
+        jsEngine = loader->CreateJsEngine(instanceId_);
+    }
     if (!jsEngine) {
         LOGE("PluginSubContainer::Initialize:jsEngine is nullptr");
         return;
