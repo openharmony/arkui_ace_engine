@@ -205,7 +205,7 @@ public:
         }
 
         ContainerScope scope(instanceId_);
-        taskExecutor->PostTask([] { SubwindowManager::GetInstance()->ClearMenu(); }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask([] { SubwindowManager::GetInstance()->CloseMenu(); }, TaskExecutor::TaskType::UI);
     }
 
 private:
