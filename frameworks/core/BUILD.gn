@@ -330,6 +330,11 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/wrap:ace_core_components_wrap_$platform",
     ]
 
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      deps += [ "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform" ]
+    }
+
     deps += [
       "$ace_root/frameworks/core/components_v2/common:ace_core_components_common_v2_$platform",
       "$ace_root/frameworks/core/components_v2/foreach:ace_core_components_foreach_v2_$platform",

@@ -654,6 +654,10 @@ public:
         return displayWindowRectInfo_;
     }
     virtual void FlushMessages() = 0;
+    void SetGSVsyncCallback(std::function<void(void)>&& callback)
+    {
+        gsVsyncCallback_ = std::move(callback);
+    }
 
     virtual void FlushUITasks() = 0;
 
@@ -749,6 +753,7 @@ private:
     // OnRouterChangeCallback is function point, need to be initialized.
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
+    std::function<void(void)> gsVsyncCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };
