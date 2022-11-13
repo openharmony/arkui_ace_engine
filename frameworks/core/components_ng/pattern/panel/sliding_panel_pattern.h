@@ -91,7 +91,7 @@ private:
     void AppendBlankHeightAnimation(float targetLocation, PanelMode mode);
     int32_t GetAnimationDuration(float delta, float dragRange) const;
     void CheckHeightValidity();
-    void CheckPanelModeandType();
+    void CheckPanelModeAndType();
 
     PanelType GetPanelType() const;
     PanelMode GetPanelMode() const;
