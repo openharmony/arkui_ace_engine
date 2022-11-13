@@ -561,4 +561,21 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
+void PipelineBase::Destroy()
+{
+    CHECK_RUN_ON(UI);
+    LOGI("PipelineBase::Destroy begin.");
+    ClearImageCache();
+    platformResRegister_.Reset();
+    drawDelegate_.reset();
+    eventManager_->ClearResults();
+    imageCache_.Reset();
+    fontManager_.Reset();
+    themeManager_.Reset();
+    window_->Destroy();
+    touchPluginPipelineContext_.clear();
+    virtualKeyBoardCallback_.clear();
+    LOGI("PipelineBase::Destroy end.");
+}
+
 } // namespace OHOS::Ace

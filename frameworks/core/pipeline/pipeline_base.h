@@ -137,7 +137,7 @@ public:
 
     virtual AnimationOption GetExplicitAnimationOption() const = 0;
 
-    virtual void Destroy() = 0;
+    virtual void Destroy();
 
     virtual void OnShow() = 0;
 

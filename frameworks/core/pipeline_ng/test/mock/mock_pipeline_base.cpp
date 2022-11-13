@@ -64,4 +64,6 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     return nullptr;
 }
 
+void PipelineBase::Destroy() {}
+
 } // namespace OHOS::Ace

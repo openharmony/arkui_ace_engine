@@ -14,9 +14,11 @@
  */
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
+
 #include "core/components_ng/render/adapter/rosen_window.h"
 #endif
 
@@ -46,6 +48,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -131,11 +134,8 @@ void PipelineContext::FlushDirtyNodeUpdate()
 
     decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
     for (const auto& node : dirtyNodes) {
-        if (AceType::InstanceOf<NG::CustomNode>(node)) {
-            auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
-            customNode->Update();
-        } else if (AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
-            auto customNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
+        if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
+            auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(node);
             customNode->Update();
         }
     }
@@ -467,6 +467,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
+    eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
@@ -481,13 +482,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             auto pluginPoint =
                 point.UpdateScalePoint(viewScale_, static_cast<float>(pipelineContext->GetPluginEventOffset().GetX()),
                     static_cast<float>(pipelineContext->GetPluginEventOffset().GetY()), point.id);
-            auto eventManager = pipelineContext->GetEventManager();
-            if (eventManager) {
-                eventManager->SetInstanceId(pipelineContext->GetInstanceId());
-            }
-
+            // eventManager_ instance Id may changed.
             pipelineContext->OnTouchEvent(pluginPoint, true);
         }
+
+        // restore instance Id.
+        eventManager_->SetInstanceId(GetInstanceId());
     }
     if (isSubPipe) {
         return;
@@ -515,6 +515,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     }
 
     eventManager_->DispatchTouchEvent(scalePoint);
+
+    if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
+        // need to reset touchPluginPipelineContext_ for next touch down event.
+        touchPluginPipelineContext_.clear();
+    }
+
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -815,6 +821,8 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
 
 void PipelineContext::Destroy()
 {
+    CHECK_RUN_ON(UI);
+    LOGI("PipelineContext::Destroy begin.");
     taskScheduler_.CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
@@ -825,9 +833,15 @@ void PipelineContext::Destroy()
     dragDropManager_.Reset();
     selectOverlayManager_.Reset();
     fullScreenManager_.Reset();
-    drawDelegate_.reset();
     touchEvents_.clear();
     buildFinishCallbacks_.clear();
+    onWindowStateChangedCallbacks_.clear();
+    onWindowFocusChangedCallbacks_.clear();
+    nodesToNotifyMemoryLevel_.clear();
+    dirtyFocusNode_.Reset();
+    dirtyFocusScope_.Reset();
+    PipelineBase::Destroy();
+    LOGI("PipelineContext::Destroy end.");
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
