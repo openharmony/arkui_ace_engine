@@ -240,6 +240,7 @@ void ContainerModalPattern::ChangeTitle(const RefPtr<FrameNode>& titleNode, bool
     auto titleLabel = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(TITLE_LABEL_INDEX));
     auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
+    titleLabel->MarkModifyDone();
     titleLabel->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     // update leftSplit button
@@ -275,6 +276,7 @@ void ContainerModalPattern::ChangeFloatingTitle(const RefPtr<FrameNode>& floatin
     auto titleLabel = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(TITLE_LABEL_INDEX));
     auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
+    titleLabel->MarkModifyDone();
     titleLabel->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     // update leftSplit button
