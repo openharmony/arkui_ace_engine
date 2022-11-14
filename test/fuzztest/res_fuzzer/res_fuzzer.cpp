@@ -14,21 +14,34 @@
  */
 
 #include "res_fuzzer.h"
-#include "json_util.h"
+
 #include <string>
+
+#include "cJSON.h"
+#include "json_util.h"
+#include "bridge/common/dom/dom_type.h"
 
 const uint32_t u16m = 65535;
 
 namespace OHOS {
 using namespace OHOS::Ace;
-
+using namespace std;
 void vfi(std::string& s);
-
+string jack = "jack";
+string tom = "tom";
+string kal = "kal";
+string kel = "kel";
+string kol = "kol";
+constexpr int32_t vol1 = 0;
+constexpr int32_t vol2 = 1;
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     bool result = false;
     auto r = JsonUtil::Create(true);
     auto r1 = JsonUtil::Create(false);
+    double point = 2.0;
+    int64_t i64 = 0;
+    size_t li = 0;
     auto ri = size % u16m;
     std::string s (reinterpret_cast<const char*>(data), ri);
     vfi(s);
@@ -36,9 +49,20 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     JsonUtil::ParseJsonString(s.c_str());
     JsonUtil::CreateArray(true);
     JsonUtil::CreateArray(false);
-    r->Put("123", 111); 
-    r->Replace("1234", false);
-    r->Replace("123", 123);
+    r->Put(jack.c_str(), vol1);
+    r->Replace(jack.c_str(), false);
+    r->Replace(jack.c_str(), vol2);
+    r->GetString(jack);
+    r->GetUInt(jack);
+    r->GetDouble(jack);
+    r->Replace(jack.c_str(), tom.c_str());
+    r->Replace(kel.c_str(), point);
+    r->Put(kal.c_str(), i64);
+    r->Put(kal.c_str(), li);
+    r->Delete(jack.c_str());
+    r->GetObject(kal);
+    r->GetBool(kal);
+    auto r2 = Ace::JsonValue(cJSON_CreateObject());
     return result;
 }
 

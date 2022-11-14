@@ -13,41 +13,35 @@
  * limitations under the License.
  */
 
-#include "util_fuzzer.h"
-
-#include <stddef.h>
-#include <stdint.h>
 #include <string>
 
 #include "json_util.h"
+#include "resource_configuration.h"
+#include "string_expression.h"
+#include "utilmost_fuzzer.h"
 
 #include "frameworks/base/memory/ace_type.h"
-#include "frameworks/bridge/common/utils/source_map.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS {
 using namespace OHOS::Ace;
 using namespace std;
 constexpr uint32_t u16m = 65535;
-string appjsmap = "{\"version\":3,"
-                             "\"file\":\"./pages/dfxtest.js\","
-                             "\"mappings\":\";\","
-                             "\"sources\":[],"
-                             "\"names\":[\"_ohos_router_1\",\"router\",\"_ohos_process_1\",\"process\"]}";
+
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     bool result = false;
-    uint32_t errorPos = 0;
-    string s(reinterpret_cast<const char*>(data), size % u16m);
-    std::vector<std::string> sourceKeyInfo;
-    OHOS::Ace::Framework::RevSourceMap::ExtractKeyInfo(s, sourceKeyInfo);
-    RefPtr<Framework::RevSourceMap> RevSourceMap = AceType::MakeRefPtr<Framework::RevSourceMap>();
-    RevSourceMap->Init(appjsmap);
-    RevSourceMap->GetOriginalNames(s, errorPos);
+    auto ri = size % u16m;
+    std::string s(reinterpret_cast<const char*>(data), ri);
+    if (s.size() == 0 || s[s.size() - 1] != '\0') {
+        return result;
+    }
+    Framework::CreateCurve(s);
+    // 111 Framework::CreateClipPath(s);
+    // 222 Framework::ParseRadialGradientSize(s);
     return result;
 }
-
-
 } // namespace OHOS
 
 /* Fuzzer entry point */
