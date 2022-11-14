@@ -12,16 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "gtest/gtest.h"
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 namespace OHOS::Ace::NG {
-void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info) {}
+void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info)
+{
+    GTEST_LOG_(INFO) << "UpdateFirstSelectHandleInfo has called";
+}
 
-void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& info) {}
+void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& info)
+{
+    GTEST_LOG_(INFO) << "UpdateSecondSelectHandleInfo has called";
+}
 
-void SelectOverlayPattern::UpdateSelectMenuInfo(const SelectMenuInfo& info) {}
+void SelectOverlayPattern::UpdateSelectMenuInfo(const SelectMenuInfo& info)
+{
+    GTEST_LOG_(INFO) << "UpdateSelectMenuInfo has called";
+}
 
-void SelectOverlayPattern::UpdateShowArea(const RectF& area) {}
+void SelectOverlayPattern::UpdateShowArea(const RectF& area)
+{
+    GTEST_LOG_(INFO) << "UpdateShowArea has called";
+}
 
 void SelectOverlayPattern::OnAttachToFrameNode() {}
 

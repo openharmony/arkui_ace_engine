@@ -34,6 +34,10 @@ class OffscreenCanvas : public AceType {
 };
 } // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t NODE_ID = 143;
+} // namespace
+
 // static method
 float PipelineContext::GetCurrentRootWidth()
 {
@@ -117,6 +121,15 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
     const std::string rootTag = "root";
     auto root = AceType::MakeRefPtr<FrameNode>(rootTag, -1, AceType::MakeRefPtr<Pattern>(), true);
     selectOverlayManager_ = AceType::MakeRefPtr<SelectOverlayManager>(root);
+
+    // mock the selectOverlayInfo, the SelectOverlayId is NODE_ID
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    SelectHandleInfo firstHandleInfo;
+    selectOverlayInfo.firstHandle = firstHandleInfo;
+    SelectHandleInfo secondHandleInfo;
+    selectOverlayInfo.secondHandle = secondHandleInfo;
+    selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo);
     return selectOverlayManager_;
 }
 
@@ -149,5 +162,4 @@ bool PipelineContext::OnBackPressed()
 void UITaskScheduler::FlushTask() {}
 
 UITaskScheduler::~UITaskScheduler() = default;
-
 } // namespace OHOS::Ace::NG

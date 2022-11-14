@@ -18,21 +18,19 @@
 #include "gtest/gtest.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
-#include "frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
-namespace {
-const int32_t NODE_ID = 143;
-} // namespace
-class SelectOverlayProxyTestNg : public testing::Test {
+namespace {} // namespace
+class DragDropManagerTestNg : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
@@ -41,16 +39,26 @@ protected:
 };
 
 /**
- * @tc.name: SelectOverlayProxyTest001
- * @tc.desc: just test the environment is ok, the test cases will be designed
+ * @tc.name: DragDropManagerTest001
+ * @tc.desc: CreateAndShowDragWindow via pixelMap and gestureEvent
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyTest001, TestSize.Level1)
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest001, TestSize.Level1)
 {
-    SelectHandleInfo selectHandleInfo;
-    auto selectOverlayProxy = AceType::MakeRefPtr<SelectOverlayProxy>(NODE_ID);
-    selectOverlayProxy->UpdateFirstSelectHandleInfo(selectHandleInfo);
-    EXPECT_EQ(1, 1);
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call CreateAndShowDragWindow
+     * @tc.expected: step2. return dragDropProxy successfully
+     */
+    RefPtr<PixelMap> pixelMap = nullptr;
+    GestureEvent gestureEvent;
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(pixelMap, gestureEvent);
+    // need to mock the pixelMap
+    EXPECT_FALSE(dragDropProxy);
 }
 } // namespace OHOS::Ace::NG
