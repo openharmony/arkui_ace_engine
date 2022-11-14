@@ -22,12 +22,13 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
-#include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
