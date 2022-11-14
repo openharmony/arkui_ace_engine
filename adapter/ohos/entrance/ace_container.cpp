@@ -1450,6 +1450,24 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition)
         TaskExecutor::TaskType::JS);
 }
 
+void AceContainer::SetToken(sptr<IRemoteObject>& token)
+{
+    std::lock_guard<std::mutex> lock(cardTokensMutex_);
+    if (token) {
+        token_ = token;
+    }
+}
+
+sptr<IRemoteObject> AceContainer::GetToken()
+{
+    std::lock_guard<std::mutex> lock(cardTokensMutex_);
+    if (token_) {
+        return token_;
+    }
+    LOGE("fail to get Token");
+    return nullptr;
+}
+
 extern "C" ACE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {

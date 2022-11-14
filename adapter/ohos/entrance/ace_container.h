@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_CPP_ACE_CONTAINER_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_CPP_ACE_CONTAINER_H
 
+#include <cstddef>
 #include <memory>
 #include <mutex>
 
@@ -353,6 +354,9 @@ public:
         cardFrontendMap = cardFrontendMap_;
     }
 
+    void SetToken(sptr<IRemoteObject>& token);
+    sptr<IRemoteObject> GetToken();
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -390,6 +394,7 @@ private:
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
     std::string windowName_;
     uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
+    sptr<IRemoteObject> token_;
 
     bool isSubContainer_ = false;
     int32_t parentId_ = 0;
@@ -397,6 +402,7 @@ private:
 
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
+    mutable std::mutex cardTokensMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

@@ -20,7 +20,6 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
-
 FormManager::FormManager() {}
 
 FormManager::~FormManager() {}
@@ -91,6 +90,23 @@ void FormManager::Dump(const std::vector<std::string>& params)
             [params, container = container.second]() { container->Dump(params); }, TaskExecutor::TaskType::UI);
     }
 #endif
+}
+
+void FormManager::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils)
+{
+    std::lock_guard<std::mutex> lock(formUtilsMutex_);
+    if (formUtils) {
+        formUtils_ = formUtils;
+    }
+}
+
+std::shared_ptr<FormUtils> FormManager::GetFormUtils()
+{
+    std::lock_guard<std::mutex> lock(formUtilsMutex_);
+    if (!formUtils_) {
+        return nullptr;
+    }
+    return formUtils_;
 }
 
 } // namespace OHOS::Ace

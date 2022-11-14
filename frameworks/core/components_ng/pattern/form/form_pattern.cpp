@@ -97,6 +97,10 @@ void FormPattern::InitFormManagerDelegate()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
+    auto formUtils = FormManager::GetInstance().GetFormUtils();
+    if (formUtils) {
+        formManagerBridge_->SetFormUtils(formUtils);
+    }
     int32_t instanceID = context->GetInstanceId();
     formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id, const std::string& path,
                                                    const std::string& module, const std::string& data,
