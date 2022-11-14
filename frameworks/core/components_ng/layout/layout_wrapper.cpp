@@ -158,16 +158,16 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
     geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
 
-    isContraintNoChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
-    if (!isContraintNoChanged_) {
-        isContraintNoChanged_ =
+    isConstraintNotChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
+    if (!isConstraintNotChanged_) {
+        isConstraintNotChanged_ =
             contentConstraint ? contentConstraint == layoutProperty_->GetContentLayoutConstraint() : false;
     }
 
     LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", host->GetTag().c_str(), host->GetDepth(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
-    if (isContraintNoChanged_ && !skipMeasureContent_) {
+    if (isConstraintNotChanged_ && !skipMeasureContent_) {
         if (!CheckNeedForceMeasureAndLayout()) {
             LOGD("%{public}s (depth: %{public}d) skip measure content", host->GetTag().c_str(), host->GetDepth());
             skipMeasureContent_ = true;

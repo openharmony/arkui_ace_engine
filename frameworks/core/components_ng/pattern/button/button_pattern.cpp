@@ -80,6 +80,11 @@ void ButtonPattern::OnModifyDone()
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
 
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    if (textNode) {
+        textNode->MarkModifyDone();
+    }
+
     if (touchListener_) {
         return;
     }
