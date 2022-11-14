@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
 
 void PixelMapImageObject::MakeCanvasImage(
-    const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize)
+    const LoadCallbacks& loadCallbacks, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
 {
     // TODO: support un-decoded pixel map that can specify size.
     // For current situation, pixel map is already decoded.

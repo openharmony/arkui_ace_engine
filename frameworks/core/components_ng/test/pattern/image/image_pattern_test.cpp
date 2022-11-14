@@ -53,6 +53,10 @@ const std::vector<float> COLOR_FILTER_DEFAULT = { 1.0, 2.0, 3.0 };
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
 const std::string RESOURCE_URL = "resource:///ohos_test_image.svg";
+const std::string PNG_IMAGE = "/common/media/aaa.png";
+const std::string WEB_IMAGE =
+    "https://img2.baidu.com/it/u=3999091694,1705560228&fm=253&fmt=auto&app=120&f=JPEG?w=1280&h=800";
+
 } // namespace
 
 class ImagePatternTest : public testing::Test {
@@ -65,6 +69,8 @@ public:
         const ImageInterpolation& interpolation = ImageInterpolation::NONE,
         const ImageRepeat& imageRepeat = ImageRepeat::NOREPEAT, const std::vector<float>& colorFilter = {},
         bool matchTextDirection = false);
+    static RefPtr<FrameNode> CreateSyncImageNode();
+    static RefPtr<FrameNode> CreateSyncWebImageNode();
 };
 
 void ImagePatternTest::SetUpTestCase()
@@ -112,6 +118,28 @@ RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, cons
     return frameNode;
 }
 
+RefPtr<FrameNode> ImagePatternTest::CreateSyncImageNode()
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(PNG_IMAGE, true, pixMap);
+    image.SetAlt(ALT_SRC_URL);
+    image.SetSyncMode(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    return frameNode;
+}
+
+RefPtr<FrameNode> ImagePatternTest::CreateSyncWebImageNode()
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(WEB_IMAGE, true, pixMap);
+    image.SetAlt(ALT_SRC_URL);
+    image.SetSyncMode(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    return frameNode;
+}
+
 /**
  * @tc.name: ImagePatternCreator001
  * @tc.desc: Create ImagePattern.
@@ -120,6 +148,32 @@ RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, cons
 HWTEST_F(ImagePatternTest, ImagePatternCreator001, TestSize.Level1)
 {
     auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternCreator002
+ * @tc.desc: Create ImagePattern with sync load.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTest, ImagePatternCreator002, TestSize.Level1)
+{
+    auto frameNode = ImagePatternTest::CreateSyncImageNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternCreator003
+ * @tc.desc: Create ImagePattern with web image and sync mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTest, ImagePatternCreator003, TestSize.Level1)
+{
+    auto frameNode = ImagePatternTest::CreateSyncWebImageNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_TRUE(imagePattern != nullptr);
@@ -319,4 +373,5 @@ HWTEST_F(ImagePatternTest, ImagePatternCallback002, TestSize.Level1)
         ImageLoadingCommand::LOAD_DATA_FAIL);
     EXPECT_TRUE(imagePattern->lastCanvasImage_ == nullptr);
 }
+
 } // namespace OHOS::Ace::NG
