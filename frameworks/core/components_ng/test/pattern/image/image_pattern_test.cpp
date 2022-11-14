@@ -30,6 +30,10 @@ namespace {
 const Color SVG_FILL_COLOR_DEFAULT = Color::BLUE;
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
+const std::string RESOURCE_URL = "resource:///ohos_test_image.svg";
+const std::string PNG_IMAGE = "/common/media/aaa.png";
+const std::string WEB_IMAGE =
+    "https://img2.baidu.com/it/u=3999091694,1705560228&fm=253&fmt=auto&app=120&f=JPEG?w=1280&h=800";
 
 } // namespace
 
