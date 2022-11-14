@@ -25,6 +25,7 @@ group("pattern_unittest") {
     "data_panel:data_panel_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "gauge:gauge_pattern_test_ng",
+    "grid_container:grid_container_pattern_test_ng",
     "grid_row:grid_row_pattern_test_ng",
     "image:image_pattern_test",
     "indexer:indexer_pattern_test_ng",
