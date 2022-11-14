@@ -18,11 +18,14 @@
 
 #include "gtest/gtest.h"
 
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
@@ -36,15 +39,28 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
 namespace {
-const bool BUBBLE_PROPERTY_SHOW = true;
+constexpr bool BUBBLE_PROPERTY_SHOW = true;
 const std::string BUBBLE_MESSAGE = "HelloWorld";
 const std::string BUBBLE_NEW_MESSAGE = "Good";
 constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
-const bool BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW = true;
-const bool BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW = false;
-const bool BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM = true;
+constexpr bool BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW = true;
+constexpr bool BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW = false;
+constexpr bool BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM = true;
 const Color BUBBLE_PAINT_PROPERTY_MASK_COLOR = Color::BLUE;
 const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color::RED;
+constexpr float ZERO = 0.0f;
+constexpr float NOPADDING = 0.0f;
+constexpr float BUBBLE_WIDTH = 80.0f;
+constexpr float BUBBLE_HEIGHT = 50.0f;
+constexpr float TARGET_WIDTH = 100.0f;
+constexpr float TARGET_HEIGHT = 200.0f;
+const SizeF TARGET_SIZE(TARGET_WIDTH, TARGET_HEIGHT);
+constexpr float TARGET_X = 100.0f;
+constexpr float TARGET_Y = 150.0f;
+const OffsetF TARGET_OFFSET(TARGET_X, TARGET_Y);
+constexpr float CONTAINER_WIDTH = 600.0f;
+constexpr float CONTAINER_HEIGHT = 1000.0f;
+const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 } // namespace
 
 class BubbleLayoutTestNg : public testing::Test {
@@ -205,6 +221,54 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest004, TestSize.Level1)
  * @tc.desc: Test BubbleNode layout
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest005, TestSize.Level1) {}
+HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest005, TestSize.Level1)
+{
+    // create targetNode and popupNode
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(targetNode == nullptr);
+    auto targetTag = targetNode->GetTag();
+    auto targetId = targetNode->GetId();
+    auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
+    EXPECT_FALSE(popupNode == nullptr);
 
+    // create layoutWrapper and update it
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        popupNode, geometryNode, AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty()));
+    auto layoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    // update layoutProperty
+    layoutProperty->UpdateEnableArrow(true);
+    layoutProperty->UpdateUseCustom(false);
+    layoutProperty->UpdatePlacement(Placement::BOTTOM);
+    layoutProperty->UpdateShowInSubWindow(false);
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BUBBLE_WIDTH), CalcLength(BUBBLE_HEIGHT)));
+    auto popupLayoutAlgorithm = popupNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(popupLayoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(popupLayoutAlgorithm));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+
+    PaddingProperty noPadding;
+    noPadding.left = CalcLength(NOPADDING);
+    noPadding.right = CalcLength(NOPADDING);
+    noPadding.top = CalcLength(NOPADDING);
+    noPadding.bottom = CalcLength(NOPADDING);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+}
 } // namespace OHOS::Ace::NG

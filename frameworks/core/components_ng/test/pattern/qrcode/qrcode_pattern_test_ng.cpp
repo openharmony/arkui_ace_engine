@@ -37,6 +37,7 @@ const std::string CREATE_VALUE = "Hello World";
 constexpr Color QR_CODE_COLOR_VALUE = Color(0XFFFF0000);
 constexpr Color QR_CODE_BACKGROUND_COLOR_VALUE = Color(0XFF0000);
 const float ZERO = 0.0f;
+const float TEN = 10.0f;
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 600.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -177,6 +178,9 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest005, TestSize.Level1)
     auto idealSizeFirst = qrcodeLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     geometryNode->SetFrameSize(SizeF(idealSizeFirst->Width(), idealSizeFirst->Width()));
     EXPECT_TRUE(idealSizeFirst->Width() == fmin(QR_CODE_WIDTH, QR_CODE_HEIGHT));
+
+    // update layoutWrapper and contentConstraint
+    geometryNode->SetContentOffset(OffsetF(TEN, TEN));
     contentConstraint.UpdateIllegalSelfIdealSizeWithCheck(SELF_IDEAL_SIZE_2);
     auto idealSizeSecond = qrcodeLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_TRUE(idealSizeSecond->Width() == fmin(QR_CODE_WIDTH, QR_CODE_HEIGHT));
@@ -208,9 +212,9 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest006, TestSize.Level1)
     EXPECT_FALSE(qrcodePattern == nullptr);
     auto qrcodeLayoutAlgorithm = AceType::DynamicCast<QRCodeLayoutAlgorithm>(qrcodePattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(qrcodeLayoutAlgorithm == nullptr);
-    auto paintMethod = qrcodePattern->CreateNodePaintMethod();
-    EXPECT_FALSE(paintMethod == nullptr);
     layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(qrcodeLayoutAlgorithm));
+    auto paintMethod = AceType::DynamicCast<QRCodePaintMethod>(qrcodePattern->CreateNodePaintMethod());
+    EXPECT_FALSE(paintMethod == nullptr);
 
     // set contentConstraint
     LayoutConstraintF contentConstraint = LayoutConstraintF();
