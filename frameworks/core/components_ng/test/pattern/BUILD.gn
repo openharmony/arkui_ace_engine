@@ -23,7 +23,11 @@ group("pattern_unittest") {
     "custom_paint:custom_paint_pattern_test_ng",
     "data_panel:data_panel_pattern_test_ng",
     "flex:flex_pattern_unit_test",
+<<<<<<< HEAD
     "gauge:gauge_pattern_test_ng",
+=======
+    "grid_row:grid_row_pattern_test_ng",
+>>>>>>> Add TDD for grid-row/grid-col.
     "linear_layout:linear_layout_creator_test_ng",
     "patternlock:patternlock_pattern_test_ng",
     "qrcode:qrcode_pattern_test_ng",
