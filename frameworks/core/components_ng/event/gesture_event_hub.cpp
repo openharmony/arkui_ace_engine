@@ -97,6 +97,14 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     return false;
 }
 
+void GestureEventHub::OnModifyDone()
+{
+    if (recreateGesture_) {
+        UpdateGestureHierarchy();
+        recreateGesture_ = false;
+    }
+}
+
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId)
 {
@@ -124,11 +132,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         innerExclusiveRecognizer_->SetCoordinateOffset(offset);
         innerExclusiveRecognizer_->BeginReferee(touchId);
         current = innerExclusiveRecognizer_;
-    }
-
-    if (recreateGesture_) {
-        UpdateGestureHierarchy();
-        recreateGesture_ = false;
     }
 
     auto context = host->GetContext();

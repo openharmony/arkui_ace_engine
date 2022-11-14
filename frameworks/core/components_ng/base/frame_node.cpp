@@ -558,6 +558,7 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    eventHub_->MarkModifyDone();
     if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
         renderContext_->HasAnchor()) {
         auto parent = GetParent();
@@ -800,8 +801,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (gestureHub) {
             TouchTestResult finalResult;
             const auto coordinateOffset = globalPoint - localPoint;
-            preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset,
-                touchRestrict, newComingTargets, finalResult, touchId);
+            preventBubbling = gestureHub->ProcessTouchTestHit(
+                coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId);
             newComingTargets.swap(finalResult);
         }
     }
