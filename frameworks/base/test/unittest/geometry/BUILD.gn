@@ -24,8 +24,10 @@ ohos_unittest("GeometryTest") {
   module_out_path = module_output_path
 
   sources = [
+    "animatable_matrix4_test.cpp",
     "dimension_test.cpp",
     "least_square_impl_test.cpp",
+    "matrix4_test.cpp",
     "quaternion_test.cpp",
     "transform_util_test.cpp",
   ]
