@@ -375,6 +375,11 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     return stageManager_;
 }
 
+const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
+{
+    return selectOverlayManager_;
+}
+
 const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 {
     return overlayManager_;
