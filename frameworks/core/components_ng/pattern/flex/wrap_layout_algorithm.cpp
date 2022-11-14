@@ -75,8 +75,12 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float currentCrossLength = 0.0f;
     int32_t currentItemCount = 0;
     float baselineDistance = 0.0f;
+    contentList_.clear();
     std::list<RefPtr<LayoutWrapper>> currentMainAxisItemsList;
     for (auto& item : children) {
+        if (item->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+            continue;
+        }
         item->Measure(childLayoutConstraint);
         // can place current child at current row
         if (mainLengthLimit_ >= currentMainLength + GetItemMainAxisLength(item->GetGeometryNode())) {
@@ -177,7 +181,7 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LOGE("WrapLayoutAlgorithm::Layout, children is empty");
         return;
     }
-    OffsetF startPosition(frameOffset_.GetX(), frameOffset_.GetY());
+    OffsetF startPosition;
     OffsetF spaceBetweenContentsOnCrossAxis;
     LayoutWholeWrap(startPosition, spaceBetweenContentsOnCrossAxis, layoutWrapper);
     TraverseContent(startPosition, spaceBetweenContentsOnCrossAxis);
@@ -230,12 +234,12 @@ SizeF WrapLayoutAlgorithm::GetLeftSize(float crossLength, float mainLeftLength, 
 
 float WrapLayoutAlgorithm::GetItemMainAxisLength(const RefPtr<GeometryNode>& item) const
 {
-    return isHorizontal_ ? item->GetFrameSize().Width() : item->GetFrameSize().Height();
+    return isHorizontal_ ? item->GetMarginFrameSize().Width() : item->GetMarginFrameSize().Height();
 }
 
 float WrapLayoutAlgorithm::GetItemCrossAxisLength(const RefPtr<GeometryNode>& item) const
 {
-    return !isHorizontal_ ? item->GetFrameSize().Width() : item->GetFrameSize().Height();
+    return !isHorizontal_ ? item->GetMarginFrameSize().Width() : item->GetMarginFrameSize().Height();
 }
 
 void WrapLayoutAlgorithm::AddPaddingToStartPosition(OffsetF& startPosition) const
@@ -428,7 +432,7 @@ float WrapLayoutAlgorithm::CalcItemCrossAxisOffset(
             return contentOffset.GetX();
         }
         case WrapAlignment::END: {
-            auto itemFrameSize = node->GetFrameSize();
+            auto itemFrameSize = node->GetMarginFrameSize();
             if (isHorizontal_) {
                 return contentOffset.GetY() + content.crossLength - itemFrameSize.Height();
             }
@@ -436,7 +440,7 @@ float WrapLayoutAlgorithm::CalcItemCrossAxisOffset(
         }
         case WrapAlignment::CENTER: {
             // divide the space by two
-            auto itemFrameSize = node->GetFrameSize();
+            auto itemFrameSize = node->GetMarginFrameSize();
             if (isHorizontal_) {
                 return contentOffset.GetY() + (content.crossLength - itemFrameSize.Height()) / 2.0f;
             }
@@ -524,16 +528,17 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
         float contentMainAxisSpan = 0.0f;
         if (isHorizontal_) {
             offset = OffsetF(itemMainAxisOffset, itemCrossAxisOffset);
-            contentMainAxisSpan = item->GetFrameSize().Width() + static_cast<float>(spacing_.ConvertToPx()) +
+            contentMainAxisSpan = item->GetMarginFrameSize().Width() + static_cast<float>(spacing_.ConvertToPx()) +
                                   spaceBetweenItemsOnMainAxis.GetX();
             contentStartPosition.AddX(isReverse_ ? -contentMainAxisSpan : contentMainAxisSpan);
         } else {
             offset = OffsetF(itemCrossAxisOffset, itemMainAxisOffset);
-            contentMainAxisSpan = item->GetFrameSize().Height() + static_cast<float>(spacing_.ConvertToPx()) +
+            contentMainAxisSpan = item->GetMarginFrameSize().Height() + static_cast<float>(spacing_.ConvertToPx()) +
                                   spaceBetweenItemsOnMainAxis.GetY();
             contentStartPosition.AddY(isReverse_ ? -contentMainAxisSpan : contentMainAxisSpan);
         }
-        itemWrapper->GetGeometryNode()->SetFrameOffset(offset);
+        itemWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+        LOGD("Node %{public}s offset %{public}s", itemWrapper->GetHostTag().c_str(), offset.ToString().c_str());
     }
 }
 

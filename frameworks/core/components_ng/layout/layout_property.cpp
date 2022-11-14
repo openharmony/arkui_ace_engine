@@ -70,6 +70,7 @@ void LayoutProperty::Reset()
     positionProperty_.reset();
     measureType_.reset();
     layoutDirection_.reset();
+    propVisibility_.reset();
     CleanDirty();
 }
 
@@ -137,6 +138,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->flexItemProperty_) {
         flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
     }
+    propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
