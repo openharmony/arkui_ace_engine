@@ -941,6 +941,17 @@ void RenderGridScroll::DealCache(int32_t start, int32_t end)
         return;
     }
 
+    if (!inRankCache_.empty()) {
+        std::set<int32_t> rankCache(std::move(inRankCache_));
+        if (deleteChildByIndex_) {
+            for (auto index : rankCache) {
+                if (items_.find(index) == items_.end()) {
+                    deleteChildByIndex_(index);
+                }
+            }
+        }
+    }
+
     std::set<int32_t> deleteItem;
     for (const auto& item : inCache_) {
         if (item < start - cacheCount_ || item > end + cacheCount_) {
@@ -1030,7 +1041,11 @@ void RenderGridScroll::ClearItems()
 {
     decltype(items_) items(std::move(items_));
     for (const auto& item : items) {
-        deleteChildByIndex_(item.first);
+        if (item.first < startRankItemIndex_) {
+            deleteChildByIndex_(item.first);
+        } else {
+            inRankCache_.emplace(item.first);
+        }
         RemoveChildByIndex(item.first);
     }
     loadingIndex_ = -1;
