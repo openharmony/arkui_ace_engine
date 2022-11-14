@@ -274,13 +274,16 @@ void GridPattern::AddScrollEvent()
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
-bool GridPattern::OnScrollCallback(float offset, int32_t /* source */)
+bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
-    /* Stop scroll controler animation */
+    // Stop scroll controller animation
     if (animator_) {
         animator_->Stop();
     }
-    return UpdateScrollPosition(static_cast<float>(offset));
+    if (source == SCROLL_FROM_START) {
+        return true;
+    }
+    return UpdateScrollPosition(offset);
 }
 
 bool GridPattern::UpdateScrollPosition(float offset)
