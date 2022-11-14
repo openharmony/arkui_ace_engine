@@ -108,5 +108,9 @@ using namespace OHOS::Ace;
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     MinorTest(data, size);
+    InternalImageLoad(data, size);
+    NetworkImageLoad(data, size);
+    AssetImageLoad(data, size);
+    FileImageLoaderTest(data, size);
     return 0;
 }
