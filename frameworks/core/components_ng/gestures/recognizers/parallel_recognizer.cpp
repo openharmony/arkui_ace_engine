@@ -76,7 +76,7 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
         refereeState_ = RefereeState::DETECTING;
     }
     for (const auto& recognizer : recognizers_) {
-        if (recognizer) {
+        if (recognizer && recognizer->CheckTouchId(point.id)) {
             recognizer->HandleEvent(point);
         }
     }

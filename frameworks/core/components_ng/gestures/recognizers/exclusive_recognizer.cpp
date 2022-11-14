@@ -101,11 +101,11 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
         case TouchType::DOWN:
         case TouchType::UP:
         case TouchType::CANCEL: {
-            if (activeRecognizer_) {
+            if (activeRecognizer_ && activeRecognizer_->CheckTouchId(point.id)) {
                 activeRecognizer_->HandleEvent(point);
             } else {
                 for (const auto& recognizer : recognizers_) {
-                    if (recognizer) {
+                    if (recognizer && recognizer->CheckTouchId(point.id)) {
                         recognizer->HandleEvent(point);
                     }
                 }
