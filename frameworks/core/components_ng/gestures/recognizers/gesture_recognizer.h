@@ -184,6 +184,7 @@ public:
         refereeState_ = RefereeState::READY;
         OnResetStatus();
     }
+    virtual bool CheckTouchId(int32_t touchId) = 0;
 
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)

@@ -327,12 +327,12 @@ RefPtr<PipelineContext> UINode::GetContext()
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, touchId);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
