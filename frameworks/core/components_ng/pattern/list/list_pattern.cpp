@@ -214,20 +214,20 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm;
     if (listLayoutProperty->HasLanes() || listLayoutProperty->HasLaneMinLength() ||
         listLayoutProperty->HasLaneMaxLength()) {
-        auto lanesLayoutAlgorithm = MakeRefPtr<ListLanesLayoutAlgorithm>(startIndex_, endIndex_);
+        auto lanesLayoutAlgorithm = MakeRefPtr<ListLanesLayoutAlgorithm>();
         if ((listLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT) == 0) {
             lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
         }
         lanesLayoutAlgorithm->SetLanes(lanes_);
         listLayoutAlgorithm.Swap(lanesLayoutAlgorithm);
     } else {
-        listLayoutAlgorithm.Swap(MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_));
+        listLayoutAlgorithm.Swap(MakeRefPtr<ListLayoutAlgorithm>());
     }
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollIndexAlignment_);
     }
-    listLayoutAlgorithm->SetCurrentOffset(currentDelta_);
+    listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     if (IsOutOfBoundary(false)) {
         listLayoutAlgorithm->SetOverScrollFeature();
@@ -447,7 +447,7 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
             return false;
         }
         scrollIndex_ = nextIndex;
-        LOGD("Scorll to next index: %{public}d", scrollIndex_);
+        LOGD("Scroll to next index: %{public}d", scrollIndex_);
         // Need to update: current selection
         ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_TOP);
         return true;
@@ -459,7 +459,7 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
             return false;
         }
         scrollIndex_ = nextIndex;
-        LOGD("Scorll to previous index: %{public}d", scrollIndex_);
+        LOGD("Scroll to previous index: %{public}d", scrollIndex_);
         // Need to update: current selection
         ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
         return true;
