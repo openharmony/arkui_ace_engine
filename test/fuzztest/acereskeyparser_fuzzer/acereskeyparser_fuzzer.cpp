@@ -20,10 +20,7 @@ namespace OHOS::Ace {
 constexpr size_t enumNum = 10;
 bool GetString(const uint8_t* data, size_t size)
 {
-    std::string randomString(reinterpret_cast<const char*>(data), size);
-    auto str = AceResKeyParser::GetInstance().GetMccByValue(reinterpret_cast<uint32_t>(randomString.c_str()));
-    str += AceResKeyParser::GetInstance().GetMncByValue(reinterpret_cast<uint32_t>(randomString.c_str()));
-    str += AceResKeyParser::GetInstance().GetMncShortLenByValue(reinterpret_cast<uint32_t>(randomString.c_str()));
+    std::string str = "";
     str += AceResKeyParser::GetInstance().GetOrientationByType(DeviceOrientation(size % enumNum));
     str += AceResKeyParser::GetInstance().GetColorModeByType(ColorMode(size % enumNum));
     str += AceResKeyParser::GetInstance().GetDeviceByType(DeviceType(size % enumNum));
