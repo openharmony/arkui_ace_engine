@@ -273,6 +273,10 @@ void GridPattern::AddScrollEvent()
 
 bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
 {
+    if (source == SCROLL_FROM_START) {
+        return true;
+    }
+
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     // When finger moves down, offset is positive.
