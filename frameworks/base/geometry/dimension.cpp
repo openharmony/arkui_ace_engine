@@ -65,6 +65,14 @@ double Dimension::ConvertToPx() const
     return 0.0;
 }
 
+double Dimension::ConvertToPxWithSize(double size) const
+{
+    if (unit_ == DimensionUnit::PERCENT) {
+        return value_ * size;
+    }
+    return ConvertToPx();
+}
+
 std::string Dimension::ToString() const
 {
     static const int32_t unitsNum = 6;

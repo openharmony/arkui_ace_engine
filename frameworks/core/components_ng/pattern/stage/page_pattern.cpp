@@ -55,12 +55,15 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrappe
     return false;
 }
 
-bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
+bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    if (pageTransitionFunc_) {
+        pageTransitionFunc_();
+    }
     return renderContext->TriggerPageTransition(type, onFinish);
 }
 
@@ -120,6 +123,38 @@ void PagePattern::BuildSharedTransitionMap()
     CHECK_NULL_VOID(host);
     sharedTransitionMap_.clear();
     IterativeAddToSharedMap(host, sharedTransitionMap_);
+}
+
+RefPtr<PageTransitionEffect> PagePattern::FindPageTransitionEffect(PageTransitionType type)
+{
+    RefPtr<PageTransitionEffect> result;
+    while (!pageTransitionEffects_.empty()) {
+        auto effect = pageTransitionEffects_.top();
+        if (effect->CanFit(type)) {
+            result = effect;
+            break;
+        }
+        pageTransitionEffects_.pop();
+    }
+    ClearPageTransitionEffect();
+    return result;
+}
+
+void PagePattern::ClearPageTransitionEffect()
+{
+    while (!pageTransitionEffects_.empty()) {
+        pageTransitionEffects_.pop();
+    }
+}
+
+RefPtr<PageTransitionEffect> PagePattern::GetTopTransition() const
+{
+    return pageTransitionEffects_.empty() ? nullptr : pageTransitionEffects_.top();
+}
+
+void PagePattern::AddPageTransition(const RefPtr<PageTransitionEffect>& effect)
+{
+    pageTransitionEffects_.emplace(effect);
 }
 
 } // namespace OHOS::Ace::NG

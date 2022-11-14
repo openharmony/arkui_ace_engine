@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
+#include "core/components_ng/pattern/stage/page_transition_effect.h"
 
 namespace OHOS::Ace::NG {
 
@@ -78,12 +79,26 @@ public:
         OnBackPressed_ = std::move(OnBackPressed);
     }
 
+    void SetPageTransitionFunc(std::function<void()>&& pageTransitionFunc)
+    {
+        pageTransitionFunc_ = std::move(pageTransitionFunc);
+    }
+
+    // find pageTransition effect according to transition type, it will clear the transition effect stack
+    RefPtr<PageTransitionEffect> FindPageTransitionEffect(PageTransitionType type);
+
+    void ClearPageTransitionEffect();
+
+    RefPtr<PageTransitionEffect> GetTopTransition() const;
+
+    void AddPageTransition(const RefPtr<PageTransitionEffect>& effect);
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<PageEventHub>();
     }
 
-    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const;
+    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish);
 
     FocusPattern GetFocusPattern() const override
     {
@@ -111,6 +126,8 @@ private:
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> OnBackPressed_;
+    std::function<void()> pageTransitionFunc_;
+    std::stack<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
 
     bool isOnShow_ = false;
 
