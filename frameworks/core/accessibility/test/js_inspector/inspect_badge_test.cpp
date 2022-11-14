@@ -66,4 +66,4 @@ HWTEST_F(InspectBadgeTest, InspectBadgeTest002, TestSize.Level1)
     EXPECT_EQ(inspectBadge.attrs_["disabled"], "false");
     EXPECT_EQ(inspectBadge.attrs_["focusable"], "false");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

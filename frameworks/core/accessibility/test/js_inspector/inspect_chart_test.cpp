@@ -85,4 +85,4 @@ HWTEST_F(InspectChartTest, InspectChartTest002, TestSize.Level1)
     EXPECT_EQ(inspectChart.styles_["start-angle"], "240");
     EXPECT_EQ(inspectChart.styles_["total-angle"], "240");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

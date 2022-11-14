@@ -73,4 +73,4 @@ HWTEST_F(InspectButtonTest, InspectButtonTest002, TestSize.Level1)
     EXPECT_EQ(inspectButton.styles_["font-weight"], "normal");
     EXPECT_EQ(inspectButton.styles_["font-family"], "sans-serif");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework
