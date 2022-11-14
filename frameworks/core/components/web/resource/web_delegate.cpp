@@ -1365,6 +1365,7 @@ void WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     std::string dataPath = filesDataPath.substr(0, baseIndex + baseDir.length());
     bundlePath_ = bundlePath;
     bundleDataPath_ = dataPath;
+    hapPath_ = container->GetHapPath();
     // load webview so
     OHOS::NWeb::NWebHelper::Instance().SetBundlePath(bundlePath_);
     if (!OHOS::NWeb::NWebHelper::Instance().Init()) {
@@ -2023,24 +2024,20 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
+            if (!delegate->hapPath_.empty()) {
+                initArgs.web_engine_args_to_add.push_back(std::string("--user-hap-path=").append(delegate->hapPath_));
+            }
             std::string customScheme = delegate->GetCustomScheme();
             if (!customScheme.empty()) {
                 LOGI("custome scheme %{public}s", customScheme.c_str());
-                initArgs.web_engine_args_to_add.push_back(
-                    std::string("--ohos-custom-scheme=").append(customScheme));
+                initArgs.web_engine_args_to_add.push_back(std::string("--ohos-custom-scheme=").append(customScheme));
             }
             sptr<Surface> surface = surfaceWeak.promote();
             CHECK_NULL_VOID(surface);
             delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);
-            if (delegate->nweb_ == nullptr) {
-                LOGE("fail to get webview instance");
-                return;
-            }
+            CHECK_NULL_VOID(delegate->nweb_);
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
-            if (delegate->cookieManager_ == nullptr) {
-                LOGE("fail to get webview instance");
-                return;
-            }
+            CHECK_NULL_VOID(delegate->cookieManager_);
             auto nweb_handler = std::make_shared<WebClientImpl>(Container::CurrentId());
             nweb_handler->SetWebDelegate(weak);
             auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());

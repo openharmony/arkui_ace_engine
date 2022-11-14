@@ -129,6 +129,11 @@ public:
 
     virtual void ProcessScreenOffEvents() {}
 
+    virtual std::string GetHapPath() const
+    {
+        return "";
+    }
+
     void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
     {
         createTime_ = time;
