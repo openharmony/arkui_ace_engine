@@ -1120,4 +1120,28 @@ void WebPattern::OnWindowHide()
     needOnFocus_ = false;
     isWindowShow_ = false;
 }
+
+void WebPattern::OnInActive()
+{
+    if (!isActive_) {
+        return;
+    }
+
+    LOGI("web OnInActive called");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->OnInactive();
+    isActive_ = false;
+}
+
+void WebPattern::OnActive()
+{
+    if (isActive_) {
+        return;
+    }
+
+    LOGI("web OnActive called");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->OnActive();
+    isActive_ = true;
+}
 } // namespace OHOS::Ace::NG
