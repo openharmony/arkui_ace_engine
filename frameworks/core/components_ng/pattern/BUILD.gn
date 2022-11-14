@@ -190,6 +190,7 @@ build_component_ng("pattern_ng") {
     "picker/datepicker_paint_method.cpp",
     "picker/datepicker_pattern.cpp",
     "picker/datepicker_view.cpp",
+    "picker/toss_animation_controller.cpp",
     "progress/progress_layout_algorithm.cpp",
     "progress/progress_model_ng.cpp",
     "progress/progress_paint_method.cpp",

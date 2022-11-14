@@ -19,14 +19,13 @@
 #include <utility>
 
 #include "base/i18n/localization.h"
-#include "core/components/picker/picker_base_component.h"
-#include "core/components/picker/picker_date_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_paint_method.h"
+#include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -45,7 +44,9 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<DatePickerColumnLayoutAlgorithm>(currentOffset_);
+        auto layoutAlgorithm = MakeRefPtr<DatePickerColumnLayoutAlgorithm>();
+        layoutAlgorithm->SetCurrentOffset(GetCurrentOffset());
+        return layoutAlgorithm;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -53,24 +54,15 @@ public:
         return MakeRefPtr<DataPickerLayoutProperty>();
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        return MakeRefPtr<DatePickerPaintMethod>(dividerSpacingWidth_, gradientHeight_, dividerHeight_);
-    }
-
     void FlushCurrentOptions();
 
     bool NotLoopOptions() const;
 
-    void UpdateColumnChildPosition(double y);
+    void UpdateColumnChildPosition(double offsetY);
 
     bool CanMove(bool isDown) const;
 
     bool InnerHandleScroll(bool isDown);
-
-    void ScrollColumn();
-
-    void UpdateCurrentOffset(float offset);
 
     uint32_t GetCurrentIndex() const
     {
@@ -82,9 +74,14 @@ public:
         currentIndex_ = value;
     }
 
-    float GetCurrentOffset() const
+    double GetCurrentOffset() const
     {
-        return currentOffset_;
+        return deltaSize_;
+    }
+
+    void SetCurrentOffset(double deltaSize)
+    {
+        deltaSize_ = deltaSize;
     }
 
     const std::map<RefPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
@@ -145,25 +142,55 @@ public:
         EventCallback_ = value;
     }
 
+    const RefPtr<TossAnimationController>& GetToss() const
+    {
+        return tossAnimationController_;
+    }
+
+    void UpdateToss(double offsetY);
+
+    void TossStoped();
+
+    void UpdateScrollDelta(double delta);
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
+
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragStart(const GestureEvent& event);
+    void HandleDragMove(const GestureEvent& event);
+    void HandleDragEnd();
+    void CreateAnimation();
+    RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
+    void HandleCurveStopped();
+    void ScrollOption(double delta);
 
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
     RefPtr<ScrollableEvent> scrollableEvent_;
-    float currentOffset_ = 0.0f;
     int32_t currentChildIndex_ = 0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
-    Dimension jumpInterval_;
+    double jumpInterval_;
     uint32_t showCount_ = 0;
     float gradientHeight_;
     float dividerHeight_;
     float dividerSpacingWidth_;
+
+    double deltaSize_ = 0.0;
+    RefPtr<PanEvent> panEvent_;
+    bool pressed_ = false;
+    double scrollDelta_ = 0.0;
+    bool animationCreated_ = false;
+    RefPtr<Animator> toController_;
+    RefPtr<Animator> fromController_;
+    RefPtr<CurveAnimation<double>> fromBottomCurve_;
+    RefPtr<CurveAnimation<double>> fromTopCurve_;
+    RefPtr<TossAnimationController> tossAnimationController_ = AceType::MakeRefPtr<TossAnimationController>();
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
 };

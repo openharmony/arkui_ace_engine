@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "base/utils/utils.h"
+#include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -48,8 +49,19 @@ void DatePickerPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (!config.frameSizeChange) {
+        return false;
+    }
+    CHECK_NULL_RETURN(dirty, false);
+    return true;
+}
+
 void DatePickerPattern::OnModifyDone()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     FlushColumn();
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
@@ -63,8 +75,6 @@ void DatePickerPattern::OnModifyDone()
             refPtr->FireChangeEvent(refresh);
         }
     });
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
@@ -238,7 +248,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh) const
     if (refresh) {
         auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
-        auto str = GetSelectedObject(true);
+        auto str = GetSelectedObject(false);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
         datePickerEventHub->FireDialogChangeEvent(str);
