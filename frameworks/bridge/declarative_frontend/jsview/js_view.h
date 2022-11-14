@@ -293,9 +293,6 @@ public:
     // at this point ElementRegister can forget about the,
     void JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& info);
 
-    // when custom node is destroy, need to clean the ids.
-    void JsDeletedElmtIdsSilently(const JSCallbackInfo& info);
-
     /**
     JS exposed function to check from ElementRegister if given elmtId is (still) in use
     */
