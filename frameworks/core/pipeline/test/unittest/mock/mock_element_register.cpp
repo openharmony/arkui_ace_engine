@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/core/pipeline/base/element_register.h"
+#include "core/components/custom_paint/render_custom_paint.h"
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
@@ -84,6 +85,12 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
 std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
 {
     return removedItems_;
+}
+
+double RenderCustomPaint::PaintMeasureText(const std::string& text, double fontSize,
+    int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    return 0.0;
 }
 
 void ElementRegister::Clear()
