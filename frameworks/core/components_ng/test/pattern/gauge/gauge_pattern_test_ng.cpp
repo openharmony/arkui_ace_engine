@@ -16,8 +16,10 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
+#define private public
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
@@ -26,26 +28,28 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-const float VALUE = 50.0f;
-const float MAX = 100.0f;
-const float MIN = 0.0f;
-const float NEW_VALUE = 70.0f;
-const float START_ANGLE = 0.0f;
-const float END_ANGLE = 180.0f;
-const Dimension STOKE_WIDTH = 20.0_vp;
+constexpr float VALUE = 50.0f;
+constexpr float MAX = 100.0f;
+constexpr float MIN = 0.0f;
+constexpr float NEW_VALUE = 70.0f;
+constexpr float START_ANGLE = 0.0f;
+constexpr float END_ANGLE = 180.0f;
+constexpr Dimension STOKE_WIDTH = 20.0_vp;
 const std::vector<Color> COLORS = { Color::BLUE, Color::RED, Color::GREEN };
 const std::vector<float> VALUES = { 1.0f, 1.5f, 2.0f };
 const std::string TEST_STRING = "test";
 const Color TEST_COLOR = Color::BLUE;
-const Dimension WIDTH = 50.0_vp;
-const Dimension HEIGHT = 50.0_vp;
-const float MAX_WIDTH = 500.0f;
-const float MAX_HEIGHT = 500.0f;
+constexpr Dimension WIDTH = 50.0_vp;
+constexpr Dimension HEIGHT = 50.0_vp;
+constexpr float MAX_WIDTH = 500.0f;
+constexpr float MAX_HEIGHT = 500.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
-const float NEGATIVE_NUMBER = -100;
-const float INFINITE = Size::INFINITE_SIZE;
-const float SMALL_WIDTH = 400.0f;
-const float SMALL_HEIGHT = 400.0f;
+constexpr float NEGATIVE_NUMBER = -100;
+constexpr float INFINITE = Size::INFINITE_SIZE;
+constexpr float SMALL_WIDTH = 400.0f;
+constexpr float SMALL_HEIGHT = 400.0f;
+constexpr bool SKIP_MEASURE = true;
+constexpr bool NO_SKIP_MEASURE = false;
 } // namespace
 
 class GaugePropertyTestNg : public testing::Test {
@@ -244,6 +248,109 @@ HWTEST_F(GaugePropertyTestNg, GaugeMeasureTest003, TestSize.Level1)
     layoutConstraintInfinite.maxSize.SetWidth(INFINITE);
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintInfinite, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(MAX_HEIGHT, MAX_HEIGHT));
+}
+
+/**
+ * @tc.name: GaugePatternTest004
+ * @tc.desc: Test Gauge Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePropertyTestNg, GaugePaintPropertyTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gauge and get frameNode.
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    EXPECT_NE(gaugePaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from gaugePaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(gaugePaintProperty->GetMaxValue(), MAX);
+    EXPECT_EQ(gaugePaintProperty->GetMinValue(), MIN);
+    EXPECT_EQ(gaugePaintProperty->GetValueValue(), VALUE);
+}
+
+/**
+ * @tc.name: GaugePatternTest005
+ * @tc.desc: Test gauge pattern OnDirtyLayoutWrapperSwap function..
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePropertyTestNg, GaugePaintPropertyTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gauge and get frameNode.
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create gauge frameNode, get gaugePattern and gaugeWrapper.
+     * @tc.expected: step2. get gaugePattern success.
+     */
+    RefPtr<GaugePattern> gaugePattern = AceType::DynamicCast<GaugePattern>(frameNode->GetPattern());
+    EXPECT_NE(gaugePattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    EXPECT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step3. call gaugePattern OnDirtyLayoutWrapperSwap function, compare result.
+     * @tc.expected: step3. OnDirtyLayoutWrapperSwap success and result correct.
+     */
+    RefPtr<GaugeLayoutAlgorithm> gaugeLayoutAlgorithm = AceType::MakeRefPtr<GaugeLayoutAlgorithm>();
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(gaugeLayoutAlgorithm, SKIP_MEASURE);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    /**
+     * @tc.steps: step4. call gaugePattern OnDirtyLayoutWrapperSwap function, compare result.
+     * @tc.expected: step4. OnDirtyLayoutWrapperSwap success and result correct.
+     */
+
+    /**
+    //     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+    */
+    bool first_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
+    EXPECT_FALSE(first_case);
+
+    /**
+    //     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+    */
+    bool second_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
+    EXPECT_FALSE(second_case);
+
+    layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(gaugeLayoutAlgorithm, NO_SKIP_MEASURE);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    /**
+    //     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+    */
+    bool third_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
+    EXPECT_FALSE(third_case);
+
+    /**
+    //     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
+    */
+    bool forth_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
+    EXPECT_TRUE(forth_case);
 }
 
 } // namespace OHOS::Ace::NG
