@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -666,9 +667,10 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->UpdateInspectorId(inspectorId);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->UpdateInspectorId(inspectorId);
+    }
 }
 
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)

@@ -49,16 +49,21 @@ void GridContainerLayoutProperty::BuildWidth(float width)
 
 void GridContainerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    LayoutProperty::ToJsonValue(json);
+    LinearLayoutProperty::ToJsonValue(json);
     if (!HasContainerInfo()) {
         return;
     }
-    auto info = GetContainerInfoValue();
 
-    json->Put("columns", std::to_string(info.GetColumns()).c_str());
-    json->Put("sizeType", std::to_string(static_cast<int32_t>(info.GetSizeType())).c_str());
-    json->Put("gutter", std::to_string(info.GetGutterWidth().ConvertToPx()).c_str());
-    json->Put("margin", std::to_string(info.GetMarginLeft().ConvertToPx()).c_str());
+    auto info = GetContainerInfoValue();
+    const std::string sizeTypeStrs[] { "SizeType.Auto", "SizeType.XS", "SizeType.SM", "SizeType.MD", "SizeType.LG",
+        "SizeType.XL" };
+    auto constructor = JsonUtil::Create(false);
+    constructor->Put("columns", std::to_string(info.GetColumns()).c_str());
+    constructor->Put("sizeType", sizeTypeStrs[static_cast<int32_t>(info.GetSizeType())].c_str());
+    constructor->Put("gutter", info.GetGutterWidth().ToString().c_str());
+    constructor->Put("margin", info.GetMarginLeft().ToString().c_str());
+
+    json->Put("constructor", constructor);
 }
 
 } // namespace OHOS::Ace::NG

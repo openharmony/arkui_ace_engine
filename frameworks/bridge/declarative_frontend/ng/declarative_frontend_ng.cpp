@@ -214,6 +214,18 @@ void DeclarativeFrontendNG::OnSurfaceChanged(int32_t width, int32_t height)
 
 void DeclarativeFrontendNG::DumpFrontend() const {}
 
+std::string DeclarativeFrontendNG::GetPagePath() const
+{
+    if (!delegate_) {
+        return "";
+    }
+    int32_t routerIndex = 0;
+    std::string routerName;
+    std::string routerPath;
+    delegate_->GetState(routerIndex, routerName, routerPath);
+    return routerPath + routerName;
+}
+
 void DeclarativeFrontendNG::TriggerGarbageCollection()
 {
     if (jsEngine_) {

@@ -98,6 +98,8 @@ public:
         return container_;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
 private:
     bool SetSpan(GridSizeType type, int32_t span);
 

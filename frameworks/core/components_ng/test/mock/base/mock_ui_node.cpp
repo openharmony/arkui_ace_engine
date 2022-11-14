@@ -16,6 +16,7 @@
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
+thread_local int32_t UINode::currentAccessibilityId_ = 0;
 UINode::~UINode() {}
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode) {}
 void UINode::Clean() {}
@@ -75,7 +76,7 @@ int32_t UINode::RemoveChildAndReturnIndex(const RefPtr<UINode>& child)
 
 void UINode::RemoveChildAtIndex(int32_t index) {}
 
-RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
+RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
     return nullptr;
 }

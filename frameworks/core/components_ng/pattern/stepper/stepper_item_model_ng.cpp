@@ -32,17 +32,17 @@ void StepperItemModelNG::Create()
 
 void StepperItemModelNG::SetPrevLabel(const std::string& leftLabel)
 {
-    ACE_UPDATE_PAINT_PROPERTY(StepperItemLayoutProperty, LeftLabel, leftLabel);
+    ACE_UPDATE_LAYOUT_PROPERTY(StepperItemLayoutProperty, LeftLabel, leftLabel);
 }
 
 void StepperItemModelNG::SetNextLabel(const std::string& rightLabel)
 {
-    ACE_UPDATE_PAINT_PROPERTY(StepperItemLayoutProperty, RightLabel, rightLabel);
+    ACE_UPDATE_LAYOUT_PROPERTY(StepperItemLayoutProperty, RightLabel, rightLabel);
 }
 
 void StepperItemModelNG::SetStatus(const std::string& labelStatus)
 {
-    ACE_UPDATE_PAINT_PROPERTY(StepperItemLayoutProperty, LabelStatus, labelStatus);
+    ACE_UPDATE_LAYOUT_PROPERTY(StepperItemLayoutProperty, LabelStatus, labelStatus);
 }
 
 } // namespace OHOS::Ace::NG

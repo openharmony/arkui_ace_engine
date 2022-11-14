@@ -64,4 +64,10 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     contentNode->AddChild(child);
 }
 
+void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto navBarNode = DynamicCast<NavBarNode>(GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    navBarNode->ToJsonValue(json);
+}
 } // namespace OHOS::Ace::NG

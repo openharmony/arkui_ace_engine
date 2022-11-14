@@ -29,6 +29,8 @@
 
 namespace OHOS::Ace::NG {
 
+thread_local int32_t UINode::currentAccessibilityId_ = 0;
+
 UINode::~UINode()
 {
     if (!removeSilently_) {
@@ -90,7 +92,7 @@ void UINode::RemoveChildAtIndex(int32_t index)
     MarkNeedSyncRenderTree();
 }
 
-RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
+RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
     if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
         return nullptr;
