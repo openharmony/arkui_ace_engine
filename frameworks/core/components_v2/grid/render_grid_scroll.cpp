@@ -187,7 +187,7 @@ void RenderGridScroll::CheckJumpToIndex(double offset)
         }
     }
     int32_t rankIndex = GetStartingItem(index);
-    if ((index - rankIndex) * estimateAverageHeight_ > colSize_) {
+    if (((index - rankIndex) * estimateAverageHeight_) > (colSize_* JUMP_INDEX_THRESHOLD)) {
         currentOffset_ += offset;
         return;
     }
@@ -946,6 +946,17 @@ void RenderGridScroll::DealCache(int32_t start, int32_t end)
         return;
     }
 
+    if (!inRankCache_.empty()) {
+        std::set<int32_t> rankCache(std::move(inRankCache_));
+        if (deleteChildByIndex_) {
+            for (auto index : rankCache) {
+                if (items_.find(index) == items_.end()) {
+                    deleteChildByIndex_(index);
+                }
+            }
+        }
+    }
+
     std::set<int32_t> deleteItem;
     for (const auto& item : inCache_) {
         if (item < start - cacheCount_ || item > end + cacheCount_) {
@@ -1037,6 +1048,8 @@ void RenderGridScroll::ClearItems()
     for (const auto& item : items) {
         if (item.first < startRankItemIndex_) {
             deleteChildByIndex_(item.first);
+        } else {
+            inRankCache_.emplace(item.first);
         }
         RemoveChildByIndex(item.first);
     }
