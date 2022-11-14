@@ -45,7 +45,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    isLimit_ = dialogProp->GetUseCustom().value_or(true);
+    isLimit_ = !dialogProp->GetUseCustom().value_or(true);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
