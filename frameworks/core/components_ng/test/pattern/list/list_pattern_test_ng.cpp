@@ -1274,4 +1274,138 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator017, TestSize.Level1)
      */
     EXPECT_EQ(listEventHub->GetDirection(), LIST_DIRECTION_CASE1_VALUE);
 }
+
+/**
+ * @tc.name: ListFrameNodeCreator018
+ * @tc.desc: Test list eventHub function. ListEventHub::InitItemDragEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListFrameNodeCreator018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.expected: step2. create eventHub success.
+     */
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto listEventHub = AceType::DynamicCast<ListEventHub>(eventHub);
+    EXPECT_NE(listEventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. call ListEventHub::InitItemDragEvent function and test result.
+     * @tc.expected: step3. call function success and result equals expected.
+     */
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    listEventHub->InitItemDragEvent(gestureEventHub);
+    EXPECT_NE(gestureEventHub->dragEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: ListFrameNodeCreator019
+ * @tc.desc: Test list eventHub function. Functions have:
+ * @tc.desc: HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd, HandleOnItemDragCancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListFrameNodeCreator019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.expected: step2. create eventHub success.
+     */
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto listEventHub = AceType::DynamicCast<ListEventHub>(eventHub);
+    EXPECT_NE(listEventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. call HandleOnItemDragStart and Update function and test result. Get draggedIndex.
+     * @tc.expected: step3. call function success and result equals expected.
+     */
+    GestureEvent gestureEvent = GestureEvent();
+    listEventHub->HandleOnItemDragStart(gestureEvent);
+    listEventHub->HandleOnItemDragUpdate(gestureEvent);
+    EXPECT_EQ(listEventHub->draggedIndex_, 0);
+
+    /**
+     * @tc.steps: step4. call HandleOnItemDragEnd function and test result. Delete dragDropProxy.
+     * @tc.expected: step4. call function success and result equals expected.
+     */
+    listEventHub->HandleOnItemDragEnd(gestureEvent);
+    EXPECT_EQ(listEventHub->dragDropProxy_, nullptr);
+
+    /**
+     * @tc.steps: step5. call HandleOnItemDragStart and Cancel function.
+     * @tc.expected: step5. call function success and result equals expected.
+     */
+    listEventHub->HandleOnItemDragStart(gestureEvent);
+    listEventHub->HandleOnItemDragCancel();
+    EXPECT_EQ(listEventHub->dragDropProxy_, nullptr);
+}
+
+/**
+ * @tc.name: ListFrameNodeCreator020
+ * @tc.desc: Test list eventHub function. Functions have:
+ * @tc.desc: HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd, HandleOnItemDragCancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListFrameNodeCreator020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.expected: step2. create eventHub success.
+     */
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto listEventHub = AceType::DynamicCast<ListEventHub>(eventHub);
+    EXPECT_NE(listEventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. call HandleOnItemDragStart and Update function and test result. Get draggedIndex.
+     * @tc.expected: step3. call function success and result equals expected.
+     */
+    GestureEvent gestureEvent = GestureEvent();
+    listEventHub->HandleOnItemDragStart(gestureEvent);
+    listEventHub->HandleOnItemDragUpdate(gestureEvent);
+    EXPECT_EQ(listEventHub->draggedIndex_, 0);
+
+    /**
+     * @tc.steps: step4. call HandleOnItemDragEnd function and test result. Delete dragDropProxy.
+     * @tc.expected: step4. call function success and result equals expected.
+     */
+    listEventHub->HandleOnItemDragEnd(gestureEvent);
+    EXPECT_EQ(listEventHub->dragDropProxy_, nullptr);
+
+    /**
+     * @tc.steps: step5. call HandleOnItemDragStart and Cancel function.
+     * @tc.expected: step5. call function success and result equals expected.
+     */
+    listEventHub->HandleOnItemDragStart(gestureEvent);
+    listEventHub->HandleOnItemDragCancel();
+    EXPECT_EQ(listEventHub->dragDropProxy_, nullptr);
+}
 } // namespace OHOS::Ace::NG
+
