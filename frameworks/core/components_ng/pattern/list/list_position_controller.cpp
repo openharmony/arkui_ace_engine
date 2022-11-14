@@ -62,6 +62,7 @@ void ListPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
     CHECK_NULL_VOID(pattern);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
     CHECK_NULL_VOID(listPattern);
+    listPattern->SetScrollState(SCROLL_FROM_JUMP);
     if (listPattern->GetDirection() == Axis::VERTICAL) {
         listPattern->UpdateCurrentOffset(static_cast<float>(-pixelY));
     } else {

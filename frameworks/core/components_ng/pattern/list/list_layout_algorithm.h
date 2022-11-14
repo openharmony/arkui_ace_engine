@@ -70,6 +70,11 @@ public:
         overScrollFeature_ = true;
     }
 
+    void SetCanOverScroll(bool canOverScroll)
+    {
+        canOverScroll_ = canOverScroll;
+    }
+
     void SetIndex(int32_t index)
     {
         jumpIndex_ = index;
@@ -220,6 +225,7 @@ private:
 
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
+    bool canOverScroll_ = false;
 
     int32_t totalItemCount_ = 0;
 
