@@ -81,9 +81,9 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg001, TestSize.Level1)
 {
     // Access to private properties and methods is implemented using macro definitions during testing.
     auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(nullptr);
-    EXPECT_FALSE(paintMethod == nullptr);
-    EXPECT_EQ(paintMethod->GetWidth(), 0);
-    EXPECT_EQ(paintMethod->GetHeight(), 0);
+    ASSERT_NE(paintMethod, nullptr);
+    EXPECT_DOUBLE_EQ(paintMethod->GetWidth(), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->GetHeight(), DEFAULT_DOUBLE0);
     paintMethod->SetSmoothingEnabled(true);
     EXPECT_TRUE(paintMethod->smoothingEnabled_);
     paintMethod->SetSmoothingEnabled(false);
@@ -114,8 +114,8 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg001, TestSize.Level1)
     paintMethod->cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
     paintMethod->skCanvas_ = std::make_unique<SkCanvas>(paintMethod->canvasCache_);
     paintMethod->cacheCanvas_ = std::make_unique<SkCanvas>(paintMethod->cacheBitmap_);
-    EXPECT_FALSE(paintMethod->skCanvas_ == nullptr);
-    EXPECT_EQ(viewScale, 1.0f);
+    EXPECT_NE(paintMethod->skCanvas_, nullptr);
+    EXPECT_DOUBLE_EQ(viewScale, DEFAULT_DOUBLE1);
 }
 
 /**
@@ -127,7 +127,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg002, TestSize.Level1)
 {
     // Access to private properties and methods is implemented using macro definitions during testing.
     auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(nullptr);
-    EXPECT_FALSE(paintMethod == nullptr);
+    EXPECT_NE(paintMethod, nullptr);
     for (auto color : CANDIDATE_COLORS) {
         paintMethod->SetFillColor(color);
         EXPECT_EQ(paintMethod->fillState_.GetColor(), color);
@@ -136,8 +136,8 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg002, TestSize.Level1)
 
     Ace::Pattern imagePattern;
     paintMethod->SetFillPattern(imagePattern);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), 0);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), 0);
+    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), DEFAULT_DOUBLE0);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImgSrc(), NULL_STR);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetRepetition(), NULL_STR);
     imagePattern.SetImageWidth(IDEAL_WIDTH);
@@ -145,8 +145,8 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg002, TestSize.Level1)
     imagePattern.SetImgSrc(IMAGE_SRC);
     imagePattern.SetRepetition(REPETITION_STR);
     paintMethod->SetFillPattern(imagePattern);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
+    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
+    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImgSrc(), IMAGE_SRC);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetRepetition(), REPETITION_STR);
     
@@ -203,8 +203,8 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg003, TestSize.Level1)
 
     Ace::Pattern imagePattern;
     paintMethod->SetStrokePattern(imagePattern);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), 0);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), 0);
+    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), DEFAULT_DOUBLE0);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImgSrc(), NULL_STR);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetRepetition(), NULL_STR);
     imagePattern.SetImageWidth(IDEAL_WIDTH);
@@ -212,8 +212,8 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg003, TestSize.Level1)
     imagePattern.SetImgSrc(IMAGE_SRC);
     imagePattern.SetRepetition(REPETITION_STR);
     paintMethod->SetStrokePattern(imagePattern);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
+    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
+    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImgSrc(), IMAGE_SRC);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetRepetition(), REPETITION_STR);
 
@@ -236,18 +236,18 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg003, TestSize.Level1)
 
     for (double item : CANDIDATE_DOUBLES) {
         paintMethod->SetLineWidth(item);
-        EXPECT_EQ(paintMethod->strokeState_.GetLineWidth(), item);
+        EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetLineWidth(), item);
         paintMethod->SetMiterLimit(item);
-        EXPECT_EQ(paintMethod->strokeState_.GetMiterLimit(), item);
+        EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetMiterLimit(), item);
     }
 
     paintMethod->SetLineDash(CANDIDATE_DOUBLES);
     for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
-        EXPECT_EQ(paintMethod->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
+        EXPECT_DOUBLE_EQ(paintMethod->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
     }
     for (double item : CANDIDATE_DOUBLES) {
         paintMethod->SetLineDashOffset(item);
-        EXPECT_EQ(paintMethod->GetLineDash().dashOffset, item);
+        EXPECT_DOUBLE_EQ(paintMethod->GetLineDash().dashOffset, item);
     }
 
     for (auto textAlign : CANDIDATE_TEXT_ALIGNS) {
@@ -286,7 +286,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg004, TestSize.Level1)
     EXPECT_FALSE(paintMethod == nullptr);
     for (double item : CANDIDATE_DOUBLES) {
         paintMethod->SetAlpha(item);
-        EXPECT_EQ(paintMethod->globalState_.GetAlpha(), item);
+        EXPECT_DOUBLE_EQ(paintMethod->globalState_.GetAlpha(), item);
     }
     for (auto compositeOperation : CANDIDATE_COMPOSITE_OPERATIONS) {
         paintMethod->SetCompositeType(compositeOperation);
@@ -312,17 +312,17 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg005, TestSize.Level1)
     paintMethod->SetShadowOffsetY(CANDIDATE_DOUBLES[0]);
     paintMethod->SetShadowBlur(CANDIDATE_DOUBLES[0]);
     EXPECT_FALSE(paintMethod->HasShadow());
-    EXPECT_EQ(paintMethod->shadow_.GetOffset().GetX(), CANDIDATE_DOUBLES[0]);
-    EXPECT_EQ(paintMethod->shadow_.GetOffset().GetY(), CANDIDATE_DOUBLES[0]);
-    EXPECT_EQ(paintMethod->shadow_.GetBlurRadius(), CANDIDATE_DOUBLES[0]);
+    EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetOffset().GetX(), CANDIDATE_DOUBLES[0]);
+    EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetOffset().GetY(), CANDIDATE_DOUBLES[0]);
+    EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetBlurRadius(), CANDIDATE_DOUBLES[0]);
     for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
         paintMethod->SetShadowOffsetX(CANDIDATE_DOUBLES[i]);
         paintMethod->SetShadowOffsetY(CANDIDATE_DOUBLES[i]);
         paintMethod->SetShadowBlur(CANDIDATE_DOUBLES[i]);
         EXPECT_TRUE(paintMethod->HasShadow());
-        EXPECT_EQ(paintMethod->shadow_.GetOffset().GetX(), CANDIDATE_DOUBLES[i]);
-        EXPECT_EQ(paintMethod->shadow_.GetOffset().GetY(), CANDIDATE_DOUBLES[i]);
-        EXPECT_EQ(paintMethod->shadow_.GetBlurRadius(), CANDIDATE_DOUBLES[i]);
+        EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetOffset().GetX(), CANDIDATE_DOUBLES[i]);
+        EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetOffset().GetY(), CANDIDATE_DOUBLES[i]);
+        EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetBlurRadius(), CANDIDATE_DOUBLES[i]);
     }
 }
 
