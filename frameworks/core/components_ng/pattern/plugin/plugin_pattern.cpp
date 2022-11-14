@@ -216,6 +216,7 @@ void PluginPattern::CreatePluginSubContainer()
 std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
+#ifdef ENABLE_ROSEN_BACKEND
     drawDelegate->SetDrawRSFrameCallback(
         [weak = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
             auto plugin = weak.Upgrade();
@@ -232,6 +233,7 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
             rsNode->AddChild(node, -1);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         });
+#endif
     return drawDelegate;
 }
 

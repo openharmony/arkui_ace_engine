@@ -44,8 +44,10 @@ public:
 
 private:
     OHOS::sptr<Rosen::Window> dragWindow_;
+#ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::RSNode> rootNode_;
     std::shared_ptr<Rosen::RSUIDirector> rsUiDirector_;
+#endif
 };
 } // namespace OHOS::Ace
 

@@ -262,12 +262,14 @@ void UIContentImpl::DestroyUIDirector()
     if (!pipelineContext) {
         return;
     }
+#ifdef ENABLE_ROSEN_BACKEND
     auto rsUIDirector = pipelineContext->GetRSUIDirector();
     if (!rsUIDirector) {
         return;
     }
     LOGI("Destroying old rsUIDirectory");
     rsUIDirector->Destroy();
+#endif
 }
 
 void UIContentImpl::DestroyCallback() const
@@ -358,6 +360,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
     LOGI("UIContent: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
         apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
+#ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
@@ -367,7 +370,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             rsUiDirector->Init();
         }
     }
-
+#endif
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
     float density = 1.0f;
