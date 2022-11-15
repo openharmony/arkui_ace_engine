@@ -108,6 +108,7 @@ public:
 
     static void RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper);
     void RemoveChildInRenderTree(int32_t index);
+    void RemoveAllChildInRenderTree();
 
     void ResetHostNode();
 
