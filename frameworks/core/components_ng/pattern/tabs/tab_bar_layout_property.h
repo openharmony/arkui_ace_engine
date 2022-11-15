@@ -44,6 +44,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
         value->propTabBarProperty_ = CloneTabBarProperty();
         value->propAxis_ = CloneAxis();
+        value->propIndicator_ = CloneIndicator();
         return value;
     }
 
@@ -52,6 +53,7 @@ public:
         LayoutProperty::Reset();
         ResetTabBarProperty();
         ResetAxis();
+        ResetIndicator();
     }
 
     RectF GetIndicatorRect(int32_t index);

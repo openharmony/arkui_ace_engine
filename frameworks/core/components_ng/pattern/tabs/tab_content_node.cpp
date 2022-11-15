@@ -44,8 +44,7 @@ void TabContentNode::OnDetachFromMainTree()
 
     auto deletedIdx = swiper->GetChildFlatIndex(GetId()).second;
     auto currentIdx = swiperPattern->GetCurrentShownIndex();
-    LOGD("Deleting tab: %{public}d, currentTab: %{public}d", deletedIdx,
-        swiperPattern->GetCurrentShownIndex());
+    LOGD("Deleting tab: %{public}d, currentTab: %{public}d", deletedIdx, swiperPattern->GetCurrentShownIndex());
 
     // Removing currently shown tab, focus on first after that
     if (currentIdx == deletedIdx) {
@@ -55,8 +54,7 @@ void TabContentNode::OnDetachFromMainTree()
 
     // Removing tab before current, re-focus on the same tab with new index
     if (currentIdx > deletedIdx) {
-        LOGD("RE-activate TAB with new IDX %{public}d from idx %{public}d",
-            currentIdx-1, deletedIdx);
+        LOGD("RE-activate TAB with new IDX %{public}d from idx %{public}d", currentIdx - 1, deletedIdx);
         swiperPattern->GetSwiperController()->SwipeToWithoutAnimation(currentIdx - 1);
     }
 }
