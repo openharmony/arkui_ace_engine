@@ -39,7 +39,7 @@ public:
     virtual void SetBackBorder() = 0;
     virtual void SetImageFit(int32_t value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
-    virtual void SetFitMaxSize(bool value) = 0;
+    virtual void SetFitOriginSize(bool value) = 0;
     virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) = 0;
     virtual void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) = 0;
     virtual void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) = 0;
