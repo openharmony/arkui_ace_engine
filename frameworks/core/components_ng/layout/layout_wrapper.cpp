@@ -94,6 +94,16 @@ void LayoutWrapper::RemoveChildInRenderTree(int32_t index)
     wrapper->isActive_ = false;
 }
 
+void LayoutWrapper::RemoveAllChildInRenderTree()
+{
+    for (auto& child : childrenMap_) {
+        child.second->isActive_ = false;
+    }
+    if (layoutWrapperBuilder_) {
+        layoutWrapperBuilder_->RemoveAllChildInRenderTree();
+    }
+}
+
 void LayoutWrapper::ResetHostNode()
 {
     hostNode_.Reset();
