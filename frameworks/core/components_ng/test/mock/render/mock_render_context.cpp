@@ -13,18 +13,30 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
-void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame) {}
+void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame)
+{
+    requestFrame_ = requestFrame;
+}
 
-void RenderContext::RequestNextFrame() const {}
+void RenderContext::RequestNextFrame() const
+{
+    if (requestFrame_) {
+        requestFrame_();
+    }
+}
 
-void RenderContext::SetHostNode(const WeakPtr<FrameNode>& host) {}
+void RenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
+{
+    host_ = host;
+}
 
 RefPtr<FrameNode> RenderContext::GetHost() const
 {
-    return nullptr;
+    return host_.Upgrade();
 }
 
 void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
