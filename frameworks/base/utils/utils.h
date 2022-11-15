@@ -74,7 +74,7 @@
 #define DEFINE_COMPARE_OPERATOR_WITH_PROPERTIES(type, PROPS) \
     bool operator==(const type& other) const                 \
     {                                                        \
-        if (&other != this) {                                \
+        if (&other == this) {                                \
             return true;                                     \
         }                                                    \
         return LOOP_COMPARE(PROPS);                          \
