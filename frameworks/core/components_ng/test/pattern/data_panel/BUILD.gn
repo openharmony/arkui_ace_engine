@@ -54,6 +54,7 @@ ohos_unittest("data_panel_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/mock_pattern.h",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_rosen_modier_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/theme/mock_theme.cpp",

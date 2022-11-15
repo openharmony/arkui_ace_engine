@@ -23,6 +23,7 @@ group("pattern_unittest") {
     "common_view:common_view_test_ng",
     "custom_paint:custom_paint_pattern_test_ng",
     "data_panel:data_panel_pattern_test_ng",
+    "divider:divider_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "gauge:gauge_pattern_test_ng",
     "gesture:gesture_pattern_test_ng",
@@ -52,6 +53,5 @@ group("pattern_unittest") {
     "xcomponent:xcomponent_pattern_test_ng",
 
     # "stepper:stepper_pattern_test_ng",
-    # "divider:divider_pattern_test_ng",
   ]
 }

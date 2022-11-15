@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#include "mock_render_context.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_COLOR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_COLOR_H
 
-#include "core/components_ng/render/render_context.h"
+#include <cstdint>
 
-namespace OHOS::Ace::NG {
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return AceType::MakeRefPtr<MockRenderContext>();
-}
-} // namespace OHOS::Ace::NG
+namespace OHOS::Ace::Testing {
+class TestingColor {
+public:
+    TestingColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {}
+    ~TestingColor() = default;
+};
+} // namespace OHOS::Ace::Testing
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_COLOR_H

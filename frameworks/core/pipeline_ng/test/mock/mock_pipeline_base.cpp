@@ -18,7 +18,10 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr double DISPLAY_WIDTH = 720;
+constexpr double DISPLAY_HEIGHT = 1280;
+}
 class Window : public AceType {
     DECLARE_ACE_TYPE(Window, AceType);
 };
@@ -70,8 +73,10 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 
 void PipelineBase::Destroy() {}
 
+void PipelineBase::RequestFrame() {}
+
 Rect PipelineBase::GetCurrentWindowRect() const
 {
-    return { 0.0f, 0.0f, 1.0f, 1.0f };
+    return {0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT};
 }
 } // namespace OHOS::Ace
