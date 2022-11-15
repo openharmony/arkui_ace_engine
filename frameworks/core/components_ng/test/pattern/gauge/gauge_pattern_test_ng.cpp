@@ -45,7 +45,7 @@ constexpr float MAX_WIDTH = 500.0f;
 constexpr float MAX_HEIGHT = 500.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 constexpr float NEGATIVE_NUMBER = -100;
-constexpr float INFINITE = Size::INFINITE_SIZE;
+constexpr float INFINITE = std::numeric_limits<float>::max();
 constexpr float SMALL_WIDTH = 400.0f;
 constexpr float SMALL_HEIGHT = 400.0f;
 constexpr bool SKIP_MEASURE = true;
