@@ -53,7 +53,6 @@ ohos_unittest("select_overlay_manager_test_ng") {
 
     # self
     "select_overlay_manager_test_ng.cpp",
-    "select_overlay_proxy_test_ng.cpp",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
