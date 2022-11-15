@@ -39,6 +39,12 @@ ohos_unittest("js_inspector_test") {
     "inspect_list_test.cpp",
     "inspect_marquee_test.cpp",
     "inspect_menu_test.cpp",
+    "inspect_navigation_bar_test.cpp",
+    "inspect_node_test.cpp",
+    "inspect_option_test.cpp",
+    "inspect_panel_test.cpp",
+    "inspect_picker_test.cpp",
+    "inspect_picker_view_test.cpp",
   ]
 
   deps = [
