@@ -147,6 +147,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
   }
   external_deps += [ "c_utils:utils" ]
   sources += [
+    "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
@@ -164,11 +165,13 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/base/log",
     "$ace_root/frameworks",
     "$ace_root",
+    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf",
     "//third_party/flutter/engine/flutter/assets",
     "//third_party/flutter/engine",
     "//third_party",
     "//commonlibrary/c_utils/base/include",
   ]
+  deps += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf" ]
 }
 
 ###############################################################################
