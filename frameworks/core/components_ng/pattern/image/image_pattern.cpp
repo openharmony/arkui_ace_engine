@@ -217,12 +217,12 @@ void ImagePattern::LoadImageDataIfNeed()
     UpdateInternalResource(currentSourceInfo);
     std::optional<Color> svgFillColorOpt = std::nullopt;
     if (currentSourceInfo.IsSvg()) {
-        svgFillColorOpt = imageRenderProperty->GetSvgFillColor() ? imageRenderProperty->GetSvgFillColor()
-                                                                 : currentSourceInfo.GetFillColor();
+        svgFillColorOpt = imageRenderProperty->GetSvgFillColor().has_value() ? imageRenderProperty->GetSvgFillColor()
+                                                                             : currentSourceInfo.GetFillColor();
     }
+
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
-        (currentSourceInfo.IsSvg() && svgFillColorOpt.has_value() &&
-            loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
+        (currentSourceInfo.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
         loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier));
         loadingCtx_->SetSvgFillColor(svgFillColorOpt);
@@ -316,7 +316,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     if (!sourceInfo.IsInternalResource()) {
         return;
     }
-    
+
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
