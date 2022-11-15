@@ -15,7 +15,6 @@
 
 #include "frameworks/core/pipeline/base/element_register.h"
 #include "core/components/custom_paint/render_custom_paint.h"
-#include "core/components/custom_paint/flutter_render_custom_paint.h"
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
