@@ -16,7 +16,6 @@
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
-
 #ifndef ENABLE_ROSEN_BACKEND
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
@@ -31,5 +30,4 @@ void AnimationUtils::Animate(
     const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
 {}
 #endif
-
 } // namespace OHOS::Ace
