@@ -253,6 +253,8 @@ public:
 
     OffsetF GetOffsetRelativeToWindow() const;
 
+    OffsetF GetPaintRectOffset() const;
+
     void SetActive(bool active) override;
 
     bool IsActive() const
