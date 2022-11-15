@@ -34,11 +34,11 @@ namespace OHOS::Ace::NG {
 class GridRowColMethodTestNg : public testing::Test {};
 
 /**
- * @tc.name: GridRowDefault000
+ * @tc.name: GridRowDefault001
  * @tc.desc: Test the default values of GridRow's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColMethodTestNg, GridRowDefault000, TestSize.Level1)
+HWTEST_F(GridRowColMethodTestNg, GridRowDefault001, TestSize.Level1)
 {
     GridRowModelNG gridRowModelNG;
     gridRowModelNG.Create();
@@ -77,11 +77,11 @@ HWTEST_F(GridRowColMethodTestNg, GridRowDefault000, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridRowDefault001
+ * @tc.name: GridRowDefault002
  * @tc.desc: Test GridRow's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColMethodTestNg, GridRowDefault001, TestSize.Level1)
+HWTEST_F(GridRowColMethodTestNg, GridRowDefault002, TestSize.Level1)
 {
     GridRowModelNG gridRowModelNG;
 
@@ -107,11 +107,11 @@ HWTEST_F(GridRowColMethodTestNg, GridRowDefault001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridColDefault000
+ * @tc.name: GridColDefault001
  * @tc.desc: Test the default values of GridCol's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColMethodTestNg, GridColDefault000, TestSize.Level1)
+HWTEST_F(GridRowColMethodTestNg, GridColDefault001, TestSize.Level1)
 {
     GridColModelNG gridColModelNG;
     gridColModelNG.Create();
@@ -143,11 +143,11 @@ HWTEST_F(GridRowColMethodTestNg, GridColDefault000, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridColDefault001
+ * @tc.name: GridColDefault002
  * @tc.desc: Test GridCol's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColMethodTestNg, GridColDefault001, TestSize.Level1)
+HWTEST_F(GridRowColMethodTestNg, GridColDefault002, TestSize.Level1)
 {
     GridColModelNG gridColModelNG;
     RefPtr<V2::GridContainerSize> spanVal = AceType::MakeRefPtr<V2::GridContainerSize>(1);
