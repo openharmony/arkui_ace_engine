@@ -144,6 +144,7 @@ ohos_unittest("ImageAnimatorElementTest") {
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
+    "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
 
     # others
     "$ace_root/frameworks/core/components/box/render_box.cpp",

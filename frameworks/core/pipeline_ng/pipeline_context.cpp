@@ -43,7 +43,7 @@
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
-#include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
@@ -399,8 +399,9 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         LOGE("rootNode_ is nullptr");
         return;
     }
-    GridSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
-    GridSystemManager::GetInstance().OnSurfaceChanged(width);
+
+    ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
+    ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
     if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF) {
         CalcSize idealSize { CalcLength(width), CalcLength(height) };
