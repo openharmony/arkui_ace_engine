@@ -196,10 +196,6 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(
 
 void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (firstLayout_) {
-        gridLayoutInfo_.gridMatrix_.clear();
-        firstLayout_ = false;
-    }
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     Axis axis = gridLayoutInfo_.axis_;
@@ -218,6 +214,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int32_t colIndex = 0;
     int32_t itemIndex = 0;
     itemsPosition_.clear();
+    gridLayoutInfo_.gridMatrix_.clear();
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childLayoutWrapper) {
@@ -274,23 +271,25 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto childPosition = itemsPosition_.find(index);
         if (childPosition != itemsPosition_.end()) {
             childOffset = itemsPosition_.at(index);
+            // TODO: add center position when grid item is less than ceil.
+            childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
+            childWrapper->Layout();
+        } else {
+            LayoutWrapper::RemoveChildInRenderTree(childWrapper);
         }
-        // TODO: add center position when grid item is less than ceil.
-        childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
-        childWrapper->Layout();
     }
 
     for (const auto& mainLine : gridLayoutInfo_.gridMatrix_) {
-        int32_t itemIdex = -1;
+        int32_t itemIndex = -1;
         for (const auto& crossLine : mainLine.second) {
-            // If item index is the same, must be the same GridItem, need't layout again.
-            if (itemIdex == crossLine.second) {
+            // If item index is the same, must be the same GridItem, needn't layout again.
+            if (itemIndex == crossLine.second) {
                 continue;
             }
-            itemIdex = crossLine.second;
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
+            itemIndex = crossLine.second;
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
             if (!wrapper) {
-                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
+                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIndex);
                 break;
             }
             auto layoutProperty = wrapper->GetLayoutProperty();
