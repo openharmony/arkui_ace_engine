@@ -41,10 +41,9 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
-
     // register image frame node to pipeline context to receive memory level notification and window state change
     // notification
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(nodeId);
     pipeline->AddWindowStateChangedCallback(nodeId);
@@ -136,7 +135,10 @@ void ImageModelNG::SetAutoResize(bool autoResize)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize);
 }
 
-void ImageModelNG::SetSyncMode(bool syncMode) {}
+void ImageModelNG::SetSyncMode(bool syncMode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SyncMode, syncMode);
+}
 
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 {
@@ -153,7 +155,10 @@ void ImageModelNG::SetOnDragMove(OnDragDropFunc&& onDragMove) {}
 
 void ImageModelNG::SetOnDrop(OnDragDropFunc&& onDrop) {}
 
-void ImageModelNG::SetCopyOption(const CopyOptions& copyOption) {}
+void ImageModelNG::SetCopyOption(const CopyOptions& copyOption)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, CopyOptions, copyOption);
+}
 
 bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)
 {
