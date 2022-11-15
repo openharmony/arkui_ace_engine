@@ -95,7 +95,7 @@ static double HandleDoubleType(napi_value ParameterNApi, napi_env env)
 
 static std::string HandleStringType(napi_value ParameterNApi, napi_env env)
 {
-   size_t ret = 0;
+    size_t ret = 0;
     std::string ParameterStr;
     int32_t ParameterInt = 0;
     napi_valuetype valueType = napi_undefined;

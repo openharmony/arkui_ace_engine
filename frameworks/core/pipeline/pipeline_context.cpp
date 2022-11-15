@@ -95,7 +95,6 @@
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr int64_t SEC_TO_NANOSEC = 1000000000;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";

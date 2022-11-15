@@ -537,7 +537,7 @@ double RenderCustomPaint::PaintMeasureText(const std::string& text, double fontS
     builder->PushStyle(txtStyle);
     builder->AddText(StringUtils::Str8ToStr16(text));
     auto paragraph = builder->Build();
-    if(!paragraph) {
+    if (!paragraph) {
         return 0.0;
     }
     paragraph->Layout(Size::INFINITE_SIZE);
