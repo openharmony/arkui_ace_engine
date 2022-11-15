@@ -22,6 +22,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/grid_layout/render_grid_layout_item.h"
 #include "core/components_v2/grid/grid_scroll_controller.h"
@@ -356,6 +357,30 @@ double RenderGridScroll::GetSize(const Size& src, bool isMain) const
     return isMain ? src.Height() : src.Width();
 }
 
+void RenderGridScroll::SizeChangeOffset(double newWindowHeight)
+{
+    LOGD("list newWindowHeight = %{public}f", newWindowHeight);
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
+    // only need to offset vertical lists
+    if (textFieldManager && (useScrollable_ == SCROLLABLE::VERTICAL)) {
+        // only when textField is onFocus
+        if (!textFieldManager->GetOnFocusTextField().Upgrade()) {
+            return;
+        }
+        auto position = textFieldManager->GetClickPosition().GetY();
+        double offset = newWindowHeight + GetGlobalPoint().GetY() - position;
+        if (LessOrEqual(offset, 0.0)) {
+            // negative offset to scroll down
+            textFieldOffset_ = offset;
+            LOGD("size change offset applied, %{public}f", offset);
+        }
+    }
+}
+
 bool RenderGridScroll::GetGridSize()
 {
     double rowSize = ((gridHeight_ > 0.0) && (gridHeight_ < GetLayoutParam().GetMaxSize().Height()))
@@ -389,6 +414,7 @@ bool RenderGridScroll::GetGridSize()
         rowSize_ = rowSize;
         colSize_ = colSize;
         CreateScrollable();
+        SizeChangeOffset(rowSize);
         return true;
     }
     return false;
@@ -677,6 +703,10 @@ void RenderGridScroll::LoadForward()
 
 void RenderGridScroll::CalculateViewPort()
 {
+    if (textFieldOffset_) {
+        currentOffset_ += textFieldOffset_.value();
+        textFieldOffset_.reset();
+    }
     while (!NearZero(currentOffset_) || needCalculateViewPort_) {
         if (currentOffset_ > 0) {
             // [currentOffset_] > 0  means grid items are going to move down
