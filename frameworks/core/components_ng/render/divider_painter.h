@@ -20,7 +20,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class DividerPainter {

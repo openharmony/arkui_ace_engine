@@ -13,10 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_FORWARD_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_FORWARD_H
+
+#ifndef ACE_UNITTEST
+namespace OHOS::Rosen {
+class RSNode;
+namespace Drawing {
+class Canvas;
+class RectF;
+} // namespace Drawing
+} // namespace OHOS::Rosen
 namespace OHOS::Ace {
-int32_t Container::CurrentId()
-{
-    return 0;
-}
+using RSCanvas = Rosen::Drawing::Canvas;
+using RSRect = Rosen::Drawing::RectF;
+using RSNode = Rosen::RSNode;
 } // namespace OHOS::Ace
+#else
+#include "core/components_ng/render/drawing_mock.h"
+#endif
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_FORWARD_H

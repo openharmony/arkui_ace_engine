@@ -88,5 +88,4 @@ public:
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
 };
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H
