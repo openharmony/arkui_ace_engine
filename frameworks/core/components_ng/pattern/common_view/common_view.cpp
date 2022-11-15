@@ -34,6 +34,7 @@ void CommonView::Create()
     int32_t nodeId = stack->ClaimNodeId();
     auto blankNode = FrameNode::GetOrCreateFrameNode(
         V2::COMMON_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CommonViewPattern>(); });
+    blankNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     stack->Push(blankNode);
 }
 
