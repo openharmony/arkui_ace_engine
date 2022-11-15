@@ -41,4 +41,6 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
     calcLayoutConstraint_->minSize = constraint.minSize;
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
 }
+
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible) const {}
 } // namespace OHOS::Ace::NG
