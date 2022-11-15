@@ -212,7 +212,10 @@ public:
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
-    virtual void OnModifyDone();
+    void MarkModifyDone();
+
+protected:
+    virtual void OnModifyDone() {}
 
 private:
     WeakPtr<FrameNode> host_;

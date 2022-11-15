@@ -557,7 +557,7 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
-    eventHub_->OnModifyDone();
+    eventHub_->MarkModifyDone();
     if (IsResponseRegion()) {
         auto parent = GetParent();
         while (parent) {
