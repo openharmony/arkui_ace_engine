@@ -38,7 +38,7 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
 void UINode::Build() {}
 void UINode::SetActive(bool active) {}
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */, bool /*silently*/)
 {
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
@@ -51,10 +51,10 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */)
     child->SetParent(Claim(this));
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
 {
     CHECK_NULL_VOID(parent);
-    parent->AddChild(AceType::Claim(this), slot);
+    parent->AddChild(AceType::Claim(this), slot, silently);
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)

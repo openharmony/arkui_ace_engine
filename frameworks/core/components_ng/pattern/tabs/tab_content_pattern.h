@@ -28,7 +28,8 @@ class ACE_EXPORT TabContentPattern : public Pattern {
     DECLARE_ACE_TYPE(TabContentPattern, Pattern);
 
 public:
-    explicit TabContentPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
+    explicit TabContentPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder),
+        tabBarParam_(std::string(""), std::string(""), nullptr) {}
     ~TabContentPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -49,8 +50,22 @@ public:
         return MakeRefPtr<TabContentLayoutProperty>();
     }
 
+    void SetTabBar(const std::string& text, const std::string& icon,
+        TabBarBuilderFunc&& builder)
+    {
+        tabBarParam_.SetText(text);
+        tabBarParam_.SetIcon(icon);
+        tabBarParam_.SetBuilder(move(builder));
+    }
+
+    const TabBarParam& GetTabBarParam() const
+    {
+        return tabBarParam_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
+    TabBarParam tabBarParam_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };
