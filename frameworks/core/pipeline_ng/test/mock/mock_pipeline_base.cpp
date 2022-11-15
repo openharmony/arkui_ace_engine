@@ -35,6 +35,14 @@ class OffscreenCanvas : public AceType {
 };
 enum class FrontendType {};
 
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
+void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
+
+void PipelineBase::OnActionEvent(const std::string& action) {}
+
+void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
+
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
     return AceType::MakeRefPtr<MockPipelineBase>();
@@ -51,12 +59,6 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
 {
     return 1;
 }
-
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
-
-void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
-
-void PipelineBase::OnActionEvent(const std::string& action) {}
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {

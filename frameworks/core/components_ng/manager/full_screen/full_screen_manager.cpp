@@ -23,8 +23,6 @@ namespace OHOS::Ace::NG {
 
 void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto parentNode = frameNode->GetParent();
@@ -39,8 +37,6 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
     if (!resultForParent.second) {
         return;
     }
-
-    auto layoutProperty = frameNode->GetLayoutProperty();
     auto geometryNode = frameNode->GetGeometryNode();
     auto originGeometryNode = geometryNode->Clone();
     auto resultForGeo = originGeometryNode_.try_emplace(nodeId, originGeometryNode);
@@ -48,8 +44,8 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
         return;
     }
     // TODO: remove the original property of padding&margin
-    auto rootWidth = context->GetRootWidth();
-    auto rootHeight = context->GetRootHeight();
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto calcRootWidth = CalcLength(rootWidth);
     auto calcRootHeight = CalcLength(rootHeight);
     CalcSize idealSize = { calcRootWidth, calcRootHeight };
@@ -61,6 +57,7 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
     parentLayoutConstraint.maxSize.SetHeight(static_cast<float>(rootHeight));
     geometryNode->SetParentLayoutConstraint(parentLayoutConstraint);
     frameNode->UpdateLayoutConstraint(layoutConstraint);
+    frameNode->GetGeometryNode()->SetMarginFrameOffset(OffsetF { 0.0f, 0.0f });
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     rootNode->RebuildRenderContextTree();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
