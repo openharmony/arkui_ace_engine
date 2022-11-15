@@ -64,5 +64,11 @@ class ViewStackProcessor {
      */
     public static FinishAndLocalUpdate(elmtId: number): void  { 
     }
+
+    static MakeUniqueId() : number {
+        return ViewStackProcessor.nextId++
+    }
+
+    private static nextId : number = 1;
   }
   
