@@ -25,8 +25,9 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid_container/grid_container_model_ng.h"
 #include "core/components_ng/pattern/grid_container/grid_container_pattern.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -38,10 +39,10 @@ using std::endl;
 
 namespace {
 
-constexpr float DEFAULT_WIDTH = 800;
+constexpr float DEFAULT_WIDTH = 800.0f;
 constexpr int32_t DEFAULT_COLUMN_NUM = 8;
-constexpr float DEFAULT_SPAN_WIDTH = 71; // To modify
-constexpr float DEFAULT_OFFSET = 95; // To modify
+constexpr float DEFAULT_SPAN_WIDTH = 71.0f; // To modify
+constexpr float DEFAULT_OFFSET = 95.0f;     // To modify
 
 void MeasureLayout(RefPtr<LayoutWrapper>& container, RefPtr<LayoutWrapper>& text)
 {
@@ -96,11 +97,11 @@ private:
 };
 
 /**
- * @tc.name: DefaultProperty000
+ * @tc.name: DefaultProperty001
  * @tc.desc: Test default properties of grid-container.
  * @tc.type: FUNC
  */
-HWTEST_F(GridContainerPatternTestNg, DefaultProperty000, TestSize.Level1)
+HWTEST_F(GridContainerPatternTestNg, DefaultProperty001, TestSize.Level1)
 {
     GridContainerInfo::Builder builder;
     GridContainerModelNG modelNG;
@@ -120,11 +121,11 @@ HWTEST_F(GridContainerPatternTestNg, DefaultProperty000, TestSize.Level1)
 }
 
 /**
- * @tc.name: BuildContainer000
+ * @tc.name: BuildContainer001
  * @tc.desc: Test GridContainer build width.
  * @tc.type: FUNC
  */
-HWTEST_F(GridContainerPatternTestNg, BuildContainer000, TestSize.Level1)
+HWTEST_F(GridContainerPatternTestNg, BuildContainer001, TestSize.Level1)
 {
     auto layoutWrapper = CreateGridContainerWithChild();
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(0);

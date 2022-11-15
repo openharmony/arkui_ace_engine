@@ -35,7 +35,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr float DEFAULT_SPAN_WIDTH = 100;
+constexpr float DEFAULT_SPAN_WIDTH = 100.0f;
 constexpr uint8_t DEFAULT_COLUMNS = 8;
 constexpr float DEFAULT_GRID_ROW_WIDTH = (DEFAULT_SPAN_WIDTH * DEFAULT_COLUMNS);
 constexpr uint8_t DEFAULT_OFFSET = 7;
@@ -170,11 +170,11 @@ void GridRowColPatternTestNg::TestGridColGeometry(
 }
 
 /**
- * @tc.name: Algorithm000
+ * @tc.name: Algorithm001
  * @tc.desc: Test GridRow Measure().
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm000, TestSize.Level1)
+HWTEST_F(GridRowColPatternTestNg, Algorithm001, TestSize.Level1)
 {
     TestGridColWidth(0, 0);
     TestGridColWidth(1, 1);
@@ -182,11 +182,11 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm000, TestSize.Level1)
 }
 
 /**
- * @tc.name: Algorithm001
+ * @tc.name: Algorithm002
  * @tc.desc: Test GridRow layout algorithm with different span/offset.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm001, TestSize.Level1)
+HWTEST_F(GridRowColPatternTestNg, Algorithm002, TestSize.Level1)
 {
     // span + offset <= columns
     constexpr uint8_t span = 6;
@@ -203,11 +203,11 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Algorithm002
+ * @tc.name: Algorithm003
  * @tc.desc: Test GridRow layout algorithm with different sizetype.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm002, TestSize.Level1)
+HWTEST_F(GridRowColPatternTestNg, Algorithm003, TestSize.Level1)
 {
     /* update grid-row columns of LG size */
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -226,14 +226,14 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm002, TestSize.Level1)
 }
 
 /**
- * @tc.name: Algorithm003
+ * @tc.name: Algorithm004
  * @tc.desc: Test GridRow layout algorithm with different gutter.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm003, TestSize.Level1)
+HWTEST_F(GridRowColPatternTestNg, Algorithm004, TestSize.Level1)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
-    constexpr float gutterVal = 20;
+    constexpr float gutterVal = 20.0f;
     layoutProperty->UpdateGutter(V2::Gutter(Dimension(gutterVal)));
     auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
     auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
@@ -246,11 +246,11 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm003, TestSize.Level1)
 }
 
 /**
- * @tc.name: Algorithm004
+ * @tc.name: Algorithm005
  * @tc.desc: Test GridRow layout algorithm with different direction.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm004, TestSize.Level1)
+HWTEST_F(GridRowColPatternTestNg, Algorithm005, TestSize.Level1)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -263,11 +263,11 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm004, TestSize.Level1)
 }
 
 /**
- * @tc.name: Algorithm005
+ * @tc.name: Algorithm006
  * @tc.desc: Test GridCol layout order.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm005, TestSize.Level1)
+HWTEST_F(GridRowColPatternTestNg, Algorithm006, TestSize.Level1)
 {
     auto colLayoutFront = colNodes_.front()->GetLayoutProperty<GridColLayoutProperty>();
     colLayoutFront->UpdateOrder(V2::GridContainerSize(6));
