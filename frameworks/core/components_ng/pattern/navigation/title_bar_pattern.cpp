@@ -36,7 +36,6 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     if (!titleBarLayoutProperty->HasNoPixMap()) {
         return;
     }
-    backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
     if (titleBarLayoutProperty->HasImageSource()) {
         backButtonLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());

@@ -34,7 +34,6 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr Dimension WINDOW_WIDTH = 520.0_vp;
 constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
 
 namespace {
@@ -180,17 +179,6 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navigationLayoutProperty);
-
-    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
-        auto context = hostNode->GetContext();
-        CHECK_NULL_VOID(context);
-        if (context->GetCurrentRootWidth() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
-            navigationLayoutProperty->UpdateNavigationMode(NavigationMode::SPLIT);
-        } else {
-            navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
-        }
-    }
-
     const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
     auto geometryNode = layoutWrapper->GetGeometryNode();
