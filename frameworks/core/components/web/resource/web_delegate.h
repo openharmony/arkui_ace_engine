@@ -26,6 +26,10 @@
 #include <ui/rs_surface_node.h>
 #endif
 
+// #include <GLES3/gl3.h>
+// #include <EGL/egl.h>
+// #include <EGL/eglext.h>
+
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
@@ -36,10 +40,20 @@
 #include "nweb_handler.h"
 #include "nweb_helper.h"
 #include "nweb_hit_testresult.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "surface.h"
+#endif
 #include "window.h"
 #endif
 
 namespace OHOS::Ace {
+
+// typedef struct WindowsSurfaceInfoTag {
+//     void * window;
+//     EGLDisplay display;
+//     EGLContext context;
+//     EGLSurface surface;
+// }WindowsSurfaceInfo;
 
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
@@ -303,11 +317,7 @@ public:
 #ifdef OHOS_STANDARD_SYSTEM
     // TODO: add to separate this file into three file, base file, component impl and ng impl.
     void InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface);
-#ifdef ENABLE_ROSEN_BACKEND
-    void InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface> surface = nullptr);
-#else
     void InitOHOSWeb(const WeakPtr<PipelineBase>& context);
-#endif
     void PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context);
     void InitWebViewWithWindow();
     void ShowWebView();
@@ -404,7 +414,15 @@ public:
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
-
+    void SetDrawSize(const Size& drawSize);
+    void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
+#if defined(ENABLE_ROSEN_BACKEND)
+    void SetSurface(const sptr<Surface>& surface);
+    sptr<Surface> surface_ = nullptr;
+#endif
+    void SetWebRendeGlobalPos(const Offset& pos) {
+        offset_ = pos;
+    }
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -469,10 +487,9 @@ private:
 
     void UpdateSettting(bool useNewPipe = false);
 
-#if defined(ENABLE_ROSEN_BACKEND)
     std::string GetCustomScheme();
-    void InitWebViewWithSurface(sptr<Surface> surface);
-#endif
+    void InitWebViewWithSurface();
+    // void GLContextInit(void* window);    
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -522,6 +539,17 @@ private:
     std::string bundleDataPath_;
     RefPtr<PixelMap> pixelMap_ = nullptr;
     bool isRefreshPixelMap_ = false;
+    Size drawSize_;
+    Offset offset_;
+    bool isEnhanceSurface_ = false;
+    void *enhanceSurfaceInfo_ = nullptr;
+    // EGLNativeWindowType mEglWindow;
+    // EGLDisplay mEGLDisplay = EGL_NO_DISPLAY;
+    // EGLConfig mEGLConfig = nullptr;
+    // EGLContext mEGLContext = EGL_NO_CONTEXT;
+    // EGLContext mSharedEGLContext = EGL_NO_CONTEXT;
+    // EGLSurface mEGLSurface = nullptr;
+    // WindowsSurfaceInfo surfaceInfo_;
 #endif
 };
 

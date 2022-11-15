@@ -1337,11 +1337,16 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
     auto rosenRenderSurface = DynamicCast<NG::RosenRenderSurface>(surface);
     if (!rosenRenderSurface) {
         LOGI("source is nullptr, initialize with window");
-        InitOHOSWeb(context, sptr<Surface>(nullptr));
+        // InitOHOSWeb(context, sptr<Surface>(nullptr));
+        PrepareInitOHOSWeb(context);
+        if (!isCreateWebView_) {
+            InitWebViewWithWindow();
+            isCreateWebView_ = true;
+        }
         return;
     }
-    auto rosenSurface = rosenRenderSurface->GetSurface();
-    InitOHOSWeb(context, rosenSurface);
+    SetSurface(rosenRenderSurface->GetSurface());
+    InitOHOSWeb(context);
 #endif
 }
 
@@ -1457,25 +1462,103 @@ void WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                             webCom->GetWindowExitEventId(), oldContext);
 }
 
-#ifdef ENABLE_ROSEN_BACKEND
-void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface> surface)
-{
-    PrepareInitOHOSWeb(context);
-    if (!isCreateWebView_) {
-        isCreateWebView_ = true;
-        InitWebViewWithSurface(surface);
+#if 0
+EGLConfig getConfig(int version, EGLDisplay eglDisplay) {
+    int attribList[] = {
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_ALPHA_SIZE, 8,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_NONE
+    };
+    EGLConfig configs = NULL;
+    int configsNum;
+    if (!eglChooseConfig(eglDisplay, attribList, &configs, 1, &configsNum)) {
+        LOGE("eglChooseConfig ERROR");
+        return NULL;
     }
+    return configs;
 }
-#else
+
+void WebDelegate::GLContextInit(void* window)
+{
+    if (!window) {
+        return;
+    }
+    LOGD("GLContextInit window = %{public}p", window);
+    mEglWindow = static_cast<EGLNativeWindowType>(window);
+
+    // 1. create sharedcontext
+    mEGLDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (mEGLDisplay == EGL_NO_DISPLAY) {
+        LOGE("unable to get EGL display.");
+        return;
+    }
+
+    EGLint eglMajVers, eglMinVers;
+    if (!eglInitialize(mEGLDisplay, &eglMajVers, &eglMinVers)) {
+        mEGLDisplay = EGL_NO_DISPLAY;
+        LOGE("unable to initialize display");
+        return;
+    }
+
+    mEGLConfig = getConfig(3, mEGLDisplay);
+    if (mEGLConfig == nullptr) {
+        LOGE("GLContextInit config ERROR");
+        return;
+    }
+
+    // 2. Create EGL Surface from Native Window
+    EGLint winAttribs[] = {EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_SRGB_KHR, EGL_NONE};
+    if (mEglWindow) {
+        mEGLSurface = eglCreateWindowSurface(mEGLDisplay, mEGLConfig, mEglWindow, winAttribs);
+        if (mEGLSurface == nullptr) {
+            LOGE("eglCreateContext eglSurface is null");
+            return;
+        }
+    }
+
+    // 3. Create EGLContext from
+    int attrib3_list[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_NONE
+    };
+
+    mEGLContext = eglCreateContext(mEGLDisplay, mEGLConfig, mSharedEGLContext, attrib3_list);
+
+    if (!eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext)) {
+        LOGE("eglMakeCurrent error = %{public}d", eglGetError());
+    }
+
+    glViewport(offsetX, offsetY, width_, height_);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glFlush();
+    glFinish();
+    eglSwapBuffers(mEGLDisplay, mEGLSurface);
+}
+#endif
+
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     PrepareInitOHOSWeb(context);
     if (!isCreateWebView_) {
         isCreateWebView_ = true;
-        InitWebViewWithWindow();
+        if (isEnhanceSurface_) {
+            // GLContextInit(nullptr);
+            InitWebViewWithSurface();
+        } else {
+#ifdef ENABLE_ROSEN_BACKEND
+            InitWebViewWithSurface();
+#else
+            InitWebViewWithWindow();
+#endif
+        }
     }
 }
-#endif
 
 void WebDelegate::RegisterOHOSWebEventAndMethord()
 {
@@ -2003,16 +2086,15 @@ std::string WebDelegate::GetCustomScheme()
     return customScheme;
 }
 
-void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
+void WebDelegate::InitWebViewWithSurface()
 {
     LOGI("Create webview with surface");
     auto context = context_.Upgrade();
-    if (!context || !surface) {
+    if (!context) {
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), surface]() {
-            wptr<Surface> surfaceWeak(surface);
+        [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             OHOS::NWeb::NWebInitArgs initArgs;
@@ -2023,18 +2105,35 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
+            bool isEnhanceSurface = delegate->isEnhanceSurface_;
+            initArgs.is_enhance_surface = isEnhanceSurface;
             std::string customScheme = delegate->GetCustomScheme();
             if (!customScheme.empty()) {
                 LOGI("custome scheme %{public}s", customScheme.c_str());
                 initArgs.web_engine_args_to_add.push_back(
                     std::string("--ohos-custom-scheme=").append(customScheme));
             }
-            sptr<Surface> surface = surfaceWeak.promote();
-            CHECK_NULL_VOID(surface);
-            delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);
-            if (delegate->nweb_ == nullptr) {
-                LOGE("fail to get webview instance");
-                return;
+            if (isEnhanceSurface) {
+                LOGI("Create webview with isEnhanceSurface");
+                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(delegate->enhanceSurfaceInfo_, initArgs);
+                if (delegate->nweb_ == nullptr) {
+                    LOGE("fail to get webview instance");
+                    return;
+                }
+            } else {
+#ifdef ENABLE_ROSEN_BACKEND
+                LOGI("Create webview with surface in");
+                wptr<Surface> surfaceWeak(delegate->surface_);
+                sptr<Surface> surface = surfaceWeak.promote();
+                CHECK_NULL_VOID(surface);
+                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);
+                if (delegate->nweb_ == nullptr) {
+                    LOGE("fail to get webview instance");
+                    return;
+                }
+#else
+
+#endif
             }
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             if (delegate->cookieManager_ == nullptr) {
@@ -3401,4 +3500,20 @@ void WebDelegate::SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern)
     webPattern_ = webPattern;
 }
 
+void WebDelegate::SetDrawSize(const Size& drawSize)
+{
+    drawSize_ = drawSize;
+}
+
+void WebDelegate::SetEnhanceSurfaceFlag(const bool& isEnhanceSurface)
+{
+    isEnhanceSurface_ = isEnhanceSurface;
+}
+
+#ifdef ENABLE_ROSEN_BACKEND
+void WebDelegate::SetSurface(const sptr<Surface>& surface)
+{
+    surface_ = surface;
+}
+#endif
 } // namespace OHOS::Ace

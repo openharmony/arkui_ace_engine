@@ -18,6 +18,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/web/render_web.h"
+#include "core/pipeline/layers/hole_layer.h"
 #include "flutter/fml/memory/ref_counted.h"
 
 namespace OHOS::Ace {
@@ -29,12 +30,15 @@ public:
     void DumpTree(int32_t depth) override;
 #if !defined(PREVIEW) and defined(OHOS_STANDARD_SYSTEM)
     void OnPaintFinish() override;
+    void Paint(RenderContext& context, const Offset& offset) override;
+    RenderLayer GetRenderLayer() override;
 #endif
 
 private:
     void PerformLayout() override;
 #if !defined(PREVIEW) and defined(OHOS_STANDARD_SYSTEM)
-    bool isCreateWebView_ = false;
+    // bool isCreateWebView_ = false;
+    RefPtr<Flutter::HoleLayer> holeLayer_;
 #endif
 };
 
