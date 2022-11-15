@@ -513,7 +513,7 @@ void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string&
     PaintText(offset, x, y, true);
 }
 
-double RenderCustomPaint::PaintMeasureText(const std::string& text, double fontSize,
+double RosenRenderCustomPaint::MeasureTextInner(const std::string& text, double fontSize,
     int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
 {
     using namespace Constants;

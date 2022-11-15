@@ -517,7 +517,7 @@ void FlutterRenderCustomPaint::StrokeText(const Offset& offset, const std::strin
     PaintText(offset, x, y, true);
 }
 
-double RenderCustomPaint::PaintMeasureText(const std::string& text, double fontSize,
+double FlutterRenderCustomPaint::MeasureTextInner(const std::string& text, double fontSize,
     int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
 {
     return 0.0;
