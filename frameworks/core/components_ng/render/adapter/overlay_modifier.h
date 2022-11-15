@@ -31,7 +31,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -76,7 +76,7 @@ public:
             paraStyle.fontSize_ = fontSize.Value();
             auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
             CHECK_NULL_VOID(builder);
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto pipelineContext = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             builder->PushStyle(ToRSTextStyle(pipelineContext, textStyle));
             builder->AddText(StringUtils::Str8ToStr16(overlayOptions.content));

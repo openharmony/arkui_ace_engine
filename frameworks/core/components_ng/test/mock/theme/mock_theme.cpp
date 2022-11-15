@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/modifier_adapter.h"
+#include "core/components/theme/theme_manager.h"
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
+ThemeManager::ThemeManager() = default;
 
-#ifndef ENABLE_ROSEN_BACKEND
-void ModifierAdapter::RemoveModifier(int32_t modifierId) {}
-#endif
-
-} // namespace OHOS::Ace::NG
+RefPtr<Theme> ThemeManager::GetTheme(ThemeType type)
+{
+    return nullptr;
+}
+} // namespace OHOS::Ace
