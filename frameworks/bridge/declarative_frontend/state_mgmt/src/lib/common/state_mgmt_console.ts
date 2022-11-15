@@ -14,9 +14,13 @@
  */
 
 
-// use own class for logging
-// allows to remap separately from other use of aceConsole
-//
+/**
+ * state mgmt library uses its own class for logging
+* allows to remap separately from other use of aceConsole
+*
+* everything in this file is framework internal
+*/
+
 class stateMgmtConsole {
     public static log (...args : any) : void {
         aceConsole.log(...args);

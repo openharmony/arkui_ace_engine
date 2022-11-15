@@ -52,7 +52,7 @@ const testViewAppStorageFU = tsuite("Full update: View AppStorge", () => {
     public aboutToBeDeleted() {
       console.debug(`${this.id__()}:${this.constructor.name}: aboutToBeDeleted`);
       this.__playCount.aboutToBeDeleted();
-      SubscriberManager.Get().delete(this.id__());
+      SubscriberManager.Delete(this.id__());
     }
 
     render() {

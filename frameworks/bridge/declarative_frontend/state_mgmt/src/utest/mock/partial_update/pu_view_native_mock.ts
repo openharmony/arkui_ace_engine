@@ -60,4 +60,7 @@ abstract class NativeViewPartialUpdate {
     console.warn("NativeViewPU(Mock).isLazyItemRender() -  unimplemented!");
     return false;
   }
+
+  setCardId(cardId: number): void {}
+  getCardId(): number { return -1; } 
 }

@@ -12,6 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * SynchedPropertySimpleOneWayPU
+ * 
+ * all definitions in this file are framework internal
+ */
 
 class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<T> {
 
