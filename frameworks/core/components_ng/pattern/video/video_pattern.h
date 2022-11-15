@@ -60,9 +60,19 @@ public:
         muted_ = muted;
     }
 
+    bool GetMuted() const
+    {
+        return muted_;
+    }
+
     void UpdateAutoPlay(bool autoPlay)
     {
         autoPlay_ = autoPlay;
+    }
+
+    bool GetAutoPlay() const
+    {
+        return autoPlay_;
     }
 
     void UpdateLoop(bool loop)
@@ -70,9 +80,19 @@ public:
         loop_ = loop;
     }
 
+    bool GetLoop() const
+    {
+        return loop_;
+    }
+
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
+    }
+
+    double GetProgressRate() const
+    {
+        return progressRate_;
     }
 
     FocusPattern GetFocusPattern() const override

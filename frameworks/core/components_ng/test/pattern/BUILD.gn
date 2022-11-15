@@ -33,6 +33,7 @@ group("pattern_unittest") {
     "stepper:stepper_pattern_test_ng",
     "text:text_pattern_test_ng",
     "textfield:textfield_pattern_test_ng",
+    "video:video_pattern_test_ng",
     "xcomponent:xcomponent_pattern_test_ng",
   ]
 }
