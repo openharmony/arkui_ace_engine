@@ -68,6 +68,7 @@ public:
     void PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const;
     void PaintProgress(RSCanvas& canvas, ArcData arcData, bool useEffect = false, bool useAnimator = false,
         float percent = 0.0f) const;
+    void PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData) const;
 
     void SetDate(float date)
     {
