@@ -22,6 +22,7 @@ group("pattern_unittest") {
     "common_view:common_view_test_ng",
     "custom_paint:custom_paint_pattern_test_ng",
     "flex:flex_pattern_unit_test",
+    "linear_layout:linear_layout_creator_test_ng",
     "patternlock:patternlock_pattern_test_ng",
     "qrcode:qrcode_pattern_test_ng",
     "rating:rating_pattern_test_ng",
