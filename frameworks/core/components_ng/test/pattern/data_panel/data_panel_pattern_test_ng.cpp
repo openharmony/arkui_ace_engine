@@ -53,7 +53,7 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelLayoutPropertyTest001, TestSize.Level
     dataPanel.Create(VALUES, MAX, TYPECYCLE);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
     EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX);
     EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), VALUES);
@@ -71,9 +71,9 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelLayoutPropertyTest002, TestSize.Level
     dataPanel.Create(VALUES, MAX, TYPECYCLE);
     dataPanel.SetEffect(CLOSE_EFFECT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
-    EXPECT_FALSE(dataPanelPaintProperty == nullptr);
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
     EXPECT_EQ(dataPanelPaintProperty->GetEffectValue(), !CLOSE_EFFECT);
 }
 
@@ -88,16 +88,16 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelMeasureTest003, TestSize.Level1)
     dataPanel.Create(VALUES, MAX, TYPECYCLE);
     dataPanel.SetEffect(!CLOSE_EFFECT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
 
-    // Create LayoutWrapper and set checkBoxLayoutAlgorithm.
+    // Create LayoutWrapper and set dataPanelLayoutAlgorithm.
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    EXPECT_NE(geometryNode, nullptr);
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto dataPanelPattern = frameNode->GetPattern<DataPanelPattern>();
-    EXPECT_FALSE(dataPanelPattern == nullptr);
+    EXPECT_NE(dataPanelPattern, nullptr);
     auto dataPanelLayoutAlgorithm = dataPanelPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(dataPanelLayoutAlgorithm == nullptr);
+    EXPECT_NE(dataPanelLayoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(dataPanelLayoutAlgorithm));
 
     /**
