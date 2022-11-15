@@ -14,34 +14,24 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-ohos_unittest("js_inspector_test") {
-  module_out_path = "$test_output_path/js_inspector"
+ohos_unittest("linear_layout_test_ng") {
+  module_out_path = "$test_output_path/linear_layout"
 
-  sources = [
-    "inspect_badge_test.cpp",
-    "inspect_button_test.cpp",
-    "inspect_camera_test.cpp",
-    "inspect_canvas_test.cpp",
-    "inspect_chart_test.cpp",
-    "inspect_dialog_test.cpp",
-    "inspect_div_test.cpp",
-    "inspect_divider_test.cpp",
-    "inspect_form_test.cpp",
-    "inspect_grid_column_test.cpp",
-    "inspect_grid_container_test.cpp",
-    "inspect_grid_row_test.cpp",
-    "inspect_image_animator_test.cpp",
-    "inspect_image_test.cpp",
-  ]
+  sources = [ "linear_layout_test_ng.cpp" ]
 
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
-    "$ace_root/frameworks/core/accessibility/js_inspector:js_inspector_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
+    "$ace_root/frameworks/core/components/test:json",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+    "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_ohos",
+    "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_ohos",
     "//third_party/googletest:gmock_main",
   ]
 
+  part_name = ace_engine_part
   configs = [
-    ":config_js_inspector_test",
+    ":config_linear_layout_test",
     "$ace_root:ace_config",
   ]
   configs += [
@@ -50,7 +40,7 @@ ohos_unittest("js_inspector_test") {
   ]
 }
 
-config("config_js_inspector_test") {
+config("config_linear_layout_test") {
   visibility = [ ":*" ]
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
