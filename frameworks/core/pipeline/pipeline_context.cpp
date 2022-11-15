@@ -95,7 +95,6 @@
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr int64_t SEC_TO_NANOSEC = 1000000000;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
@@ -260,6 +259,13 @@ void PipelineContext::FlushPredictLayout(int64_t deadline)
     for (const auto& dirtyNode : dirtyNodes) {
         dirtyNode->OnPredictLayout(deadline);
     }
+}
+
+double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    return OHOS::Ace::RenderCustomPaint::PaintMeasureText(text, fontSize, fontStyle,
+        fontWeight, fontFamily, letterSpacing);
 }
 
 void PipelineContext::FlushFocus()

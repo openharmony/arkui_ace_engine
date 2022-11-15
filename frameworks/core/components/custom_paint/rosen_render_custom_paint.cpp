@@ -43,6 +43,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
@@ -510,6 +511,37 @@ void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string&
         return;
     }
     PaintText(offset, x, y, true);
+}
+
+double RosenRenderCustomPaint::MeasureTextInner(const std::string& text, double fontSize,
+    int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    using namespace Constants;
+    txt::ParagraphStyle style;
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    if (!fontCollection) {
+        LOGW("fontCollection is null");
+        return 0.0;
+    }
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
+    std::vector<std::string> fontFamilies;
+    txtStyle.font_size = fontSize;
+    FontStyle fontStyleInt = OHOS::Ace::Framework::ConvertStrToFontStyle(std::to_string(fontStyle));
+    txtStyle.font_style = ConvertTxtFontStyle(fontStyleInt);
+    FontWeight fontWeightStr = StringUtils::StringToFontWeight(fontWeight);
+    txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
+    StringUtils::StringSplitter(fontFamily, ',', fontFamilies);
+    txtStyle.font_families = fontFamilies;
+    txtStyle.letter_spacing = letterSpacing;
+    builder->PushStyle(txtStyle);
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
+    if (!paragraph) {
+        return 0.0;
+    }
+    paragraph->Layout(Size::INFINITE_SIZE);
+    return paragraph->GetMaxIntrinsicWidth();
 }
 
 double RosenRenderCustomPaint::MeasureText(const std::string& text, const PaintState& state)

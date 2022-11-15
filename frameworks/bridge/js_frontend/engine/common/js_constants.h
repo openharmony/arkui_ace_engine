@@ -63,6 +63,15 @@ ACE_EXPORT extern const char PROMPT_KEY_BUTTONS[];
 ACE_EXPORT extern const char PROMPT_DIALOG_AUTO_CANCEL[];
 ACE_EXPORT extern const char PROMPT_SHOW_ACTION_MENU[];
 
+// for measure
+ACE_EXPORT extern const char MEASURE_TEXT[];
+ACE_EXPORT extern const char MEASURE_KEY_TEXT_CONTENT[];
+ACE_EXPORT extern const char MEASURE_KEY_FONTSIZE[];
+ACE_EXPORT extern const char MEASURE_KEY_FONTSTYLE[];
+ACE_EXPORT extern const char MEASURE_KEY_FONTWEIGHT[];
+ACE_EXPORT extern const char MEASURE_KEY_FONTFAMILY[];
+ACE_EXPORT extern const char MEASURE_KEY_LETTER_SPACING[];
+
 // for callback
 ACE_EXPORT extern const char APP_DESTROY_FINISH[];
 ACE_EXPORT extern const char CALLBACK_NATIVE[];

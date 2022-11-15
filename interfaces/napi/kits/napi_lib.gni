@@ -19,6 +19,7 @@ common_napi_libs = [
   "device",
   "grid",
   "mediaquery",
+  "measure",
   "prompt",
   "router",
 ]
