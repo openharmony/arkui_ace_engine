@@ -50,7 +50,6 @@ constexpr float SMALL_WIDTH = 400.0f;
 constexpr float SMALL_HEIGHT = 400.0f;
 constexpr bool SKIP_MEASURE = true;
 constexpr bool NO_SKIP_MEASURE = false;
-const Alignment ALIGNMENT = Alignment::BOTTOM_RIGHT;
 } // namespace
 
 class GaugePropertyTestNg : public testing::Test {
@@ -352,34 +351,6 @@ HWTEST_F(GaugePropertyTestNg, GaugePaintPropertyTest005, TestSize.Level1)
     */
     bool forth_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forth_case);
-}
-
-/**
- * @tc.name: GaugePatternTest009
- * @tc.desc: Test Gauge OnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(GaugePropertyTestNg, GaugeLayoutPropertyTest009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create datapnel and set effct.
-     */
-    GaugeModelNG dataPanel;
-    dataPanel.Create(VALUE, MIN, MAX);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. create dataPanel frameNode, get dataPanelPattern and dataPanelWrapper.
-     * @tc.expected: step2. get dataPanelPattern success.
-     */
-    RefPtr<GaugePattern> dataPanelPattern = AceType::DynamicCast<GaugePattern>(frameNode->GetPattern());
-    auto layoutProperty = frameNode->GetLayoutProperty();   
-    dataPanelPattern->OnModifyDone();
-    //EXPECT_EQ(DEFAULT_ALIGNMENT, layoutProperty->GetPositionProperty()->GetAlignmentValue());
-    layoutProperty->UpdateAlignment(ALIGNMENT);
-    dataPanelPattern->OnModifyDone();
-    EXPECT_EQ(ALIGNMENT, layoutProperty->GetPositionProperty()->GetAlignmentValue());
 }
 
 } // namespace OHOS::Ace::NG

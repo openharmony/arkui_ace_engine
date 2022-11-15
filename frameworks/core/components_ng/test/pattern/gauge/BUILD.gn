@@ -61,7 +61,6 @@ ohos_unittest("gauge_pattern_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_theme_manager.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/rosen/mock_canvas.h",
 
     # self
     "gauge_paint_method_test_ng.cpp",

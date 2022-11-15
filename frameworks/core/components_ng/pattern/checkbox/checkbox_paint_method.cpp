@@ -169,5 +169,4 @@ void CheckBoxPaintMethod::DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSP
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
 }
-
 } // namespace OHOS::Ace::NG

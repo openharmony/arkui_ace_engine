@@ -14,9 +14,6 @@
  */
 
 #include "gtest/gtest.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/paint_wrapper.h"
 
 #define private public
 #include "core/components_ng/base/view_stack_processor.h"
@@ -29,14 +26,12 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float VALUE = 50.0f;
-constexpr float MAX = 100.0f;
-constexpr float MIN = 0.0f;
 constexpr float START = 20.0f;
 constexpr float LESS_START = 5.0f;
 constexpr float INTERVAL = 30.0f;
 constexpr float LESS_INTERVAL = -15.0f;
 constexpr float PERCENT = 10.0f;
+
 } // namespace
 class GaugePaintMethodTestNg : public testing::Test {
 public:
@@ -96,38 +91,6 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintPropertyTest001, TestSize.Level1)
     percent = PERCENT;
     result = gaugePaintMethod.ShouldHighLight(start, interval, percent);
     EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: GaugePaintMethodTest002
- * @tc.desc: Test Gauge PaintMethod DrawGauge
- * @tc.type: FUNC
- */
-HWTEST_F(GaugePaintMethodTestNg, GaugePaintPropertyTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create gauge and get frameNode.
-     */
-    GaugeModelNG gauge;
-    gauge.Create(VALUE, MIN, MAX);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
-     * @tc.expected: step2. related function is called.
-     */
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
-    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
-    EXPECT_NE(gaugePaintProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. test DrawGauge
-     * @tc.expected: the result of ShouldHighLight is correct.
-     */
-    RenderRingInfo data;
-    
 }
 
 } // namespace OHOS::Ace::NG
