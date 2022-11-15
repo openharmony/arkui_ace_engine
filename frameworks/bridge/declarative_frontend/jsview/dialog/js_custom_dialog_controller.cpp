@@ -80,6 +80,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSVal> customStyleValue = constructorArg->GetProperty("customStyle");
         if (customStyleValue->IsBoolean()) {
             instance->dialogProperties_.customStyle = customStyleValue->ToBoolean();
+            instance->dialogProperties_.useCustom = customStyleValue->ToBoolean();
         }
 
         // Parse alignment
