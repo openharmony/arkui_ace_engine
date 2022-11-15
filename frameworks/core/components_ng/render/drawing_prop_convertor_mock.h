@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "mock_render_context.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
 
-#include "core/components_ng/render/render_context.h"
+namespace OHOS::Ace {
+RSColor ToRSColor(const Color& color);
+RSPoint ToRSPonit(const NG::PointF& point);
+RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
+} // namespace OHOS::Ace
 
-namespace OHOS::Ace::NG {
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return AceType::MakeRefPtr<MockRenderContext>();
-}
-} // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H

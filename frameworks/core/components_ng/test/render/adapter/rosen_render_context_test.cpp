@@ -52,9 +52,6 @@ void RosenRenderContextTest::TearDown() {}
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest001, TestSize.Level1)
 {
     auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
-    auto pattern = AceType::MakeRefPtr<MockPattern>();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("test", 1, pattern);
-    rosenRenderContext->SetHostNode(frameNode);
     rosenRenderContext->rsNode_ = Rosen::RSCanvasNode::Create(true);
 
     rosenRenderContext->OnFrontBlurRadiusUpdate(Dimension(1.0));

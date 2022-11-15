@@ -15,8 +15,6 @@
 
 #include "core/components_v2/inspector/inspector_constants.h"
 
-#include "core/components/shape/shape_component.h"
-
 namespace OHOS::Ace::V2 {
 // common attrs
 // dimension
@@ -243,24 +241,24 @@ const char BOX_COMPONENT_TAG[] = "BoxComponent";
 const char BLANK_ETS_TAG[] = "Blank";
 
 // button
-ACE_EXPORT extern const char BUTTON_COMPONENT_TAG[] = "ButtonComponent";
-ACE_EXPORT extern const char BUTTON_ETS_TAG[] = "Button";
+const char BUTTON_COMPONENT_TAG[] = "ButtonComponent";
+const char BUTTON_ETS_TAG[] = "Button";
 
 // common view
 const char COMMON_VIEW_ETS_TAG[] = "__Common__";
 // option
-ACE_EXPORT extern const char OPTION_COMPONENT_TAG[] = "OptionComponent";
-ACE_EXPORT extern const char OPTION_ETS_TAG[] = "Option";
+const char OPTION_COMPONENT_TAG[] = "OptionComponent";
+const char OPTION_ETS_TAG[] = "Option";
 
 // divider
-ACE_EXPORT extern const char DIVIDER_COMPONENT_TAG[] = "DividerComponent";
-ACE_EXPORT extern const char DIVIDER_ETS_TAG[] = "Divider";
+const char DIVIDER_COMPONENT_TAG[] = "DividerComponent";
+const char DIVIDER_ETS_TAG[] = "Divider";
 
 // checkbox
 const char CHECKBOX_COMPONENT_TAG[] = "CheckboxComponent";
 const char CHECKBOX_ETS_TAG[] = "Toggle";
-ACE_EXPORT extern const char CHECK_BOX_COMPONENT_TAG[] = "Checkbox";
-ACE_EXPORT extern const char CHECK_BOX_ETS_TAG[] = "Checkbox";
+const char CHECK_BOX_COMPONENT_TAG[] = "Checkbox";
+const char CHECK_BOX_ETS_TAG[] = "Checkbox";
 
 // switch
 const char SWITCH_COMPONENT_TAG[] = "SwitchComponent";
@@ -275,8 +273,8 @@ const char SCROLL_COMPONENT_TAG[] = "ScrollComponent";
 const char SCROLL_ETS_TAG[] = "Scroll";
 
 // calendar
-ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[] = "calendar";
-ACE_EXPORT extern const char CALENDAR_ETS_TAG[] = "Calendar";
+const char CALENDAR_COMPONENT_TAG[] = "calendar";
+const char CALENDAR_ETS_TAG[] = "Calendar";
 
 // badge
 const char BADGE_COMPONENT_TAG[] = "BadgeComponent";
@@ -303,175 +301,175 @@ const char INDEXER_COMPONENT_TAG[] = "IndexerComponent";
 const char INDEXER_ETS_TAG[] = "AlphabetIndexer";
 
 // slider
-ACE_EXPORT extern const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
-ACE_EXPORT extern const char SLIDER_ETS_TAG[] = "Slider";
+const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
+const char SLIDER_ETS_TAG[] = "Slider";
 
 // rating
-ACE_EXPORT extern const char RATING_COMPONENT_TAG[] = "RatingComponent";
-ACE_EXPORT extern const char RATING_ETS_TAG[] = "Rating";
+const char RATING_COMPONENT_TAG[] = "RatingComponent";
+const char RATING_ETS_TAG[] = "Rating";
 
 // progress
-ACE_EXPORT extern const char PROGRESS_COMPONENT_TAG[] = "ProgressComponent";
-ACE_EXPORT extern const char PROGRESS_ETS_TAG[] = "Progress";
+const char PROGRESS_COMPONENT_TAG[] = "ProgressComponent";
+const char PROGRESS_ETS_TAG[] = "Progress";
 
 // datapanel
-ACE_EXPORT extern const char DATA_PANEL_COMPONENT_TAG[] = "PercentageDataPanelComponent";
-ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[] = "DataPanel";
+const char DATA_PANEL_COMPONENT_TAG[] = "PercentageDataPanelComponent";
+const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 
 // sheet
-ACE_EXPORT extern const char SHEET_COMPONENT_TAG[] = "SheetComponent";
-ACE_EXPORT extern const char SHEET_ETS_TAG[] = "Sheet";
+const char SHEET_COMPONENT_TAG[] = "SheetComponent";
+const char SHEET_ETS_TAG[] = "Sheet";
 
 // hyperlink
-ACE_EXPORT extern const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";
-ACE_EXPORT extern const char HYPERLINK_ETS_TAG[] = "Hyperlink";
+const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";
+const char HYPERLINK_ETS_TAG[] = "Hyperlink";
 
 // stepper
-ACE_EXPORT extern const char STEPPER_COMPONENT_TAG[] = "StepperComponent";
-ACE_EXPORT extern const char STEPPER_ETS_TAG[] = "Stepper";
+const char STEPPER_COMPONENT_TAG[] = "StepperComponent";
+const char STEPPER_ETS_TAG[] = "Stepper";
 
 // stepperItem
-ACE_EXPORT extern const char STEPPER_ITEM_COMPONENT_TAG[] = "StepperItemComponentV2";
-ACE_EXPORT extern const char STEPPER_ITEM_ETS_TAG[] = "StepperItem";
+const char STEPPER_ITEM_COMPONENT_TAG[] = "StepperItemComponentV2";
+const char STEPPER_ITEM_ETS_TAG[] = "StepperItem";
 
 // scrollbar
-ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";
-ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[] = "ScrollBar";
+const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";
+const char SCROLL_BAR_ETS_TAG[] = "ScrollBar";
 
 // refresh
-ACE_EXPORT extern const char REFRESH_COMPONENT_TAG[] = "RefreshComponent";
-ACE_EXPORT extern const char REFRESH_ETS_TAG[] = "Refresh";
+const char REFRESH_COMPONENT_TAG[] = "RefreshComponent";
+const char REFRESH_ETS_TAG[] = "Refresh";
 
 // datePicker
-ACE_EXPORT extern const char DATE_PICKER_COMPONENT_TAG[] = "PickerDateComponent";
-ACE_EXPORT extern const char DATE_PICKER_ETS_TAG[] = "DatePicker";
-ACE_EXPORT extern const char TIME_PICKER_COMPONENT_TAG[] = "PickerTimeComponent";
-ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[] = "TimePicker";
+const char DATE_PICKER_COMPONENT_TAG[] = "PickerDateComponent";
+const char DATE_PICKER_ETS_TAG[] = "DatePicker";
+const char TIME_PICKER_COMPONENT_TAG[] = "PickerTimeComponent";
+const char TIME_PICKER_ETS_TAG[] = "TimePicker";
 
 // Radio
-ACE_EXPORT extern const char RADIO_COMPONENT_TAG[] = "RadioComponent<VALUE_TYPE>";
-ACE_EXPORT extern const char RADIO_ETS_TAG[] = "Radio";
+const char RADIO_COMPONENT_TAG[] = "RadioComponent<VALUE_TYPE>";
+const char RADIO_ETS_TAG[] = "Radio";
 
 // gauge
-ACE_EXPORT extern const char GAUGE_COMPONENT_TAG[] = "Gauge";
-ACE_EXPORT extern const char GAUGE_ETS_TAG[] = "Gauge";
+const char GAUGE_COMPONENT_TAG[] = "Gauge";
+const char GAUGE_ETS_TAG[] = "Gauge";
 
 // gridContainer
-ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[] = "GridContainer";
-ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[] = "GridContainer";
+const char GRIDCONTAINER_COMPONENT_TAG[] = "GridContainer";
+const char GRIDCONTAINER_ETS_TAG[] = "GridContainer";
 
 // gridCol
-ACE_EXPORT extern const char GRID_COL_COMPONENT_TAG[] = "GridColComponent";
-ACE_EXPORT extern const char GRID_COL_ETS_TAG[] = "GridColComponent";
+const char GRID_COL_COMPONENT_TAG[] = "GridColComponent";
+const char GRID_COL_ETS_TAG[] = "GridColComponent";
 
 // gridRow
-ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
-ACE_EXPORT extern const char GRID_ROW_ETS_TAG[] = "GridRowComponent";
+const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
+const char GRID_ROW_ETS_TAG[] = "GridRowComponent";
 
 // relativeContainer
-ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainerComponent";
-ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
+const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainerComponent";
+const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
 
 // menu
-ACE_EXPORT extern const char MENU_COMPONENT_TAG[] = "MenuComponent";
-ACE_EXPORT extern const char MENU_TAG[] = "menu";
-ACE_EXPORT extern const char MENU_ETS_TAG[] = "Menu";
-ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
+const char MENU_COMPONENT_TAG[] = "MenuComponent";
+const char MENU_TAG[] = "menu";
+const char MENU_ETS_TAG[] = "Menu";
+const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
 
 // textarea
-ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
-ACE_EXPORT extern const char TEXTAREA_ETS_TAG[] = "TextArea";
+const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
+const char TEXTAREA_ETS_TAG[] = "TextArea";
 
 // textinput
-ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
-ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[] = "TextInput";
+const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
+const char TEXTINPUT_ETS_TAG[] = "TextInput";
 
 // texttimer
-ACE_EXPORT extern const char TEXTTIMER_COMPONENT_TAG[] = "TextTimerComponent";
-ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[] = "TextTimer";
+const char TEXTTIMER_COMPONENT_TAG[] = "TextTimerComponent";
+const char TEXTTIMER_ETS_TAG[] = "TextTimer";
 
 // select
-ACE_EXPORT extern const char SELECT_COMPONENT_TAG[] = "SelectComponent";
-ACE_EXPORT extern const char SELECT_ETS_TAG[] = "Select";
+const char SELECT_COMPONENT_TAG[] = "SelectComponent";
+const char SELECT_ETS_TAG[] = "Select";
 
 // select_popup
-ACE_EXPORT extern const char SELECT_POPUP_COMPONENT_TAG[] = "SelectPopupComponent";
-ACE_EXPORT extern const char SELECT_POPUP_ETS_TAG[] = "SelectPopup";
+const char SELECT_POPUP_COMPONENT_TAG[] = "SelectPopupComponent";
+const char SELECT_POPUP_ETS_TAG[] = "SelectPopup";
 
 // marquee
-ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[] = "MarqueeComponent";
-ACE_EXPORT extern const char MARQUEE_ETS_TAG[] = "Marquee";
+const char MARQUEE_COMPONENT_TAG[] = "MarqueeComponent";
+const char MARQUEE_ETS_TAG[] = "Marquee";
 
 // textclock
-ACE_EXPORT extern const char TEXTCLOCK_COMPONENT_TAG[] = "TextClockComponent";
-ACE_EXPORT extern const char TEXTCLOCK_ETS_TAG[] = "TextClock";
+const char TEXTCLOCK_COMPONENT_TAG[] = "TextClockComponent";
+const char TEXTCLOCK_ETS_TAG[] = "TextClock";
 
 // textpicker
-ACE_EXPORT extern const char TEXT_PICKER_COMPONENT_TAG[] = "PickerTextComponent";
-ACE_EXPORT extern const char TEXT_PICKER_ETS_TAG[] = "TextPicker";
+const char TEXT_PICKER_COMPONENT_TAG[] = "PickerTextComponent";
+const char TEXT_PICKER_ETS_TAG[] = "TextPicker";
 
 // pickertextdialog
-ACE_EXPORT extern const char PICKER_TEXT_DIALOG_COMPONENT_TAG[] = "pickerTextDialog";
-ACE_EXPORT extern const char PICKER_TEXT_DIALOG_ETS_TAG[] = "pickerTextDialog";
+const char PICKER_TEXT_DIALOG_COMPONENT_TAG[] = "pickerTextDialog";
+const char PICKER_TEXT_DIALOG_ETS_TAG[] = "pickerTextDialog";
 
 // canvas
-ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
-ACE_EXPORT extern const char CANVAS_ETS_TAG[] = "Canvas";
+const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
+const char CANVAS_ETS_TAG[] = "Canvas";
 
 // ActionSheet
-ACE_EXPORT extern const char ACTION_SHEET_DIALOG_COMPONENT_TAG[] = "ActionSheet";
-ACE_EXPORT extern const char ACTION_SHEET_DIALOG_ETS_TAG[] = "ActionSheet";
+const char ACTION_SHEET_DIALOG_COMPONENT_TAG[] = "ActionSheet";
+const char ACTION_SHEET_DIALOG_ETS_TAG[] = "ActionSheet";
 
 // AlertDialog
-ACE_EXPORT extern const char ALERT_DIALOG_COMPONENT_TAG[] = "AlertDialog";
-ACE_EXPORT extern const char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
+const char ALERT_DIALOG_COMPONENT_TAG[] = "AlertDialog";
+const char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
 
 // customdialog
-ACE_EXPORT extern const char CUSTOM_DIALOG_COMPONENT_TAG[] = "CustomDialog";
-ACE_EXPORT extern const char CUSTOM_DIALOG_ETS_TAG[] = "CustomDialog";
+const char CUSTOM_DIALOG_COMPONENT_TAG[] = "CustomDialog";
+const char CUSTOM_DIALOG_ETS_TAG[] = "CustomDialog";
 
 // datePickerdialog
-ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
-ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
+const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
+const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
 
 // Normal dialog
-ACE_EXPORT extern const char DIALOG_COMPONENT_TAG[] = "Dialog";
-ACE_EXPORT extern const char DIALOG_ETS_TAG[] = "Dialog";
+const char DIALOG_COMPONENT_TAG[] = "Dialog";
+const char DIALOG_ETS_TAG[] = "Dialog";
 
 // sideBar
-ACE_EXPORT extern const char SIDE_BAR_COMPONENT_TAG[] = "SideBarContainerComponent";
-ACE_EXPORT extern const char SIDE_BAR_ETS_TAG[] = "SideBarContainer";
+const char SIDE_BAR_COMPONENT_TAG[] = "SideBarContainerComponent";
+const char SIDE_BAR_ETS_TAG[] = "SideBarContainer";
 
 // loadingProgress
-ACE_EXPORT extern const char LOADING_PROGRESS_COMPONENT_TAG[] = "LoadingProgressComponent";
-ACE_EXPORT extern const char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
+const char LOADING_PROGRESS_COMPONENT_TAG[] = "LoadingProgressComponent";
+const char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
 
 // checkboxGroup
 const char CHECKBOXGROUP_COMPONENT_TAG[] = "CheckboxGroupComponent";
 const char CHECKBOXGROUP_ETS_TAG[] = "CheckboxGroup";
 
 // timePickerdialog
-ACE_EXPORT extern const char TIME_PICKER_DIALOG_COMPONENT_TAG[] = "TimePickerDialog";
-ACE_EXPORT extern const char TIME_PICKER_DIALOG_ETS_TAG[] = "TimePickerDialog";
+const char TIME_PICKER_DIALOG_COMPONENT_TAG[] = "TimePickerDialog";
+const char TIME_PICKER_DIALOG_ETS_TAG[] = "TimePickerDialog";
 
 // web
-ACE_EXPORT extern const char WEB_COMPONENT_TAG[] = "WebComponent";
-ACE_EXPORT extern const char WEB_ETS_TAG[] = "Web";
+const char WEB_COMPONENT_TAG[] = "WebComponent";
+const char WEB_ETS_TAG[] = "Web";
 
 // richText
-ACE_EXPORT extern const char RICH_TEXT_COMPONENT_TAG[] = "RichTextComponent";
-ACE_EXPORT extern const char RICH_TEXT_ETS_TAG[] = "RichText";
+const char RICH_TEXT_COMPONENT_TAG[] = "RichTextComponent";
+const char RICH_TEXT_ETS_TAG[] = "RichText";
 
 // xcomponent
-ACE_EXPORT extern const char XCOMPONENT_TAG[] = "XComponentComponent";
-ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[] = "XComponent";
+const char XCOMPONENT_TAG[] = "XComponentComponent";
+const char XCOMPONENT_ETS_TAG[] = "XComponent";
 
 // ability_component
-ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
+const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
 // Popup
-ACE_EXPORT extern const char POPUP_ETS_TAG[] = "Popup";
+const char POPUP_ETS_TAG[] = "Popup";
 
 // remote window
-ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
+const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 
 } // namespace OHOS::Ace::V2

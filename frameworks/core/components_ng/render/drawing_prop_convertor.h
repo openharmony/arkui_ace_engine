@@ -23,8 +23,11 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline/pipeline_base.h"
 
+#ifndef ACE_UNITTEST
 namespace OHOS::Ace {
-
+RSColor ToRSColor(const Color& color);
+RSPoint ToRSPonit(const NG::PointF& point);
+RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 RSColor ToRSColor(const Color& color);
 RSColor ToRSColor(const LinearColor& color);
 RSRect ToRSRect(const NG::RectF& rect);
@@ -35,7 +38,8 @@ rosen::TextDirection ToRSTextDirection(const TextDirection& txtDir);
 rosen::TextAlign ToRSTextAlign(const TextAlign& align);
 rosen::WordBreakType ToRSWordBreakType(const WordBreak& wordBreak);
 rosen::TextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle);
-
 } // namespace OHOS::Ace
-
+#else
+#include "core/components_ng/render/drawing_prop_convertor_mock.h"
+#endif
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_H

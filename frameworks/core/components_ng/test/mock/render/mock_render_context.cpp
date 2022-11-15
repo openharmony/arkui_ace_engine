@@ -13,13 +13,19 @@
  * limitations under the License.
  */
 
-#include "mock_render_context.h"
-
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<RenderContext> RenderContext::Create()
+void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame) {}
+
+void RenderContext::RequestNextFrame() const {}
+
+void RenderContext::SetHostNode(const WeakPtr<FrameNode>& host) {}
+
+RefPtr<FrameNode> RenderContext::GetHost() const
 {
-    return AceType::MakeRefPtr<MockRenderContext>();
+    return nullptr;
 }
+
+void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 } // namespace OHOS::Ace::NG
