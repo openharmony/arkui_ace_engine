@@ -15,18 +15,15 @@
 
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 
+#include "core/components/badge/badge_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/badge/badge_theme.h"
 
 namespace OHOS::Ace::NG {
-
-constexpr Dimension NUMERICAL_BADGE_PADDING = 6.0_vp;
-constexpr int MAX_COUNT = 99;
 
 void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -68,7 +65,8 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto badgeWidth = 0.0;
     auto badgeHeight = badgeCircleDiameter;
-    auto countLimit = layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : MAX_COUNT;
+    auto countLimit =
+        layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : badgeTheme->GetMaxCount();
     auto badgeCircleRadius = badgeCircleDiameter / 2;
 
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
@@ -89,7 +87,7 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
         } else if (textData.size() > 1 || messageCount > countLimit) {
-            badgeWidth = textSize.Width() + NUMERICAL_BADGE_PADDING.ConvertToPx() * 2;
+            badgeWidth = textSize.Width() + badgeTheme->GetNumericalBadgePadding().ConvertToPx() * 2;
             badgeWidth = badgeCircleDiameter > badgeWidth ? badgeCircleDiameter : badgeWidth;
             badgeCircleRadius = badgeCircleDiameter / 2;
         }
@@ -143,7 +141,8 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto badgeWidth = 0.0;
     auto badgeCircleRadius = badgeCircleDiameter / 2;
-    auto countLimit = layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : MAX_COUNT;
+    auto countLimit =
+        layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : badgeTheme->GetMaxCount();
 
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
     CHECK_NULL_VOID(textWrapper);
@@ -166,7 +165,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
         } else if (textData.size() > 1 || messageCount > countLimit) {
-            badgeWidth = textSize.Width() + NUMERICAL_BADGE_PADDING.ConvertToPx() * 2;
+            badgeWidth = textSize.Width() + badgeTheme->GetNumericalBadgePadding().ConvertToPx() * 2;
             badgeWidth = badgeCircleDiameter > badgeWidth ? badgeCircleDiameter : badgeWidth;
             badgeCircleRadius = badgeCircleDiameter / 2;
         }
