@@ -147,6 +147,7 @@ public:
 protected:
     int32_t GetItemMainIndex(const RefPtr<RenderNode>& child, bool isMain) const;
     void SetMainSize(Size& dst, const Size& src);
+    void SizeChangeOffset(double newWindowHeight);
     double GetSize(const Size& src, bool isMain = true) const;
     void GetNextGrid(int32_t& curMain, int32_t& curCross) const override;
     void GetPreviousGrid(int32_t& curMain, int32_t& curCross);
@@ -231,6 +232,7 @@ protected:
     bool needCalculateViewPort_ = false;
     double startMainPos_ = 0.0;
     double currentOffset_ = 0.0;
+    std::optional<double> textFieldOffset_;
     double animateDelta_ = 0.0;
     double lastOffset_ = 0.0;
     double firstItemOffset_ = 0.0;
