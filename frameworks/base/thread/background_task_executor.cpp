@@ -17,15 +17,9 @@
 
 #include <pthread.h>
 #include <string>
-#include <functional>
 
 #include "base/log/log.h"
 #include "base/memory/memory_monitor.h"
-#include "frame_trace.h"
-
-using namespace FRAME_TRACE;
-
-static const std::string BG_THREAD_NAME = "ui";
 
 namespace OHOS::Ace {
 namespace {
@@ -89,17 +83,6 @@ bool BackgroundTaskExecutor::PostTask(Task&& task, BgTaskPriority priority)
     if (!running_) {
         return false;
     }
-    if (FrameAwareTraceEnable(BG_THREAD_NAME)) {
-        switch (priority) {
-            case BgTaskPriority::LOW:
-                TraceAndExecute(std::move(task), TraceType::QUICK_TRACE);
-                break;
-            default:
-                TraceAndExecute(std::move(task), TraceType::SLOW_TRACE);
-                break;
-        }
-        return true;
-    }
     switch (priority) {
         case BgTaskPriority::LOW:
             lowPriorityTasks_.emplace_back(std::move(task));
@@ -121,17 +104,6 @@ bool BackgroundTaskExecutor::PostTask(const Task& task, BgTaskPriority priority)
     std::lock_guard<std::mutex> lock(mutex_);
     if (!running_) {
         return false;
-    }
-    if (FrameAwareTraceEnable(BG_THREAD_NAME)) {
-        Task variableTask = task;
-        switch (priority) {
-            case BgTaskPriority::LOW:
-                TraceAndExecute(std::move(variableTask), TraceType::QUICK_TRACE);
-                break;
-            default:
-                TraceAndExecute(std::move(variableTask), TraceType::SLOW_TRACE);
-        }
-        return true;
     }
     switch (priority) {
         case BgTaskPriority::LOW:

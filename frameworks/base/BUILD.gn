@@ -26,7 +26,6 @@ template("ace_base_source_set") {
       "base64:ace_base_base64_$platform",
       "i18n:ace_base_i18n_$platform",
       "resource:ace_resource",
-      "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf",
     ]
 
     configs = [ "$ace_root:ace_config" ]
@@ -58,11 +57,9 @@ template("ace_base_source_set") {
       "utils/time_util.cpp",
     ]
 
-    include_dirs = []
-
     if (platform != "windows") {
       # add secure c API
-      include_dirs += [ "//third_party/bounds_checking_function/include" ]
+      include_dirs = [ "//third_party/bounds_checking_function/include" ]
 
       sources += [
         "//third_party/bounds_checking_function/src/memset_s.c",
@@ -91,7 +88,6 @@ template("ace_base_source_set") {
 
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
-    include_dirs += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
   }
 }
 
