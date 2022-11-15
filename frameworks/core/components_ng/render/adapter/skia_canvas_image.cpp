@@ -181,16 +181,13 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
         (int)(imagePaintConfig_->imageFit_),
         (int)(imagePaintConfig_->imageRepeat_),
         radii,
-        1.0
+        1.0,
+        GetUniqueID(),
+        GetCompressWidth(),
+        GetCompressHeight()
     );
-    int w = GetCompressWidth();
-    int h = GetCompressHeight();
     auto data = GetCompressData();
-    recordingCanvas->DrawImageWithParm(image, std::move(data), w, h, rsImageInfo, paint);
-    if (data) {
-        // should only clear image after sending draw command.
-        ReplaceSkImage({ nullptr, nullptr });
-    }
+    recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
 #else
     canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
 #endif

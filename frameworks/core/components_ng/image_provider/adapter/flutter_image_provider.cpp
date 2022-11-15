@@ -251,11 +251,14 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
         int32_t dstWidth = static_cast<int32_t>(resizeTarget.Width() + 0.5);
         int32_t dstHeight = static_cast<int32_t>(resizeTarget.Height() + 0.5);
 
-        auto skdata = SkData::MakeWithCopy(data->GetData(), data->GetSize());
+        auto skiaImageData = DynamicCast<SkiaImageData>(data);
+        CHECK_NULL_VOID(skiaImageData);
+        auto skdata = skiaImageData->GetSkData();
         auto stripped = ImageCompressor::StripFileHeader(skdata);
         LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(),
             dstWidth, dstHeight);
         skiaCanvasImage->SetCompressData(stripped, dstWidth, dstHeight);
+        skiaCanvasImage->ReplaceSkImage({ nullptr, flutterRenderTaskHolder->unrefQueue });
         callback(skiaCanvasImage);
         return;
     }
@@ -294,6 +297,7 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
             if (compressData) {
                 // replace skImage of [CanvasImage] with [rasterizedImage]
                 skiaCanvasImage->SetCompressData(compressData, width, height);
+                skiaCanvasImage->ReplaceSkImage({ nullptr, flutterRenderTaskHolder->unrefQueue });
             } else {
                 skiaCanvasImage->ReplaceSkImage({ rasterizedImage, flutterRenderTaskHolder->unrefQueue });
             }
