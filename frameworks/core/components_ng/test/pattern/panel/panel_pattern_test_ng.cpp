@@ -231,7 +231,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest002, TestSize.Level1)
 HWTEST_F(PanelPatternTestNg, PanelPatternTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize all properties of texttimer.
+     * @tc.steps: step1. Initialize all properties of panel.
      */
     TestProperty testProperty;
     testProperty.panelType = std::make_optional(PANEL_TYPE_VALUE);
