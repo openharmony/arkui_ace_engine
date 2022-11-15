@@ -38,4 +38,11 @@ const std::list<RefPtr<LayoutWrapper>>& LayoutWrapperBuilder::ExpandAllChildWrap
     return OnExpandChildLayoutWrapper();
 }
 
+void LayoutWrapperBuilder::RemoveAllChildInRenderTree()
+{
+    for (auto& child : wrapperMap_) {
+        child.second->SetActive(false);
+    }
+}
+
 } // namespace OHOS::Ace::NG
