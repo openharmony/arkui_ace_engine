@@ -64,6 +64,8 @@ private:
     void BackToPreNavDestination(const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation);
     void AddBackButtonIconToNavDestination(const RefPtr<UINode>& parent);
     bool CleanNodeInNavigation(const RefPtr<UINode>& parent);
+    void SetBackButtonVisible(const RefPtr<UINode>& navDestination,
+        const RefPtr<UINode>& navRouter, const RefPtr<UINode>& navigation);
 
     RefPtr<UINode> navDestinationNode_;
 };

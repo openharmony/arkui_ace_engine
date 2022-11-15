@@ -19,10 +19,12 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
@@ -214,15 +216,17 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         const auto& childNode = *iter;
         auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(childNode);
-        if (navDestinationNode) {
+        if (navDestinationNode && navDestinationNode != navDestination) {
             navDestination->SetPreNode(navDestinationNode);
             SetOnStateChangeFalse(navDestinationNode, parent);
+            SetBackButtonVisible(navDestination, AceType::Claim(this), parent);
             break;
         }
     }
 
     navigationContentNode->Clean();
     navigationContentNode->AddChild(navDestination);
+    SetBackButtonVisible(navDestination, AceType::Claim(this), parent);
     navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -294,6 +298,42 @@ bool NavRouterGroupNode::CleanNodeInNavigation(const RefPtr<UINode>& parent)
         }
     }
     return false;
+}
+
+void NavRouterGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestination,
+    const RefPtr<UINode>& navRouter, const RefPtr<UINode>& navigation)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigation);
+    CHECK_NULL_VOID(navigationNode);
+    auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto parent = navRouter->GetParent();
+    while (parent) {
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(parent);
+        if (navBarNode) {
+            break;
+        }
+        parent = parent->GetParent();
+    }
+
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(parent);
+    if (navBarNode && layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
+        return;
+    }
+
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestination);
+    CHECK_NULL_VOID(navDestination);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonLayoutProperty);
+    backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    backButtonNode->MarkModifyDone();
 }
 
 } // namespace OHOS::Ace::NG

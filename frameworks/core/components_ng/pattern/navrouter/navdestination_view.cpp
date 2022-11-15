@@ -64,6 +64,7 @@ void NavDestinationView::Create()
         auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonLayoutProperty);
         backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
         backButtonNode->MarkModifyDone();
 
         auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
