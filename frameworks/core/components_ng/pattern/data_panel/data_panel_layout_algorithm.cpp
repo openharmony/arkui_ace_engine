@@ -26,11 +26,6 @@ void DataPanelLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> DataPanelLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, std::nullopt);
-
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
     }
