@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -65,6 +66,7 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     JSClass<JSViewStackProcessor>::StaticMethod(
         "ImplicitPopBeforeContinue", &JSViewStackProcessor::JsImplicitPopBeforeContinue, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("visualState", JSVisualState, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod("MakeUniqueId", &JSViewStackProcessor::JSMakeUniqueId, opt);
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
 }
 
@@ -136,6 +138,12 @@ void JSViewStackProcessor::JsImplicitPopBeforeContinue()
         LOGD("NO Implicit Pop before continue. top component is %{public}s",
             AceType::TypeName(ViewStackProcessor::GetInstance()->GetMainComponent()));
     }
+}
+
+void JSViewStackProcessor::JSMakeUniqueId(const JSCallbackInfo& info)
+{
+    const auto result = ElementRegister::GetInstance()->MakeUniqueId();
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
 } // namespace OHOS::Ace::Framework
