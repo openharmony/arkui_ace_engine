@@ -51,4 +51,11 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
     return impl;
 }
 
+void EventHub::OnModifyDone()
+{
+    if (gestureEventHub_) {
+        gestureEventHub_->OnModifyDone();
+    }
+}
+
 } // namespace OHOS::Ace::NG

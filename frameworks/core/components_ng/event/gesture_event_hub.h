@@ -298,6 +298,8 @@ public:
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
 
+    void OnModifyDone();
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId);

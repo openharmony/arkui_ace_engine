@@ -24,6 +24,7 @@ ohos_unittest("gauge_pattern_test_ng") {
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+    "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_ohos",
     "//third_party/googletest:gmock_main",
   ]
 
