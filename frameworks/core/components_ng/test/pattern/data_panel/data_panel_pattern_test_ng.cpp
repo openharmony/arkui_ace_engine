@@ -15,6 +15,8 @@
 
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-internal.h"
+#include "core/components/common/properties/alignment.h"
+#include "core/pipeline/base/constants.h"
 
 #define private public
 #include "core/components_ng/base/view_stack_processor.h"
@@ -39,6 +41,7 @@ const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 constexpr float NEGATIVE_NUMBER = -100;
 constexpr bool SKIP_MEASURE = true;
 constexpr bool NO_SKIP_MEASURE = false;
+const Alignment ALIGNMENT = Alignment::BOTTOM_RIGHT;
 } // namespace
 
 class DataPanelPropertyTestNg : public testing::Test {
@@ -319,7 +322,7 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPatternTest007, TestSize.Level1)
  * @tc.desc: Test dataPanel pattern OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest005, TestSize.Level1)
+HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create dataPanel and get frameNode.
@@ -382,6 +385,35 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest005, TestSize.Level1
     */
     bool forth_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forth_case);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest009
+ * @tc.desc: Test DataPanel OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelPropertyTestNg, DataPanelLayoutPropertyTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and set effct.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+    dataPanel.SetEffect(CLOSE_EFFECT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create dataPanel frameNode, get dataPanelPattern and dataPanelWrapper.
+     * @tc.expected: step2. get dataPanelPattern success.
+     */
+    RefPtr<DataPanelPattern> dataPanelPattern = AceType::DynamicCast<DataPanelPattern>(frameNode->GetPattern());
+    auto layoutProperty = frameNode->GetLayoutProperty();   
+    dataPanelPattern->OnModifyDone();
+    //EXPECT_EQ(DEFAULT_ALIGNMENT, layoutProperty->GetPositionProperty()->GetAlignmentValue());
+    layoutProperty->UpdateAlignment(ALIGNMENT);
+    dataPanelPattern->OnModifyDone();
+    EXPECT_EQ(ALIGNMENT, layoutProperty->GetPositionProperty()->GetAlignmentValue());
 }
 
 } // namespace OHOS::Ace::NG
