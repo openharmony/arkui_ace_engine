@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define private public
+
 #include "gtest/gtest.h"
 
+#define private public
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
@@ -25,11 +26,11 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-const float START = 20.0f;
-const float LESS_START = 5.0f;
-const float INTERVAL = 30.0f;
-const float LESS_INTERVAL = -15.0f;
-const float PERCENT = 10.0f;
+constexpr float START = 20.0f;
+constexpr float LESS_START = 5.0f;
+constexpr float INTERVAL = 30.0f;
+constexpr float LESS_INTERVAL = -15.0f;
+constexpr float PERCENT = 10.0f;
 
 } // namespace
 class GaugePaintMethodTestNg : public testing::Test {
