@@ -345,7 +345,6 @@ template("ace_core_source_set") {
     ]
 
     deps += [ "$ace_root/frameworks/core/components_part_upd/foreach:ace_core_components_foreach_part_upd_$platform" ]
-    deps += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf" ]
 
     deps += [
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
