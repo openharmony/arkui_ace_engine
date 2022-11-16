@@ -3313,9 +3313,8 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     }
     double radius = 0.0;
     ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
-    if (LessOrEqual(radius, 0.0)) {
-        LOGE("JsShadow Parse radius failed, radius = %{public}lf", radius);
-        return;
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
     std::vector<Shadow> shadows(1);
     shadows.begin()->SetBlurRadius(radius);
