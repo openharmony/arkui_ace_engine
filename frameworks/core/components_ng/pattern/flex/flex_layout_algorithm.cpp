@@ -639,6 +639,10 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         mainAxisSize_ = 0.0f;
     }
     TravelChildrenFlexProps(layoutWrapper, realSize, padding);
+    if (GreatNotEqual(totalFlexWeight_, 0.0f)) {
+        LOGD("Flex weight only supported in match parent");
+        isInfiniteLayout_ = false;
+    }
     selfIdealCrossAxisSize_ = GetCrossAxisSizeHelper(realSize, direction_);
     FlexItemProperties flexItemProperties;
 
