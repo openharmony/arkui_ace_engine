@@ -1527,10 +1527,10 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetPageTransition
                 effect->Translate({ rect.Width(), 0, 0 });
                 break;
             case SlideEffect::BOTTOM:
-                effect->Translate({ rect.Height(), 0, 0 });
+                effect->Translate({ 0, rect.Height(), 0 });
                 break;
             case SlideEffect::TOP:
-                effect->Translate({ -rect.Height(), 0, 0 });
+                effect->Translate({ 0, -rect.Height(), 0 });
                 break;
             default:
                 LOGW("unexpected slide effect");
@@ -1589,7 +1589,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     }
     if (transitionIn) {
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); },
             onFinish);
     } else {
         auto wrappedFinish = [onFinish, weak = WeakPtr<FrameNode>(host)]() {
@@ -1602,7 +1602,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
             }
         };
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, false); },
             wrappedFinish);
     }
     return true;
