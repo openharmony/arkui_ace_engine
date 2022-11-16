@@ -73,6 +73,11 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 
 void PipelineBase::Destroy() {}
 
+double PipelineBase::ConvertPxToVp(const Dimension& /* dimension */) const
+{
+    return 1.0f;
+}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "base/memory/ace_type.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS ::Ace {
@@ -130,6 +132,15 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
     selectOverlayInfo.secondHandle = secondHandleInfo;
     selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo);
     return selectOverlayManager_;
+}
+
+const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
+{
+    if (dragDropManager_) {
+        return dragDropManager_;
+    }
+    dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
+    return dragDropManager_;
 }
 
 uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)

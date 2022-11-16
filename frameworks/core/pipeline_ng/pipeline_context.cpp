@@ -14,6 +14,7 @@
  */
 
 #include "core/pipeline_ng/pipeline_context.h"
+
 #include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -373,6 +374,11 @@ void PipelineContext::SetupSubRootElement()
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;
+}
+
+const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
+{
+    return dragDropManager_;
 }
 
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
