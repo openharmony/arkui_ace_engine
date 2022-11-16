@@ -31,6 +31,11 @@ namespace {
 constexpr bool EVENT_HUB_ENABLE = false;
 constexpr bool APPEAR_VALUE = true;
 constexpr bool DISAPPEAR_VALUE = false;
+const std::string DRAG_STARR_EVENT_TYPE = "drag start";
+const std::string DRAG_ENTER_EVENT_TYPE = "drag enter";
+const std::string DRAG_LEAVE_EVENT_TYPE = "drag leave";
+const std::string DRAG_MOVE_EVENT_TYPE = "drag move";
+const std::string DRAG_DROP_EVENT_TYPE = "drag drop";
 
 const float OLD_X_VALUE = 10.9f;
 const float OLD_Y_VALUE = 11.0f;
@@ -193,5 +198,76 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest003, TestSize.Level1)
     eventHub->SetOnDisappear(onDisappear);
     eventHub->FireOnDisappear();
     EXPECT_EQ(isAppear, DISAPPEAR_VALUE);
+}
+
+/**
+ * @tc.name: EventHubDragEventsTest004
+ * @tc.desc: Create EventHub and set/fire drag related functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub != nullptr);
+
+    /**
+     * @tc.steps: step2. Set EventHub OnDragStart event and fire it.
+     * @tc.expected: OnDragStart is invoked and the temp values are assigned with correct values.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    std::string dragEventType;
+    auto OnDragStartFunc = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */,
+                               const std::string& eventType) -> DragDropInfo {
+        dragEventType = eventType;
+        return {};
+    };
+    eventHub->SetOnDragStart(OnDragStartFunc);
+    EXPECT_TRUE(eventHub->HasOnDragStart());
+    EXPECT_TRUE(eventHub->GetOnDragStart() != nullptr);
+    eventHub->GetOnDragStart()(dragEvent, DRAG_STARR_EVENT_TYPE);
+    EXPECT_EQ(dragEventType, DRAG_STARR_EVENT_TYPE);
+
+    /**
+     * @tc.steps: step3. Set EventHub OnDragEnter event and fire it.
+     * @tc.expected: OnDragEnter is invoked and the temp values are assigned with correct values.
+     */
+    auto OnDragFunc = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */,
+                          const std::string& eventType) { dragEventType = eventType; };
+    auto onDragEnter = OnDragFunc;
+    eventHub->SetOnDragEnter(onDragEnter);
+    eventHub->FireOnDragEnter(dragEvent, DRAG_ENTER_EVENT_TYPE);
+    EXPECT_EQ(dragEventType, DRAG_ENTER_EVENT_TYPE);
+
+    /**
+     * @tc.steps: step4. Set EventHub OnDragLeave event and fire it.
+     * @tc.expected: OnDragLeave is invoked and the temp values are assigned with correct values.
+     */
+    auto onDragLeave = OnDragFunc;
+    eventHub->SetOnDragLeave(onDragLeave);
+    eventHub->FireOnDragLeave(dragEvent, DRAG_LEAVE_EVENT_TYPE);
+    EXPECT_EQ(dragEventType, DRAG_LEAVE_EVENT_TYPE);
+
+    /**
+     * @tc.steps: step5. Set EventHub OnDragMove event and fire it.
+     * @tc.expected: OnDragMove is invoked and the temp values are assigned with correct values.
+     */
+    auto onDragMove = OnDragFunc;
+    eventHub->SetOnDragMove(onDragMove);
+    eventHub->FireOnDragMove(dragEvent, DRAG_MOVE_EVENT_TYPE);
+    EXPECT_EQ(dragEventType, DRAG_MOVE_EVENT_TYPE);
+
+    /**
+     * @tc.steps: step6. Set EventHub OnDrop event and fire it.
+     * @tc.expected: OnDrop is invoked and the temp values are assigned with correct values.
+     */
+    auto onDragDrop = OnDragFunc;
+    eventHub->SetOnDrop(onDragDrop);
+    eventHub->FireOnDragMove(dragEvent, DRAG_DROP_EVENT_TYPE);
+    EXPECT_TRUE(eventHub->HasOnDrop());
+    EXPECT_EQ(dragEventType, DRAG_DROP_EVENT_TYPE);
 }
 } // namespace OHOS::Ace::NG
