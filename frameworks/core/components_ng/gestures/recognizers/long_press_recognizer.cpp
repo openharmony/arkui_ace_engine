@@ -32,6 +32,7 @@ constexpr int32_t MAX_FINGERS = 10;
 void LongPressRecognizer::OnAccepted()
 {
     LOGD("%{public}p long press gesture has been accepted!", this);
+    refereeState_ = RefereeState::SUCCEED;
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
         LongPressInfo info(trackPoint.id);
@@ -73,7 +74,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
-    LOGD("long press recognizer receives touch down event, begin to detect long press event");
+    LOGI("long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     int32_t curDuration = duration_;
     if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
         curDuration = 0;
@@ -86,12 +87,6 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = event;
     auto pointsCount = static_cast<int32_t>(touchPoints_.size());
-
-    if (pointsCount > fingers_) {
-        LOGW("the pointsCount %{public}d is larger than %{public}d fingers_", pointsCount, fingers_);
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        return;
-    }
 
     if (pointsCount == fingers_) {
         refereeState_ = RefereeState::DETECTING;
