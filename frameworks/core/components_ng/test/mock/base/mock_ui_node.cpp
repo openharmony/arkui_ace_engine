@@ -17,10 +17,10 @@
 
 namespace OHOS::Ace::NG {
 UINode::~UINode() {}
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot) {}
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */, bool /*silently*/) {}
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode) {}
 void UINode::Clean() {}
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot) {}
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently) {}
 void UINode::OnRemoveFromParent() {}
 void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const {}
 void UINode::AttachToMainTree() {}
