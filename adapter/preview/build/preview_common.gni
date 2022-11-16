@@ -30,6 +30,7 @@ video_components_support = false
 web_components_support = false
 preview_support = true
 model_component_support = false
+window_scene_support = false
 defines = []
 
 if (defined(web_components_support) && web_components_support) {

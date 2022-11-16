@@ -444,7 +444,7 @@ template("ace_core_source_set") {
       }
     }
 
-    if (defined(config.remote_window_support) && config.remote_window_support) {
+    if (defined(config.remote_window_support) && config.remote_window_support) {  
       if (!use_mingw_win && !use_mac && !use_linux) {
         deps += [
           "$ace_root/frameworks/core/components/remote_window:ace_core_components_remote_window_$platform",
@@ -508,6 +508,10 @@ template("ace_core_source_set") {
         "common/rosen/rosen_window.cpp",
       ]
       deps += [ "//third_party/libuv:uv" ]
+    }
+
+    if (defined(config.window_scene_support) && config.window_scene_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform" ]
     }
 
     cflags_cc = []

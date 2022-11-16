@@ -188,6 +188,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
 #endif
 
+#if defined(WINDW_SCENE_SUPPORT)
+
+#endif
+
 namespace OHOS::Ace::Framework {
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
@@ -508,6 +512,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     { "Model", JSSceneView::JSBind },
+#endif
+#if defined(WINDW_SCENE_SUPPORT)
+
 #endif
 };
 
