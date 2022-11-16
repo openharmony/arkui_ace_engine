@@ -32,8 +32,8 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<TextFieldController> SearchView::Create(
-    std::optional<std::string>& value, std::optional<std::string>& placeholder, std::optional<std::string>& icon)
+RefPtr<TextFieldController> SearchView::Create(const std::optional<std::string>& value,
+    const std::optional<std::string>& placeholder, const std::optional<std::string>& icon)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
@@ -111,6 +111,7 @@ void SearchView::SetPlaceholderColor(const Color& color)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchView::SetPlaceholderFont(const Font& font)
@@ -133,6 +134,7 @@ void SearchView::SetPlaceholderFont(const Font& font)
     if (!font.fontFamilies.empty()) {
         textFieldLayoutProperty->UpdatePlaceholderFontFamily(font.fontFamilies);
     }
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchView::SetTextFont(const Font& font)
@@ -155,6 +157,19 @@ void SearchView::SetTextFont(const Font& font)
     if (!font.fontFamilies.empty()) {
         textFieldLayoutProperty->UpdateFontFamily(font.fontFamilies);
     }
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchView::SetTextAlign(const TextAlign& textAlign)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextAlign(textAlign);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchView::SetCopyOption(const CopyOptions& copyOptions)
@@ -166,6 +181,7 @@ void SearchView::SetCopyOption(const CopyOptions& copyOptions)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateCopyOptions(copyOptions);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchView::SetOnSubmit(ChangeAndSubmitEvent&& onSubmit)
