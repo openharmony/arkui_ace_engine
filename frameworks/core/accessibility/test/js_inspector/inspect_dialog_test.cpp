@@ -69,4 +69,4 @@ HWTEST_F(InspectDialogTest, InspectDialogTest002, TestSize.Level1)
     EXPECT_EQ(inspectDialog.styles_["margin-right"], "0");
     EXPECT_EQ(inspectDialog.styles_["margin-bottom"], "0");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

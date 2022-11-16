@@ -67,4 +67,4 @@ HWTEST_F(InspectImageAnimatorTest, InspectImageAnimatorTest002, TestSize.Level1)
     EXPECT_EQ(inspectImageAnimator.attrs_["disabled"], "false");
     EXPECT_EQ(inspectImageAnimator.attrs_["focusable"], "false");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework
