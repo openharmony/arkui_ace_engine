@@ -215,7 +215,6 @@ void RenderDialogTween::HandleDragUpdate(const Offset& currentPoint)
 void RenderDialogTween::CallOnSuccess(int32_t successType)
 {
     if (onStatusChanged_) {
-        onStatusChanged_(false);
         popDialog_ = true;
     }
     const auto context = context_.Upgrade();
@@ -241,6 +240,9 @@ void RenderDialogTween::CallOnSuccess(int32_t successType)
             if (dialog->onComplete_) {
                 dialog->onComplete_();
             }
+            if (dialog->onStatusChanged_) {
+                dialog->onStatusChanged_(false);
+            }
         });
         animator_->Play();
     } else {
@@ -250,6 +252,9 @@ void RenderDialogTween::CallOnSuccess(int32_t successType)
         }
         if (onComplete_) {
             onComplete_();
+        }
+        if (onStatusChanged_) {
+            onStatusChanged_(false);
         }
     }
     RemoveAccessibilityNode();
@@ -526,7 +531,6 @@ void RenderDialogTween::OnTouchTestHit(
 bool RenderDialogTween::PopDialog()
 {
     if (onStatusChanged_) {
-        onStatusChanged_(false);
         popDialog_ = true;
     }
     const auto context = context_.Upgrade();
@@ -552,6 +556,9 @@ bool RenderDialogTween::PopDialog()
             if (dialog->onComplete_) {
                 dialog->onComplete_();
             }
+            if (dialog->onStatusChanged_) {
+                dialog->onStatusChanged_(false);
+            }
         });
         animator_->Play();
     } else {
@@ -561,6 +568,9 @@ bool RenderDialogTween::PopDialog()
         }
         if (onComplete_) {
             onComplete_();
+        }
+        if (onStatusChanged_) {
+            onStatusChanged_(false);
         }
     }
     RemoveAccessibilityNode();
