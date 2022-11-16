@@ -1161,11 +1161,11 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 
 void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 {
-    auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->CheckBlurRadius(radius)) {
+    const auto& graphics = GetOrCreateGraphics();
+    if (graphics->CheckBlurRadius(radius)) {
         return;
     }
-    backDecoration->UpdateBlurRadius(radius);
+    graphics->UpdateBlurRadius(radius);
 
     auto pipelineBase = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineBase);
@@ -1196,23 +1196,18 @@ void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
+void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 {
-    const auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->CheckBackShadow(shadow)) {
-        return;
-    }
-    backDecoration->UpdateBackShadow(shadow);
     CHECK_NULL_VOID(rsNode_);
-    if (!shadow.GetHardwareAcceleration()) {
-        rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
-    } else {
-        rsNode_->SetShadowElevation(shadow.GetElevation());
+    if (LessOrEqual(shadow.GetBlurRadius(), 0.0)) {
+        rsNode_->SetShadowRadius(0.0);
+        RequestNextFrame();
+        return;
     }
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
-    rsNode_->SetShadowElevation(shadow.GetElevation());
+    rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
     RequestNextFrame();
 }
 
