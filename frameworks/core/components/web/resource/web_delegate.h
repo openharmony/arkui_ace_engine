@@ -47,14 +47,6 @@
 #endif
 
 namespace OHOS::Ace {
-
-// typedef struct WindowsSurfaceInfoTag {
-//     void * window;
-//     EGLDisplay display;
-//     EGLContext context;
-//     EGLSurface surface;
-// }WindowsSurfaceInfo;
-
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
@@ -543,13 +535,6 @@ private:
     Offset offset_;
     bool isEnhanceSurface_ = false;
     void *enhanceSurfaceInfo_ = nullptr;
-    // EGLNativeWindowType mEglWindow;
-    // EGLDisplay mEGLDisplay = EGL_NO_DISPLAY;
-    // EGLConfig mEGLConfig = nullptr;
-    // EGLContext mEGLContext = EGL_NO_CONTEXT;
-    // EGLContext mSharedEGLContext = EGL_NO_CONTEXT;
-    // EGLSurface mEGLSurface = nullptr;
-    // WindowsSurfaceInfo surfaceInfo_;
 #endif
 };
 

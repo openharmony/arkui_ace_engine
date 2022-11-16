@@ -1337,7 +1337,6 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
     auto rosenRenderSurface = DynamicCast<NG::RosenRenderSurface>(surface);
     if (!rosenRenderSurface) {
         LOGI("source is nullptr, initialize with window");
-        // InitOHOSWeb(context, sptr<Surface>(nullptr));
         PrepareInitOHOSWeb(context);
         if (!isCreateWebView_) {
             InitWebViewWithWindow();
@@ -1462,86 +1461,6 @@ void WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                             webCom->GetWindowExitEventId(), oldContext);
 }
 
-#if 0
-EGLConfig getConfig(int version, EGLDisplay eglDisplay) {
-    int attribList[] = {
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-        EGL_RED_SIZE, 8,
-        EGL_GREEN_SIZE, 8,
-        EGL_BLUE_SIZE, 8,
-        EGL_ALPHA_SIZE, 8,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-        EGL_NONE
-    };
-    EGLConfig configs = NULL;
-    int configsNum;
-    if (!eglChooseConfig(eglDisplay, attribList, &configs, 1, &configsNum)) {
-        LOGE("eglChooseConfig ERROR");
-        return NULL;
-    }
-    return configs;
-}
-
-void WebDelegate::GLContextInit(void* window)
-{
-    if (!window) {
-        return;
-    }
-    LOGD("GLContextInit window = %{public}p", window);
-    mEglWindow = static_cast<EGLNativeWindowType>(window);
-
-    // 1. create sharedcontext
-    mEGLDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if (mEGLDisplay == EGL_NO_DISPLAY) {
-        LOGE("unable to get EGL display.");
-        return;
-    }
-
-    EGLint eglMajVers, eglMinVers;
-    if (!eglInitialize(mEGLDisplay, &eglMajVers, &eglMinVers)) {
-        mEGLDisplay = EGL_NO_DISPLAY;
-        LOGE("unable to initialize display");
-        return;
-    }
-
-    mEGLConfig = getConfig(3, mEGLDisplay);
-    if (mEGLConfig == nullptr) {
-        LOGE("GLContextInit config ERROR");
-        return;
-    }
-
-    // 2. Create EGL Surface from Native Window
-    EGLint winAttribs[] = {EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_SRGB_KHR, EGL_NONE};
-    if (mEglWindow) {
-        mEGLSurface = eglCreateWindowSurface(mEGLDisplay, mEGLConfig, mEglWindow, winAttribs);
-        if (mEGLSurface == nullptr) {
-            LOGE("eglCreateContext eglSurface is null");
-            return;
-        }
-    }
-
-    // 3. Create EGLContext from
-    int attrib3_list[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 2,
-        EGL_NONE
-    };
-
-    mEGLContext = eglCreateContext(mEGLDisplay, mEGLConfig, mSharedEGLContext, attrib3_list);
-
-    if (!eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext)) {
-        LOGE("eglMakeCurrent error = %{public}d", eglGetError());
-    }
-
-    glViewport(offsetX, offsetY, width_, height_);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glFlush();
-    glFinish();
-    eglSwapBuffers(mEGLDisplay, mEGLSurface);
-}
-#endif
-
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     PrepareInitOHOSWeb(context);
@@ -1559,7 +1478,6 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
         }
     }
 }
-
 void WebDelegate::RegisterOHOSWebEventAndMethord()
 {
     auto reloadCallback = [weak = WeakClaim(this)]() {
@@ -2131,8 +2049,6 @@ void WebDelegate::InitWebViewWithSurface()
                     LOGE("fail to get webview instance");
                     return;
                 }
-#else
-
 #endif
             }
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();

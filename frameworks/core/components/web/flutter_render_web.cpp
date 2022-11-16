@@ -31,10 +31,6 @@ void FlutterRenderWeb::OnPaintFinish()
     if (!delegate_) {
         return;
     }
-    // if (!isCreateWebView_) {
-    //     isCreateWebView_ = true;
-    //     delegate_->InitWebViewWithWindow();
-    // }
 }
 
 RenderLayer FlutterRenderWeb::GetRenderLayer()

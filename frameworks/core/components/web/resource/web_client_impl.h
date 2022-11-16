@@ -58,7 +58,6 @@ public:
 
     void ReleaseSurface() override;
 
-
     // void SetSurfaceDelegate(const sptr<SURFACE_DELEGATE> &surfaceDelegate)
     // {
     //     surfaceDelegate_ = surfaceDelegate;
