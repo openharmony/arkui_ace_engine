@@ -43,12 +43,12 @@ public:
 private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper);
-    void MeasureRecordedItems(float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper, float& mainLength);
+    void MeasureRecordedItems(
+        float mainSize, float crossSize, float crossGap, LayoutWrapper* layoutWrapper, float& mainLength);
 
     // fill end of viewport
     void FillBlankAtStart(float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper, float& mainLength);
+        LayoutWrapper* layoutWrapper, float crossGap);
     float FillNewLineForward(float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
         LayoutWrapper* layoutWrapper);
 
@@ -74,7 +74,7 @@ private:
     LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const;
     void StripItemsOutOfViewport(LayoutWrapper* layoutWrapper);
-    void ModifyCurrentOffsetWhenReachEnd(float mainSize);
+    void ModifyCurrentOffsetWhenReachEnd(float mainSize, float crossGap);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
 
     uint32_t crossCount_ = 0;
