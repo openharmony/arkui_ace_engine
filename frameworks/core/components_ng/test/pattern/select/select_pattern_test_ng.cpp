@@ -16,6 +16,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#define private public
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
@@ -62,6 +63,30 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
         auto optionPattern = options[i]->GetPattern<OptionPattern>();
         EXPECT_TRUE(optionPattern->GetText() == params[i].first);
     }
+}
+
+/**
+ * @tc.name: SelectLayoutPropertyTest002
+ * @tc.desc: Test Select OnDirtyLayoutWrapperSwap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest002, TestSize.Level1)
+{
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    SelectView::Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    auto layoutWrapper = select->CreateLayoutWrapper();
+    EXPECT_FALSE(layoutWrapper == nullptr);
+    EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    config.skipMeasure = false;
+    EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 }
 
 } // namespace OHOS::Ace::NG

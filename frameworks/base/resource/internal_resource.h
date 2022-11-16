@@ -87,6 +87,7 @@ public:
         TRANSLATE_C2E_SVG,
         SHARE_SVG,
         SIDE_BAR,
+        SPINNER,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.
