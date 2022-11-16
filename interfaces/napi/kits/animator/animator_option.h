@@ -70,9 +70,19 @@ public:
         return onframe_;
     }
 
+    void SetOnframeRef(const napi_ref& onframe)
+    {
+        onframe_ = onframe;
+    }
+
     napi_ref GetOnfinishRef() const
     {
         return onfinish_;
+    }
+
+    void SetOnfinishRef(const napi_ref& onfinish)
+    {
+        onfinish_ = onfinish;
     }
 
     napi_ref GetOncancelRef() const
@@ -80,18 +90,28 @@ public:
         return oncancel_;
     }
 
+    void SetOncancelRef(const napi_ref& oncancel)
+    {
+        oncancel_ = oncancel;
+    }
+
     napi_ref GetOnrepeatRef() const
     {
         return onrepeat_;
     }
 
+    void SetOnrepeatRef(const napi_ref& onrepeat)
+    {
+        onrepeat_ = onrepeat;
+    }
+
 private:
     RefPtr<Animator> animator_;
     std::shared_ptr<AnimatorOption> option_;
-    napi_ref onframe_;
-    napi_ref onfinish_;
-    napi_ref oncancel_;
-    napi_ref onrepeat_;
+    napi_ref onframe_ = nullptr;
+    napi_ref onfinish_ = nullptr;
+    napi_ref oncancel_ = nullptr;
+    napi_ref onrepeat_ = nullptr;
 };
 
 } // namespace OHOS::Ace::Napi
