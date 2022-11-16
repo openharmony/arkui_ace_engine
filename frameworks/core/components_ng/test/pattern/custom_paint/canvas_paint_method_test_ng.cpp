@@ -17,10 +17,8 @@
 #include <sys/types.h>
 
 #include "gtest/gtest.h"
-
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
@@ -38,7 +36,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 class CanvasPaintMethodTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -325,5 +322,4 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg005, TestSize.Level1)
         EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetBlurRadius(), CANDIDATE_DOUBLES[i]);
     }
 }
-
 } // namespace OHOS::Ace::NG

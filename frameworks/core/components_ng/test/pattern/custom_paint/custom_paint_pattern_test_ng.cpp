@@ -354,7 +354,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
 
 /**
  * @tc.name: CustomPaintPatternTestNg007
- * @tc.desc: Test functions about fonts.
+ * @tc.desc: Test functions about text.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg007, TestSize.Level1)
@@ -371,10 +371,28 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg007, TestSize.Level1)
     EXPECT_FALSE(paintMethod->HasTask());
 
     /**
-     * @tc.steps2: Test functions about fonts.
+     * @tc.steps2: Test functions about text.
      * @tc.expected: The task queue of paintMethod is changed to unempty.
      */
+    customPattern->FillText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->StrokeText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    TextAlign textAlign = TextAlign::CENTER;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateTextAlign(textAlign);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    TextBaseline textBaseline = TextBaseline::ALPHABETIC;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateTextBaseline(textBaseline);
+    EXPECT_TRUE(paintMethod->HasTask());
+
     FontWeight weight = FontWeight::BOLD;
+    paintMethod->tasks_.clear();
     customPattern->UpdateFontWeight(weight);
     EXPECT_TRUE(paintMethod->HasTask());
 
@@ -426,6 +444,17 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg008, TestSize.Level1)
     paintMethod->tasks_.clear();
     customPattern->Transform(param);
     EXPECT_TRUE(paintMethod->HasTask());
+
+    customPattern->Scale(DEFAULT_DOUBLE0, DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->Translate(DEFAULT_DOUBLE0, DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->Rotate(DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
 }
 
 /**
@@ -464,6 +493,194 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg009, TestSize.Level1)
 
     paintMethod->tasks_.clear();
     customPattern->AddRect(rect);
+    EXPECT_TRUE(paintMethod->HasTask());
+}
+
+/**
+ * @tc.name: CustomPaintPatternTestNg010
+ * @tc.desc: Test functions about Shadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->tasks_.clear();
+    EXPECT_FALSE(paintMethod->HasTask());
+
+    /**
+     * @tc.steps2: Test functions about Shadow.
+     * @tc.expected: The task queue of paintMethod is changed to unempty.
+     */
+    Color color = Color::BLACK;
+    customPattern->UpdateShadowColor(color);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->UpdateShadowBlur(DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->UpdateShadowOffsetX(DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->UpdateShadowOffsetY(DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+}
+
+/**
+ * @tc.name: CustomPaintPatternTestNg011
+ * @tc.desc: Test functions about Stroke.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->tasks_.clear();
+    EXPECT_FALSE(paintMethod->HasTask());
+
+    /**
+     * @tc.steps2: Test functions about Stroke.
+     * @tc.expected: The task queue of paintMethod is changed to unempty.
+     */
+    RefPtr<CanvasPath2D> path = AceType::MakeRefPtr<CanvasPath2D>();
+    customPattern->Stroke(path);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->Stroke();
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    Ace::Pattern pattern;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateStrokePattern(pattern);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    Color color = Color::BLACK;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateStrokeColor(color);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    Ace::Gradient gradient;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateStrokeGradient(gradient);
+    EXPECT_TRUE(paintMethod->HasTask());
+}
+
+/**
+ * @tc.name: CustomPaintPatternTestNg012
+ * @tc.desc: Test functions about path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->tasks_.clear();
+    EXPECT_FALSE(paintMethod->HasTask());
+
+    /**
+     * @tc.steps2: Test functions about path.
+     * @tc.expected: The task queue of paintMethod is changed to unempty.
+     */
+    RefPtr<CanvasPath2D> path = AceType::MakeRefPtr<CanvasPath2D>();
+    customPattern->Stroke(path);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->Stroke();
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->Fill();
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->Fill(path);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->Clip();
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->Clip(path);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->BeginPath();
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->ClosePath();
+    EXPECT_TRUE(paintMethod->HasTask());
+}
+
+/**
+ * @tc.name: CustomPaintPatternTestNg013
+ * @tc.desc: Test functions about line.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->tasks_.clear();
+    EXPECT_FALSE(paintMethod->HasTask());
+
+    /**
+     * @tc.steps2: Test functions about path.
+     * @tc.expected: The task queue of paintMethod is changed to unempty.
+     */
+    customPattern->LineTo(DEFAULT_DOUBLE1, DEFAULT_DOUBLE10);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    LineCapStyle lineCapStyle = LineCapStyle::BUTT;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateLineCap(lineCapStyle);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->UpdateLineDashOffset(DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->UpdateLineDash(CANDIDATE_DOUBLES);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    LineJoinStyle LineJoinStyle = LineJoinStyle::BEVEL;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateLineJoin(LineJoinStyle);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->UpdateLineWidth(DEFAULT_DOUBLE0);
     EXPECT_TRUE(paintMethod->HasTask());
 }
 } // namespace OHOS::Ace::NG
