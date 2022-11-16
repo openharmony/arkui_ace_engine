@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
@@ -41,6 +42,7 @@ constexpr float ANIMATION_DURATION = 200.0f;
 constexpr bool IS_VERTICAL = true;
 constexpr bool SCROLLABLE = true;
 constexpr char DEFAULT_TAB_BAR_NAME[] = "TabBar";
+constexpr float SET_ANIMATION_DURATION = 500.0f;
 } // namespace
 class TabsPatternTestNg : public testing::Test {
 public:
@@ -102,7 +104,6 @@ HWTEST_F(TabsPatternTestNg, TabsTest001, TestSize.Level1)
     EXPECT_EQ(tabsLayoutProperty->GetTabBarPosition(), BarPosition::START);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     EXPECT_FALSE(tabBarLayoutProperty == nullptr);
-    EXPECT_EQ(tabBarLayoutProperty->GetIndicator(), 1);
     EXPECT_EQ(swiperLayoutProperty->GetIndex(), 1);
 }
 
@@ -156,7 +157,6 @@ HWTEST_F(TabsPatternTestNg, TabsTest002, TestSize.Level1)
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     EXPECT_FALSE(swiperLayoutProperty == nullptr);
     EXPECT_EQ(swiperLayoutProperty->GetDirection(), axis);
-    EXPECT_EQ(tabBarLayoutProperty->GetIndicator(), 2);
     EXPECT_EQ(swiperLayoutProperty->GetIndex(), 2);
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     EXPECT_FALSE(swiperPaintProperty == nullptr);
@@ -282,6 +282,94 @@ HWTEST_F(TabsPatternTestNg, TabsTest005, TestSize.Level1)
     EXPECT_FALSE(tabsFrameNode->GetTabBarId() == -1);
     EXPECT_FALSE(tabsFrameNode->GetTabBar() == nullptr);
     EXPECT_FALSE(tabsFrameNode->GetTabs() == nullptr);
+}
+
+/**
+ * @tc.name: TabsTest006
+ * @tc.desc: Test set index and animation duration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsPatternTestNg, TabsTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    /**
+     * @tc.steps: step3. get the properties of all settings.
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    EXPECT_FALSE(tabsFrameNode == nullptr);
+    EXPECT_EQ(tabsFrameNode->GetTag(), V2::TABS_ETS_TAG);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildren().back());
+    EXPECT_FALSE(swiperNode == nullptr);
+    EXPECT_EQ(swiperNode->GetTag(), V2::SWIPER_ETS_TAG);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    EXPECT_FALSE(swiperLayoutProperty == nullptr);
+    EXPECT_EQ(swiperLayoutProperty->GetIndex(), 1);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    EXPECT_FALSE(swiperPaintProperty == nullptr);
+    EXPECT_EQ(swiperPaintProperty->GetDuration(), ANIMATION_DURATION);
+    auto firstTabContentFrameNode =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 20, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto secondTabContentFrameNode =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 21, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto thirdTabContentFrameNode =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 22, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    swiperNode->AddChild(firstTabContentFrameNode);
+    swiperNode->AddChild(secondTabContentFrameNode);
+    swiperNode->AddChild(secondTabContentFrameNode);
+    tabsFrameNode->MarkModifyDone();
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildren().front());
+    EXPECT_FALSE(tabBarNode == nullptr);
+    EXPECT_EQ(tabBarNode->GetTag(), V2::TAB_BAR_ETS_TAG);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    EXPECT_FALSE(tabBarPattern == nullptr);
+    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+    EXPECT_FALSE(tabBarLayoutProperty == nullptr);
+    EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+}
+
+/**
+ * @tc.name: TabsTest007
+ * @tc.desc: Test set index and animation duration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsPatternTestNg, TabsTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    instance.SetIndex(4);
+    instance.SetAnimationDuration(SET_ANIMATION_DURATION);
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    /**
+     * @tc.steps: step3. get the properties of all settings.
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    EXPECT_FALSE(tabsFrameNode == nullptr);
+    EXPECT_EQ(tabsFrameNode->GetTag(), V2::TABS_ETS_TAG);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildren().back());
+    EXPECT_FALSE(swiperNode == nullptr);
+    EXPECT_EQ(swiperNode->GetTag(), V2::SWIPER_ETS_TAG);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    EXPECT_FALSE(swiperLayoutProperty == nullptr);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    EXPECT_FALSE(swiperPaintProperty == nullptr);
+    EXPECT_EQ(swiperLayoutProperty->GetIndex(), 4);
+    EXPECT_EQ(swiperPaintProperty->GetDuration(), SET_ANIMATION_DURATION);
 }
 
 } // namespace OHOS::Ace::NG
