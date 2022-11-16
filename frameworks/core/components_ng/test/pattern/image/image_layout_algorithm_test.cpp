@@ -107,7 +107,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout001, TestSize.Level1)
 
 /**
  * @tc.name: ImageLayout002
- * @tc.desc: Verify that ImageComponent which has no SelfSize can resize with ContainerSize, whether there is an Alt or not.
+ * @tc.desc: Verify that Image which has no SelfSize can resize with ContainerSize.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout002, TestSize.Level1)
