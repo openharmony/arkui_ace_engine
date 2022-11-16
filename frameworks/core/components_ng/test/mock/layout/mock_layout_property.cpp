@@ -25,4 +25,20 @@ RefPtr<LayoutProperty> LayoutProperty::Clone() const
 }
 
 void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const {}
+
+void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
+{
+    if (!calcLayoutConstraint_) {
+        calcLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        return;
+    }
+    if (*calcLayoutConstraint_ == constraint) {
+        return;
+    }
+    calcLayoutConstraint_->selfIdealSize = constraint.selfIdealSize;
+    calcLayoutConstraint_->maxSize = constraint.maxSize;
+    calcLayoutConstraint_->minSize = constraint.minSize;
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+}
 } // namespace OHOS::Ace::NG

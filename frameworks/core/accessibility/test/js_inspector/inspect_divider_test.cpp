@@ -75,4 +75,4 @@ HWTEST_F(InspectDividerTest, InspectDividerTest002, TestSize.Level1)
     EXPECT_EQ(inspectDivider.styles_["flex-grow"], "0");
     EXPECT_EQ(inspectDivider.styles_["flex-shrink"], "1");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

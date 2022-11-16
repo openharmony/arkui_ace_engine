@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -32,9 +33,7 @@ void FrameNode::OnAttachToMainTree() {}
 void FrameNode::OnDetachFromMainTree() {}
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty) {}
 void FrameNode::SetActive(bool active) {}
-void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node) {}
 void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType) {}
-void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint) {}
 void FrameNode::RebuildRenderContextTree() {}
 void FrameNode::MarkModifyDone() {}
 void FrameNode::OnMountToParentDone() {}
@@ -52,12 +51,25 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion) {}
 
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
-{}
+{
+    layoutProperty_ = MakeRefPtr<LayoutProperty>();
+}
+
+void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
+{
+    geometryNode_ = node;
+}
+
+void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint)
+{
+    layoutProperty_->UpdateCalcLayoutProperty(calcLayoutConstraint);
+}
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
-    return nullptr;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, nodeId, pattern);
+    return frameNode;
 }
 
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
@@ -148,7 +160,7 @@ bool FrameNode::IsResponseRegion() const
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     return HitTestResult::BUBBLING;
 }

@@ -119,8 +119,6 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraintForControlBar.UpdateMaxSizeWithCheck(controlBarSize);
             layoutConstraintForControlBar.UpdateMinSizeWithCheck(controlBarSize);
             child->Measure(layoutConstraintForControlBar);
-        } else {
-            child->Measure(layoutConstraint);
         }
     }
     PerformMeasureSelf(layoutWrapper);
