@@ -184,6 +184,35 @@ void SubwindowManager::HideMenuNG()
     }
 }
 
+void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        LOGI("Subwindow is null, add a new one.");
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    subwindow->ShowPopupNG(targetId, popupInfo);
+}
+
+void SubwindowManager::HidePopupNG(int32_t targetId)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->HidePopupNG(targetId);
+    }
+}
+
+void SubwindowManager::HidePopupNG()
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->HidePopupNG();
+    }
+}
+
 void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
 {
     auto containerId = Container::CurrentId();

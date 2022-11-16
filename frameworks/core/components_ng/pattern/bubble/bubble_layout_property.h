@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_PROPERTY_H
 
+#include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/layout_property.h"
 
@@ -34,6 +35,8 @@ public:
         value->propEnableArrow_ = CloneEnableArrow();
         value->propUseCustom_ = CloneUseCustom();
         value->propPlacement_ = ClonePlacement();
+        value->propShowInSubWindow_ = CloneShowInSubWindow();
+        value->propDisplayWindowOffset_ = CloneDisplayWindowOffset();
         return value;
     }
 
@@ -43,11 +46,15 @@ public:
         ResetEnableArrow();
         ResetPlacement();
         ResetUseCustom();
+        ResetShowInSubWindow();
+        ResetDisplayWindowOffset();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseCustom, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placement, Placement, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayWindowOffset, OffsetF, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutProperty);
