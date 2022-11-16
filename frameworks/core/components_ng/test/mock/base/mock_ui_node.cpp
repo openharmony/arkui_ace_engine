@@ -38,21 +38,34 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
 void UINode::Build() {}
 void UINode::SetActive(bool active) {}
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */, bool /*silently*/)
 {
     CHECK_NULL_VOID(child);
+    auto it = std::find(children_.begin(), children_.end(), child);
+    if (it != children_.end()) {
+        return;
+    }
+    it = children_.begin();
+    std::advance(it, -1);
+    children_.insert(it, child);
     child->SetParent(Claim(this));
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
 {
     CHECK_NULL_VOID(parent);
-    parent->AddChild(AceType::Claim(this), slot);
+    parent->AddChild(AceType::Claim(this), slot, silently);
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
 {
-    return children_.end();
+    CHECK_NULL_RETURN(child, children_.end());
+    auto iter = std::find(children_.begin(), children_.end(), child);
+    if (iter == children_.end()) {
+        return children_.end();
+    }
+    auto result = children_.erase(iter);
+    return result;
 }
 
 int32_t UINode::RemoveChildAndReturnIndex(const RefPtr<UINode>& child)
@@ -78,7 +91,7 @@ RefPtr<PipelineContext> UINode::GetContext()
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     return HitTestResult::OUT_OF_REGION;
 }

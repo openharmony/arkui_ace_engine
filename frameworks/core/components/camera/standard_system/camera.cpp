@@ -66,9 +66,6 @@ constexpr int32_t RATE = 48000;
 constexpr int32_t AUDIO_CHANNEL_COUNT = 2;
 constexpr int32_t AUDIO_SAMPLE_RATE = 48000;
 constexpr int32_t AUDIO_ENCODING_BITRATE = 48000;
-#ifndef ENABLE_ROSEN_BACKEND
-constexpr int32_t QUEUE_SIZE = 10;
-#endif
 constexpr double FPS = 30;
 const uid_t CHOWN_OWNER_ID = -1;
 const gid_t CHOWN_GROUP_ID = 1023;

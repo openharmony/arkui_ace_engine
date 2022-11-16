@@ -18,11 +18,11 @@ const testViewAppStorage = tsuite("@StorageLink - AppStorge", () => {
 
   class SubscribingViewPU implements IMultiPropertiesChangeSubscriber {
 
-    private id_: number = SubscriberManager.Get().MakeId();
+    private id_: number = SubscriberManager.MakeId();
     private label_: string;
 
     constructor(label: string) {
-      SubscriberManager.Get().add(this);
+      SubscriberManager.Add(this);
       this.label_ = label;
     }
 
@@ -35,7 +35,7 @@ const testViewAppStorage = tsuite("@StorageLink - AppStorge", () => {
     // that the subscriber is about to be deleted
     // hence , unsubscribe
     aboutToBeDeleted(): void {
-      SubscriberManager.Get().delete(this.id__());
+      SubscriberManager.Delete(this.id__());
     }
 
     // implements IMultiPropertiesChangePublisher
@@ -47,7 +47,7 @@ const testViewAppStorage = tsuite("@StorageLink - AppStorge", () => {
   let storeView = new SubscribingViewPU("v1p1b1");
 
   /* @StorageLink(moveDistance) storeProp:number=  0;  */
-  let __storeProp: ObservedPropertyAbstract<number> =
+  let __storeProp: SubscribedAbstractProperty<number> =
     AppStorage.SetAndLink<number>('storeProp', /* default value */  7,  /* subscriber */ storeView, /* var name in View */ "viewVar");
 
 

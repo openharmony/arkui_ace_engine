@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 
 #include <map>
@@ -24,9 +25,6 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr Dimension COLUMN_2_AND_4_BREAKPOINT = 320.0_vp;
-constexpr Dimension COLUMN_4_AND_8_BREAKPOINT = 600.0_vp;
-constexpr Dimension COLUMN_8_AND_12_BREAKPOINT = 840.0_vp;
 constexpr Dimension SMALL_GUTTER = 12.0_vp;
 constexpr Dimension SMALL_MARGIN = 12.0_vp;
 constexpr Dimension LARGE_GUTTER = 24.0_vp;
@@ -138,51 +136,30 @@ SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridSizeType& sizeType
         return GRID_COLUMNS_4;
     } else if (sizeType == GridSizeType::MD) {
         return GRID_COLUMNS_8;
-    } else if (sizeType == GridSizeType::LG) {
+    } else if (sizeType >= GridSizeType::LG) {
         return GRID_COLUMNS_12;
     }
 
     return SystemGridInfo();
 }
 
-void GridSystemManager::OnSurfaceChanged(double width)
+const SystemGridInfo& GridSystemManager::GetCurrentGridInfo()
 {
-    screenWidth_ = width;
-    if (width < COLUMN_2_AND_4_BREAKPOINT.Value() * density_) {
-        currentSize_ = GridSizeType::XS;
-        systemGridInfo_ = GRID_COLUMNS_2;
-    } else if (width < COLUMN_4_AND_8_BREAKPOINT.Value() * density_) {
-        currentSize_ = GridSizeType::SM;
-        systemGridInfo_ = GRID_COLUMNS_4;
-    } else if (width < COLUMN_8_AND_12_BREAKPOINT.Value() * density_) {
-        currentSize_ = GridSizeType::MD;
-        systemGridInfo_ = GRID_COLUMNS_8;
-    } else {
-        currentSize_ = GridSizeType::LG;
-        systemGridInfo_ = GRID_COLUMNS_12;
-    }
-    currentSize_ = systemGridInfo_.sizeType;
-
-    LOGD("OnSurfaceChanged: %{public}f: sizeType = %{public}d", width, systemGridInfo_.sizeType);
+    GridSizeType sizeType = ScreenSystemManager::GetInstance().GetCurrentSize();
+    systemGridInfo_ = GetSystemGridInfo(sizeType);
+    LOGD("GetCurrentGridInfo: %{public}f: sizeType = %{public}d", GetScreenWidth(), systemGridInfo_.sizeType);
+    return systemGridInfo_;
 }
 
 SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridTemplateType& templateType, double width)
 {
-    // Input width is normalized in px.
+    GridSizeType sizeType = ScreenSystemManager::GetInstance().GetSize(width);
     if (templateType == GridTemplateType::NORMAL) {
-        if (width < COLUMN_2_AND_4_BREAKPOINT.Value() * dipScale_) {
-            return GRID_COLUMNS_2;
-        } else if (width < COLUMN_4_AND_8_BREAKPOINT.Value() * dipScale_) {
-            return GRID_COLUMNS_4;
-        } else if (width < COLUMN_8_AND_12_BREAKPOINT.Value() * dipScale_) {
-            return GRID_COLUMNS_8;
-        } else {
-            return GRID_COLUMNS_12;
-        }
+        return GetSystemGridInfo(sizeType);
     }
-    if (width < COLUMN_4_AND_8_BREAKPOINT.Value() * dipScale_) {
+    if (sizeType == GridSizeType::XS || sizeType == GridSizeType::SM) {
         return GRID_TEMPLATE_COLUMNS_4;
-    } else if (width < COLUMN_8_AND_12_BREAKPOINT.Value() * dipScale_) {
+    } else if (sizeType == GridSizeType::MD) {
         return GRID_TEMPLATE_COLUMNS_8;
     } else {
         return GRID_TEMPLATE_COLUMNS_12;

@@ -276,7 +276,13 @@ void NavigationView::Create()
 
     stack->Push(navigationGroupNode);
     auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
-    navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
+    auto context = navigationGroupNode->GetContext();
+    CHECK_NULL_VOID(context);
+    if (context->GetCurrentRootWidth() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
+        navigationLayoutProperty->UpdateNavigationMode(NavigationMode::SPLIT);
+    } else {
+        navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
+    }
     navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 }
 

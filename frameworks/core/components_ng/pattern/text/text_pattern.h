@@ -80,6 +80,8 @@ public:
         return { FocusType::NODE, false };
     }
 
+    void DumpInfo() override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;

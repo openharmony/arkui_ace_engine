@@ -42,4 +42,6 @@ abstract class NativeViewFullUpdate {
     console.warn("NativeView(Mock).restoreInstanceId() -  unimplemented!");
   }
 
+  setCardId(cardId: number): void {}
+  getCardId(): number { return -1; } 
 }

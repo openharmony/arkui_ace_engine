@@ -221,11 +221,12 @@ void XComponentElement::CreatePlatformResource()
 #ifdef OHOS_STANDARD_SYSTEM
 void XComponentElement::CreateSurface()
 {
+#ifdef ENABLE_ROSEN_BACKEND
     auto rosenTexture = AceType::DynamicCast<RosenRenderXComponent>(renderNode_);
     if (rosenTexture) {
         producerSurface_ = rosenTexture->GetSurface();
     }
-
+#endif
     if (producerSurface_ == nullptr) {
         LOGE("producerSurface is nullptr");
         return;

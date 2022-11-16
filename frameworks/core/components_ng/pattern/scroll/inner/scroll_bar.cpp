@@ -107,7 +107,7 @@ void ScrollBar::SetRectTrickRegion(const Offset& offset, const Size& size,
         }
         double lastMainOffset =
             std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
-        offsetScale_ = (mainSize - activeSize) / (estimatedHeight - mainSize);
+        offsetScale_ = (barRegionSize - activeSize) / (estimatedHeight - mainSize);
         double activeMainOffset = offsetScale_ * lastMainOffset;
         activeMainOffset = std::min(activeMainOffset, barRegionSize - activeSize);
         double normalWidth = NormalizeToPx(normalWidth_);

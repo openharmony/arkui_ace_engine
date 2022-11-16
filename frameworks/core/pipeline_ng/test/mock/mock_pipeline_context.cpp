@@ -15,8 +15,29 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
-namespace OHOS::Ace::NG {
+namespace OHOS ::Ace {
+class Window : public AceType {
+    DECLARE_ACE_TYPE(Window, AceType);
+};
 
+class FontManager : public AceType {
+    DECLARE_ACE_TYPE(FontManager, AceType);
+};
+
+class ManagerInterface : public AceType {
+    DECLARE_ACE_TYPE(ManagerInterface, AceType);
+};
+
+class OffscreenCanvas : public AceType {
+    DECLARE_ACE_TYPE(Frontend, AceType);
+};
+} // namespace OHOS::Ace
+namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t NODE_ID = 143;
+} // namespace
+
+// static method
 float PipelineContext::GetCurrentRootWidth()
 {
     return 1.0f;
@@ -27,9 +48,31 @@ float PipelineContext::GetCurrentRootHeight()
     return 1.0f;
 }
 
-void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId) {}
+RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
+{
+    return AceType::MakeRefPtr<PipelineContext>();
+}
 
-void PipelineContext::FlushMessages() {}
+// non-static method
+void PipelineContext::PipelineContext::SetupRootElement() {}
+
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
+
+void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
+
+void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
+
+void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action) {}
+
+void PipelineContext::OnIdle(int64_t deadline) {}
+
+void PipelineContext::Destroy() {}
+
+void PipelineContext::OnShow() {}
+
+void PipelineContext::OnHide() {}
+
+void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId) {}
 
@@ -37,4 +80,89 @@ void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
+void PipelineContext::WindowFocus(bool isFocus) {}
+
+void PipelineContext::ShowContainerTitle(bool isShow) {}
+
+void PipelineContext::SetAppBgColor(const Color& color) {}
+
+void PipelineContext::SetAppTitle(const std::string& title) {}
+
+void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
+
+void PipelineContext::OnSurfaceDensityChanged(double density) {}
+
+void PipelineContext::SetRootRect(double width, double height, double offset) {}
+
+void PipelineContext::FlushBuild() {}
+
+void PipelineContext::NotifyMemoryLevel(int32_t level) {}
+
+void PipelineContext::FlushMessages() {}
+
+void PipelineContext::Finish(bool autoFinish) const {}
+
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
+void PipelineContext::FlushPipelineWithoutAnimation() {}
+
+void PipelineContext::FlushFocus() {}
+
+void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
+
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
+
+const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
+{
+    if (selectOverlayManager_) {
+        return selectOverlayManager_;
+    }
+    const std::string rootTag = "root";
+    auto root = AceType::MakeRefPtr<FrameNode>(rootTag, -1, AceType::MakeRefPtr<Pattern>(), true);
+    selectOverlayManager_ = AceType::MakeRefPtr<SelectOverlayManager>(root);
+
+    // mock the selectOverlayInfo, the SelectOverlayId is NODE_ID
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    SelectHandleInfo firstHandleInfo;
+    selectOverlayInfo.firstHandle = firstHandleInfo;
+    SelectHandleInfo secondHandleInfo;
+    selectOverlayInfo.secondHandle = secondHandleInfo;
+    selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo);
+    return selectOverlayManager_;
+}
+
+uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
+{
+    return 0;
+}
+
+bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+{
+    return false;
+}
+
+bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+{
+    return false;
+}
+
+bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
+{
+    return false;
+}
+
+bool PipelineContext::OnBackPressed()
+{
+    return false;
+}
+
+// core/pipeline_ng/pipeline_context.h depends on the specific impl
+void UITaskScheduler::FlushTask() {}
+
+UITaskScheduler::~UITaskScheduler() = default;
+
+void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
+
+void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 } // namespace OHOS::Ace::NG

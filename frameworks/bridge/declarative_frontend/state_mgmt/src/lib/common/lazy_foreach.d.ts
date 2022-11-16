@@ -14,23 +14,11 @@
  */
 
 
-// LazyForEach ===========================
-
-declare interface DataChangeListener {
-  onDataReloaded(): void;
-  onDataAdded(index: number): void;
-  onDataMoved(from: number, to: number): void;
-  onDataDeleted(index: number): void;
-  onDataChanged(index: number): void;
-}
-
-declare interface IDataSource {
-  totalCount(): number;
-  getData(index: number): any;
-  registerDataChangeListener(listener: DataChangeListener): void;
-  unregisterDataChangeListener(listener: DataChangeListener): void;
-}
-
+/**
+ * Bindings of LazyForEach
+ *
+ * internla API
+ */
 declare class LazyForEach  {
   static create(id: string, parent: ViewPU, dataSource: IDataSource, builder: (item: any) => void, idfunc?: (item: any) => string); void;
   static pop() : void;

@@ -20,10 +20,12 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
-#include "core/components/common/layout/grid_column_info.h"
+#include "core/components/common/layout/grid_layout_info.h"
+#include "core/components/common/layout/screen_system_manager.h"
 
 namespace OHOS::Ace {
 
+class GridColumnInfo;
 struct SystemGridInfo {
     SystemGridInfo() = default;
     SystemGridInfo(
@@ -47,37 +49,30 @@ public:
     ~GridSystemManager() = default;
     ACE_EXPORT static GridSystemManager& GetInstance();
 
-    const SystemGridInfo& GetCurrentGridInfo()
-    {
-        return systemGridInfo_;
-    }
+    const SystemGridInfo& GetCurrentGridInfo();
 
     static SystemGridInfo GetSystemGridInfo(const GridSizeType& sizeType);
     static RefPtr<GridColumnInfo> GetInfoByType(const GridColumnType& type);
     // width is use px unit.
     SystemGridInfo GetSystemGridInfo(const GridTemplateType& templateType, double width);
-    void OnSurfaceChanged(double width);
-    void SetWindowInfo(double screenWidth, double density, double dipScale)
-    {
-        screenWidth_ = screenWidth;
-        density_ = density;
-        dipScale_ = dipScale;
-        viewScale_ = density / dipScale;
-    }
-
     double GetScreenWidth() const
     {
-        return screenWidth_;
+        return ScreenSystemManager::GetInstance().GetScreenWidth();
     }
 
     double GetDipScale() const
     {
-        return dipScale_;
+        return ScreenSystemManager::GetInstance().GetDipScale();
     }
 
     GridSizeType GetCurrentSize() const
     {
-        return currentSize_;
+        return ScreenSystemManager::GetInstance().GetCurrentSize();
+    }
+
+    double GetDensity() const
+    {
+        return ScreenSystemManager::GetInstance().GetDensity();
     }
 
 private:
@@ -86,11 +81,6 @@ private:
     static GridSystemManager* instance_;
     static std::mutex mutex_;
 
-    double screenWidth_ = 0.0;
-    double density_ = 1.0;
-    double dipScale_ = 1.0;
-    double viewScale_ = 1.0;
-    GridSizeType currentSize_ = GridSizeType::UNDEFINED;
     SystemGridInfo systemGridInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridSystemManager);

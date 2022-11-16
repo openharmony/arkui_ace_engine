@@ -26,6 +26,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace {
+#ifdef ENABLE_ROSEN_BACKEND
 namespace {
 sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
 {
@@ -122,6 +123,7 @@ void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width,
     canvas->drawImageRect(skImage, skSrcRect, skDstRect, &paint);
 }
 } // namespace
+#endif
 
 RefPtr<DragWindow> DragWindow::CreateDragWindow(
     const std::string& windowName, int32_t x, int32_t y, uint32_t width, uint32_t height)
@@ -185,6 +187,7 @@ void DragWindowOhos::Destroy() const
 
 void DragWindowOhos::DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(rootNode);
 
     auto surfaceNode = dragWindow_->GetSurfaceNode();
@@ -203,10 +206,12 @@ void DragWindowOhos::DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode)
 
     rsUiDirector_->SetRoot(rsNode->GetId());
     rsUiDirector_->SendMessages();
+#endif
 }
 
 void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     if (!pixelmap) {
         LOGE("the pixmap is nullptr");
         return;
@@ -229,10 +234,12 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
     DrawSkImage(skia, pixelmap, rect.width_, rect.height_);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
+#endif
 }
 
 void DragWindowOhos::DrawImage(void* skImage)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     if (!skImage) {
         LOGE("Skimage is nullptr");
         return;
@@ -266,11 +273,13 @@ void DragWindowOhos::DrawImage(void* skImage)
     DrawSkImage(skia, canvasImage->image(), rect.width_, rect.height_);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
+#endif
 }
 
 void DragWindowOhos::DrawText(std::shared_ptr<txt::Paragraph> paragraph,
     const Offset& offset, const RefPtr<RenderText>& renderText)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     if (!paragraph) {
         LOGE("Paragraph is nullptr");
         return;
@@ -327,5 +336,6 @@ void DragWindowOhos::DrawText(std::shared_ptr<txt::Paragraph> paragraph,
     paragraph->Paint(skia, 0, 0);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
+#endif
 }
 } // namespace OHOS::Ace

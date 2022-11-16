@@ -38,11 +38,12 @@
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/manager_interface.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
-#include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
@@ -169,6 +170,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         drawDelegate_ = nullptr;
     }
     FlushTouchEvents();
+    if (!taskScheduler_.isEmpty()) {
+#if !defined(PREVIEW)
+        LayoutInspector::SupportInspector();
+#endif
+    }
     taskScheduler_.FlushTask();
     auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAninmation) {
@@ -369,6 +375,11 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     return stageManager_;
 }
 
+const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
+{
+    return selectOverlayManager_;
+}
+
 const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 {
     return overlayManager_;
@@ -388,8 +399,9 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         LOGE("rootNode_ is nullptr");
         return;
     }
-    GridSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
-    GridSystemManager::GetInstance().OnSurfaceChanged(width);
+
+    ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
+    ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
     if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF) {
         CalcSize idealSize { CalcLength(width), CalcLength(height) };

@@ -86,7 +86,7 @@ const testViewStateFU = tsuite("View State", () => {
       // tell the ObservedProperty this View is to be deleted
       this.__forLink_.aboutToBeDeleted(this);
       this.__forProp_.aboutToBeDeleted(this);
-      SubscriberManager.Get().delete(this.id__());
+      SubscriberManager.Delete(this.id__());
     }
 
     // added just to make things work, not in production when this func is implemented in C++
@@ -191,7 +191,7 @@ const testViewStateFU = tsuite("View State", () => {
       this.__link_.aboutToBeDeleted();
       this.__prop_.aboutToBeDeleted();
 
-      SubscriberManager.Get().delete(this.id__());
+      SubscriberManager.Delete(this.id__());
     }
 
 
@@ -237,13 +237,14 @@ const testViewStateFU = tsuite("View State", () => {
     test(`Check @Link and @State subscribed ok: parent.__forLink_ subscribers`, parentView.__forLink_.numberOfSubscrbers() == 2);
     test(`Check @Link and @State subscribed ok: parent.__forProp_ subscribers`, parentView.__forProp_.numberOfSubscrbers() == 2);
 
-    SubscriberManager.Get().dumpSubscriberInfo();
+    SubscriberManager.DumpSubscriberInfo();
+    
     // parent view
     // parent view 2 state vard
     // child view
     // child view 3 state vars
     // 7 subscribers total
-    test(`SubscriberManager num of subscribers, is ${SubscriberManager.Get().numberOfSubscrbers()} should be 7`, SubscriberManager.Get().numberOfSubscrbers() == 7);
+    test(`SubscriberManager num of subscribers, is ${SubscriberManager.NumberOfSubscribers()} should be 7`, SubscriberManager.NumberOfSubscribers() == 7);
   });
 
   tcase("Simulate an event handler mutating parent's @State props", () => {
@@ -318,19 +319,20 @@ const testViewStateFU = tsuite("View State", () => {
     test(`aboutToBeDeleted was called on childView.__prop`, spyChildPropAboutToBeDeleted.called);
     test(`parent.__forLink_ subscribers`, parentView.__forLink_.numberOfSubscrbers() == 1);
 
-    SubscriberManager.Get().dumpSubscriberInfo();
+    SubscriberManager.DumpSubscriberInfo();
+
     // parent view
     // parent view forLink_, forProp_ state vars
-    test(`SubscriberManager num of subscribers is ${SubscriberManager.Get().numberOfSubscrbers()} should be 3`, SubscriberManager.Get().numberOfSubscrbers() == 3);
+    test(`SubscriberManager num of subscribers is ${SubscriberManager.NumberOfSubscribers()} should be 3`, SubscriberManager.NumberOfSubscribers() == 3);
   });
 
   tcase("Notify about deletion, second parent ...", () => {
     parentView.aboutToBeDeleted();
     test(`parent.__forLink_ subscribers`, parentView.__forLink_.numberOfSubscrbers() == 0);
 
-    SubscriberManager.Get().dumpSubscriberInfo();
+    SubscriberManager.DumpSubscriberInfo();
 
-    test(`SubscriberManager num of subscribers is ${SubscriberManager.Get().numberOfSubscrbers()} should be 0 .`, SubscriberManager.Get().numberOfSubscrbers() == 0);
+    test(`SubscriberManager num of subscribers is ${SubscriberManager.NumberOfSubscribers()} should be 0 .`, SubscriberManager.NumberOfSubscribers() == 0);
   });
 
 });

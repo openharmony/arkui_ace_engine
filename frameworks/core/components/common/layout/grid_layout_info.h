@@ -17,17 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_GRID_LAYOUT_INFO_H
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/screen_system_manager.h"
 
 namespace OHOS::Ace {
 
-enum class GridSizeType {
-    UNDEFINED = 0,
-    XS,
-    SM,
-    MD,
-    LG,
-    XL,
-};
+using GridSizeType = ScreenSizeType;
 
 enum class GridTemplateType {
     NORMAL = 0,

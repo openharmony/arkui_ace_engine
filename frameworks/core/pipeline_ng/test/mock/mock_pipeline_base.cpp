@@ -18,7 +18,10 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr double DISPLAY_WIDTH = 720;
+constexpr double DISPLAY_HEIGHT = 1280;
+}
 class Window : public AceType {
     DECLARE_ACE_TYPE(Window, AceType);
 };
@@ -36,9 +39,19 @@ class OffscreenCanvas : public AceType {
 };
 enum class FrontendType {};
 
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
+void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
+
+void PipelineBase::OnActionEvent(const std::string& action) {}
+
+void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
+
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
-    return AceType::MakeRefPtr<MockPipelineBase>();
+    auto pipeline = AceType::MakeRefPtr<MockPipelineBase>();
+    pipeline->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
+    return pipeline;
 }
 
 double PipelineBase::NormalizeToPx(const Dimension& /*dimension*/) const
@@ -53,12 +66,6 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return 1;
 }
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
-
-void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
-
-void PipelineBase::OnActionEvent(const std::string& action) {}
-
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;
@@ -66,4 +73,10 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 
 void PipelineBase::Destroy() {}
 
+void PipelineBase::RequestFrame() {}
+
+Rect PipelineBase::GetCurrentWindowRect() const
+{
+    return {0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT};
+}
 } // namespace OHOS::Ace

@@ -31,10 +31,11 @@ void RemoteWindowView::Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsNode
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::REMOTE_WINDOW_ETS_TAG, nodeId, [rsNode]() { return AceType::MakeRefPtr<RemoteWindowPattern>(); });
     stack->Push(frameNode);
-
+#ifdef ENABLE_ROSEN_BACKEND
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(rsNode);
+#endif
 }
 
 } // namespace OHOS::Ace::NG

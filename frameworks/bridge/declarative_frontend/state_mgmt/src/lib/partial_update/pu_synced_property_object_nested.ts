@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * SynchedPropertyNesedObjectPU
+ * 
+ * all definitions in this file are framework internal
+ * 
+ */
 class SynchedPropertyNesedObjectPU<C extends Object>
   extends ObservedPropertyObjectAbstractPU<C>
   implements ISinglePropertyChangeSubscriber<C> {

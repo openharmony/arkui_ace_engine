@@ -14,12 +14,10 @@
  */
 
 #include "core/common/container.h"
-
 namespace OHOS::Ace {
 
 int32_t Container::CurrentId()
 {
     return 0;
 }
-
 } // namespace OHOS::Ace

@@ -17,11 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
 
 #include <stdint.h>
+
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_v2/list/list_component.h"

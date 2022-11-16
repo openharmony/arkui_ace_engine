@@ -23,13 +23,18 @@ group("pattern_unittest") {
     "common_view:common_view_test_ng",
     "custom_paint:custom_paint_pattern_test_ng",
     "data_panel:data_panel_pattern_test_ng",
+    "divider:divider_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "gauge:gauge_pattern_test_ng",
+    "gesture:gesture_pattern_test_ng",
+    "grid_container:grid_container_pattern_test_ng",
+    "grid_row:grid_row_pattern_test_ng",
     "image:image_pattern_test",
     "indexer:indexer_pattern_test_ng",
     "linear_layout:linear_layout_creator_test_ng",
     "list:list_pattern_test_ng",
     "marquee:marquee_pattern_unit_test",
+    "panel:panel_pattern_test_ng",
     "patternlock:patternlock_pattern_test_ng",
     "qrcode:qrcode_pattern_test_ng",
     "radio:radio_pattern_test_ng",
@@ -39,6 +44,7 @@ group("pattern_unittest") {
     "select:select_pattern_test_ng",
     "shape:shape_pattern_unit_test",
     "stack:stack_pattern_test_ng",
+    "tabs:tabs_pattern_test_ng",
     "text:text_pattern_test_ng",
     "text_clock:text_clock_pattern_unit_test",
     "textfield:textfield_pattern_test_ng",
@@ -47,6 +53,5 @@ group("pattern_unittest") {
     "xcomponent:xcomponent_pattern_test_ng",
 
     # "stepper:stepper_pattern_test_ng",
-    # "divider:divider_pattern_test_ng",
   ]
 }

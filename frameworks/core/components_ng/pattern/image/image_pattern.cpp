@@ -163,8 +163,7 @@ void ImagePattern::SetImagePaintConfig(
     imagePaintConfig.imageInterpolation_ =
         imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
-
-    auto pipelineCtx = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipelineCtx = NG::PipelineContext::GetCurrentContext();
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
     imagePaintConfig.needFlipCanvasHorizontally_ =
         isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
@@ -316,8 +315,8 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     if (!sourceInfo.IsInternalResource()) {
         return;
     }
-
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);

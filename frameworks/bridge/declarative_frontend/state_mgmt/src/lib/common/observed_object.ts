@@ -13,6 +13,16 @@
  * limitations under the License.
  */
 
+
+/**
+ * ObservedObject, i.e. wrapper for class Object type state variable
+ * 
+ * This class and all other definitoons in this file are framework 
+ * internal / non-SDK
+ * 
+ */
+
+
 // class of Class in TS
 // ad defined in @angular/core
 interface Type<T> extends Function {
@@ -84,9 +94,8 @@ class SubscribableHandler {
 
   protected notifyPropertyHasChanged(propName: string, newValue: any) {
     stateMgmtConsole.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`)
-    var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.owningProperties_.forEach((subscribedId) => {
-      var owningProperty: IPropertySubscriber = registry!.get(subscribedId)
+      var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (owningProperty) {
         if ('hasChanged' in owningProperty) {
           (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);

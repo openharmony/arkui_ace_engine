@@ -73,14 +73,12 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             }
         }
 
-        double paragraphNewWidth = 0.0;
+        double paragraphNewWidth = paragraph_->GetMaxWidth();
         if (!contentConstraint.selfIdealSize.Width()) {
             paragraphNewWidth = std::clamp(GetTextWidth(), 0.0f, contentConstraint.maxSize.Width());
-        } else {
-            paragraphNewWidth = GetTextWidth();
-        }
-        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
-            paragraph_->Layout(std::ceil(paragraphNewWidth));
+            if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+                paragraph_->Layout(std::ceil(paragraphNewWidth));
+            }
         }
     }
 

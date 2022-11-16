@@ -214,48 +214,39 @@ void SwiperModelImpl::SetRemoteMessageEventId(RemoteCallback&& remoteCallback)
     swiperComponent->SetRemoteMessageEventId(remoteMessageEventId);
 }
 
-void SwiperModelImpl::SetDigital(bool digitalIndicator)
-{
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (swiper) {
-        swiper->SetDigitalIndicator(digitalIndicator);
-    }
-}
-
 void SwiperModelImpl::SetIndicatorStyle(const SwiperParameters& swiperParameters)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
-        auto indictor = swiper->GetIndicator();
-        if (!indictor) {
+        auto indicator = swiper->GetIndicator();
+        if (!indicator) {
             return;
         }
 
         if (swiperParameters.dimLeft.has_value()) {
-            indictor->SetLeft(swiperParameters.dimLeft.value());
+            indicator->SetLeft(swiperParameters.dimLeft.value());
         }
         if (swiperParameters.dimTop.has_value()) {
-            indictor->SetTop(swiperParameters.dimTop.value());
+            indicator->SetTop(swiperParameters.dimTop.value());
         }
         if (swiperParameters.dimRight.has_value()) {
-            indictor->SetRight(swiperParameters.dimRight.value());
+            indicator->SetRight(swiperParameters.dimRight.value());
         }
         if (swiperParameters.dimBottom.has_value()) {
-            indictor->SetBottom(swiperParameters.dimBottom.value());
+            indicator->SetBottom(swiperParameters.dimBottom.value());
         }
         if (swiperParameters.dimSize.has_value()) {
-            indictor->SetSize(swiperParameters.dimSize.value());
+            indicator->SetSize(swiperParameters.dimSize.value());
         }
         if (swiperParameters.maskValue.has_value()) {
-            indictor->SetIndicatorMask(swiperParameters.maskValue.value());
+            indicator->SetIndicatorMask(swiperParameters.maskValue.value());
         }
         if (swiperParameters.colorVal.has_value()) {
-            indictor->SetColor(swiperParameters.colorVal.value());
+            indicator->SetColor(swiperParameters.colorVal.value());
         }
         if (swiperParameters.selectedColorVal.has_value()) {
-            indictor->SetSelectedColor(swiperParameters.selectedColorVal.value());
+            indicator->SetSelectedColor(swiperParameters.selectedColorVal.value());
         }
     }
 }

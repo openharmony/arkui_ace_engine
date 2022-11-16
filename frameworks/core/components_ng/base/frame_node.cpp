@@ -146,12 +146,13 @@ void FrameNode::DumpInfo()
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
                                                    : "NA"));
-    DumpLog::GetInstance().AddDesc(std::string("top: ").append(std::to_string(GetOffsetRelativeToWindow().GetY())));
-    DumpLog::GetInstance().AddDesc(std::string("left: ").append(std::to_string(GetOffsetRelativeToWindow().GetX())));
-    DumpLog::GetInstance().AddDesc(
-        std::string("width: ").append(std::to_string(geometryNode_->GetFrameRect().Width())));
-    DumpLog::GetInstance().AddDesc(
-        std::string("height: ").append(std::to_string(geometryNode_->GetFrameRect().Height())));
+    DumpLog::GetInstance().AddDesc(std::string("top: ")
+                                       .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
+                                       .append(" left: ")
+                                       .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+    DumpLog::GetInstance().AddDesc(std::string("Visible: ")
+                                       .append(std::to_string(static_cast<int32_t>(
+                                           layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
@@ -730,7 +731,7 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     if (!isActive_ || !eventHub_->IsEnabled()) {
         LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
@@ -766,7 +767,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
 
         const auto& child = *iter;
-        auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets);
+        auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets, touchId);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
@@ -798,8 +799,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (gestureHub) {
             TouchTestResult finalResult;
             const auto coordinateOffset = globalPoint - localPoint;
-            preventBubbling =
-                gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets, finalResult);
+            preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset,
+                touchRestrict, newComingTargets, finalResult, touchId);
             newComingTargets.swap(finalResult);
         }
     }
@@ -808,7 +809,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     result.splice(result.end(), std::move(newComingTargets));
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (gestureHub) {
-        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result);
+        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result, touchId);
     }
 
     // consumed by children and return result.
