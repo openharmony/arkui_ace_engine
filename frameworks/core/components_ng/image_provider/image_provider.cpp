@@ -38,6 +38,7 @@ void ImageProvider::WrapTaskAndPostTo(
     taskExecutor->PostTask(
         [task, id = Container::CurrentId()] {
             ContainerScope scope(id);
+            CHECK_NULL_VOID(task);
             task();
         },
         taskType);
@@ -46,6 +47,7 @@ void ImageProvider::WrapTaskAndPostTo(
 #define WRAP_TASK_AND_POST_TO(thread, threadName)                                                       \
     void ImageProvider::WrapTaskAndPostTo##threadName(std::function<void()>&& task)                     \
     {                                                                                                   \
+        CHECK_NULL_VOID(task);                                                                          \
         ImageProvider::WrapTaskAndPostTo(std::move(task), TaskExecutor::TaskType::thread, #threadName); \
     }
 WRAP_TASK_AND_POST_TO(UI, UI);
