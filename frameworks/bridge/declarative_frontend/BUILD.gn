@@ -289,6 +289,7 @@ template("declarative_js_engine") {
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",
+      "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
       "jsview/models/stepper_item_model_impl.cpp",
