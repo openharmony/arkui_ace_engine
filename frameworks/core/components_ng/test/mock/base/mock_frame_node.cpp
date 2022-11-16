@@ -33,10 +33,16 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::OnAttachToMainTree() {}
 void FrameNode::OnDetachFromMainTree() {}
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty) {}
-void FrameNode::SetActive(bool active) {}
+void FrameNode::SetActive(bool active)
+{
+    isActive_ = active;
+}
 void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType) {}
 void FrameNode::RebuildRenderContextTree() {}
-void FrameNode::MarkModifyDone() {}
+void FrameNode::MarkModifyDone()
+{
+    pattern_->OnModifyDone();
+}
 void FrameNode::OnMountToParentDone() {}
 void FrameNode::FlushUpdateAndMarkDirty() {}
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag) {}
