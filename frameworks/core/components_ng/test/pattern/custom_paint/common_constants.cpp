@@ -31,19 +31,29 @@ const SizeF MIN_SIZE(MIN_WIDTH, MIN_HEIGHT);
 
 const int32_t CANVAS_WIDTH = 300;
 const int32_t CANVAS_HEIGHT = 300;
+const int32_t DEFAULT_INSTANCE_ID = 0;
+
+const std::string URL_PREFIX = "data:";
+const std::string IMAGE_PNG = "image/png";
+const std::string IMAGE_JPEG = "image/jpeg";
+const std::string IMAGE_WEBP = "image/webp";
 
 const std::string NULL_STR;
-extern const std::string DEFAULT_STR = "default";
+const std::string DEFAULT_STR = "default";
 const std::string IMAGE_SRC = "common/images/test.png";
 const std::string REPETITION_STR = "repetition";
-extern const std::vector<std::string> CANDIDATE_STRINGS = {
+const std::vector<std::string> CANDIDATE_STRINGS = {
     "aaaaaaaaaaaa",
     "bbbbbb",
     "abcdefg"
 };
 
-extern const double DEFAULT_DOUBLE = 10.0;
-const std::vector<double> CANDIDATE_DOUBLES = { 0.0, 1.0, 10.0, 100.0, 1000.0};
+const double DEFAULT_DOUBLE0 = 0.0;
+const double DEFAULT_DOUBLE1 = 1.0;
+const double DEFAULT_DOUBLE2 = 2.0;
+const double DEFAULT_DOUBLE10 = 10.0;
+
+const std::vector<double> CANDIDATE_DOUBLES = { 0.0, 1.0, 10.0, 100.0, 1000.0 };
 
 const std::vector<Color> CANDIDATE_COLORS = {
     Color::TRANSPARENT,
