@@ -79,6 +79,11 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 void PipelineBase::Destroy() {}
 
+double PipelineBase::ConvertPxToVp(const Dimension& /* dimension */) const
+{
+    return 1.0f;
+}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
