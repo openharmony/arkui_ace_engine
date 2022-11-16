@@ -24,6 +24,8 @@ group("pattern_unittest") {
     "data_panel:data_panel_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "gauge:gauge_pattern_test_ng",
+    "grid_container:grid_container_pattern_test_ng",
+    "grid_row:grid_row_pattern_test_ng",
     "linear_layout:linear_layout_creator_test_ng",
     "marquee:marquee_pattern_unit_test",
     "patternlock:patternlock_pattern_test_ng",
@@ -37,6 +39,7 @@ group("pattern_unittest") {
     "text_clock:text_clock_pattern_unit_test",
     "textfield:textfield_pattern_test_ng",
     "texttimer:text_timer_pattern_unit_test",
+    "video:video_pattern_test_ng",
     "xcomponent:xcomponent_pattern_test_ng",
   ]
 }
