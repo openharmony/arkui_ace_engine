@@ -26,6 +26,7 @@ group("pattern_unittest") {
     "data_panel:data_panel_pattern_test_ng",
     "divider:divider_pattern_test_ng",
     "flex:flex_pattern_unit_test",
+    "focusHub:focusHub_pattern_test_ng",
     "gauge:gauge_pattern_test_ng",
     "gesture:gesture_pattern_test_ng",
     "grid_container:grid_container_pattern_test_ng",
