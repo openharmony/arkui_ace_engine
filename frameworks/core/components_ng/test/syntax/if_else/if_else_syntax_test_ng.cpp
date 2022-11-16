@@ -71,7 +71,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest001, TestSize.Level1)
     IfElseModelNG ifElse;
     ifElse.Create();
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(ifElseNodeNode == nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
+    EXPECT_TRUE(ifElseNodeNode != nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
 }
 
 /**
@@ -102,7 +102,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest003, TestSize.Level1)
 
     EXPECT_EQ(ifElse.GetBranchId(), IF_ELSE_BRANCH_ID);
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(ifElseNodeNode == nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
+    EXPECT_TRUE(ifElseNodeNode != nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
     EXPECT_EQ(ifElseNodeNode->GetBranchId(), IF_ELSE_BRANCH_ID);
 
     /**
@@ -132,7 +132,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest004, TestSize.Level1)
     ifElse.SetBranchId(IF_ELSE_BRANCH_ID);
 
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(ifElseNodeNode == nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
+    EXPECT_TRUE(ifElseNodeNode != nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
     EXPECT_EQ(ifElseNodeNode->IsAtomicNode(), IS_ATOMIC_NODE);
 }
 } // namespace OHOS::Ace::NG
