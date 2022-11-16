@@ -118,4 +118,12 @@ void UITaskScheduler::CleanUp()
     dirtyRenderNodes_.clear();
 }
 
+bool UITaskScheduler::isEmpty()
+{
+    if (dirtyLayoutNodes_.empty() && dirtyRenderNodes_.empty()) {
+        return true;
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

@@ -197,8 +197,6 @@ protected:
 private:
     void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
-    void RecyclePrevIndex(LayoutWrapper* layoutWrapper);
-
     void CalculateEstimateOffset();
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(

@@ -59,6 +59,11 @@ public:
         return MakeRefPtr<DataPickerRowLayoutProperty>();
     }
 
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<DatePickerPaintMethod>();
+    }
+
     void SetChangeCallback(ColumnChangeCallback&& value);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
@@ -399,6 +404,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     static void Init();
     RefPtr<ClickEvent> clickEventListener_;
 

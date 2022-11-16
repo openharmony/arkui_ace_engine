@@ -33,23 +33,16 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
 
-namespace OHOS::Rosen {
-class RSNode;
-namespace Drawing {
-class Canvas;
-}
-}
 namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
 class Modifier;
 
-using RSNode = Rosen::RSNode;
-using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
 // RenderContext is used for render node to paint.
@@ -130,7 +123,7 @@ public:
     virtual void OnNodeDisappear(FrameNode* host) {}
     virtual void OnNodeAppear() {}
 
-    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
+    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
     {
         return false;
     }

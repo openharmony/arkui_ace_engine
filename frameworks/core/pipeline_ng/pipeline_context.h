@@ -46,6 +46,7 @@ public:
         const RefPtr<Frontend>& frontend, int32_t instanceId);
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
+    PipelineContext() = default;
 
     ~PipelineContext() override = default;
 
@@ -174,10 +175,7 @@ public:
 
     const RefPtr<OverlayManager>& GetOverlayManager();
 
-    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager()
-    {
-        return selectOverlayManager_;
-    }
+    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager();
 
     const RefPtr<SharedOverlayManager>& GetSharedOverlayManager()
     {

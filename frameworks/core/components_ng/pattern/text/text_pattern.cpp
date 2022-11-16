@@ -18,12 +18,14 @@
 #include <stack>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/gestures/gesture_info.h"
@@ -224,4 +226,12 @@ void TextPattern::BeforeCreateLayoutWrapper()
         }
     }
 }
+
+void TextPattern::DumpInfo()
+{
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
+}
+
 } // namespace OHOS::Ace::NG

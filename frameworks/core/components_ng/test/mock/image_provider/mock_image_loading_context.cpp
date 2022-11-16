@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/test/mock/render/mock_canvas_image.h"
 
 namespace OHOS::Ace::NG {
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier)
@@ -73,7 +74,18 @@ LoadSuccessCallback ImageLoadingContext::GenerateLoadSuccessCallback()
     return nullptr;
 }
 
-void ImageLoadingContext::OnLoadSuccess(const ImageSourceInfo& sourceInfo) {}
+void ImageLoadingContext::OnLoadSuccess(const ImageSourceInfo& sourceInfo)
+{
+    RectF rect { 0, 0, GetSourceInfo().GetSourceSize().Width(), GetSourceInfo().GetSourceSize().Height() };
+    dstRect_ = rect;
+    srcRect_ = rect;
+    if (loadNotifier_.dataReadyNotifyTask_) {
+        loadNotifier_.dataReadyNotifyTask_(sourceInfo);
+    }
+    if (loadNotifier_.loadSuccessNotifyTask_) {
+        loadNotifier_.loadSuccessNotifyTask_(sourceInfo);
+    }
+}
 
 LoadFailCallback ImageLoadingContext::GenerateLoadFailCallback()
 {
@@ -81,8 +93,12 @@ LoadFailCallback ImageLoadingContext::GenerateLoadFailCallback()
 }
 
 void ImageLoadingContext::OnLoadFail(
-    const ImageSourceInfo& sourceInfo, const std::string& errorMsg, const ImageLoadingCommand& command)
-{}
+    const ImageSourceInfo& sourceInfo, const std::string& /* errorMsg */, const ImageLoadingCommand& /* command */)
+{
+    if (loadNotifier_.loadFailNotifyTask_) {
+        loadNotifier_.loadFailNotifyTask_(sourceInfo);
+    }
+}
 
 const RectF& ImageLoadingContext::GetDstRect() const
 {
@@ -96,7 +112,7 @@ const RectF& ImageLoadingContext::GetSrcRect() const
 
 RefPtr<CanvasImage> ImageLoadingContext::GetCanvasImage() const
 {
-    return nullptr;
+    return MakeRefPtr<MockCanvasImage>();
 }
 
 void ImageLoadingContext::LoadImageData() {}

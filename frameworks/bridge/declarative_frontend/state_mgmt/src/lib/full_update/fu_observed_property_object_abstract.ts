@@ -14,7 +14,11 @@
  */
 
 /**
- * common bbase class of ObservedPropertyObject and
+ * ObservedPropertyObjectAbstract
+ * 
+ * all definitions in this file are framework internal
+ *
+ * common base class of ObservedPropertyObject and
  * SyncedObjectPropertyTwoWay
  * adds the createObjectLink to the ObservedPropertyAbstract base
  */

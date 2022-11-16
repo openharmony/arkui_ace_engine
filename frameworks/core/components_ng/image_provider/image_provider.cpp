@@ -137,7 +137,10 @@ bool ImageProvider::QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, false);
     auto imageCache = pipelineCtx->GetImageCache();
-    CHECK_NULL_RETURN(imageCache, false);
+    if (!imageCache) {
+        LOGD("No image cache.");
+        return false;
+    }
     RefPtr<ImageObject> imageObj = imageCache->GetCacheImgObjNG(sourceInfo.ToString());
     if (imageObj) { // if [imageObj] of [sourceInfo] is already in cache, notify data ready immediately
         loadCallbacks.dataReadyCallback_(sourceInfo, imageObj);

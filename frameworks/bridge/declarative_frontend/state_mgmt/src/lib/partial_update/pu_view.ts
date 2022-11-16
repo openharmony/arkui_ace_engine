@@ -11,7 +11,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ * 
+ *  * ViewPU - View for Partial Update
+ *  
+* all definitions in this file are framework internal
+*/
 
 /**
  * WeakRef
@@ -105,7 +109,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   */
   constructor(parent: ViewPU, localStorage?: LocalStorage) {
     super();
-    this.id_ = SubscriberManager.Get().MakeId();
+    this.id_ = SubscriberManager.MakeId();
     this.providedVars_ = parent ? new Map(parent.providedVars_)
       : new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -121,7 +125,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
     }
 
-    SubscriberManager.Get().add(this);
+    SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.constructor.name}(${this.id__()}): constructor done`);
   }
 

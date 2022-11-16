@@ -15,8 +15,7 @@
 
 #include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/dimension_rect.h"
+#include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
@@ -25,9 +24,14 @@ namespace {
 
 void PaintIndicator(RSCanvas& canvas, RectF indicator)
 {
-    indicator.SetHeight(Dimension(4, DimensionUnit::VP).ConvertToPx());
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    indicator.SetHeight(tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
     RSBrush brush;
-    brush.SetColor(ToRSColor(Color(0xFF254ff7)));
+    brush.SetAntiAlias(true);
+    brush.SetColor(ToRSColor(tabTheme->GetActiveIndicatorColor()));
     brush.SetBlendMode(RSBlendMode::SRC_OVER);
     canvas.AttachBrush(brush);
     canvas.DrawRect(ToRSRect(indicator));

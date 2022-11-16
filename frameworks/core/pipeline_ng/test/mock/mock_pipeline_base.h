@@ -21,7 +21,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
-
 class MockPipelineBase : public PipelineBase {
     DECLARE_ACE_TYPE(MockPipelineBase, PipelineBase);
 
@@ -85,7 +84,5 @@ public:
     MOCK_METHOD0(FlushPipelineWithoutAnimation, void());
     MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H

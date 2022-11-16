@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-/*
-  class that holds an actual property value of type T
-  uses its base class to manage subscribers to this
-  property.
-*/
+/**
+ * ObservedPropertySimple
+ * 
+ * all definitions in this file are framework internal
+ */
+
 class ObservedPropertySimple<T> extends ObservedPropertySimpleAbstract<T>
   implements ISinglePropertyChangeSubscriber<T> {
 

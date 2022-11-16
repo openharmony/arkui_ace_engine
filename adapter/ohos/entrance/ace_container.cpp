@@ -750,17 +750,24 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
     CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
     CHECK_NULL_VOID(container);
+#ifdef ENABLE_ROSEN_BACKEND
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+#else
+    auto platformWindow = PlatformWindow::Create(view);
+    CHECK_NULL_VOID(platformWindow);
+    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+#endif
+    AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
 void AceContainer::SetViewNew(
     AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
     CHECK_NULL_VOID(container);
@@ -770,6 +777,7 @@ void AceContainer::SetViewNew(
 
     std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
+#endif
 }
 
 void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow)

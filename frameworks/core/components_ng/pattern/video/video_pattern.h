@@ -122,6 +122,7 @@ private:
     void ExitFullScreen();
     void UpdateLooping();
     void SetSpeed();
+    void UpdateMuted();
 
     void OnCurrentTimeChange(uint32_t currentPos);
     void OnPlayerStatus(PlaybackStatus status);
@@ -135,6 +136,7 @@ private:
 
     void AddPreviewNodeIfNeeded();
     void AddControlBarNodeIfNeeded();
+    void UpdateVideoProperty();
     RefPtr<FrameNode> CreateControlBar();
     static RefPtr<FrameNode> CreateSVG();
     static RefPtr<FrameNode> CreateText(uint32_t time);

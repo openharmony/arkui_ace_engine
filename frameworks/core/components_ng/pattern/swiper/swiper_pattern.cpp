@@ -30,8 +30,10 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -75,6 +77,7 @@ void SwiperPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
+    InitSwiperIndicator();
     auto childrenSize = TotalCount();
     if (CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
@@ -289,6 +292,64 @@ void SwiperPattern::InitSwiperController()
             swiper->FinishAnimation();
         }
     });
+}
+
+void SwiperPattern::InitSwiperIndicator()
+{
+    auto swiperNode = GetHost();
+    CHECK_NULL_VOID(swiperNode);
+    RefPtr<FrameNode> indicatorNode;
+    if (swiperNode->GetLastChild()->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+        LOGI("Swiper create new indicator");
+        if (!IsShowIndicator()) {
+            return;
+        }
+        indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        swiperNode->AddChild(indicatorNode);
+    } else {
+        LOGI("Swiper indicator already exist");
+        indicatorNode = DynamicCast<FrameNode>(swiperNode->GetLastChild());
+        if (!IsShowIndicator()) {
+            swiperNode->RemoveChild(indicatorNode);
+            return;
+        }
+    }
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = indicatorNode->GetPaintProperty<SwiperIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (swiperParameters_.dimLeft.has_value()) {
+        layoutProperty->UpdateLeft(swiperParameters_.dimLeft.value());
+    }
+    if (swiperParameters_.dimTop.has_value()) {
+        layoutProperty->UpdateTop(swiperParameters_.dimTop.value());
+    }
+    if (swiperParameters_.dimRight.has_value()) {
+        layoutProperty->UpdateRight(swiperParameters_.dimRight.value());
+    }
+    if (swiperParameters_.dimBottom.has_value()) {
+        layoutProperty->UpdateBottom(swiperParameters_.dimBottom.value());
+    }
+    if (swiperParameters_.dimSize.has_value()) {
+        paintProperty->UpdateSize(swiperParameters_.dimSize.value());
+    }
+    if (swiperParameters_.maskValue.has_value()) {
+        paintProperty->UpdateIndicatorMask(swiperParameters_.maskValue.value());
+    }
+    if (swiperParameters_.colorVal.has_value()) {
+        paintProperty->UpdateColor(swiperParameters_.colorVal.value());
+    }
+    if (swiperParameters_.selectedColorVal.has_value()) {
+        paintProperty->UpdateSelectedColor(swiperParameters_.selectedColorVal.value());
+    }
+
+    indicatorNode->MarkModifyDone();
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -508,6 +569,10 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
+    const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
+    if (tabBarFinishCallback) {
+        tabBarFinishCallback();
+    }
     // Stop translate animation when touch down.
     if (controller_ && !controller_->IsStopped()) {
         // Clear stop listener before stop, otherwise the previous swipe will be considered complete.
@@ -531,6 +596,10 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart()
 {
+    const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
+    if (tabBarFinishCallback) {
+        tabBarFinishCallback();
+    }
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding.
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
@@ -855,11 +924,19 @@ bool SwiperPattern::IsDisableSwipe() const
     return swiperPaintProperty->GetDisableSwipe().value_or(false);
 }
 
+bool SwiperPattern::IsShowIndicator() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, true);
+    return swiperLayoutProperty->GetShowIndicatorValue(true);
+}
+
 int32_t SwiperPattern::TotalCount() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0);
-    return host->TotalChildCount();
+    // last child is swiper indicator
+    return IsShowIndicator() ? host->TotalChildCount() - 1 : host->TotalChildCount();
 }
 
 } // namespace OHOS::Ace::NG

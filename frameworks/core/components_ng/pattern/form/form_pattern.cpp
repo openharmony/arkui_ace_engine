@@ -224,6 +224,7 @@ void FormPattern::CreateCardContainer()
 std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
+#ifdef ENABLE_ROSEN_BACKEND
     drawDelegate->SetDrawRSFrameCallback(
         [weak = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
             CHECK_NULL_VOID(node);
@@ -256,6 +257,7 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
             rsNode->AddChild(node, -1);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         });
+#endif
     return drawDelegate;
 }
 

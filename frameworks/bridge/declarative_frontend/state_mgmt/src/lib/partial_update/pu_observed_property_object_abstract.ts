@@ -14,10 +14,15 @@
  */
 
 /**
- * common bbase class of ObservedPropertyObject and
- * SyncedObjectPropertyTwoWay
+ * ObservedPropertyObjectAbstractPU
+ * 
+ * common bbase class of ObservedPropertyObjectPU and
+ * SyncedObjectPropertyTwoWayPU
  * adds the createObjectLink to the ObservedPropertyAbstract base
+ * 
+ * all definitions in this file are framework internal
  */
+
 abstract class ObservedPropertyObjectAbstractPU<C extends Object>
   extends ObservedPropertyAbstractPU<C> {
 

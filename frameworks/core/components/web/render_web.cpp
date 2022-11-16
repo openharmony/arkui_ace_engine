@@ -305,6 +305,7 @@ void RenderWeb::OnAppShow()
 void RenderWeb::OnAppHide()
 {
     RenderNode::OnAppHide();
+    needOnFocus_ = false;
     if (delegate_) {
         delegate_->HideWebView();
     }

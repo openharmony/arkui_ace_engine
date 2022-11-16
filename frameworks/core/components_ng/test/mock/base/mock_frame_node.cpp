@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -32,10 +33,16 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::OnAttachToMainTree() {}
 void FrameNode::OnDetachFromMainTree() {}
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty) {}
-void FrameNode::SetActive(bool active) {}
+void FrameNode::SetActive(bool active)
+{
+    isActive_ = active;
+}
 void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType) {}
 void FrameNode::RebuildRenderContextTree() {}
-void FrameNode::MarkModifyDone() {}
+void FrameNode::MarkModifyDone()
+{
+    pattern_->OnModifyDone();
+}
 void FrameNode::OnMountToParentDone() {}
 void FrameNode::FlushUpdateAndMarkDirty() {}
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag) {}
@@ -72,7 +79,8 @@ void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstrai
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
-    return nullptr;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, nodeId, pattern);
+    return frameNode;
 }
 
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
@@ -164,7 +172,7 @@ bool FrameNode::IsResponseRegion() const
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     return HitTestResult::BUBBLING;
 }

@@ -58,7 +58,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentHeight = contentSize.Height();
     }
     if (!frameSize.Height().has_value()) {
-        frameSize.SetHeight(std::max(GetTextFieldDefaultHeight(), contentHeight));
+        frameSize.SetHeight(std::min(GetTextFieldDefaultHeight(), contentHeight));
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
