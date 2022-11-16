@@ -27,6 +27,7 @@ group("pattern_unittest") {
     "grid_container:grid_container_pattern_test_ng",
     "grid_row:grid_row_pattern_test_ng",
     "linear_layout:linear_layout_creator_test_ng",
+    "marquee:marquee_pattern_unit_test",
     "patternlock:patternlock_pattern_test_ng",
     "qrcode:qrcode_pattern_test_ng",
     "radio:radio_pattern_test_ng",
@@ -35,7 +36,9 @@ group("pattern_unittest") {
     "shape:shape_pattern_unit_test",
     "stepper:stepper_pattern_test_ng",
     "text:text_pattern_test_ng",
+    "text_clock:text_clock_pattern_unit_test",
     "textfield:textfield_pattern_test_ng",
+    "texttimer:text_timer_pattern_unit_test",
     "video:video_pattern_test_ng",
     "xcomponent:xcomponent_pattern_test_ng",
   ]
