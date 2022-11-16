@@ -148,4 +148,26 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldFilter002, TestSize.Level1)
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, INSERT_VALUE_SINGLE_NUMBER.size());
 }
 
+/**
+ * @tc.name: TextareaMoveCaret001
+ * @tc.desc: Test textarea move caret.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextareaMoveCaret001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    auto controller = AccessibilityManager::DynamicCast<TextFieldController>(
+        textFieldModelNG.CreateTextArea(PLACEHOLDER, EMPTY_TEXT_VALUE));
+    EXPECT_FALSE(controller == nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->InsertValue(TEXT_VALUE);
+    EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE);
+    controller->CaretPosition(CARET_POSITION_1);
+    // inserting text value length larger than caret position
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, CARET_POSITION_1);
+}
+
 } // namespace OHOS::Ace::NG
