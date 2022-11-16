@@ -19,6 +19,7 @@
 #include "base/log/log.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -139,6 +140,7 @@ double RotationRecognizer::ChangeValueRange(double value)
 
 void RotationRecognizer::OnResetStatus()
 {
+    MultiFingersRecognizer::OnResetStatus();
     initialAngle_ = 0.0;
     currentAngle_ = 0.0;
     resultAngle_ = 0.0;
