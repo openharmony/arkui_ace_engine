@@ -71,4 +71,4 @@ HWTEST_F(InspectGridContainerTest, InspectGridContainerTest002, TestSize.Level1)
     EXPECT_EQ(inspectGridContainer.styles_["align-items"], "stretch");
     EXPECT_EQ(inspectGridContainer.styles_["align-content"], "flex-start");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework
