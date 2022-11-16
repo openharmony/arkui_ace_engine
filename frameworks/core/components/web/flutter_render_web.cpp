@@ -74,7 +74,6 @@ void FlutterRenderWeb::Paint(RenderContext& context, const Offset& offset)
             isUrlLoaded_ = true;
         }
     }
-    // SyncGeometryProperties();
     RenderNode::Paint(context, offset);
 }
 

@@ -26,10 +26,6 @@
 #include <ui/rs_surface_node.h>
 #endif
 
-// #include <GLES3/gl3.h>
-// #include <EGL/egl.h>
-// #include <EGL/eglext.h>
-
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
@@ -412,7 +408,8 @@ public:
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
 #endif
-    void SetWebRendeGlobalPos(const Offset& pos) {
+    void SetWebRendeGlobalPos(const Offset& pos)
+    {
         offset_ = pos;
     }
 private:
@@ -480,8 +477,7 @@ private:
     void UpdateSettting(bool useNewPipe = false);
 
     std::string GetCustomScheme();
-    void InitWebViewWithSurface();
-    // void GLContextInit(void* window);    
+    void InitWebViewWithSurface();   
 #endif
 
     WeakPtr<WebComponent> webComponent_;
