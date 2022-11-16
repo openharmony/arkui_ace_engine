@@ -18,8 +18,6 @@
 namespace OHOS::Ace::NG {
 RefPtr<RenderContext> RenderContext::Create()
 {
-    auto mockRenderContext = MakeRefPtr<MockRenderContext>();
-    EXPECT_CALL(*AceType::RawPtr(mockRenderContext), SetClipToBounds(true)).Times(1);
-    return mockRenderContext;
+    return MakeRefPtr<MockRenderContext>();
 }
 } // namespace OHOS::Ace::NG
