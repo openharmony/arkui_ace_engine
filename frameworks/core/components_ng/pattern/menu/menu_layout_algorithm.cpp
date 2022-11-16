@@ -34,7 +34,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     // calculate menu position based on target FrameNode
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    position_ = props->GetMenuOffset().value();
+    position_ = props->GetMenuOffset().value_or(OffsetF());
 }
 
 // Called to perform layout render node and child.

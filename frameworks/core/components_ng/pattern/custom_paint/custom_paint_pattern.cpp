@@ -27,7 +27,7 @@ void CustomPaintPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context);
 }

@@ -23,7 +23,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/test/base/mock_render_context.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;

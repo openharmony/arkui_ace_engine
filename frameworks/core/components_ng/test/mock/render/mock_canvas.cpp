@@ -13,22 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_VIEW_H
-
-#include <vector>
-
-#include "base/json/json_util.h"
-#include "core/components/common/layout/constants.h"
+#include "core/components_ng/render/canvas.h"
 
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT DataPanelView {
-public:
-    static void Create(const std::vector<double>& values, double max, int32_t dataPanelType);
-    static void SetEffect(bool Effect);
-};
-
+RefPtr<Canvas> Canvas::Create(void* rawCanvas)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_VIEW_H
