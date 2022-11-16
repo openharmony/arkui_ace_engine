@@ -28,6 +28,7 @@ RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& sourceInfo,
     ImageProvider::MakeSvgDom(svgImageObj, loadCallbacks, svgFillColor);
     if (!svgImageObj->GetSVGDom()) {
         // no SvgDom, can not trigger dataReadyCallback_, should return
+        LOGW("svgDom can't be created");
         return nullptr;
     }
     return svgImageObj;
