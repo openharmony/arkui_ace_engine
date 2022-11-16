@@ -63,4 +63,11 @@ declare class ViewStackProcessor {
    * @param elmtId
    */
   public static FinishAndLocalUpdate(elmtId: number): void;
+
+
+  /**
+   * Returns a globally unique id from ElementRegister
+   * JS signatire: MakeUniqueId() : number
+  */
+  public static MakeUniqueId(): number;
 }

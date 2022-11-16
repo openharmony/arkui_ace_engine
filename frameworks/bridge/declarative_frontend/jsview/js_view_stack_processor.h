@@ -45,6 +45,12 @@ public:
 
     static void JsImplicitPopBeforeContinue();
 
+    /**
+     * Returns a globally unique id from ElementRegister
+     * JS signatire: MakeUniqueId() : number
+    */
+    static void JSMakeUniqueId(const JSCallbackInfo& info);
+
 private:
     static void JSVisualState(const JSCallbackInfo& info);
 };
