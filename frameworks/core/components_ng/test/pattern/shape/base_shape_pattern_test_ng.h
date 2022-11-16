@@ -14,6 +14,7 @@
  */
 
 #include <array>
+
 #include "gtest/gtest.h"
 
 #include "core/components_ng/base/frame_node.h"
@@ -23,7 +24,7 @@ namespace OHOS::Ace::NG {
 
 class BaseShapePatternTestNg : public testing::Test {
 public:
-    BaseShapePatternTestNg()= default;
+    BaseShapePatternTestNg() = default;
     void CheckSize(bool hasValue);
     void CheckFill(bool hasValue);
     void CheckFillOpacity(bool hasValue);
@@ -39,7 +40,7 @@ public:
     void SetSize(ShapeAbstractModelNG& shapeAbstractModelNG) const;
     virtual RefPtr<FrameNode> CreadFrameNode();
     virtual void Draw(RefPtr<FrameNode> frameNode);
-    ~BaseShapePatternTestNg()= default;
+    ~BaseShapePatternTestNg() = default;
 
     static constexpr float WIDTH = 200.0f;
     static constexpr float HEIGHT = 300.0f;

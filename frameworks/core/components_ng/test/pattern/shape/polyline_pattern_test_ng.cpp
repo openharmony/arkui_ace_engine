@@ -59,6 +59,17 @@ public:
         RSCanvas rsCavas(&canvas);
         contentDraw(rsCavas);
     }
+
+    void CheckPolylinePoints(bool hasValue)
+    {
+        PolygonModelNG().Create(false);
+        auto shapeAbstactModel = ShapeAbstractModelNG();
+        SetSize(shapeAbstactModel);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        ViewStackProcessor::GetInstance()->Pop();
+        CheckPoints(frameNode, hasValue);
+        Draw(frameNode);
+    }
 };
 
 /**
@@ -69,13 +80,18 @@ public:
 
 HWTEST_F(PolylinePatternTestNg, PolylinePaintProperty001, TestSize.Level1)
 {
-    PolygonModelNG().Create(false);
-    auto shapeAbstactModel = ShapeAbstractModelNG();
-    SetSize(shapeAbstactModel);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    ViewStackProcessor::GetInstance()->Pop();
-    CheckPoints(frameNode);
-    Draw(frameNode);
+    CheckPolylinePoints(true);
+}
+
+/**
+ * @tc.name: PolylinePaintProperty002
+ * @tc.desc: create polyline with no points
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(PolylinePatternTestNg, PolylinePaintProperty002, TestSize.Level1)
+{
+    CheckPolylinePoints(false);
 }
 
 } // namespace OHOS::Ace::NG
