@@ -33,8 +33,8 @@ public:
     RefPtr<PaintProperty> Clone() const override
     {
         auto paintProperty = MakeRefPtr<TabBarPaintProperty>();
-        paintProperty->UpdatePaintProperty(this);
-        paintProperty->CloneIndicator();
+        paintProperty->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
+        paintProperty->propIndicator_ = CloneIndicator();
         return paintProperty;
     }
 
