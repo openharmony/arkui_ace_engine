@@ -101,7 +101,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // bubble's size
     auto child = children.front();
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's child's size
-    childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's child's offset
+    childOffset_ = GetChildPosition(childSize_, bubbleProp); // bubble's child's offset
     bool useCustom = bubbleProp->GetUseCustom().value_or(false);
     if (useCustom) { // use custom popupOption
         UpdateCustomChildPosition(bubbleProp);

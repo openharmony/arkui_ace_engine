@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
@@ -34,35 +35,37 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool SLIDING_PANEL_SHOW = false;
-constexpr float ZERO = 0.0f;
 constexpr bool SLIDING_PANEL_LAYOUT_PROPERTY_HAS_DRAG_BAR = false;
-constexpr PanelType PANEL_TYPE_VALUE = PanelType::MINI_BAR;
-constexpr PanelMode PANEL_MODE_VALUE = PanelMode::FULL;
 constexpr bool SLIDING_PANEL_HAS_DRAG_BAR = false;
+
+constexpr float ZERO = 0.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
-const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr float PANEL_HEIGHT = 900.0f;
-constexpr Dimension SLIDING_PANEL_MINI_HEIGHT = 50.0_px;
-constexpr Dimension SLIDING_PANEL_HALF_HEIGHT = 300.0_px;
-constexpr Dimension SLIDING_PANEL_FULL_HEIGHT = 600.0_px;
 constexpr float HEIGHT_1 = 100.0f;
 constexpr float HEIGHT_2 = 400.0f;
-constexpr Color BACKGROUND_COLOR_VALUE = Color(0XFFFF0000);
 constexpr float START_X = 50.0f;
 constexpr float START_Y = 100.0f;
-const Offset START_POINT(START_X, START_Y);
 constexpr float MAIN_DELTA = 80.0f;
 constexpr float MAIN_VELOCITY = 500.0f;
 constexpr float CURRENT_OFFSET = 200.f;
 constexpr float DRAG_LENGTH = 100.0f;
 constexpr float DRAG_VELOCITY = 50.0f;
-constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
+constexpr float VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 constexpr float FULL_MIN_BOUNDARY = 500.0f;
 constexpr float FULL_HALF_BOUNDARY = 800.0f;
 constexpr float HALF_MINI_BOUNDARY = 200.0f;
 constexpr float TARGET_LOCATION = 480.0f;
 constexpr float DEFAULT_BLANK_HEIGHT_MODE_HALF = 568.0f;
+
+const Offset START_POINT(START_X, START_Y);
+const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+constexpr Color BACKGROUND_COLOR_VALUE = Color(0XFFFF0000);
+constexpr Dimension SLIDING_PANEL_MINI_HEIGHT = 50.0_px;
+constexpr Dimension SLIDING_PANEL_HALF_HEIGHT = 300.0_px;
+constexpr Dimension SLIDING_PANEL_FULL_HEIGHT = 600.0_px;
+constexpr PanelType PANEL_TYPE_VALUE = PanelType::MINI_BAR;
+constexpr PanelMode PANEL_MODE_VALUE = PanelMode::FULL;
 const std::vector<PanelType> PANEL_PANEL_TYPE = { PanelType::MINI_BAR, PanelType::FOLDABLE_BAR,
     PanelType::TEMP_DISPLAY };
 } // namespace
