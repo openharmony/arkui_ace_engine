@@ -325,6 +325,7 @@ void SubwindowOhos::ClearMenu()
 
 void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
 {
+    LOGI("SubwindowOhos::ShowMenuNG");
     ShowWindow();
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -337,6 +338,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
 
 void SubwindowOhos::HideMenuNG()
 {
+    LOGI("SubwindowOhos::HideMenuNG");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -350,6 +352,7 @@ void SubwindowOhos::HideMenuNG()
 
 void SubwindowOhos::HideMenuNG(int32_t targetId)
 {
+    LOGI("SubwindowOhos::HideMenuNG for target id %{public}d", targetId);
     targetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);

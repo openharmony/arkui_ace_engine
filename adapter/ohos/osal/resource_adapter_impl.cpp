@@ -224,7 +224,7 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetStringById(resId, strResult);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetString error, id=%{public}u", resId);
+            LOGD("GetString error, id=%{public}u", resId);
         }
     }
     return strResult;
@@ -248,7 +248,7 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) con
     if (resourceManager_) {
         auto state = resourceManager_->GetStringArrayById(resId, strResults);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetStringArray error, id=%{public}u", resId);
+            LOGD("GetStringArray error, id=%{public}u", resId);
         }
     }
     return strResults;
