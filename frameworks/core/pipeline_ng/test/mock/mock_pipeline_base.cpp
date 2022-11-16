@@ -71,12 +71,6 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     return nullptr;
 }
 
-bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
-{
-    return true;
-}
-
 void PipelineBase::Destroy() {}
 
 void PipelineBase::RequestFrame() {}
