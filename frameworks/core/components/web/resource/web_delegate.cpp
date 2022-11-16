@@ -2033,7 +2033,9 @@ void WebDelegate::InitWebViewWithSurface()
             }
             if (isEnhanceSurface) {
                 LOGI("Create webview with isEnhanceSurface");
-                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(delegate->enhanceSurfaceInfo_, initArgs);
+                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
+                    delegate->enhanceSurfaceInfo_,
+                    initArgs);
                 if (delegate->nweb_ == nullptr) {
                     LOGE("fail to get webview instance");
                     return;

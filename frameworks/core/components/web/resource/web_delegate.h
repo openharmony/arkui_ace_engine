@@ -477,7 +477,7 @@ private:
     void UpdateSettting(bool useNewPipe = false);
 
     std::string GetCustomScheme();
-    void InitWebViewWithSurface();   
+    void InitWebViewWithSurface();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
