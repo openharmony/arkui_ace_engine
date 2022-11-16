@@ -1337,10 +1337,13 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
     auto rosenRenderSurface = DynamicCast<NG::RosenRenderSurface>(surface);
     if (!rosenRenderSurface) {
         LOGI("source is nullptr, initialize with window");
-        PrepareInitOHOSWeb(context);
-        if (!isCreateWebView_) {
-            InitWebViewWithWindow();
-            isCreateWebView_ = true;
+        if (PrepareInitOHOSWeb(context)) {
+            if (!isCreateWebView_) {
+                InitWebViewWithWindow();
+                isCreateWebView_ = true;
+            }
+        } else {
+            LOGE("prepare init web failed");
         }
         return;
     }
@@ -1349,14 +1352,14 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
 #endif
 }
 
-void WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
+bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     state_ = State::CREATING;
     // obtain hap data path
     auto container = Container::Current();
     if (container == nullptr) {
         LOGE("Fail to get container");
-        return;
+        return false;
     }
     const std::string& bundlePath = container->GetBundlePath();
     const std::string& filesDataPath = container->GetFilesDataPath();
@@ -1364,7 +1367,7 @@ void WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     std::size_t baseIndex = filesDataPath.find(baseDir);
     if (baseIndex == std::string::npos) {
         LOGE("Fail to parse hap data base path");
-        return;
+        return false;
     }
     std::string dataPath = filesDataPath.substr(0, baseIndex + baseDir.length());
     bundlePath_ = bundlePath;
@@ -1373,7 +1376,7 @@ void WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     OHOS::NWeb::NWebHelper::Instance().SetBundlePath(bundlePath_);
     if (!OHOS::NWeb::NWebHelper::Instance().Init()) {
         LOGE("Fail to init NWebHelper");
-        return;
+        return false;
     }
     auto webCom = webComponent_.Upgrade();
     auto webPattern = webPattern_.Upgrade();
@@ -1382,88 +1385,92 @@ void WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     if (useNewPipe && !webPattern && !eventHub) {
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
-        return;
+        return false;
     }
     if (!useNewPipe && !webCom) {
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
-        return;
+        return false;
     }
     context_ = context;
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to context is null");
-        return;
+        return false;
     }
     state_ = State::CREATED;
 
     SetWebCallBack();
     if (!pipelineContext->GetIsDeclarative()) {
         RegisterOHOSWebEventAndMethord();
-        return;
-    }
-    auto oldContext = DynamicCast<PipelineContext>(pipelineContext);
+    } else {
+        auto oldContext = DynamicCast<PipelineContext>(pipelineContext);
 
-    onPageFinishedV2_ = useNewPipe ? eventHub->GetOnPageFinishedEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetPageFinishedEventId(), oldContext);
-    onPageStartedV2_ = useNewPipe ? eventHub->GetOnPageStartedEvent()
-                                  : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                        webCom->GetPageStartedEventId(), oldContext);
-    onTitleReceiveV2_ = useNewPipe ? eventHub->GetOnTitleReceiveEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetTitleReceiveEventId(), oldContext);
-    onFullScreenExitV2_ = useNewPipe ? eventHub->GetOnFullScreenExitEvent()
-                                     : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                           webCom->GetOnFullScreenExitEventId(), oldContext);
-    onGeolocationHideV2_ = useNewPipe ? eventHub->GetOnGeolocationHideEvent()
-                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                            webCom->GetGeolocationHideEventId(), oldContext);
-    onGeolocationShowV2_ = useNewPipe ? eventHub->GetOnGeolocationShowEvent()
-                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                            webCom->GetGeolocationShowEventId(), oldContext);
-    onErrorReceiveV2_ = useNewPipe ? eventHub->GetOnErrorReceiveEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetPageErrorEventId(), oldContext);
-    onHttpErrorReceiveV2_ = useNewPipe ? eventHub->GetOnHttpErrorReceiveEvent()
-                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                             webCom->GetHttpErrorEventId(), oldContext);
-    onRequestFocusV2_ = useNewPipe ? eventHub->GetOnRequestFocusEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetRequestFocusEventId(), oldContext);
-    onDownloadStartV2_ = useNewPipe ? eventHub->GetOnDownloadStartEvent()
+        onPageFinishedV2_ = useNewPipe ? eventHub->GetOnPageFinishedEvent()
                                     : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                          webCom->GetDownloadStartEventId(), oldContext);
-    onRenderExitedV2_ = useNewPipe ? eventHub->GetOnRenderExitedEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetRenderExitedId(), oldContext);
-    onRefreshAccessedHistoryV2_ = useNewPipe ? eventHub->GetOnRefreshAccessedHistoryEvent()
-                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                                   webCom->GetRefreshAccessedHistoryId(), oldContext);
-    onResourceLoadV2_ = useNewPipe ? eventHub->GetOnResourceLoadEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetResourceLoadId(), oldContext);
-    onScaleChangeV2_ = useNewPipe ? eventHub->GetOnScaleChangeEvent()
-                                  : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                        webCom->GetScaleChangeId(), oldContext);
-    onPermissionRequestV2_ = useNewPipe ? eventHub->GetOnPermissionRequestEvent()
+                                            webCom->GetPageFinishedEventId(), oldContext);
+        onPageStartedV2_ = useNewPipe ? eventHub->GetOnPageStartedEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetPageStartedEventId(), oldContext);
+        onTitleReceiveV2_ = useNewPipe ? eventHub->GetOnTitleReceiveEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetTitleReceiveEventId(), oldContext);
+        onFullScreenExitV2_ = useNewPipe ? eventHub->GetOnFullScreenExitEvent()
                                         : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                              webCom->GetPermissionRequestEventId(), oldContext);
-    onSearchResultReceiveV2_ = useNewPipe ? eventHub->GetOnSearchResultReceiveEvent()
-                                          : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                                webCom->GetSearchResultReceiveEventId(), oldContext);
-    onScrollV2_ = useNewPipe ? eventHub->GetOnScrollEvent()
-                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                   webCom->GetScrollId(), oldContext);
-    onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
+                                            webCom->GetOnFullScreenExitEventId(), oldContext);
+        onGeolocationHideV2_ = useNewPipe ? eventHub->GetOnGeolocationHideEvent()
                                         : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                            webCom->GetWindowExitEventId(), oldContext);
+                                                webCom->GetGeolocationHideEventId(), oldContext);
+        onGeolocationShowV2_ = useNewPipe ? eventHub->GetOnGeolocationShowEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetGeolocationShowEventId(), oldContext);
+        onErrorReceiveV2_ = useNewPipe ? eventHub->GetOnErrorReceiveEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetPageErrorEventId(), oldContext);
+        onHttpErrorReceiveV2_ = useNewPipe ? eventHub->GetOnHttpErrorReceiveEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetHttpErrorEventId(), oldContext);
+        onRequestFocusV2_ = useNewPipe ? eventHub->GetOnRequestFocusEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetRequestFocusEventId(), oldContext);
+        onDownloadStartV2_ = useNewPipe ? eventHub->GetOnDownloadStartEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetDownloadStartEventId(), oldContext);
+        onRenderExitedV2_ = useNewPipe ? eventHub->GetOnRenderExitedEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetRenderExitedId(), oldContext);
+        onRefreshAccessedHistoryV2_ = useNewPipe ? eventHub->GetOnRefreshAccessedHistoryEvent()
+                                                : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                    webCom->GetRefreshAccessedHistoryId(), oldContext);
+        onResourceLoadV2_ = useNewPipe ? eventHub->GetOnResourceLoadEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetResourceLoadId(), oldContext);
+        onScaleChangeV2_ = useNewPipe ? eventHub->GetOnScaleChangeEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetScaleChangeId(), oldContext);
+        onPermissionRequestV2_ = useNewPipe ? eventHub->GetOnPermissionRequestEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetPermissionRequestEventId(), oldContext);
+        onSearchResultReceiveV2_ = useNewPipe ? eventHub->GetOnSearchResultReceiveEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                    webCom->GetSearchResultReceiveEventId(), oldContext);
+        onScrollV2_ = useNewPipe ? eventHub->GetOnScrollEvent()
+                                : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                    webCom->GetScrollId(), oldContext);
+        onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetWindowExitEventId(), oldContext);
+    }
+    return true;
 }
 
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
-    PrepareInitOHOSWeb(context);
+    if (!PrepareInitOHOSWeb(context)) {
+        LOGE("prepare init web failed");
+        return;
+    }
     if (!isCreateWebView_) {
         isCreateWebView_ = true;
         if (isEnhanceSurface_) {

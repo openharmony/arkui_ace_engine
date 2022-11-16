@@ -306,7 +306,7 @@ public:
     // TODO: add to separate this file into three file, base file, component impl and ng impl.
     void InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface);
     void InitOHOSWeb(const WeakPtr<PipelineBase>& context);
-    void PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context);
+    bool PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context);
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
