@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -67,7 +68,8 @@ void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstrai
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
-    return nullptr;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, nodeId, pattern);
+    return frameNode;
 }
 
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(

@@ -64,4 +64,11 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;
 }
+
+void PipelineBase::Destroy() {}
+
+Rect PipelineBase::GetCurrentWindowRect() const
+{
+    return { 0.0f, 0.0f, 1.0f, 1.0f };
+}
 } // namespace OHOS::Ace
