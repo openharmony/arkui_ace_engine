@@ -41,6 +41,8 @@ struct GridLayoutInfo {
     bool reachEnd_ = false;
     bool reachStart_ = false;
 
+    bool offsetEnd_ = false;
+
     // Map structure: [mainIndex, [crossIndex, index]],
     // when vertical, mainIndex is rowIndex and crossIndex is columnIndex.
     std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;
