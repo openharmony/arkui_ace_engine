@@ -19,46 +19,49 @@
 #define private public
 #define protected public
 
-#include "frameworks/core/accessibility/js_inspector/inspect_canvas.h"
+#include "frameworks/core/accessibility/js_inspector/inspect_stack.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::Framework {
-class InspectCanvasTest : public testing::Test {
+class InspectStackTest : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
 };
 
 /**
- * @tc.name: InspectCanvasTest001
- * @tc.desc: InspectCanvas::InspectCanvas
+ * @tc.name: InspectStackTest001
+ * @tc.desc: InspectStack::InspectStack
  * @tc.type: FUNC
  */
-HWTEST_F(InspectCanvasTest, InspectCanvasTest001, TestSize.Level1)
+HWTEST_F(InspectStackTest, InspectStackTest001, TestSize.Level1)
 {
     NodeId nodeId = -1;
     std::string tag = "tagTest";
-    InspectCanvas inspectCanvas(nodeId, tag);
-    EXPECT_EQ(inspectCanvas.nodeId_, nodeId);
-    EXPECT_EQ(inspectCanvas.tag_, tag);
+    InspectStack inspectStack(nodeId, tag);
+    EXPECT_EQ(inspectStack.nodeId_, nodeId);
+    EXPECT_EQ(inspectStack.tag_, tag);
 }
 
 /**
- * @tc.name: InspectCanvasTest002
- * @tc.desc: InspectCanvas::PackAttrAndStyle
+ * @tc.name: InspectStackTest002
+ * @tc.desc: InspectStack::PackAttrAndStyle
  * @tc.type: FUNC
  */
-HWTEST_F(InspectCanvasTest, InspectCanvasTest002, TestSize.Level1)
+HWTEST_F(InspectStackTest, InspectStackTest002, TestSize.Level1)
 {
     NodeId nodeId = -1;
     std::string tag = "tagTest";
-    InspectCanvas inspectCanvas(nodeId, tag);
-    auto size = inspectCanvas.attrs_.size();
-    uint16_t sizeInsert = 2;
-    inspectCanvas.PackAttrAndStyle();
-    EXPECT_EQ(inspectCanvas.attrs_.size(), size + sizeInsert);
-    EXPECT_EQ(inspectCanvas.attrs_["disabled"], "false");
-    EXPECT_EQ(inspectCanvas.attrs_["focusable"], "false");
+    InspectStack inspectStack(nodeId, tag);
+    auto attrsSize = inspectStack.attrs_.size();
+    auto stylesSize = inspectStack.styles_.size();
+    uint16_t attrsSizeInsert = 2;
+
+    inspectStack.PackAttrAndStyle();
+    EXPECT_EQ(inspectStack.attrs_.size(), attrsSize + attrsSizeInsert);
+    EXPECT_EQ(inspectStack.attrs_["disabled"], "false");
+    EXPECT_EQ(inspectStack.attrs_["focusable"], "true");
+    EXPECT_EQ(inspectStack.styles_.size(), stylesSize);
 }
 } // namespace OHOS::Ace::Framework

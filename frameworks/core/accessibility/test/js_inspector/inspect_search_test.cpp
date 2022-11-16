@@ -19,53 +19,53 @@
 #define private public
 #define protected public
 
-#include "frameworks/core/accessibility/js_inspector/inspect_image.h"
+#include "frameworks/core/accessibility/js_inspector/inspect_search.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::Framework {
-class InspectImageTest : public testing::Test {
+class InspectSearchTest : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
 };
 
 /**
- * @tc.name: InspectImageTest001
- * @tc.desc: InspectImage::InspectImage
+ * @tc.name: InspectSearchTest001
+ * @tc.desc: InspectSearch::InspectSearch
  * @tc.type: FUNC
  */
-HWTEST_F(InspectImageTest, InspectImageTest001, TestSize.Level1)
+HWTEST_F(InspectSearchTest, InspectSearchTest001, TestSize.Level1)
 {
     NodeId nodeId = -1;
     std::string tag = "tagTest";
-    InspectImage inspectImage(nodeId, tag);
-    EXPECT_EQ(inspectImage.nodeId_, nodeId);
-    EXPECT_EQ(inspectImage.tag_, tag);
+    InspectSearch inspectSearch(nodeId, tag);
+    EXPECT_EQ(inspectSearch.nodeId_, nodeId);
+    EXPECT_EQ(inspectSearch.tag_, tag);
 }
 
 /**
- * @tc.name: InspectImageTest002
- * @tc.desc: InspectImage::PackAttrAndStyle
+ * @tc.name: InspectSearchTest002
+ * @tc.desc: InspectSearch::PackAttrAndStyle
  * @tc.type: FUNC
  */
-HWTEST_F(InspectImageTest, InspectImageTest002, TestSize.Level1)
+HWTEST_F(InspectSearchTest, InspectSearchTest002, TestSize.Level1)
 {
     NodeId nodeId = -1;
     std::string tag = "tagTest";
-    InspectImage inspectImage(nodeId, tag);
-    auto attrsSize = inspectImage.attrs_.size();
-    auto stylesSize = inspectImage.styles_.size();
+    InspectSearch inspectSearch(nodeId, tag);
+    auto attrsSize = inspectSearch.attrs_.size();
+    auto stylesSize = inspectSearch.styles_.size();
     uint16_t attrsSizeInsert = 2;
     uint16_t stylesSizeInsert = 3;
 
-    inspectImage.PackAttrAndStyle();
-    EXPECT_EQ(inspectImage.attrs_.size(), attrsSize + attrsSizeInsert);
-    EXPECT_EQ(inspectImage.attrs_["disabled"], "false");
-    EXPECT_EQ(inspectImage.attrs_["focusable"], "false");
-    EXPECT_EQ(inspectImage.styles_.size(), stylesSize + stylesSizeInsert);
-    EXPECT_EQ(inspectImage.styles_["object-fit"], "cover");
-    EXPECT_EQ(inspectImage.styles_["match-text-direction"], "false");
-    EXPECT_EQ(inspectImage.styles_["fit-original-size"], "false");
+    inspectSearch.PackAttrAndStyle();
+    EXPECT_EQ(inspectSearch.attrs_.size(), attrsSize + attrsSizeInsert);
+    EXPECT_EQ(inspectSearch.attrs_["disabled"], "false");
+    EXPECT_EQ(inspectSearch.attrs_["focusable"], "true");
+    EXPECT_EQ(inspectSearch.styles_.size(), stylesSize + stylesSizeInsert);
+    EXPECT_EQ(inspectSearch.styles_["allow-scale"], "true");
+    EXPECT_EQ(inspectSearch.styles_["font-weight"], "normal");
+    EXPECT_EQ(inspectSearch.styles_["font-family"], "sans-serif");
 }
 } // namespace OHOS::Ace::Framework
