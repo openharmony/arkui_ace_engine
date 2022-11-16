@@ -33,9 +33,9 @@ class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
 
 public:
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
-    void BeginReferee(int32_t touchId)
+    void BeginReferee(int32_t touchId, bool needUpdateChild = false)
     {
-        OnBeginGestureReferee(touchId);
+        OnBeginGestureReferee(touchId, needUpdateChild);
     }
 
     // Triggered when the Gesture referee ends a gesture referee.
@@ -194,7 +194,7 @@ protected:
     }
     virtual void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
 
-    virtual void OnBeginGestureReferee(int32_t touchId) {}
+    virtual void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) {}
     virtual void OnFinishGestureReferee(int32_t touchId) {}
 
     virtual void HandleTouchDownEvent(const TouchEvent& event) = 0;

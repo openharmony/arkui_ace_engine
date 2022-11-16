@@ -139,7 +139,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             continue;
         }
         recognizer->SetCoordinateOffset(offset);
-        recognizer->BeginReferee(touchId);
+        recognizer->BeginReferee(touchId, true);
         auto gestureMask = recognizer->GetPriorityMask();
         if (gestureMask == GestureMask::IgnoreInternal) {
             // In ignore case, dropped the self inner recognizer and children recognizer.
