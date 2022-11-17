@@ -63,7 +63,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    void UpdateCurrentOffset(float offset);
+    bool UpdateCurrentOffset(float offset);
 
     int32_t GetStartIndex() const
     {
