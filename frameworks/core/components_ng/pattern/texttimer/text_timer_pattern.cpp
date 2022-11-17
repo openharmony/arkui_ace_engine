@@ -139,9 +139,13 @@ void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
 
     // format time text.
     std::string timerText = Localization::GetInstance()->FormatDuration(elapsedTime, GetFormat());
+    if (timerText.empty()) {
+        timerText = Localization::GetInstance()->FormatDuration(elapsedTime, DEFAULT_FORMAT);
+    }
     if (textLayoutProperty->GetContent() == timerText) {
         return; // needless to update
     }
+    textLayoutProperty->UpdateForceRender(true);
     textLayoutProperty->UpdateContent(timerText); // Update time text.
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
