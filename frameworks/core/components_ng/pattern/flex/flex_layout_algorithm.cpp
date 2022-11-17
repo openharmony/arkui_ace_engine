@@ -105,7 +105,7 @@ void UpdateChildLayoutConstrainByFlexBasis(
     if (!flexBasis) {
         return;
     }
-    if (flexBasis->Unit() == DimensionUnit::AUTO) {
+    if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
