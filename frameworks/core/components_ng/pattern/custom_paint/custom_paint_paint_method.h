@@ -269,7 +269,7 @@ protected:
     void InitImagePaint();
     void InitImageCallbacks();
     virtual void SetPaintImage() = 0;
-    virtual void ImageObjReady(const RefPtr<ImageObject>& imageObj) = 0;
+    virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
     virtual sk_sp<SkImage> GetImage(const std::string& src) = 0;
     void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);

@@ -23,6 +23,7 @@
 #include "core/components_ng/image_provider/svg_image_object.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/image/image_loader.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -117,8 +118,7 @@ ImageObjectType ImageProvider::ParseImageObjectType(
     const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo)
 {
     if (!data) {
-        LOGW(
-            "data is null when try ParseImageObjectType, sourceInfo: %{public}s", imageSourceInfo.ToString().c_str());
+        LOGW("data is null when try ParseImageObjectType, sourceInfo: %{public}s", imageSourceInfo.ToString().c_str());
         return ImageObjectType::UNKNOWN;
     }
     if (imageSourceInfo.IsSvg()) {
@@ -130,9 +130,26 @@ ImageObjectType ImageProvider::ParseImageObjectType(
     return ImageObjectType::STATIC_IMAGE_OBJECT;
 }
 
+bool ImageProvider::QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks, const ImageSourceInfo& sourceInfo)
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineCtx, false);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_RETURN(imageCache, false);
+    RefPtr<ImageObject> imageObj = imageCache->GetCacheImgObjNG(sourceInfo.ToString());
+    if (imageObj) { // if [imageObj] of [sourceInfo] is already in cache, notify data ready immediately
+        loadCallbacks.dataReadyCallback_(sourceInfo, imageObj);
+        return true;
+    }
+    return false;
+}
+
 void ImageProvider::CreateImageObject(
     const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks, const std::optional<Color>& svgFillColor)
 {
+    if (ImageProvider::QueryImageObjectFromCache(loadCallbacks, sourceInfo)) {
+        return;
+    }
     auto createImageObjectTask = [sourceInfo, loadCallbacks, svgFillColor] {
         // step1: load image data
         auto imageLoader = ImageLoader::CreateImageLoader(sourceInfo);
@@ -228,6 +245,12 @@ void ImageProvider::MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageOb
     };
     // TODO: add sync load
     ImageProvider::WrapTaskAndPostToBackground(std::move(canvasImageMakingTask));
+}
+
+std::string ImageProvider::GenerateCacheKey(const ImageSourceInfo& srcInfo, const NG::SizeF& targetImageSize)
+{
+    return srcInfo.GetCacheKey() + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
+           std::to_string(static_cast<int32_t>(targetImageSize.Height()));
 }
 
 } // namespace OHOS::Ace::NG

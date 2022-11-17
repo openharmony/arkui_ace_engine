@@ -47,6 +47,17 @@ public:
 #endif
         return nullptr;
     }
+
+    virtual fml::RefPtr<flutter::CanvasImage> GetFlutterCanvasImage() const
+    {
+#ifndef NG_BUILD
+        if (image_) {
+            return image_;
+        }
+#endif
+        return nullptr;
+    }
+
     void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
