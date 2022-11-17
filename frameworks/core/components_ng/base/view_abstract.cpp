@@ -158,6 +158,9 @@ void ViewAbstract::SetFlexGrow(float value)
 
 void ViewAbstract::SetFlexBasis(const Dimension& value)
 {
+    if (LessNotEqual(value.Value(), 0.0f)) {
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value);
 }
 

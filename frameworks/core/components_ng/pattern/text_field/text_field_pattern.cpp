@@ -152,10 +152,13 @@ TextFieldPattern::~TextFieldPattern()
     }
 
     // If soft keyboard is still exist, close it.
+    if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
-    LOGI("Destruction text field, close input method.");
-    MiscServices::InputMethodController::GetInstance()->Close();
+        LOGI("Destruction of text field, close input method.");
+        MiscServices::InputMethodController::GetInstance()->HideTextInput();
+        MiscServices::InputMethodController::GetInstance()->Close();
 #endif
+    }
 }
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -1161,6 +1164,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
             return false;
         }
         inputMethod->HideTextInput();
+        inputMethod->Close();
 #endif
         return true;
     }
@@ -1795,9 +1799,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("text", textEditingValue_.text.c_str());
     json->Put("fontSize", GetFontSize().c_str());
     json->Put("fontColor", GetTextColor().c_str());
-    json->Put("fontStyle", GetItalicFontStyle() == Ace::FontStyle::NORMAL
-                               ? "FontStyle.Normal"
-                               : "FontStyle.Italic");
+    json->Put("fontStyle", GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
     json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight()).c_str());
     json->Put("fontFamily", GetFontFamily().c_str());
     json->Put("textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign()).c_str());
