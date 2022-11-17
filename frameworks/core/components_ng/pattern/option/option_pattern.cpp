@@ -40,7 +40,7 @@ void OptionPattern::RegisterOnClick()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<OptionEventHub>();
 
-    auto event = [JsAction = hub->GetJsCallback(), onSelect = hub->GetOnSelect(), targetId = targetId_, index = index_](
+    auto event = [JsAction = hub->GetJsCallback(), onSelect = hub->GetOnSelect(), index = index_](
                      GestureEvent& /*info*/) {
         if (JsAction) {
             LOGI("Option's callback executing");
@@ -50,12 +50,6 @@ void OptionPattern::RegisterOnClick()
             LOGI("selecting option %d", index);
             onSelect(index);
         }
-        // hide menu when option is clicked
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->HideMenu(targetId);
     };
     auto clickEvent = MakeRefPtr<ClickEvent>(std::move(event));
 
