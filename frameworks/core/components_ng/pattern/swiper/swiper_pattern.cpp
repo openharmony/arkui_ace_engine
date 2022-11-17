@@ -564,6 +564,8 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
         HandleTouchDown();
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
+    } else if (touchType == TouchType::CANCEL) {
+        HandleTouchUp();
     }
 }
 
