@@ -105,6 +105,16 @@ public:
         return showPrevImpl_ && showNextImpl_ && finishImpl_ && finishCallback_;
     }
 
+    void SetTabBarFinishCallback(const CommonFunc& onTabBarFinish)
+    {
+        tabBarFinishCallback_ = onTabBarFinish;
+    }
+
+    const CommonFunc& GetTabBarFinishCallback() const
+    {
+        return tabBarFinishCallback_;
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
@@ -112,6 +122,7 @@ private:
     CommonFunc showNextImpl_;
     CommonFunc finishImpl_;
     CommonFunc finishCallback_;
+    CommonFunc tabBarFinishCallback_;
 };
 
 } // namespace OHOS::Ace

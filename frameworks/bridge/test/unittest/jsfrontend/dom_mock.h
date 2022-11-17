@@ -99,6 +99,10 @@ public:
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override {}
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override {}
     void DumpFrontend() const override {}
+    std::string GetPagePath() const override
+    {
+        return "";
+    }
     void AddPage(const RefPtr<AcePage>& page) override {}
     void RunPage(int32_t pageId, const std::string& content, const std::string& params) override {}
     void PushPage(const std::string& content, const std::string& params) override {}

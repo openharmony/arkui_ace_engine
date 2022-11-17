@@ -39,6 +39,7 @@ RefPtr<AceType> ViewFullUpdateModelNG::CreateNode(NodeInfo&& info)
         return AceType::DynamicCast<UINode>(uiNode);
     };
     composedNode->SetRenderFunction(std::move(renderFunction));
+    composedNode->SetPageTransitionFunction(std::move(info.pageTransitionFunc));
     return composedNode;
 }
 

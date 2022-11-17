@@ -19,6 +19,10 @@
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
+
+#include "dm/display_manager.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
@@ -34,12 +38,8 @@
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/popup/popup_component.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "dm/display_manager.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
-#include "interfaces/inner_api/ace/viewport_config.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
-#include <atomic>
 
 namespace OHOS::Ace {
 
@@ -203,6 +203,51 @@ bool SubwindowOhos::CancelPopup(const std::string& id)
     context->FlushPipelineImmediately();
     HideWindow();
     return true;
+}
+
+void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
+{
+    ShowWindow();
+    popupTargetId_ = targetId;
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
+}
+
+void SubwindowOhos::HidePopupNG(int32_t targetId)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    popupInfo.popupId = -1;
+    popupInfo.markNeedUpdate = true;
+    overlayManager->HidePopup(targetId, popupInfo);
+    context->FlushPipelineImmediately();
+    HideWindow();
+}
+
+void SubwindowOhos::HidePopupNG()
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto popupInfo = overlayManager->GetPopupInfo(popupTargetId_);
+    popupInfo.popupId = -1;
+    popupInfo.markNeedUpdate = true;
+    overlayManager->HidePopup(popupTargetId_, popupInfo);
+    context->FlushPipelineImmediately();
+    HideWindow();
 }
 
 void SubwindowOhos::ShowWindow()
@@ -392,8 +437,8 @@ void SubwindowOhos::GetToastDialogWindowProperty(
         height = defaultDisplay->GetHeight();
         density = defaultDisplay->GetVirtualPixelRatio();
     }
-    LOGI("Toast posX: %{public}d, posY: %{public}d, width: %{public}d, height: %{public}d, density: %{public}f",
-        posX, posY, width, height, density);
+    LOGI("Toast posX: %{public}d, posY: %{public}d, width: %{public}d, height: %{public}d, density: %{public}f", posX,
+        posY, width, height, density);
 }
 
 bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY)
@@ -499,8 +544,8 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
         int32_t width = 0;
         int32_t height = 0;
         float density = 1.0f;
-        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(
-            SubwindowManager::GetInstance()->GetCurrentDialogWindow());
+        auto subwindowOhos =
+            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
         CHECK_NULL_VOID(subwindowOhos);
         subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
         auto childContainerId = subwindowOhos->GetChildContainerId();
@@ -538,15 +583,15 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
     }
 
     SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
-    auto showDialogCallback = [
-        title, message, &buttons, autoCancel, callbackParam = std::move(callback), &callbacks]() {
+    auto showDialogCallback = [title, message, &buttons, autoCancel, callbackParam = std::move(callback),
+                                  &callbacks]() {
         int32_t posX = 0;
         int32_t posY = 0;
         int32_t width = 0;
         int32_t height = 0;
         float density = 1.0f;
-        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(
-            SubwindowManager::GetInstance()->GetCurrentDialogWindow());
+        auto subwindowOhos =
+            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
         CHECK_NULL_VOID(subwindowOhos);
         subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
         bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY);
@@ -569,8 +614,8 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
     LOGI("SubwindowOhos::ShowDialog end");
 }
 
-void SubwindowOhos::ShowActionMenu(const std::string& title,
-    const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+void SubwindowOhos::ShowActionMenu(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     LOGI("SubwindowOhos::ShowActionMenu begin");
     bool ret = CreateEventRunner();
@@ -585,8 +630,8 @@ void SubwindowOhos::ShowActionMenu(const std::string& title,
         int32_t width = 0;
         int32_t height = 0;
         float density = 1.0f;
-        auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(
-            SubwindowManager::GetInstance()->GetCurrentDialogWindow());
+        auto subwindowOhos =
+            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
         CHECK_NULL_VOID(subwindowOhos);
         subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
         bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY);

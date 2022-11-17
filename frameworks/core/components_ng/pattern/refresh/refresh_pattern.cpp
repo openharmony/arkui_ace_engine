@@ -163,6 +163,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(diameter), CalcLength(diameter)));
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto triggerLoadingDistance =
         refreshLayoutProperty->GetLoadingDistanceValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
     auto triggerShowTimeDistance =
@@ -286,19 +287,13 @@ RefreshStatus RefreshPattern::GetNextStatus()
             }
             break;
         case RefreshStatus::DRAG:
+        case RefreshStatus::OVER_DRAG:
             if (LessOrEqual(scrollableOffset.GetY(), 0.0)) {
                 nextStatus = RefreshStatus::INACTIVE;
             } else if (scrollableOffset.GetY() < triggerRefreshDistance) {
                 nextStatus = RefreshStatus::DRAG;
             } else {
                 nextStatus = RefreshStatus::OVER_DRAG;
-            }
-            break;
-        case RefreshStatus::OVER_DRAG:
-            if (scrollableOffset.GetY() > triggerRefreshDistance) {
-                nextStatus = RefreshStatus::OVER_DRAG;
-            } else {
-                nextStatus = RefreshStatus::DRAG;
             }
             break;
         case RefreshStatus::REFRESH:
@@ -465,7 +460,6 @@ std::string RefreshPattern::GetFormatDateTime()
     dateTime.hour = static_cast<uint32_t>(local->tm_hour);
     dateTime.minute = static_cast<uint32_t>(local->tm_min);
     std::string time = Localization::GetInstance()->FormatDateTime(dateTime, LAST_UPDATE_FORMAT);
-    LOGI("Last update refresh time is %{public}s", time.c_str());
     return time;
 }
 

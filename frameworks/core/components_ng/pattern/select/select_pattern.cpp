@@ -22,8 +22,10 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_view.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
@@ -45,6 +47,8 @@ namespace {
 constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 constexpr Dimension SELECT_BORDER = 20.0_vp;
 const Edge SELECT_PADDING = Edge(8.0, 9.25, 8.0, 9.25, DimensionUnit::VP);
+constexpr Dimension SPINNER_WIDTH = 10.0_vp;
+constexpr Dimension SPINNER_HEIGHT = 7.0_vp;
 
 } // namespace
 
@@ -62,12 +66,20 @@ void SelectPattern::RegisterOnClick()
     CHECK_NULL_VOID(host);
 
     auto callback = [id = host->GetId(), menu = menu_](GestureEvent& /*info*/) mutable {
-        LOGD("start executing click callback %p", RawPtr(menu));
+        if (menu) {
+            LOGI("start executing click callback %d", menu->GetId());
+        }
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->ShowMenu(id, false, NG::OffsetF(), menu);
+        auto selectNode = FrameNode::GetFrameNode(V2::SELECT_ETS_TAG, id);
+        CHECK_NULL_VOID(selectNode);
+        auto select = selectNode->GetPattern<SelectPattern>();
+        CHECK_NULL_VOID(select);
+        auto offset = selectNode->GetPaintRectOffset();
+        offset.AddY(select->GetSelectSize().Height());
+        overlayManager->ShowMenu(id, offset, menu);
         // menuNode already registered, nullify
         menu.Reset();
     };
@@ -148,6 +160,12 @@ void SelectPattern::SetSelected(int32_t index)
     selected_ = index;
 }
 
+void SelectPattern::AddOptionNode(const RefPtr<FrameNode>& option)
+{
+    CHECK_NULL_VOID(option);
+    options_.push_back(option);
+}
+
 void SelectPattern::BuildChild()
 {
     // get theme from SelectThemeManager
@@ -157,22 +175,46 @@ void SelectPattern::BuildChild()
 
     auto row = FrameNode::CreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_VOID(row);
     auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+    CHECK_NULL_VOID(rowProps);
     rowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     rowProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    rowProps->UpdateSpace(Dimension(8.0f, DimensionUnit::VP));
     text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
-
+    CHECK_NULL_VOID(textProps);
     textProps->UpdateTextDecoration(theme->GetTextDecoration());
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
 
+    ImageSourceInfo imageSourceInfo;
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto iconTheme = themeManager->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER);
+    imageSourceInfo.SetSrc(iconPath);
+    auto spinner = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ImagePattern>());
+    CHECK_NULL_VOID(spinner);
+    auto spinnerLayoutProperty = spinner->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(spinnerLayoutProperty);
+    spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    CalcSize idealSize = { CalcLength(SPINNER_WIDTH), CalcLength(SPINNER_HEIGHT) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    spinner->UpdateLayoutConstraint(layoutConstraint);
     // mount triangle and text
     text_->MountToParent(row);
-
+    spinner->MountToParent(row);
+    spinner->MarkModifyDone();
     auto select = GetHost();
-    text_->MountToParent(select);
+    row->MountToParent(select);
+    row->MarkModifyDone();
 
     // set bgColor and border
     auto renderContext = select->GetRenderContext();
@@ -368,6 +410,11 @@ void SelectPattern::SetSelectedOptionFontColor(const Color& color)
     }
 }
 
+const std::vector<RefPtr<FrameNode>>& SelectPattern::GetOptions()
+{
+    return options_;
+}
+
 // update selected option props
 void SelectPattern::UpdateSelectedProps(int32_t index)
 {
@@ -386,10 +433,8 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         lastSelected->SetItalicFontStyle(newSelected->GetItalicFontStyle());
         lastSelected->SetFontWeight(newSelected->GetFontWeight());
 
-        auto defaultPaintProps = options_[index]->GetPaintProperty<OptionPaintProperty>();
-        CHECK_NULL_VOID(defaultPaintProps);
         lastSelected->SetBgColor(newSelected->GetBgColor());
-        options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
 
     // set newSelected props
@@ -411,7 +456,6 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     if (selectedBgColor_.has_value()) {
         newSelected->SetBgColor(selectedBgColor_.value());
     }
-    options_[index]->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SelectPattern::UpdateText(int32_t index)
@@ -423,7 +467,7 @@ void SelectPattern::UpdateText(int32_t index)
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(newSelected);
     textProps->UpdateContent(newSelected->GetText());
-
+    textProps->UpdateForceRender(true);
     LOGD("new text = %s", newSelected->GetText().c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -492,6 +536,17 @@ std::string SelectPattern::InspectorGetSelectedFont() const
         font.SetFontWeight(selectedFont_.FontWeight.value());
     }
     return V2::GetTextStyleInJson(font);
+}
+
+bool SelectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+        return false;
+    }
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    SetSelectSize(geometryNode->GetFrameSize());
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

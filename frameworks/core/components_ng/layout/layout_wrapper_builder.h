@@ -39,6 +39,8 @@ public:
 
     const std::list<RefPtr<LayoutWrapper>>& ExpandAllChildWrappers();
 
+    void RemoveAllChildInRenderTree();
+
     int32_t GetTotalCount()
     {
         return OnGetTotalCount();

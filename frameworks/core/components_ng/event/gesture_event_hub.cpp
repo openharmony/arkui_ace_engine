@@ -97,6 +97,14 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     return false;
 }
 
+void GestureEventHub::OnModifyDone()
+{
+    if (recreateGesture_) {
+        UpdateGestureHierarchy();
+        recreateGesture_ = false;
+    }
+}
+
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId)
 {
@@ -126,11 +134,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         current = innerExclusiveRecognizer_;
     }
 
-    if (recreateGesture_) {
-        UpdateGestureHierarchy();
-        recreateGesture_ = false;
-    }
-
     auto context = host->GetContext();
     int32_t parallelIndex = 0;
     int32_t exclusiveIndex = 0;
@@ -139,7 +142,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             continue;
         }
         recognizer->SetCoordinateOffset(offset);
-        recognizer->BeginReferee(touchId);
+        recognizer->BeginReferee(touchId, true);
         auto gestureMask = recognizer->GetPriorityMask();
         if (gestureMask == GestureMask::IgnoreInternal) {
             // In ignore case, dropped the self inner recognizer and children recognizer.

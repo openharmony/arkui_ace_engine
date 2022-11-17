@@ -281,10 +281,11 @@ bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
     CHECK_NULL_RETURN(host, false);
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    if (gridLayoutInfo_.reachEnd_) {
+    if (gridLayoutInfo_.offsetEnd_) {
         if (LessOrEqual(offset, 0)) {
             return false;
         }
+        gridLayoutInfo_.offsetEnd_ = false;
         gridLayoutInfo_.reachEnd_ = false;
     }
     if (gridLayoutInfo_.reachStart_) {
@@ -293,6 +294,7 @@ bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
         }
         gridLayoutInfo_.reachStart_ = false;
     }
+    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
     gridLayoutInfo_.currentOffset_ += offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;

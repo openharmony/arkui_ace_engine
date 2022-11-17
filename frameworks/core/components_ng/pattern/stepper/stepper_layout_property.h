@@ -45,7 +45,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        json->Put("Index", std::to_string(GetIndex().value_or(0)).c_str());
+        json->Put("index", std::to_string(GetIndex().value_or(0)).c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, uint32_t, PROPERTY_UPDATE_LAYOUT);

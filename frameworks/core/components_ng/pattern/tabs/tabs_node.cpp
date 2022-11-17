@@ -46,12 +46,12 @@ void TabsNode::AddChildToGroup(const RefPtr<UINode>& child)
 void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     FrameNode::ToJsonValue(json);
-    json->Put("index", GetIndex());
-    json->Put("scrollable", Scrollable() ? "true" : "false");
+    json->Put("index", std::to_string(GetIndex()).c_str());
+    json->Put("scrollable", Scrollable());
     json->Put("animationDuration", GetAnimationDuration());
     json->Put("barMode", GetTabBarMode() == TabBarMode::SCROLLABLE ? "BarMode.Scrollable" : "BarMode.Fixed");
-    json->Put("barWidth", GetBarWidth().ToString().c_str());
-    json->Put("barHeight", GetBarHeight().ToString().c_str());
+    json->Put("barWidth", std::to_string(GetBarWidth().Value()).c_str());
+    json->Put("barHeight", std::to_string(GetBarHeight().Value()).c_str());
 }
 
 bool TabsNode::Scrollable() const

@@ -61,7 +61,7 @@ public:                                                                      \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);           \
+        RequestTextFlushDirty();                                             \
     }
 
 namespace OHOS::Ace::NG {
@@ -103,7 +103,7 @@ public:
             return;
         }
         spanItem_->content = content;
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        RequestTextFlushDirty();
     }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
@@ -138,6 +138,8 @@ public:
     {
         spanItem_->ToJsonValue(json);
     }
+
+    void RequestTextFlushDirty();
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;

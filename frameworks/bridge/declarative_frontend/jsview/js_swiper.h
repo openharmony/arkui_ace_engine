@@ -27,20 +27,17 @@ public:
 
 protected:
     static void SetAutoPlay(bool autoPlay);
-    static void SetDigital(bool digitalIndicator);
     static void SetDuration(int32_t duration);
     static void SetIndex(int32_t index);
     static void SetInterval(int32_t interval);
     static void SetLoop(bool loop);
     static void SetVertical(bool isVertical);
     static void SetIndicator(bool showIndicator);
-    static void SetCancelSwipeOnOtherAxis(bool cancel);
     static void SetWidth(const JSCallbackInfo& info);
     static void SetHeight(const JSCallbackInfo& info);
     static void SetWidth(const JSRef<JSVal>& jsValue);
     static void SetHeight(const JSRef<JSVal>& jsValue);
     static void SetSize(const JSCallbackInfo& info);
-    static RefPtr<OHOS::Ace::SwiperIndicator> InitIndicatorStyle();
     static void SetIndicatorStyle(const JSCallbackInfo& info);
     static void SetItemSpace(const JSCallbackInfo& info);
     static void SetDisplayMode(int32_t index);

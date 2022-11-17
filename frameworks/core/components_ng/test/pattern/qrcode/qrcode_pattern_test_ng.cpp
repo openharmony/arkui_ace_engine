@@ -21,15 +21,15 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
-#include "core/components_ng/pattern/qrcode/qrcode_view.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string CREATE_VALUE = "Hello World";
-constexpr Color QRCODE_COLOR_VALUE = Color(0XFFFF0000);
+constexpr Color QR_CODE_COLOR_VALUE = Color(0XFFFF0000);
 } // namespace
 
 class QRCodePropertyTestNg : public testing::Test {
@@ -45,7 +45,8 @@ public:
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
 {
-    QRCodeView::Create(CREATE_VALUE);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
     auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
@@ -60,13 +61,14 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePaintPropertyTest002, TestSize.Level1)
 {
-    QRCodeView::Create(CREATE_VALUE);
-    QRCodeView::SetQRCodeColor(QRCODE_COLOR_VALUE);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    qrCodeModelNG.SetQRCodeColor(QR_CODE_COLOR_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
     auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
     EXPECT_FALSE(qrcodePaintProperty == nullptr);
-    EXPECT_EQ(qrcodePaintProperty->GetColorValue(), QRCODE_COLOR_VALUE);
+    EXPECT_EQ(qrcodePaintProperty->GetColorValue(), QR_CODE_COLOR_VALUE);
 }
 
 } // namespace OHOS::Ace::NG

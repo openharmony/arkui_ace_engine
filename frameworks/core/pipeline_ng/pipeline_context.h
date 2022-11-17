@@ -225,10 +225,6 @@ public:
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
 
-    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
-    {
-        drawDelegate_ = std::move(delegate);
-    }
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
@@ -292,7 +288,6 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
-    std::unique_ptr<DrawDelegate> drawDelegate_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;

@@ -101,6 +101,7 @@ template("ace_osal_ohos_source_set") {
       "pixel_map_ohos.cpp",
     ]
     external_deps += [
+      "ability_runtime:runtime",
       "hicollie_native:libhicollie",
       "hisysevent_native:libhisysevent",
       "hitrace_native:libhitracechain",

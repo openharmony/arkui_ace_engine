@@ -57,6 +57,7 @@ public:
     void OnModifyDone() override;
     void FireConnect();
     void FireDisConnect();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 private:
     void OnActive() override
@@ -74,8 +75,6 @@ private:
         }
         isActive_ = false;
     }
-
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void UpdateWindowRect();
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;
