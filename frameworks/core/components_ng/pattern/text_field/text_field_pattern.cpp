@@ -151,10 +151,13 @@ TextFieldPattern::~TextFieldPattern()
     }
 
     // If soft keyboard is still exist, close it.
+    if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
-    LOGI("Destruction text field, close input method.");
-    MiscServices::InputMethodController::GetInstance()->Close();
+        LOGI("Destruction of text field, close input method.");
+        MiscServices::InputMethodController::GetInstance()->HideTextInput();
+        MiscServices::InputMethodController::GetInstance()->Close();
 #endif
+    }
 }
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -1107,6 +1110,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
             return false;
         }
         inputMethod->HideTextInput();
+        inputMethod->Close();
 #endif
         return true;
     }

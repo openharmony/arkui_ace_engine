@@ -271,6 +271,21 @@ public:
     void CaretMoveToLastNewLineChar();
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    void SetInputMethodStatus(bool imeAttached)
+    {
+        imeAttached_ = imeAttached;
+    }
+
+#endif
+    bool HasConnection() const
+    {
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        return imeAttached_;
+#endif
+        return false;
+    }
+
 private:
     bool IsTextArea();
     void HandleBlurEvent();
@@ -410,6 +425,10 @@ private:
     std::vector<TextSelector> redoTextSelectorRecords_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
+
+#endif
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    bool imeAttached_ = false;
 #endif
     int32_t instanceId_ = -1;
 };

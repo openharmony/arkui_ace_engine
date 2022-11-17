@@ -67,7 +67,18 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
     PostTaskToUI(task);
 }
 
-void OnTextChangedListenerImpl::SetKeyboardStatus(bool status) {}
+void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
+{
+    LOGI("[OnTextChangedListenerImpl] SetKeyboardStatus status: %{public}d", status);
+    auto task = [textField = pattern_, status] {
+        auto client = textField.Upgrade();
+        if (client) {
+            ContainerScope scope(client->GetInstanceId());
+            client->SetInputMethodStatus(status);
+        }
+    };
+    PostTaskToUI(task);
+}
 
 void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) {}
 
