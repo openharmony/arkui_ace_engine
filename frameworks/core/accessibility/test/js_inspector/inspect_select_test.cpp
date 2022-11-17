@@ -19,46 +19,51 @@
 #define private public
 #define protected public
 
-#include "frameworks/core/accessibility/js_inspector/inspect_canvas.h"
+#include "frameworks/core/accessibility/js_inspector/inspect_select.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::Framework {
-class InspectCanvasTest : public testing::Test {
+class InspectSelectTest : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
 };
 
 /**
- * @tc.name: InspectCanvasTest001
- * @tc.desc: InspectCanvas::InspectCanvas
+ * @tc.name: InspectSelectTest001
+ * @tc.desc: InspectSelect::InspectSelect
  * @tc.type: FUNC
  */
-HWTEST_F(InspectCanvasTest, InspectCanvasTest001, TestSize.Level1)
+HWTEST_F(InspectSelectTest, InspectSelectTest001, TestSize.Level1)
 {
     NodeId nodeId = -1;
     std::string tag = "tagTest";
-    InspectCanvas inspectCanvas(nodeId, tag);
-    EXPECT_EQ(inspectCanvas.nodeId_, nodeId);
-    EXPECT_EQ(inspectCanvas.tag_, tag);
+    InspectSelect inspectSelect(nodeId, tag);
+    EXPECT_EQ(inspectSelect.nodeId_, nodeId);
+    EXPECT_EQ(inspectSelect.tag_, tag);
 }
 
 /**
- * @tc.name: InspectCanvasTest002
- * @tc.desc: InspectCanvas::PackAttrAndStyle
+ * @tc.name: InspectSelectTest002
+ * @tc.desc: InspectSelect::PackAttrAndStyle
  * @tc.type: FUNC
  */
-HWTEST_F(InspectCanvasTest, InspectCanvasTest002, TestSize.Level1)
+HWTEST_F(InspectSelectTest, InspectSelectTest002, TestSize.Level1)
 {
     NodeId nodeId = -1;
     std::string tag = "tagTest";
-    InspectCanvas inspectCanvas(nodeId, tag);
-    auto size = inspectCanvas.attrs_.size();
-    uint16_t sizeInsert = 2;
-    inspectCanvas.PackAttrAndStyle();
-    EXPECT_EQ(inspectCanvas.attrs_.size(), size + sizeInsert);
-    EXPECT_EQ(inspectCanvas.attrs_["disabled"], "false");
-    EXPECT_EQ(inspectCanvas.attrs_["focusable"], "false");
+    InspectSelect inspectSelect(nodeId, tag);
+    auto attrsSize = inspectSelect.attrs_.size();
+    auto stylesSize = inspectSelect.styles_.size();
+    uint16_t attrsSizeInsert = 2;
+    uint16_t stylesSizeInsert = 1;
+
+    inspectSelect.PackAttrAndStyle();
+    EXPECT_EQ(inspectSelect.attrs_.size(), attrsSize + attrsSizeInsert);
+    EXPECT_EQ(inspectSelect.attrs_["disabled"], "false");
+    EXPECT_EQ(inspectSelect.attrs_["focusable"], "true");
+    EXPECT_EQ(inspectSelect.styles_.size(), stylesSize + stylesSizeInsert);
+    EXPECT_EQ(inspectSelect.styles_["font-family"], "sans-serif");
 }
 } // namespace OHOS::Ace::Framework
