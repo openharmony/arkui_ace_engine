@@ -36,7 +36,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();
-        auto childOffset = padding.Offset() + OffsetF(0.0f, childStartCoordinate);
+        auto childOffset = padding.Offset() + OffsetF(0.0f, childStartCoordinate + currentOffset_);
         childGeometryNode->SetMarginFrameOffset(childOffset);
         child->Layout();
         childStartCoordinate += childSize.Height();
