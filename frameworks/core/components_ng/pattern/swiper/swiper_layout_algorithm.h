@@ -59,11 +59,6 @@ public:
         totalCount_ = totalCount;
     }
 
-    void ResetTargetIndex()
-    {
-        targetIndex_.reset();
-    }
-
     const std::set<int32_t>& GetItemRange()
     {
         return itemRange_;

@@ -63,7 +63,6 @@ public:
     virtual void SetCachedCount(int32_t cachedCount);
     virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
 
-    virtual void SetDigital(bool digitalIndicator);
     virtual void SetRemoteMessageEventId(RemoteCallback&& remoteCallback);
     virtual void SetOnClick(
         std::function<void(const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl)>&& value);
