@@ -32,7 +32,7 @@ const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
 const TouchRestrict DRAG_TOUCH_RESTRICT = { TouchRestrict::CLICK };
 constexpr int32_t FINGERS_NUMBER = 2;
 constexpr int32_t TOUCH_TEST_RESULT_SIZE = 1;
-constexpr float DISTANCE = 10.5;
+constexpr float DISTANCE = 10.5f;
 const float WIDTH = 400.0f;
 const float HEIGHT = 400.0f;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
