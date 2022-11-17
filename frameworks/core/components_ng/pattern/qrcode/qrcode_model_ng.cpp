@@ -31,6 +31,7 @@ void QRCodeModelNG::Create(const std::string& value)
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, Color::BLACK);
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, Color::WHITE);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::WHITE);
 }
 
 void QRCodeModelNG::SetQRCodeColor(Color color)

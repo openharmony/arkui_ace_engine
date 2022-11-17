@@ -116,6 +116,7 @@ void FrameNode::InitializePatternAndContext()
 {
     eventHub_->AttachHost(WeakClaim(this));
     pattern_->AttachToFrameNode(WeakClaim(this));
+    accessibilityProperty_->SetHost(WeakClaim(this));
     renderContext_->SetRequestFrame([weak = WeakClaim(this)] {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -181,17 +182,16 @@ void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    // scrollable in AccessibilityProperty
+    ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
     if (renderContext_) {
         renderContext_->ToJsonValue(json);
     }
-    if (pattern_) {
-        pattern_->ToJsonValue(json);
-    }
     if (eventHub_) {
-        pattern_->ToJsonValue(json);
+        eventHub_->ToJsonValue(json);
     }
     FocusToJsonValue(json);
 }
@@ -1016,7 +1016,7 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
         event.type = eventType;
-        event.nodeId = GetId();
+        event.nodeId = GetAccessibilityId();
         PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
     }
 }

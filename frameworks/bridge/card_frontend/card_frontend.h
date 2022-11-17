@@ -111,6 +111,10 @@ public:
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void DumpFrontend() const override {}
+    std::string GetPagePath() const override
+    {
+        return "";
+    }
     WindowConfig& GetWindowConfig() override;
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;

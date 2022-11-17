@@ -52,4 +52,12 @@ void SwiperGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     swiperNode->AddChild(child);
 }
 
+void SwiperGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto swiper = GetChildAtIndex(0);
+    if (swiper) {
+        swiper->ToJsonValue(json);
+    }
+}
+
 } // namespace OHOS::Ace::NG

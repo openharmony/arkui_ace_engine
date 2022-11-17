@@ -765,6 +765,18 @@ void PluginFrontend::DumpFrontend() const
     }
 }
 
+std::string PluginFrontend::GetPagePath() const
+{
+    if (!delegate_) {
+        return "";
+    }
+    int32_t routerIndex = 0;
+    std::string routerName;
+    std::string routerPath;
+    delegate_->GetState(routerIndex, routerName, routerPath);
+    return routerPath + routerName;
+}
+
 void PluginFrontend::TriggerGarbageCollection()
 {
     if (jsEngine_) {

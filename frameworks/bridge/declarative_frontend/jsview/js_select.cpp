@@ -292,13 +292,6 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
         return;
     }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         return;
@@ -309,6 +302,12 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
         return;
     }
 
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
+    if (!selectComponent) {
+        LOGE("search component error");
+        return;
+    }
     auto textStyle = selectComponent->GetSelectStyle();
     textStyle.SetTextColor(textColor);
     selectComponent->SetSelectStyle(std::move(textStyle));

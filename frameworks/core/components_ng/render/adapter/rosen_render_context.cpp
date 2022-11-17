@@ -532,11 +532,13 @@ void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnAccessibilityFocusUpdate(bool /* isAccessibilityFocus */)
+void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
 {
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
     uiNode->MarkDirtyNode(false, true, PROPERTY_UPDATE_RENDER);
+    uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
+                                                      : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
     RequestNextFrame();
 }
 
