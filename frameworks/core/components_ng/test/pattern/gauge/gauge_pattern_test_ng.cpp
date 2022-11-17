@@ -17,7 +17,6 @@
 #include "gtest/internal/gtest-port.h"
 
 #define private public
-#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"

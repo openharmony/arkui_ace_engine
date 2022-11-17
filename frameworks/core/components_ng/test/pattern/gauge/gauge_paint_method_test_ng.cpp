@@ -18,12 +18,14 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "base/geometry/offset.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/rosen/testing_canvas.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -135,178 +137,431 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintMethodTest002, TestSize.Level1)
 
 /**
  * @tc.name: GaugePaintMethodTest003
- * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.desc: Test Gauge PaintMethod DrawGauge
  * @tc.type: FUNC
  */
 HWTEST_F(GaugePaintMethodTestNg, GaugePaintMethodTest003, TestSize.Level1)
 {
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    std::vector<Color> colors = { Color::RED, Color::GREEN };
+    std::vector<float> values = { 1.0f, 2.0f };
+    gauge.SetColors(colors, values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(1);
+    gaugePaintMethod.DrawGauge(rsCanvas, data);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest004
+ * @tc.desc: Test Gauge PaintMethod DrawIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintMethodTest004, TestSize.Level1)
+{
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    std::vector<Color> colors = { Color::RED, Color::GREEN };
+    std::vector<float> values = { 1.0f, 2.0f };
+    gauge.SetColors(colors, values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(2);
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    gaugePaintMethod.DrawIndicator(rsCanvas, data);
+}
+
+/**
+ * @tc.name: GGaugePaintTest001
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest001, TestSize.Level1)
+{
     /**
-     * @tc.steps: step1. analysis how to cover all branches.
+     * case 1: Paint can DrawGauge and DrawIndicator
+     * value = 2  min = 1 max = 3
+     * startangle = 50         endangle = 450
+     * colors = {red,green} values = {1,2};
+     * StrokeWidth = 50.0_vp
      */
-    /**
-    //     branch-1 : value,min,max need to include follow
-    // value = 2  min = 1 max = 3
-    // value = 4  min = 1 max = 3
-    // value = 0  min = 1 max = 3
-    // value = 2  min = 3 max = 1
-    // value = 4  min = 3 max = 1
-    // value = 0  min = 3 max = 1
-    */
-    /**
-    //     branch-2 : startangle,endangle need to include follow
-    // startangle = 50         endangle = 450
-    // startangle = 50         endangle = 0
-    // startangle = 0         endangle = 0
-    // startangle = null endangle = null
-    */
-    /**
-    //     branch-3 : colors,values need to include follow
-    // color = {red,green} values = {1,2};
-    // color = {} values = {};
-    // color = {} values = {1};
-    // color = {red} values = {};
-    // color = {red} values = {0};
-    // color = {red} values = {1};
-    */
-    /**
-    //     branch-4 : StrokeWidth need to include follow
-    // StrokeWidth = 50.0_vp
-    // StrokeWidth = 0.5_vp
-    // StrokeWidth = -50.0_vp
-    // StrokeWidth = null
-    */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    gauge.SetStartAngle(START_ANGLE);
+    gauge.SetEndAngle(END_ANGLE);
+    gauge.SetStrokeWidth(WIDTH);
+    std::vector<Color> colors = { Color::RED, Color::GREEN };
+    std::vector<float> values = { 1.0f, 2.0f };
+    gauge.SetColors(colors, values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
 
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest002
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest002, TestSize.Level1)
+{
     /**
-     * @tc.steps: step2. test in different cases
+     * case 2: Paint retrun because colors.size() != weights.size()
      */
-    GaugeModelNG gauge_case_1;
-    gauge_case_1.Create(VALUE, MIN, MAX);
-    gauge_case_1.SetStartAngle(START_ANGLE);
-    gauge_case_1.SetEndAngle(END_ANGLE);
-    std::vector<Color> colors_case_1 = { Color::RED, Color::GREEN };
-    std::vector<float> values_case_1 = { 1.0f, 2.0f };
-    gauge_case_1.SetColors(colors_case_1, values_case_1);
-    gauge_case_1.SetStrokeWidth(WIDTH);
-    auto frameNode_case_1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode_case_1, nullptr);
-    GaugePaintMethod gaugePaintMethod_case_1;
-    RefPtr<RenderContext> rendercontext_case_1;
-    auto gaugePaintProperty_case_1 = frameNode_case_1->GetPaintProperty<GaugePaintProperty>();
-    RefPtr<GeometryNode> geometryNode_case_1 = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintwrapper_case_1 = new PaintWrapper(rendercontext_case_1, geometryNode_case_1, gaugePaintProperty_case_1);
-    EXPECT_NE(paintwrapper_case_1, nullptr);
-    RenderRingInfo data_case_1;
-    RSCanvas rsCanvas_case_1;
-    gaugePaintMethod_case_1.Paint(rsCanvas_case_1, paintwrapper_case_1);
-    gaugePaintMethod_case_1.DrawGauge(rsCanvas_case_1, data_case_1);
-    gaugePaintMethod_case_1.DrawIndicator(rsCanvas_case_1, data_case_1);
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    gauge.SetStartAngle(START_ANGLE);
+    gauge.SetEndAngle(END_ANGLE);
+    std::vector<Color> colors = { Color::RED, Color::GREEN };
+    std::vector<float> values = { 1.0f };
+    gauge.SetColors(colors, values);
+    gauge.SetStrokeWidth(WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
 
-    GaugeModelNG gauge_case_2;
-    gauge_case_2.Create(VALUE_BIG, MIN, MAX);
-    gauge_case_2.SetStartAngle(START_ANGLE);
-    gauge_case_2.SetEndAngle(ZERO);
-    gauge_case_2.SetStrokeWidth(WIDTH_SMALL);
-    std::vector<Color> colors_case_2 = {};
-    std::vector<float> values_case_2 = {};
-    gauge_case_2.SetColors(colors_case_2, values_case_2);
-    auto frameNode_case_2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode_case_2, nullptr);
-    GaugePaintMethod gaugePaintMethod_case_2;
-    RefPtr<RenderContext> rendercontext_case_2;
-    auto gaugePaintProperty_case_2 = frameNode_case_2->GetPaintProperty<GaugePaintProperty>();
-    RefPtr<GeometryNode> geometryNode_case_2 = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintwrapper_case_2 = new PaintWrapper(rendercontext_case_2, geometryNode_case_2, gaugePaintProperty_case_2);
-    EXPECT_NE(paintwrapper_case_2, nullptr);
-    RenderRingInfo data_case_2;
-    RSCanvas rsCanvas_case_2;
-    gaugePaintMethod_case_2.Paint(rsCanvas_case_2, paintwrapper_case_2);
-    gaugePaintMethod_case_2.DrawGauge(rsCanvas_case_2, data_case_2);
-    gaugePaintMethod_case_2.DrawIndicator(rsCanvas_case_2, data_case_2);
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(0);
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
+}
 
-    GaugeModelNG gauge_case_3;
-    gauge_case_3.Create(VALUE_SMALL, MIN, MAX);
-    gauge_case_3.SetStartAngle(ZERO);
-    gauge_case_3.SetEndAngle(ZERO);
-    std::vector<Color> colors_case_3 = {};
-    std::vector<float> values_case_3 = { 1.0f };
-    gauge_case_3.SetColors(colors_case_3, values_case_3);
-    auto frameNode_case_3 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode_case_3, nullptr);
-    GaugePaintMethod gaugePaintMethod_case_3;
-    RefPtr<RenderContext> rendercontext_case_3;
-    auto gaugePaintProperty_case_3 = frameNode_case_3->GetPaintProperty<GaugePaintProperty>();
-    RefPtr<GeometryNode> geometryNode_case_3 = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintwrapper_case_3 = new PaintWrapper(rendercontext_case_3, geometryNode_case_3, gaugePaintProperty_case_3);
-    EXPECT_NE(paintwrapper_case_3, nullptr);
-    RenderRingInfo data_case_3;
-    RSCanvas rsCanvas_case_3;
-    gaugePaintMethod_case_3.Paint(rsCanvas_case_3, paintwrapper_case_3);
-    gaugePaintMethod_case_3.DrawGauge(rsCanvas_case_3, data_case_3);
-    gaugePaintMethod_case_3.DrawIndicator(rsCanvas_case_3, data_case_3);
+/**
+ * @tc.name: GaugePaintMethodTest003
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest003, TestSize.Level1)
+{
+    /**
+     * case 3: Paint retrun because colors.size() = 0 and weights.size = 0
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    gauge.SetStartAngle(START_ANGLE);
+    gauge.SetEndAngle(END_ANGLE);
+    std::vector<Color> colors = {};
+    std::vector<float> values = {};
+    gauge.SetColors(colors, values);
+    gauge.SetStrokeWidth(WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
 
-    GaugeModelNG gauge_case_4;
-    gauge_case_4.Create(VALUE, MAX, MIN);
-    std::vector<Color> colors_case_4 = { Color::RED };
-    std::vector<float> values_case_4 = {};
-    gauge_case_4.SetColors(colors_case_4, values_case_4);
-    gauge_case_4.SetStrokeWidth(0.0_vp);
-    auto frameNode_case_4 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode_case_4, nullptr);
-    GaugePaintMethod gaugePaintMethod_case_4;
-    RefPtr<RenderContext> rendercontext_case_4;
-    auto gaugePaintProperty_case_4 = frameNode_case_4->GetPaintProperty<GaugePaintProperty>();
-    RefPtr<GeometryNode> geometryNode_case_4 = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintwrapper_case_4 = new PaintWrapper(rendercontext_case_4, geometryNode_case_4, gaugePaintProperty_case_4);
-    EXPECT_NE(paintwrapper_case_4, nullptr);
-    RenderRingInfo data_case_4;
-    RSCanvas rsCanvas_case_4;
-    gaugePaintMethod_case_4.Paint(rsCanvas_case_4, paintwrapper_case_4);
-    gaugePaintMethod_case_4.DrawGauge(rsCanvas_case_4, data_case_4);
-    gaugePaintMethod_case_4.DrawIndicator(rsCanvas_case_4, data_case_4);
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(0);
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
+}
 
-    GaugeModelNG gauge_case_5;
-    gauge_case_5.Create(VALUE_BIG, MAX, MIN);
-    gauge_case_5.SetStartAngle(START_ANGLE);
-    gauge_case_5.SetEndAngle(END_ANGLE);
-    std::vector<Color> colors_case_5 = { Color::RED };
-    std::vector<float> values_case_5 = { 0.0f };
-    gauge_case_5.SetColors(colors_case_5, values_case_5);
-    auto frameNode_case_5 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    gauge_case_5.SetStrokeWidth(WIDTH);
-    EXPECT_NE(frameNode_case_5, nullptr);
-    GaugePaintMethod gaugePaintMethod_case_5;
-    RefPtr<RenderContext> rendercontext_case_5;
-    auto gaugePaintProperty_case_5 = frameNode_case_5->GetPaintProperty<GaugePaintProperty>();
-    RefPtr<GeometryNode> geometryNode_case_5 = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintwrapper_case_5 = new PaintWrapper(rendercontext_case_5, geometryNode_case_5, gaugePaintProperty_case_5);
-    EXPECT_NE(paintwrapper_case_5, nullptr);
-    RenderRingInfo data_case_5;
-    RSCanvas rsCanvas_case_5;
-    gaugePaintMethod_case_5.Paint(rsCanvas_case_5, paintwrapper_case_5);
-    gaugePaintMethod_case_5.DrawGauge(rsCanvas_case_5, data_case_5);
-    gaugePaintMethod_case_5.DrawIndicator(rsCanvas_case_5, data_case_5);
+/**
+ * @tc.name: GaugePaintMethodTest004
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest004, TestSize.Level1)
+{
+    /**
+     * case 4: Paint retrun because colors.size() = 0
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    gauge.SetStartAngle(START_ANGLE);
+    gauge.SetEndAngle(END_ANGLE);
+    std::vector<Color> colors = {};
+    std::vector<float> values = { 1.0f };
+    gauge.SetColors(colors, values);
+    gauge.SetStrokeWidth(WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
 
-    GaugeModelNG gauge_case_6;
-    gauge_case_6.Create(VALUE_SMALL, MAX, MIN);
-    gauge_case_6.SetStartAngle(START_ANGLE);
-    gauge_case_6.SetEndAngle(END_ANGLE);
-    gauge_case_6.SetStrokeWidth(WIDTH);
-    std::vector<Color> colors_case_6 = { Color::RED };
-    std::vector<float> values_case_6 = { 1.0f };
-    gauge_case_6.SetColors(colors_case_6, values_case_6);
-    auto frameNode_case_6 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode_case_6, nullptr);
-    GaugePaintMethod gaugePaintMethod_case_6;
-    RefPtr<RenderContext> rendercontext_case_6;
-    auto gaugePaintProperty_case_6 = frameNode_case_6->GetPaintProperty<GaugePaintProperty>();
-    RefPtr<GeometryNode> geometryNode_case_6 = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintwrapper_case_6 = new PaintWrapper(rendercontext_case_6, geometryNode_case_6, gaugePaintProperty_case_6);
-    EXPECT_NE(paintwrapper_case_6, nullptr);
-    RenderRingInfo data_case_6;
-    RSCanvas rsCanvas_case_6;
-    gaugePaintMethod_case_6.Paint(rsCanvas_case_6, paintwrapper_case_6);
-    gaugePaintMethod_case_6.DrawGauge(rsCanvas_case_6, data_case_6);
-    gaugePaintMethod_case_6.DrawIndicator(rsCanvas_case_6, data_case_6);
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(0);
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest005
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest005, TestSize.Level1)
+{
+    /**
+     * case 5: Paint retrun because total weight is 0.0
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    gauge.SetStartAngle(START_ANGLE);
+    gauge.SetEndAngle(END_ANGLE);
+    std::vector<Color> colors = { Color::RED, Color::GREEN };
+    std::vector<float> values = { 1.0f, -1.0f };
+    gauge.SetColors(colors, values);
+    gauge.SetStrokeWidth(WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(0);
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
+}
+
+/**
+ * @tc.name: GGaugePaintTest006
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest006, TestSize.Level1)
+{
+    /**
+     * case 6: Paint can DrawGauge and DrawIndicator
+     * value = 4  min = 1 max = 3
+     * startangle = 50         endangle = 0
+     * colors = {red,green} values = {1,2};
+     * StrokeWidth = 0.5_vp
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE_BIG, MIN, MAX);
+    gauge.SetStartAngle(START_ANGLE);
+    gauge.SetEndAngle(ZERO);
+    gauge.SetStrokeWidth(WIDTH_SMALL);
+    std::vector<Color> colors = { Color::RED, Color::GREEN };
+    std::vector<float> values = { 1.0f, 2.0f };
+    gauge.SetColors(colors, values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
+}
+
+/**
+ * @tc.name: GGaugePaintTest007
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest007, TestSize.Level1)
+{
+    /**
+     * case 7: Paint can DrawGauge and DrawIndicator
+     * value = 0  min = 1 max = 3
+     * startangle = 0         endangle = 0
+     * colors = {red,green} values = {1,2};
+     * StrokeWidth = 0.5_vp
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE_SMALL, MIN, MAX);
+    gauge.SetStartAngle(ZERO);
+    gauge.SetEndAngle(ZERO);
+    gauge.SetStrokeWidth(WIDTH_SMALL);
+    std::vector<Color> colors = { Color::RED, Color::GREEN };
+    std::vector<float> values = { 1.0f, 2.0f };
+    gauge.SetColors(colors, values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
+}
+
+/**
+ * @tc.name: GGaugePaintTest008
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest008, TestSize.Level1)
+{
+    /**
+     * case 8: Paint can DrawGauge and DrawIndicator
+     * value = 2  min = 1 max = 3
+     * colors = {red,green} values = {1,2};
+     * StrokeWidth = -50.0_vp
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MAX, MIN);
+    gauge.SetStrokeWidth(-WIDTH);
+    std::vector<Color> colors = { Color::RED, Color::GREEN };
+    std::vector<float> values = { 1.0f, 2.0f };
+    gauge.SetColors(colors, values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
+}
+
+/**
+ * @tc.name: GGaugePaintTest009
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest009, TestSize.Level1)
+{
+    /**
+     * case 9: Paint can DrawGauge and DrawIndicator
+     * value = 4  min = 1 max = 3
+     * colors = {red} values = {1};
+     * StrokeWidth = 50.0_vp
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE_BIG, MAX, MIN);
+    gauge.SetStrokeWidth(WIDTH);
+    std::vector<Color> colors = { Color::RED };
+    std::vector<float> values = { 1.0f };
+    gauge.SetColors(colors, values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
+}
+
+/**
+ * @tc.name: GGaugePaintTest010
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest010, TestSize.Level1)
+{
+    /**
+     * case 10: Paint can DrawGauge and DrawIndicator
+     * value = 0  min = 1 max = 3
+     * startangle = NAN       endangle = NAN
+     * colors = {red} values = {1};
+     * StrokeWidth = 50.0_vp
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE_SMALL, MAX, MIN);
+    gauge.SetStrokeWidth(WIDTH);
+    gauge.SetStartAngle(NAN);
+    gauge.SetEndAngle(NAN);
+    std::vector<Color> colors = { Color::RED };
+    std::vector<float> values = { 1.0f };
+    gauge.SetColors(colors, values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    GaugePaintMethod gaugePaintMethod;
+    RefPtr<RenderContext> rendercontext;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
+    EXPECT_NE(paintwrapper, nullptr);
+    RenderRingInfo data;
+    RSCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    gaugePaintMethod.Paint(rsCanvas, paintwrapper);
 }
 
 } // namespace OHOS::Ace::NG

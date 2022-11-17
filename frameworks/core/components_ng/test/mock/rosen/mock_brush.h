@@ -13,24 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PEN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PEN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_BRUSH_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_BRUSH_H
 
 #include "gmock/gmock.h"
+#include "testing_brush.h"
 #include "testing_color.h"
-#include "testing_pen.h"
 
 namespace OHOS::Ace::Testing {
-class MockPen : public TestingPen {
+class MockBrush : public TestingBrush {
 public:
-    MockPen() = default;
-    ~MockPen() = default;
+    MockBrush() = default;
+    ~MockBrush() = default;
 
     MOCK_METHOD1(SetAntiAlias, void(bool aa));
     MOCK_METHOD1(SetWidth, void(scalar width));
-    MOCK_METHOD1(SetCapStyle, void(CapStyle cs));
     MOCK_METHOD1(SetColor, void(const TestingColor& c));
     MOCK_METHOD1(SetColor, void(int c));
+    MOCK_METHOD1(SetShaderEffect, void(std::shared_ptr<TestingShaderEffect> e));
+    MOCK_METHOD1(SetFilter, void(const TestingFilter filter));
 };
 } // namespace OHOS::Ace::Testing
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PEN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_BRUSH_H
