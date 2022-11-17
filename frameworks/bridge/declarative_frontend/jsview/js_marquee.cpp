@@ -110,7 +110,7 @@ void JSMarquee::JSBind(BindingTarget globalObj)
 void JSMarquee::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("SetTextColor create error, info is non-valid");
+        LOGE("SetFontColor create error, info is non-valid");
         return;
     }
 
