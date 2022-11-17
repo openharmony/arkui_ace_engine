@@ -140,6 +140,11 @@ public:
 
     bool IsContainsBuilder();
 
+    void SetAnimationDuration(int32_t animationDuration)
+    {
+        animationDuration_ = animationDuration;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -162,6 +167,7 @@ private:
     Axis axis_ = Axis::HORIZONTAL;
     std::vector<OffsetF> tabItemOffsets_;
     std::unordered_map<int32_t, bool> tabBarType_;
+    std::optional<int32_t> animationDuration_;
 
     bool isRTL_ = false; // TODO Adapt RTL.
 };
