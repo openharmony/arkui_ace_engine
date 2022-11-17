@@ -555,7 +555,6 @@ void ViewAbstract::BindPopup(
     }
     // update PopupInfo props
     popupInfo.popupId = popupId;
-    popupInfo.markNeedUpdate = isShow;
     popupInfo.popupNode = popupNode;
     if (popupNode) {
         popupNode->MarkModifyDone();
