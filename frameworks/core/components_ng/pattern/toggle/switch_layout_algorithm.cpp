@@ -38,8 +38,8 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.Width().has_value()) {
         frameWidth = contentConstraint.selfIdealSize.Width().value();
     } else {
-        frameWidth =
-            static_cast<float>((switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).Value());
+        auto width = (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
+        frameWidth = static_cast<float>(width);
         if (frameWidth > contentConstraint.maxSize.Width()) {
             frameWidth = contentConstraint.maxSize.Width();
         }
@@ -47,8 +47,8 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         frameHeight = contentConstraint.selfIdealSize.Height().value();
     } else {
-        frameHeight =
-            static_cast<float>((switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).Value());
+        auto height = (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+        frameHeight = static_cast<float>(height);
         if (frameHeight > contentConstraint.maxSize.Height()) {
             frameHeight = contentConstraint.maxSize.Height();
         }
