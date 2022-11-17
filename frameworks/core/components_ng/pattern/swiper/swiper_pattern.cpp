@@ -79,7 +79,7 @@ void SwiperPattern::OnModifyDone()
 
     InitSwiperIndicator();
     auto childrenSize = TotalCount();
-    if (CurrentIndex() >= 0) {
+    if (CurrentIndex() >= 0 && CurrentIndex() < childrenSize) {
         currentIndex_ = CurrentIndex();
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
