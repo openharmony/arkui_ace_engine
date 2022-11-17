@@ -648,4 +648,11 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
+
+std::string CanvasPaintMethod::GetJsonData(const std::string& path)
+{
+    AssetImageLoader imageLoader;
+    return imageLoader.LoadJsonData(path, context_);
+}
 } // namespace OHOS::Ace::NG
+
