@@ -288,8 +288,8 @@ void RosenRenderContext::PaintBackground()
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetImage(skImage);
     auto compressData = skiaCanvasImage->GetCompressData();
-    rosenImage->SetCompressData(compressData, skiaCanvasImage->GetUniqueID(),
-        skiaCanvasImage->GetCompressWidth(), skiaCanvasImage->GetCompressHeight());
+    rosenImage->SetCompressData(compressData, skiaCanvasImage->GetUniqueID(), skiaCanvasImage->GetCompressWidth(),
+        skiaCanvasImage->GetCompressHeight());
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NOREPEAT)));
     rsNode_->SetBgImage(rosenImage);
 
@@ -602,18 +602,13 @@ void RosenRenderContext::PaintBorderImage()
             return;
         }
         auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
-                                ? (*layoutProperty->GetBorderWidthProperty())
-                                : BorderWidthProperty();
+                                       ? (*layoutProperty->GetBorderWidthProperty())
+                                       : BorderWidthProperty();
         RSImage rsImage(&skImage);
         RSCanvas rsCanvas(&canvas);
-        BorderImagePainter borderImagePainter(
-            layoutProperty->GetBorderWidthProperty() != nullptr,
-            *rosenRenderContext->GetBdImage(),
-            borderWidthProperty,
-            paintRect.GetSize(),
-            rsImage,
-            PipelineBase::GetCurrentContext()->GetDipScale()
-        );
+        BorderImagePainter borderImagePainter(layoutProperty->GetBorderWidthProperty() != nullptr,
+            *rosenRenderContext->GetBdImage(), borderWidthProperty, paintRect.GetSize(), rsImage,
+            PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -709,16 +704,14 @@ void RosenRenderContext::PaintBorderImageGradient()
     CHECK_NULL_VOID(layoutProperty);
 
     auto borderImageProperty = *GetBdImage();
-    auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
-                                    ? (*layoutProperty->GetBorderWidthProperty())
-                                    : BorderWidthProperty();
+    auto borderWidthProperty =
+        layoutProperty->GetBorderWidthProperty() ? (*layoutProperty->GetBorderWidthProperty()) : BorderWidthProperty();
     bool hasBorderWidthProperty = layoutProperty->GetBorderWidthProperty() != nullptr;
     auto paintTask = [paintSize, borderImageProperty, borderWidthProperty, hasBorderWidthProperty](
                          const NG::Gradient& gradient, RSCanvas& rsCanvas) mutable {
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
-        BorderImagePainter borderImagePainter(hasBorderWidthProperty,
-            borderImageProperty, borderWidthProperty, paintSize, rsImage,
-            PipelineBase::GetCurrentContext()->GetDipScale());
+        BorderImagePainter borderImagePainter(hasBorderWidthProperty, borderImageProperty, borderWidthProperty,
+            paintSize, rsImage, PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -1199,15 +1192,23 @@ void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
 void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (LessOrEqual(shadow.GetBlurRadius(), 0.0)) {
-        rsNode_->SetShadowRadius(0.0);
+    if (!shadow.IsValid()) {
+        if (shadow.GetHardwareAcceleration()) {
+            rsNode_->SetShadowElevation(0.0);
+        } else {
+            rsNode_->SetShadowRadius(0.0);
+        }
         RequestNextFrame();
         return;
     }
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
-    rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
+    if (shadow.GetHardwareAcceleration()) {
+        rsNode_->SetShadowElevation(shadow.GetElevation());
+    } else {
+        rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
+    }
     RequestNextFrame();
 }
 
@@ -1584,8 +1585,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     }
     if (transitionIn) {
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); },
-            onFinish);
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); }, onFinish);
     } else {
         auto wrappedFinish = [onFinish, weak = WeakPtr<FrameNode>(host)]() {
             auto host = weak.Upgrade();
@@ -1597,8 +1597,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
             }
         };
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, false); },
-            wrappedFinish);
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, false); }, wrappedFinish);
     }
     return true;
 }

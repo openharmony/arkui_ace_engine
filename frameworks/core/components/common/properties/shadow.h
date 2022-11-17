@@ -25,7 +25,6 @@ constexpr float LIGHT_HEIGHT = 600.0f; // System recommended value.
 constexpr float LIGHT_RADIUS = 800.0f; // System recommended value.
 constexpr float LIGHT_POSITION_X = 540.0f; // System recommended value.
 constexpr float LIGHT_POSITION_Y = 0.0f; // System recommended value.
-constexpr float DEFAULT_ELEVATION = 5.0f;
 
 // A style class indicates the way to render shadow effect
 class Shadow final {
@@ -168,15 +167,14 @@ public:
     {
         if (isHardwareAcceleration_) {
             return elevation_ > 0.0f && elevation_ < LIGHT_HEIGHT;
-        } else {
-            return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
         }
+        return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
     }
 
 private:
     float lightHeight_ = LIGHT_HEIGHT;
     float lightRadius_ = LIGHT_RADIUS;
-    float elevation_ = DEFAULT_ELEVATION; // Rosen always needs a non-zero elevation.
+    float elevation_ = 0.0f; // Rosen always needs a non-zero elevation.
     double blurRadius_ = 0.0;
     double spreadRadius_ = 0.0;
     Offset offset_;
