@@ -417,7 +417,6 @@ void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTe
                     }
                     delete work;
                 });
-
             if (rev != 0) {
                 delete resultData;
                 delete work;
