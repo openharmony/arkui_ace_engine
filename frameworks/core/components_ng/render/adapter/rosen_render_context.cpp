@@ -29,6 +29,7 @@
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/theme/app_theme.h"
@@ -1420,42 +1421,123 @@ void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape
     RequestNextFrame();
 }
 
-bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
+std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTransitionType type)
 {
-    CHECK_NULL_RETURN(rsNode_, false);
-    const int32_t PAGE_TRANSITION_DURATION = 300;
-    AnimationOption option;
-    option.SetCurve(Curves::LINEAR);
-    option.SetDuration(PAGE_TRANSITION_DURATION);
-    auto pipelineBase = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineBase, false);
-    const double width = pipelineBase->GetRootWidth();
+    auto rect = GetPaintRectWithoutTransform();
     std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
-    bool transitionIn = true;
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
-            effect->Translate({ width, 0, 0 });
-            transitionIn = true;
+        case PageTransitionType::EXIT_POP:
+            effect->Translate({ rect.Width(), 0, 0 });
             break;
         case PageTransitionType::ENTER_POP:
-            effect->Translate({ -width, 0, 0 });
-            transitionIn = true;
-            break;
         case PageTransitionType::EXIT_PUSH:
-            effect->Translate({ -width, 0, 0 });
-            transitionIn = false;
-            break;
-        case PageTransitionType::EXIT_POP:
-            effect->Translate({ width, 0, 0 });
-            transitionIn = false;
+            effect->Translate({ -rect.Width(), 0, 0 });
             break;
         default:
             LOGI("unexpected transition type");
-            return false;
+            break;
     }
-    AnimationUtils::Animate(
-        option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
-        onFinish);
+    return effect;
+}
+
+std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetPageTransitionEffect(
+    const RefPtr<PageTransitionEffect>& transition)
+{
+    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
+    if (transition->GetScaleEffect().has_value()) {
+        const auto& scaleOptions = transition->GetScaleEffect();
+        effect->Scale({ scaleOptions->xScale, scaleOptions->yScale, scaleOptions->zScale });
+    }
+    // slide and translate, only one can be effective
+    if (transition->GetSlideEffect().has_value()) {
+        auto rect = GetPaintRectWithoutTransform();
+        switch (transition->GetSlideEffect().value()) {
+            case SlideEffect::LEFT:
+                effect->Translate({ -rect.Width(), 0, 0 });
+                break;
+            case SlideEffect::RIGHT:
+                effect->Translate({ rect.Width(), 0, 0 });
+                break;
+            case SlideEffect::BOTTOM:
+                effect->Translate({ 0, rect.Height(), 0 });
+                break;
+            case SlideEffect::TOP:
+                effect->Translate({ 0, -rect.Height(), 0 });
+                break;
+            default:
+                LOGW("unexpected slide effect");
+                break;
+        }
+    } else if (transition->GetTranslateEffect().has_value()) {
+        auto rect = GetPaintRectWithoutTransform();
+        const auto& translateOptions = transition->GetTranslateEffect();
+        auto xTranslate = static_cast<float>(translateOptions->x.ConvertToPxWithSize(rect.Width()));
+        auto yTranslate = static_cast<float>(translateOptions->y.ConvertToPxWithSize(rect.Height()));
+        auto zTranslate = static_cast<float>(translateOptions->z.ConvertToPx());
+        effect->Translate({ xTranslate, yTranslate, zTranslate });
+    }
+    if (transition->GetOpacityEffect().has_value()) {
+        effect->Opacity(transition->GetOpacityEffect().value());
+    }
+    return effect;
+}
+
+bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
+{
+    bool transitionIn = true;
+    if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
+        transitionIn = true;
+    } else if (type == PageTransitionType::EXIT_PUSH || type == PageTransitionType::EXIT_POP) {
+        transitionIn = false;
+    } else {
+        LOGW("unexpected transition type");
+        return false;
+    }
+    CHECK_NULL_RETURN(rsNode_, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto transition = pattern->FindPageTransitionEffect(type);
+    std::shared_ptr<Rosen::RSTransitionEffect> effect;
+    AnimationOption option;
+    if (transition) {
+        effect = GetPageTransitionEffect(transition);
+        if (transition->GetScaleEffect().has_value()) {
+            const auto& scaleOptions = transition->GetScaleEffect();
+            auto rect = GetPaintRectWithoutTransform();
+            float xPivot = ConvertDimensionToScaleBySize(scaleOptions->centerX, rect.Width());
+            float yPivot = ConvertDimensionToScaleBySize(scaleOptions->centerY, rect.Height());
+            SetPivot(xPivot, yPivot);
+        }
+        option.SetCurve(transition->GetCurve());
+        option.SetDuration(transition->GetDuration());
+        option.SetDelay(transition->GetDelay());
+    } else {
+        effect = GetDefaultPageTransition(type);
+        const int32_t pageTransitionDuration = 300;
+        option.SetCurve(Curves::LINEAR);
+        option.SetDuration(pageTransitionDuration);
+    }
+    if (transitionIn) {
+        AnimationUtils::Animate(
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); },
+            onFinish);
+    } else {
+        auto wrappedFinish = [onFinish, weak = WeakPtr<FrameNode>(host)]() {
+            auto host = weak.Upgrade();
+            if (host) {
+                host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+            }
+            if (onFinish) {
+                onFinish();
+            }
+        };
+        AnimationUtils::Animate(
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, false); },
+            wrappedFinish);
+    }
     return true;
 }
 

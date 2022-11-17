@@ -288,6 +288,17 @@ public:
 
     void FlushImplicitAnimation();
 
+    // used for knowing which page node to execute the pageTransitionFunc
+    void SetPageNode(const RefPtr<FrameNode>& pageNode)
+    {
+        currentPage_ = pageNode;
+    }
+
+    const RefPtr<FrameNode>& GetPageNode() const
+    {
+        return currentPage_;
+    }
+
 private:
     ViewStackProcessor();
 
@@ -298,6 +309,8 @@ private:
 
     // render component stack
     std::stack<RefPtr<UINode>> elementsStack_;
+
+    RefPtr<FrameNode> currentPage_;
 
     RefPtr<GestureProcessor> gestureStack_;
 

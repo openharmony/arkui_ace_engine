@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -43,6 +44,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
     const auto& children = stageNode_->GetChildren();
     RefPtr<FrameNode> outPageNode;
+    needTransition &= !children.empty();
     if (!children.empty() && needHideLast) {
         FirePageHide(children.back(), needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         outPageNode = AceType::DynamicCast<FrameNode>(children.back());
@@ -83,6 +85,8 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
         return false;
     }
     auto pageNode = children.back();
+    const size_t transitionPageSize = 2;
+    needTransition &= (children.size() >= transitionPageSize);
     FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
     stageNode_->RemoveChild(pageNode);
 
@@ -197,6 +201,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pagePattern);
     if (transitionType != PageTransitionType::NONE) {
         pagePattern->TriggerPageTransition(transitionType, [weak = WeakPtr<PagePattern>(pagePattern)]() {
+            LOGI("pageTransition exit finish");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnHide();
@@ -221,6 +226,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    pageNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     pagePattern->OnShow();
     if (transitionType != PageTransitionType::NONE) {
         pagePattern->TriggerPageTransition(transitionType, nullptr);
