@@ -38,6 +38,8 @@ ohos_unittest("gauge_pattern_test_ng") {
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/gauge/gauge_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/gauge/gauge_model_ng.cpp",

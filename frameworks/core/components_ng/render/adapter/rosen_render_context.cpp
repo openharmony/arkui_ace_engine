@@ -1161,11 +1161,11 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 
 void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 {
-    auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->CheckBlurRadius(radius)) {
+    const auto& graphics = GetOrCreateGraphics();
+    if (graphics->CheckBlurRadius(radius)) {
         return;
     }
-    backDecoration->UpdateBlurRadius(radius);
+    graphics->UpdateBlurRadius(radius);
 
     auto pipelineBase = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineBase);
@@ -1196,23 +1196,18 @@ void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
+void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 {
-    const auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->CheckBackShadow(shadow)) {
-        return;
-    }
-    backDecoration->UpdateBackShadow(shadow);
     CHECK_NULL_VOID(rsNode_);
-    if (!shadow.GetHardwareAcceleration()) {
-        rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
-    } else {
-        rsNode_->SetShadowElevation(shadow.GetElevation());
+    if (LessOrEqual(shadow.GetBlurRadius(), 0.0)) {
+        rsNode_->SetShadowRadius(0.0);
+        RequestNextFrame();
+        return;
     }
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
-    rsNode_->SetShadowElevation(shadow.GetElevation());
+    rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
     RequestNextFrame();
 }
 
@@ -1527,10 +1522,10 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetPageTransition
                 effect->Translate({ rect.Width(), 0, 0 });
                 break;
             case SlideEffect::BOTTOM:
-                effect->Translate({ rect.Height(), 0, 0 });
+                effect->Translate({ 0, rect.Height(), 0 });
                 break;
             case SlideEffect::TOP:
-                effect->Translate({ -rect.Height(), 0, 0 });
+                effect->Translate({ 0, -rect.Height(), 0 });
                 break;
             default:
                 LOGW("unexpected slide effect");
@@ -1589,7 +1584,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     }
     if (transitionIn) {
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); },
             onFinish);
     } else {
         auto wrappedFinish = [onFinish, weak = WeakPtr<FrameNode>(host)]() {
@@ -1602,7 +1597,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
             }
         };
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, false); },
             wrappedFinish);
     }
     return true;

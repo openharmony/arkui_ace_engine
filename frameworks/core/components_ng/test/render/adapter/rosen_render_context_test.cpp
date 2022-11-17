@@ -28,6 +28,14 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+namespace {
+const float SHADOW_RADIUS_NEGATIVE = -5.0f;
+const float SHADOW_RADIUS_ZERO = 0.0f;
+const float SHADOW_RADIUS_FIVE = 5.0f;
+const float SHADOW_RADIUS_TEN = 10.0f;
+} // namespace
+
 class RosenRenderContextTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -61,5 +69,41 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest001, TestSize.Level1)
     rosenRenderContext->OnTransformRotateUpdate(Vector4F(1.0f, 1.0f, 1.0f, 1.0f));
     rosenRenderContext->OnTransformCenterUpdate(DimensionOffset(Dimension(1.0), Dimension(1.0)));
     EXPECT_NE(rosenRenderContext->rsNode_, nullptr);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest002
+ * @tc.desc: Test RosenRenderContext shadow radius
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest002, TestSize.Level1)
+{
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    auto pattern = AceType::MakeRefPtr<MockPattern>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test", 1, pattern);
+    rosenRenderContext->SetHostNode(frameNode);
+    rosenRenderContext->rsNode_ = Rosen::RSCanvasNode::Create(true);
+
+    // change shadow radius value
+    Shadow shadow;
+    shadow.SetBlurRadius(SHADOW_RADIUS_FIVE);
+
+    rosenRenderContext->UpdateBackShadow(shadow);
+    EXPECT_NE(rosenRenderContext->rsNode_, nullptr);
+    EXPECT_TRUE(rosenRenderContext->HasBackShadow());
+    EXPECT_EQ(rosenRenderContext->GetBackShadow()->blurRadius_, SHADOW_RADIUS_FIVE);
+    EXPECT_EQ(rosenRenderContext->GetBackShadow()->color_, Color::BLACK);
+    EXPECT_EQ(rosenRenderContext->GetBackShadow()->offset_, Offset());
+
+    shadow.SetBlurRadius(SHADOW_RADIUS_ZERO);
+    rosenRenderContext->UpdateBackShadow(shadow);
+
+    shadow.SetBlurRadius(SHADOW_RADIUS_TEN);
+    rosenRenderContext->UpdateBackShadow(shadow);
+
+    shadow.SetBlurRadius(SHADOW_RADIUS_NEGATIVE);
+    rosenRenderContext->UpdateBackShadow(shadow);
+    EXPECT_TRUE(rosenRenderContext->HasBackShadow());
+    EXPECT_EQ(rosenRenderContext->GetBackShadow()->blurRadius_, SHADOW_RADIUS_NEGATIVE);
 }
 } // namespace OHOS::Ace::NG

@@ -57,8 +57,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             skipMeasure = NearEqual(GetTextWidth(), width);
         }
     }
-
-    if (!skipMeasure) {
+    auto prop = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    if (!skipMeasure || prop->GetForceRenderValue(false)) {
+        prop->UpdateForceRender(false);
         TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
             textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
         if (!textStyle.GetAdaptTextSize()) {

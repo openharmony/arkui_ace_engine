@@ -15,18 +15,16 @@
 
 #include "gtest/gtest.h"
 
-#include "base/memory/referenced.h"
-
 #define private public
 #define protected public
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,7 +47,7 @@ constexpr ImageInterpolation IMAGE_INTERPOLATION_DEFAULT = ImageInterpolation::H
 constexpr ImageRenderMode IMAGE_RENDERMODE_DEFAULT = ImageRenderMode::ORIGINAL;
 constexpr bool MATCHTEXTDIRECTION_DEFAULT = true;
 const Color SVG_FILL_COLOR_DEFAULT = Color::BLUE;
-const std::vector<float> COLOR_FILTER_DEFAULT = {1.0, 2.0, 3.0};
+const std::vector<float> COLOR_FILTER_DEFAULT = { 1.0, 2.0, 3.0 };
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
 const std::string RESOURCE_URL = "resource:///ohos_test_image.svg";
@@ -132,7 +130,6 @@ HWTEST_F(ImagePatternTest, ImagePatternModifyDone001, TestSize.Level1)
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_TRUE(imagePattern != nullptr);
-    imagePattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     frameNode->MarkModifyDone();
     EXPECT_TRUE(imagePattern->loadingCtx_ != nullptr);
     EXPECT_TRUE(imagePattern->altLoadingCtx_ != nullptr);
@@ -149,7 +146,6 @@ HWTEST_F(ImagePatternTest, UpdateInternalResource001, TestSize.Level1)
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_TRUE(imagePattern != nullptr);
-    imagePattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     /**
     //     case1 : imageSource is not internal resource, and it can not load correct resource Icon.
     */
@@ -189,13 +185,11 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
      */
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_TRUE(imagePattern != nullptr);
-    imagePattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
     EXPECT_TRUE(imageLayoutProperty != nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
-    imageLayoutProperty->UpdateAlt(
-        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
+    imageLayoutProperty->UpdateAlt(ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
     frameNode->MarkModifyDone();
     /**
      * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
@@ -260,7 +254,6 @@ HWTEST_F(ImagePatternTest, ImagePatternCallback001, TestSize.Level1)
      */
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_TRUE(imagePattern != nullptr);
-    imagePattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
     EXPECT_TRUE(imageLayoutProperty != nullptr);
     frameNode->MarkModifyDone();
@@ -303,7 +296,6 @@ HWTEST_F(ImagePatternTest, ImagePatternCallback002, TestSize.Level1)
      */
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_TRUE(imagePattern != nullptr);
-    imagePattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
     EXPECT_TRUE(imageLayoutProperty != nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(

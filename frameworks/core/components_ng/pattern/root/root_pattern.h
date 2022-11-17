@@ -66,6 +66,7 @@ public:
         }
         CHECK_NULL_VOID(stage);
         LOGI("SetAppBgColor in page node successfully, bgColor is %{public}u", color.GetValue());
+        stage->GetRenderContext()->UpdateBackgroundColor(color);
         auto pages = stage->GetChildren();
         for (const auto& page : pages) {
             auto pageNode = DynamicCast<FrameNode>(page);

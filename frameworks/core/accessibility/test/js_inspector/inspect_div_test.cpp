@@ -75,4 +75,4 @@ HWTEST_F(InspectDivTest, InspectDivTest002, TestSize.Level1)
     EXPECT_EQ(inspectDiv.styles_["grid-columns-gap"], "0");
     EXPECT_EQ(inspectDiv.styles_["grid-rows-gap"], "0");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

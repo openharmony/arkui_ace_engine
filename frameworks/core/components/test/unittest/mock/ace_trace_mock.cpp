@@ -25,6 +25,17 @@ AceScopedTrace::AceScopedTrace(const char* format, ...)
 AceScopedTrace::~AceScopedTrace()
 {
 }
+
+AceAsyncScopedTrace::AceAsyncScopedTrace(const char* format, ...)
+{
+    asyncTraceEnabled_ = false;
+    taskId_ = 0;
+}
+
+AceAsyncScopedTrace::~AceAsyncScopedTrace()
+{
+}
+
 bool AceTraceEnabled()
 {
     return true;

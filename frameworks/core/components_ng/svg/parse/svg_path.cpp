@@ -17,6 +17,7 @@
 
 #include "include/utils/SkParsePath.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_path_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -33,13 +34,11 @@ RefPtr<SvgNode> SvgPath::Create()
     return AceType::MakeRefPtr<SvgPath>();
 }
 
-SkPath SvgPath::AsPath(const Size& viewPort) const
+SkPath SvgPath::AsPath(const Size& /* viewPort */) const
 {
     SkPath out;
     auto declaration = AceType::DynamicCast<SvgPathDeclaration>(declaration_);
-    if (declaration == nullptr) {
-        return out;
-    }
+    CHECK_NULL_RETURN(declaration, out);
 
     auto pathD = declaration->GetD();
     if (!pathD.empty()) {
