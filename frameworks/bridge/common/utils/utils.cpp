@@ -130,7 +130,7 @@ RefPtr<Curve> ResponsiveSpringMotionCreator(const std::vector<std::string>& para
                             : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
     return AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
 }
-
+#ifndef FUZZTEST
 void SetBgImgPositionX(
     const BackgroundImagePositionType type, const double value, BackgroundImagePosition& bgImgPosition)
 {
@@ -235,7 +235,7 @@ void SetBgImgSizeY(BackgroundImageSizeType type, double value, BackgroundImageSi
     bgImgSize.SetSizeTypeY(type);
     bgImgSize.SetSizeValueY(value);
 }
-
+#endif
 } // namespace
 
 RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc)
@@ -323,7 +323,7 @@ TransitionType ParseTransitionType(const std::string& transitionType)
         return TransitionType::ALL;
     }
 }
-
+#ifndef FUZZTEST
 // Support keyword values / percentage/px values. Do not support multiple images and edge offsets values.
 bool ParseBackgroundImagePosition(const std::string& value, BackgroundImagePosition& backgroundImagePosition)
 {
@@ -441,7 +441,7 @@ bool ParseBackgroundImageSize(const std::string& value, BackgroundImageSize& bgI
     }
     return true;
 }
-
+#endif
 RefPtr<ClipPath> CreateClipPath(const std::string& value)
 {
     if (value.empty()) {
@@ -476,7 +476,7 @@ std::optional<RadialSizeType> ParseRadialGradientSize(const std::string& value)
     }
     return std::nullopt;
 }
-
+#ifndef FUZZTEST
 // ObjectPosition
 ImageObjectPosition ParseImageObjectPosition(const std::string& value)
 {
@@ -535,6 +535,6 @@ ImageObjectPosition ParseImageObjectPosition(const std::string& value)
 
     return imageObjectPosition;
 }
-
+#endif
 
 } // namespace OHOS::Ace::Framework
