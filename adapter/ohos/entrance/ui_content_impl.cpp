@@ -276,7 +276,7 @@ void UIContentImpl::DestroyCallback() const
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
@@ -703,9 +703,9 @@ void UIContentImpl::Foreground()
         LOGE("get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGI("get old pipeline context failed");
+        LOGI("get pipeline context failed");
         return;
     }
     pipelineContext->SetForegroundCalled(true);
@@ -1034,7 +1034,7 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
         LOGE("get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
         LOGE("get pipeline context failed");
         return;
