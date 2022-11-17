@@ -15,18 +15,17 @@
 
 #include "gtest/gtest.h"
 
+#define private public
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/pipeline/base/constants.h"
-
-#define private public
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_modifer.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/pipeline/base/constants.h"
 
 using namespace testing;
 using namespace testing::ext;
