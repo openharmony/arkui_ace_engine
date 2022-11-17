@@ -25,10 +25,11 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
-constexpr int16_t scale = RADIUS_TO_DIAMETER;
 constexpr float SCALE_ACTIVE_CIRCLE_RADIUS = 16.00 / 14.00;
 constexpr float GRADUAL_CHANGE_POINT = 0.5;
+} // namespace
 
 CanvasDrawFunction PatternLockPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
@@ -100,6 +101,7 @@ void PatternLockPaintMethod::InitializeParam(const RefPtr<PatternLockPaintProper
 OffsetF PatternLockPaintMethod::GetCircleCenterByXY(const OffsetF& offset, int16_t x, int16_t y)
 {
     OffsetF cellCenter;
+    int16_t scale = RADIUS_TO_DIAMETER;
     cellCenter.SetX(offset.GetX() + sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT / scale * (x * scale - 1));
     cellCenter.SetY(offset.GetY() + sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT / scale * (y * scale - 1));
     return cellCenter;

@@ -233,8 +233,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     auto effect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    bool canOverScroll = (effect == EdgeEffect::SPRING) && (scrollState_ == SCROLL_FROM_UPDATE ||
-        scrollState_ == SCROLL_FROM_ANIMATION || scrollState_ == SCROLL_FROM_ANIMATION_SPRING);
+    bool canOverScroll = (effect == EdgeEffect::SPRING) && (scrollableEvent_ && !scrollableEvent_->Idle());
     listLayoutAlgorithm->SetCanOverScroll(canOverScroll);
     return listLayoutAlgorithm;
 }

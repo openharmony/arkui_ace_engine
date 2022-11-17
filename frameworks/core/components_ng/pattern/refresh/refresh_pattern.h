@@ -67,10 +67,16 @@ public:
     void FireStateChange(int32_t value);
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    void OnActive() override {}
+    void OnInActive() override;
 
 private:
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-    void OnAttachToFrameNode() override;
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragStart();
+    void HandleDragUpdate(float delta);
+    void HandleDragEnd();
+    void HandleDragCancel();
     void UpdateScrollableOffset(float delta);
     float GetFriction(float percentage) const;
     float GetOffset(float delta) const;
@@ -80,14 +86,8 @@ private:
     OffsetF GetShowTimeOffset() const;
     float GetOpacity() const;
     RefreshStatus GetNextStatus();
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart();
-    void HandleDragUpdate(float delta);
-    void HandleDragEnd();
-    void HandleDragCancel();
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
     static std::string GetFormatDateTime();
-    void OnActive() override {}
-    void OnInActive() override;
     RefPtr<PanEvent> panEvent_;
     OffsetF timeOffset_;
 

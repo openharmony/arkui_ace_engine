@@ -131,6 +131,16 @@ public:
     {
         return isFocus_;
     }
+
+    void SetNeedOnFocus(bool needOnFocus)
+    {
+        needOnFocus_ = needOnFocus;
+    }
+
+    bool GetNeedOnFocus() const
+    {
+        return needOnFocus_;
+    }
     void PanOnActionStart(const GestureEvent& info) override;
     void PanOnActionUpdate(const GestureEvent& info) override;
     void PanOnActionEnd(const GestureEvent& info) override;
@@ -193,6 +203,7 @@ private:
     Offset position_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
+    bool needOnFocus_ = false;
     double offsetFix_ = 0.0;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     std::queue<MouseClickInfo> doubleClickQueue_;

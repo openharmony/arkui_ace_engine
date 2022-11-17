@@ -336,8 +336,14 @@ private:
     std::string TextInputActionToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
+    std::string GetTextColor() const;
+    std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
     std::string GetFontSize() const;
+    Ace::FontStyle GetItalicFontStyle() const;
+    FontWeight GetFontWeight() const;
+    std::string GetFontFamily() const;
+    TextAlign GetTextAlign() const;
     std::string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
     std::string GetInputFilter() const;

@@ -173,9 +173,6 @@ public:
     // the map to the render component stack.
     void Push(const RefPtr<UINode>& element, bool isCustomView = false);
 
-    void PushTabBar(const TabBarParam& tabBarParam);
-    const TabBarParam& PopTabBar() const;
-
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.
     void Pop();
@@ -291,6 +288,17 @@ public:
 
     void FlushImplicitAnimation();
 
+    // used for knowing which page node to execute the pageTransitionFunc
+    void SetPageNode(const RefPtr<FrameNode>& pageNode)
+    {
+        currentPage_ = pageNode;
+    }
+
+    const RefPtr<FrameNode>& GetPageNode() const
+    {
+        return currentPage_;
+    }
+
 private:
     ViewStackProcessor();
 
@@ -301,6 +309,8 @@ private:
 
     // render component stack
     std::stack<RefPtr<UINode>> elementsStack_;
+
+    RefPtr<FrameNode> currentPage_;
 
     RefPtr<GestureProcessor> gestureStack_;
 
@@ -316,8 +326,6 @@ private:
 
     // elmtId to account get access to
     ElementIdType accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
-
-    TabBarParam tabBarParam_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

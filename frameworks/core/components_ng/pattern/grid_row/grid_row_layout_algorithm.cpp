@@ -38,7 +38,7 @@ namespace {
 std::string ConvertSizeTypeToString(GridSizeType sizeType)
 {
     auto index = static_cast<int32_t>(sizeType);
-    std::array<const char*, 7> refs { "xs", "sm", "lg", "md", "xl", "xxl", "undefined" }; // 7 types of size
+    std::array<const char*, 7> refs { "xs", "sm", "md", "lg", "xl", "xxl", "undefined" }; // 7 types of size
     return refs[index];
 }
 

@@ -126,7 +126,7 @@ public:
     virtual void OnNodeDisappear(FrameNode* host) {}
     virtual void OnNodeAppear() {}
 
-    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
+    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
     {
         return false;
     }

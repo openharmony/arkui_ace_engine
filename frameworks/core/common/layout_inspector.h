@@ -16,11 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H
 
+#include "core/common/container.h"
+
 namespace OHOS::Ace {
 
 class LayoutInspector {
 public:
     static void SupportInspector();
+    static void SetlayoutInspectorStatus();
+private:
+    static bool layoutInspectorStatus_;
 };
 
 } // namespace OHOS::Ace

@@ -15,8 +15,12 @@
 
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 
+#include <optional>
+
 #include "base/geometry/offset.h"
+#include "base/geometry/point.h"
 #include "base/log/log.h"
+#include "base/utils/type_definition.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -46,7 +50,14 @@ double ChangeValueRange(double value)
 
 double ComputeAngle(double x, double y)
 {
-    return ChangeValueRange(atan2(y, x) * ANGLE_SUM_OF_TRIANGLE / M_PI);
+    if (NearZero(x)) {
+        const double verticalAngle = 90.0;
+        if (Negative(y)) {
+            return -verticalAngle;
+        }
+        return verticalAngle;
+    }
+    return ChangeValueRange(atan(y / x) * ANGLE_SUM_OF_TRIANGLE / M_PI);
 }
 } // namespace
 
@@ -64,7 +75,7 @@ void SwipeRecognizer::OnRejected()
 
 void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    LOGD("swipe recognizer receives touch down event, begin to detect swipe event");
+    LOGI("swipe recognizer receives %{public}d touch down event, begin to detect swipe event", event.id);
     if (fingers_ > MAX_SWIPE_FINGERS) {
         LOGW("the fingers is larger than max");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
@@ -72,6 +83,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     if (direction_.type == SwipeDirection::NONE) {
+        LOGW("the type is none");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -81,12 +93,6 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     time_ = event.time;
     lastTouchEvent_ = event;
 
-    if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
-        LOGW("the finger is larger than the defined finger");
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
-
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         touchDownTime_ = event.time;
         refereeState_ = RefereeState::DETECTING;
@@ -95,7 +101,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
-    LOGD("swipe recognizer receives touch down event, begin to detect swipe event");
+    LOGI("swipe recognizer receives axis down event, begin to detect swipe event");
     if (direction_.type == SwipeDirection::NONE) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
@@ -111,7 +117,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    LOGD("swipe recognizer receives touch up event");
+    LOGI("swipe recognizer receives %{public}d touch up event", event.id);
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
     lastTouchEvent_ = event;
@@ -121,14 +127,16 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::DETECTING) {
-        auto offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
+        auto offset = event.GetOffset() - downEvents_[event.id].GetOffset();
         // nanoseconds duration to seconds.
         std::chrono::duration<double> duration = event.time - touchDownTime_;
         auto seconds = duration.count();
         resultSpeed_ = offset.GetDistance() / seconds;
         if (resultSpeed_ < speed_) {
+            LOGI("the result speed %{public}f is less than duration %{public}f", resultSpeed_, speed_);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         } else {
+            LOGI("try to accepte swipe gesture");
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
     }
@@ -136,7 +144,7 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    LOGD("swipe recognizer receives touch up event");
+    LOGI("swipe recognizer receives axis up event");
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
     if ((refereeState_ != RefereeState::DETECTING) && (refereeState_ != RefereeState::FAIL)) {
@@ -164,19 +172,20 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("swipe recognizer receives touch move event");
+    if (refereeState_ != RefereeState::DETECTING) {
+        return;
+    }
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
     lastTouchEvent_ = event;
     Offset moveDistance = event.GetOffset() - touchPoints_[event.id].GetOffset();
     touchPoints_[event.id] = event;
-    if (refereeState_ == RefereeState::DETECTING) {
-        double newAngle = ComputeAngle(moveDistance.GetX(), moveDistance.GetY());
-        if (CheckAngle(newAngle)) {
-            prevAngle_ = newAngle;
-            return;
-        }
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
+    double newAngle = ComputeAngle(moveDistance.GetX(), moveDistance.GetY());
+    if (CheckAngle(newAngle)) {
+        prevAngle_ = newAngle;
+        return;
     }
+    Adjudicate(Claim(this), GestureDisposal::REJECT);
 }
 
 void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
@@ -209,21 +218,25 @@ void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 
 bool SwipeRecognizer::CheckAngle(double angle)
 {
-    const double angleDiffDuration = 15;
     const double axisDiffDuration = 45;
     if (prevAngle_.has_value()) {
-        if (std::abs(prevAngle_.value() - angle) > angleDiffDuration) {
+        auto diffValue = std::abs(prevAngle_.value()) - std::abs(angle);
+        if (diffValue > axisDiffDuration) {
+            LOGI("the angle is larger than diff duration, value: %{public}f", diffValue);
             return false;
         }
     }
-    if ((direction_.type & SwipeDirection::HORIZONTAL) == SwipeDirection::HORIZONTAL) {
+    if (direction_.type == SwipeDirection::HORIZONTAL) {
         if (std::abs(angle) > axisDiffDuration) {
+            LOGI("the angle is larger than horizontal axis diff duration, value: %{public}f", std::abs(angle));
             return false;
         }
     }
-    if ((direction_.type & SwipeDirection::VERTICAL) == SwipeDirection::HORIZONTAL) {
+    if (direction_.type == SwipeDirection::VERTICAL) {
         const double axisVertical = 90;
-        if (std::abs(angle - axisVertical) > axisDiffDuration) {
+        auto diffValue = std::abs(angle) - axisVertical;
+        if (std::abs(diffValue) > axisDiffDuration) {
+            LOGI("the angle is larger than vertical axis diff duration, value: %{public}f", diffValue);
             return false;
         }
     }
@@ -236,6 +249,12 @@ void SwipeRecognizer::OnResetStatus()
     axisHorizontalTotal_ = 0.0;
     axisVerticalTotal_ = 0.0;
     resultSpeed_ = 0.0;
+    lastTouchEvent_ = TouchEvent();
+    downEvents_.clear();
+    time_ = TimeStamp();
+    touchDownTime_ = TimeStamp();
+    globalPoint_ = Point();
+    prevAngle_ = std::nullopt;
 }
 
 void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
@@ -260,6 +279,9 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
         info.SetSourceTool(lastTouchEvent_.sourceTool);
+        if (prevAngle_) {
+            info.SetAngle(prevAngle_.value());
+        }
         (*callback)(info);
     }
 }

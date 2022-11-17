@@ -47,7 +47,7 @@ public:
         ResetTimeText();
         ResetLastTimeText();
     }
-    
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);

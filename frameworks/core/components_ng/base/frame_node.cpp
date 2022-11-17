@@ -116,6 +116,7 @@ void FrameNode::InitializePatternAndContext()
 {
     eventHub_->AttachHost(WeakClaim(this));
     pattern_->AttachToFrameNode(WeakClaim(this));
+    accessibilityProperty_->SetHost(WeakClaim(this));
     renderContext_->SetRequestFrame([weak = WeakClaim(this)] {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -181,14 +182,13 @@ void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    // scrollable in AccessibilityProperty
+    ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
     if (renderContext_) {
         renderContext_->ToJsonValue(json);
-    }
-    if (pattern_) {
-        pattern_->ToJsonValue(json);
     }
     if (eventHub_) {
         eventHub_->ToJsonValue(json);
@@ -208,8 +208,8 @@ void FrameNode::OnAttachToMainTree()
     CHECK_NULL_VOID(context);
     context->RequestFrame();
     hasPendingRequest_ = false;
-
-    if (IsResponseRegion()) {
+    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
+        renderContext_->HasAnchor()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -557,7 +557,9 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
-    if (IsResponseRegion()) {
+    eventHub_->MarkModifyDone();
+    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
+        renderContext_->HasAnchor()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -723,7 +725,7 @@ bool FrameNode::IsResponseRegion() const
 
 void FrameNode::MarkResponseRegion(bool isResponseRegion)
 {
-    auto gestureHub = eventHub_->GetGestureEventHub();
+    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
     if (gestureHub) {
         gestureHub->MarkResponseRegion(isResponseRegion);
     }
@@ -1005,6 +1007,21 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     return offset;
 }
 
+OffsetF FrameNode::GetPaintRectOffset() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return offset;
+}
+
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
@@ -1015,7 +1032,7 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
         event.type = eventType;
-        event.nodeId = GetId();
+        event.nodeId = GetAccessibilityId();
         PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
     }
 }

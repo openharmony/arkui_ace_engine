@@ -38,7 +38,7 @@ void BadgePattern::OnModifyDone()
         CHECK_NULL_VOID(lastFrameNode);
         lastFrameNode->MountToParent(frameNode);
     }
-    
+
     auto textLayoutProperty = lastFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
@@ -58,8 +58,10 @@ void BadgePattern::OnModifyDone()
         } else {
             textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()));
         }
-    } else if (badgeCount.has_value() && badgeCount.value() <= 0) {
+    } else if (badgeCount.has_value() && badgeCount.value() < 0) {
         textLayoutProperty->UpdateContent(" ");
+    } else if (badgeCount.has_value() && badgeCount.value() == 0) {
+        textLayoutProperty->ResetContent();
     }
 
     if (badgeValue.has_value()) {
