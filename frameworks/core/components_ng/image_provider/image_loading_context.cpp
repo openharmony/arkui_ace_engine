@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -381,7 +382,7 @@ void ImageLoadingContext::CacheImageObject()
     CHECK_NULL_VOID(pipelineCtx);
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_VOID(imageCache);
-    if (imageCache && imageObj_->GetFrameCount() == 1) {
+    if (imageCache && imageObj_->GetFrameCount() == 1 && !AceType::InstanceOf<PixelMapImageObject>(imageObj_)) {
         imageCache->CacheImgObjNG(imageObj_->GetSourceInfo().ToString(), imageObj_);
     }
 }

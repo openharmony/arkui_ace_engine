@@ -250,4 +250,10 @@ void ImageProvider::MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageOb
     ImageProvider::WrapTaskAndPostToBackground(std::move(canvasImageMakingTask));
 }
 
+std::string ImageProvider::GenerateCacheKey(const ImageSourceInfo& srcInfo, const NG::SizeF& targetImageSize)
+{
+    return srcInfo.GetCacheKey() + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
+           std::to_string(static_cast<int32_t>(targetImageSize.Height()));
+}
+
 } // namespace OHOS::Ace::NG
