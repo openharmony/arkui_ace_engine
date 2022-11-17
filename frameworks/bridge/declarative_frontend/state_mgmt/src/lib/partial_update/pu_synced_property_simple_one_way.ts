@@ -27,7 +27,9 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
 
     // use own backing store for value to avoid
     // value changes to be propagated back to source
-    this.wrappedValue_ = source.getUnmonitored();
+    if (this.source_) {
+        this.wrappedValue_ = source.getUnmonitored();
+    }
   }
 
   /*
@@ -35,8 +37,10 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
     the property.
   */
   aboutToBeDeleted() {
-    this.source_.unlinkSuscriber(this.id__());
-    this.source_ = undefined;
+    if (this.source_) {
+        this.source_.unlinkSuscriber(this.id__());
+        this.source_ = undefined;
+    }
     super.aboutToBeDeleted();
   }
 
@@ -45,7 +49,7 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   // when source notifies a change, copy its value to local backing store
   hasChanged(newValue: T): void {
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
-    this.wrappedValue_ = this.source_.getUnmonitored();
+    this.wrappedValue_ = newValue;
     this.notifyHasChanged(newValue);
   }
 

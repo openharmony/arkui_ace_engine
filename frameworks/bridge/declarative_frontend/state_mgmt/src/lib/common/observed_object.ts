@@ -65,8 +65,12 @@ class SubscribableHandler {
   }
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
-    stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
-    this.owningProperties_.add(subscriber.id__());
+    if (subscriber) {
+        stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
+        this.owningProperties_.add(subscriber.id__());
+    } else {
+        stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
+    }
   }
 
   /*
