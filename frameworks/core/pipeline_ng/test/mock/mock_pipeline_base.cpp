@@ -45,7 +45,9 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
-    return AceType::MakeRefPtr<MockPipelineBase>();
+    auto pipeline = AceType::MakeRefPtr<MockPipelineBase>();
+    pipeline->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
+    return pipeline;
 }
 
 double PipelineBase::NormalizeToPx(const Dimension& /* dimension */) const
