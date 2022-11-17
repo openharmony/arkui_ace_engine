@@ -467,7 +467,7 @@ void SelectPattern::UpdateText(int32_t index)
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(newSelected);
     textProps->UpdateContent(newSelected->GetText());
-    textProps->UpdateForceRender(true);
+    text_->MarkModifyDone();
     LOGD("new text = %s", newSelected->GetText().c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
