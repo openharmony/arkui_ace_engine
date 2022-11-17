@@ -18,5 +18,6 @@ group("event_unittest") {
     "drag_event:drag_event_test_ng",
     "event_hub:event_hub_test_ng",
     "focus_hub:focus_hub_test_ng",
+    "input_event_hub:input_event_hub_test_ng",
   ]
 }

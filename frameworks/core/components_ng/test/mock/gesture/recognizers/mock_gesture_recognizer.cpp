@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,18 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/pipeline/base/element_register.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
-namespace OHOS::Ace {
-ElementRegister* ElementRegister::GetInstance()
-{
-    return new ElementRegister();
-}
-
-bool ElementRegister::RemoveItem(ElementIdType elementId)
+namespace OHOS::Ace::NG {
+bool NGGestureRecognizer::HandleEvent(const TouchEvent& /* point */)
 {
     return true;
 }
 
-bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
+bool NGGestureRecognizer::HandleEvent(const AxisEvent& /* event */)
 {
     return true;
 }
-} // namespace OHOS::Ace
+
+void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) {}
+} // namespace OHOS::Ace::NG
