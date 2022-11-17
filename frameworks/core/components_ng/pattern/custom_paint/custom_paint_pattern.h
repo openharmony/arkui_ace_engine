@@ -108,6 +108,7 @@ public:
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
     std::string ToDataURL(const std::string& args);
+    std::string GetJsonData(const std::string& path);
 
     void UpdateGlobalAlpha(double alpha);
     void UpdateCompositeOperation(CompositeOperation type);
