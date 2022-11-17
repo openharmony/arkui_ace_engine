@@ -208,8 +208,8 @@ void FrameNode::OnAttachToMainTree()
     CHECK_NULL_VOID(context);
     context->RequestFrame();
     hasPendingRequest_ = false;
-
-    if (IsResponseRegion()) {
+    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
+        renderContext_->HasAnchor()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -558,7 +558,8 @@ void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
     eventHub_->MarkModifyDone();
-    if (IsResponseRegion()) {
+    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
+        renderContext_->HasAnchor()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -724,7 +725,7 @@ bool FrameNode::IsResponseRegion() const
 
 void FrameNode::MarkResponseRegion(bool isResponseRegion)
 {
-    auto gestureHub = eventHub_->GetGestureEventHub();
+    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
     if (gestureHub) {
         gestureHub->MarkResponseRegion(isResponseRegion);
     }
@@ -1003,6 +1004,21 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
         parent = parent->GetAncestorNodeOfFrame();
     }
 
+    return offset;
+}
+
+OffsetF FrameNode::GetPaintRectOffset() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
     return offset;
 }
 

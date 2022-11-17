@@ -37,13 +37,6 @@ void JSSelect::Create(const JSCallbackInfo& info)
         return;
     }
 
-    auto selectTheme = GetTheme<SelectTheme>();
-    auto selectComponent = AceType::MakeRefPtr<SelectComponent>();
-    selectComponent->SetTheme(selectTheme);
-
-    auto tipText = AceType::MakeRefPtr<TextComponent>("");
-    selectComponent->SetTipText(tipText);
-
     if (Container::IsCurrentUseNewPipeline()) {
         if (info[0]->IsArray()) {
             auto paramArray = JSRef<JSArray>::Cast(info[0]);
@@ -70,6 +63,13 @@ void JSSelect::Create(const JSCallbackInfo& info)
         }
         return;
     }
+
+    auto selectTheme = GetTheme<SelectTheme>();
+    auto selectComponent = AceType::MakeRefPtr<SelectComponent>();
+    selectComponent->SetTheme(selectTheme);
+
+    auto tipText = AceType::MakeRefPtr<TextComponent>("");
+    selectComponent->SetTipText(tipText);
 
     if (info[0]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);

@@ -54,6 +54,14 @@ public:
     }
 
     void AddOptionNode(const RefPtr<FrameNode>& option);
+    void SetSelectSize(const SizeF& selectSize)
+    {
+        selectSize_ = selectSize;
+    }
+    SizeF GetSelectSize() const
+    {
+        return selectSize_;
+    }
 
     void SetSelected(int32_t index);
 
@@ -81,8 +89,12 @@ public:
     void SetSelectedOptionFontFamily(const std::vector<std::string>& value);
     void SetSelectedOptionFontColor(const Color& color);
 
+    // Get functions for unit tests
+    const std::vector<RefPtr<FrameNode>>& GetOptions();
+
 private:
     void OnModifyDone() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // change background color when hovered
     void RegisterOnHover();
@@ -99,6 +111,7 @@ private:
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menu_ = nullptr;
     RefPtr<FrameNode> text_ = nullptr;
+    SizeF selectSize_;
 
     // index of selected option
     int32_t selected_ = -1;
