@@ -28,6 +28,11 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr int32_t RADIUS_TO_DIAMETER = 2;
+constexpr float SCALE_SELECTED_CIRCLE_RADIUS = 26.00 / 14.00;
+} // namespace
+
 void PatternLockPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -79,7 +84,7 @@ void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::DOWN) {
         OnTouchDown(info);
     } else if (touchType == TouchType::UP) {
-        OnTouchUp(info);
+        OnTouchUp();
     } else if (touchType == TouchType::MOVE) {
         OnTouchMove(info);
     }
@@ -87,9 +92,6 @@ void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int16_t x, int16_t y)
 {
-    constexpr int32_t RADIUS_TO_DIAMETER = 2;
-    constexpr float SCALE_SELECTED_CIRCLE_RADIUS = 26.00 / 14.00;
-
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
@@ -249,7 +251,7 @@ void PatternLockPattern::OnTouchMove(const TouchEventInfo& info)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void PatternLockPattern::OnTouchUp(const TouchEventInfo& info)
+void PatternLockPattern::OnTouchUp()
 {
     if (!CheckAutoReset()) {
         return;
